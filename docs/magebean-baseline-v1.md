@@ -394,16 +394,15 @@ Magebean CLI is distributed as a self-contained `.phar` package.
 It requires **PHP 8.1+** and can be downloaded from the official Magebean distribution site.  
 
 ```bash
-wget https://files.magebean.com/magebean-cli.phar -O magebean
-chmod +x magebean
-mv magebean /usr/local/bin/
+wget https://files.magebean.com/magebean-cli.phar -O magebean.phar
+chmod +x magebean.phar
 ```
 
 ### 4.2 Basic Usage
 Run a scan against a Magento 2 installation:  
 
 ```bash
-php bin/magebean scan --path=/var/www/magento
+./magebean.phar scan --path=/var/www/magento
 ```
 
 - `--path` specifies the root directory of the Magento 2 project.  
@@ -417,7 +416,7 @@ Magebean CLI supports multiple report formats:
 - **HTML/PDF:** Styled reports for auditors and stakeholders.  
 
 ```bash
-php bin/magebean scan --path=/var/www/magento --format=html --output=report.html
+./magebean scan --path=/var/www/magento --format=html --output=report.html
 ```
 
 ### 4.4 CI/CD Integration
@@ -433,7 +432,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: Run Magebean Audit
-        run: php bin/magebean scan --path=. --format=json --output=report.json
+        run: /path-to-file/magebean.phar scan --path=. --format=json --output=report.json
 ```
 
 ### 4.5 Operational Recommendations
