@@ -1,4 +1,4 @@
-# Magebean Security Baseline v1.0 (Rebalanced)
+# Magebean Security Baseline v1.0
 
 **Author:** Son Cao  
 **Date:** 2025-08-20  
@@ -13,6 +13,83 @@ It is 100% aligned with the **OWASP Top 10 (2021)**.
 This baseline is designed to be implemented with the `magebean-cli` tool, which provides automated validation, reporting, and CI/CD integration.  
 
 ---
+
+
+## Chapter 1. Key Terminology
+
+The **Magebean Baseline v1** defines a set of **12 Controls** and **81 Rules** for auditing security, configuration, and operations in Magento 2.  
+This chapter introduces the key terms used throughout the document, designed for readers who may not be familiar with audit and AppSec terminology.  
+
+---
+
+### 1.1 Control
+- **Definition:** A **Control** is a high-level category of checks or requirements, representing an essential aspect of security or compliance (e.g., access management, data encryption, extension governance).  
+- **Role:** Controls provide structure by grouping audit activities into well-defined topics, ensuring that all relevant risk areas are covered.  
+- **Example:**  
+  - Control: *Password Management* — requires strong password policies.  
+  - Control: *Extension Governance* — requires extensions to be free of known vulnerabilities.  
+
+---
+
+### 1.2 Rule
+- **Definition:** A **Rule** is a specific, measurable check that determines whether a system complies with a Control. Rules are typically automatable and serve as the unit of measurement for an audit.  
+- **Role:** Rules bring detail and precision, allowing evidence-based verification of compliance. A Control may consist of multiple Rules.  
+- **Example:**  
+  - Rule: *Admin passwords must be at least 8 characters long and contain uppercase, lowercase, numeric, and special characters.*  
+  - Rule: *Extension `vendor/module` found in `composer.lock` must not appear in any public CVE list.*  
+
+---
+
+### 1.3 Relationship Between Controls and Rules
+- Each **Control** consists of multiple **Rules** that together enforce its intent.  
+- Example:  
+  - Control: *Administrator Account Security*  
+  - Associated Rules:  
+    - Rule 1: Admin passwords must meet minimum complexity requirements.  
+    - Rule 2: Two-Factor Authentication must be enabled for all admin accounts.  
+    - Rule 3: No admin account should use the default username `admin`.  
+
+---
+
+### 1.4 Baseline
+- **Definition:** A **Baseline** in the Magebean context is the consolidated standard consisting of **12 Controls** and **81 Rules**. It represents the minimum recommended security posture for a Magento 2 deployment.  
+- **Role:** The baseline serves as a reference framework for developers, agencies, and merchants to assess and improve their security posture.  
+
+---
+
+### 1.5 Scan and Audit
+- **Audit:** The structured process of reviewing and evaluating a system against Controls and Rules.  
+- **Scan:** The technical execution (performed by Magebean CLI) of automated checks against Rules, producing a report with findings and remediation guidance.  
+
+---
+
+
+
+
+## Chapter 2. Scope & Objectives
+
+The **Magebean Security Baseline** is designed to establish a minimum security standard for Magento 2 deployments.  
+It defines the scope, intended audience, and objectives of applying the 12 Controls and 81 Rules.  
+
+### 2.1 Scope
+- **System Components:** Magento 2 application codebase, extensions, server configuration, dependencies, and integrations.  
+- **Security Domains:** File permissions, admin interface hardening, secure coding practices, cryptography, deployment hygiene, extension governance, and third-party integrations.  
+- **Environments:** Applicable to development, staging, and production environments, with emphasis on production hardening.  
+
+### 2.2 Intended Audience
+- **Developers:** To validate code quality and security practices before deployment.  
+- **Agencies:** To ensure delivery quality, compliance, and client assurance.  
+- **Merchants:** To monitor live stores and maintain operational security hygiene.  
+
+### 2.3 Objectives
+- Provide a **repeatable audit framework** for Magento 2 security.  
+- Align Magento security checks with **OWASP Top 10** and industry standards.  
+- Enable **automated validation** using `magebean-cli` in CI/CD pipelines.  
+- Facilitate **remediation guidance** and continuous improvement across teams.  
+
+---
+
+## Chapter 3. Controls & Rules Catalog
 
 ## Magebean 12 Controls
 - **MB-C01** File & Folder Permissions  
@@ -30,7 +107,7 @@ This baseline is designed to be implemented with the `magebean-cli` tool, which 
 
 ---
 
-## Rule Catalog (81 Rules, Rebalanced)
+## Rule Catalog (81 Rules)
 
 ### MB-C01 File & Folder Permissions (5 rules)
 
@@ -300,6 +377,96 @@ This baseline is designed to be implemented with the `magebean-cli` tool, which 
 - **MB-R081 — Cloud/SaaS integrations restricted by ACL (Medium, A05)**  
   *Description:* Accounts used for SaaS connectors must follow least privilege. Assign scoped API roles, restrict IP ranges, and separate production from sandbox tenants. Over‑permissioned API users amplify blast radius when credentials leak, enabling destructive actions beyond the integration’s intended purpose.
 
+
+---
+
+
+
+
+
+## Chapter 4. Implementation Guidance
+
+The **Magebean CLI** (`magebean-cli`) is the primary tool to operationalize this baseline.  
+It allows automated scanning of Magento 2 projects, validation of Controls and Rules, and generation of actionable reports.  
+
+### 4.1 Installation
+Magebean CLI is distributed as a self-contained `.phar` package.  
+It requires **PHP 8.1+** and can be downloaded from the official Magebean distribution site.  
+
+```bash
+wget https://files.magebean.com/magebean-cli.phar -O magebean
+chmod +x magebean
+mv magebean /usr/local/bin/
+```
+
+### 4.2 Basic Usage
+Run a scan against a Magento 2 installation:  
+
+```bash
+php bin/magebean scan --path=/var/www/magento
+```
+
+- `--path` specifies the root directory of the Magento 2 project.  
+- The tool will automatically apply all 12 Controls and 81 Rules.  
+
+### 4.3 Output Formats
+Magebean CLI supports multiple report formats:  
+
+- **CLI (default):** Human-readable summary directly in the console.  
+- **JSON:** Machine-readable output for integration.  
+- **HTML/PDF:** Styled reports for auditors and stakeholders.  
+
+```bash
+php bin/magebean scan --path=/var/www/magento --format=html --output=report.html
+```
+
+### 4.4 CI/CD Integration
+Magebean CLI is designed to run inside CI/CD pipelines.  
+Exit codes are mapped to severity levels, allowing builds to fail when critical issues are found.  
+
+Example GitHub Actions workflow:  
+
+```yaml
+jobs:
+  security-audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Run Magebean Audit
+        run: php bin/magebean scan --path=. --format=json --output=report.json
+```
+
+### 4.5 Operational Recommendations
+- **Audit Frequency:** Run baseline audits before every release and weekly on production environments.  
+- **Remediation Workflow:** Prioritize fixes for *Critical* and *High* severity findings.  
+- **Version Control:** Store reports in CI artifacts for traceability and compliance.  
+- **Offline Mode:** Magebean CLI runs fully offline to preserve privacy; CVE databases can be updated manually when needed.  
+
+---
+
+## Chapter 5. Severity & Risk Rating
+
+Each Rule in this baseline is assigned a **severity level** based on potential impact and likelihood of exploitation.  
+This chapter explains the rating system to help prioritize remediation.  
+
+### 5.1 Severity Levels
+- **Critical**  
+  Exploitation can lead to full system compromise, data breach, or payment fraud. Must be remediated immediately.  
+- **High**  
+  Exploitation can cause significant security or operational risk, such as privilege escalation or data leakage. Should be prioritized for remediation.  
+- **Medium**  
+  Exploitation has limited impact or requires additional conditions. Important to fix but may be scheduled.  
+- **Low**  
+  Minor security hygiene issues or best practices. Fix as part of normal maintenance.  
+
+### 5.2 Risk Mapping
+- **OWASP Top 10:** Each Rule is mapped to relevant OWASP category (e.g., A01: Broken Access Control, A06: Vulnerable Components).  
+- **CVSS Alignment:** Critical/High ratings generally align with CVSS base scores ≥ 7.0, while Medium/Low correspond to lower CVSS ranges.  
+
+### 5.3 Usage in Reporting
+- Magebean CLI can generate reports grouped by severity.  
+- Exit codes may be configured for CI/CD pipelines (e.g., fail build if Critical issues are detected).  
+- Severity levels guide triage and remediation priorities for development and operations teams.  
 
 ---
 
