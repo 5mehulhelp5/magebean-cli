@@ -1,0 +1,71 @@
+{
+  "control": "MB-C10",
+  "title": "Abandoned Extensions Removal",
+  "rules": [
+    {
+      "id": "MB-R061",
+      "title": "No packages marked 'abandoned' on Packagist",
+      "control": "MB-C10",
+      "severity": "high",
+      "op": "all",
+      "checks": [
+        {
+          "name": "composer_abandoned_offline",
+          "args": {
+            "lock_file": "composer.lock",
+            "packagist_meta": "rules/packagist-abandoned.json"
+          }
+        }
+      ]
+    },
+    {
+      "id": "MB-R062",
+      "title": "No packages without release in > 24 months",
+      "control": "MB-C10",
+      "severity": "medium",
+      "op": "all",
+      "checks": [
+        {
+          "name": "composer_release_recency_offline",
+          "args": {
+            "lock_file": "composer.lock",
+            "release_meta": "rules/release-history.json",
+            "months": 24
+          }
+        }
+      ]
+    },
+    {
+      "id": "MB-R063",
+      "title": "No packages from archived repositories",
+      "control": "MB-C10",
+      "severity": "medium",
+      "op": "all",
+      "checks": [
+        {
+          "name": "composer_repo_archived_offline",
+          "args": {
+            "lock_file": "composer.lock",
+            "repo_meta": "rules/repo-status.json"
+          }
+        }
+      ]
+    },
+    {
+      "id": "MB-R064",
+      "title": "No risky forks replacing upstream libs",
+      "control": "MB-C10",
+      "severity": "medium",
+      "op": "all",
+      "checks": [
+        {
+          "name": "composer_risky_fork_offline",
+          "args": {
+            "lock_file": "composer.lock",
+            "repo_meta": "rules/repo-status.json"
+          }
+        }
+      ]
+    }
+  ]
+}

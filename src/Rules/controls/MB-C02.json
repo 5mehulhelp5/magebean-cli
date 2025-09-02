@@ -1,0 +1,115 @@
+{
+  "control": "MB-C02",
+  "title": "Admin & Auth Hardening",
+  "rules": [
+    {
+      "id": "MB-R006",
+      "title": "Non-default admin path (not /admin)",
+      "control": "MB-C02",
+      "severity": "high",
+      "op": "all",
+      "checks": [
+        {
+          "name": "php_array_neq",
+          "args": {
+            "file": "app/etc/env.php",
+            "path": "backend.frontName",
+            "not_equals": "admin"
+          }
+        }
+      ]
+    },
+    {
+      "id": "MB-R007",
+      "title": "Admin 2FA module enabled",
+      "control": "MB-C02",
+      "severity": "critical",
+      "op": "all",
+      "checks": [
+        {
+          "name": "php_array_eq",
+          "args": {
+            "file": "app/etc/config.php",
+            "path": "modules.Magento_TwoFactorAuth",
+            "equals": 1
+          }
+        }
+      ]
+    },
+    {
+      "id": "MB-R008",
+      "title": "Strong password policy enforced",
+      "control": "MB-C02",
+      "severity": "high",
+      "op": "all",
+      "checks": [
+        {
+          "name": "php_array_exists",
+          "args": {
+            "file": "app/etc/config.php",
+            "path": "system.default.admin/security"
+          }
+        }
+      ]
+    },
+    {
+      "id": "MB-R009",
+      "title": "Admin session timeout <= 900s",
+      "control": "MB-C02",
+      "severity": "medium",
+      "op": "all",
+      "checks": [
+        {
+          "name": "php_array_numeric_compare",
+          "args": {
+            "file": "app/etc/env.php",
+            "path": "session.lifetime",
+            "op": "<=",
+            "value": 900
+          }
+        }
+      ]
+    },
+    {
+      "id": "MB-R010",
+      "title": "Admin URL exposure restricted",
+      "control": "MB-C02",
+      "severity": "medium",
+      "op": "any",
+      "checks": [
+        {
+          "name": "php_array_neq",
+          "args": {
+            "file": "app/etc/env.php",
+            "path": "backend.frontName",
+            "not_equals": "admin"
+          }
+        },
+        {
+          "name": "nginx_directive",
+          "args": {
+            "file": "nginx.conf",
+            "directive": "deny|allow",
+            "expects_regex": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "MB-R011",
+      "title": "Login rate-limiting / CAPTCHA enabled",
+      "control": "MB-C02",
+      "severity": "medium",
+      "op": "all",
+      "checks": [
+        {
+          "name": "php_array_exists",
+          "args": {
+            "file": "app/etc/config.php",
+            "path": "system.default.admin/captcha"
+          }
+        }
+      ]
+    }
+  ]
+}

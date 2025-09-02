@@ -1,0 +1,242 @@
+{
+  "control": "MB-C12",
+  "title": "Third-party Config Security",
+  "rules": [
+    {
+      "id": "MB-R072",
+      "title": "No secrets in VCS (working tree or git history)",
+      "control": "MB-C12",
+      "severity": "critical",
+      "op": "all",
+      "checks": [
+        {
+          "name": "webroot_hygiene",
+          "args": {
+            "webroot": ".",
+            "forbidden": [".env", ".env.local", "*.pem", "*.key"]
+          }
+        },
+        {
+          "name": "git_history_scan",
+          "args": {
+            "paths": ["app", "env", "pub"],
+            "patterns": [
+              "AKIA[0-9A-Z]{16}",                  
+              "ASIA[0-9A-Z]{16}",
+              "AIza[0-9A-Za-z\\-_]{35}",           
+              "-----BEGIN( RSA)? PRIVATE KEY-----",
+              "xox[baprs]-[0-9A-Za-z\\-]{10,48}",  
+              "sk_live_[0-9a-zA-Z]{24,}"      
+            ],
+            "max_results": 20
+          }
+        }
+      ]
+    },
+    {
+      "id": "MB-R073",
+      "title": "HTTPS-only endpoints configured",
+      "control": "MB-C12",
+      "severity": "high",
+      "op": "any",
+      "checks": [
+        {
+          "name": "text_grep",
+          "args": {
+            "file": "app/etc/env.php",
+            "must_not_match": ["http://"]
+          }
+        },
+        {
+          "name": "code_grep",
+          "args": {
+            "paths": ["app"],
+            "include_ext": ["php", "phtml", "js", "html", "xml"],
+            "must_not_match": ["http://[^\\s\"'>]+"]
+          }
+        }
+      ]
+    },
+    {
+      "id": "MB-R074",
+      "title": "Debug/verbose off for third-party integrations",
+      "control": "MB-C12",
+      "severity": "medium",
+      "op": "all",
+      "checks": [
+        {
+          "name": "php_array_eq",
+          "args": {
+            "file": "app/etc/env.php",
+            "path": "system.default.dev/debug/debug_logging",
+            "equals": 0
+          }
+        }
+      ]
+    },
+    {
+      "id": "MB-R075",
+      "title": "Webhook signature validation present",
+      "control": "MB-C12",
+      "severity": "high",
+      "op": "all",
+      "checks": [
+        {
+          "name": "code_grep",
+          "args": {
+            "paths": ["app"],
+            "include_ext": ["php"],
+            "must_match": [
+              "hash_hmac\\(",
+              "X-(Signature|Hub-Signature|Stripe-Signature|Webhook-Signature)"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "MB-R076",
+      "title": "Outbound connections restricted by allow-list",
+      "control": "MB-C12",
+      "severity": "medium",
+      "op": "all",
+      "checks": [
+        {
+          "name": "code_grep",
+          "args": {
+            "paths": ["app"],
+            "include_ext": ["php"],
+            "must_match": [
+              "allowed_hosts|allowlist|whitelist",
+              "CURLOPT_(RESOLVE|CONNECTTIMEOUT|TIMEOUT)"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "MB-R077",
+      "title": "PII minimization for third-party flows",
+      "control": "MB-C12",
+      "severity": "high",
+      "op": "all",
+      "checks": [
+        {
+          "name": "code_grep",
+          "args": {
+            "paths": ["app"],
+            "include_ext": ["php"],
+            "must_not_match": [
+              "full_card",
+              "cvv",
+              "ssn",
+              "passport_number"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "MB-R078",
+      "title": "Strong TLS ciphers on upstream gateways",
+      "control": "MB-C12",
+      "severity": "medium",
+      "op": "any",
+      "checks": [
+        {
+          "name": "nginx_directive",
+          "args": {
+            "file": "nginx.conf",
+            "directive": "ssl_ciphers\\s+.*(TLSv1\\.2|TLSv1\\.3|ECDHE)\\b",
+            "expects_regex": true
+          }
+        },
+        {
+          "name": "apache_htaccess_directive",
+          "args": {
+            "file": "pub/.htaccess",
+            "directive": "SSLCipherSuite\\s+",
+            "expects_regex": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "MB-R079",
+      "title": "API keys stored in env.php (not in DB/plain code)",
+      "control": "MB-C12",
+      "severity": "high",
+      "op": "all",
+      "checks": [
+        {
+          "name": "php_array_key_search",
+          "args": {
+            "file": "app/etc/env.php",
+            "key_regex": "(api_)?key|secret|token",
+            "min_found": 1
+          }
+        },
+        {
+          "name": "code_grep",
+          "args": {
+            "paths": ["app"],
+            "include_ext": ["php", "phtml", "xml"],
+            "must_not_match": [
+              "INSERT\\s+INTO\\s+.*(api_)?key",
+              "setData\\(\\s*['\\\"](api_)?key",
+              "update\\s+.*(api_)?key"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "MB-R080",
+      "title": "Third-party logging sanitized (mask/redact)",
+      "control": "MB-C12",
+      "severity": "medium",
+      "op": "all",
+      "checks": [
+        {
+          "name": "code_grep",
+          "args": {
+            "paths": ["app"],
+            "include_ext": ["php"],
+            "must_match": [
+              "mask|redact|sanitize|filter"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "MB-R081",
+      "title": "SaaS integrations scoped by ACL (least privilege/IP allowlist)",
+      "control": "MB-C12",
+      "severity": "low",
+      "op": "any",
+      "checks": [
+        {
+          "name": "text_grep",
+          "args": {
+            "file": "SECURITY.md",
+            "must_match": [
+              "least privilege|scope",
+              "IP allowlist|CIDR"
+            ]
+          }
+        },
+        {
+          "name": "text_grep",
+          "args": {
+            "file": "docs/integrations.md",
+            "must_match": [
+              "least privilege|scope",
+              "IP allowlist|CIDR"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

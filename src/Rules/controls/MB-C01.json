@@ -1,0 +1,84 @@
+{
+  "control": "MB-C01",
+  "title": "File & Folder Permissions",
+  "rules": [
+    {
+      "id": "MB-R001",
+      "title": "No chmod 777 (no world-writable files/dirs)",
+      "control": "MB-C01",
+      "severity": "high",
+      "op": "all",
+      "checks": [
+        {
+          "name": "fs_no_world_writable",
+          "args": {
+            "path": ".",
+            "max_results": 50
+          }
+        }
+      ]
+    },
+    {
+      "id": "MB-R002",
+      "title": "env.php permissions <= 0640",
+      "control": "MB-C01",
+      "severity": "high",
+      "op": "all",
+      "checks": [
+        {
+          "name": "file_mode_max",
+          "args": {
+            "file": "app/etc/env.php",
+            "max_octal": "0640"
+          }
+        }
+      ]
+    },
+    {
+      "id": "MB-R003",
+      "title": "Webroot hygiene (no .git/.env/backups in pub/)",
+      "control": "MB-C01",
+      "severity": "high",
+      "op": "all",
+      "checks": [
+        {
+          "name": "webroot_hygiene",
+          "args": {
+            "webroot": "pub",
+            "forbidden": [".git", ".env", ".env.local", "*.bak", "*.old", "*~"]
+          }
+        }
+      ]
+    },
+    {
+      "id": "MB-R004",
+      "title": "Code directories not group/other-writable",
+      "control": "MB-C01",
+      "severity": "high",
+      "op": "all",
+      "checks": [
+        {
+          "name": "code_dirs_readonly",
+          "args": {
+            "dirs": ["app", "vendor", "lib"]
+          }
+        }
+      ]
+    },
+    {
+      "id": "MB-R005",
+      "title": "Directory listing disabled",
+      "control": "MB-C01",
+      "severity": "medium",
+      "op": "all",
+      "checks": [
+        {
+          "name": "no_directory_listing",
+          "args": {
+            "webroot": "pub"
+          }
+        }
+      ]
+    }
+  ]
+}

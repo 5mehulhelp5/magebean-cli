@@ -1,0 +1,118 @@
+{
+  "control": "MB-C04",
+  "title": "HTTPS & TLS Enforcement",
+  "rules": [
+    {
+      "id": "MB-R026",
+      "title": "Force HTTPS in admin and storefront",
+      "control": "MB-C04",
+      "severity": "high",
+      "op": "all",
+      "checks": [
+        {
+          "name": "php_array_eq",
+          "args": {
+            "file": "app/etc/env.php",
+            "path": "system.default.web.secure.use_in_adminhtml",
+            "equals": 1
+          }
+        },
+        {
+          "name": "php_array_eq",
+          "args": {
+            "file": "app/etc/env.php",
+            "path": "system.default.web.secure.use_in_frontend",
+            "equals": 1
+          }
+        }
+      ]
+    },
+    {
+      "id": "MB-R027",
+      "title": "HSTS header is set",
+      "control": "MB-C04",
+      "severity": "medium",
+      "op": "any",
+      "checks": [
+        {
+          "name": "nginx_directive",
+          "args": {
+            "file": "nginx.conf",
+            "directive": "add_header\\s+Strict-Transport-Security\\b",
+            "expects_regex": true
+          }
+        },
+        {
+          "name": "apache_htaccess_directive",
+          "args": {
+            "file": "pub/.htaccess",
+            "directive": "Header\\s+(set|always set)\\s+Strict-Transport-Security\\b",
+            "expects_regex": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "MB-R028",
+      "title": "TLS protocols >= 1.2",
+      "control": "MB-C04",
+      "severity": "high",
+      "op": "all",
+      "checks": [
+        {
+          "name": "nginx_directive",
+          "args": {
+            "file": "nginx.conf",
+            "directive": "ssl_protocols\\s+TLSv1\\.2(\\s+TLSv1\\.3)?\\s*;",
+            "expects_regex": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "MB-R029",
+      "title": "No mixed content (http://) in templates/assets",
+      "control": "MB-C04",
+      "severity": "medium",
+      "op": "all",
+      "checks": [
+        {
+          "name": "code_grep",
+          "args": {
+            "paths": ["app/design", "app"],
+            "include_ext": ["phtml", "js", "html", "xml"],
+            "must_not_match": [
+              "http://[^\\s\"'>]+"
+            ],
+            "max_results": 50
+          }
+        }
+      ]
+    },
+    {
+      "id": "MB-R030",
+      "title": "Secure cookies: Secure + HttpOnly enabled",
+      "control": "MB-C04",
+      "severity": "high",
+      "op": "all",
+      "checks": [
+        {
+          "name": "php_array_eq",
+          "args": {
+            "file": "app/etc/env.php",
+            "path": "session.cookie.secure",
+            "equals": 1
+          }
+        },
+        {
+          "name": "php_array_eq",
+          "args": {
+            "file": "app/etc/env.php",
+            "path": "session.cookie.httponly",
+            "equals": 1
+          }
+        }
+      ]
+    }
+  ]
+}

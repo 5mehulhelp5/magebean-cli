@@ -1,0 +1,121 @@
+{
+  "control": "MB-C11",
+  "title": "Composer Dependency Hygiene",
+  "rules": [
+    {
+      "id": "MB-R065",
+      "title": "No wildcard constraints in composer.json",
+      "control": "MB-C11",
+      "severity": "medium",
+      "op": "all",
+      "checks": [
+        {
+          "name": "composer_json_constraints",
+          "args": {
+            "json_file": "composer.json",
+            "deny": ["*", "dev-master"]
+          }
+        }
+      ]
+    },
+    {
+      "id": "MB-R066",
+      "title": "No dev branches in composer.json",
+      "control": "MB-C11",
+      "severity": "medium",
+      "op": "all",
+      "checks": [
+        {
+          "name": "composer_json_constraints",
+          "args": {
+            "json_file": "composer.json",
+            "deny_prefix": ["dev-"]
+          }
+        }
+      ]
+    },
+    {
+      "id": "MB-R067",
+      "title": "prefer-stable=true in composer.json",
+      "control": "MB-C11",
+      "severity": "low",
+      "op": "all",
+      "checks": [
+        {
+          "name": "composer_json_kv",
+          "args": {
+            "json_file": "composer.json",
+            "path": "config.prefer-stable",
+            "equals": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "MB-R068",
+      "title": "Composer audit clean (no known vulns)",
+      "control": "MB-C11",
+      "severity": "critical",
+      "op": "all",
+      "checks": [
+        {
+          "name": "composer_audit_offline",
+          "args": {
+            "lock_file": "composer.lock",
+            "vuln_db": "rules/osv-db.json",
+            "fail_on_found": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "MB-R069",
+      "title": "Direct dependencies up-to-date",
+      "control": "MB-C11",
+      "severity": "medium",
+      "op": "all",
+      "checks": [
+        {
+          "name": "composer_outdated_offline",
+          "args": {
+            "lock_file": "composer.lock",
+            "release_meta": "rules/release-history.json",
+            "scope": "direct"
+          }
+        }
+      ]
+    },
+    {
+      "id": "MB-R070",
+      "title": "composer.lock integrity with composer.json",
+      "control": "MB-C11",
+      "severity": "high",
+      "op": "all",
+      "checks": [
+        {
+          "name": "composer_lock_integrity",
+          "args": {
+            "json_file": "composer.json",
+            "lock_file": "composer.lock"
+          }
+        }
+      ]
+    },
+    {
+      "id": "MB-R071",
+      "title": "No abandoned libraries allowed",
+      "control": "MB-C11",
+      "severity": "medium",
+      "op": "all",
+      "checks": [
+        {
+          "name": "composer_abandoned_offline",
+          "args": {
+            "lock_file": "composer.lock",
+            "packagist_meta": "rules/packagist-abandoned.json"
+          }
+        }
+      ]
+    }
+  ]
+}
