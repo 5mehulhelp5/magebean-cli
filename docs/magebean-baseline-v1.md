@@ -7,17 +7,18 @@
 ---
 
 ## Introduction
-The **Magebean Security Baseline** defines 12 Controls and 81 Logic Rules to evaluate the security, configuration, and dependency hygiene of Magento 2 stores.  
-It is 100% aligned with the **OWASP Top 10 (2021)**.  
+The **Magebean Security Baseline** defines 12 Controls and 81 Logic Rules to evaluate the security, configuration, and dependency hygiene of Magento 2 stores.
+These controls are explicitly designed to provide concrete verification steps to address OWASP Top 10: The Ten Most Critical Web Application Security Risks.
 
-This baseline is designed to be implemented with the `magebean-cli` tool, which provides automated validation, reporting, and CI/CD integration.  
+This baseline is designed to be implemented with the magebean-cli tool, which provides automated validation, reporting, and CI/CD integration.
+
 
 ---
 
 
 ## Chapter 1. Key Terminology
 
-The **Magebean Baseline v1** defines a set of **12 Controls** and **81 Rules** for auditing security, configuration, and operations in Magento 2.  
+The **Magebean Security Baseline v1** defines a set of **12 Controls** and **81 Rules** for auditing security, configuration, and operations in Magento 2.  
 This chapter introduces the key terms used throughout the document, designed for readers who may not be familiar with audit and AppSec terminology.  
 
 ---
