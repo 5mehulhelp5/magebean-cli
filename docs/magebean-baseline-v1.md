@@ -93,18 +93,18 @@ It defines the scope, intended audience, and objectives of applying the 12 Contr
 ## Chapter 3. Controls & Rules Catalog
 
 ## Magebean 12 Controls
-- **MB-C01** File & Folder Permissions  
-- **MB-C02** Admin Hardening  
-- **MB-C03** Secure Coding Practices  
-- **MB-C04** HTTPS & TLS Enforcement  
-- **MB-C05** Production Mode & Deployment Hygiene  
-- **MB-C06** Cache & Indexing Health  
-- **MB-C07** Logging & Monitoring  
-- **MB-C08** Cron Job Reliability  
-- **MB-C09** Extension Vulnerability Management  
-- **MB-C10** Abandoned Extensions Removal  
-- **MB-C11** Composer Dependency Hygiene  
-- **MB-C12** Third-party Config Security  
+- **MB-C01** File & Folder Permissions (5 rules)
+- **MB-C02** Admin Hardening (6 rules)
+- **MB-C03** Secure Coding Practices (14 rules)
+- **MB-C04** HTTPS & TLS Enforcement (5 rules) 
+- **MB-C05** Production Mode & Deployment Hygiene (6 rules) 
+- **MB-C06** Cache & Indexing Health (5 rules) 
+- **MB-C07** Logging & Monitoring (4 rules) 
+- **MB-C08** Cron Job Reliability (3 rules) 
+- **MB-C09** Extension Vulnerability Management (12 rules) 
+- **MB-C10** Abandoned Extensions Removal (4 rules) 
+- **MB-C11** Composer Dependency Hygiene (7 rules) 
+- **MB-C12** Third-party Config Security (10 rules) 
 
 ---
 
