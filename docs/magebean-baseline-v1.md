@@ -471,9 +471,80 @@ This chapter explains the rating system to help prioritize remediation.
 
 ## References
 - OWASP Top 10 (2021) — https://owasp.org/Top10/  
-- OWASP ASVS 4.0 — https://owasp.org/ASVS/  
+- OWASP ASVS 4.0 — https://owasp.org/www-project-application-security-verification-standard/  
 - Magento 2 Documentation — https://developer.adobe.com/commerce/docs/  
-- OSV.dev Vulnerability Database — https://osv.dev/  
+- OSV.dev Vulnerability Database — https://osv.dev/ 
+
+## Appendix C. Glossary of Terms
+
+**Audit**  
+A structured review process to evaluate a Magento system against Controls and Rules. In Magebean CLI, an audit is executed via automated scans.  
+
+**Baseline**  
+The minimum recommended standard consisting of 12 Controls and 81 Rules. It provides a reference point for measuring Magento 2 security posture.  
+
+**Control**  
+A high-level category of checks that represents a key security or compliance area (e.g., Admin Hardening, HTTPS Enforcement).  
+
+**Rule**  
+A specific, measurable requirement that enforces a Control. Rules are automatable and serve as the unit of compliance in an audit.  
+
+**Scan**  
+The technical execution of automated checks against all Rules, producing pass/fail results and reports.  
+
+**OWASP Top 10**  
+A globally recognized standard for the top ten most critical web application security risks (2021 edition is referenced in this baseline).  
+
+**CVE (Common Vulnerabilities and Exposures)**  
+A standardized identifier for publicly known security vulnerabilities. Used in Magebean to flag risky Magento extensions or dependencies.  
+
+**Composer / composer.lock**  
+PHP’s dependency manager. The `composer.lock` file ensures deterministic dependency versions. Weak constraints or outdated lockfiles can lead to insecure builds.  
+
+**Extension (Magento Module)**  
+A third-party or custom Magento add-on. Extensions increase functionality but may also introduce vulnerabilities if unmaintained or insecure.  
+
+**Dependency / Transitive Dependency**  
+A software package required by Magento or its extensions. Transitive dependencies are nested libraries pulled indirectly, often overlooked but exploitable.  
+
+**Misconfiguration**  
+An insecure or unintended system setting (e.g., `display_errors=On`, HTTP enabled instead of HTTPS). A common source of compromise.  
+
+**Hardening**  
+Strengthening security by reducing attack surface and enforcing best practices. Examples include Admin Hardening and TLS Hardening.  
+
+**2FA (Two-Factor Authentication)**  
+An additional authentication step beyond passwords, required to secure Magento admin logins.  
+
+**CSRF (Cross-Site Request Forgery)**  
+An attack where a user’s authenticated session is abused to perform unwanted actions. Magento mitigates CSRF with form keys.  
+
+**XSS (Cross-Site Scripting)**  
+An injection attack where malicious scripts execute in the browser. Prevented by proper output escaping in templates and JavaScript contexts.  
+
+**SQL Injection (SQLi)**  
+An injection flaw where unsanitized input alters database queries. Prevented by Magento’s query abstraction and bound parameters.  
+
+**SSRF (Server-Side Request Forgery)**  
+An attack where the server is tricked into making unintended HTTP requests. Prevented by allow-listing outbound destinations.  
+
+**CSPRNG (Cryptographically Secure Random Number Generator)**  
+A random generator suitable for security-sensitive tokens (e.g., `random_bytes`). Prevents predictability in sessions or nonces.  
+
+**PII (Personally Identifiable Information)**  
+Any data that can identify an individual (e.g., name, email, address). Must be protected and never logged in plaintext.  
+
+**HSTS (HTTP Strict Transport Security)**  
+A security header forcing browsers to use HTTPS, preventing downgrade or SSL-stripping attacks.  
+
+**TLS (Transport Layer Security)**  
+The cryptographic protocol that secures data in transit. Magebean requires TLS 1.2 or higher with strong ciphers.  
+
+**FPC (Full Page Cache)**  
+Magento’s built-in caching mechanism. Ensures better performance and reduces backend exposure.  
+
+**Indexers**  
+Magento background processes that pre-compute data (e.g., search, catalog, pricing). Must remain healthy to avoid performance degradation.  
 
 ---
 
