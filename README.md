@@ -153,6 +153,12 @@ Responsible disclosure: please email **support@magebean.com**.
 
 ---
 
-## 📝 License
+## License
 
-MIT (or your preferred license). See `LICENSE`.
+MageBean CLI is open-sourced software licensed under the [MIT license](./LICENSE).
+
+- **Core CLI** → MIT licensed, free to use and extend.
+- **CVE Data Bundle** → Proprietary, licensed separately.
+- **Audit-as-a-Service** → Commercial offering.
+
+This dual model ensures that the community benefits from a free baseline audit tool, while advanced vulnerability data and professional audit services remain sustainable.
