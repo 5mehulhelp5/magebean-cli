@@ -21,17 +21,21 @@
           "args": {
             "paths": ["app", "env", "pub"],
             "patterns": [
-              "AKIA[0-9A-Z]{16}",                  
+              "AKIA[0-9A-Z]{16}",
               "ASIA[0-9A-Z]{16}",
-              "AIza[0-9A-Za-z\\-_]{35}",           
+              "AIza[0-9A-Za-z\\-_]{35}",
               "-----BEGIN( RSA)? PRIVATE KEY-----",
-              "xox[baprs]-[0-9A-Za-z\\-]{10,48}",  
-              "sk_live_[0-9a-zA-Z]{24,}"      
+              "xox[baprs]-[0-9A-Za-z\\-]{10,48}",
+              "sk_live_[0-9a-zA-Z]{24,}"
             ],
             "max_results": 20
           }
         }
-      ]
+      ],
+      "messages": {
+        "pass": "No secrets detected in the working tree or Git history.",
+        "fail": "Secrets detected in files or Git history. Remove, rotate keys, and purge history with a secure rewrite."
+      }
     },
     {
       "id": "MB-R073",
@@ -55,7 +59,11 @@
             "must_not_match": ["http://[^\\s\"'>]+"]
           }
         }
-      ]
+      ],
+      "messages": {
+        "pass": "All configured endpoints use HTTPS (no http:// references).",
+        "fail": "Insecure http:// endpoint references found. Switch to HTTPS."
+      }
     },
     {
       "id": "MB-R074",
@@ -72,7 +80,11 @@
             "equals": 0
           }
         }
-      ]
+      ],
+      "messages": {
+        "pass": "Third-party debug/verbose logging is disabled.",
+        "fail": "Third-party debug/verbose logging is enabled. Disable debug_logging in env.php."
+      }
     },
     {
       "id": "MB-R075",
@@ -92,7 +104,11 @@
             ]
           }
         }
-      ]
+      ],
+      "messages": {
+        "pass": "Webhook handlers validate signatures (HMAC) from providers.",
+        "fail": "Webhook signature validation not detected. Verify MAC using shared secret headers."
+      }
     },
     {
       "id": "MB-R076",
@@ -112,7 +128,11 @@
             ]
           }
         }
-      ]
+      ],
+      "messages": {
+        "pass": "Outbound HTTP requests are constrained by allowlists and sane timeouts.",
+        "fail": "No allowlist or timeouts for outbound requests. Add domain allowlists and cURL timeouts."
+      }
     },
     {
       "id": "MB-R077",
@@ -134,7 +154,11 @@
             ]
           }
         }
-      ]
+      ],
+      "messages": {
+        "pass": "No direct handling of sensitive PII (e.g., full card, CVV, SSN, passport).",
+        "fail": "Sensitive PII handling detected. Remove or tokenize via a PCI-compliant provider."
+      }
     },
     {
       "id": "MB-R078",
@@ -159,7 +183,11 @@
             "expects_regex": true
           }
         }
-      ]
+      ],
+      "messages": {
+        "pass": "Web server enforces strong TLS ciphers (TLS 1.2/1.3, ECDHE).",
+        "fail": "Weak or unspecified TLS ciphers. Configure strong cipher suites on the web server."
+      }
     },
     {
       "id": "MB-R079",
@@ -188,7 +216,11 @@
             ]
           }
         }
-      ]
+      ],
+      "messages": {
+        "pass": "API credentials are stored in env.php, not embedded in code or the DB.",
+        "fail": "API keys found in code or DB paths. Move secrets to env.php and rotate compromised keys."
+      }
     },
     {
       "id": "MB-R080",
@@ -207,7 +239,11 @@
             ]
           }
         }
-      ]
+      ],
+      "messages": {
+        "pass": "Third-party logs apply masking/redaction for sensitive fields.",
+        "fail": "Logs are not sanitized. Add masking or redaction for tokens, emails, and identifiers."
+      }
     },
     {
       "id": "MB-R081",
@@ -236,7 +272,11 @@
             ]
           }
         }
-      ]
+      ],
+      "messages": {
+        "pass": "Integration docs mention least-privilege scopes and optional IP allowlisting.",
+        "fail": "No ACL/scoping guidance found. Document least-privilege permissions and IP allowlists."
+      }
     }
   ]
 }

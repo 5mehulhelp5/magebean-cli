@@ -16,7 +16,11 @@
             "max_results": 50
           }
         }
-      ]
+      ],
+      "messages": {
+        "pass": "No world-writable files or directories detected (chmod 777 not found).",
+        "fail": "World-writable files or directories detected. Remove 777 and tighten permissions."
+      }
     },
     {
       "id": "MB-R002",
@@ -32,7 +36,11 @@
             "max_octal": "0640"
           }
         }
-      ]
+      ],
+      "messages": {
+        "pass": "app/etc/env.php permissions are within safe range (<= 0640).",
+        "fail": "app/etc/env.php permissions are too permissive. Set to 0640 (owner read/write, group read)."
+      }
     },
     {
       "id": "MB-R003",
@@ -48,7 +56,11 @@
             "forbidden": [".git", ".env", ".env.local", "*.bak", "*.old", "*~"]
           }
         }
-      ]
+      ],
+      "messages": {
+        "pass": "Webroot is clean: no sensitive or backup artifacts exposed under pub/.",
+        "fail": "Sensitive or backup artifacts found under pub/. Remove them to prevent exposure."
+      }
     },
     {
       "id": "MB-R004",
@@ -63,7 +75,11 @@
             "dirs": ["app", "vendor", "lib"]
           }
         }
-      ]
+      ],
+      "messages": {
+        "pass": "Code directories (app, vendor, lib) are not group/other-writable.",
+        "fail": "One or more code directories are group/other-writable. Tighten to read-only for non-owners."
+      }
     },
     {
       "id": "MB-R005",
@@ -78,7 +94,11 @@
             "webroot": "pub"
           }
         }
-      ]
+      ],
+      "messages": {
+        "pass": "Directory listing is disabled for public paths.",
+        "fail": "Directory listing is enabled on at least one public path. Disable autoindex/listing."
+      }
     }
   ]
 }

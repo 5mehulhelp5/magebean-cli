@@ -17,7 +17,11 @@
             "equals": 2
           }
         }
-      ]
+      ],
+      "messages": {
+        "pass": "Full Page Cache (FPC) is enabled and configured.",
+        "fail": "Full Page Cache is disabled or not using Varnish. Enable FPC for performance."
+      }
     },
     {
       "id": "MB-R038",
@@ -42,7 +46,11 @@
             "equals": "redis"
           }
         }
-      ]
+      ],
+      "messages": {
+        "pass": "Cache backend is configured to use Redis or Varnish.",
+        "fail": "Cache backend is still using file-based storage. Switch to Redis or Varnish."
+      }
     },
     {
       "id": "MB-R039",
@@ -58,7 +66,11 @@
             "must_match": ["READY"]
           }
         }
-      ]
+      ],
+      "messages": {
+        "pass": "All indexers are in READY state with no backlog.",
+        "fail": "Some indexers are not READY. Run `bin/magento indexer:reindex`."
+      }
     },
     {
       "id": "MB-R040",
@@ -82,7 +94,11 @@
             "path": "session.redis.password"
           }
         }
-      ]
+      ],
+      "messages": {
+        "pass": "Sessions are stored in Redis with authentication configured.",
+        "fail": "Session storage is not hardened. Use Redis with a password for secure sessions."
+      }
     },
     {
       "id": "MB-R041",
@@ -107,7 +123,11 @@
             "not_equals": "file"
           }
         }
-      ]
+      ],
+      "messages": {
+        "pass": "No file-based cache backend detected.",
+        "fail": "File cache backend detected. Replace with Redis or Varnish for production."
+      }
     }
   ]
 }

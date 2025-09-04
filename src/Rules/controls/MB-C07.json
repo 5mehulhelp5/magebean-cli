@@ -16,7 +16,11 @@
             "forbidden": ["var/log", "var/report"]
           }
         }
-      ]
+      ],
+      "messages": {
+        "pass": "Log and report directories are not exposed under pub/.",
+        "fail": "Log or report directories are exposed in pub/. Move them out of the webroot."
+      }
     },
     {
       "id": "MB-R043",
@@ -32,7 +36,11 @@
             "must_match": ["rotate", "compress"]
           }
         }
-      ]
+      ],
+      "messages": {
+        "pass": "Log rotation is configured (rotate and compress directives present).",
+        "fail": "Log rotation is not configured. Add logrotate settings to prevent oversized log files."
+      }
     },
     {
       "id": "MB-R044",
@@ -49,7 +57,11 @@
             "equals": 0
           }
         }
-      ]
+      ],
+      "messages": {
+        "pass": "Debug template hints are disabled in production.",
+        "fail": "Debug template hints are enabled in production. Set dev/debug/template_hints_storefront to 0."
+      }
     },
     {
       "id": "MB-R045",
@@ -70,7 +82,11 @@
             ]
           }
         }
-      ]
+      ],
+      "messages": {
+        "pass": "No PII such as passwords, tokens, or card data is logged.",
+        "fail": "Sensitive PII is logged. Remove logging of passwords, tokens, and card details."
+      }
     }
   ]
 }

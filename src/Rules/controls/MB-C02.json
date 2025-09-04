@@ -17,7 +17,11 @@
             "not_equals": "admin"
           }
         }
-      ]
+      ],
+      "messages": {
+        "pass": "Admin path is non-default (not '/admin').",
+        "fail": "Admin path is still '/admin'. Change env.php backend.frontName to a non-guessable value and update web server rules."
+      }
     },
     {
       "id": "MB-R007",
@@ -34,7 +38,11 @@
             "equals": 1
           }
         }
-      ]
+      ],
+      "messages": {
+        "pass": "Two-Factor Authentication (Magento_TwoFactorAuth) is enabled for admin.",
+        "fail": "Two-Factor Authentication is disabled or missing. Enable Magento_TwoFactorAuth and enforce 2FA for all admin users."
+      }
     },
     {
       "id": "MB-R008",
@@ -50,7 +58,11 @@
             "path": "system.default.admin/security"
           }
         }
-      ]
+      ],
+      "messages": {
+        "pass": "Admin password/security policy is configured (system.default.admin/security present).",
+        "fail": "Admin password/security policy is not configured. Define complexity, history, lockout, and rotation settings under admin/security."
+      }
     },
     {
       "id": "MB-R009",
@@ -68,7 +80,11 @@
             "value": 900
           }
         }
-      ]
+      ],
+      "messages": {
+        "pass": "Admin session lifetime is at or below 900 seconds.",
+        "fail": "Admin session lifetime exceeds 900 seconds. Reduce session.lifetime to ≤ 900 for better security."
+      }
     },
     {
       "id": "MB-R010",
@@ -93,7 +109,11 @@
             "expects_regex": true
           }
         }
-      ]
+      ],
+      "messages": {
+        "pass": "Admin URL is either non-default or network-restricted (deny/allow rules present).",
+        "fail": "Admin URL is exposed (default path and no network ACLs). Change backend.frontName and/or restrict access via web server allow/deny."
+      }
     },
     {
       "id": "MB-R011",
@@ -109,7 +129,11 @@
             "path": "system.default.admin/captcha"
           }
         }
-      ]
+      ],
+      "messages": {
+        "pass": "CAPTCHA / rate-limiting is configured for admin authentication.",
+        "fail": "CAPTCHA / rate-limiting is not configured. Enable admin CAPTCHA (or reCAPTCHA) to slow brute-force attempts."
+      }
     }
   ]
 }

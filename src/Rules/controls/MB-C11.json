@@ -16,7 +16,11 @@
             "deny": ["*", "dev-master"]
           }
         }
-      ]
+      ],
+      "messages": {
+        "pass": "No wildcard or 'dev-master' constraints found in composer.json.",
+        "fail": "Wildcard or 'dev-master' constraints detected. Pin to stable, supported version ranges."
+      }
     },
     {
       "id": "MB-R066",
@@ -32,7 +36,11 @@
             "deny_prefix": ["dev-"]
           }
         }
-      ]
+      ],
+      "messages": {
+        "pass": "No dev branch constraints (dev-*) are used.",
+        "fail": "Dev branch constraints detected. Replace with tagged releases or stable ranges."
+      }
     },
     {
       "id": "MB-R067",
@@ -49,7 +57,11 @@
             "equals": true
           }
         }
-      ]
+      ],
+      "messages": {
+        "pass": "composer.json sets config.prefer-stable=true.",
+        "fail": "prefer-stable is not enabled. Set config.prefer-stable=true to favor stable releases."
+      }
     },
     {
       "id": "MB-R068",
@@ -66,7 +78,11 @@
             "fail_on_found": true
           }
         }
-      ]
+      ],
+      "messages": {
+        "pass": "No known vulnerabilities found in composer.lock against the offline database.",
+        "fail": "Known vulnerabilities detected. Update to patched versions per advisories."
+      }
     },
     {
       "id": "MB-R069",
@@ -83,7 +99,11 @@
             "scope": "direct"
           }
         }
-      ]
+      ],
+      "messages": {
+        "pass": "All direct dependencies are within acceptable freshness.",
+        "fail": "Outdated direct dependencies detected. Upgrade primary packages to recent stable releases."
+      }
     },
     {
       "id": "MB-R070",
@@ -99,7 +119,11 @@
             "lock_file": "composer.lock"
           }
         }
-      ]
+      ],
+      "messages": {
+        "pass": "composer.lock is in sync with composer.json.",
+        "fail": "composer.lock integrity check failed. Run `composer update` (or `composer install`) to reconcile."
+      }
     },
     {
       "id": "MB-R071",
@@ -115,7 +139,11 @@
             "packagist_meta": "rules/packagist-abandoned.json"
           }
         }
-      ]
+      ],
+      "messages": {
+        "pass": "No installed libraries are marked as abandoned on Packagist.",
+        "fail": "Abandoned libraries detected. Replace with maintained alternatives."
+      }
     }
   ]
 }

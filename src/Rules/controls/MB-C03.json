@@ -21,7 +21,11 @@
             ]
           }
         }
-      ]
+      ],
+      "messages": {
+        "pass": "No unsafe raw SQL statements detected; database queries use abstraction layers.",
+        "fail": "Unsafe raw SQL calls detected (query, mysqli_query, or new PDO). Use Magento DB abstraction or safe ORM."
+      }
     },
     {
       "id": "MB-R013",
@@ -42,7 +46,11 @@
             ]
           }
         }
-      ]
+      ],
+      "messages": {
+        "pass": "Template output uses proper escaping functions.",
+        "fail": "Unescaped template output detected. Use escapeHtml() or escapeHtmlAttr() for safe rendering."
+      }
     },
     {
       "id": "MB-R014",
@@ -63,7 +71,11 @@
             ]
           }
         }
-      ]
+      ],
+      "messages": {
+        "pass": "No direct access to PHP superglobals detected.",
+        "fail": "Direct use of $_GET/$_POST/$_REQUEST found. Use Magento request objects for sanitization."
+      }
     },
     {
       "id": "MB-R015",
@@ -83,7 +95,11 @@
             ]
           }
         }
-      ]
+      ],
+      "messages": {
+        "pass": "Forms include CSRF protection via form_key.",
+        "fail": "Forms without form_key detected. Add CSRF token for protection."
+      }
     },
     {
       "id": "MB-R016",
@@ -103,7 +119,11 @@
             ]
           }
         }
-      ]
+      ],
+      "messages": {
+        "pass": "Outbound HTTP requests include SSRF protections (allowlists and timeouts).",
+        "fail": "No SSRF protections found. Add domain allowlists and connection timeouts."
+      }
     },
     {
       "id": "MB-R017",
@@ -121,7 +141,11 @@
             "must_match": ["json_decode\\(|Serializer|Json\\\\Encoder"]
           }
         }
-      ]
+      ],
+      "messages": {
+        "pass": "No unsafe unserialize() usage detected; safe serialization methods in use.",
+        "fail": "Unsafe unserialize() calls detected. Replace with JSON or Magento Serializer classes."
+      }
     },
     {
       "id": "MB-R018",
@@ -142,7 +166,11 @@
             ]
           }
         }
-      ]
+      ],
+      "messages": {
+        "pass": "No unsafe command execution functions detected.",
+        "fail": "exec(), shell_exec(), or system() calls found. Avoid OS command execution."
+      }
     },
     {
       "id": "MB-R019",
@@ -163,7 +191,11 @@
             ]
           }
         }
-      ]
+      ],
+      "messages": {
+        "pass": "No dangerous dynamic execution functions detected.",
+        "fail": "Use of eval/assert/create_function detected. Remove or refactor these functions."
+      }
     },
     {
       "id": "MB-R020",
@@ -183,7 +215,11 @@
             ]
           }
         }
-      ]
+      ],
+      "messages": {
+        "pass": "Path sanitization functions (realpath/basename) are present.",
+        "fail": "No path sanitization functions found. Add realpath() or basename() to prevent traversal."
+      }
     },
     {
       "id": "MB-R021",
@@ -204,7 +240,11 @@
             ]
           }
         }
-      ]
+      ],
+      "messages": {
+        "pass": "File uploads are validated with extension, MIME type, and size checks.",
+        "fail": "File upload handling lacks validation. Add allowed extensions, MIME type checks, and size limits."
+      }
     },
     {
       "id": "MB-R022",
@@ -224,7 +264,11 @@
             ]
           }
         }
-      ]
+      ],
+      "messages": {
+        "pass": "JavaScript context output uses proper escaping.",
+        "fail": "No escaping for JavaScript context detected. Use escapeJs() or json_encode()."
+      }
     },
     {
       "id": "MB-R023",
@@ -248,7 +292,11 @@
             ]
           }
         }
-      ]
+      ],
+      "messages": {
+        "pass": "Cryptographically secure RNG functions (random_bytes/random_int) are used.",
+        "fail": "Weak PRNG functions (rand/mt_rand) detected. Replace with random_bytes/random_int."
+      }
     },
     {
       "id": "MB-R024",
@@ -269,7 +317,11 @@
             ]
           }
         }
-      ]
+      ],
+      "messages": {
+        "pass": "No sensitive data (passwords, tokens, card details) logged in code.",
+        "fail": "Sensitive data logging detected. Remove logs containing passwords, tokens, or card information."
+      }
     },
     {
       "id": "MB-R025",
@@ -289,7 +341,11 @@
             ]
           }
         }
-      ]
+      ],
+      "messages": {
+        "pass": "Magento's built-in APIs are used for encryption and session management.",
+        "fail": "Custom crypto/session code found. Use Magento Framework Encryption and Session APIs instead."
+      }
     }
   ]
 }

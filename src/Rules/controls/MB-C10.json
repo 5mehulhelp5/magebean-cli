@@ -16,7 +16,11 @@
             "packagist_meta": "rules/packagist-abandoned.json"
           }
         }
-      ]
+      ],
+      "messages": {
+        "pass": "No installed packages are marked as 'abandoned' on Packagist.",
+        "fail": "Abandoned packages detected. Replace them or switch to the recommended alternatives."
+      }
     },
     {
       "id": "MB-R062",
@@ -33,7 +37,11 @@
             "months": 24
           }
         }
-      ]
+      ],
+      "messages": {
+        "pass": "All packages have had a release within the last 24 months.",
+        "fail": "Stale packages found (no release > 24 months). Replace or fork and maintain internally."
+      }
     },
     {
       "id": "MB-R063",
@@ -49,7 +57,11 @@
             "repo_meta": "rules/repo-status.json"
           }
         }
-      ]
+      ],
+      "messages": {
+        "pass": "No installed packages come from archived repositories.",
+        "fail": "Packages from archived repositories detected. Migrate to active upstreams."
+      }
     },
     {
       "id": "MB-R064",
@@ -65,7 +77,11 @@
             "repo_meta": "rules/repo-status.json"
           }
         }
-      ]
+      ],
+      "messages": {
+        "pass": "No risky forks detected replacing upstream libraries.",
+        "fail": "Risky forks detected. Prefer official upstreams or vetted, actively maintained forks."
+      }
     }
   ]
 }

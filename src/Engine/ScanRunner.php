@@ -16,41 +16,123 @@ final class ScanRunner
         $this->pack = $pack;
     }
 
+    private function evalCheckWithEvidence($name, $args, $fs, $phpc, $comp, $mage, $http, $code, $web, $git): array
+    {
+        [$ok, $msg, $ev] = match ($name) {
+            'fs_no_world_writable' => $fs->noWorldWritable($args),
+            'file_mode_max'        => $fs->fileModeMax($args),
+            // ... các check khác bạn đã map ...
+            default => [false, 'Unknown check: ' . $name, []],
+        };
+        if (!isset($ev)) {
+            $ev = [];
+        } // fallback khi check chỉ trả về 2 phần tử
+        return [$ok, $msg, $ev];
+    }
+
     public function run(): array
     {
         $findings = [];
         $passed = 0;
         $failed = 0;
-        $fs = new FilesystemCheck($this->ctx);
+
+        $fs  = new FilesystemCheck($this->ctx);
         $phpc = new PhpConfigCheck($this->ctx);
         $comp = new ComposerCheck($this->ctx);
         $mage = new MagentoCheck($this->ctx);
         $http = new HttpCheck($this->ctx);
         $code = new CodeSearchCheck($this->ctx);
-        $web = new WebServerConfigCheck($this->ctx);
-        $git = new GitHistoryCheck($this->ctx);
+        $web  = new WebServerConfigCheck($this->ctx);
+        $git  = new GitHistoryCheck($this->ctx);
 
         foreach ($this->pack['rules'] as $rule) {
-            $ok = true;
-            $details = [];
             $op = $rule['op'] ?? 'all';
+            // Với 'any' khởi tạo FAIL cho tới khi có check PASS
+            $ok = ($op === 'any') ? false : true;
+
+            $details  = [];
+            $evidence = [];
+
             foreach ($rule['checks'] as $chk) {
                 $name = $chk['name'];
                 $args = $chk['args'] ?? [];
-                [$cok, $msg] = ($this->evalCheck($name, $args, $fs, $phpc, $comp, $mage, $http, $code, $web, $git) ?? []) + [false, ''];
-                $details[] = [$name, $msg, $cok];
-                if (!$cok && $op === 'all') $ok = false;
-                if ($cok && $op === 'any') {
+
+                [$cok, $msg, $ev] = $this->evalCheckWithEvidence(
+                    $name,
+                    $args,
+                    $fs,
+                    $phpc,
+                    $comp,
+                    $mage,
+                    $http,
+                    $code,
+                    $web,
+                    $git
+                );
+
+                $details[] = [$name, $msg, (bool)$cok];
+                if (!empty($ev)) {
+                    $evidence = array_merge($evidence, is_array($ev) ? $ev : [$ev]);
+                }
+                $details[] = [$name, $msg, (bool)$cok];
+                if (!empty($ev)) {
+                    $evidence = array_merge($evidence, is_array($ev) ? $ev : [$ev]);
+                }
+
+                if ($op === 'all' && !$cok) {
+                    $ok = false;
+                }
+                if ($op === 'any' && $cok) {
                     $ok = true;
                     break;
                 }
             }
-            $findings[] = ['id' => $rule['id'], 'title' => $rule['title'], 'control' => $rule['control'], 'severity' => $rule['severity'], 'passed' => $ok, 'details' => $details];
+
+            $msgPass = $rule['messages']['pass'] ?? null;
+            $msgFail = $rule['messages']['fail'] ?? null;
+            if ($ok) {
+                if ($msgPass) {
+                    $finalMsg = $msgPass;
+                } else {
+                    $okMsgs = array_values(array_map(
+                        fn($d) => $d[1],
+                        array_filter($details, fn($d) => $d[2] === true)
+                    ));
+                    $finalMsg = $okMsgs[0] ?? 'Rule passed';
+                }
+            } else {
+                if ($msgFail) {
+                    $finalMsg = $msgFail;
+                } else {
+                    $bad = array_values(array_map(
+                        fn($d) => $d[1],
+                        array_filter($details, fn($d) => $d[2] === false)
+                    ));
+                    $finalMsg = $bad ? implode(' | ', array_slice($bad, 0, 2)) : 'Rule failed';
+                }
+            }
+
+            $findings[] = [
+                'id'       => $rule['id'],
+                'title'    => $rule['title'],
+                'control'  => $rule['control'],
+                'severity' => $rule['severity'],
+                'passed'   => $ok,
+                'message'  => $finalMsg,
+                'details'  => $details,
+                'evidence' => $evidence
+            ];
+
             if ($ok) $passed++;
             else $failed++;
         }
-        return ['summary' => ['passed' => $passed, 'failed' => $failed, 'total' => $passed + $failed], 'findings' => $findings];
+
+        return [
+            'summary'  => ['passed' => $passed, 'failed' => $failed, 'total' => $passed + $failed],
+            'findings' => $findings
+        ];
     }
+
 
     private function evalCheck(
         string $name,

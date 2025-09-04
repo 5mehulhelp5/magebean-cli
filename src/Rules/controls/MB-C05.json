@@ -17,7 +17,11 @@
             "equals": "production"
           }
         }
-      ]
+      ],
+      "messages": {
+        "pass": "Magento is running in PRODUCTION mode.",
+        "fail": "Magento is not in PRODUCTION mode. Set MAGE_MODE to 'production' in env.php and redeploy."
+      }
     },
     {
       "id": "MB-R032",
@@ -36,7 +40,11 @@
             ]
           }
         }
-      ]
+      ],
+      "messages": {
+        "pass": "Xdebug is not enabled in the production PHP configuration.",
+        "fail": "Xdebug settings detected. Remove the zend_extension and xdebug.* directives in production."
+      }
     },
     {
       "id": "MB-R033",
@@ -54,7 +62,11 @@
             ]
           }
         }
-      ]
+      ],
+      "messages": {
+        "pass": "PHP display_errors is Off.",
+        "fail": "PHP display_errors is On. Set display_errors=Off and log errors to files instead."
+      }
     },
     {
       "id": "MB-R034",
@@ -71,7 +83,11 @@
           "name": "fs_exists",
           "args": { "path": "generated/code" }
         }
-      ]
+      ],
+      "messages": {
+        "pass": "Generated DI metadata and code are present.",
+        "fail": "Missing generated/metadata or generated/code. Run `bin/magento setup:di:compile`."
+      }
     },
     {
       "id": "MB-R035",
@@ -88,7 +104,11 @@
           "name": "fs_exists",
           "args": { "path": "var/view_preprocessed" }
         }
-      ]
+      ],
+      "messages": {
+        "pass": "Static view files are deployed (pub/static and var/view_preprocessed exist).",
+        "fail": "Static content is not fully deployed. Run `bin/magento setup:static-content:deploy` for production."
+      }
     },
     {
       "id": "MB-R036",
@@ -105,7 +125,11 @@
             "equals": 0
           }
         }
-      ]
+      ],
+      "messages": {
+        "pass": "Developer template hints are disabled in production.",
+        "fail": "Developer template hints are enabled. Disable system.default.dev/debug/template_hints (set to 0)."
+      }
     }
   ]
 }

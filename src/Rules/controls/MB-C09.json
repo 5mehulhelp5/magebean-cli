@@ -16,7 +16,11 @@
             "vuln_db": "rules/osv-db.json"
           }
         }
-      ]
+      ],
+      "messages": {
+        "pass": "No vulnerable packages detected against the offline OSV database.",
+        "fail": "Vulnerable packages found. Upgrade or patch affected versions per OSV advisories."
+      }
     },
     {
       "id": "MB-R050",
@@ -32,7 +36,11 @@
             "advisories": "rules/adobe-core-advisories.json"
           }
         }
-      ]
+      ],
+      "messages": {
+        "pass": "No unresolved Adobe core advisories detected.",
+        "fail": "Unresolved Adobe core advisories present. Apply the recommended patches or versions."
+      }
     },
     {
       "id": "MB-R051",
@@ -48,7 +56,11 @@
             "vuln_db": "rules/osv-db.json"
           }
         }
-      ]
+      ],
+      "messages": {
+        "pass": "Fix versions are available for all known vulnerable packages.",
+        "fail": "Some vulnerable packages lack an applied fix version. Pin or upgrade to the suggested safe version."
+      }
     },
     {
       "id": "MB-R052",
@@ -64,7 +76,11 @@
             "high_risk_list": "rules/high-risk-modules.json"
           }
         }
-      ]
+      ],
+      "messages": {
+        "pass": "No high-risk modules from the list are installed, or they are acknowledged and controlled.",
+        "fail": "High-risk modules detected. Review, sandbox, restrict scope, or replace with safer alternatives."
+      }
     },
     {
       "id": "MB-R053",
@@ -84,7 +100,11 @@
             "must_match": ["Mitigation", "Workaround"]
           }
         }
-      ]
+      ],
+      "messages": {
+        "pass": "Mitigations/workarounds are documented in SECURITY.md.",
+        "fail": "No documented mitigations. Record temporary workarounds and rollback plans in SECURITY.md."
+      }
     },
     {
       "id": "MB-R054",
@@ -100,7 +120,11 @@
             "list": "rules/cisa-kev.json"
           }
         }
-      ]
+      ],
+      "messages": {
+        "pass": "No packages match the CISA Known Exploited Vulnerabilities list.",
+        "fail": "Packages on the CISA KEV list detected. Prioritize immediate remediation."
+      }
     },
     {
       "id": "MB-R055",
@@ -117,7 +141,11 @@
             "scope": "transitive"
           }
         }
-      ]
+      ],
+      "messages": {
+        "pass": "Transitive dependencies are free from known CVEs in the offline database.",
+        "fail": "Vulnerable transitive dependencies detected. Update constraints to pull safe versions."
+      }
     },
     {
       "id": "MB-R056",
@@ -134,7 +162,11 @@
             "advisory_fix": ">=x.y.z"
           }
         }
-      ]
+      ],
+      "messages": {
+        "pass": "Composer constraints do not block required security update ranges.",
+        "fail": "Version constraints block security updates. Relax or adjust constraints to allow patched versions."
+      }
     },
     {
       "id": "MB-R057",
@@ -150,7 +182,11 @@
             "meta": "rules/packagist-yanked.json"
           }
         }
-      ]
+      ],
+      "messages": {
+        "pass": "No yanked or withdrawn packages are installed.",
+        "fail": "Yanked/withdrawn packages detected. Replace or upgrade to a supported release."
+      }
     },
     {
       "id": "MB-R058",
@@ -167,7 +203,11 @@
             "max_age_days": 365
           }
         }
-      ]
+      ],
+      "messages": {
+        "pass": "Installed Marketplace extensions are within the allowed freshness window.",
+        "fail": "Outdated Marketplace extensions detected. Update to a maintained release."
+      }
     },
     {
       "id": "MB-R059",
@@ -183,7 +223,11 @@
             "advisories": "rules/osv-db.json"
           }
         }
-      ]
+      ],
+      "messages": {
+        "pass": "Average advisory response time is within the accepted SLA.",
+        "fail": "Advisory response time exceeds target. Tighten triage and patch workflows."
+      }
     },
     {
       "id": "MB-R060",
@@ -199,7 +243,11 @@
             "vendor_meta": "rules/vendor-support.json"
           }
         }
-      ]
+      ],
+      "messages": {
+        "pass": "All installed extensions have active vendor support.",
+        "fail": "Unsupported extensions detected. Replace, remove, or fork and maintain internally."
+      }
     }
   ]
 }

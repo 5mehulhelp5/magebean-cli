@@ -23,7 +23,11 @@
             "must_match": ["bin/magento\\s+cron:run"]
           }
         }
-      ]
+      ],
+      "messages": {
+        "pass": "Magento cron entries are present in crontab configuration.",
+        "fail": "Magento cron entries are missing. Add 'bin/magento cron:run' to your crontab."
+      }
     },
     {
       "id": "MB-R047",
@@ -39,7 +43,11 @@
             "seconds": 900
           }
         }
-      ]
+      ],
+      "messages": {
+        "pass": "Cron heartbeat is recent (<= 15 minutes).",
+        "fail": "Cron has not run in the last 15 minutes. Investigate cron service and schedule."
+      }
     },
     {
       "id": "MB-R048",
@@ -52,12 +60,14 @@
           "name": "text_grep",
           "args": {
             "file": "var/cron/queue.size",
-            "must_not_match": [
-              "^([1-9][0-9]{3,})$"
-            ]
+            "must_not_match": ["^([1-9][0-9]{3,})$"]
           }
         }
-      ]
+      ],
+      "messages": {
+        "pass": "Cron queue size is within acceptable limits.",
+        "fail": "Cron queue size is high. Jobs are backlogged—scale workers or fix failing jobs."
+      }
     }
   ]
 }
