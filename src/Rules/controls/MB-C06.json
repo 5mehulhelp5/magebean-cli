@@ -1,0 +1,113 @@
+{
+  "control": "MB-C06",
+  "title": "Cache & Indexing Health",
+  "rules": [
+    {
+      "id": "MB-R037",
+      "title": "Full Page Cache (FPC) enabled",
+      "control": "MB-C06",
+      "severity": "high",
+      "op": "all",
+      "checks": [
+        {
+          "name": "php_array_eq",
+          "args": {
+            "file": "app/etc/env.php",
+            "path": "system.default.system/full_page_cache/caching_application",
+            "equals": 2
+          }
+        }
+      ]
+    },
+    {
+      "id": "MB-R038",
+      "title": "Cache backend is Redis/Varnish (not file)",
+      "control": "MB-C06",
+      "severity": "medium",
+      "op": "any",
+      "checks": [
+        {
+          "name": "php_array_eq",
+          "args": {
+            "file": "app/etc/env.php",
+            "path": "cache.frontend.default.backend",
+            "equals": "Cm_Cache_Backend_Redis"
+          }
+        },
+        {
+          "name": "php_array_eq",
+          "args": {
+            "file": "app/etc/env.php",
+            "path": "cache.backend",
+            "equals": "redis"
+          }
+        }
+      ]
+    },
+    {
+      "id": "MB-R039",
+      "title": "Indexers are READY (no backlog)",
+      "control": "MB-C06",
+      "severity": "medium",
+      "op": "all",
+      "checks": [
+        {
+          "name": "text_grep",
+          "args": {
+            "file": "var/.indexer_status",
+            "must_match": ["READY"]
+          }
+        }
+      ]
+    },
+    {
+      "id": "MB-R040",
+      "title": "Session storage hardened (Redis with auth)",
+      "control": "MB-C06",
+      "severity": "high",
+      "op": "all",
+      "checks": [
+        {
+          "name": "php_array_eq",
+          "args": {
+            "file": "app/etc/env.php",
+            "path": "session.save",
+            "equals": "redis"
+          }
+        },
+        {
+          "name": "php_array_exists",
+          "args": {
+            "file": "app/etc/env.php",
+            "path": "session.redis.password"
+          }
+        }
+      ]
+    },
+    {
+      "id": "MB-R041",
+      "title": "No dev cache backends (avoid file backend)",
+      "control": "MB-C06",
+      "severity": "low",
+      "op": "any",
+      "checks": [
+        {
+          "name": "php_array_neq",
+          "args": {
+            "file": "app/etc/env.php",
+            "path": "cache.frontend.default.backend",
+            "not_equals": "Cm_Cache_Backend_File"
+          }
+        },
+        {
+          "name": "php_array_neq",
+          "args": {
+            "file": "app/etc/env.php",
+            "path": "cache.backend",
+            "not_equals": "file"
+          }
+        }
+      ]
+    }
+  ]
+}

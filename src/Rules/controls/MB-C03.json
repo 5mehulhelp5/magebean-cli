@@ -1,0 +1,295 @@
+{
+  "control": "MB-C03",
+  "title": "Secure Coding Practices",
+  "rules": [
+    {
+      "id": "MB-R012",
+      "title": "No raw SQL without abstraction",
+      "control": "MB-C03",
+      "severity": "high",
+      "op": "all",
+      "checks": [
+        {
+          "name": "code_grep",
+          "args": {
+            "paths": ["app"],
+            "include_ext": ["php", "phtml"],
+            "must_not_match": [
+              "->query\\(",
+              "mysqli_query\\(",
+              "new\\s+PDO\\s*\\("
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "MB-R013",
+      "title": "Template output is escaped",
+      "control": "MB-C03",
+      "severity": "medium",
+      "op": "all",
+      "checks": [
+        {
+          "name": "code_grep",
+          "args": {
+            "paths": ["app/design"],
+            "include_ext": ["phtml"],
+            "must_match": [
+              "escapeHtml\\(",
+              "escapeHtmlAttr\\(",
+              "\\$block->escapeHtml"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "MB-R014",
+      "title": "Avoid PHP superglobals directly",
+      "control": "MB-C03",
+      "severity": "medium",
+      "op": "all",
+      "checks": [
+        {
+          "name": "code_grep",
+          "args": {
+            "paths": ["app"],
+            "include_ext": ["php"],
+            "must_not_match": [
+              "\\$_GET\\[",
+              "\\$_POST\\[",
+              "\\$_REQUEST\\["
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "MB-R015",
+      "title": "Forms include CSRF tokens (form_key)",
+      "control": "MB-C03",
+      "severity": "high",
+      "op": "all",
+      "checks": [
+        {
+          "name": "code_grep",
+          "args": {
+            "paths": ["app"],
+            "include_ext": ["php", "phtml"],
+            "must_match": [
+              "form_key",
+              "getFormKey\\("
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "MB-R016",
+      "title": "SSRF protections present",
+      "control": "MB-C03",
+      "severity": "medium",
+      "op": "all",
+      "checks": [
+        {
+          "name": "code_grep",
+          "args": {
+            "paths": ["app"],
+            "include_ext": ["php"],
+            "must_match": [
+              "allowlist|whitelist",
+              "CURLOPT_CONNECTTIMEOUT|CURLOPT_TIMEOUT"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "MB-R017",
+      "title": "No unsafe deserialization",
+      "control": "MB-C03",
+      "severity": "high",
+      "op": "all",
+      "checks": [
+        {
+          "name": "code_grep",
+          "args": {
+            "paths": ["app"],
+            "include_ext": ["php"],
+            "must_not_match": ["unserialize\\("],
+            "must_match": ["json_decode\\(|Serializer|Json\\\\Encoder"]
+          }
+        }
+      ]
+    },
+    {
+      "id": "MB-R018",
+      "title": "Command execution functions are not used",
+      "control": "MB-C03",
+      "severity": "high",
+      "op": "all",
+      "checks": [
+        {
+          "name": "code_grep",
+          "args": {
+            "paths": ["app"],
+            "include_ext": ["php"],
+            "must_not_match": [
+              "exec\\(",
+              "shell_exec\\(",
+              "system\\("
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "MB-R019",
+      "title": "No eval/assert/dynamic execution",
+      "control": "MB-C03",
+      "severity": "high",
+      "op": "all",
+      "checks": [
+        {
+          "name": "code_grep",
+          "args": {
+            "paths": ["app"],
+            "include_ext": ["php"],
+            "must_not_match": [
+              "eval\\(",
+              "assert\\(",
+              "create_function\\("
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "MB-R020",
+      "title": "Path traversal protections (sanitization present)",
+      "control": "MB-C03",
+      "severity": "medium",
+      "op": "all",
+      "checks": [
+        {
+          "name": "code_grep",
+          "args": {
+            "paths": ["app"],
+            "include_ext": ["php"],
+            "must_match": [
+              "realpath\\(",
+              "basename\\("
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "MB-R021",
+      "title": "Secure file upload handling",
+      "control": "MB-C03",
+      "severity": "medium",
+      "op": "all",
+      "checks": [
+        {
+          "name": "code_grep",
+          "args": {
+            "paths": ["app"],
+            "include_ext": ["php"],
+            "must_match": [
+              "isAllowedExtension",
+              "validateMime|mime_content_type|getClientMimeType",
+              "max_file_size|filesize\\("
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "MB-R022",
+      "title": "Escaping for JS context",
+      "control": "MB-C03",
+      "severity": "low",
+      "op": "all",
+      "checks": [
+        {
+          "name": "code_grep",
+          "args": {
+            "paths": ["app/design"],
+            "include_ext": ["phtml", "js", "html"],
+            "must_match": [
+              "escapeJs\\(",
+              "json_encode\\("
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "MB-R023",
+      "title": "Use CSPRNG; avoid weak PRNG",
+      "control": "MB-C03",
+      "severity": "high",
+      "op": "all",
+      "checks": [
+        {
+          "name": "code_grep",
+          "args": {
+            "paths": ["app"],
+            "include_ext": ["php"],
+            "must_match": [
+              "random_bytes\\(",
+              "random_int\\("
+            ],
+            "must_not_match": [
+              "mt_rand\\(",
+              "rand\\("
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "MB-R024",
+      "title": "Sensitive data not logged",
+      "control": "MB-C03",
+      "severity": "high",
+      "op": "all",
+      "checks": [
+        {
+          "name": "code_grep",
+          "args": {
+            "paths": ["app"],
+            "include_ext": ["php"],
+            "must_not_match": [
+              "logger->(info|debug|notice)\\([^)]*password",
+              "logger->(info|debug|notice)\\([^)]*Authorization",
+              "logger->(info|debug|notice)\\([^)]*(card_number|cvv)"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "MB-R025",
+      "title": "Use Magento APIs for crypto & session",
+      "control": "MB-C03",
+      "severity": "medium",
+      "op": "all",
+      "checks": [
+        {
+          "name": "code_grep",
+          "args": {
+            "paths": ["app"],
+            "include_ext": ["php"],
+            "must_match": [
+              "Magento\\\\\\\\Framework\\\\\\\\Encryption",
+              "Magento\\\\\\\\Framework\\\\\\\\Session"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,63 @@
+{
+  "control": "MB-C08",
+  "title": "Cron Job Reliability",
+  "rules": [
+    {
+      "id": "MB-R046",
+      "title": "Crontab entries present (Magento cron)",
+      "control": "MB-C08",
+      "severity": "medium",
+      "op": "any",
+      "checks": [
+        {
+          "name": "text_grep",
+          "args": {
+            "file": "app/etc/crontab.sample",
+            "must_match": ["bin/magento\\s+cron:run"]
+          }
+        },
+        {
+          "name": "text_grep",
+          "args": {
+            "file": "deploy/cron.txt",
+            "must_match": ["bin/magento\\s+cron:run"]
+          }
+        }
+      ]
+    },
+    {
+      "id": "MB-R047",
+      "title": "Cron heartbeat is recent (<= 900s)",
+      "control": "MB-C08",
+      "severity": "high",
+      "op": "all",
+      "checks": [
+        {
+          "name": "fs_mtime_max_age",
+          "args": {
+            "file": "var/cron/cron.timestamp",
+            "seconds": 900
+          }
+        }
+      ]
+    },
+    {
+      "id": "MB-R048",
+      "title": "Cron backlog below threshold",
+      "control": "MB-C08",
+      "severity": "medium",
+      "op": "all",
+      "checks": [
+        {
+          "name": "text_grep",
+          "args": {
+            "file": "var/cron/queue.size",
+            "must_not_match": [
+              "^([1-9][0-9]{3,})$"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

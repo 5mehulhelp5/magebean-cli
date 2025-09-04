@@ -1,0 +1,15 @@
+{
+  "alias": "magebean.phar",
+  "chmod": "0755",
+  "directories": [
+    "src",
+    "resources"
+  ],
+  "files": [
+    "vendor/autoload.php"
+  ],
+  "main": "bin/magebean",
+  "output": "dist/magebean.phar",
+  "stub": true,
+  "compression": "GZ"
+}

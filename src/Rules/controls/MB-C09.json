@@ -1,0 +1,205 @@
+{
+  "control": "MB-C09",
+  "title": "Extension Vulnerability Management",
+  "rules": [
+    {
+      "id": "MB-R049",
+      "title": "No vulnerable packages (CVE via OSV)",
+      "control": "MB-C09",
+      "severity": "critical",
+      "op": "all",
+      "checks": [
+        {
+          "name": "composer_audit_offline",
+          "args": {
+            "lock_file": "composer.lock",
+            "vuln_db": "rules/osv-db.json"
+          }
+        }
+      ]
+    },
+    {
+      "id": "MB-R050",
+      "title": "Adobe core module advisories resolved",
+      "control": "MB-C09",
+      "severity": "critical",
+      "op": "all",
+      "checks": [
+        {
+          "name": "composer_core_advisories_offline",
+          "args": {
+            "lock_file": "composer.lock",
+            "advisories": "rules/adobe-core-advisories.json"
+          }
+        }
+      ]
+    },
+    {
+      "id": "MB-R051",
+      "title": "Suggest fixed versions for vulnerable packages",
+      "control": "MB-C09",
+      "severity": "medium",
+      "op": "all",
+      "checks": [
+        {
+          "name": "composer_fix_version",
+          "args": {
+            "lock_file": "composer.lock",
+            "vuln_db": "rules/osv-db.json"
+          }
+        }
+      ]
+    },
+    {
+      "id": "MB-R052",
+      "title": "High-risk modules flagged",
+      "control": "MB-C09",
+      "severity": "medium",
+      "op": "all",
+      "checks": [
+        {
+          "name": "composer_risk_surface_tag",
+          "args": {
+            "lock_file": "composer.lock",
+            "high_risk_list": "rules/high-risk-modules.json"
+          }
+        }
+      ]
+    },
+    {
+      "id": "MB-R053",
+      "title": "Temporary mitigations documented",
+      "control": "MB-C09",
+      "severity": "low",
+      "op": "all",
+      "checks": [
+        {
+          "name": "fs_exists",
+          "args": { "path": "SECURITY.md" }
+        },
+        {
+          "name": "text_grep",
+          "args": {
+            "file": "SECURITY.md",
+            "must_match": ["Mitigation", "Workaround"]
+          }
+        }
+      ]
+    },
+    {
+      "id": "MB-R054",
+      "title": "Known-exploited packages prioritized (CISA KEV)",
+      "control": "MB-C09",
+      "severity": "critical",
+      "op": "all",
+      "checks": [
+        {
+          "name": "composer_match_list",
+          "args": {
+            "lock_file": "composer.lock",
+            "list": "rules/cisa-kev.json"
+          }
+        }
+      ]
+    },
+    {
+      "id": "MB-R055",
+      "title": "Transitive dependencies checked for CVEs",
+      "control": "MB-C09",
+      "severity": "high",
+      "op": "all",
+      "checks": [
+        {
+          "name": "composer_audit_offline",
+          "args": {
+            "lock_file": "composer.lock",
+            "vuln_db": "rules/osv-db.json",
+            "scope": "transitive"
+          }
+        }
+      ]
+    },
+    {
+      "id": "MB-R056",
+      "title": "No constraints blocking security updates",
+      "control": "MB-C09",
+      "severity": "medium",
+      "op": "all",
+      "checks": [
+        {
+          "name": "composer_constraints_conflict",
+          "args": {
+            "json_file": "composer.json",
+            "lock_file": "composer.lock",
+            "advisory_fix": ">=x.y.z"
+          }
+        }
+      ]
+    },
+    {
+      "id": "MB-R057",
+      "title": "No yanked/withdrawn packages",
+      "control": "MB-C09",
+      "severity": "high",
+      "op": "all",
+      "checks": [
+        {
+          "name": "composer_yanked_offline",
+          "args": {
+            "lock_file": "composer.lock",
+            "meta": "rules/packagist-yanked.json"
+          }
+        }
+      ]
+    },
+    {
+      "id": "MB-R058",
+      "title": "No outdated Marketplace extensions",
+      "control": "MB-C09",
+      "severity": "medium",
+      "op": "all",
+      "checks": [
+        {
+          "name": "composer_outdated_offline",
+          "args": {
+            "lock_file": "composer.lock",
+            "market_meta": "rules/marketplace-versions.json",
+            "max_age_days": 365
+          }
+        }
+      ]
+    },
+    {
+      "id": "MB-R059",
+      "title": "Advisories handled in timely manner",
+      "control": "MB-C09",
+      "severity": "low",
+      "op": "all",
+      "checks": [
+        {
+          "name": "composer_advisory_latency",
+          "args": {
+            "lock_file": "composer.lock",
+            "advisories": "rules/osv-db.json"
+          }
+        }
+      ]
+    },
+    {
+      "id": "MB-R060",
+      "title": "No extensions without vendor support",
+      "control": "MB-C09",
+      "severity": "medium",
+      "op": "all",
+      "checks": [
+        {
+          "name": "composer_vendor_support_offline",
+          "args": {
+            "lock_file": "composer.lock",
+            "vendor_meta": "rules/vendor-support.json"
+          }
+        }
+      ]
+    }
+  ]
+}

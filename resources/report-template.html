@@ -1,0 +1,151 @@
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>Magebean Report</title>
+    <style>
+        body {
+            font-family: system-ui;
+            margin: 24px
+        }
+
+        table {
+            border-collapse: collapse;
+            width: 100%
+        }
+
+        td,
+        th {
+            border: 1px solid #ddd;
+            padding: 8px
+        }
+
+        tr:nth-child(even) {
+            background: #fafafa
+        }
+
+        .summary {
+            margin: 24px 0;
+        }
+
+        .summary h2 {
+            margin: 0 0 12px;
+            font-size: 20px;
+        }
+
+        .summary-table th {
+            width: 220px;
+            text-align: left;
+            background: #f7f7f7;
+        }
+
+        .summary-table td code {
+            background: #f5f5f5;
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+
+        .progress {
+            width: 100%;
+            height: 10px;
+            background: #eee;
+            border-radius: 6px;
+            overflow: hidden;
+            margin: 6px 0;
+            border: 1px solid #ddd;
+        }
+
+        .progress-bar {
+            height: 100%;
+            /* màu mặc định của trình duyệt (không cần đặt color cụ thể) */
+            background: linear-gradient(to right, rgba(0, 0, 0, .2), rgba(0, 0, 0, .1));
+        }
+
+        .progress-label {
+            font-size: 12px;
+            color: #555;
+        }
+
+        .status-pass {
+            color: #155724;
+            background-color: #d4edda;
+            font-weight: bold;
+        }
+
+        .status-fail {
+            color: #721c24;
+            background-color: #f8d7da;
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Magebean Report</h1>
+    <section class="summary">
+        <h2>Summary</h2>
+
+        <table class="summary-table">
+            <tbody>
+                <tr>
+                    <th>Scan Time</th>
+                    <td>
+                        {{scan_completed}}
+                    </td>
+                </tr>
+                <tr>
+                    <th>Path Audited</th>
+                    <td><code>{{path_audited}}</code></td>
+                </tr>
+                <tr>
+                    <th>Rules Checked</th>
+                    <td>
+                        Total: {{rules_total}}
+                        &nbsp;|&nbsp;
+                        Passed: {{rules_passed}}
+                        &nbsp;|&nbsp;
+                        Failed: {{rules_failed}}
+                    </td>
+                </tr>
+                <tr>
+                    <th>Findings Overview</th>
+                    <td>
+                        Critical: {{findings_critical}}
+                        &nbsp;|&nbsp;
+                        High: {{findings_high}}
+                        &nbsp;|&nbsp;
+                        Medium: {{findings_medium}}
+                        &nbsp;|&nbsp;
+                        Low: {{findings_low}}
+                        &nbsp;|&nbsp;
+                        Total: {{findings_total}}
+                    </td>
+                </tr>
+                <tr>
+                    <th>Score (Rules Passed %)</th>
+                    <td>
+                        <div class="progress">
+                            <div class="progress-bar" style="width: {{rules_passed_percent}}%;"></div>
+                        </div>
+                        <div class="progress-label">{{rules_passed}} / {{rules_total}} ({{rules_passed_percent}}%)</div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </section>
+
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Control</th>
+                <th>Severity</th>
+                <th>Status</th>
+                <th>Title</th>
+            </tr>
+        </thead>
+        <tbody>{{table}}</tbody>
+    </table>
+</body>
+
+</html>

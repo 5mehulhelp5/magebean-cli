@@ -1,0 +1,111 @@
+{
+  "control": "MB-C05",
+  "title": "Production Mode & Deployment Hygiene",
+  "rules": [
+    {
+      "id": "MB-R031",
+      "title": "Magento runs in PRODUCTION mode",
+      "control": "MB-C05",
+      "severity": "high",
+      "op": "all",
+      "checks": [
+        {
+          "name": "php_array_eq",
+          "args": {
+            "file": "app/etc/env.php",
+            "path": "MAGE_MODE",
+            "equals": "production"
+          }
+        }
+      ]
+    },
+    {
+      "id": "MB-R032",
+      "title": "Xdebug disabled in production",
+      "control": "MB-C05",
+      "severity": "medium",
+      "op": "all",
+      "checks": [
+        {
+          "name": "text_grep",
+          "args": {
+            "file": "php.ini",
+            "must_not_match": [
+              "zend_extension\\s*=\\s*xdebug",
+              "^\\s*xdebug\\.mode\\s*="
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "MB-R033",
+      "title": "display_errors is Off",
+      "control": "MB-C05",
+      "severity": "medium",
+      "op": "all",
+      "checks": [
+        {
+          "name": "text_grep",
+          "args": {
+            "file": "php.ini",
+            "must_match": [
+              "display_errors\\s*=\\s*Off"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "MB-R034",
+      "title": "Compiled DI generated (metadata & code)",
+      "control": "MB-C05",
+      "severity": "low",
+      "op": "all",
+      "checks": [
+        {
+          "name": "fs_exists",
+          "args": { "path": "generated/metadata" }
+        },
+        {
+          "name": "fs_exists",
+          "args": { "path": "generated/code" }
+        }
+      ]
+    },
+    {
+      "id": "MB-R035",
+      "title": "Static content deployed",
+      "control": "MB-C05",
+      "severity": "low",
+      "op": "all",
+      "checks": [
+        {
+          "name": "fs_exists",
+          "args": { "path": "pub/static" }
+        },
+        {
+          "name": "fs_exists",
+          "args": { "path": "var/view_preprocessed" }
+        }
+      ]
+    },
+    {
+      "id": "MB-R036",
+      "title": "No dev debug configs on production (template hints off)",
+      "control": "MB-C05",
+      "severity": "medium",
+      "op": "all",
+      "checks": [
+        {
+          "name": "php_array_eq",
+          "args": {
+            "file": "app/etc/env.php",
+            "path": "system.default.dev/debug/template_hints",
+            "equals": 0
+          }
+        }
+      ]
+    }
+  ]
+}
