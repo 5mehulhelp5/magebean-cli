@@ -4,10 +4,9 @@ declare(strict_types=1);
 
 namespace Magebean\Engine\Reporting;
 
-final class HtmlReporter implements Reporter
+final class HtmlReporter
 {
     private string $tpl;
-
     public function __construct(string $tpl)
     {
         $this->tpl = $tpl;
@@ -15,12 +14,11 @@ final class HtmlReporter implements Reporter
 
     public function write(array $result, string $outFile): void
     {
-        $html = file_get_contents($this->tpl);
+        $html = (string)file_get_contents($this->tpl);
 
         // --- Summary inputs ---
         $sum = $result['summary'] ?? [];
-
-        $completedRaw = $sum['completed']    ?? $result['completed']    ?? $sum['end']   ?? $result['end']
+        $completedRaw = $sum['completed'] ?? $result['completed'] ?? $sum['end'] ?? $result['end']
             ?? $sum['completed_at'] ?? $result['completed_at'] ?? null;
         $scanCompleted = $this->formatTsOrNow($completedRaw);
 
@@ -32,39 +30,43 @@ final class HtmlReporter implements Reporter
         $rulesTotal  = (int)($sum['total']  ?? ($rulesPassed + $rulesFailed));
         $rulesPct    = $rulesTotal > 0 ? round(($rulesPassed / $rulesTotal) * 100, 1) : 0.0;
 
+        // Đếm theo mức độ chỉ cho FAIL
         $sevCounts = ['Critical' => 0, 'High' => 0, 'Medium' => 0, 'Low' => 0];
-        $rows = '';
 
+        // ----- Table rows: chỉ Title + Message -----
+        $rows = '';
         foreach ($result['findings'] ?? [] as $f) {
             $id       = htmlspecialchars((string)($f['id'] ?? ''), ENT_QUOTES, 'UTF-8');
             $control  = htmlspecialchars((string)($f['control'] ?? ''), ENT_QUOTES, 'UTF-8');
             $severity = htmlspecialchars((string)($f['severity'] ?? ''), ENT_QUOTES, 'UTF-8');
-            $title    = htmlspecialchars((string)($f['title'] ?? ''), ENT_QUOTES, 'UTF-8');
 
             $passed = (bool)($f['passed'] ?? false);
             $status = $passed ? 'PASS' : 'FAIL';
             $statusClass = $passed ? 'status-pass' : 'status-fail';
 
+            // chỉ in message cuối cùng (được build ở ScanRunner từ messages.pass/fail)
+            $userMsg = htmlspecialchars((string)($f['message'] ?? ''), ENT_QUOTES, 'UTF-8');
+
             if (!$passed) {
-                $sevKey = ucfirst(strtolower($f['severity'] ?? 'Low'));
-                if (!isset($sevCounts[$sevKey])) {
-                    $sevKey = 'Low';
-                }
+                $sevKey = ucfirst(strtolower((string)($f['severity'] ?? 'Low')));
+                if (!isset($sevCounts[$sevKey])) $sevKey = 'Low';
                 $sevCounts[$sevKey]++;
             }
 
-            $rows .= "<tr>"
-                . "<td>{$id}</td>"
-                . "<td>{$control}</td>"
-                . "<td>{$severity}</td>"
-                . "<td class=\"{$statusClass}\">{$status}</td>"
-                . "<td>{$title}</td>"
-                . "</tr>";
+            $rows .= '<tr>'
+                . '<td>' . $id . '</td>'
+                . '<td>' . $control . '</td>'
+                . '<td>' . $severity . '</td>'
+                . '<td class="' . $statusClass . '">' . $status . '</td>'
+                . '<td>'
+                . ($userMsg !== '' ? '<div style="color:#333;margin-top:4px">' . $userMsg . '</div>' : '')
+                . '</td>'
+                . '</tr>';
         }
 
         $findingsTotal = array_sum($sevCounts);
 
-
+        // Thay placeholders trong template
         $html = str_replace('{{summary}}', '', $html);
         $html = strtr($html, [
             '{{scan_completed}}'       => $scanCompleted,
@@ -87,16 +89,13 @@ final class HtmlReporter implements Reporter
         file_put_contents($outFile, $html);
     }
 
-    private function formatTsOrNow($ts): string
+    private function formatTsOrNow($tsOrStr): string
     {
-        if ($ts instanceof \DateTimeInterface) {
-            return $ts->format('Y-m-d H:i:s');
+        if (is_numeric($tsOrStr)) {
+            return date('Y-m-d H:i:s');
         }
-        if (is_numeric($ts)) {
-            return date('Y-m-d H:i:s', (int)$ts);
-        }
-        if (is_string($ts) && strtotime($ts)) {
-            return date('Y-m-d H:i:s', strtotime($ts));
+        if (is_string($tsOrStr) && $tsOrStr !== '') {
+            return $tsOrStr;
         }
         return date('Y-m-d H:i:s');
     }

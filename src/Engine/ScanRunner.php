@@ -16,19 +16,31 @@ final class ScanRunner
         $this->pack = $pack;
     }
 
-    private function evalCheckWithEvidence($name, $args, $fs, $phpc, $comp, $mage, $http, $code, $web, $git): array
-    {
-        [$ok, $msg, $ev] = match ($name) {
-            'fs_no_world_writable' => $fs->noWorldWritable($args),
-            'file_mode_max'        => $fs->fileModeMax($args),
-            // ... các check khác bạn đã map ...
-            default => [false, 'Unknown check: ' . $name, []],
-        };
-        if (!isset($ev)) {
-            $ev = [];
-        } // fallback khi check chỉ trả về 2 phần tử
+    private function evalCheckWithEvidence(
+        string $name,
+        array $args,
+        FilesystemCheck $fs,
+        PhpConfigCheck $phpc,
+        ComposerCheck $comp,
+        MagentoCheck $mage,
+        HttpCheck $http,
+        CodeSearchCheck $code,
+        WebServerConfigCheck $web,
+        GitHistoryCheck $git
+    ): array {
+        $res = $this->evalCheck($name, $args, $fs, $phpc, $comp, $mage, $http, $code, $web, $git);
+        if (!is_array($res)) {
+            $res = [false, 'Unknown check: ' . $name];
+        }
+        $ok  = (bool)($res[0] ?? false);
+        $msg = (string)($res[1] ?? '');
+        $ev  = $res[2] ?? [];
+        if (!is_array($ev)) {
+            $ev = $ev !== null ? [$ev] : [];
+        }
         return [$ok, $msg, $ev];
     }
+
 
     public function run(): array
     {
@@ -74,11 +86,6 @@ final class ScanRunner
                 if (!empty($ev)) {
                     $evidence = array_merge($evidence, is_array($ev) ? $ev : [$ev]);
                 }
-                $details[] = [$name, $msg, (bool)$cok];
-                if (!empty($ev)) {
-                    $evidence = array_merge($evidence, is_array($ev) ? $ev : [$ev]);
-                }
-
                 if ($op === 'all' && !$cok) {
                     $ok = false;
                 }
