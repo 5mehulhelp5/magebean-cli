@@ -30,7 +30,7 @@ Audit Magento 2 security, configuration, performance, and extensions from the co
 ### Option 1: Use the packaged PHAR
 ```bash
 # Download magebean.phar (example path)
-curl -L -o magebean.phar https://files.magebean.com/magebean.phar
+curl -L -o magebean.phar https://magebean.com/files/magebean.phar
 chmod +x magebean.phar
 ```
 
