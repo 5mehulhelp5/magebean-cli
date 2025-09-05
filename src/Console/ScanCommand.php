@@ -1,10 +1,14 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace Magebean\Console;
 
 use Magebean\Engine\Context;
 use Magebean\Engine\ScanRunner;
 use Magebean\Engine\Reporting\HtmlReporter;
+use Magebean\Bundle\BundleManager;
+use Magebean\Engine\Cve\CveAuditor;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -14,7 +18,7 @@ final class ScanCommand extends Command
 {
     public function __construct()
     {
-        parent::__construct('scan'); // luôn có tên lệnh
+        parent::__construct('scan');
     }
 
     protected function configure(): void
@@ -24,10 +28,9 @@ final class ScanCommand extends Command
             ->addOption('path', null, InputOption::VALUE_REQUIRED, 'Project path to scan', '.')
             ->addOption('format', null, InputOption::VALUE_REQUIRED, 'Output format: html|json|sarif', 'html')
             ->addOption('output', null, InputOption::VALUE_OPTIONAL, 'Output file (auto default by format)')
-            ->addOption('vuln-data', null, InputOption::VALUE_OPTIONAL, 'Path to OSV export (JSON) for offline audit')
+            ->addOption('cve-data', null, InputOption::VALUE_OPTIONAL, 'Path to CVE data (JSON/NDJSON or ZIP bundle)')
             ->addOption('control', null, InputOption::VALUE_OPTIONAL, 'Only run a single control id (e.g., MB-C03)')
-            ->addOption('rules-dir', null, InputOption::VALUE_OPTIONAL, 'Rules directory', __DIR__.'/../Rules/controls')
-            ->addOption('show-fail', null, InputOption::VALUE_NONE, 'Print failed rule messages/evidence to console'); // vẫn giữ tuỳ chọn cũ
+            ->addOption('rules-dir', null, InputOption::VALUE_OPTIONAL, 'Rules directory', __DIR__ . '/../Rules/controls');
     }
 
     protected function execute(InputInterface $in, OutputInterface $out): int
@@ -37,7 +40,7 @@ final class ScanCommand extends Command
         $outFile     = (string)($in->getOption('output') ?? '');
         $rulesDir    = (string)$in->getOption('rules-dir');
         $onlyControl = (string)($in->getOption('control') ?? '');
-        $vulnData    = (string)($in->getOption('vuln-data') ?? '');
+        $cveDataOpt  = trim((string)($in->getOption('cve-data') ?? ''));
 
         if ($outFile === '') {
             $outFile = match ($format) {
@@ -47,32 +50,66 @@ final class ScanCommand extends Command
             };
         }
 
-        // Context (đưa --vuln-data)
-        $ctx  = new Context($projectPath, $vulnData);
+        // --cve-data: JSON/NDJSON hoặc .zip (extract)
+        $cveDataFile = '';
+        if ($cveDataOpt !== '') {
+            $isZip = (bool)preg_match('/\.zip$/i', $cveDataOpt);
+            if ($isZip) {
+                $bm = new BundleManager();
+                $extracted = $bm->extractOsvFileFromZip($cveDataOpt);
+                if ($extracted && is_file($extracted)) {
+                    $cveDataFile = $extracted;
+                } else {
+                    $out->writeln('<comment>Warning:</comment> Could not extract JSON/NDJSON from zip (cve-data).');
+                    if (class_exists(\ZipArchive::class)) {
+                        $zip = new \ZipArchive();
+                        if ($zip->open($cveDataOpt) === true) {
+                            $out->writeln('  Entries in ZIP:');
+                            $listed = 0;
+                            for ($i = 0; $i < $zip->numFiles && $listed < 50; $i++) {
+                                $st = $zip->statIndex($i);
+                                if (!$st) continue;
+                                $out->writeln('   - ' . $st['name'] . ' (' . $st['size'] . ' bytes)');
+                                $listed++;
+                            }
+                            $zip->close();
+                        }
+                    }
+                }
+            } else {
+                $cveDataFile = $cveDataOpt;
+            }
+        }
+
+        // Build context
+        $ctx  = new Context($projectPath, $cveDataFile);
         $pack = $this->loadRulesPack($rulesDir, $onlyControl);
         if (empty($pack['rules'])) {
             $out->writeln('<error>No rules found. Check rules directory or control filter.</error>');
             return Command::FAILURE;
         }
 
-        // Run
+        // 1) Scan rules
         $runner = new ScanRunner($ctx, $pack);
         $result = $runner->run();
         $result['summary']['path'] = $projectPath;
 
+        // 2) CVE audit (nếu có data)
+        if ($cveDataFile !== '' && is_file($cveDataFile)) {
+            $aud = new CveAuditor($ctx);
+            $result['cve_audit'] = $aud->run($cveDataFile);
+        } else {
+            $result['cve_audit'] = null;
+        }
+        // 3) Write output
+        // ---------- Pretty console output (mimic sample) ----------
+        $this->renderPrettySummary($out, $result, $projectPath, $outFile);
+
+        // 4) Render export
         // Write output file
         switch ($format) {
             case 'json':
-                file_put_contents($outFile, json_encode($result, JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES));
-                break;
-            case 'sarif':
-                if (class_exists('\\Magebean\\Engine\\Reporting\\SarifReporter')) {
-                    /** @var \Magebean\Engine\Reporting\SarifReporter $rep */
-                    $rep = new \Magebean\Engine\Reporting\SarifReporter();
-                    $rep->write($result, $outFile);
-                } else {
-                    file_put_contents($outFile, json_encode($result, JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES));
-                }
+                file_put_contents($outFile, json_encode($result, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
                 break;
             default:
                 $tpl = $this->resolveTemplatePath();
@@ -80,9 +117,6 @@ final class ScanCommand extends Command
                 $rep->write($result, $outFile);
                 break;
         }
-
-        // Pretty console output giống mẫu
-        $this->renderPrettySummary($out, $result, $projectPath, $outFile, $vulnData);
 
         // exit code theo số fail
         $sum = $result['summary'] ?? [];
@@ -94,10 +128,10 @@ final class ScanCommand extends Command
         $pack = ['rules' => []];
         $base = realpath($rulesDir) ?: $rulesDir;
         if (!is_dir($base)) {
-            $fallback = realpath(__DIR__.'/../Rules/controls');
+            $fallback = realpath(__DIR__ . '/../Rules/controls');
             $base = $fallback !== false ? $fallback : $rulesDir;
         }
-        $files = glob(rtrim($base, '/').'/*.json');
+        $files = glob(rtrim($base, '/') . '/*.json');
         if (!$files) return $pack;
 
         foreach ($files as $f) {
@@ -118,17 +152,109 @@ final class ScanCommand extends Command
         return $pack;
     }
 
+    private function renderPrettySummary(OutputInterface $out, array $result, string $path, string $outFile): void
+    {
+        $sum = $result['summary'] ?? [];
+        $total  = (int)($sum['total']  ?? 0);
+        $passed = (int)($sum['passed'] ?? 0);
+        $failed = (int)($sum['failed'] ?? 0);
+
+        $env = strtoupper($this->detectMageMode($path));
+        $phpShort = PHP_MAJOR_VERSION . '.' . PHP_MINOR_VERSION;
+
+        // Header
+        $out->writeln(sprintf('<options=bold>Magebean Security Audit v1.0</>            Target: %s', $path));
+        $out->writeln(sprintf('Time: %s      PHP: %s   Env: %s', date('Y-m-d H:i'), $phpShort, $env));
+        $out->writeln('');
+
+        // Findings: list các FAIL theo thứ tự severity
+        $failedFindings = array_values(array_filter(($result['findings'] ?? []), fn($f) => empty($f['passed']) === true));
+        usort($failedFindings, fn($a, $b) => $this->sevOrder($a['severity'] ?? 'Low') <=> $this->sevOrder($b['severity'] ?? 'Low'));
+        $top = array_slice($failedFindings, 0, 10);
+
+        $out->writeln(sprintf('Findings (%d)', count($failedFindings)));
+        foreach ($top as $f) {
+            $sev = strtoupper((string)($f['severity'] ?? 'LOW'));
+            $title = (string)($f['title'] ?? '');
+            $msg = (string)($f['message'] ?? '');
+            $line = sprintf('[%s] %s', $sev, $msg !== '' ? $msg : $title);
+            $out->writeln('  ' . $line);
+        }
+        if (count($failedFindings) > count($top)) {
+            $out->writeln(sprintf('  … and %d more', count($failedFindings) - count($top)));
+        }
+        $out->writeln('');
+
+        $sevCounts = ['critical' => 0, 'high' => 0, 'medium' => 0, 'low' => 0];
+        foreach ($failedFindings as $f) {
+            $k = strtolower((string)($f['severity'] ?? 'low'));
+            if (!isset($sevCounts[$k])) $k = 'low';
+            $sevCounts[$k]++;
+        }
+        $out->writeln('Summary');
+        $out->writeln(sprintf('Passed Rules: %d / %d', $passed, $total));
+        $out->writeln(sprintf(
+            'Issues: %d Critical, %d High, %d Medium, %d Low',
+            $sevCounts['critical'],
+            $sevCounts['high'],
+            $sevCounts['medium'],
+            $sevCounts['low']
+        ));
+
+        // CVE console
+        if (!empty($result['cve_audit']) && is_array($result['cve_audit'])) {
+            $cs = $result['cve_audit']['summary'] ?? [];
+            $out->writeln(sprintf(
+                "CVE Checks: %d packages against %d known CVEs | Affected: %d",
+                (int)($cs['packages_total'] ?? 0),
+                (int)($cs['dataset_total'] ?? 0),
+                (int)($cs['packages_affected'] ?? 0)
+            ));
+        } else {
+            $out->writeln('');
+            $out->writeln('⚠ CVE checks skipped');
+            $out->writeln('  → Requires CVE Bundle (--cve-data=magebean-cve-bundle-YYYYMM.zip)');
+            $out->writeln('  → Visit https://magebean.com/download');
+        }
+        $out->writeln('');
+        $out->writeln(sprintf('→ Report saved to %s', $outFile));
+        $out->writeln('Contact: support@magebean.com');
+    }
+
+    private function sevOrder(string $sev): int
+    {
+        return match (strtolower($sev)) {
+            'critical' => 0,
+            'high'     => 1,
+            'medium'   => 2,
+            default    => 3
+        };
+    }
+
+    private function detectMageMode(string $path): string
+    {
+        $envFile = rtrim($path, '/') . '/app/etc/env.php';
+        if (!is_file($envFile)) return 'UNKNOWN';
+        $arr = @include $envFile;
+        if (is_array($arr)) {
+            if (isset($arr['MAGE_MODE'])) return (string)$arr['MAGE_MODE'];
+            // thử key kiểu nested
+            $m = $arr['system']['default']['dev']['debug']['environment'] ?? null;
+            if (is_string($m) && $m !== '') return $m;
+        }
+        return 'UNKNOWN';
+    }
     private function resolveTemplatePath(): string
     {
         $candidates = [
-            __DIR__.'/../../resources/report-template.html',
-            __DIR__.'/../resources/report-template.html',
-            getcwd().'/resources/report-template.html',
+            __DIR__ . '/../../resources/report-template.html',
+            __DIR__ . '/../resources/report-template.html',
+            getcwd() . '/resources/report-template.html',
         ];
         foreach ($candidates as $p) {
             if (is_file($p)) return $p;
         }
-        $tmp = sys_get_temp_dir().'/magebean-report-template.html';
+        $tmp = sys_get_temp_dir() . '/magebean-report-template.html';
         $html = <<<HTML
 <!doctype html><html><head><meta charset="utf-8"><title>Magebean Report</title>
 <style>
@@ -155,118 +281,5 @@ summary{cursor:pointer}
 HTML;
         file_put_contents($tmp, $html);
         return $tmp;
-    }
-
-    // ---------- Pretty console like sample ----------
-
-    private function renderPrettySummary(OutputInterface $out, array $result, string $path, string $outFile, string $vulnData): void
-    {
-        $sum = $result['summary'] ?? [];
-        $total  = (int)($sum['total']  ?? 0);
-        $passed = (int)($sum['passed'] ?? 0);
-        $failed = (int)($sum['failed'] ?? 0);
-
-        $env = strtoupper($this->detectMageMode($path));
-        $phpShort = PHP_MAJOR_VERSION.'.'.PHP_MINOR_VERSION;
-
-        // Header
-        $out->writeln(sprintf('<options=bold>Magebean Security Audit v1.0</>            Target: %s', $path));
-        $out->writeln(sprintf('Time: %s      PHP: %s   Env: %s', date('Y-m-d H:i'), $phpShort, $env));
-        $out->writeln('');
-
-        // CVE/OSV section
-        if ($vulnData === '') {
-            $out->writeln('<comment>⚠ CVE check skipped</comment>');
-            $out->writeln('  → Requires OSV export (use --vuln-data=rules/osv-export.json)');
-            $out->writeln('  → See https://osv.dev or bundle update docs');
-            $out->writeln('');
-        }
-
-        // Findings: list các FAIL theo thứ tự severity
-        $failedFindings = array_values(array_filter(($result['findings'] ?? []), fn($f) => empty($f['passed']) === true));
-        usort($failedFindings, fn($a,$b) => $this->sevOrder($a['severity'] ?? 'Low') <=> $this->sevOrder($b['severity'] ?? 'Low'));
-        $top = array_slice($failedFindings, 0, 10);
-
-        $out->writeln(sprintf('Findings (%d)', count($failedFindings)));
-        foreach ($top as $f) {
-            $sev = strtoupper((string)($f['severity'] ?? 'LOW'));
-            $title = (string)($f['title'] ?? '');
-            $msg = (string)($f['message'] ?? '');
-            $line = sprintf('[%s] %s', $sev, $msg !== '' ? $msg : $title);
-            $out->writeln('  '.$line);
-        }
-        if (count($failedFindings) > count($top)) {
-            $out->writeln(sprintf('  … and %d more', count($failedFindings) - count($top)));
-        }
-        $out->writeln('');
-
-        // Summary + issues by severity
-        $sevCounts = ['critical'=>0,'high'=>0,'medium'=>0,'low'=>0];
-        foreach ($failedFindings as $f) {
-            $k = strtolower((string)($f['severity'] ?? 'low'));
-            if (!isset($sevCounts[$k])) $k = 'low';
-            $sevCounts[$k]++;
-        }
-        $out->writeln('Summary');
-        $out->writeln(sprintf('Passed Rules: %d / %d', $passed, $total));
-        $out->writeln(sprintf(
-            'Issues: %d Critical, %d High, %d Medium, %d Low',
-            $sevCounts['critical'], $sevCounts['high'], $sevCounts['medium'], $sevCounts['low']
-        ));
-        $out->writeln('');
-        $out->writeln(sprintf('→ Report saved to %s', $outFile));
-    }
-
-    private function sevOrder(string $sev): int
-    {
-        return match (strtolower($sev)) {
-            'critical' => 0,
-            'high'     => 1,
-            'medium'   => 2,
-            default    => 3
-        };
-    }
-
-    private function detectMageMode(string $path): string
-    {
-        $envFile = rtrim($path,'/').'/app/etc/env.php';
-        if (!is_file($envFile)) return 'UNKNOWN';
-        $arr = @include $envFile;
-        if (is_array($arr)) {
-            if (isset($arr['MAGE_MODE'])) return (string)$arr['MAGE_MODE'];
-            // thử key kiểu nested
-            $m = $arr['system']['default']['dev']['debug']['environment'] ?? null;
-            if (is_string($m) && $m !== '') return $m;
-        }
-        return 'UNKNOWN';
-    }
-
-    private function printFailedRules(OutputInterface $out, array $result): void
-    {
-        // vẫn giữ cho -v hoặc --show-fail (đã không dùng trong pretty mặc định)
-        foreach (($result['findings'] ?? []) as $f) {
-            if (!empty($f['passed'])) continue;
-            $out->writeln('');
-            $out->writeln(sprintf('<error>FAIL %s [%s] %s</error>',
-                (string)($f['id'] ?? ''),
-                (string)($f['control'] ?? ''),
-                (string)($f['title'] ?? '')
-            ));
-            if (!empty($f['message'])) {
-                $out->writeln('  '.$f['message']);
-            }
-            foreach (($f['details'] ?? []) as $d) {
-                $ok = (bool)($d[2] ?? false);
-                if ($ok) continue;
-                $out->writeln(sprintf('  - %s: %s', (string)$d[0], (string)$d[1]));
-            }
-            if (!empty($f['evidence']) && is_array($f['evidence'])) {
-                $out->writeln('  Evidence:');
-                foreach (array_slice($f['evidence'], 0, 8) as $ev) {
-                    $line = is_array($ev) ? implode(' | ', array_map('strval', $ev)) : (string)$ev;
-                    $out->writeln('    • '.$line);
-                }
-            }
-        }
     }
 }

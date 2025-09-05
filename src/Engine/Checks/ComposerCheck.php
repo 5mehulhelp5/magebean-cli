@@ -20,13 +20,145 @@ final class ComposerCheck
         return [true, "ComposerCheck stub PASS"];
     }
 
-    // --- mới thêm các stub offline ---
-
     public function auditOffline(array $args): array
     {
-        $lock = $this->ctx->abs($args['lock_file'] ?? 'composer.lock');
-        return [true, "composer_audit_offline checked $lock against {$args['vuln_db']}"];
+        // 1. Xác định file CVE data
+        $cveRel = $this->ctx->cveData !== '' ? $this->ctx->cveData : ($args['cve_db'] ?? '');
+        if ($cveRel === '') {
+            return [false, "Missing CVE data (use --cve-data=path or args.cve_db)"];
+        }
+        $cvePath = $this->ctx->abs($cveRel);
+        if (!is_file($cvePath)) {
+            return [false, "CVE file not found ($cveRel)"];
+        }
+
+        // 2. Đọc composer.lock
+        $lockFile = $this->ctx->abs($args['lock_file'] ?? 'composer.lock');
+        if (!is_file($lockFile)) {
+            return [false, "composer.lock not found"];
+        }
+        $lockJson = json_decode((string)file_get_contents($lockFile), true);
+        if (!is_array($lockJson)) {
+            return [false, "Invalid composer.lock"];
+        }
+        $pkgs = array_merge($lockJson['packages'] ?? [], $lockJson['packages-dev'] ?? []);
+        $installed = [];
+        foreach ($pkgs as $p) {
+            if (!isset($p['name'], $p['version'])) continue;
+            $ver = ltrim((string)$p['version'], 'v');
+            $installed[$p['name']] = $ver;
+        }
+        if (!$installed) {
+            return [true, "No packages in composer.lock (nothing to audit)"];
+        }
+
+        // 3. Đọc CVE data (JSON array hoặc NDJSON)
+        $raw = (string)file_get_contents($cvePath);
+        $cve = json_decode($raw, true);
+        if (!is_array($cve)) {
+            // fallback NDJSON
+            $lines = preg_split('/\r?\n/', $raw, -1, PREG_SPLIT_NO_EMPTY);
+            $cve = [];
+            foreach ($lines as $ln) {
+                $obj = json_decode($ln, true);
+                if (is_array($obj)) $cve[] = $obj;
+            }
+            if (!$cve) {
+                return [false, "Unrecognized CVE format (expect JSON array or NDJSON)"];
+            }
+        }
+
+        // 4. So khớp
+        $sus = [];
+        foreach ($cve as $vuln) {
+            if (!isset($vuln['affected']) || !is_array($vuln['affected'])) continue;
+            foreach ($vuln['affected'] as $aff) {
+                $pkg = $aff['package']['name'] ?? null;
+                $eco = $aff['package']['ecosystem'] ?? null;
+                if (!$pkg || !$eco) continue;
+                $ecoNorm = strtolower((string)$eco);
+                if ($ecoNorm !== 'packagist' && $ecoNorm !== 'composer') continue;
+                if (!array_key_exists($pkg, $installed)) continue;
+
+                $current = $installed[$pkg];
+                $hit = false;
+
+                // match theo versions liệt kê
+                if (!empty($aff['versions']) && is_array($aff['versions'])) {
+                    foreach ($aff['versions'] as $v) {
+                        $v = ltrim((string)$v, 'v');
+                        if ($v !== '' && version_compare($current, $v, '==')) {
+                            $hit = true;
+                            break;
+                        }
+                    }
+                }
+
+                // match theo ranges
+                if (!$hit && !empty($aff['ranges']) && is_array($aff['ranges'])) {
+                    foreach ($aff['ranges'] as $rng) {
+                        $events = $rng['events'] ?? [];
+                        $intervals = $this->eventsToIntervals($events);
+                        foreach ($intervals as [$a, $b]) {
+                            if ($this->inRange($current, $a, $b)) {
+                                $hit = true;
+                                break 2;
+                            }
+                        }
+                    }
+                }
+
+                if ($hit) {
+                    $id  = $vuln['id'] ?? ($vuln['aliases'][0] ?? 'CVE');
+                    $sev = $this->extractSeverity($vuln);
+                    $sus[] = $pkg . '@' . $current . ' -> ' . $id . ($sev ? " (" . $sev . ")" : '');
+                }
+            }
+        }
+
+        if ($sus) {
+            $msg = 'Vulnerable: ' . implode('; ', array_slice($sus, 0, 20));
+            return [false, $msg, $sus];
+        }
+        return [true, "No vulnerable packages according to CVE data (" . count($installed) . " pkgs)"];
     }
+
+    // helpers
+    private function eventsToIntervals(array $events): array
+    {
+        $res = [];
+        $curStart = null;
+        foreach ($events as $ev) {
+            if (isset($ev['introduced'])) {
+                $curStart = ltrim((string)$ev['introduced'], 'v');
+            } elseif (isset($ev['fixed'])) {
+                $end = ltrim((string)$ev['fixed'], 'v');
+                if ($curStart !== null) {
+                    $res[] = [$curStart, $end];
+                    $curStart = null;
+                } else {
+                    $res[] = [null, $end];
+                }
+            }
+        }
+        if ($curStart !== null) $res[] = [$curStart, null];
+        return $res;
+    }
+
+    private function inRange(string $cur, ?string $a, ?string $b): bool
+    {
+        $cur = ltrim($cur, 'v');
+        if ($a !== null && version_compare($cur, $a, '<')) return false;
+        if ($b !== null && version_compare($cur, $b, '>=')) return false;
+        return true;
+    }
+
+    private function extractSeverity(array $vuln): ?string
+    {
+        $sev = $vuln['severity'][0]['score'] ?? null;
+        return is_string($sev) ? $sev : null;
+    }
+
 
     public function coreAdvisoriesOffline(array $args): array
     {
@@ -429,5 +561,4 @@ final class ComposerCheck
         }
         return null;
     }
-
 }

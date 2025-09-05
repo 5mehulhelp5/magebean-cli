@@ -13,7 +13,7 @@
           "name": "composer_audit_offline",
           "args": {
             "lock_file": "composer.lock",
-            "vuln_db": "rules/osv-db.json"
+            "cve_db": "rules/osv-db.json"
           }
         }
       ],
@@ -53,7 +53,7 @@
           "name": "composer_fix_version",
           "args": {
             "lock_file": "composer.lock",
-            "vuln_db": "rules/osv-db.json"
+            "cve_db": "rules/osv-db.json"
           }
         }
       ],
@@ -137,7 +137,7 @@
           "name": "composer_audit_offline",
           "args": {
             "lock_file": "composer.lock",
-            "vuln_db": "rules/osv-db.json",
+            "cve_db": "rules/osv-db.json",
             "scope": "transitive"
           }
         }

@@ -74,7 +74,7 @@
           "name": "composer_audit_offline",
           "args": {
             "lock_file": "composer.lock",
-            "vuln_db": "rules/osv-db.json",
+            "cve_db": "rules/osv-db.json",
             "fail_on_found": true
           }
         }
