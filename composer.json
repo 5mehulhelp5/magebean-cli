@@ -11,5 +11,17 @@
       "Magebean\\": "src/"
     }
   },
-  "bin": ["bin/magebean"]
+  "bin": ["bin/magebean"],
+  "require-dev": {
+    "humbug/box": "^4.6"
+  },
+  "scripts": {
+    "build:phar": [
+      "composer install", 
+      "php -d phar.readonly=0 vendor/bin/box compile"
+    ],
+    "build:clean": [
+      "rm -f magebean.phar"
+    ]
+  }
 }

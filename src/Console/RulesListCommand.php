@@ -14,12 +14,12 @@ final class RulesListCommand extends Command
     protected function configure(): void
     {
         $this->setName('rules:list')
-            ->addOption('controls', null, InputOption::VALUE_OPTIONAL, 'Comma list of controls (e.g. MB-C01,MB-C02)')
+            ->addOption('control', null, InputOption::VALUE_OPTIONAL, 'Comma list of controls (e.g. MB-C01,MB-C02)')
             ->addOption('severity', null, InputOption::VALUE_OPTIONAL, 'low|medium|high|critical');
     }
     protected function execute(InputInterface $in, OutputInterface $out): int
     {
-        $controlsOpt = (string)($in->getOption('controls') ?? '');
+        $controlsOpt = (string)($in->getOption('control') ?? '');
         $controls = $controlsOpt ? array_map('trim', explode(',', $controlsOpt)) : [];
         $pack = RulePackLoader::loadAll($controls);
         $sev = $in->getOption('severity');

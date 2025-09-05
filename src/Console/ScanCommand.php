@@ -6,9 +6,11 @@ namespace Magebean\Console;
 
 use Magebean\Engine\Context;
 use Magebean\Engine\ScanRunner;
+use Magebean\Engine\RulePackLoader;
 use Magebean\Engine\Reporting\HtmlReporter;
 use Magebean\Bundle\BundleManager;
 use Magebean\Engine\Cve\CveAuditor;
+
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -29,8 +31,7 @@ final class ScanCommand extends Command
             ->addOption('format', null, InputOption::VALUE_REQUIRED, 'Output format: html|json|sarif', 'html')
             ->addOption('output', null, InputOption::VALUE_OPTIONAL, 'Output file (auto default by format)')
             ->addOption('cve-data', null, InputOption::VALUE_OPTIONAL, 'Path to CVE data (JSON/NDJSON or ZIP bundle)')
-            ->addOption('control', null, InputOption::VALUE_OPTIONAL, 'Only run a single control id (e.g., MB-C03)')
-            ->addOption('rules-dir', null, InputOption::VALUE_OPTIONAL, 'Rules directory', __DIR__ . '/../Rules/controls');
+            ->addOption('control', null, InputOption::VALUE_OPTIONAL, 'Only run a single control id (e.g., MB-C03)');
     }
 
     protected function execute(InputInterface $in, OutputInterface $out): int
@@ -38,7 +39,6 @@ final class ScanCommand extends Command
         $projectPath = (string)$in->getOption('path');
         $format      = strtolower((string)$in->getOption('format'));
         $outFile     = (string)($in->getOption('output') ?? '');
-        $rulesDir    = (string)$in->getOption('rules-dir');
         $onlyControl = (string)($in->getOption('control') ?? '');
         $cveDataOpt  = trim((string)($in->getOption('cve-data') ?? ''));
 
@@ -82,8 +82,10 @@ final class ScanCommand extends Command
         }
 
         // Build context
+        $controlsOpt = (string)($in->getOption('control') ?? '');
+        $controls = $controlsOpt ? array_map('trim', explode(',', $controlsOpt)) : [];
         $ctx  = new Context($projectPath, $cveDataFile);
-        $pack = $this->loadRulesPack($rulesDir, $onlyControl);
+        $pack = RulePackLoader::loadAll($controls);
         if (empty($pack['rules'])) {
             $out->writeln('<error>No rules found. Check rules directory or control filter.</error>');
             return Command::FAILURE;

@@ -1,15 +1,31 @@
 {
-  "alias": "magebean.phar",
+  "$schema": "https://box-project.github.io/box/schema.json",
+  "output": "magebean.phar",
+  "main": "bin/magebean",
   "chmod": "0755",
+  "stub": true,
+  "compression": "GZ",
+
   "directories": [
+    "bin",
     "src",
-    "resources"
+    "resources",
+    "rules",
+    "vendor"
   ],
   "files": [
-    "vendor/autoload.php"
+    "composer.json",
+    "LICENSE"
   ],
-  "main": "bin/magebean",
-  "output": "dist/magebean.phar",
-  "stub": true,
-  "compression": "GZ"
+
+  "finder": [
+    {
+      "in": ["."],
+      "exclude": ["tests", "test", "docs", ".github", "vendor/bin", "node_modules", "cache", "var", "build", "dist"],
+      "notPath": [".env", ".env.example", ".phpunit.result.cache", ".php-cs-fixer.cache"]
+    }
+  ],
+
+  "banner": "Magebean CLI",
+  "check-requirements": false
 }
