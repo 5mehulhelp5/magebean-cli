@@ -1,9 +1,10 @@
 {
-  "name": "magebean/cli",
+  "name": "magebean/magebean-cli",
   "description": "Magebean CLI - Magento 2 AppSec Audit",
-  "type": "project",
+  "type": "library",
+  "license": "MIT",
   "require": {
-    "php": "^8.1",
+    "php": ">=8.1",
     "symfony/console": "^7.0"
   },
   "autoload": {
@@ -17,11 +18,17 @@
   },
   "scripts": {
     "build:phar": [
-      "composer install", 
+      "composer install",
       "php -d phar.readonly=0 vendor/bin/box compile"
     ],
     "build:clean": [
       "rm -f magebean.phar"
     ]
+  },
+  "extra": {
+    "branch-alias": {
+      "dev-main": "1.x-dev"
+    }
   }
 }
+
