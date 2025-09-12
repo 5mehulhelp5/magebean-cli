@@ -2,9 +2,38 @@
 <?php
 declare(strict_types=1);
 
-require __DIR__ . '/../vendor/autoload.php';
+// Avoid stale code during dev
+if (PHP_SAPI === 'cli') {
+    ini_set('opcache.enable_cli', '0');
+}
+
+require \dirname(__DIR__) . '/vendor/autoload.php';
 
 use Magebean\Application;
 
 $app = new Application();
+
+/**
+ * If the user called global --help (or -h) WITHOUT a specific command,
+ * temporarily switch to single-command mode so that the help of `scan`
+ * is shown instead of the default `list` help.
+ */
+$argv = $_SERVER['argv'] ?? [];
+$hasGlobalHelp = in_array('--help', $argv, true) || in_array('-h', $argv, true);
+
+// Count non-option args (first arg is script name)
+$nonOptionArgs = [];
+foreach ($argv as $i => $arg) {
+    if ($i === 0) continue;           // skip script name
+    if (strlen($arg) > 0 && $arg[0] !== '-') {
+        $nonOptionArgs[] = $arg;      // this would be a command name or operand
+    }
+}
+$hasExplicitCommand = count($nonOptionArgs) > 0;
+
+if ($hasGlobalHelp && !$hasExplicitCommand) {
+    // Only in the "global --help" case, show ScanCommand help as the application help.
+    $app->setDefaultCommand('scan', true);
+}
+
 $app->run();
