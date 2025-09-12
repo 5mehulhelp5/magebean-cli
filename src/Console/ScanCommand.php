@@ -23,47 +23,49 @@ final class ScanCommand extends Command
 
     /** Keep help text in one place */
     private const HELP = <<<'HELP'
-Execute a comprehensive audit for a Magento 2 project using 12 controls and 81 rules.
-Doc: https://magebean.com/documentation
+<fg=cyan;options=bold>Execute a comprehensive audit</> for a Magento 2 project using <fg=green;options=bold>12 controls</> and <fg=green;options=bold>81 rules</>.
+Doc: <href=https://magebean.com/documentation>magebean.com/documentation</>
 
-What it checks
-  • Security Auditing — unsafe code patterns, permissions, world-writable files, XSS, SQLi, SSRF
-  • Configuration Auditing — production mode, cache, Elasticsearch, cron jobs, logging/monitoring
-  • Performance Insights — runtime hotspots, cache effectiveness, DB indexing, static assets
-  • Extension Auditing — parse composer.lock, match against known CVEs, flag abandoned modules
+<options=bold>What it checks</>
+  • <fg=red;options=bold>Security Auditing</> — unsafe code patterns, permissions, world-writable files, XSS, SQLi, SSRF
+  • <fg=yellow;options=bold>Configuration Auditing</> — production mode, cache, Elasticsearch, cron jobs, logging/monitoring
+  • <fg=blue;options=bold>Performance Insights</> — runtime hotspots, cache effectiveness, DB indexing, static assets
+  • <fg=magenta;options=bold>Extension Auditing</> — parse composer.lock, match against known CVEs, flag abandoned modules
 
-USAGE
-  php magebean.phar scan --path=/var/www/html
-  php magebean.phar scan --path=. --format=html --output=report.html
+<options=bold>USAGE</>
+  <fg=green>php magebean.phar scan --path=/var/www/html</>
+  <fg=green>php magebean.phar scan --path=. --format=html --output=report.html</>
 
-COMMON OPTIONS
-  --path=PATH                 Path to the Magento 2 root to scan (default: current directory)
-  --format=html|json          Output format for results (default: html)
-  --output=FILE               Save results to a file (auto default based on format)
-  --cve-data=PATH             Path to CVE data (JSON/NDJSON or ZIP bundle)
-  --control=MB-Cxx            Only run a single control (e.g., MB-C03)
+<options=bold>COMMON OPTIONS</>
+  <fg=yellow>--path=PATH</>                 Path to the Magento 2 root to scan (default: current directory)
+  <fg=yellow>--format=html|json</>          Output format for results (default: html)
+  <fg=yellow>--output=FILE</>               Save results to a file (auto default based on format)
+  <fg=yellow>--cve-data=PATH</>             Path to CVE data (JSON/NDJSON or ZIP bundle)
+  <fg=yellow>--control=MB-Cxx</>            Only run a single control (e.g., MB-C03)
 
-EXAMPLES
+<options=bold>EXAMPLES</>
   # Scan current directory and print a quick summary
-  php magebean.phar scan --path=.
+  <fg=green>php magebean.phar scan --path=.</>
 
   # Generate a shareable HTML report
-  php magebean.phar scan --path=/var/www/html --format=html --output=report.html
+  <fg=green>php magebean.phar scan --path=/var/www/html --format=html --output=report.html</>
 
-  # Use a knowm CVE data when auditing installed extensions. Download: https://magebean.com/download
-  php magebean.phar scan --path=. --cve-data=/downloads/magebean-known-cve-bundle-202509.zip
+  # Use a known CVE data when auditing installed extensions.
+  # Download: <href=https://magebean.com/download>magebean.com/download</>
+  <fg=green>php magebean.phar scan --path=. --cve-data=/downloads/magebean-known-cve-bundle-202509.zip</>
 
-SEE ALSO
-  rules:list           List all baseline rules
-  rules:validate       Validate rule JSON files before scanning
+<options=bold>SEE ALSO</>
+  <fg=cyan>rules:list</>           List all baseline rules
+  <fg=cyan>rules:validate</>       Validate rule JSON files before scanning
 
-NOTES
-  • Ensure --path points to the Magento root that contains app/etc and vendor.
-  • HTML reports are convenient for stakeholders; JSON can be archived in CI.
+<options=bold>NOTES</>
+  • Ensure <fg=yellow>--path</> points to the Magento root that contains app/etc and vendor.
+  • <fg=blue>HTML reports</> are convenient for stakeholders; <fg=yellow>JSON</> can be archived in CI.
 
-CONTACT: support@magebean.com
+CONTACT: <href=mailto:support@magebean.com>support@magebean.com</>
 
 HELP;
+
 
     public function __construct()
     {
@@ -222,71 +224,103 @@ HELP;
 
     private function renderPrettySummary(OutputInterface $out, array $result, string $path, string $outFile): void
     {
-        $sum = $result['summary'] ?? [];
+        $sum    = $result['summary'] ?? [];
         $total  = (int)($sum['total']  ?? 0);
         $passed = (int)($sum['passed'] ?? 0);
 
-        $env = strtoupper($this->detectMageMode($path));
+        $env      = strtoupper($this->detectMageMode($path));
         $phpShort = PHP_MAJOR_VERSION . '.' . PHP_MINOR_VERSION;
+
+        // Helpers
+        $sevBadge = function (string $sev): string {
+            $sev = strtoupper($sev);
+            return match ($sev) {
+                'CRITICAL' => '<fg=white;bg=red;options=bold>[CRITICAL]</>',
+                'HIGH'     => '<fg=red;options=bold>[HIGH]</>',
+                'MEDIUM'   => '<fg=yellow;options=bold>[MEDIUM]</>',
+                'LOW'      => '<fg=blue;options=bold>[LOW]</>',
+                default    => sprintf('[%s]', $sev),
+            };
+        };
+        $envTag = function (string $env) {
+            return match ($env) {
+                'PRODUCTION' => '<fg=white;bg=green;options=bold>PRODUCTION</>',
+                'DEVELOPER'  => '<fg=yellow;options=bold>DEVELOPER</>',
+                'DEFAULT'    => '<fg=cyan>DEFAULT</>',
+                default      => sprintf('<fg=magenta>%s</>', $env),
+            };
+        };
 
         // Header
         $out->writeln('');
-        $out->writeln(sprintf('<options=bold>Magebean Security Audit v1.0</>        Target: %s', $path));
-        $out->writeln(sprintf('Time: %s   PHP: %s   Env: %s', date('Y-m-d H:i'), $phpShort, $env));
+        $out->writeln(sprintf('<fg=cyan;options=bold>Magebean Security Audit v1.0</>        Target: <fg=green>%s</>', $path));
+        $out->writeln(sprintf('Time: <comment>%s</comment>   PHP: <info>%s</info>   Env: %s', date('Y-m-d H:i'), $phpShort, $envTag($env)));
         $out->writeln('');
 
+        // Findings
         $failedFindings = array_values(array_filter(($result['findings'] ?? []), fn($f) => empty($f['passed']) === true));
         usort($failedFindings, fn($a, $b) => $this->sevOrder($a['severity'] ?? 'Low') <=> $this->sevOrder($b['severity'] ?? 'Low'));
         $top = array_slice($failedFindings, 0, 10);
 
-        $out->writeln(sprintf('Findings (%d)', count($failedFindings)));
+        $out->writeln(sprintf('<options=bold>Findings</> (<fg=red>%d</>)', count($failedFindings)));
         foreach ($top as $f) {
-            $sev = strtoupper((string)($f['severity'] ?? 'LOW'));
+            $sev   = strtoupper((string)($f['severity'] ?? 'LOW'));
             $title = (string)($f['title'] ?? '');
-            $msg = (string)($f['message'] ?? '');
-            $line = sprintf('[%s] %s', $sev, $msg !== '' ? $msg : $title);
+            $msg   = (string)($f['message'] ?? '');
+            $line  = sprintf('%s %s', $sevBadge($sev), $msg !== '' ? $msg : $title);
             $out->writeln('  ' . $line);
         }
         if (count($failedFindings) > count($top)) {
-            $out->writeln(sprintf('  … and %d more', count($failedFindings) - count($top)));
+            $out->writeln(sprintf('  <comment>… and %d more</comment>', count($failedFindings) - count($top)));
         }
         $out->writeln('');
 
+        // Severity counts
         $sevCounts = ['critical' => 0, 'high' => 0, 'medium' => 0, 'low' => 0];
         foreach ($failedFindings as $f) {
             $k = strtolower((string)($f['severity'] ?? 'low'));
             if (!isset($sevCounts[$k])) $k = 'low';
             $sevCounts[$k]++;
         }
-        $out->writeln('Summary');
-        $out->writeln(sprintf('Passed Rules: %d / %d', $passed, $total));
+
+        // Summary (colored)
+        $out->writeln('<options=bold>Summary</>');
+        $out->writeln(sprintf('Passed Rules: <info>%d</info> / <info>%d</info>', $passed, $total));
         $out->writeln(sprintf(
-            'Issues: %d Critical, %d High, %d Medium, %d Low',
+            'Issues: %s %d Critical</> | %s %d High</> | %s %d Medium</> | %s %d Low</>',
+            '<fg=white;bg=red;options=bold>',
             $sevCounts['critical'],
+            '<fg=red;options=bold>',
             $sevCounts['high'],
+            '<fg=yellow;options=bold>',
             $sevCounts['medium'],
-            $sevCounts['low']
+            '<fg=blue;options=bold>',
+            $sevCounts['low'],
         ));
 
         // CVE console
         if (!empty($result['cve_audit']) && is_array($result['cve_audit'])) {
             $cs = $result['cve_audit']['summary'] ?? [];
             $out->writeln(sprintf(
-                "CVE Checks: %d packages against %d known CVEs | Affected: %d",
+                "\n<info>✓ CVE Checks</info>: %d packages against %d known CVEs | Affected: <fg=red;options=bold>%d</>",
                 (int)($cs['packages_total'] ?? 0),
                 (int)($cs['dataset_total'] ?? 0),
                 (int)($cs['packages_affected'] ?? 0)
             ));
         } else {
             $out->writeln('');
-            $out->writeln('⚠ CVE checks skipped');
-            $out->writeln('  → Requires CVE Bundle (--cve-data=magebean-cve-bundle-YYYYMM.zip)');
-            $out->writeln('  → Visit https://magebean.com/download');
+            $out->writeln('<comment>⚠ CVE checks skipped</comment>');
+            $out->writeln('  → Requires CVE Bundle (<comment>--cve-data=magebean-cve-bundle-YYYYMM.zip</comment>)');
+            $out->writeln('  → Visit <href=https://magebean.com/download>magebean.com/download</>');
         }
+
+        // Footer
         $out->writeln('');
-        $out->writeln(sprintf('→ Report saved to %s', $outFile));
-        $out->writeln('Contact: support@magebean.com');
+        $out->writeln(sprintf('→ <info>Report saved to</info> <href=file://%1$s>%1$s</>', $outFile));
+        $out->writeln('Contact: <href=mailto:support@magebean.com>support@magebean.com</>');
+        $out->writeln('');
     }
+
 
     private function sevOrder(string $sev): int
     {
