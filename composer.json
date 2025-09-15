@@ -1,6 +1,6 @@
 {
   "name": "magebean/magebean-cli",
-  "description": "A CLI tool for Magento development by Magebean",
+  "description": "A CLI tool for Magento security audit by Magebean",
   "type": "library",
   "require": {
     "php": ">=8.1",
