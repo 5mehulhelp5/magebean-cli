@@ -13,7 +13,7 @@ final class RulesListCommand extends Command
 {
     protected function configure(): void
     {
-        $this->setName('rules:list')
+        $this->setName('list')
             ->addOption('control', null, InputOption::VALUE_OPTIONAL, 'Comma list of controls (e.g. MB-C01,MB-C02)')
             ->addOption('severity', null, InputOption::VALUE_OPTIONAL, 'low|medium|high|critical');
     }
