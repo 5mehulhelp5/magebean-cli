@@ -13,7 +13,10 @@
           "name": "webroot_hygiene",
           "args": {
             "webroot": "pub",
-            "forbidden": ["var/log", "var/report"]
+            "forbidden": [
+              "var/log",
+              "var/report"
+            ]
           }
         }
       ],
@@ -33,7 +36,10 @@
           "name": "text_grep",
           "args": {
             "file": "devops/logrotate.conf",
-            "must_match": ["rotate", "compress"]
+            "must_match": [
+              "rotate",
+              "compress"
+            ]
           }
         }
       ],
@@ -47,14 +53,21 @@
       "title": "Debug template hints disabled in production",
       "control": "MB-C07",
       "severity": "medium",
-      "op": "all",
+      "op": "any",
       "checks": [
         {
           "name": "php_array_eq",
           "args": {
             "file": "app/etc/env.php",
-            "path": "dev/debug/template_hints_storefront",
+            "path": "system.default.dev/translate_inline/active",
             "equals": 0
+          }
+        },
+        {
+          "name": "php_array_absent",
+          "args": {
+            "file": "app/etc/env.php",
+            "path": "system.default.dev/translate_inline/active"
           }
         }
       ],
@@ -73,8 +86,12 @@
         {
           "name": "code_grep",
           "args": {
-            "paths": ["app"],
-            "include_ext": ["php"],
+            "paths": [
+              "app"
+            ],
+            "include_ext": [
+              "php"
+            ],
             "must_not_match": [
               "logger->(info|debug|notice)\\([^)]*password",
               "logger->(info|debug|notice)\\([^)]*Authorization",

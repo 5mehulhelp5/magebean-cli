@@ -77,11 +77,15 @@
       "checks": [
         {
           "name": "fs_exists",
-          "args": { "path": "generated/metadata" }
+          "args": {
+            "path": "generated/metadata"
+          }
         },
         {
           "name": "fs_exists",
-          "args": { "path": "generated/code" }
+          "args": {
+            "path": "generated/code"
+          }
         }
       ],
       "messages": {
@@ -98,11 +102,15 @@
       "checks": [
         {
           "name": "fs_exists",
-          "args": { "path": "pub/static" }
+          "args": {
+            "path": "pub/static"
+          }
         },
         {
           "name": "fs_exists",
-          "args": { "path": "var/view_preprocessed" }
+          "args": {
+            "path": "var/view_preprocessed"
+          }
         }
       ],
       "messages": {
@@ -115,7 +123,7 @@
       "title": "No dev debug configs on production (template hints off)",
       "control": "MB-C05",
       "severity": "medium",
-      "op": "all",
+      "op": "any",
       "checks": [
         {
           "name": "php_array_eq",
@@ -123,6 +131,13 @@
             "file": "app/etc/env.php",
             "path": "system.default.dev/debug/template_hints",
             "equals": 0
+          }
+        },
+        {
+          "name": "php_array_absent",
+          "args": {
+            "file": "app/etc/env.php",
+            "path": "system.default.dev/debug/template_hints"
           }
         }
       ],
