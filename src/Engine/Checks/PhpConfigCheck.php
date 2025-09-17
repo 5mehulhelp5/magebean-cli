@@ -23,6 +23,7 @@ final class PhpConfigCheck
             'php_array_eq'              => $this->arrayEquals($args),
             'php_array_neq'             => $this->arrayNotEquals($args),
             'php_array_numeric_compare' => $this->arrayNumericCompare($args),
+            'php_array_absent'          => $this->arrayAbsent($args),
             default => [false, 'Unknown PhpConfigCheck: ' . $name],
         };
     }
@@ -165,5 +166,29 @@ final class PhpConfigCheck
             }
         }
         return $cnt;
+    }
+
+    private function arrayAbsent(array $args): array
+    {
+        $file = (string)($args['file'] ?? '');
+        $path = (string)($args['path'] ?? '');
+        if ($file === '' || $path === '') {
+            return [false, 'php_array_absent requires file & path'];
+        }
+
+        // Chuẩn hoá để hỗ trợ cả “system.default.dev/debug/template_hints”
+        // lẫn dot-path thuần: getByDotPath dùng dấu chấm.
+        $normPath = str_replace('/', '.', $path);
+
+        $arr = $this->loadArray($file);
+        if (isset($arr['__ERROR__'])) {
+            return [false, $arr['__ERROR__']];
+        }
+
+        $val = $this->getByDotPath($arr, $normPath, '__NOT_FOUND__');
+        if ($val === '__NOT_FOUND__') {
+            return [true, "Path '$normPath' not present in $file"];
+        }
+        return [false, "Path '$normPath' exists in $file (value: " . var_export($val, true) . ")"];
     }
 }

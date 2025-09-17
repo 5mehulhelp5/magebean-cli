@@ -19,7 +19,6 @@ $app = new Application();
  * is shown instead of the default `list` help.
  */
 $argv = $_SERVER['argv'] ?? [];
-$hasGlobalHelp = in_array('--help', $argv, true) || in_array('-h', $argv, true);
 
 // Count non-option args (first arg is script name)
 $nonOptionArgs = [];
@@ -30,10 +29,5 @@ foreach ($argv as $i => $arg) {
     }
 }
 $hasExplicitCommand = count($nonOptionArgs) > 0;
-
-if ($hasGlobalHelp && !$hasExplicitCommand) {
-    // Only in the "global --help" case, show ScanCommand help as the application help.
-    $app->setDefaultCommand('scan', true);
-}
-
+$app->setDefaultCommand('scan', true);
 $app->run();

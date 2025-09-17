@@ -168,7 +168,8 @@ final class ScanRunner
             'php_array_exists',
             'php_array_eq',
             'php_array_neq',
-            'php_array_numeric_compare' => $phpc->dispatch($name, $args),
+            'php_array_numeric_compare',
+            'php_array_absent' => $phpc->dispatch($name, $args),
 
             'composer_audit' => $comp->stub($args),
             'magento_config' => $mage->stub($args),

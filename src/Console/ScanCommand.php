@@ -41,7 +41,7 @@ Doc: <href=https://magebean.com/documentation>magebean.com/documentation</>
   <fg=yellow>--format=html|json</>          Output format for results (default: html)
   <fg=yellow>--output=FILE</>               Save results to a file (auto default based on format)
   <fg=yellow>--cve-data=PATH</>             Path to CVE data (JSON/NDJSON or ZIP bundle)
-  <fg=yellow>--control=MB-Cxx</>            Only run a single control (e.g., MB-C03)
+  <fg=yellow>--rules=MB-Rxx,MB-Rxx</>       Only run a list of specified rules (e.g., MB-R03,)
 
 <options=bold>EXAMPLES</>
   # Scan current directory and print a quick summary
@@ -56,7 +56,6 @@ Doc: <href=https://magebean.com/documentation>magebean.com/documentation</>
 
 <options=bold>SEE ALSO</>
   <fg=cyan>rules:list</>           List all baseline rules
-  <fg=cyan>rules:validate</>       Validate rule JSON files before scanning
 
 <options=bold>NOTES</>
   • Ensure <fg=yellow>--path</> points to the Magento root that contains app/etc and vendor.
@@ -82,12 +81,13 @@ HELP;
             ->addOption('format', null, InputOption::VALUE_REQUIRED, 'Output format: html|json', 'html')
             ->addOption('output', null, InputOption::VALUE_OPTIONAL, 'Output file (auto default by format)')
             ->addOption('cve-data', null, InputOption::VALUE_OPTIONAL, 'Path to CVE data (JSON/NDJSON or ZIP bundle)')
-            ->addOption('control', null, InputOption::VALUE_OPTIONAL, 'Only run a single control id (e.g., MB-C03)')
+            ->addOption('standard', null, InputOption::VALUE_OPTIONAL, 'Report standard: magebean (default) | owasp | pci | cwe', 'magebean')
+            ->addOption('rules', null, InputOption::VALUE_OPTIONAL, 'Comma-separated rule IDs to run (e.g., MB-R036,MB-R020)')
             ->addOption(
                 'path',
                 null,
                 InputOption::VALUE_OPTIONAL,
-                'Magento root path (defaults to current working directory)',
+                'Magento root path (omit to auto-detect from current working directory)',
                 getcwd()
             );
     }
@@ -99,11 +99,24 @@ HELP;
 
     protected function execute(InputInterface $in, OutputInterface $out): int
     {
-
         $io = new SymfonyStyle($in, $out);
 
-        $requestedPath = (string)($in->getOption('path') ?? getcwd());
-        $requestedPath = rtrim($requestedPath, DIRECTORY_SEPARATOR);
+        $pathOpt = (string)($in->getOption('path') ?? '');
+        $requestedPath = $pathOpt !== '' ? $pathOpt : getcwd();
+        $requestedPath = self::normalize($requestedPath);
+
+        // Nếu path không trỏ tới Magento root, thử leo lên tối đa 4 cấp
+        if (!self::isMagentoRoot($requestedPath)) {
+            $detected = self::detectMagentoRoot($requestedPath, 4);
+            if ($detected !== null) {
+                $out->writeln(sprintf('<info>Detected Magento root:</info> %s', $detected));
+                $requestedPath = $detected;
+            } else {
+                $out->writeln("<error>Cannot locate Magento root from: {$requestedPath}</error>");
+                $out->writeln('Hint: run from your Magento root or pass --path=/absolute/path/to/magento');
+                return Command::FAILURE;
+            }
+        }
 
         try {
             // Cho phép tự dò lên trên tối đa 2 cấp nếu user chỉ định nhầm subfolder
@@ -121,11 +134,19 @@ HELP;
             $this->assertMagento2Root($magentoRoot);
 
             // ✅ OK -> bắt đầu scan
-            $projectPath = (string)$in->getOption('path');
-            $format      = strtolower((string)$in->getOption('format'));
+            $projectPath = (string)$requestedPath;
+            $format      = (string)$in->getOption('format');
             $outFile     = (string)($in->getOption('output') ?? '');
-            $controlsOpt = (string)($in->getOption('control') ?? '');
-            $cveDataOpt  = trim((string)($in->getOption('cve-data') ?? ''));
+            $cveDataFile = (string)($in->getOption('cve-data') ?? '');
+            $standard    = strtolower((string)($in->getOption('standard') ?? 'magebean'));
+            $rulesOpt    = (string)($in->getOption('rules') ?? '');
+
+            // validate standard
+            $allowed = ['magebean', 'owasp', 'pci', 'cwe'];
+            if (!in_array($standard, $allowed, true)) {
+                $out->writeln('<error>Invalid --standard. Allowed: magebean | owasp | pci | cwe</error>');
+                return Command::FAILURE;
+            }
 
             if ($outFile === '') {
                 $outFile = match ($format) {
@@ -134,19 +155,18 @@ HELP;
                 };
             }
 
-            $cveDataFile = '';
-            if ($cveDataOpt !== '') {
-                $isZip = (bool)preg_match('/\.zip$/i', $cveDataOpt);
+            if ($cveDataFile !== '') {
+                $isZip = (bool)preg_match('/\.zip$/i', $cveDataFile);
                 if ($isZip) {
                     $bm = new BundleManager();
-                    $extracted = $bm->extractOsvFileFromZip($cveDataOpt);
+                    $extracted = $bm->extractOsvFileFromZip($cveDataFile);
                     if ($extracted && is_file($extracted)) {
                         $cveDataFile = $extracted;
                     } else {
                         $out->writeln('<comment>Warning:</comment> Could not extract JSON/NDJSON from zip (cve-data).');
                         if (class_exists(\ZipArchive::class)) {
                             $zip = new \ZipArchive();
-                            if ($zip->open($cveDataOpt) === true) {
+                            if ($zip->open($cveDataFile) === true) {
                                 $out->writeln('  Entries in ZIP:');
                                 $listed = 0;
                                 for ($i = 0; $i < $zip->numFiles && $listed < 50; $i++) {
@@ -159,15 +179,42 @@ HELP;
                             }
                         }
                     }
-                } else {
-                    $cveDataFile = $cveDataOpt;
                 }
             }
 
-            // Build context
-            $controls = $controlsOpt ? array_map('trim', explode(',', $controlsOpt)) : [];
             $ctx  = new Context($projectPath, $cveDataFile);
-            $pack = RulePackLoader::loadAll($controls);
+
+            $pack = RulePackLoader::loadAll();
+
+            // filter by --rules (comma-separated IDs)
+            $requestedIds = [];
+            if ($rulesOpt !== '') {
+                $requestedIds = array_values(array_unique(array_filter(array_map('trim', explode(',', $rulesOpt)))));
+                if ($requestedIds) {
+                    $byId = [];
+                    foreach ($pack['rules'] as $r) {
+                        $byId[strtoupper((string)($r['id'] ?? ''))] = $r;
+                    }
+                    $selected = [];
+                    $unknown  = [];
+                    foreach ($requestedIds as $id) {
+                        $key = strtoupper($id);
+                        if (isset($byId[$key])) $selected[] = $byId[$key];
+                        else $unknown[] = $id;
+                    }
+                    foreach ($unknown as $id) {
+                        $out->writeln(sprintf('<comment>Unknown rule id:</comment> %s', $id));
+                    }
+                    if ($selected) {
+                        // giữ nguyên controls pack để render/summary, nhưng thay tập rules đã chọn
+                        $pack['rules'] = $selected;
+                    } else {
+                        $out->writeln('<error>No valid rules matched the --rules filter.</error>');
+                        return Command::FAILURE;
+                    }
+                }
+            }
+
             if (empty($pack['rules'])) {
                 $out->writeln('<error>No rules found. Check rules directory or control filter.</error>');
                 return Command::FAILURE;
@@ -176,6 +223,9 @@ HELP;
             // 1) Scan rules
             $runner = new ScanRunner($ctx, $pack);
             $result = $runner->run();
+            // attach meta
+            $result['meta']['standard']    = $standard;
+            $result['meta']['rules_filter'] = $requestedIds;
             $result['summary']['path'] = $projectPath;
 
             // 2) CVE audit (nếu có data)
@@ -254,6 +304,8 @@ HELP;
         // Header
         $out->writeln('');
         $out->writeln(sprintf('<fg=cyan;options=bold>Magebean Security Audit v1.0</>        Target: <fg=green>%s</>', $path));
+        $standard = (string)($result['meta']['standard'] ?? 'magebean');
+        $out->writeln(sprintf('Standard: <info>%s</info>', strtoupper($standard)));
         $out->writeln(sprintf('Time: <comment>%s</comment>   PHP: <info>%s</info>   Env: %s', date('Y-m-d H:i'), $phpShort, $envTag($env)));
         $out->writeln('');
 
@@ -468,5 +520,31 @@ HTML;
                 "composer.json does not look like a Magento 2 project (missing require: magento/framework)."
             );
         }
+    }
+
+    private static function normalize(string $p): string
+    {
+        $rp = realpath($p);
+        return $rp !== false ? rtrim($rp, DIRECTORY_SEPARATOR) : rtrim($p, DIRECTORY_SEPARATOR);
+    }
+
+    private static function isMagentoRoot(string $dir): bool
+    {
+        // Tiêu chí an toàn: có cả env.php và bin/magento
+        return is_file($dir . '/app/etc/env.php') && is_file($dir . '/bin/magento');
+    }
+
+    private static function detectMagentoRoot(string $startDir, int $maxUp = 4): ?string
+    {
+        $dir = self::normalize($startDir);
+        for ($i = 0; $i <= $maxUp; $i++) {
+            if (self::isMagentoRoot($dir)) {
+                return $dir;
+            }
+            $parent = dirname($dir);
+            if ($parent === $dir) break; // đến root FS
+            $dir = $parent;
+        }
+        return null;
     }
 }
