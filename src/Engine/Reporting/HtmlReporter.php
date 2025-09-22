@@ -14,7 +14,6 @@ final class HtmlReporter
         if ($html === false || $html === '') {
             $html = $this->fallbackTemplate();
         }
-
         // --- Summary inputs ---
         $sum = $result['summary'] ?? [];
         $completedRaw = $sum['completed'] ?? $result['completed'] ?? $sum['end'] ?? $result['end']
@@ -26,7 +25,8 @@ final class HtmlReporter
 
         $rulesPassed = (int)($sum['passed'] ?? 0);
         $rulesFailed = (int)($sum['failed'] ?? 0);
-        $rulesTotal  = (int)($sum['total']  ?? ($rulesPassed + $rulesFailed));
+        $rulesUnknown = (int)($sum['unknown'] ?? max(0, (($sum['total'] ?? 0) - ($rulesPassed + $rulesFailed))));
+        $rulesTotal  = (int)($sum['total']  ?? ($rulesPassed + $rulesFailed + $rulesUnknown));
         $rulesPct    = $rulesTotal > 0 ? round(($rulesPassed / $rulesTotal) * 100, 1) : 0.0;
 
         $sevCounts = ['Critical' => 0, 'High' => 0, 'Medium' => 0, 'Low' => 0];
@@ -38,10 +38,15 @@ final class HtmlReporter
             $severity = htmlspecialchars((string)($f['severity'] ?? ''), ENT_QUOTES, 'UTF-8');
             $passed   = (bool)($f['passed'] ?? false);
             $status   = $passed ? 'PASS' : 'FAIL';
-            $statusClass = $passed ? 'status-pass' : 'status-fail';
-            $userMsg  = htmlspecialchars((string)($f['message'] ?? ''), ENT_QUOTES, 'UTF-8');
+            $status   = strtoupper((string)($f['status'] ?? ($passed ? 'PASS' : 'FAIL')));
+            $statusClass = match($status){ 'PASS'=>'status-pass', 'FAIL'=>'status-fail', 'UNKNOWN'=>'status-unknown', default=>'status-fail' };
+            $userMsgRaw = (string)($f['message'] ?? '');
+            if ($status === 'UNKNOWN' && trim($userMsgRaw) === '') {
+                $userMsgRaw = 'CVE file not found (requires --cve-data package)';
+            }
+            $userMsg  = htmlspecialchars($userMsgRaw, ENT_QUOTES, 'UTF-8');
 
-            if (!$passed) {
+            if ($status === 'FAIL') {
                 $sevKey = ucfirst(strtolower((string)($f['severity'] ?? 'Low')));
                 if (!isset($sevCounts[$sevKey])) $sevKey = 'Low';
                 $sevCounts[$sevKey]++;
@@ -58,6 +63,14 @@ final class HtmlReporter
         }
 
         $findingsTotal = array_sum($sevCounts);
+        // Footer note nếu có UNKNOWN
+        $hasUnknown = false;
+        foreach (($result['findings'] ?? []) as $f) {
+            if (strtoupper((string)($f['status'] ?? '')) === 'UNKNOWN') { $hasUnknown = true; break; }
+        }
+        if ($hasUnknown) {
+            $html = str_replace('{{cve_section}}', '<div class="section"><strong>Note:</strong> Some CVE-related rules are <span class="status-unknown">UNKNOWN</span> because CVE data was missing. Provide a CVE bundle via <code>--cve-data=path.zip</code> to enable full checks.</div>'.'{{cve_section}}', $html);
+        }
 
         // Thay placeholder phần findings
         $html = strtr($html, [
@@ -66,6 +79,7 @@ final class HtmlReporter
             '{{rules_total}}'          => (string)$rulesTotal,
             '{{rules_passed}}'         => (string)$rulesPassed,
             '{{rules_failed}}'         => (string)$rulesFailed,
+            '{{rules_unknown}}'        => (string)$rulesUnknown,
             '{{rules_passed_percent}}' => (string)$rulesPct,
             '{{findings_critical}}'    => (string)$sevCounts['Critical'],
             '{{findings_high}}'        => (string)$sevCounts['High'],
@@ -82,7 +96,7 @@ final class HtmlReporter
         } else {
             $html = str_replace('</body>', $cveHtml.'</body>', $html);
         }
-        $footer = '<p>This report was generated using Magebean CLI, based on the <a href="https://magebean.com/magebean-baseline-docs/index.html">Magebean Security Baseline v1</a>. Findings are provided for informational and audit purposes only.</p>';
+        $footer = '<p>This report was generated using Magebean CLI, based on the <a href="https://magebean.com/documentation/index.html">Magebean Security Baseline v1</a>. Findings are provided for informational and audit purposes only.</p>';
         $html = str_replace('</body>', $footer.'</body>', $html);
 
         // 2) Đảm bảo thư mục output tồn tại
@@ -101,8 +115,8 @@ final class HtmlReporter
     private function renderCveSection($cve): string
     {
         if (!$cve) {
-            return '<div class="section"><h3>CVE Check (Composer / Packagist)</h3>
-            <div>→ Requires CVE Bundle (--cve-data=magebean-cve-bundle-YYYYMM.zip)</div>
+            return '<div class="section"><h3>CVE checks skipped</h3>
+            <div>→ Requires CVE Data (--cve-data=magebean-cve-bundle-'.date('Ym').'.zip)</div>
             <div>→ Visit <a href="https://magebean.com/download" title="Download">https://magebean.com/download</a></div>
             </div>';
         }
@@ -226,7 +240,8 @@ final class HtmlReporter
 body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;padding:16px;}
 table{width:100%;border-collapse:collapse;margin-top:12px}
 td,th{border:1px solid #eee;padding:8px;vertical-align:top}
-.status-pass{color:#0a0;background:#e9fbe9;font-weight:600;text-align:center}
+.status-pass{color:#0a0;font-weight:bold}
+.status-unknown{color:#a80;font-weight:bold}
 .status-fail{color:#a00;background:#fdeaea;font-weight:600;text-align:center}
 summary{cursor:pointer}
 .section{margin-top:24px}
@@ -235,7 +250,7 @@ summary{cursor:pointer}
 <h2>Magebean Scan</h2>
 <div>Completed: {{scan_completed}}</div>
 <div>Path: {{path_audited}}</div>
-<div>Rules: {{rules_passed}} / {{rules_total}} ({{rules_passed_percent}}%) — Failed: {{rules_failed}}</div>
+<div>Rules: {{rules_passed}} / {{rules_total}} ({{rules_passed_percent}}%) — Failed: {{rules_failed}} — Unknown: {{rules_unknown}}</div>
 <div>Findings Overview — Critical: {{findings_critical}} | High: {{findings_high}} | Medium: {{findings_medium}} | Low: {{findings_low}} | Total: {{findings_total}}</div>
 <table>
 <thead><tr><th>ID</th><th>Control</th><th>Severity</th><th>Status</th><th>Message</th></tr></thead>

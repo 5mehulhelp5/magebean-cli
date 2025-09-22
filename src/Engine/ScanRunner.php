@@ -32,7 +32,7 @@ final class ScanRunner
         if (!is_array($res)) {
             $res = [false, 'Unknown check: ' . $name];
         }
-        $ok  = (bool)($res[0] ?? false);
+        $ok  = $res[0] ?? null;
         $msg = (string)($res[1] ?? '');
         $ev  = $res[2] ?? [];
         if (!is_array($ev)) {
@@ -64,6 +64,9 @@ final class ScanRunner
 
             $details  = [];
             $evidence = [];
+            $hasTrue = false;
+            $hasFalse = false;
+            $hasUnknown = false;
 
             foreach ($rule['checks'] as $chk) {
                 $name = $chk['name'];
@@ -82,22 +85,46 @@ final class ScanRunner
                     $git
                 );
 
-                $details[] = [$name, $msg, (bool)$cok];
+                $details[] = [$name, $msg, $cok];
                 if (!empty($ev)) {
                     $evidence = array_merge($evidence, is_array($ev) ? $ev : [$ev]);
                 }
-                if ($op === 'all' && !$cok) {
+                if ($op === 'all' && $cok === false) {
                     $ok = false;
                 }
-                if ($op === 'any' && $cok) {
+                if ($op === 'any' && $cok === true) {
                     $ok = true;
                     break;
                 }
+                if ($cok === true) $hasTrue = true;
+                elseif ($cok === false) $hasFalse = true;
+                else $hasUnknown = true;
             }
 
+            $status = null;
+            if ($hasFalse) {
+                $ok = false;
+                $status = 'FAIL';
+            } elseif ($hasTrue) {
+                $ok = true;
+                $status = 'PASS';
+            } elseif ($hasUnknown) {
+                $ok = false; // giữ boolean để tương thích cũ, nhưng status sẽ là UNKNOWN
+                $status = 'UNKNOWN';
+            } else {
+                // không có check nào -> PASS
+                $ok = true;
+                $status = 'PASS';
+            }
             $msgPass = $rule['messages']['pass'] ?? null;
             $msgFail = $rule['messages']['fail'] ?? null;
-            if ($ok) {
+            if ($status === 'UNKNOWN') {
+                $unkMsgs = array_values(array_map(
+                    fn($d) => $d[1],
+                    array_filter($details, fn($d) => ($d[2] === null) || (is_string($d[1]) && str_starts_with((string)$d[1], '[UNKNOWN]')))
+                ));
+                $finalMsg = $unkMsgs[0] ?? 'CVE file not found (requires --cve-data package)';
+            } elseif ($ok) {
                 if ($msgPass) {
                     $finalMsg = $msgPass;
                 } else {
@@ -119,24 +146,37 @@ final class ScanRunner
                 }
             }
 
+            if ($status === 'UNKNOWN' && (!isset($finalMsg) || trim((string)$finalMsg) === '')) {
+                $finalMsg = 'CVE file not found (requires --cve-data package)';
+            }
+
             $findings[] = [
                 'id'       => $rule['id'],
                 'title'    => $rule['title'],
                 'control'  => $rule['control'],
                 'severity' => $rule['severity'],
                 'passed'   => $ok,
+                'status'   => $status,
                 'message'  => $finalMsg,
                 'details'  => $details,
                 'evidence' => $evidence
             ];
 
-            if ($ok) $passed++;
-            else $failed++;
+            // Đếm theo status để UNKNOWN không bị tính là failed
+            if ($status === 'PASS') {
+                $passed++;
+            } elseif ($status === 'FAIL') {
+                $failed++;
+            } // UNKNOWN: không cộng vào passed/failed
         }
 
+        $unknown = 0;
+        foreach ($findings as $f) {
+            if (($f['status'] ?? '') === 'UNKNOWN') $unknown++;
+        }
         return [
-            'summary'  => ['passed' => $passed, 'failed' => $failed, 'total' => $passed + $failed],
-            'findings' => $findings
+            'summary'  => ['passed' => $passed, 'failed' => $failed, 'unknown' => $unknown, 'total' => count($findings)],
+             'findings' => $findings
         ];
     }
 

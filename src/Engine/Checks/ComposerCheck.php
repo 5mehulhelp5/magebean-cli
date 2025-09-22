@@ -25,11 +25,11 @@ final class ComposerCheck
         // 1. Xác định file CVE data
         $cveRel = $this->ctx->cveData !== '' ? $this->ctx->cveData : ($args['cve_db'] ?? '');
         if ($cveRel === '') {
-            return [false, "Missing CVE data (use --cve-data=path or args.cve_db)"];
+            return [null, "[UNKNOWN] Missing CVE data (use --cve-data=path or args.cve_db)"];
         }
         $cvePath = $this->ctx->abs($cveRel);
         if (!is_file($cvePath)) {
-            return [false, "CVE file not found ($cveRel)"];
+            return [null, "[UNKNOWN] CVE file not found (requires --cve-data package)"];
         }
 
         // 2. Đọc composer.lock
@@ -64,7 +64,7 @@ final class ComposerCheck
                 if (is_array($obj)) $cve[] = $obj;
             }
             if (!$cve) {
-                return [false, "Unrecognized CVE format (expect JSON array or NDJSON)"];
+                return [null, "[UNKNOWN] Unrecognized CVE format (expect JSON array or NDJSON)"];
             }
         }
 

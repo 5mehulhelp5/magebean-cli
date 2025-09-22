@@ -77,6 +77,13 @@
             background-color: #f8d7da;
             font-weight: bold;
         }
+
+        .status-unknown {
+            color: #a80;
+            background: #fff6db;
+            font-weight: 600;
+            text-align: center
+        }
     </style>
 </head>
 
@@ -105,6 +112,8 @@
                         Passed: {{rules_passed}}
                         &nbsp;|&nbsp;
                         Failed: {{rules_failed}}
+                        &nbsp;|&nbsp;
+                        Unknown: {{rules_unknown}}
                     </td>
                 </tr>
                 <tr>

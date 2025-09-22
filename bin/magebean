@@ -29,5 +29,5 @@ foreach ($argv as $i => $arg) {
     }
 }
 $hasExplicitCommand = count($nonOptionArgs) > 0;
-$app->setDefaultCommand('scan', true);
+$app->setDefaultCommand('scan');
 $app->run();
