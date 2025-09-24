@@ -1,0 +1,164 @@
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>Magebean Report</title>
+    <style>
+        body {
+            font-family: system-ui;
+            margin: 24px
+        }
+
+        table {
+            border-collapse: collapse;
+            width: 100%
+        }
+
+        td,
+        th {
+            border: 1px solid #ddd;
+            padding: 8px
+        }
+
+        tr:nth-child(even) {
+            background: #fafafa
+        }
+
+        .summary {
+            margin: 24px 0;
+        }
+
+        .summary h2 {
+            margin: 0 0 12px;
+            font-size: 20px;
+        }
+
+        .summary-table th {
+            width: 220px;
+            text-align: left;
+            background: #f7f7f7;
+        }
+
+        .summary-table td code {
+            background: #f5f5f5;
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+
+        .progress {
+            width: 100%;
+            height: 10px;
+            background: #eee;
+            border-radius: 6px;
+            overflow: hidden;
+            margin: 6px 0;
+            border: 1px solid #ddd;
+        }
+
+        .progress-bar {
+            height: 100%;
+            /* màu mặc định của trình duyệt (không cần đặt color cụ thể) */
+            background: linear-gradient(to right, rgba(0, 0, 0, .2), rgba(0, 0, 0, .1));
+        }
+
+        .progress-label {
+            font-size: 12px;
+            color: #555;
+        }
+
+        .status-pass {
+            color: #155724;
+            background-color: #d4edda;
+            font-weight: bold;
+        }
+
+        .status-fail {
+            color: #721c24;
+            background-color: #f8d7da;
+            font-weight: bold;
+        }
+
+        .status-unknown {
+            color: #a80;
+            background: #fff6db;
+            font-weight: 600;
+            text-align: center
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Magebean Report</h1>
+    <section class="summary">
+        <h2>Summary</h2>
+
+        <table class="summary-table">
+            <tbody>
+                <tr>
+                    <th>Scan Time</th>
+                    <td>
+                        2025-09-24 20:47:36
+                    </td>
+                </tr>
+                <tr>
+                    <th>Path Audited</th>
+                    <td><code>/home/son/sites/magento</code></td>
+                </tr>
+                <tr>
+                    <th>Rules Checked</th>
+                    <td>
+                        Total: 81
+                        &nbsp;|&nbsp;
+                        Passed: 29
+                        &nbsp;|&nbsp;
+                        Failed: 47
+                        &nbsp;|&nbsp;
+                        Unknown: 5
+                    </td>
+                </tr>
+                <tr>
+                    <th>Findings Overview</th>
+                    <td>
+                        Critical: 2
+                        &nbsp;|&nbsp;
+                        High: 18
+                        &nbsp;|&nbsp;
+                        Medium: 22
+                        &nbsp;|&nbsp;
+                        Low: 5
+                        &nbsp;|&nbsp;
+                        Total: 47
+                    </td>
+                </tr>
+                <tr>
+                    <th>Score (Rules Passed %)</th>
+                    <td>
+                        <div class="progress">
+                            <div class="progress-bar" style="width: 35.8%;"></div>
+                        </div>
+                        <div class="progress-label">29 / 81 (35.8%)</div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </section>
+
+    <table>
+        <thead>
+            <tr>
+                <th width="100">ID</th>
+                <th width="150">Control</th>
+                <th width="100">Severity</th>
+                <th width="100">Status</th>
+                <th>Title</th>
+            </tr>
+        </thead>
+        <tbody><tr><td>MB-R001</td><td>MB-C01</td><td>high</td><td class="status-fail">FAIL</td><td><div style="color:#333;margin-top:4px">World-writable files or directories detected. Remove 777 and tighten permissions.</div></td></tr><tr><td>MB-R002</td><td>MB-C01</td><td>high</td><td class="status-fail">FAIL</td><td><div style="color:#333;margin-top:4px">app/etc/env.php permissions are too permissive. Set to 0640 (owner read/write, group read).</div></td></tr><tr><td>MB-R003</td><td>MB-C01</td><td>high</td><td class="status-pass">PASS</td><td><div style="color:#333;margin-top:4px">Webroot is clean: no sensitive or backup artifacts exposed under pub/.</div></td></tr><tr><td>MB-R004</td><td>MB-C01</td><td>high</td><td class="status-pass">PASS</td><td><div style="color:#333;margin-top:4px">Code directories (app, vendor, lib) are not group/other-writable.</div></td></tr><tr><td>MB-R005</td><td>MB-C01</td><td>medium</td><td class="status-fail">FAIL</td><td><div style="color:#333;margin-top:4px">Directory listing is enabled on at least one public path. Disable autoindex/listing.</div></td></tr><tr><td>MB-R006</td><td>MB-C02</td><td>high</td><td class="status-fail">FAIL</td><td><div style="color:#333;margin-top:4px">Admin path is still &#039;/admin&#039;. Change env.php backend.frontName to a non-guessable value and update web server rules.</div></td></tr><tr><td>MB-R007</td><td>MB-C02</td><td>critical</td><td class="status-fail">FAIL</td><td><div style="color:#333;margin-top:4px">Two-Factor Authentication is disabled or missing. Enable Magento_TwoFactorAuth and enforce 2FA for all admin users.</div></td></tr><tr><td>MB-R008</td><td>MB-C02</td><td>high</td><td class="status-fail">FAIL</td><td><div style="color:#333;margin-top:4px">Admin password/security policy is not configured. Define complexity, history, lockout, and rotation settings under admin/security.</div></td></tr><tr><td>MB-R009</td><td>MB-C02</td><td>medium</td><td class="status-fail">FAIL</td><td><div style="color:#333;margin-top:4px">Admin session lifetime exceeds 900 seconds. Reduce session.lifetime to ≤ 900 for better security.</div></td></tr><tr><td>MB-R010</td><td>MB-C02</td><td>medium</td><td class="status-fail">FAIL</td><td><div style="color:#333;margin-top:4px">Admin URL is exposed (default path and no network ACLs). Change backend.frontName and/or restrict access via web server allow/deny.</div></td></tr><tr><td>MB-R011</td><td>MB-C02</td><td>medium</td><td class="status-fail">FAIL</td><td><div style="color:#333;margin-top:4px">CAPTCHA / rate-limiting is not configured. Enable admin CAPTCHA (or reCAPTCHA) to slow brute-force attempts.</div></td></tr><tr><td>MB-R012</td><td>MB-C03</td><td>high</td><td class="status-pass">PASS</td><td><div style="color:#333;margin-top:4px">No unsafe raw SQL statements detected; database queries use abstraction layers.</div></td></tr><tr><td>MB-R013</td><td>MB-C03</td><td>medium</td><td class="status-fail">FAIL</td><td><div style="color:#333;margin-top:4px">Unescaped template output detected. Use escapeHtml() or escapeHtmlAttr() for safe rendering.</div></td></tr><tr><td>MB-R014</td><td>MB-C03</td><td>medium</td><td class="status-pass">PASS</td><td><div style="color:#333;margin-top:4px">No direct access to PHP superglobals detected.</div></td></tr><tr><td>MB-R015</td><td>MB-C03</td><td>high</td><td class="status-fail">FAIL</td><td><div style="color:#333;margin-top:4px">Forms without form_key detected. Add CSRF token for protection.</div></td></tr><tr><td>MB-R016</td><td>MB-C03</td><td>medium</td><td class="status-fail">FAIL</td><td><div style="color:#333;margin-top:4px">No SSRF protections found. Add domain allowlists and connection timeouts.</div></td></tr><tr><td>MB-R017</td><td>MB-C03</td><td>high</td><td class="status-fail">FAIL</td><td><div style="color:#333;margin-top:4px">Unsafe unserialize() calls detected. Replace with JSON or Magento Serializer classes.</div></td></tr><tr><td>MB-R018</td><td>MB-C03</td><td>high</td><td class="status-fail">FAIL</td><td><div style="color:#333;margin-top:4px">exec(), shell_exec(), or system() calls found. Avoid OS command execution.</div></td></tr><tr><td>MB-R019</td><td>MB-C03</td><td>high</td><td class="status-fail">FAIL</td><td><div style="color:#333;margin-top:4px">Use of eval/assert/create_function detected. Remove or refactor these functions.</div></td></tr><tr><td>MB-R020</td><td>MB-C03</td><td>medium</td><td class="status-pass">PASS</td><td><div style="color:#333;margin-top:4px">Path sanitization functions (realpath/basename) are present.</div></td></tr><tr><td>MB-R021</td><td>MB-C03</td><td>medium</td><td class="status-fail">FAIL</td><td><div style="color:#333;margin-top:4px">File upload handling lacks validation. Add allowed extensions, MIME type checks, and size limits.</div></td></tr><tr><td>MB-R022</td><td>MB-C03</td><td>low</td><td class="status-fail">FAIL</td><td><div style="color:#333;margin-top:4px">No escaping for JavaScript context detected. Use escapeJs() or json_encode().</div></td></tr><tr><td>MB-R023</td><td>MB-C03</td><td>high</td><td class="status-fail">FAIL</td><td><div style="color:#333;margin-top:4px">Weak PRNG functions (rand/mt_rand) detected. Replace with random_bytes/random_int.</div></td></tr><tr><td>MB-R024</td><td>MB-C03</td><td>high</td><td class="status-pass">PASS</td><td><div style="color:#333;margin-top:4px">No sensitive data (passwords, tokens, card details) logged in code.</div></td></tr><tr><td>MB-R025</td><td>MB-C03</td><td>medium</td><td class="status-fail">FAIL</td><td><div style="color:#333;margin-top:4px">Custom crypto/session code found. Use Magento Framework Encryption and Session APIs instead.</div></td></tr><tr><td>MB-R026</td><td>MB-C04</td><td>high</td><td class="status-fail">FAIL</td><td><div style="color:#333;margin-top:4px">HTTPS is not enforced in admin or storefront. Enable secure URLs in env.php.</div></td></tr><tr><td>MB-R027</td><td>MB-C04</td><td>medium</td><td class="status-fail">FAIL</td><td><div style="color:#333;margin-top:4px">HSTS header is missing. Add Strict-Transport-Security to enforce HTTPS on clients.</div></td></tr><tr><td>MB-R028</td><td>MB-C04</td><td>high</td><td class="status-fail">FAIL</td><td><div style="color:#333;margin-top:4px">TLS configuration allows outdated protocols. Restrict to TLS 1.2+.</div></td></tr><tr><td>MB-R029</td><td>MB-C04</td><td>medium</td><td class="status-fail">FAIL</td><td><div style="color:#333;margin-top:4px">Mixed content detected. Replace http:// references with https://.</div></td></tr><tr><td>MB-R030</td><td>MB-C04</td><td>high</td><td class="status-fail">FAIL</td><td><div style="color:#333;margin-top:4px">Cookies lack Secure or HttpOnly flags. Enable them to protect against theft and XSS.</div></td></tr><tr><td>MB-R031</td><td>MB-C05</td><td>high</td><td class="status-fail">FAIL</td><td><div style="color:#333;margin-top:4px">Magento is not in PRODUCTION mode. Set MAGE_MODE to &#039;production&#039; in env.php and redeploy.</div></td></tr><tr><td>MB-R032</td><td>MB-C05</td><td>medium</td><td class="status-fail">FAIL</td><td><div style="color:#333;margin-top:4px">Xdebug settings detected. Remove the zend_extension and xdebug.* directives in production.</div></td></tr><tr><td>MB-R033</td><td>MB-C05</td><td>medium</td><td class="status-fail">FAIL</td><td><div style="color:#333;margin-top:4px">PHP display_errors is On. Set display_errors=Off and log errors to files instead.</div></td></tr><tr><td>MB-R034</td><td>MB-C05</td><td>low</td><td class="status-pass">PASS</td><td><div style="color:#333;margin-top:4px">Generated DI metadata and code are present.</div></td></tr><tr><td>MB-R035</td><td>MB-C05</td><td>low</td><td class="status-pass">PASS</td><td><div style="color:#333;margin-top:4px">Static view files are deployed (pub/static and var/view_preprocessed exist).</div></td></tr><tr><td>MB-R036</td><td>MB-C05</td><td>medium</td><td class="status-fail">FAIL</td><td><div style="color:#333;margin-top:4px">Developer template hints are enabled. Disable system.default.dev/debug/template_hints (set to 0).</div></td></tr><tr><td>MB-R037</td><td>MB-C06</td><td>high</td><td class="status-fail">FAIL</td><td><div style="color:#333;margin-top:4px">Full Page Cache is disabled or not using Varnish. Enable FPC for performance.</div></td></tr><tr><td>MB-R038</td><td>MB-C06</td><td>medium</td><td class="status-fail">FAIL</td><td><div style="color:#333;margin-top:4px">Cache backend is still using file-based storage. Switch to Redis or Varnish.</div></td></tr><tr><td>MB-R039</td><td>MB-C06</td><td>medium</td><td class="status-fail">FAIL</td><td><div style="color:#333;margin-top:4px">Some indexers are not READY. Run `bin/magento indexer:reindex`.</div></td></tr><tr><td>MB-R040</td><td>MB-C06</td><td>high</td><td class="status-fail">FAIL</td><td><div style="color:#333;margin-top:4px">Session storage is not hardened. Use Redis with a password for secure sessions.</div></td></tr><tr><td>MB-R041</td><td>MB-C06</td><td>low</td><td class="status-fail">FAIL</td><td><div style="color:#333;margin-top:4px">File cache backend detected. Replace with Redis or Varnish for production.</div></td></tr><tr><td>MB-R042</td><td>MB-C07</td><td>high</td><td class="status-pass">PASS</td><td><div style="color:#333;margin-top:4px">Log and report directories are not exposed under pub/.</div></td></tr><tr><td>MB-R043</td><td>MB-C07</td><td>medium</td><td class="status-fail">FAIL</td><td><div style="color:#333;margin-top:4px">Log rotation is not configured. Add logrotate settings to prevent oversized log files.</div></td></tr><tr><td>MB-R044</td><td>MB-C07</td><td>medium</td><td class="status-fail">FAIL</td><td><div style="color:#333;margin-top:4px">Debug template hints are enabled in production. Set dev/debug/template_hints_storefront to 0.</div></td></tr><tr><td>MB-R045</td><td>MB-C07</td><td>high</td><td class="status-pass">PASS</td><td><div style="color:#333;margin-top:4px">No PII such as passwords, tokens, or card data is logged.</div></td></tr><tr><td>MB-R046</td><td>MB-C08</td><td>medium</td><td class="status-fail">FAIL</td><td><div style="color:#333;margin-top:4px">Magento cron entries are missing. Add &#039;bin/magento cron:run&#039; to your crontab.</div></td></tr><tr><td>MB-R047</td><td>MB-C08</td><td>high</td><td class="status-fail">FAIL</td><td><div style="color:#333;margin-top:4px">Cron has not run in the last 15 minutes. Investigate cron service and schedule.</div></td></tr><tr><td>MB-R048</td><td>MB-C08</td><td>medium</td><td class="status-fail">FAIL</td><td><div style="color:#333;margin-top:4px">Cron queue size is high. Jobs are backlogged—scale workers or fix failing jobs.</div></td></tr><tr><td>MB-R049</td><td>MB-C09</td><td>critical</td><td class="status-unknown">UNKNOWN</td><td><div style="color:#333;margin-top:4px">[UNKNOWN] CVE file not found (requires --cve-data package)</div></td></tr><tr><td>MB-R050</td><td>MB-C09</td><td>critical</td><td class="status-pass">PASS</td><td><div style="color:#333;margin-top:4px">No unresolved Adobe core advisories detected.</div></td></tr><tr><td>MB-R051</td><td>MB-C09</td><td>medium</td><td class="status-pass">PASS</td><td><div style="color:#333;margin-top:4px">Fix versions are available for all known vulnerable packages.</div></td></tr><tr><td>MB-R052</td><td>MB-C09</td><td>medium</td><td class="status-pass">PASS</td><td><div style="color:#333;margin-top:4px">No high-risk modules from the list are installed, or they are acknowledged and controlled.</div></td></tr><tr><td>MB-R053</td><td>MB-C09</td><td>low</td><td class="status-fail">FAIL</td><td><div style="color:#333;margin-top:4px">No documented mitigations. Record temporary workarounds and rollback plans in SECURITY.md.</div></td></tr><tr><td>MB-R054</td><td>MB-C09</td><td>critical</td><td class="status-pass">PASS</td><td><div style="color:#333;margin-top:4px">No packages match the CISA Known Exploited Vulnerabilities list.</div></td></tr><tr><td>MB-R055</td><td>MB-C09</td><td>high</td><td class="status-unknown">UNKNOWN</td><td><div style="color:#333;margin-top:4px">[UNKNOWN] CVE file not found (requires --cve-data package)</div></td></tr><tr><td>MB-R056</td><td>MB-C09</td><td>medium</td><td class="status-pass">PASS</td><td><div style="color:#333;margin-top:4px">Composer constraints do not block required security update ranges.</div></td></tr><tr><td>MB-R057</td><td>MB-C09</td><td>high</td><td class="status-pass">PASS</td><td><div style="color:#333;margin-top:4px">No yanked or withdrawn packages are installed.</div></td></tr><tr><td>MB-R058</td><td>MB-C09</td><td>medium</td><td class="status-pass">PASS</td><td><div style="color:#333;margin-top:4px">Installed Marketplace extensions are within the allowed freshness window.</div></td></tr><tr><td>MB-R059</td><td>MB-C09</td><td>low</td><td class="status-pass">PASS</td><td><div style="color:#333;margin-top:4px">Average advisory response time is within the accepted SLA.</div></td></tr><tr><td>MB-R060</td><td>MB-C09</td><td>medium</td><td class="status-pass">PASS</td><td><div style="color:#333;margin-top:4px">All installed extensions have active vendor support.</div></td></tr><tr><td>MB-R061</td><td>MB-C10</td><td>high</td><td class="status-pass">PASS</td><td><div style="color:#333;margin-top:4px">No installed packages are marked as &#039;abandoned&#039; on Packagist.</div></td></tr><tr><td>MB-R062</td><td>MB-C10</td><td>medium</td><td class="status-pass">PASS</td><td><div style="color:#333;margin-top:4px">All packages have had a release within the last 24 months.</div></td></tr><tr><td>MB-R063</td><td>MB-C10</td><td>medium</td><td class="status-pass">PASS</td><td><div style="color:#333;margin-top:4px">No installed packages come from archived repositories.</div></td></tr><tr><td>MB-R064</td><td>MB-C10</td><td>medium</td><td class="status-pass">PASS</td><td><div style="color:#333;margin-top:4px">No risky forks detected replacing upstream libraries.</div></td></tr><tr><td>MB-R065</td><td>MB-C11</td><td>medium</td><td class="status-unknown">UNKNOWN</td><td><div style="color:#333;margin-top:4px">CVE file not found (requires --cve-data package)</div></td></tr><tr><td>MB-R066</td><td>MB-C11</td><td>medium</td><td class="status-unknown">UNKNOWN</td><td><div style="color:#333;margin-top:4px">CVE file not found (requires --cve-data package)</div></td></tr><tr><td>MB-R067</td><td>MB-C11</td><td>low</td><td class="status-fail">FAIL</td><td><div style="color:#333;margin-top:4px">prefer-stable is not enabled. Set config.prefer-stable=true to favor stable releases.</div></td></tr><tr><td>MB-R068</td><td>MB-C11</td><td>critical</td><td class="status-unknown">UNKNOWN</td><td><div style="color:#333;margin-top:4px">[UNKNOWN] CVE file not found (requires --cve-data package)</div></td></tr><tr><td>MB-R069</td><td>MB-C11</td><td>medium</td><td class="status-pass">PASS</td><td><div style="color:#333;margin-top:4px">All direct dependencies are within acceptable freshness.</div></td></tr><tr><td>MB-R070</td><td>MB-C11</td><td>high</td><td class="status-pass">PASS</td><td><div style="color:#333;margin-top:4px">composer.lock is in sync with composer.json.</div></td></tr><tr><td>MB-R071</td><td>MB-C11</td><td>medium</td><td class="status-pass">PASS</td><td><div style="color:#333;margin-top:4px">No installed libraries are marked as abandoned on Packagist.</div></td></tr><tr><td>MB-R072</td><td>MB-C12</td><td>critical</td><td class="status-fail">FAIL</td><td><div style="color:#333;margin-top:4px">Secrets detected in files or Git history. Remove, rotate keys, and purge history with a secure rewrite.</div></td></tr><tr><td>MB-R073</td><td>MB-C12</td><td>high</td><td class="status-fail">FAIL</td><td><div style="color:#333;margin-top:4px">Insecure http:// endpoint references found. Switch to HTTPS.</div></td></tr><tr><td>MB-R074</td><td>MB-C12</td><td>medium</td><td class="status-fail">FAIL</td><td><div style="color:#333;margin-top:4px">Third-party debug/verbose logging is enabled. Disable debug_logging in env.php.</div></td></tr><tr><td>MB-R075</td><td>MB-C12</td><td>high</td><td class="status-fail">FAIL</td><td><div style="color:#333;margin-top:4px">Webhook signature validation not detected. Verify MAC using shared secret headers.</div></td></tr><tr><td>MB-R076</td><td>MB-C12</td><td>medium</td><td class="status-fail">FAIL</td><td><div style="color:#333;margin-top:4px">No allowlist or timeouts for outbound requests. Add domain allowlists and cURL timeouts.</div></td></tr><tr><td>MB-R077</td><td>MB-C12</td><td>high</td><td class="status-pass">PASS</td><td><div style="color:#333;margin-top:4px">No direct handling of sensitive PII (e.g., full card, CVV, SSN, passport).</div></td></tr><tr><td>MB-R078</td><td>MB-C12</td><td>medium</td><td class="status-fail">FAIL</td><td><div style="color:#333;margin-top:4px">Weak or unspecified TLS ciphers. Configure strong cipher suites on the web server.</div></td></tr><tr><td>MB-R079</td><td>MB-C12</td><td>high</td><td class="status-pass">PASS</td><td><div style="color:#333;margin-top:4px">API credentials are stored in env.php, not embedded in code or the DB.</div></td></tr><tr><td>MB-R080</td><td>MB-C12</td><td>medium</td><td class="status-pass">PASS</td><td><div style="color:#333;margin-top:4px">Third-party logs apply masking/redaction for sensitive fields.</div></td></tr><tr><td>MB-R081</td><td>MB-C12</td><td>low</td><td class="status-fail">FAIL</td><td><div style="color:#333;margin-top:4px">No ACL/scoping guidance found. Document least-privilege permissions and IP allowlists.</div></td></tr></tbody>
+    </table>
+
+<div class="section"><h3>CVE checks skipped</h3>
+            <div>→ Requires CVE Data (--cve-data=magebean-cve-bundle-202509.zip)</div>
+            <div>→ Visit <a href="https://magebean.com/download" title="Download">https://magebean.com/download</a></div>
+            </div><p>This report was generated using Magebean CLI, based on the <a href="https://magebean.com/documentation/index.html">Magebean Security Baseline v1</a>. Findings are provided for informational and audit purposes only.</p></body>
+
+</html>

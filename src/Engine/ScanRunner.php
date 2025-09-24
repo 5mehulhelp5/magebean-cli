@@ -241,6 +241,18 @@ final class ScanRunner
             'php_array_key_search' => $phpc->keySearch($args),
             'git_history_scan'     => $git->secretScan($args),
 
+            // HTTP (external-url) checks
+            'http_force_https_redirect'   => $http->dispatch($name, $args),
+            'http_has_hsts'               => $http->dispatch($name, $args),
+            'http_no_mixed_content'       => $http->dispatch($name, $args),
+            'http_cookie_flags'           => $http->dispatch($name, $args),
+            'http_no_directory_listing'   => $http->dispatch($name, $args),
+            'http_no_public_artifacts'    => $http->dispatch($name, $args),
+            'http_no_stacktrace'          => $http->dispatch($name, $args),
+            'http_no_xdebug_headers'      => $http->dispatch($name, $args),
+            'http_admin_path_heuristics'  => $http->dispatch($name, $args),
+            'http_magento_fingerprint'    => $http->dispatch($name, $args),
+
             default => [false, 'Unknown check: ' . $name],
         };
     }

@@ -64,6 +64,7 @@ final class HtmlReporter
 
         $findingsTotal = array_sum($sevCounts);
         // Footer note nếu có UNKNOWN
+        $isExternal = $this->isExternal($result);
         $hasUnknown = false;
         foreach (($result['findings'] ?? []) as $f) {
             if (strtoupper((string)($f['status'] ?? '')) === 'UNKNOWN') { $hasUnknown = true; break; }
@@ -90,12 +91,15 @@ final class HtmlReporter
         $html = str_replace('{{table}}', $rows, $html);
 
         // --- CVE section ---
-        $cveHtml = $this->renderCveSection($result['cve_audit'] ?? null);
-        if (strpos($html, '{{cve_section}}') !== false) {
-            $html = str_replace('{{cve_section}}', $cveHtml, $html);
-        } else {
-            $html = str_replace('</body>', $cveHtml.'</body>', $html);
+        if (!$isExternal) {
+            $cveHtml = $this->renderCveSection($result['cve_audit'] ?? null);
+            if (strpos($html, '{{cve_section}}') !== false) {
+                $html = str_replace('{{cve_section}}', $cveHtml, $html);
+            } else {
+                $html = str_replace('</body>', $cveHtml.'</body>', $html);
+            }
         }
+        
         $footer = '<p>This report was generated using Magebean CLI, based on the <a href="https://magebean.com/documentation/index.html">Magebean Security Baseline v1</a>. Findings are provided for informational and audit purposes only.</p>';
         $html = str_replace('</body>', $footer.'</body>', $html);
 
@@ -110,6 +114,12 @@ final class HtmlReporter
         if ($ok === false) {
             throw new \RuntimeException('Failed to write HTML report to: '.$outFile);
         }
+    }
+
+    private function isExternal(array $result): bool
+    {
+        $p = (string)($result['summary']['path'] ?? '');
+        return str_starts_with($p, 'URL:');
     }
 
     private function renderCveSection($cve): string

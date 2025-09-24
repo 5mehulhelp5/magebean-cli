@@ -78,18 +78,14 @@ HELP;
             ->addUsage('--path=/var/www/html')
             ->addUsage('--path=. --format=html --output=report.html')
             ->addUsage('--path=. --cve-data=./cve/magebean-known-cve-bundle-' . date('Ym') . '.zip')
+            ->addUsage('--url=https://store.example')
             ->addOption('format', null, InputOption::VALUE_REQUIRED, 'Output format: html|json', 'html')
             ->addOption('output', null, InputOption::VALUE_OPTIONAL, 'Output file (auto default by format)')
             ->addOption('cve-data', null, InputOption::VALUE_OPTIONAL, 'Path to CVE data (JSON/NDJSON or ZIP bundle)')
             ->addOption('standard', null, InputOption::VALUE_OPTIONAL, 'Report standard: magebean (default) | owasp | pci | cwe', 'magebean')
             ->addOption('rules', null, InputOption::VALUE_OPTIONAL, 'Comma-separated rule IDs to run (e.g., MB-R036,MB-R020)')
-            ->addOption(
-                'path',
-                null,
-                InputOption::VALUE_OPTIONAL,
-                'Magento root path (omit to auto-detect from current working directory)',
-                getcwd()
-            );
+            ->addOption('path', null, InputOption::VALUE_OPTIONAL, 'Magento root path (omit to auto-detect from current working directory)', '')
+            ->addOption('url',  null, InputOption::VALUE_OPTIONAL, 'Magento storefront URL to audit (external mode)');
     }
 
     public function getHelp(): string
@@ -104,6 +100,97 @@ HELP;
         $pathOpt = (string)($in->getOption('path') ?? '');
         $requestedPath = $pathOpt !== '' ? $pathOpt : getcwd();
         $requestedPath = self::normalize($requestedPath);
+
+        $urlOpt = (string)($in->getOption('url') ?? '');
+        if ($urlOpt !== '' && $pathOpt !== '') {
+            $out->writeln('<error>Usage error:</error> You must provide either --path or --url, not both.');
+            return 64; // EX_USAGE
+        }
+        if ($urlOpt !== '') {
+            // URL mode (ExternalMagentoAudit)
+            $url = trim($urlOpt);
+            if (!preg_match('/^https?:\\/\\//i', $url)) {
+                $out->writeln('<error>Invalid --url: must start with http:// or https://</error>');
+                return Command::FAILURE;
+            }
+            $format      = (string)$in->getOption('format');
+            $outFile     = (string)($in->getOption('output') ?? '');
+            $standard    = 'magebean';
+            $rulesOpt    = (string)($in->getOption('rules') ?? '');
+
+            if ($outFile === '') {
+                $outFile = match ($format) {
+                    'json'  => 'magebean-report.json',
+                    default => 'magebean-report.html',
+                };
+            }
+
+            $ctx  = new Context(getcwd(), '', ['url' => $url]);
+            $pack = RulePackLoader::loadExternalMagento();
+
+            // --rules filter (optional)
+            $requestedIds = [];
+            if ($rulesOpt !== '') {
+                $requestedIds = array_values(array_unique(array_filter(array_map('trim', explode(',', $rulesOpt)))));
+                if ($requestedIds) {
+                    $byId = [];
+                    foreach ($pack['rules'] as $r) {
+                        $byId[strtoupper((string)($r['id'] ?? ''))] = $r;
+                    }
+                    $selected = [];
+                    $unknown  = [];
+                    foreach ($requestedIds as $id) {
+                        $key = strtoupper($id);
+                        if (isset($byId[$key])) $selected[] = $byId[$key];
+                        else $unknown[] = $id;
+                    }
+                    foreach ($unknown as $id) {
+                        $out->writeln(sprintf('<comment>Unknown rule id:</comment> %s', $id));
+                    }
+                    if ($selected) {
+                        $pack['rules'] = $selected;
+                    } else {
+                        $out->writeln('<error>No valid rules matched the --rules filter.</error>');
+                        return Command::FAILURE;
+                    }
+                }
+            }
+
+            if (empty($pack['rules'])) {
+                $out->writeln('<error>No rules found for ExternalMagentoAudit.</error>');
+                return Command::FAILURE;
+            }
+
+            // 1) Scan rules (URL)
+            $runner = new ScanRunner($ctx, $pack);
+            $result = $runner->run();
+            // attach meta
+            $result['meta']['standard']     = $standard;
+            $result['meta']['rules_filter'] = $requestedIds;
+            $result['summary']['path']      = 'URL: ' . $url;
+
+            $projectPath = 'URL: ' . $url;
+            // No CVE in URL mode
+            $result['cve_audit'] = null;
+
+            // 3) Write output (reuse existing templating)
+            // ---------- Pretty console output (mimic sample) ----------
+            $this->renderPrettySummary($out, $result, $projectPath, $outFile);
+
+            // 4) Render export
+            // Write output file (dùng HtmlReporter như --path)
+            if ($format === 'json') {
+                file_put_contents($outFile, json_encode($result, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
+                $out->writeln(sprintf('<info>JSON report written:</info> %s', $outFile));
+            } else {
+                $tpl = $this->resolveTemplatePath();
+                $rep = new HtmlReporter($tpl);
+                $rep->write($result, $outFile);
+            }
+            // Exit code giống nhánh --path (để CI nhận biết fail)
+            $sum = $result['summary'] ?? [];
+            return ((int)($sum['failed'] ?? 0) > 0) ? Command::FAILURE : Command::SUCCESS;
+        }
 
         // Nếu path không trỏ tới Magento root, thử leo lên tối đa 4 cấp
         if (!self::isMagentoRoot($requestedPath)) {
@@ -279,6 +366,8 @@ HELP;
         $passed = (int)($sum['passed'] ?? 0);
 
         $env      = strtoupper($this->detectMageMode($path));
+        $isExternal = str_starts_with($path, 'URL:');
+        $env        = $isExternal ? 'EXTERNAL' : strtoupper($this->detectMageMode($path));
         $phpShort = PHP_MAJOR_VERSION . '.' . PHP_MINOR_VERSION;
 
         // Helpers
@@ -297,6 +386,7 @@ HELP;
                 'PRODUCTION' => '<fg=white;bg=green;options=bold>PRODUCTION</>',
                 'DEVELOPER'  => '<fg=yellow;options=bold>DEVELOPER</>',
                 'DEFAULT'    => '<fg=cyan>DEFAULT</>',
+                'EXTERNAL'   => '<fg=blue;options=bold>EXTERNAL</>',
                 default      => sprintf('<fg=magenta>%s</>', $env),
             };
         };
@@ -350,20 +440,22 @@ HELP;
             $sevCounts['low'],
         ));
 
-        // CVE console
-        if (!empty($result['cve_audit']) && is_array($result['cve_audit'])) {
-            $cs = $result['cve_audit']['summary'] ?? [];
-            $out->writeln(sprintf(
-                "\n<info>✓ CVE Checks</info>: %d packages against %d known CVEs | Affected: <fg=red;options=bold>%d</>",
-                (int)($cs['packages_total'] ?? 0),
-                (int)($cs['dataset_total'] ?? 0),
-                (int)($cs['packages_affected'] ?? 0)
-            ));
-        } else {
-            $out->writeln('');
-            $out->writeln('<comment>⚠ CVE checks skipped</comment>');
-            $out->writeln('  → Requires CVE Bundle (<comment>--cve-data=magebean-cve-bundle-YYYYMM.zip</comment>)');
-            $out->writeln('  → Visit <href=https://magebean.com/download>magebean.com/download</>');
+        // CVE console:
+        if (!$isExternal) {
+            if (!empty($result['cve_audit']) && is_array($result['cve_audit'])) {
+                $cs = $result['cve_audit']['summary'] ?? [];
+                $out->writeln(sprintf(
+                    "\n<info>✓ CVE Checks</info>: %d packages against %d known CVEs | Affected: <fg=red;options=bold>%d</>",
+                    (int)($cs['packages_total'] ?? 0),
+                    (int)($cs['dataset_total'] ?? 0),
+                    (int)($cs['packages_affected'] ?? 0)
+                ));
+            } else {
+                $out->writeln('');
+                $out->writeln('<comment>⚠ CVE checks skipped</comment>');
+                $out->writeln('  → Requires CVE Bundle (<comment>--cve-data=magebean-cve-bundle-YYYYMM.zip</comment>)');
+                $out->writeln('  → Visit <href=https://magebean.com/download>magebean.com/download</>');
+            }
         }
 
         // Footer

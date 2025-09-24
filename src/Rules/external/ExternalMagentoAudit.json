@@ -1,0 +1,157 @@
+{
+  "title": "External Magento Audit (URL mode)",
+  "rules": [
+    {
+      "id": "MB-R026",
+      "title": "Force HTTPS in admin and storefront",
+      "control": "MB-C04",
+      "severity": "high",
+      "op": "all",
+      "checks": [
+        { "name": "http_force_https_redirect", "args": { "timeout_ms": 8000 } }
+      ],
+      "messages": {
+        "pass": "HTTP redirects to HTTPS.",
+        "fail": "No HTTP→HTTPS redirect detected."
+      }
+    },
+    {
+      "id": "MB-R027",
+      "title": "HSTS enabled",
+      "control": "MB-C04",
+      "severity": "medium",
+      "op": "all",
+      "checks": [
+        { "name": "http_has_hsts", "args": { "min_max_age": 15552000, "timeout_ms": 8000 } }
+      ],
+      "messages": {
+        "pass": "HSTS configured.",
+        "fail": "Missing or weak HSTS header."
+      }
+    },
+    {
+      "id": "MB-R029",
+      "title": "No mixed content (http://) on homepage",
+      "control": "MB-C04",
+      "severity": "medium",
+      "op": "all",
+      "checks": [
+        { "name": "http_no_mixed_content", "args": { "timeout_ms": 8000 } }
+      ],
+      "messages": {
+        "pass": "No mixed content.",
+        "fail": "Homepage loads insecure (http://) assets."
+      }
+    },
+    {
+      "id": "MB-R030",
+      "title": "Cookies have Secure/HttpOnly/SameSite",
+      "control": "MB-C04",
+      "severity": "high",
+      "op": "all",
+      "checks": [
+        { "name": "http_cookie_flags", "args": { "timeout_ms": 8000 } }
+      ],
+      "messages": {
+        "pass": "Cookies set with security flags.",
+        "fail": "Some cookies missing Secure/HttpOnly/SameSite."
+      }
+    },
+    {
+      "id": "MB-R005",
+      "title": "No directory listing",
+      "control": "MB-C01",
+      "severity": "medium",
+      "op": "all",
+      "checks": [
+        {
+          "name": "http_no_directory_listing",
+          "args": { "paths": ["/media/", "/static/", "/errors/", "/var/"], "timeout_ms": 8000 }
+        }
+      ],
+      "messages": {
+        "pass": "Directory listing disabled.",
+        "fail": "Directory listing found on a common path."
+      }
+    },
+    {
+      "id": "MB-R003",
+      "title": "No public artifacts exposed",
+      "control": "MB-C01",
+      "severity": "high",
+      "op": "all",
+      "checks": [
+        {
+          "name": "http_no_public_artifacts",
+          "args": {
+            "paths": ["/.git/HEAD", "/.env", "/phpinfo.php", "/composer.lock~", "/dump.sql", "/backup.zip"],
+            "timeout_ms": 8000
+          }
+        }
+      ],
+      "messages": {
+        "pass": "No public artifacts.",
+        "fail": "Sensitive artifacts publicly accessible."
+      }
+    },
+    {
+      "id": "MB-R032",
+      "title": "No debug headers on production",
+      "control": "MB-C07",
+      "severity": "medium",
+      "op": "all",
+      "checks": [
+        { "name": "http_no_xdebug_headers", "args": { "timeout_ms": 8000 } }
+      ],
+      "messages": {
+        "pass": "No debug headers.",
+        "fail": "Debug headers present in responses."
+      }
+    },
+    {
+      "id": "MB-R033",
+      "title": "Display errors disabled",
+      "control": "MB-C07",
+      "severity": "high",
+      "op": "all",
+      "checks": [
+        { "name": "http_no_stacktrace", "args": { "timeout_ms": 8000 } }
+      ],
+      "messages": {
+        "pass": "No error traces visible.",
+        "fail": "Error/stack trace visible on pages."
+      }
+    },
+    {
+      "id": "MB-R010",
+      "title": "Admin path hardening",
+      "control": "MB-C02",
+      "severity": "high",
+      "op": "all",
+      "checks": [
+        {
+          "name": "http_admin_path_heuristics",
+          "args": { "paths": ["/admin/", "/backend/", "/index.php/admin/"], "timeout_ms": 8000 }
+        }
+      ],
+      "messages": {
+        "pass": "No obvious admin path exposure.",
+        "fail": "Admin path appears exposed (heuristic)."
+      }
+    },
+    {
+      "id": "MBX-R001",
+      "title": "Magento fingerprint (headers/body)",
+      "control": "MB-C12",
+      "severity": "low",
+      "op": "all",
+      "checks": [
+        { "name": "http_magento_fingerprint", "args": { "timeout_ms": 8000 } }
+      ],
+      "messages": {
+        "pass": "Magento fingerprint detected.",
+        "fail": "No Magento fingerprint found (informational)."
+      }
+    }
+  ]
+}
