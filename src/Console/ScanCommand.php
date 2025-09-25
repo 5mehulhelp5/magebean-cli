@@ -125,6 +125,24 @@ HELP;
                 };
             }
 
+             // -------------------------
+            // Preflight: Magento 2 detect (fail-fast nếu không phải M2)
+            // -------------------------
+            $det = $this->detectMagento2ByUrl($url, 7000);
+            if (!$det['ok']) {
+                $out->writeln('<error>Target does not appear to be a Magento 2 storefront.</error>');
+                $out->writeln(sprintf('Confidence: <comment>%d%%</comment>', (int)$det['confidence']));
+                if (!empty($det['signals'])) {
+                    $out->writeln('Signals:');
+                    foreach ($det['signals'] as $sig) {
+                        $out->writeln('  - ' . $sig);
+                    }
+                }
+                $out->writeln('<comment>Aborting.</comment> If this is a Magento site behind CDN/WAF that strips headers, try scanning the canonical store domain or whitelist our User-Agent.');
+                return Command::FAILURE;
+            }
+            // (tiếp tục scan nếu ok)
+
             $ctx  = new Context(getcwd(), '', ['url' => $url]);
             $pack = RulePackLoader::loadExternalMagento();
 
@@ -638,5 +656,145 @@ HTML;
             $dir = $parent;
         }
         return null;
+    }
+
+    private function detectMagento2ByUrl(string $url, int $timeoutMs = 6000): array
+    {
+        [$ok, $err, $resp] = $this->httpFetch($url, $timeoutMs);
+        $signals = [];
+        if (!$ok) {
+            return ['ok' => false, 'confidence' => 0, 'signals' => ["Fetch error: {$err}"]];
+        }
+        $headers = array_change_key_case((array)($resp['headers'] ?? []), CASE_LOWER);
+        $body    = (string)($resp['body'] ?? '');
+        $conf    = 0;
+
+        // 1) Headers đặc trưng Magento 2
+        $hasMagentoHdr = false;
+        foreach (['x-magento-tags','x-magento-cache-debug','x-magento-advanced'] as $hk) {
+            if (array_key_exists($hk, $headers)) { $hasMagentoHdr = true; break; }
+        }
+        if ($hasMagentoHdr) { $conf += 60; $signals[] = 'Header: X-Magento-* present'; }
+        else { $signals[] = 'Header: X-Magento-* NOT present'; }
+
+        // 2) Token phổ biến trong HTML/JS của M2
+        $bodyLc = strtolower($body);
+        $hitBody = false;
+        // data-mage-init (UI components), mage-cache-storage (LS), /static/version (asset), /static/frontend/ (theme assets)
+        $patterns = [
+            '~data-mage-init~i',
+            '~mage-cache-storage~i',
+            '~/static/version~i',
+            '~/static/frontend/~i',         // theme assets
+            '~/static/_cache/merged/~i',    // merged/bundled static
+            '~window\\.checkoutConfig~i',
+            '~Magento~i'
+        ];
+        foreach ($patterns as $rx) {
+            if (preg_match($rx, $bodyLc) === 1) { $hitBody = true; break; }
+        }
+        if ($hitBody) { $conf += 40; $signals[] = 'HTML token(s): Magento UI/asset markers found'; }
+        else { $signals[] = 'HTML token(s): no typical Magento markers'; }
+
+        // 3) URL canonical/asset gợi ý
+        $assetHits = [];
+        if (preg_match('~/static/version\\d+/~i', $bodyLc))         $assetHits[] = '/static/version';
+        if (preg_match('~/pub/static/~i', $bodyLc))                 $assetHits[] = '/pub/static';
+        // /static/frontend/<Vendor>/<theme>/<locale>/...  (vd: Dowlis/cisco2/en_US/…)
+        if (
+            preg_match('~/static/frontend/[^"\']+/(en_[A-Z]{2}|[a-z]{2}_[A-Z]{2})/~i', $bodyLc)
+            || preg_match('~/static/frontend/~i', $bodyLc)
+        ) {
+            $assetHits[] = '/static/frontend';
+        }
+        if (preg_match('~/static/_cache/merged/~i', $bodyLc))       $assetHits[] = '/static/_cache/merged';
+        if (preg_match('~luma-icons\\.(woff2|woff|ttf)~i', $bodyLc))$assetHits[] = 'Luma-Icons';
+
+        if ($assetHits) {
+            // +10 điểm mỗi clue (tối đa +30), riêng Luma-Icons cộng thêm +20 (Magento đặc trưng)
+            $base  = min(30, count($assetHits) * 10);
+            $bonus = in_array('Luma-Icons', $assetHits, true) ? 20 : 0;
+            $conf += ($base + $bonus);
+            $signals[] = 'Asset clues: ' . implode(', ', $assetHits);
+        } else {
+            $signals[] = 'Asset clues: none';
+        }
+
+        // 4) Tránh false-positive với WordPress/Woo/Shopify
+        $nonMagentoHints = 0;
+        if (str_contains($bodyLc, 'wp-content') || str_contains($bodyLc, 'wp-json')) $nonMagentoHints++;
+        if (str_contains($bodyLc, 'cdn.shopify.com') || str_contains($bodyLc, 'x-shopify')) $nonMagentoHints++;
+        if ($nonMagentoHints > 0) { $conf = max(0, $conf - 40); $signals[] = 'Non-Magento hints present (WordPress/Shopify)'; }
+
+        if ($conf > 100) $conf = 100;
+        return ['ok' => $conf >= 60, 'confidence' => $conf, 'signals' => $signals];
+    }
+
+    /**
+     * HTTP fetch đơn giản (curl nếu có, fallback streams).
+     * @return array{0:bool,1:string,2:array{status:int,headers:array,body:string,final_url:string}}
+     */
+    private function httpFetch(string $url, int $timeoutMs = 6000): array
+    {
+        $ua = 'Magebean-CLI/1.0';
+        if (function_exists('curl_init')) {
+            $ch = curl_init();
+            curl_setopt_array($ch, [
+                CURLOPT_URL => $url,
+                CURLOPT_CUSTOMREQUEST => 'GET',
+                CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_HEADER => true,
+                CURLOPT_TIMEOUT_MS => $timeoutMs,
+                CURLOPT_FOLLOWLOCATION => true,
+                CURLOPT_MAXREDIRS => 3,
+                CURLOPT_USERAGENT => $ua,
+            ]);
+            $resp = curl_exec($ch);
+            if ($resp === false) {
+                $err = curl_error($ch);
+                curl_close($ch);
+                return [false, $err, ['status' => 0, 'headers' => [], 'body' => '', 'final_url' => $url]];
+            }
+            $status  = (int)curl_getinfo($ch, CURLINFO_RESPONSE_CODE);
+            $hdrSize = (int)curl_getinfo($ch, CURLINFO_HEADER_SIZE);
+            $hdrRaw  = substr((string)$resp, 0, $hdrSize);
+            $body    = substr((string)$resp, $hdrSize);
+            $final   = (string)curl_getinfo($ch, CURLINFO_EFFECTIVE_URL);
+            curl_close($ch);
+            return [true, '', ['status' => $status, 'headers' => $this->parseHeadersAssoc($hdrRaw), 'body' => $body, 'final_url' => $final]];
+        }
+        // streams fallback
+        $opts = ['http' => [
+            'method' => 'GET',
+            'header' => "User-Agent: {$ua}\r\n",
+            'ignore_errors' => true,
+            'timeout' => max(1, (int)ceil($timeoutMs/1000)),
+        ]];
+        $ctx = stream_context_create($opts);
+        $body = @file_get_contents($url, false, $ctx);
+        $rawHeaders = is_array($http_response_header ?? null) ? implode("\r\n", $http_response_header) : '';
+        $status = 0;
+        if (preg_match('~HTTP/\S+\s+(\d{3})~', $rawHeaders, $m)) $status = (int)$m[1];
+        if ($body === false) return [false, 'HTTP error (stream)', ['status' => 0, 'headers' => [], 'body' => '', 'final_url' => $url]];
+        return [true, '', ['status' => $status, 'headers' => $this->parseHeadersAssoc($rawHeaders), 'body' => $body, 'final_url' => $url]];
+    }
+
+    /** Parse header raw thành assoc lowercase */
+    private function parseHeadersAssoc(string $raw): array
+    {
+        $out = [];
+        foreach (preg_split("~\r?\n~", $raw) as $line) {
+            if (strpos($line, ':') !== false) {
+                [$k, $v] = array_map('trim', explode(':', $line, 2));
+                $k = strtolower($k);
+                // gộp header trùng (vd: Set-Cookie)
+                if (isset($out[$k])) {
+                    if (is_array($out[$k])) $out[$k][] = $v; else $out[$k] = [$out[$k], $v];
+                } else {
+                    $out[$k] = $v;
+                }
+            }
+        }
+        return $out;
     }
 }
