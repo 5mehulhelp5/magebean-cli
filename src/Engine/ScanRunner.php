@@ -47,6 +47,8 @@ final class ScanRunner
         $findings = [];
         $passed = 0;
         $failed = 0;
+        $plannedRules = is_array($this->pack['rules'] ?? null) ? count($this->pack['rules']) : 0;
+        $executedRules = 0;
 
         $fs  = new FilesystemCheck($this->ctx);
         $phpc = new PhpConfigCheck($this->ctx);
@@ -58,6 +60,7 @@ final class ScanRunner
         $git  = new GitHistoryCheck($this->ctx);
 
         foreach ($this->pack['rules'] as $rule) {
+            $executedRules++;
             $op = $rule['op'] ?? 'all';
             // Với 'any' khởi tạo FAIL cho tới khi có check PASS
             $ok = ($op === 'any') ? false : true;
@@ -149,7 +152,8 @@ final class ScanRunner
             if ($status === 'UNKNOWN' && (!isset($finalMsg) || trim((string)$finalMsg) === '')) {
                 $finalMsg = 'CVE file not found (requires --cve-data package)';
             }
-
+            // Ước lượng confidence cho finding (dựa trên loại check & evidence gom được)
+            [$conf, $confWhy] = $this->estimateConfidenceForRule((array)($rule['checks'] ?? []), $evidence, (string)$status);
             $findings[] = [
                 'id'       => $rule['id'],
                 'title'    => $rule['title'],
@@ -159,7 +163,10 @@ final class ScanRunner
                 'status'   => $status,
                 'message'  => $finalMsg,
                 'details'  => $details,
-                'evidence' => $evidence
+                'details'  => $details,
+                'evidence' => $evidence,
+                'confidence' => $conf,
+                'confidence_reason' => $confWhy
             ];
 
             // Đếm theo status để UNKNOWN không bị tính là failed
@@ -174,9 +181,24 @@ final class ScanRunner
         foreach ($findings as $f) {
             if (($f['status'] ?? '') === 'UNKNOWN') $unknown++;
         }
+        // Lấy transport counters từ HttpCheck nếu có (để tính transport_success_percent ở ScanCommand)
+        $transportOk = 0;
+        $transportTotal = 0;
+        if (method_exists($http, 'getTransportCounts')) {
+            $tc = $http->getTransportCounts();
+            $transportOk    = (int)($tc['ok'] ?? 0);
+            $transportTotal = (int)($tc['total'] ?? 0);
+        }
+
         return [
             'summary'  => ['passed' => $passed, 'failed' => $failed, 'unknown' => $unknown, 'total' => count($findings)],
-             'findings' => $findings
+            'findings' => $findings,
+            'meta'     => [
+                'planned_rules'  => $plannedRules,
+                'executed_rules' => $executedRules,
+                'transport_ok'   => $transportOk,
+                'transport_total' => $transportTotal
+            ]
         ];
     }
 
@@ -255,5 +277,55 @@ final class ScanRunner
 
             default => [false, 'Unknown check: ' . $name],
         };
+    }
+
+    private function estimateConfidenceForRule(array $checks, array $evidence, string $status): array
+    {
+        $first = is_array($checks[0] ?? null) ? $checks[0] : [];
+        $name  = strtolower((string)($first['name'] ?? ''));
+        $base  = match ($name) {
+            // header/value exact
+            'http_has_hsts', 'http_cookie_flags',
+            'http_header_equals', 'http_header_in' => 95,
+            // redirects / status gating
+            'http_force_https_redirect', 'http_block_path' => 90,
+            // tls/cert
+            'http_tls_min_version', 'http_tls_cert_days_left' => 85,
+            // html/dom content
+            'http_no_mixed_content', 'http_no_stacktrace' => 80,
+            // absence / probing
+            'http_no_directory_listing', 'http_no_public_artifacts' => 70,
+            // heuristic
+            'http_admin_path_heuristics', 'http_server_banner_not_verbose' => 60,
+            default => 75,
+        };
+
+        // Nếu UNKNOWN → giảm 20
+        if (strtoupper($status) === 'UNKNOWN') {
+            $base = max(0, $base - 20);
+        }
+
+        // Tìm headers trong evidence để dò CDN/WAF → giảm 10
+        $hdrs = [];
+        if (isset($evidence['headers']) && is_array($evidence['headers'])) {
+            $hdrs = array_change_key_case($evidence['headers'], CASE_LOWER);
+        } else {
+            foreach ($evidence as $ev) {
+                if (is_array($ev) && isset($ev['headers']) && is_array($ev['headers'])) {
+                    $hdrs = array_change_key_case($ev['headers'], CASE_LOWER);
+                    break;
+                }
+            }
+        }
+        $server = (string)($hdrs['server'] ?? '');
+        foreach (['cloudflare', 'akamai', 'fastly', 'sucuri', 'incapsula', 'varnish'] as $kw) {
+            if ($server !== '' && stripos($server, $kw) !== false) {
+                $base = max(0, $base - 10);
+                break;
+            }
+        }
+
+        $base = max(0, min(100, (int)$base));
+        return [$base, 'Estimated by check type ' . ($name ?: 'n/a') . ($server ? " (server: {$server})" : '')];
     }
 }

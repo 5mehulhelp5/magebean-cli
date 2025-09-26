@@ -1,11 +1,16 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace Magebean\Engine\Reporting;
 
 final class HtmlReporter
 {
     private string $tpl;
-    public function __construct(string $tpl){ $this->tpl = $tpl; }
+    public function __construct(string $tpl)
+    {
+        $this->tpl = $tpl;
+    }
 
     public function write(array $result, string $outFile): void
     {
@@ -33,13 +38,20 @@ final class HtmlReporter
         $rows = '';
 
         foreach ($result['findings'] ?? [] as $f) {
+            $confVal = isset($f['confidence']) ? (int)$f['confidence'] : null;
+            $confWhy = isset($f['confidence_reason']) ? (string)$f['confidence_reason'] : '';
             $id       = htmlspecialchars((string)($f['id'] ?? ''), ENT_QUOTES, 'UTF-8');
             $control  = htmlspecialchars((string)($f['control'] ?? ''), ENT_QUOTES, 'UTF-8');
             $severity = htmlspecialchars((string)($f['severity'] ?? ''), ENT_QUOTES, 'UTF-8');
             $passed   = (bool)($f['passed'] ?? false);
             $status   = $passed ? 'PASS' : 'FAIL';
             $status   = strtoupper((string)($f['status'] ?? ($passed ? 'PASS' : 'FAIL')));
-            $statusClass = match($status){ 'PASS'=>'status-pass', 'FAIL'=>'status-fail', 'UNKNOWN'=>'status-unknown', default=>'status-fail' };
+            $statusClass = match ($status) {
+                'PASS' => 'status-pass',
+                'FAIL' => 'status-fail',
+                'UNKNOWN' => 'status-unknown',
+                default => 'status-fail'
+            };
             $userMsgRaw = (string)($f['message'] ?? '');
             if ($status === 'UNKNOWN' && trim($userMsgRaw) === '') {
                 $userMsgRaw = 'CVE file not found (requires --cve-data package)';
@@ -54,11 +66,18 @@ final class HtmlReporter
 
             // Cột nội dung: chỉ in message theo yêu cầu mới
             $rows .= '<tr>'
-                . '<td>'.$id.'</td>'
-                . '<td>'.$control.'</td>'
-                . '<td>'.$severity.'</td>'
-                . '<td class="'.$statusClass.'">'.$status.'</td>'
-                . '<td>'.($userMsg !== '' ? '<div style="color:#333;margin-top:4px">'.$userMsg.'</div>' : '').'</td>'
+                . '<td>' . $id . '</td>'
+                . '<td>' . $control . '</td>'
+                . '<td>' . $severity . '</td>'
+                . '<td class="' . $statusClass . '">' . $status . '</td>'
+                . '<td>' . ($userMsg !== '' ? '<div style="color:#333;margin-top:4px">' . $userMsg . '</div>' : '') . '</td>'
+                . '<td>'
+                . ($userMsg !== '' ? '<div style="color:#333;margin-top:4px">'.$userMsg.'</div>' : '')
+                . (
+                    $confVal !== null
+                    ? '<div style="opacity:.8;margin-top:4px"><small'.($confWhy!==''?' title="'.htmlspecialchars($confWhy,ENT_QUOTES,'UTF-8').'"':'').'>confidence: '.$confVal.'%</small></div>'
+                    : ''
+                  )
                 . '</tr>';
         }
 
@@ -67,10 +86,13 @@ final class HtmlReporter
         $isExternal = $this->isExternal($result);
         $hasUnknown = false;
         foreach (($result['findings'] ?? []) as $f) {
-            if (strtoupper((string)($f['status'] ?? '')) === 'UNKNOWN') { $hasUnknown = true; break; }
+            if (strtoupper((string)($f['status'] ?? '')) === 'UNKNOWN') {
+                $hasUnknown = true;
+                break;
+            }
         }
-        if ($hasUnknown) {
-            $html = str_replace('{{cve_section}}', '<div class="section"><strong>Note:</strong> Some CVE-related rules are <span class="status-unknown">UNKNOWN</span> because CVE data was missing. Provide a CVE bundle via <code>--cve-data=path.zip</code> to enable full checks.</div>'.'{{cve_section}}', $html);
+        if ($hasUnknown && !$isExternal) {
+            $html = str_replace('{{cve_section}}', '<div class="section"><strong>Note:</strong> Some CVE-related rules are <span class="status-unknown">UNKNOWN</span> because CVE data was missing. Provide a CVE bundle via <code>--cve-data=path.zip</code> to enable full checks.</div>' . '{{cve_section}}', $html);
         }
 
         // Thay placeholder phần findings
@@ -96,12 +118,33 @@ final class HtmlReporter
             if (strpos($html, '{{cve_section}}') !== false) {
                 $html = str_replace('{{cve_section}}', $cveHtml, $html);
             } else {
-                $html = str_replace('</body>', $cveHtml.'</body>', $html);
+                $html = str_replace('</body>', $cveHtml . '</body>', $html);
             }
         }
-        
+
+        // --- Confidence section (URL mode) ---
+        // Nếu meta đã có các trường confidence do ScanCommand/ScanRunner tính, hiển thị một block gọn.
+        if ($isExternal) {
+            $meta = (array)($result['meta'] ?? []);
+            $det  = (array)($meta['detected'] ?? []);
+            $detConf = (int)($det['confidence'] ?? 0);
+            $overall = (int)($meta['overall_confidence'] ?? 0);
+            $tPct    = (int)($meta['transport_success_percent'] ?? 0);
+            $cPct    = (int)($meta['coverage_percent'] ?? 0);
+            $execd   = (int)($meta['executed_rules'] ?? 0);
+            $planned = (int)($meta['planned_rules']  ?? 0);
+            $signals = isset($det['signals']) && is_array($det['signals']) ? $det['signals'] : [];
+
+            $confHtml = '<div class="section"><h3>Scan Confidence</h3>'
+                . '<div>Detected platform: <strong>Magento 2</strong> (confidence '.$detConf.'%)</div>'
+                . '<div>Overall confidence: <strong>'.$overall.'%</strong> &nbsp;—&nbsp; transport '.$tPct.'% &middot; coverage '.$cPct.'%'.($planned>0?' ('.$execd.'/'.$planned.')':'').'</div>'
+                . (!empty($signals) ? '<div style="opacity:.85;margin-top:6px"><small>Signals: '.htmlspecialchars(implode(' • ', $signals), ENT_QUOTES, 'UTF-8').'</small></div>' : '')
+                . '</div>';
+            $html = str_replace('</body>', $confHtml.'</body>', $html);
+        }
+
         $footer = '<p>This report was generated using Magebean CLI, based on the <a href="https://magebean.com/documentation/index.html">Magebean Security Baseline v1</a>. Findings are provided for informational and audit purposes only.</p>';
-        $html = str_replace('</body>', $footer.'</body>', $html);
+        $html = str_replace('</body>', $footer . '</body>', $html);
 
         // 2) Đảm bảo thư mục output tồn tại
         $dir = dirname($outFile);
@@ -112,7 +155,7 @@ final class HtmlReporter
         // 3) Ghi file và kiểm tra lỗi
         $ok = file_put_contents($outFile, $html);
         if ($ok === false) {
-            throw new \RuntimeException('Failed to write HTML report to: '.$outFile);
+            throw new \RuntimeException('Failed to write HTML report to: ' . $outFile);
         }
     }
 
@@ -126,7 +169,7 @@ final class HtmlReporter
     {
         if (!$cve) {
             return '<div class="section"><h3>CVE checks skipped</h3>
-            <div>→ Requires CVE Data (--cve-data=magebean-cve-bundle-'.date('Ym').'.zip)</div>
+            <div>→ Requires CVE Data (--cve-data=magebean-cve-bundle-' . date('Ym') . '.zip)</div>
             <div>→ Visit <a href="https://magebean.com/download" title="Download">https://magebean.com/download</a></div>
             </div>';
         }
@@ -135,9 +178,9 @@ final class HtmlReporter
 
         $hdr = sprintf(
             "<div><strong>Total</strong>: %d packages against %d known CVEs | Affected: %d</div>",
-                (int)($sum['packages_total'] ?? 0),
-                (int)($sum['dataset_total'] ?? 0),
-                (int)($sum['packages_affected'] ?? 0)
+            (int)($sum['packages_total'] ?? 0),
+            (int)($sum['dataset_total'] ?? 0),
+            (int)($sum['packages_affected'] ?? 0)
         );
 
         // Bảng tất cả package
@@ -152,12 +195,12 @@ final class HtmlReporter
             $cls  = $stat === 'FAIL' ? 'status-fail' : 'status-pass';
 
             $rows .= '<tr>'
-                . '<td>'.$name.'</td>'
-                . '<td>'.$ver.'</td>'
-                . '<td class="'.$cls.'">'.$stat.'</td>'
-                . '<td>'.$advc.'</td>'
-                . '<td>'.$sev.'</td>'
-                . '<td>'.($fx !== '' ? $fx : '&mdash;').'</td>'
+                . '<td>' . $name . '</td>'
+                . '<td>' . $ver . '</td>'
+                . '<td class="' . $cls . '">' . $stat . '</td>'
+                . '<td>' . $advc . '</td>'
+                . '<td>' . $sev . '</td>'
+                . '<td>' . ($fx !== '' ? $fx : '&mdash;') . '</td>'
                 . '</tr>';
         }
 
@@ -183,11 +226,11 @@ final class HtmlReporter
                 $parts  = [];
                 foreach ($ranges as $rg) {
                     $seg = [];
-                    if (!empty($rg['introduced'])) $seg[] = '≥ '.$rg['introduced'];
-                    if (!empty($rg['fixed']))      $seg[] = '< '.$rg['fixed'];
+                    if (!empty($rg['introduced'])) $seg[] = '≥ ' . $rg['introduced'];
+                    if (!empty($rg['fixed']))      $seg[] = '< ' . $rg['fixed'];
                     $parts[] = implode(', ', $seg);
                 }
-                if ($vers) $parts[] = 'versions: '.implode(', ', array_slice($vers, 0, 5));
+                if ($vers) $parts[] = 'versions: ' . implode(', ', array_slice($vers, 0, 5));
                 $affStr = htmlspecialchars(implode(' | ', $parts), ENT_QUOTES, 'UTF-8');
 
                 $fixed = '';
@@ -199,29 +242,29 @@ final class HtmlReporter
                 $refs = $a['references'] ?? [];
                 if (!empty($refs) && isset($refs[0]['url'])) {
                     $u = htmlspecialchars((string)$refs[0]['url'], ENT_QUOTES, 'UTF-8');
-                    $ref = '<a href="'.$u.'" target="_blank" rel="noopener">reference</a>';
+                    $ref = '<a href="' . $u . '" target="_blank" rel="noopener">reference</a>';
                 }
 
                 $sumLine = htmlspecialchars((string)($a['summary'] ?? ''), ENT_QUOTES, 'UTF-8');
 
                 $advRows .= '<tr>'
-                    . '<td>'.$id.'</td>'
-                    . '<td>'.$sv.($cv!==''?' / '.$cv:'').'</td>'
-                    . '<td>'.($affStr!==''?$affStr:'&mdash;').'</td>'
-                    . '<td>'.($fixed!==''?$fixed:'&mdash;').'</td>'
-                    . '<td>'.($ref!==''?$ref:'&mdash;').'</td>'
-                    . '<td>'.($sumLine!==''?$sumLine:'&mdash;').'</td>'
+                    . '<td>' . $id . '</td>'
+                    . '<td>' . $sv . ($cv !== '' ? ' / ' . $cv : '') . '</td>'
+                    . '<td>' . ($affStr !== '' ? $affStr : '&mdash;') . '</td>'
+                    . '<td>' . ($fixed !== '' ? $fixed : '&mdash;') . '</td>'
+                    . '<td>' . ($ref !== '' ? $ref : '&mdash;') . '</td>'
+                    . '<td>' . ($sumLine !== '' ? $sumLine : '&mdash;') . '</td>'
                     . '</tr>';
             }
 
-            $caption = $name.'@'.$ver.' — '.$cnt.' advisories (Highest: '.$sev.')';
-            if ($fx !== '') $caption .= ' — min fix: '.$fx;
+            $caption = $name . '@' . $ver . ' — ' . $cnt . ' advisories (Highest: ' . $sev . ')';
+            if ($fx !== '') $caption .= ' — min fix: ' . $fx;
 
-            $details .= '<details class="section"><summary><strong>'.$caption.'</strong></summary>'
+            $details .= '<details class="section"><summary><strong>' . $caption . '</strong></summary>'
                 . '<table style="width:100%;border-collapse:collapse;margin-top:8px">'
                 . '<thead><tr>'
                 . '<th>ID</th><th>Severity / CVSS</th><th>Affected</th><th>Fixed in</th><th>Reference</th><th>Summary</th>'
-                . '</tr></thead><tbody>'.$advRows.'</tbody></table></details>';
+                . '</tr></thead><tbody>' . $advRows . '</tbody></table></details>';
         }
 
         return '<div class="section">'
@@ -229,7 +272,7 @@ final class HtmlReporter
             . $hdr
             . '<table style="width:100%;border-collapse:collapse;margin-top:8px">'
             . '<thead><tr><th>Package</th><th>Installed</th><th>Status</th><th>Advisories</th><th>Highest Severity</th><th>Min Fixed</th></tr></thead>'
-            . '<tbody>'.$rows.'</tbody></table>'
+            . '<tbody>' . $rows . '</tbody></table>'
             . $details
             . '</div>';
     }

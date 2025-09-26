@@ -146,6 +146,7 @@ HELP;
             $ctx  = new Context(getcwd(), '', ['url' => $url]);
             $pack = RulePackLoader::loadExternalMagento();
 
+            $detectConfidence = (int)$det['confidence'];
             // --rules filter (optional)
             $requestedIds = [];
             if ($rulesOpt !== '') {
@@ -186,10 +187,26 @@ HELP;
             $result['meta']['standard']     = $standard;
             $result['meta']['rules_filter'] = $requestedIds;
             $result['summary']['path']      = 'URL: ' . $url;
-
+            // detection meta (đưa ra HTML/JSON/CLI)
+            $result['meta']['detected'] = [
+                'platform'   => 'magento2',
+                'confidence' => $detectConfidence,
+                'signals'    => $det['signals'] ?? [],
+            ];
             $projectPath = 'URL: ' . $url;
             // No CVE in URL mode
             $result['cve_audit'] = null;
+            // Tính overall confidence dựa trên meta từ runner (transport & coverage)
+            $transportOk     = (int)($result['meta']['transport_ok'] ?? 0);
+            $transportTotal  = (int)($result['meta']['transport_total'] ?? 0);
+            $transportPct    = $transportTotal > 0 ? (int)floor(100 * $transportOk / $transportTotal) : 0;
+            $plannedRules    = (int)($result['meta']['planned_rules'] ?? count($pack['rules']));
+            $executedRules   = (int)($result['meta']['executed_rules'] ?? 0);
+            $coveragePct     = $plannedRules > 0 ? (int)floor(100 * $executedRules / $plannedRules) : 0;
+            $overallConf     = (int)round(0.5 * $detectConfidence + 0.3 * $transportPct + 0.2 * $coveragePct);
+            $result['meta']['transport_success_percent'] = $transportPct;
+            $result['meta']['coverage_percent']          = $coveragePct;
+            $result['meta']['overall_confidence']        = $overallConf;
 
             // 3) Write output (reuse existing templating)
             // ---------- Pretty console output (mimic sample) ----------
@@ -415,6 +432,29 @@ HELP;
         $standard = (string)($result['meta']['standard'] ?? 'magebean');
         $out->writeln(sprintf('Standard: <info>%s</info>', strtoupper($standard)));
         $out->writeln(sprintf('Time: <comment>%s</comment>   PHP: <info>%s</info>   Env: %s', date('Y-m-d H:i'), $phpShort, $envTag($env)));
+        if ($isExternal) {
+            $det = $result['meta']['detected'] ?? [];
+            $detConf = (int)($det['confidence'] ?? 0);
+            $signals = (array)($det['signals'] ?? []);
+            $overall = (int)($result['meta']['overall_confidence'] ?? 0);
+            $tPct    = (int)($result['meta']['transport_success_percent'] ?? 0);
+            $cPct    = (int)($result['meta']['coverage_percent'] ?? 0);
+            $planned = (int)($result['meta']['planned_rules'] ?? 0);
+            $execd   = (int)($result['meta']['executed_rules'] ?? 0);
+            $out->writeln(sprintf('Detected: <info>Magento 2</info> (confidence <comment>%d%%</comment>)', $detConf));
+            $out->writeln(sprintf('Scan confidence: <info>%d%%</info> (detect %d, transport %d, coverage %d)', $overall, $detConf, $tPct, $cPct));
+            if ($planned > 0) {
+                $out->writeln(sprintf('Coverage: <info>%d/%d</info> rules (%d%%)', $execd, $planned, $cPct));
+            }
+            if (!empty($signals)) {
+                $out->writeln('Signals:');
+                foreach (array_slice($signals, 0, 6) as $s) {
+                    $out->writeln('  - ' . $s);
+                }
+                if (count($signals) > 6) $out->writeln('  - …');
+            }
+            $out->writeln('');
+        }
         $out->writeln('');
 
         // Findings

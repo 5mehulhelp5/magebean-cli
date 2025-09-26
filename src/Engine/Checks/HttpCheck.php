@@ -9,10 +9,14 @@ use Magebean\Engine\Context;
 final class HttpCheck
 {
     private Context $ctx;
+    private int $transportOk = 0;
+    private int $transportTotal = 0;
+
     public function __construct(Context $ctx)
     {
         $this->ctx = $ctx;
     }
+
     public function stub(array $args): array
     {
         return [true, 'HttpCheck stub PASS'];
@@ -35,12 +39,26 @@ final class HttpCheck
         };
     }
 
+    public function getTransportCounts(): array
+    {
+        return [
+            'ok'    => $this->transportOk,
+            'total' => $this->transportTotal,
+        ];
+    }
+
     private function baseUrl(): string
     {
         $u = (string)$this->ctx->get('url', '');
         if ($u === '') return '';
         if (!preg_match('~^https?://~i', $u)) return '';
         return rtrim($u, '/');
+    }
+
+    private function bump(bool $ok): void
+    {
+        $this->transportTotal++;
+        if ($ok) $this->transportOk++;
     }
 
     private function fetch(string $url, string $method = 'GET', array $headers = [], int $timeoutMs = 8000, bool $follow = true): array
@@ -63,6 +81,7 @@ final class HttpCheck
             if ($resp === false) {
                 $err = curl_error($ch);
                 curl_close($ch);
+                $this->bump(false);
                 return [false, 'HTTP error: ' . $err, ['url' => $url]];
             }
             $status = curl_getinfo($ch, CURLINFO_RESPONSE_CODE);
@@ -71,6 +90,7 @@ final class HttpCheck
             $body = substr((string)$resp, (int)$hdrSize);
             $finalUrl = curl_getinfo($ch, CURLINFO_EFFECTIVE_URL);
             curl_close($ch);
+            $this->bump(false);
             $headersAssoc = $this->parseHeaders($hdrRaw);
             return [true, '', ['status' => $status, 'headers' => $headersAssoc, 'body' => $body, 'final_url' => $finalUrl]];
         }
@@ -80,7 +100,7 @@ final class HttpCheck
                 'method' => $method,
                 'header' => implode("\r\n", $ctxHeaders),
                 'ignore_errors' => true,
-                'timeout' => max(1, (int)ceil($timeoutMs/1000)),
+                'timeout' => max(1, (int)ceil($timeoutMs / 1000)),
             ]
         ];
         $context = stream_context_create($opts);
@@ -91,7 +111,8 @@ final class HttpCheck
             $hdrs = $this->parseHeaders(implode("\r\n", $http_response_header));
             if (preg_match('~HTTP/\S+\s+(\d{3})~', $http_response_header[0] ?? '', $m)) $status = (int)$m[1];
         }
-        if ($body === false) return [false, 'HTTP error (stream)', ['url' => $url]];
+        if ($body === false) { $this->bump(false); return [false, 'HTTP error (stream)', ['url' => $url]]; }
+        $this->bump(true);
         return [true, '', ['status' => $status, 'headers' => $hdrs, 'body' => $body, 'final_url' => $url]];
     }
 
@@ -117,7 +138,7 @@ final class HttpCheck
         if (!$ok) return [false, $msg, $ev];
         $status = (int)($ev['status'] ?? 0);
         $final  = (string)($ev['final_url'] ?? '');
-        $isRedirected = in_array($status, [301,302,307,308], true) && str_starts_with(strtolower($final), 'https://');
+        $isRedirected = in_array($status, [301, 302, 307, 308], true) && str_starts_with(strtolower($final), 'https://');
         return [$isRedirected, $isRedirected ? 'HTTP redirected to HTTPS' : 'No HTTP→HTTPS redirect', $ev];
     }
 
@@ -157,14 +178,20 @@ final class HttpCheck
         $headers = (array)($ev['headers'] ?? []);
         $cookies = [];
         foreach ($headers as $k => $v) {
-            if (strtolower($k) === 'set-cookie') { $cookies = is_array($v) ? $v : [$v]; break; }
+            if (strtolower($k) === 'set-cookie') {
+                $cookies = is_array($v) ? $v : [$v];
+                break;
+            }
         }
         if (!$cookies) return [true, 'No cookies observed', []];
         $allOk = true;
         foreach ($cookies as $cookie) {
             $flags = strtolower((string)$cookie);
             $okf = str_contains($flags, 'secure') && str_contains($flags, 'httponly') && (str_contains($flags, 'samesite=lax') || str_contains($flags, 'samesite=strict'));
-            if (!$okf) { $allOk = false; break; }
+            if (!$okf) {
+                $allOk = false;
+                break;
+            }
         }
         return [$allOk, $allOk ? 'Cookies have Secure/HttpOnly/SameSite' : 'Cookies missing security flags', []];
     }
@@ -173,7 +200,7 @@ final class HttpCheck
     {
         $base = $this->baseUrl();
         if ($base === '') return [false, 'Missing URL in context'];
-        $paths = $args['paths'] ?? ['/media/','/static/','/errors/','/var/'];
+        $paths = $args['paths'] ?? ['/media/', '/static/', '/errors/', '/var/'];
         foreach ($paths as $p) {
             [$ok, $msg, $ev] = $this->fetch($base . $p, 'GET', [], (int)($args['timeout_ms'] ?? 8000), false);
             if (!$ok) continue;
@@ -189,7 +216,7 @@ final class HttpCheck
     {
         $base = $this->baseUrl();
         if ($base === '') return [false, 'Missing URL in context'];
-        $paths = $args['paths'] ?? ['/.git/HEAD','/.env','/phpinfo.php','/composer.lock~','/dump.sql','/backup.zip'];
+        $paths = $args['paths'] ?? ['/.git/HEAD', '/.env', '/phpinfo.php', '/composer.lock~', '/dump.sql', '/backup.zip'];
         foreach ($paths as $p) {
             [$ok, $msg, $ev] = $this->fetch($base . $p, 'GET', [], (int)($args['timeout_ms'] ?? 8000), false);
             if (!$ok) continue;
@@ -226,9 +253,9 @@ final class HttpCheck
     {
         $base = $this->baseUrl();
         if ($base === '') return [false, 'Missing URL in context'];
-        $candidates = $args['paths'] ?? ['/admin/','/backend/','/index.php/admin/'];
+        $candidates = $args['paths'] ?? ['/admin/', '/backend/', '/index.php/admin/'];
         foreach ($candidates as $p) {
-            [$ok, $msg, $ev] = $this->fetch($base . rtrim($p,'/').'/', 'GET', [], (int)($args['timeout_ms'] ?? 8000), false);
+            [$ok, $msg, $ev] = $this->fetch($base . rtrim($p, '/') . '/', 'GET', [], (int)($args['timeout_ms'] ?? 8000), false);
             if (!$ok) continue;
             $status = (int)($ev['status'] ?? 0);
             $b = strtolower((string)($ev['body'] ?? ''));
