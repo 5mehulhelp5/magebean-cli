@@ -639,79 +639,17 @@ final class HttpCheck
         $host = (string)parse_url($base, PHP_URL_HOST);
         if ($host === '') return [null, '[UNKNOWN] Invalid host', []];
 
-        $timeout = (int)($args['timeout_s'] ?? 5);
-
-        // Map các phiên bản legacy cần kiểm tra
-        $attempts = [
-            'tls1.0' => defined('STREAM_CRYPTO_METHOD_TLSv1_0_CLIENT') ? STREAM_CRYPTO_METHOD_TLSv1_0_CLIENT : null,
-            'tls1.1' => defined('STREAM_CRYPTO_METHOD_TLSv1_1_CLIENT') ? STREAM_CRYPTO_METHOD_TLSv1_1_CLIENT : null,
-        ];
-
-        $results = [];
-        $supportedLegacy = false;
-        $anyAttempted = false;
-
-        foreach ($attempts as $label => $method) {
-            if ($method === null) {
-                $results[$label] = 'unsupported';
-                continue;
-            }
-            $anyAttempted = true;
-
-            // TCP connect trước, rồi chủ động handshake đúng version bằng stream_socket_enable_crypto
-            $ctx = stream_context_create([
-                'ssl' => [
-                    'SNI_enabled'       => true,
-                    'peer_name'         => $host,  // SNI cho đúng hostname
-                    'verify_peer'       => false,  // không cần verify cert cho probe version
-                    'verify_peer_name'  => false,
-                ]
-            ]);
-
-            $sock = @stream_socket_client("tcp://{$host}:443", $errno, $errstr, max(1, $timeout), STREAM_CLIENT_CONNECT, $ctx);
-            if (!is_resource($sock)) {
-                $results[$label] = 'connect-failed';
-                continue;
-            }
-
-            stream_set_blocking($sock, true);
-
-            // Ép handshake cụ thể TLS1.0 / TLS1.1
-            $enabled = @stream_socket_enable_crypto($sock, true, $method);
-            if ($enabled === 0) {
-                // Thúc đẩy handshake bằng 1 request nhỏ
-                @fwrite($sock, "GET / HTTP/1.0\r\nHost: {$host}\r\n\r\n");
-                $enabled = @stream_socket_enable_crypto($sock, true, $method);
-            }
-
-            if ($enabled === true) {
-                // Handshake OK với TLS cũ => server vẫn chấp nhận legacy
-                $supportedLegacy = true;
-                $results[$label] = 'handshake-ok';
-            } elseif ($enabled === false) {
-                $results[$label] = 'handshake-failed';
-            } else {
-                // Vẫn 0 (rất hiếm): coi như không xác định
-                $results[$label] = 'indeterminate';
-            }
-
-            @fclose($sock);
+        $probe = $this->probeTlsWithNmap($host, (int)($args['timeout_s'] ?? 10));
+        if (empty($probe['ok'])) {
+            return [null, '[UNKNOWN] TLS probing requires nmap', ['host' => $host, 'err' => $probe['err'] ?? '']];
         }
 
-        if (!$anyAttempted) {
-            return [null, '[UNKNOWN] TLS probing not supported on this PHP build', [
-                'host'     => $host,
-                'attempts' => $results
-            ]];
-        }
+        $legacy = (array)$probe['legacy'];
+        $hasLegacy = !empty($legacy['tls1.0']) || !empty($legacy['tls1.1']);
+        $pass = !$hasLegacy;
+        $msg  = $pass ? 'TLS < 1.2 disabled (nmap)' : 'Legacy TLS (1.0/1.1) still accepted (nmap)';
 
-        $pass = !$supportedLegacy; // PASS khi KHÔNG chấp nhận TLS1.0/1.1
-        $msg  = $pass ? 'TLS < 1.2 disabled' : 'Legacy TLS still accepted';
-
-        return [$pass, $msg, [
-            'host'     => $host,
-            'attempts' => $results
-        ]];
+        return [$pass, $msg, ['host' => $host, 'legacy' => $legacy]];
     }
 
 
@@ -1058,42 +996,91 @@ final class HttpCheck
     {
         $base = $this->baseUrl();
         if ($base === '') return [null, '[UNKNOWN] Missing URL in context', []];
+
         [$ok, $msg, $ev] = $this->fetch($base, 'GET', [], 8000, true);
         if ($ok === null) return [null, $msg, $ev];
         if (!$ok) return [null, '[UNKNOWN] Unable to fetch homepage', $ev];
 
-        $body = (string)($ev['body'] ?? '');
-        $domains = [
-            'checkout.stripe.com',
-            'stripe.com',
-            'braintreepayments.com',
-            'paypal.com',
-            'adyen.com',
-            'adyenpayments.com',
-            'squareup.com'
-        ];
-        $hosts = [];
-        foreach ($domains as $d) {
-            if (stripos($body, $d) !== false) $hosts[] = $d;
-        }
-        if (!$hosts) return [null, '[UNKNOWN] No payment endpoints detected', []];
+        $html = (string)($ev['body'] ?? '');
+        $origin = (string)parse_url($base, PHP_URL_HOST);
 
-        $tested = 0;
-        $weak = [];
-        foreach (array_unique($hosts) as $h) {
-            $tested++;
-            $const = defined('STREAM_CRYPTO_METHOD_TLSv1_0_CLIENT') ? STREAM_CRYPTO_METHOD_TLSv1_0_CLIENT : 0;
-            if ($const === 0) continue;
-            $context = stream_context_create(['ssl' => ['crypto_method' => $const, 'SNI_enabled' => true]]);
-            $c = @stream_socket_client("ssl://{$h}:443", $errno, $errstr, 5, STREAM_CLIENT_CONNECT, $context);
-            if ($c) {
-                $weak[] = $h;
-                @fclose($c);
+        $hosts = [];
+        if (preg_match_all('#https?://([a-z0-9\.\-]+)(?:[:/][^\s"\'<]*)?#i', $html, $m)) {
+            foreach ($m[1] as $h) {
+                $h = strtolower($h);
+                if ($h !== strtolower($origin)) $hosts[] = $h;
             }
         }
-        if ($tested === 0) return [null, '[UNKNOWN] TLS probing not supported', []];
+        $hosts = array_values(array_unique($hosts));
+        if (empty($hosts)) return [true, 'No third-party endpoints to audit for TLS', []];
+
+        // Yêu cầu có nmap
+        $which = @trim((string)@shell_exec('command -v nmap 2>/dev/null'));
+        if ($which === '') {
+            return [null, '[UNKNOWN] TLS probing third-parties requires nmap', ['hosts' => $hosts]];
+        }
+
+        $weak = [];
+        $evidences = [];
+        foreach ($hosts as $h) {
+            $probe = $this->probeTlsWithNmap($h, (int)($args['timeout_s'] ?? 10));
+            if (empty($probe['ok'])) {
+                $evidences[$h] = ['err' => $probe['err'] ?? 'n/a'];
+                continue;
+            }
+            $legacy = (array)$probe['legacy'];
+            $evidences[$h] = $legacy;
+            if (!empty($legacy['tls1.0']) || !empty($legacy['tls1.1'])) $weak[] = $h;
+        }
+
+        if (empty($evidences)) return [null, '[UNKNOWN] No evidence collected', ['hosts' => $hosts]];
 
         $pass = empty($weak);
-        return [$pass, $pass ? 'Payment endpoints enforce TLS ≥ 1.2' : ('Legacy TLS accepted by: ' . implode(', ', array_unique($weak))), []];
+        $msg  = $pass ? 'Payment/3rd-party endpoints enforce TLS ≥ 1.2' : ('Legacy TLS accepted by: ' . implode(', ', $weak));
+        return [$pass, $msg, ['hosts_checked' => $evidences]];
+    }
+
+    private function probeTlsWithNmap(string $host, int $timeout = 10): array
+    {
+        $host = trim($host); 
+        if ($host === '') return ['ok' => false, 'err' => 'empty host'];
+
+        $which = @trim((string)@shell_exec('command -v nmap 2>/dev/null'));
+        if ($which === '') return ['ok' => false, 'err' => 'nmap not found'];
+
+        $cmd = sprintf(
+            '%s --script ssl-enum-ciphers -p 443 %s 2>&1',
+            escapeshellcmd($which),
+            escapeshellarg($host)
+        );
+        $out = @shell_exec($cmd);
+        if ($out === null || $out === '') return ['ok' => false, 'err' => 'empty nmap output'];
+
+        
+
+        // Helper: rút block cho 1 version, rồi xác định có cipher thật không
+        $hasLegacy = function (string $out, string $verRegex): bool {
+            // Lấy block từ "TLSvX.Y:" đến ngay trước dòng bắt đầu bằng "|   TLS" kế tiếp hoặc hết file
+            if (!preg_match('/' . $verRegex . ':(.*?)(?:(?:\r?\n)\|\s*TLS|$)/si', $out, $m)) {
+                // Không có section => coi như tắt version này
+                return false;
+            }
+            $blk = $m[1];
+
+            // Nếu block chứa câu "No supported ciphers found" -> không legacy
+            if (stripos($blk, 'No supported ciphers found') !== false) return false;
+
+            // Có cipher thực khi thấy "ciphers:" hoặc ít nhất một dòng cipher bắt đầu bằng "|       TLS_"
+            if (preg_match('/\|\s*ciphers\s*:/i', $blk)) return true;
+            if (preg_match('/\|\s+TLS[_A-Z0-9\-]+/i', $blk)) return true;
+
+            // Nếu block hoàn toàn rỗng/không có chỉ dấu cipher -> không coi là legacy
+            return false;
+        };
+
+        $has10 = $hasLegacy($out, 'TLSv?1\\.0');
+        $has11 = $hasLegacy($out, 'TLSv?1\\.1');
+
+        return ['ok' => true, 'legacy' => ['tls1.0' => $has10, 'tls1.1' => $has11], 'raw' => $out];
     }
 }

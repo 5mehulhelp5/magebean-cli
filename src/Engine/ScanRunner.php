@@ -202,7 +202,6 @@ final class ScanRunner
         ];
     }
 
-
     private function evalCheck(
         string $name,
         array $args,
@@ -216,6 +215,17 @@ final class ScanRunner
         GitHistoryCheck $git
     ): array {
         $path = $this->ctx->path;
+
+        // 1) Đưa tất cả http_* về HttpCheck->dispatch()
+        if ($name === 'http_header') {
+            // backwards-compat nếu còn dùng stub này
+            return $http->stub($args);
+        }
+        if (str_starts_with($name, 'http_')) {
+            return $http->dispatch($name, $args);
+        }
+
+        // 2) Các check non-HTTP giữ nguyên như cũ
         return match ($name) {
             // Filesystem
             'fs_no_world_writable' => $fs->noWorldWritable($args),
@@ -224,58 +234,43 @@ final class ScanRunner
             'code_dirs_readonly'   => $fs->codeDirsReadonly($args),
             'no_directory_listing' => $fs->noDirectoryListing($args),
             'fs_exists'            => $fs->fsExists($args),
-            'fs_mtime_max_age' => $fs->mtimeMaxAge($args),
+            'fs_mtime_max_age'     => $fs->mtimeMaxAge($args),
 
-            // PhpConfig
+            // PhpConfig (gom nhóm)
             'php_array_exists',
             'php_array_eq',
             'php_array_neq',
             'php_array_numeric_compare',
             'php_array_absent' => $phpc->dispatch($name, $args),
 
-            'composer_audit' => $comp->stub($args),
-            'magento_config' => $mage->stub($args),
-            'http_header'    => $http->stub($args),
+            // Composer / Magento / Code / Web / Git
+            'composer_audit'                      => $comp->stub($args),
+            'magento_config'                      => $mage->stub($args),
+            'code_grep'                           => $code->grep($args),
+            'nginx_directive'                     => $web->nginxDirective($args),
+            'apache_htaccess_directive'           => $web->apacheDirective($args),
+            'composer_audit_offline'              => $comp->auditOffline($args),
+            'composer_core_advisories_offline'    => $comp->coreAdvisoriesOffline($args),
+            'composer_fix_version'                => $comp->fixVersion($args),
+            'composer_risk_surface_tag'           => $comp->riskSurfaceTag($args),
+            'composer_match_list'                 => $comp->matchList($args),
+            'composer_constraints_conflict'       => $comp->constraintsConflict($args),
+            'composer_yanked_offline'             => $comp->yankedOffline($args),
+            'composer_outdated_offline'           => $comp->outdatedOffline($args),
+            'composer_advisory_latency'           => $comp->advisoryLatency($args),
+            'composer_vendor_support_offline'     => $comp->vendorSupportOffline($args),
+            'composer_abandoned_offline'          => $comp->abandonedOffline($args),
+            'composer_release_recency_offline'    => $comp->releaseRecencyOffline($args),
+            'composer_repo_archived_offline'      => $comp->repoArchivedOffline($args),
+            'composer_risky_fork_offline'         => $comp->riskyForkOffline($args),
+            'composer_json_constraints'           => $comp->jsonConstraints($path),
+            'composer_json_kv'                    => $comp->jsonKv($args),
+            'composer_lock_integrity'             => $comp->lockIntegrity($args),
+            'php_array_key_search'                => $phpc->keySearch($args),
+            'git_history_scan'                    => $git->secretScan($args),
 
-            'code_grep' => $code->grep($args),
-
-            'nginx_directive'            => $web->nginxDirective($args),
-            'apache_htaccess_directive'  => $web->apacheDirective($args),
-
-            'composer_audit_offline'         => $comp->auditOffline($args),
-            'composer_core_advisories_offline' => $comp->coreAdvisoriesOffline($args),
-            'composer_fix_version'           => $comp->fixVersion($args),
-            'composer_risk_surface_tag'      => $comp->riskSurfaceTag($args),
-            'composer_match_list'            => $comp->matchList($args),
-            'composer_constraints_conflict'  => $comp->constraintsConflict($args),
-            'composer_yanked_offline'        => $comp->yankedOffline($args),
-            'composer_outdated_offline'      => $comp->outdatedOffline($args),
-            'composer_advisory_latency'      => $comp->advisoryLatency($args),
-            'composer_vendor_support_offline' => $comp->vendorSupportOffline($args),
-            'composer_abandoned_offline'        => $comp->abandonedOffline($args),
-            'composer_release_recency_offline'  => $comp->releaseRecencyOffline($args),
-            'composer_repo_archived_offline'    => $comp->repoArchivedOffline($args),
-            'composer_risky_fork_offline'       => $comp->riskyForkOffline($args),
-            'composer_json_constraints' => $comp->jsonConstraints($path),
-            'composer_json_kv'          => $comp->jsonKv($args),
-            'composer_lock_integrity'   => $comp->lockIntegrity($args),
-
-            'php_array_key_search' => $phpc->keySearch($args),
-            'git_history_scan'     => $git->secretScan($args),
-
-            // HTTP (external-url) checks
-            'http_force_https_redirect'   => $http->dispatch($name, $args),
-            'http_has_hsts'               => $http->dispatch($name, $args),
-            'http_no_mixed_content'       => $http->dispatch($name, $args),
-            'http_cookie_flags'           => $http->dispatch($name, $args),
-            'http_no_directory_listing'   => $http->dispatch($name, $args),
-            'http_no_public_artifacts'    => $http->dispatch($name, $args),
-            'http_no_stacktrace'          => $http->dispatch($name, $args),
-            'http_no_xdebug_headers'      => $http->dispatch($name, $args),
-            'http_admin_path_heuristics'  => $http->dispatch($name, $args),
-            'http_magento_fingerprint'    => $http->dispatch($name, $args),
-
-            default => [false, 'Unknown check: ' . $name],
+            // 3) Unknown → trả UNKNOWN (null) thay vì false để khỏi “đè” rule thành FAIL
+            default => [null, '[UNKNOWN] Unknown check: ' . $name, []],
         };
     }
 
