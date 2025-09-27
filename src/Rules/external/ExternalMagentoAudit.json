@@ -8,11 +8,16 @@
       "severity": "high",
       "op": "all",
       "checks": [
-        { "name": "http_force_https_redirect", "args": { "timeout_ms": 8000 } }
+        {
+          "name": "http_force_https_redirect",
+          "args": {
+            "timeout_ms": 8000
+          }
+        }
       ],
       "messages": {
         "pass": "HTTP redirects to HTTPS.",
-        "fail": "No HTTP→HTTPS redirect detected."
+        "fail": "No HTTP\u2192HTTPS redirect detected."
       }
     },
     {
@@ -22,7 +27,13 @@
       "severity": "medium",
       "op": "all",
       "checks": [
-        { "name": "http_has_hsts", "args": { "min_max_age": 15552000, "timeout_ms": 8000 } }
+        {
+          "name": "http_has_hsts",
+          "args": {
+            "min_max_age": 15552000,
+            "timeout_ms": 8000
+          }
+        }
       ],
       "messages": {
         "pass": "HSTS configured.",
@@ -36,7 +47,12 @@
       "severity": "medium",
       "op": "all",
       "checks": [
-        { "name": "http_no_mixed_content", "args": { "timeout_ms": 8000 } }
+        {
+          "name": "http_no_mixed_content",
+          "args": {
+            "timeout_ms": 8000
+          }
+        }
       ],
       "messages": {
         "pass": "No mixed content.",
@@ -50,7 +66,12 @@
       "severity": "high",
       "op": "all",
       "checks": [
-        { "name": "http_cookie_flags", "args": { "timeout_ms": 8000 } }
+        {
+          "name": "http_cookie_flags",
+          "args": {
+            "timeout_ms": 8000
+          }
+        }
       ],
       "messages": {
         "pass": "Cookies set with security flags.",
@@ -66,7 +87,15 @@
       "checks": [
         {
           "name": "http_no_directory_listing",
-          "args": { "paths": ["/media/", "/static/", "/errors/", "/var/"], "timeout_ms": 8000 }
+          "args": {
+            "paths": [
+              "/media/",
+              "/static/",
+              "/errors/",
+              "/var/"
+            ],
+            "timeout_ms": 8000
+          }
         }
       ],
       "messages": {
@@ -84,7 +113,14 @@
         {
           "name": "http_no_public_artifacts",
           "args": {
-            "paths": ["/.git/HEAD", "/.env", "/phpinfo.php", "/composer.lock~", "/dump.sql", "/backup.zip"],
+            "paths": [
+              "/.git/HEAD",
+              "/.env",
+              "/phpinfo.php",
+              "/composer.lock~",
+              "/dump.sql",
+              "/backup.zip"
+            ],
             "timeout_ms": 8000
           }
         }
@@ -101,7 +137,12 @@
       "severity": "medium",
       "op": "all",
       "checks": [
-        { "name": "http_no_xdebug_headers", "args": { "timeout_ms": 8000 } }
+        {
+          "name": "http_no_xdebug_headers",
+          "args": {
+            "timeout_ms": 8000
+          }
+        }
       ],
       "messages": {
         "pass": "No debug headers.",
@@ -115,7 +156,12 @@
       "severity": "high",
       "op": "all",
       "checks": [
-        { "name": "http_no_stacktrace", "args": { "timeout_ms": 8000 } }
+        {
+          "name": "http_no_stacktrace",
+          "args": {
+            "timeout_ms": 8000
+          }
+        }
       ],
       "messages": {
         "pass": "No error traces visible.",
@@ -131,7 +177,14 @@
       "checks": [
         {
           "name": "http_admin_path_heuristics",
-          "args": { "paths": ["/admin/", "/backend/", "/index.php/admin/"], "timeout_ms": 8000 }
+          "args": {
+            "paths": [
+              "/admin/",
+              "/backend/",
+              "/index.php/admin/"
+            ],
+            "timeout_ms": 8000
+          }
         }
       ],
       "messages": {
@@ -146,11 +199,638 @@
       "severity": "low",
       "op": "all",
       "checks": [
-        { "name": "http_magento_fingerprint", "args": { "timeout_ms": 8000 } }
+        {
+          "name": "http_magento_fingerprint",
+          "args": {
+            "timeout_ms": 8000
+          }
+        }
       ],
       "messages": {
         "pass": "Magento fingerprint detected.",
         "fail": "No Magento fingerprint found (informational)."
+      }
+    },
+    {
+      "id": "MB-R028",
+      "title": "Disallow legacy TLS (\u2265 1.2 only)",
+      "control": "MB-C04",
+      "severity": "high",
+      "op": "all",
+      "checks": [
+        {
+          "name": "http_tls_min_version",
+          "args": {
+            "timeout_ms": 8000
+          }
+        }
+      ],
+      "messages": {
+        "pass": "TLS < 1.2 disabled.",
+        "fail": "Legacy TLS versions still accepted."
+      }
+    },
+    {
+      "id": "MB-R035",
+      "title": "Static assets deployed/versioned",
+      "control": "MB-C05",
+      "severity": "medium",
+      "op": "all",
+      "checks": [
+        {
+          "name": "http_static_assets_deployed",
+          "args": {
+            "timeout_ms": 8000
+          }
+        }
+      ],
+      "messages": {
+        "pass": "Static assets signals present.",
+        "fail": "No strong static asset signals."
+      }
+    },
+    {
+      "id": "MB-R037",
+      "title": "Cache/FPC signals present",
+      "control": "MB-C06",
+      "severity": "medium",
+      "op": "all",
+      "checks": [
+        {
+          "name": "http_cache_signals",
+          "args": {
+            "timeout_ms": 8000
+          }
+        }
+      ],
+      "messages": {
+        "pass": "Cache headers/signals detected.",
+        "fail": "No cache/FPC signals."
+      }
+    },
+    {
+      "id": "MB-R038",
+      "title": "Varnish/edge cache configured",
+      "control": "MB-C06",
+      "severity": "medium",
+      "op": "all",
+      "checks": [
+        {
+          "name": "http_cache_signals",
+          "args": {
+            "timeout_ms": 8000
+          }
+        }
+      ],
+      "messages": {
+        "pass": "Edge cache signals present.",
+        "fail": "No Varnish/CDN signals."
+      }
+    },
+    {
+      "id": "MB-R042",
+      "title": "Application logs/reports not exposed",
+      "control": "MB-C07",
+      "severity": "high",
+      "op": "all",
+      "checks": [
+        {
+          "name": "http_logs_protected",
+          "args": {
+            "timeout_ms": 8000
+          }
+        }
+      ],
+      "messages": {
+        "pass": "Logs/report paths not publicly accessible.",
+        "fail": "Log/report path accessible."
+      }
+    },
+    {
+      "id": "MB-R015",
+      "title": "CSRF form_key present on public forms",
+      "control": "MB-C03",
+      "severity": "medium",
+      "op": "all",
+      "checks": [
+        {
+          "name": "http_csrf_form_key_signal",
+          "args": {
+            "timeout_ms": 8000
+          }
+        }
+      ],
+      "messages": {
+        "pass": "form_key signal present.",
+        "fail": "No form_key signal on homepage."
+      }
+    },
+    {
+      "id": "MB-R072",
+      "title": "No VCS or sensitive artifacts exposed",
+      "control": "MB-C12",
+      "severity": "high",
+      "op": "all",
+      "checks": [
+        {
+          "name": "http_no_vcs_misc",
+          "args": {
+            "timeout_ms": 8000
+          }
+        }
+      ],
+      "messages": {
+        "pass": "No VCS/misc artifacts found.",
+        "fail": "Exposed VCS/sensitive artifact."
+      }
+    },
+    {
+      "id": "MB-R073",
+      "title": "Third-party links use HTTPS",
+      "control": "MB-C12",
+      "severity": "high",
+      "op": "all",
+      "checks": [
+        {
+          "name": "http_third_party_links_https",
+          "args": {
+            "timeout_ms": 8000
+          }
+        }
+      ],
+      "messages": {
+        "pass": "External links/forms use HTTPS.",
+        "fail": "Found http:// link to third-party."
+      }
+    },
+    {
+      "id": "MB-R074",
+      "title": "No debug/diagnostic endpoints open",
+      "control": "MB-C12",
+      "severity": "medium",
+      "op": "all",
+      "checks": [
+        {
+          "name": "http_no_debug_endpoints",
+          "args": {
+            "timeout_ms": 8000
+          }
+        }
+      ],
+      "messages": {
+        "pass": "No obvious debug endpoints.",
+        "fail": "Debug/diagnostic path accessible."
+      }
+    },
+    {
+      "id": "MB-R078",
+      "title": "Payment endpoints enforce strong TLS",
+      "control": "MB-C12",
+      "severity": "medium",
+      "op": "all",
+      "checks": [
+        {
+          "name": "http_payment_tls_min",
+          "args": {
+            "timeout_ms": 8000
+          }
+        }
+      ],
+      "messages": {
+        "pass": "Payment endpoints require TLS \u2265 1.2.",
+        "fail": "Some payment endpoints accept legacy TLS."
+      }
+    },
+    {
+      "id": "MBX-R101",
+      "title": "X-Content-Type-Options=nosniff",
+      "control": "MB-C04",
+      "severity": "medium",
+      "op": "all",
+      "checks": [
+        {
+          "name": "http_header_equals",
+          "args": {
+            "header": "x-content-type-options",
+            "equals": "nosniff",
+            "timeout_ms": 8000
+          }
+        }
+      ],
+      "messages": {
+        "pass": "nosniff set.",
+        "fail": "X-Content-Type-Options missing or not nosniff."
+      }
+    },
+    {
+      "id": "MBX-R102",
+      "title": "Clickjacking protection (XFO or CSP)",
+      "control": "MB-C04",
+      "severity": "high",
+      "op": "all",
+      "checks": [
+        {
+          "name": "http_clickjacking_protection",
+          "args": {
+            "timeout_ms": 8000
+          }
+        }
+      ],
+      "messages": {
+        "pass": "Clickjacking protection present.",
+        "fail": "Missing X-Frame-Options and CSP frame-ancestors."
+      }
+    },
+    {
+      "id": "MBX-R103",
+      "title": "Referrer-Policy sane",
+      "control": "MB-C04",
+      "severity": "low",
+      "op": "all",
+      "checks": [
+        {
+          "name": "http_header_in",
+          "args": {
+            "header": "referrer-policy",
+            "allowed": [
+              "strict-origin-when-cross-origin",
+              "no-referrer",
+              "same-origin",
+              "no-referrer-when-downgrade"
+            ],
+            "timeout_ms": 8000
+          }
+        }
+      ],
+      "messages": {
+        "pass": "Referrer-Policy acceptable.",
+        "fail": "Referrer-Policy missing or not acceptable."
+      }
+    },
+    {
+      "id": "MBX-R104",
+      "title": "Permissions-Policy minimal",
+      "control": "MB-C04",
+      "severity": "low",
+      "op": "all",
+      "checks": [
+        {
+          "name": "http_header_absent",
+          "args": {
+            "header": "feature-policy",
+            "timeout_ms": 8000
+          }
+        },
+        {
+          "name": "http_header_absent",
+          "args": {
+            "header": "x-permitted-cross-domain-policies",
+            "timeout_ms": 8000
+          }
+        }
+      ],
+      "messages": {
+        "pass": "Legacy Feature-Policy header absent.",
+        "fail": "Legacy Feature-Policy present."
+      }
+    },
+    {
+      "id": "MBX-R105",
+      "title": "X-Permitted-Cross-Domain-Policies: none",
+      "control": "MB-C04",
+      "severity": "low",
+      "op": "all",
+      "checks": [
+        {
+          "name": "http_header_equals",
+          "args": {
+            "header": "x-permitted-cross-domain-policies",
+            "equals": "none",
+            "timeout_ms": 8000
+          }
+        }
+      ],
+      "messages": {
+        "pass": "X-Permitted-Cross-Domain-Policies=none",
+        "fail": "Header missing or not none."
+      }
+    },
+    {
+      "id": "MBX-R110",
+      "title": "CSP present",
+      "control": "MB-C04",
+      "severity": "medium",
+      "op": "all",
+      "checks": [
+        {
+          "name": "http_csp_present_min",
+          "args": {
+            "timeout_ms": 8000
+          }
+        }
+      ],
+      "messages": {
+        "pass": "CSP present.",
+        "fail": "CSP header absent."
+      }
+    },
+    {
+      "id": "MBX-R111",
+      "title": "CSP not overly permissive",
+      "control": "MB-C04",
+      "severity": "low",
+      "op": "all",
+      "checks": [
+        {
+          "name": "http_csp_not_overly_permissive",
+          "args": {
+            "timeout_ms": 8000
+          }
+        }
+      ],
+      "messages": {
+        "pass": "CSP looks reasonable.",
+        "fail": "CSP overly permissive."
+      }
+    },
+    {
+      "id": "MBX-R112",
+      "title": "No CORS wildcard with credentials",
+      "control": "MB-C04",
+      "severity": "medium",
+      "op": "all",
+      "checks": [
+        {
+          "name": "http_cors_no_wildcard_with_credentials",
+          "args": {
+            "timeout_ms": 8000
+          }
+        }
+      ],
+      "messages": {
+        "pass": "CORS configuration ok.",
+        "fail": "ACAO '*' with credentials=true."
+      }
+    },
+    {
+      "id": "MBX-R113",
+      "title": "CORS preflight not overly permissive",
+      "control": "MB-C04",
+      "severity": "low",
+      "op": "all",
+      "checks": [
+        {
+          "name": "http_cors_preflight_safe",
+          "args": {
+            "timeout_ms": 8000
+          }
+        }
+      ],
+      "messages": {
+        "pass": "OPTIONS looks safe.",
+        "fail": "Preflight allows wildcard methods."
+      }
+    },
+    {
+      "id": "MBX-R120",
+      "title": "TLS certificate not expiring soon",
+      "control": "MB-C04",
+      "severity": "low",
+      "op": "all",
+      "checks": [
+        {
+          "name": "http_tls_cert_days_left",
+          "args": {
+            "min_days": 15,
+            "timeout_ms": 8000
+          }
+        }
+      ],
+      "messages": {
+        "pass": "Cert validity ok.",
+        "fail": "Certificate will expire soon."
+      }
+    },
+    {
+      "id": "MBX-R121",
+      "title": "HSTS preload-ready",
+      "control": "MB-C04",
+      "severity": "low",
+      "op": "all",
+      "checks": [
+        {
+          "name": "http_hsts_preload_ready",
+          "args": {
+            "min_max_age": 31536000,
+            "timeout_ms": 8000
+          }
+        }
+      ],
+      "messages": {
+        "pass": "HSTS preload-ready.",
+        "fail": "Not preload-ready (max-age/subdomains/preload)."
+      }
+    },
+    {
+      "id": "MBX-R130",
+      "title": "TRACE disabled",
+      "control": "MB-C04",
+      "severity": "low",
+      "op": "all",
+      "checks": [
+        {
+          "name": "http_method_disallowed",
+          "args": {
+            "method": "TRACE",
+            "timeout_ms": 8000
+          }
+        }
+      ],
+      "messages": {
+        "pass": "TRACE not allowed.",
+        "fail": "TRACE allowed."
+      }
+    },
+    {
+      "id": "MBX-R131",
+      "title": "OPTIONS not verbose",
+      "control": "MB-C04",
+      "severity": "low",
+      "op": "all",
+      "checks": [
+        {
+          "name": "http_options_not_overly_verbose",
+          "args": {
+            "timeout_ms": 8000
+          }
+        }
+      ],
+      "messages": {
+        "pass": "OPTIONS safe.",
+        "fail": "OPTIONS reveals unsafe methods."
+      }
+    },
+    {
+      "id": "MBX-R132",
+      "title": "Server banner not verbose",
+      "control": "MB-C04",
+      "severity": "low",
+      "op": "all",
+      "checks": [
+        {
+          "name": "http_server_banner_not_verbose",
+          "args": {
+            "timeout_ms": 8000
+          }
+        }
+      ],
+      "messages": {
+        "pass": "Server banner ok.",
+        "fail": "Server banner exposes version."
+      }
+    },
+    {
+      "id": "MBX-R133",
+      "title": "No X-Powered-By header",
+      "control": "MB-C04",
+      "severity": "low",
+      "op": "all",
+      "checks": [
+        {
+          "name": "http_header_absent",
+          "args": {
+            "header": "x-powered-by",
+            "timeout_ms": 8000
+          }
+        }
+      ],
+      "messages": {
+        "pass": "X-Powered-By absent.",
+        "fail": "X-Powered-By present."
+      }
+    },
+    {
+      "id": "MBX-R140",
+      "title": "Do not expose X-Magento-Cache-Debug",
+      "control": "MB-C05",
+      "severity": "low",
+      "op": "all",
+      "checks": [
+        {
+          "name": "http_header_absent",
+          "args": {
+            "header": "x-magento-cache-debug",
+            "timeout_ms": 8000
+          }
+        }
+      ],
+      "messages": {
+        "pass": "Debug cache header absent.",
+        "fail": "X-Magento-Cache-Debug present."
+      }
+    },
+    {
+      "id": "MBX-R141",
+      "title": "/setup/ and installer blocked",
+      "control": "MB-C05",
+      "severity": "high",
+      "op": "all",
+      "checks": [
+        {
+          "name": "http_block_path",
+          "args": {
+            "paths": [
+              "/setup/",
+              "/downloader/"
+            ],
+            "allowed_status": [
+              401,
+              403,
+              404,
+              301,
+              302
+            ],
+            "timeout_ms": 8000
+          }
+        }
+      ],
+      "messages": {
+        "pass": "Installer paths blocked.",
+        "fail": "Installer path accessible (200)."
+      }
+    },
+    {
+      "id": "MBX-R142",
+      "title": "GraphQL introspection disabled",
+      "control": "MB-C03",
+      "severity": "low",
+      "op": "all",
+      "checks": [
+        {
+          "name": "http_graphql_introspection_disabled",
+          "args": {
+            "path": "/graphql",
+            "timeout_ms": 8000
+          }
+        }
+      ],
+      "messages": {
+        "pass": "Introspection disabled.",
+        "fail": "Introspection enabled."
+      }
+    },
+    {
+      "id": "MBX-R143",
+      "title": "REST sensitive endpoints not public",
+      "control": "MB-C03",
+      "severity": "medium",
+      "op": "all",
+      "checks": [
+        {
+          "name": "http_rest_sensitive_endpoints_closed",
+          "args": {
+            "paths": [
+              "/rest/V1/customers",
+              "/rest/V1/guest-carts/"
+            ],
+            "timeout_ms": 8000
+          }
+        }
+      ],
+      "messages": {
+        "pass": "Sensitive endpoints closed.",
+        "fail": "Sensitive REST endpoint accessible."
+      }
+    },
+    {
+      "id": "MBX-R144",
+      "title": "Sample/diagnostic pages blocked",
+      "control": "MB-C05",
+      "severity": "low",
+      "op": "all",
+      "checks": [
+        {
+          "name": "http_block_path",
+          "args": {
+            "paths": [
+              "/phpinfo.php",
+              "/readme.html",
+              "/errors/"
+            ],
+            "allowed_status": [
+              401,
+              403,
+              404,
+              301,
+              302
+            ],
+            "timeout_ms": 8000
+          }
+        }
+      ],
+      "messages": {
+        "pass": "Diagnostic pages blocked.",
+        "fail": "Diagnostic page accessible."
       }
     }
   ]

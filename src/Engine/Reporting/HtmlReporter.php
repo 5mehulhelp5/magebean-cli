@@ -70,7 +70,7 @@ final class HtmlReporter
                 . '<td>' . $control . '</td>'
                 . '<td>' . $severity . '</td>'
                 . '<td class="' . $statusClass . '">' . $status . '</td>'
-                . '<td>' . ($userMsg !== '' ? '<div style="color:#333;margin-top:4px">' . $userMsg . '</div>' : '') . '</td>'
+                // . '<td>' . ($userMsg !== '' ? '<div style="color:#333;margin-top:4px">' . $userMsg . '</div>' : '') . '</td>'
                 . '<td>'
                 . ($userMsg !== '' ? '<div style="color:#333;margin-top:4px">'.$userMsg.'</div>' : '')
                 . (
