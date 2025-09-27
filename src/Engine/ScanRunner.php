@@ -152,9 +152,12 @@ final class ScanRunner
             if ($status === 'UNKNOWN' && (!isset($finalMsg) || trim((string)$finalMsg) === '')) {
                 $finalMsg = 'CVE file not found (requires --cve-data package)';
             }
-            // Ước lượng confidence cho finding (dựa trên loại check & evidence gom được)
-            [$conf, $confWhy] = $this->estimateConfidenceForRule((array)($rule['checks'] ?? []), $evidence, (string)$status);
-            $findings[] = [
+            // Xác định chế độ suppress confidence (path-mode: có path, không có url)
+            $hasUrl  = (string)$this->ctx->get('url') !== '';
+            $hasPath = is_string($this->ctx->path ?? null) && $this->ctx->path !== '';
+            $suppressConfidence = ($hasPath && !$hasUrl) || (bool)$this->ctx->get('suppress_confidence');
+
+            $finding = [
                 'id'       => $rule['id'],
                 'title'    => $rule['title'],
                 'control'  => $rule['control'],
@@ -165,9 +168,15 @@ final class ScanRunner
                 'details'  => $details,
                 'details'  => $details,
                 'evidence' => $evidence,
-                'confidence' => $conf,
-                'confidence_reason' => $confWhy
             ];
+
+            // Chỉ gắn confidence khi KHÔNG suppress
+            if (!$suppressConfidence) {
+                [$conf, $confWhy] = $this->estimateConfidenceForRule((array)($rule['checks'] ?? []), $evidence, (string)$status);
+                $finding['confidence'] = $conf;
+                $finding['confidence_reason'] = $confWhy;
+            }
+            $findings[] = $finding;
 
             // Đếm theo status để UNKNOWN không bị tính là failed
             if ($status === 'PASS') {
@@ -197,7 +206,8 @@ final class ScanRunner
                 'planned_rules'  => $plannedRules,
                 'executed_rules' => $executedRules,
                 'transport_ok'   => $transportOk,
-                'transport_total' => $transportTotal
+                'transport_total' => $transportTotal,
+                'suppress_confidence' => $suppressConfidence ?? false
             ]
         ];
     }
@@ -223,6 +233,9 @@ final class ScanRunner
         }
         if (str_starts_with($name, 'http_')) {
             return $http->dispatch($name, $args);
+        }
+        if ($name === 'code_grep' || $name === 'text_grep' || $name === 'file_grep' || $name === 'grep') {
+            return $code->grep($args);
         }
 
         // 2) Các check non-HTTP giữ nguyên như cũ
@@ -278,29 +291,66 @@ final class ScanRunner
     {
         $first = is_array($checks[0] ?? null) ? $checks[0] : [];
         $name  = strtolower((string)($first['name'] ?? ''));
-        $base  = match ($name) {
-            // header/value exact
+        $hasUrl = (string)$this->ctx->get('url') !== '';
+
+        // 1) Base theo nhóm check (online/offline)
+        $base = match ($name) {
+            // HTTP exact header/value
             'http_has_hsts', 'http_cookie_flags',
             'http_header_equals', 'http_header_in' => 95,
-            // redirects / status gating
+
+            // HTTP redirects / status gating
             'http_force_https_redirect', 'http_block_path' => 90,
-            // tls/cert
+
+            // HTTP tls/cert
             'http_tls_min_version', 'http_tls_cert_days_left' => 85,
-            // html/dom content
+
+            // HTTP html/dom content
             'http_no_mixed_content', 'http_no_stacktrace' => 80,
-            // absence / probing
+
+            // HTTP absence / probing
             'http_no_directory_listing', 'http_no_public_artifacts' => 70,
-            // heuristic
+
+            // HTTP heuristic
             'http_admin_path_heuristics', 'http_server_banner_not_verbose' => 60,
+
+            // Offline groups (—path)
+            'code_grep' => 70, // heuristic by design
+            'nginx_directive', 'apache_htaccess_directive' => 85,
+
             default => 75,
         };
 
-        // Nếu UNKNOWN → giảm 20
+        // Bổ sung theo tiền tố cho offline checks chưa liệt kê cụ thể
+        if ($name !== '') {
+            if (str_starts_with($name, 'fs_') || $name === 'no_directory_listing') {
+                $base = max($base, 85);
+            }
+            if (str_starts_with($name, 'composer_')) {
+                $base = max($base, 85);
+            }
+            if (str_starts_with($name, 'php_')) {
+                $base = max($base, 80);
+            }
+            if ($name === 'git_history_scan') {
+                $base = max($base, 80);
+            }
+            if ($name === 'text_grep' || $name === 'file_grep' || $name === 'grep') {
+                $base = max($base, 70);
+            }
+        }
+
+        // 2) Giảm confidence cho http_* nếu đang chạy --path (không có URL)
+        if (!$hasUrl && str_starts_with($name, 'http_')) {
+            $base = max(0, $base - 40);
+        }
+
+        // 3) UNKNOWN → giảm 20
         if (strtoupper($status) === 'UNKNOWN') {
             $base = max(0, $base - 20);
         }
 
-        // Tìm headers trong evidence để dò CDN/WAF → giảm 10
+        // 4) Nếu evidence cho thấy CDN/WAF (server header) → giảm 10
         $hdrs = [];
         if (isset($evidence['headers']) && is_array($evidence['headers'])) {
             $hdrs = array_change_key_case($evidence['headers'], CASE_LOWER);
@@ -321,6 +371,6 @@ final class ScanRunner
         }
 
         $base = max(0, min(100, (int)$base));
-        return [$base, 'Estimated by check type ' . ($name ?: 'n/a') . ($server ? " (server: {$server})" : '')];
+        return [$base, 'Estimated by check type ' . ($name ?: 'n/a') . ($server ? " (server: {$server})" : '') . (!$hasUrl && str_starts_with($name, 'http_') ? ' [path-mode]' : '')];
     }
 }

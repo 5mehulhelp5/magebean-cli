@@ -418,13 +418,40 @@ final class HttpCheck
     {
         $base = $this->baseUrl();
         if ($base === '') return [false, 'Missing URL in context'];
-        [$ok, $msg, $ev] = $this->fetch($base, 'GET', [], (int)($args['timeout_ms'] ?? 8000), false);
-        if ($ok === null) return [null, $msg, $ev];
-        if (!$ok) return [false, $msg, $ev];
-        $b = (string)($ev['body'] ?? '');
-        $has = preg_match('~(Stack trace:|Fatal error:|Warning:\s+|Notice:\s+|in\s+/.+?\.php\s+on\s+line\s+\d+)~i', $b) === 1;
-        return [!$has, $has ? 'Error/stack trace visible on homepage' : 'No error traces observed', []];
+
+        $targets = [];
+        $targets[] = rtrim($base, '/'); // home
+        // 404 thử nghiệm
+        $targets[] = rtrim($base, '/') . '/__mb-not-exist-' . time();
+        // (tuỳ chọn) trang search đơn giản
+        $targets[] = rtrim($base, '/') . '/search?q=test';
+
+        $pattern = '~(Stack trace:|Fatal error:|Uncaught (?:Exception|Error)|'
+            . ' in /[A-Za-z0-9._/\-]+\.php on line \d+|'
+            . ' at /[A-Za-z0-9._/\-]+\.php:\d+|'
+            . '<b>(?:Warning|Notice)</b>:.{0,240} in /[A-Za-z0-9._/\-]+\.php on line \d+)~i';
+
+        foreach ($targets as $u) {
+            [$ok, $msg, $ev] = $this->fetch($u, 'GET', ['Accept: text/html'], (int)($args['timeout_ms'] ?? 8000), true);
+            if ($ok !== true) continue;
+
+            $hdrs = array_change_key_case((array)($ev['headers'] ?? []), CASE_LOWER);
+            $ctype = strtolower($this->hget($hdrs, 'content-type'));
+            if ($ctype && stripos($ctype, 'text/html') === false) continue;
+
+            $body = (string)($ev['body'] ?? '');
+            // Loại trừ trang WAF/challenge
+            $waf = preg_match('~(cloudflare|akamai|fastly|sucuri|incapsula|varnish|attention required|error reference number)~i', substr($body, 0, 8192)) === 1;
+            if ($waf) continue;
+
+            if (preg_match($pattern, $body) === 1) {
+                return [false, 'Error/stack trace visible on pages', ['url' => $u]];
+            }
+        }
+
+        return [true, 'No error traces observed', []];
     }
+
 
     private function noXdebugHeaders(array $args): array
     {
@@ -1042,7 +1069,7 @@ final class HttpCheck
 
     private function probeTlsWithNmap(string $host, int $timeout = 10): array
     {
-        $host = trim($host); 
+        $host = trim($host);
         if ($host === '') return ['ok' => false, 'err' => 'empty host'];
 
         $which = @trim((string)@shell_exec('command -v nmap 2>/dev/null'));
@@ -1056,7 +1083,7 @@ final class HttpCheck
         $out = @shell_exec($cmd);
         if ($out === null || $out === '') return ['ok' => false, 'err' => 'empty nmap output'];
 
-        
+
 
         // Helper: rút block cho 1 version, rồi xác định có cipher thật không
         $hasLegacy = function (string $out, string $verRegex): bool {

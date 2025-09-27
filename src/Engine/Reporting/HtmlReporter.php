@@ -34,6 +34,10 @@ final class HtmlReporter
         $rulesTotal  = (int)($sum['total']  ?? ($rulesPassed + $rulesFailed + $rulesUnknown));
         $rulesPct    = $rulesTotal > 0 ? round(($rulesPassed / $rulesTotal) * 100, 1) : 0.0;
 
+        // Lấy meta & cờ suppress confidence (được set bởi ScanRunner)
+        $meta = (array)($result['meta'] ?? []);
+        $suppressConfidence = (bool)($meta['suppress_confidence'] ?? false);
+
         $sevCounts = ['Critical' => 0, 'High' => 0, 'Medium' => 0, 'Low' => 0];
         $rows = '';
 
@@ -72,12 +76,12 @@ final class HtmlReporter
                 . '<td class="' . $statusClass . '">' . $status . '</td>'
                 // . '<td>' . ($userMsg !== '' ? '<div style="color:#333;margin-top:4px">' . $userMsg . '</div>' : '') . '</td>'
                 . '<td>'
-                . ($userMsg !== '' ? '<div style="color:#333;margin-top:4px">'.$userMsg.'</div>' : '')
+                . ($userMsg !== '' ? '<div style="color:#333;margin-top:4px">' . $userMsg . '</div>' : '')
                 . (
-                    $confVal !== null
-                    ? '<div style="opacity:.8;margin-top:4px"><small'.($confWhy!==''?' title="'.htmlspecialchars($confWhy,ENT_QUOTES,'UTF-8').'"':'').'>confidence: '.$confVal.'%</small></div>'
+                    (!$suppressConfidence && $confVal !== null)
+                    ? '<div style="opacity:.8;margin-top:4px"><small' . ($confWhy !== '' ? ' title="' . htmlspecialchars($confWhy, ENT_QUOTES, 'UTF-8') . '"' : '') . '>confidence: ' . $confVal . '%</small></div>'
                     : ''
-                  )
+                )
                 . '</tr>';
         }
 
@@ -124,7 +128,7 @@ final class HtmlReporter
 
         // --- Confidence section (URL mode) ---
         // Nếu meta đã có các trường confidence do ScanCommand/ScanRunner tính, hiển thị một block gọn.
-        if ($isExternal) {
+        if ($isExternal && !$suppressConfidence) {
             $meta = (array)($result['meta'] ?? []);
             $det  = (array)($meta['detected'] ?? []);
             $detConf = (int)($det['confidence'] ?? 0);
@@ -136,11 +140,11 @@ final class HtmlReporter
             $signals = isset($det['signals']) && is_array($det['signals']) ? $det['signals'] : [];
 
             $confHtml = '<div class="section"><h3>Scan Confidence</h3>'
-                . '<div>Detected platform: <strong>Magento 2</strong> (confidence '.$detConf.'%)</div>'
-                . '<div>Overall confidence: <strong>'.$overall.'%</strong> &nbsp;—&nbsp; transport '.$tPct.'% &middot; coverage '.$cPct.'%'.($planned>0?' ('.$execd.'/'.$planned.')':'').'</div>'
-                . (!empty($signals) ? '<div style="opacity:.85;margin-top:6px"><small>Signals: '.htmlspecialchars(implode(' • ', $signals), ENT_QUOTES, 'UTF-8').'</small></div>' : '')
+                . '<div>Detected platform: <strong>Magento 2</strong> (confidence ' . $detConf . '%)</div>'
+                . '<div>Overall confidence: <strong>' . $overall . '%</strong> &nbsp;—&nbsp; transport ' . $tPct . '% &middot; coverage ' . $cPct . '%' . ($planned > 0 ? ' (' . $execd . '/' . $planned . ')' : '') . '</div>'
+                . (!empty($signals) ? '<div style="opacity:.85;margin-top:6px"><small>Signals: ' . htmlspecialchars(implode(' • ', $signals), ENT_QUOTES, 'UTF-8') . '</small></div>' : '')
                 . '</div>';
-            $html = str_replace('</body>', $confHtml.'</body>', $html);
+            $html = str_replace('</body>', $confHtml . '</body>', $html);
         }
 
         $footer = '<p>This report was generated using Magebean CLI, based on the <a href="https://magebean.com/documentation/index.html">Magebean Security Baseline v1</a>. Findings are provided for informational and audit purposes only.</p>';
