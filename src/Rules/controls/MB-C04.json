@@ -65,7 +65,7 @@
       "title": "TLS protocols >= 1.2",
       "control": "MB-C04",
       "severity": "high",
-      "op": "all",
+      "op": "any",
       "checks": [
         {
           "name": "nginx_directive",
@@ -73,6 +73,12 @@
             "file": "nginx.conf",
             "directive": "ssl_protocols\\s+TLSv1\\.2(\\s+TLSv1\\.3)?\\s*;",
             "expects_regex": true
+          }
+        },
+        {
+          "name": "http_tls_min_version",
+          "args": {
+            "timeout_s": 10
           }
         }
       ],
@@ -91,8 +97,16 @@
         {
           "name": "code_grep",
           "args": {
-            "paths": ["app/design", "app"],
-            "include_ext": ["phtml", "js", "html", "xml"],
+            "paths": [
+              "app/design",
+              "app"
+            ],
+            "include_ext": [
+              "phtml",
+              "js",
+              "html",
+              "xml"
+            ],
             "must_not_match": [
               "http://[^\\s\"'>]+"
             ],

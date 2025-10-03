@@ -18,7 +18,7 @@ final class WebServerConfigCheck
     {
         $file = (string)($args['file'] ?? 'nginx.conf');
         $path = $this->ctx->abs($file);
-        if (!is_file($path)) return [null, "$file not found"];
+        if (!is_file($path)) return [null, "$file not found"]; 
         $needle = (string)($args['directive'] ?? '');
         $isRe   = (bool)($args['expects_regex'] ?? false);
         $txt = (string)file_get_contents($path);

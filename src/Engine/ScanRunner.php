@@ -95,29 +95,38 @@ final class ScanRunner
                 if ($op === 'all' && $cok === false) {
                     $ok = false;
                 }
-                if ($op === 'any' && $cok === true) {
+                if ($op === 'any' && $cok === true) {   // dùng && thay vì &
                     $ok = true;
+                    $hasTrue = true;                    // ghi nhận PASS trước khi break
                     break;
                 }
-                if ($cok === true) $hasTrue = true;
-                elseif ($cok === false) $hasFalse = true;
-                else $hasUnknown = true;
+                if ($cok === true) {
+                    $hasTrue = true;
+                } elseif ($cok === false) {
+                    $hasFalse = true;
+                } else {
+                    $hasUnknown = true;
+                }
             }
 
-            $status = null;
-            if ($hasFalse) {
-                $ok = false;
-                $status = 'FAIL';
-            } elseif ($hasTrue) {
-                $ok = true;
-                $status = 'PASS';
-            } elseif ($hasUnknown) {
-                $ok = false; // giữ boolean để tương thích cũ, nhưng status sẽ là UNKNOWN
-                $status = 'UNKNOWN';
-            } else {
-                // không có check nào -> PASS
-                $ok = true;
-                $status = 'PASS';
+            if ($op === 'any') {
+                if ($ok) {
+                    $status = 'PASS';
+                } elseif ($hasUnknown && !$hasFalse) {
+                    $status = 'UNKNOWN';
+                } else {
+                    $status = 'FAIL';
+                }
+            } else { // op === 'all'
+                if ($hasFalse) {
+                    $ok = false;
+                    $status = 'FAIL';
+                } elseif ($hasUnknown && !$hasTrue) {
+                    $status = 'UNKNOWN';
+                } else {
+                    $ok = true;
+                    $status = 'PASS';
+                }
             }
             $msgPass = $rule['messages']['pass'] ?? null;
             $msgFail = $rule['messages']['fail'] ?? null;

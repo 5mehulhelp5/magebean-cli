@@ -164,7 +164,7 @@
               "php"
             ],
             "must_not_match": [
-              "(?<!->)(?<!::)\\b\\\\?unserialize\\s*\\("
+              "(?<!->)(?<!::)(?<!function[ \\t])\\b\\\\?unserialize\\s*\\("
             ]
           }
         }
@@ -333,20 +333,31 @@
             "include_ext": [
               "php"
             ],
-            "must_match": [
-              "random_bytes\\(",
-              "random_int\\("
-            ],
             "must_not_match": [
-              "mt_rand\\(",
-              "rand\\("
+              "(?i)(token|otp|one.?time.?password|pass(word)?|reset|nonce|secret|api[_-]?key|key|salt|verify|activation|code)[^\\n;\\)]{0,120}\\b(?:rand|mt_rand|array_rand|shuffle|str_shuffle|uniqid)\\s*\\(",
+              "(?i)\\b(?:rand|mt_rand|array_rand|shuffle|str_shuffle|uniqid)\\s*\\([^\\n;\\)]{0,120}(token|otp|one.?time.?password|pass(word)?|reset|nonce|secret|api[_-]?key|key|salt|verify|activation|code)"
+            ]
+          }
+        },
+        {
+          "name": "code_grep",
+          "args": {
+            "paths": [
+              "app"
+            ],
+            "include_ext": [
+              "php"
+            ],
+            "must_match": [
+              "(?i)(token|otp|one.?time.?password|pass(word)?|reset|nonce|secret|api[_-]?key|key|salt|verify|activation|code)[^\\n;\\)]{0,120}\\b(?:random_int|random_bytes|openssl_random_pseudo_bytes)\\s*\\(",
+              "(?i)\\b(?:random_int|random_bytes|openssl_random_pseudo_bytes)\\s*\\([^\\n;\\)]{0,120}(token|otp|one.?time.?password|pass(word)?|reset|nonce|secret|api[_-]?key|key|salt|verify|activation|code)"
             ]
           }
         }
       ],
       "messages": {
-        "pass": "Cryptographically secure RNG functions (random_bytes/random_int) are used.",
-        "fail": "Weak PRNG functions (rand/mt_rand) detected. Replace with random_bytes/random_int."
+        "pass": "No insecure RNG in security-sensitive contexts, or secure RNG (random_int/random_bytes) is used when generating secrets.",
+        "fail": "Insecure RNG (rand/mt_rand/array_rand/uniqid/shuffle) used near security-sensitive code (token/password/nonce...). Use random_int/random_bytes."
       }
     },
     {
