@@ -282,8 +282,7 @@ final class ComposerCheck
 
     public function jsonKv(array $args): array
     {
-        $root = (string)$this->ctx->get('root', '');
-        $root = $this->absPath($root);
+        $root = (string)$this->ctx->path;
 
         $jsonRel  = is_string($args['json_file'] ?? null) ? $args['json_file'] : 'composer.json';
         $jsonPath = $this->join($root, $jsonRel);
@@ -394,7 +393,7 @@ final class ComposerCheck
         // Returns: [bool, string]
 
         $root = (string)$this->ctx->get('root', '');
-        $root = $this->absPath($root);
+        $root = (string)$this->ctx->path;
 
         $lockRel      = is_string($args['lock_file'] ?? null) ? $args['lock_file'] : 'composer.lock';
         $jsonRel      = is_string($args['json_file'] ?? null) ? $args['json_file'] : 'composer.json';

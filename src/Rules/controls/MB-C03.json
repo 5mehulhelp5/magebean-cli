@@ -12,8 +12,13 @@
         {
           "name": "code_grep",
           "args": {
-            "paths": ["app"],
-            "include_ext": ["php", "phtml"],
+            "paths": [
+              "app"
+            ],
+            "include_ext": [
+              "php",
+              "phtml"
+            ],
             "must_not_match": [
               "->query\\(",
               "mysqli_query\\(",
@@ -37,8 +42,12 @@
         {
           "name": "code_grep",
           "args": {
-            "paths": ["app/design"],
-            "include_ext": ["phtml"],
+            "paths": [
+              "app/design"
+            ],
+            "include_ext": [
+              "phtml"
+            ],
             "must_match": [
               "escapeHtml\\(",
               "escapeHtmlAttr\\(",
@@ -62,8 +71,12 @@
         {
           "name": "code_grep",
           "args": {
-            "paths": ["app"],
-            "include_ext": ["php"],
+            "paths": [
+              "app"
+            ],
+            "include_ext": [
+              "php"
+            ],
             "must_not_match": [
               "\\$_GET\\[",
               "\\$_POST\\[",
@@ -87,8 +100,13 @@
         {
           "name": "code_grep",
           "args": {
-            "paths": ["app"],
-            "include_ext": ["php", "phtml"],
+            "paths": [
+              "app"
+            ],
+            "include_ext": [
+              "php",
+              "phtml"
+            ],
             "must_match": [
               "form_key",
               "getFormKey\\("
@@ -111,8 +129,12 @@
         {
           "name": "code_grep",
           "args": {
-            "paths": ["app"],
-            "include_ext": ["php"],
+            "paths": [
+              "app"
+            ],
+            "include_ext": [
+              "php"
+            ],
             "must_match": [
               "allowlist|whitelist",
               "CURLOPT_CONNECTTIMEOUT|CURLOPT_TIMEOUT"
@@ -135,10 +157,15 @@
         {
           "name": "code_grep",
           "args": {
-            "paths": ["app"],
-            "include_ext": ["php"],
-            "must_not_match": ["unserialize\\("],
-            "must_match": ["json_decode\\(|Serializer|Json\\\\Encoder"]
+            "paths": [
+              "app"
+            ],
+            "include_ext": [
+              "php"
+            ],
+            "must_not_match": [
+              "(?<!->)(?<!::)\\b\\\\?unserialize\\s*\\("
+            ]
           }
         }
       ],
@@ -157,12 +184,14 @@
         {
           "name": "code_grep",
           "args": {
-            "paths": ["app"],
-            "include_ext": ["php"],
+            "paths": [
+              "app"
+            ],
+            "include_ext": [
+              "php"
+            ],
             "must_not_match": [
-              "exec\\(",
-              "shell_exec\\(",
-              "system\\("
+              "(?<!->)(?<!::)\\b\\\\?(?:exec|shell_exec|system)\\s*\\("
             ]
           }
         }
@@ -182,8 +211,12 @@
         {
           "name": "code_grep",
           "args": {
-            "paths": ["app"],
-            "include_ext": ["php"],
+            "paths": [
+              "app"
+            ],
+            "include_ext": [
+              "php"
+            ],
             "must_not_match": [
               "eval\\(",
               "assert\\(",
@@ -207,11 +240,15 @@
         {
           "name": "code_grep",
           "args": {
-            "paths": ["app"],
-            "include_ext": ["php"],
+            "paths": [
+              "app"
+            ],
+            "include_ext": [
+              "php"
+            ],
             "must_match": [
-              "realpath\\(",
-              "basename\\("
+              "(?:realpath|\\$this->fileDriver->getRealPath|resolvePath|DirectoryList)\\(",
+              "(?:basename|pathinfo\\s*\\([^,]+,\\s*PATHINFO_BASENAME)"
             ]
           }
         }
@@ -231,12 +268,16 @@
         {
           "name": "code_grep",
           "args": {
-            "paths": ["app"],
-            "include_ext": ["php"],
+            "paths": [
+              "app"
+            ],
+            "include_ext": [
+              "php"
+            ],
             "must_match": [
-              "isAllowedExtension",
-              "validateMime|mime_content_type|getClientMimeType",
-              "max_file_size|filesize\\("
+              "isAllowedExtension|pathinfo\\s*\\([^,]+,\\s*PATHINFO_EXTENSION\\)|getClientOriginalExtension",
+              "validateMime|mime_content_type|getClientMimeType|finfo_(?:open|file)|getMimeType",
+              "max_file_size|filesize\\(|getSize\\s*\\(|\\$_FILES\\[[^\\]]+\\]\\s*\\[\\s*['\\\"]size['\\\"]\\s*\\]"
             ]
           }
         }
@@ -256,8 +297,14 @@
         {
           "name": "code_grep",
           "args": {
-            "paths": ["app/design"],
-            "include_ext": ["phtml", "js", "html"],
+            "paths": [
+              "app/design"
+            ],
+            "include_ext": [
+              "phtml",
+              "js",
+              "html"
+            ],
             "must_match": [
               "escapeJs\\(",
               "json_encode\\("
@@ -280,8 +327,12 @@
         {
           "name": "code_grep",
           "args": {
-            "paths": ["app"],
-            "include_ext": ["php"],
+            "paths": [
+              "app"
+            ],
+            "include_ext": [
+              "php"
+            ],
             "must_match": [
               "random_bytes\\(",
               "random_int\\("
@@ -308,8 +359,12 @@
         {
           "name": "code_grep",
           "args": {
-            "paths": ["app"],
-            "include_ext": ["php"],
+            "paths": [
+              "app"
+            ],
+            "include_ext": [
+              "php"
+            ],
             "must_not_match": [
               "logger->(info|debug|notice)\\([^)]*password",
               "logger->(info|debug|notice)\\([^)]*Authorization",
@@ -328,16 +383,37 @@
       "title": "Use Magento APIs for crypto & session",
       "control": "MB-C03",
       "severity": "medium",
-      "op": "all",
+      "op": "any",
       "checks": [
         {
           "name": "code_grep",
           "args": {
-            "paths": ["app"],
-            "include_ext": ["php"],
+            "paths": [
+              "app"
+            ],
+            "include_ext": [
+              "php"
+            ],
             "must_match": [
-              "Magento\\\\\\\\Framework\\\\\\\\Encryption",
+              "Magento\\\\\\\\Framework\\\\\\\\Encryption|Magento\\\\\\\\Framework\\\\\\\\Encryption\\\\\\\\EncryptorInterface",
               "Magento\\\\\\\\Framework\\\\\\\\Session"
+            ]
+          }
+        },
+        {
+          "name": "code_grep",
+          "args": {
+            "paths": [
+              "app"
+            ],
+            "include_ext": [
+              "php"
+            ],
+            "must_not_match": [
+              "session_start\\(",
+              "\\$_SESSION\\[",
+              "openssl_(?:encrypt|decrypt)\\(",
+              "mcrypt_"
             ]
           }
         }

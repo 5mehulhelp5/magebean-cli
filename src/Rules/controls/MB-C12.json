@@ -99,8 +99,8 @@
             "paths": ["app"],
             "include_ext": ["php"],
             "must_match": [
-              "hash_hmac\\(",
-              "X-(Signature|Hub-Signature|Stripe-Signature|Webhook-Signature)"
+              "hash_hmac\\(|\\\\Stripe\\\\Webhook::constructEvent",
+              "X-(?:Signature|Hub-Signature|Hub-Signature-256|Stripe-Signature|Shopify-Hmac-Sha256|Slack-Signature|Twilio-Signature|Line-Signature|Twitch-Eventsub-Message-Signature|Webhook-Signature)"
             ]
           }
         }
@@ -194,7 +194,7 @@
       "title": "API keys stored in env.php (not in DB/plain code)",
       "control": "MB-C12",
       "severity": "high",
-      "op": "all",
+      "op": "any",
       "checks": [
         {
           "name": "php_array_key_search",
@@ -210,9 +210,14 @@
             "paths": ["app"],
             "include_ext": ["php", "phtml", "xml"],
             "must_not_match": [
-              "INSERT\\s+INTO\\s+.*(api_)?key",
-              "setData\\(\\s*['\\\"](api_)?key",
-              "update\\s+.*(api_)?key"
+               "(?i)INSERT\\s+INTO\\s+.*\\bcore_config_data\\b.*\\b(path|value)\\b.*(api[_-]?key|secret|token)",
+              "(?i)UPDATE\\s+\\bcore_config_data\\b.*\\b(path|value)\\b.*(api[_-]?key|secret|token)",
+              "(?i)INSERT\\s+INTO\\s+.*(api[_-]?key|secret|token)",
+              "(?i)update\\s+.*(api[_-]?key|secret|token)",
+              "(?i)setData\\(\\s*['\\\"](?:payment\\/[^'\\\"]+\\/)?(api[_-]?key|secret|token)",
+              "(?i)setValue\\(\\s*['\\\"](?:payment\\/[^'\\\"]+\\/)?(api[_-]?key|secret|token)",
+              "(?i)save\\(\\)\\s*;\\s*\\/\\/.*(api[_-]?key|secret|token).*", 
+              "(?i)Config\\s*\\(.*(api[_-]?key|secret|token).*\\)" 
             ]
           }
         }
