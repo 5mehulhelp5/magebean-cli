@@ -81,6 +81,7 @@ HELP;
             ->addUsage('--url=https://store.example')
             ->addOption('format', null, InputOption::VALUE_REQUIRED, 'Output format: html|json', 'html')
             ->addOption('output', null, InputOption::VALUE_OPTIONAL, 'Output file (auto default by format)')
+            ->addOption('detail', null, InputOption::VALUE_NONE, 'Include Details column in HTML report')
             ->addOption('cve-data', null, InputOption::VALUE_OPTIONAL, 'Path to CVE data (JSON/NDJSON or ZIP bundle)')
             ->addOption('standard', null, InputOption::VALUE_OPTIONAL, 'Report standard: magebean (default) | owasp | pci | cwe', 'magebean')
             ->addOption('rules', null, InputOption::VALUE_OPTIONAL, 'Comma-separated rule IDs to run (e.g., MB-R036,MB-R020)')
@@ -219,7 +220,7 @@ HELP;
                 $out->writeln(sprintf('<info>JSON report written:</info> %s', $outFile));
             } else {
                 $tpl = $this->resolveTemplatePath();
-                $rep = new HtmlReporter($tpl);
+                $rep = new HtmlReporter($tpl, (bool)$in->getOption('detail'));
                 $rep->write($result, $outFile);
             }
             // Exit code giống nhánh --path (để CI nhận biết fail)
@@ -357,6 +358,7 @@ HELP;
             } else {
                 $result['cve_audit'] = null;
             }
+            
             // 3) Write output
             // ---------- Pretty console output (mimic sample) ----------
             $this->renderPrettySummary($out, $result, $projectPath, $outFile);
@@ -369,7 +371,7 @@ HELP;
                     break;
                 default:
                     $tpl = $this->resolveTemplatePath();
-                    $rep = new HtmlReporter($tpl);
+                    $rep = new HtmlReporter($tpl, (bool)$in->getOption('detail'));
                     $rep->write($result, $outFile);
                     break;
             }

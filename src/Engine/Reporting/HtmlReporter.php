@@ -7,9 +7,11 @@ namespace Magebean\Engine\Reporting;
 final class HtmlReporter
 {
     private string $tpl;
-    public function __construct(string $tpl)
+    private bool $showDetails = false;
+    public function __construct(string $tpl, bool $showDetails = false)
     {
         $this->tpl = $tpl;
+        $this->showDetails = $showDetails;
     }
 
     public function write(array $result, string $outFile): void
@@ -18,6 +20,12 @@ final class HtmlReporter
         $html = file_get_contents($this->tpl);
         if ($html === false || $html === '') {
             $html = $this->fallbackTemplate();
+        }
+        // Nếu --detail bật, thêm cột Details vào header
+        if ($this->showDetails) {
+            if (strpos($html, '<th>Details</th>') === false) {
+                $html = preg_replace('/<\/tr>\s*<\/thead>/', '<th>Details</th></tr></thead>', $html, 1);
+            }
         }
         // --- Summary inputs ---
         $sum = $result['summary'] ?? [];
@@ -82,6 +90,8 @@ final class HtmlReporter
                     ? '<div style="opacity:.8;margin-top:4px"><small' . ($confWhy !== '' ? ' title="' . htmlspecialchars($confWhy, ENT_QUOTES, 'UTF-8') . '"' : '') . '>confidence: ' . $confVal . '%</small></div>'
                     : ''
                 )
+                . '</td>'  /* Quan trọng: đóng ô Message trước khi thêm ô Details */
+                . ($this->showDetails ? '<td>' . $this->renderDetails($f) . '</td>' : '')
                 . '</tr>';
         }
 
@@ -279,6 +289,28 @@ final class HtmlReporter
             . '<tbody>' . $rows . '</tbody></table>'
             . $details
             . '</div>';
+    }
+
+    private function renderDetails(array $f): string
+    {
+        $out = '';
+        $details = $f['details'] ?? [];
+        if (is_array($details) && !empty($details)) {
+            foreach ($details as $d) {
+                if (is_array($d)) {
+                    $line = implode(' — ', array_map(static function ($x) {
+                        if (is_array($x)) {
+                            return json_encode($x, JSON_UNESCAPED_SLASHES|JSON_UNESCAPED_UNICODE);
+                        }
+                        return (string)$x;
+                    }, $d));
+                    $out .= '<div>' . htmlspecialchars($line, ENT_QUOTES, 'UTF-8') . '</div>';
+                } else {
+                    $out .= '<div>' . htmlspecialchars((string)$d, ENT_QUOTES, 'UTF-8') . '</div>';
+                }
+            }
+        }
+        return $out;
     }
 
     private function formatTsOrNow($tsOrStr): string

@@ -18,11 +18,11 @@ final class WebServerConfigCheck
     {
         $file = (string)($args['file'] ?? 'nginx.conf');
         $path = $this->ctx->abs($file);
-        if (!is_file($path)) return [false, "$file not found"];
+        if (!is_file($path)) return [null, "$file not found"];
         $needle = (string)($args['directive'] ?? '');
         $isRe   = (bool)($args['expects_regex'] ?? false);
         $txt = (string)file_get_contents($path);
-        if ($txt === '') return [false, "$file is empty or unreadable"];
+        if ($txt === '') return [null, "$file is empty or unreadable"];
 
         if ($isRe) {
             if (@preg_match('/'.$needle.'/m', '') === false) {
@@ -41,11 +41,11 @@ final class WebServerConfigCheck
     {
         $file = (string)($args['file'] ?? 'pub/.htaccess');
         $path = $this->ctx->abs($file);
-        if (!is_file($path)) return [false, "$file not found"];
+        if (!is_file($path)) return [null, "$file not found"];
         $needle = (string)($args['directive'] ?? '');
         $isRe   = (bool)($args['expects_regex'] ?? false);
         $txt = (string)file_get_contents($path);
-        if ($txt === '') return [false, "$file is empty or unreadable"];
+        if ($txt === '') return [null, "$file is empty or unreadable"];
 
         if ($isRe) {
             if (@preg_match('/'.$needle.'/m', '') === false) {

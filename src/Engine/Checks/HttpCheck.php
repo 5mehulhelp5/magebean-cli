@@ -196,7 +196,7 @@ final class HttpCheck
     private function forceHttpsRedirect(array $args): array
     {
         $base = $this->baseUrl();
-        if ($base === '') return [false, 'Missing URL in context'];
+        if ($base === '') return [null, '[UNKNOWN] Missing URL in context'];
 
         // Always test HTTP entrypoint (no redirect follow)
         $http = preg_replace('~^https://~i', 'http://', $base);
@@ -227,7 +227,7 @@ final class HttpCheck
     private function hasHsts(array $args): array
     {
         $base = $this->baseUrl();
-        if ($base === '') return [false, 'Missing URL in context'];
+        if ($base === '') return [null, '[UNKNOWN] Missing URL in context'];
         [$ok, $msg, $ev] = $this->fetch($base, 'GET', [], (int)($args['timeout_ms'] ?? 8000), false);
         if ($ok === null) return [null, $msg, $ev];
         if (!$ok) return [false, $msg, $ev];
@@ -245,7 +245,7 @@ final class HttpCheck
     private function noMixedContent(array $args): array
     {
         $base = $this->baseUrl();
-        if ($base === '') return [false, 'Missing URL in context'];
+        if ($base === '') return [null, '[UNKNOWN] Missing URL in context'];
         [$ok, $msg, $ev] = $this->fetch($base, 'GET', [], (int)($args['timeout_ms'] ?? 8000), false);
         if ($ok === null) return [null, $msg, $ev];
         if (!$ok) return [false, $msg, $ev];
