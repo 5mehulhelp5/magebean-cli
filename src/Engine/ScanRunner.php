@@ -285,7 +285,7 @@ final class ScanRunner
             'composer_release_recency_offline'    => $comp->releaseRecencyOffline($args),
             'composer_repo_archived_offline'      => $comp->repoArchivedOffline($args),
             'composer_risky_fork_offline'         => $comp->riskyForkOffline($args),
-            'composer_json_constraints'           => $comp->jsonConstraints($path),
+            'composer_json_constraints'           => $comp->jsonConstraints($args),
             'composer_json_kv'                    => $comp->jsonKv($args),
             'composer_lock_integrity'             => $comp->lockIntegrity($args),
             'php_array_key_search'                => $phpc->keySearch($args),

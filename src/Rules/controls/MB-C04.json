@@ -1,152 +1,153 @@
 {
-  "control": "MB-C04",
-  "title": "HTTPS & TLS Enforcement",
-  "rules": [
-    {
-      "id": "MB-R026",
-      "title": "Force HTTPS in admin and storefront",
-      "control": "MB-C04",
-      "severity": "high",
-      "op": "all",
-      "checks": [
+    "control": "MB-C04",
+    "title": "HTTPS & TLS Enforcement",
+    "rules": [
         {
-          "name": "php_array_eq",
-          "args": {
-            "file": "app/etc/env.php",
-            "path": "system.default.web.secure.use_in_adminhtml",
-            "equals": 1
-          }
-        },
-        {
-          "name": "php_array_eq",
-          "args": {
-            "file": "app/etc/env.php",
-            "path": "system.default.web.secure.use_in_frontend",
-            "equals": 1
-          }
-        }
-      ],
-      "messages": {
-        "pass": "HTTPS is enforced for both admin and storefront areas.",
-        "fail": "HTTPS is not enforced in admin or storefront. Enable secure URLs in env.php."
-      }
-    },
-    {
-      "id": "MB-R027",
-      "title": "HSTS header is set",
-      "control": "MB-C04",
-      "severity": "medium",
-      "op": "any",
-      "checks": [
-        {
-          "name": "nginx_directive",
-          "args": {
-            "file": "nginx.conf",
-            "directive": "add_header\\s+Strict-Transport-Security\\b",
-            "expects_regex": true
-          }
-        },
-        {
-          "name": "apache_htaccess_directive",
-          "args": {
-            "file": "pub/.htaccess",
-            "directive": "Header\\s+(set|always set)\\s+Strict-Transport-Security\\b",
-            "expects_regex": true
-          }
-        }
-      ],
-      "messages": {
-        "pass": "HSTS (Strict-Transport-Security) header is configured.",
-        "fail": "HSTS header is missing. Add Strict-Transport-Security to enforce HTTPS on clients."
-      }
-    },
-    {
-      "id": "MB-R028",
-      "title": "TLS protocols >= 1.2",
-      "control": "MB-C04",
-      "severity": "high",
-      "op": "any",
-      "checks": [
-        {
-          "name": "nginx_directive",
-          "args": {
-            "file": "nginx.conf",
-            "directive": "ssl_protocols\\s+TLSv1\\.2(\\s+TLSv1\\.3)?\\s*;",
-            "expects_regex": true
-          }
-        },
-        {
-          "name": "http_tls_min_version",
-          "args": {
-            "timeout_s": 10
-          }
-        }
-      ],
-      "messages": {
-        "pass": "TLS is configured to use version 1.2 or higher.",
-        "fail": "TLS configuration allows outdated protocols. Restrict to TLS 1.2+."
-      }
-    },
-    {
-      "id": "MB-R029",
-      "title": "No mixed content (http://) in templates/assets",
-      "control": "MB-C04",
-      "severity": "medium",
-      "op": "all",
-      "checks": [
-        {
-          "name": "code_grep",
-          "args": {
-            "paths": [
-              "app/design",
-              "app"
+            "id": "MB-R026",
+            "title": "Force HTTPS in admin and storefront",
+            "control": "MB-C04",
+            "severity": "high",
+            "op": "any",
+            "checks": [
+                {
+                    "name": "php_array_eq",
+                    "args": {
+                        "file": "app/etc/env.php",
+                        "path": "system.default.web.secure.use_in_adminhtml",
+                        "equals": 1
+                    }
+                },
+                {
+                    "name": "php_array_eq",
+                    "args": {
+                        "file": "app/etc/env.php",
+                        "path": "system.default.web.secure.use_in_frontend",
+                        "equals": 1
+                    }
+                },
+                {
+                    "name": "http_force_https_redirect",
+                    "args": {
+                        "timeout_ms": 8000
+                    }
+                }
             ],
-            "include_ext": [
-              "phtml",
-              "js",
-              "html",
-              "xml"
-            ],
-            "must_not_match": [
-              "http://[^\\s\"'>]+"
-            ],
-            "max_results": 50
-          }
-        }
-      ],
-      "messages": {
-        "pass": "No insecure http:// references detected in templates or assets.",
-        "fail": "Mixed content detected. Replace http:// references with https://."
-      }
-    },
-    {
-      "id": "MB-R030",
-      "title": "Secure cookies: Secure + HttpOnly enabled",
-      "control": "MB-C04",
-      "severity": "high",
-      "op": "all",
-      "checks": [
-        {
-          "name": "php_array_eq",
-          "args": {
-            "file": "app/etc/env.php",
-            "path": "session.cookie.secure",
-            "equals": 1
-          }
+            "messages": {
+                "pass": "HTTPS is enforced for both admin and storefront areas.",
+                "fail": "HTTPS is not enforced in admin or storefront. Enable secure URLs in env.php."
+            }
         },
         {
-          "name": "php_array_eq",
-          "args": {
-            "file": "app/etc/env.php",
-            "path": "session.cookie.httponly",
-            "equals": 1
-          }
+            "id": "MB-R027",
+            "title": "HSTS header is set",
+            "control": "MB-C04",
+            "severity": "medium",
+            "op": "any",
+            "checks": [
+                {
+                    "name": "http_has_hsts",
+                    "args": {
+                        "min_max_age": 15552000,
+                        "timeout_ms": 8000
+                    }
+                }
+            ],
+            "messages": {
+                "pass": "HSTS (Strict-Transport-Security) header is configured.",
+                "fail": "HSTS header is missing. Add Strict-Transport-Security to enforce HTTPS on clients."
+            }
+        },
+        {
+            "id": "MB-R028",
+            "title": "TLS protocols >= 1.2",
+            "control": "MB-C04",
+            "severity": "high",
+            "op": "any",
+            "checks": [
+                {
+                    "name": "http_tls_min_version",
+                    "args": {
+                        "timeout_ms": 8000
+                    }
+                }
+            ],
+            "messages": {
+                "pass": "TLS is configured to use version 1.2 or higher.",
+                "fail": "TLS configuration allows outdated protocols. Restrict to TLS 1.2+."
+            }
+        },
+        {
+            "id": "MB-R029",
+            "title": "No mixed content (http://) in templates/assets",
+            "control": "MB-C04",
+            "severity": "medium",
+            "op": "all",
+            "checks": [
+                {
+                    "name": "code_grep",
+                    "args": {
+                        "paths": [
+                            "app/design",
+                            "app"
+                        ],
+                        "include_ext": [
+                            "phtml",
+                            "js",
+                            "html",
+                            "xml"
+                        ],
+                        "must_not_match": [
+                            "https?:\\\\/\\\\/[^\\s\"'>]+"
+                        ],
+                        "max_results": 50
+                    }
+                },
+                {
+                    "name": "http_no_mixed_content",
+                    "args": {
+                        "timeout_ms": 8000
+                    }
+                }
+            ],
+            "messages": {
+                "pass": "No insecure http:// references detected in templates or assets.",
+                "fail": "Mixed content detected. Replace http:// references with https://."
+            }
+        },
+        {
+            "id": "MB-R030",
+            "title": "Secure cookies: Secure + HttpOnly enabled",
+            "control": "MB-C04",
+            "severity": "high",
+            "op": "all",
+            "checks": [
+                {
+                    "name": "php_array_eq",
+                    "args": {
+                        "file": "app/etc/env.php",
+                        "path": "session.cookie.secure",
+                        "equals": 1
+                    }
+                },
+                {
+                    "name": "php_array_eq",
+                    "args": {
+                        "file": "app/etc/env.php",
+                        "path": "session.cookie.httponly",
+                        "equals": 1
+                    }
+                },
+                {
+                    "name": "http_cookie_flags",
+                    "args": {
+                        "timeout_ms": 8000
+                    }
+                }
+            ],
+            "messages": {
+                "pass": "Session cookies are configured with Secure and HttpOnly flags.",
+                "fail": "Cookies lack Secure or HttpOnly flags. Enable them to protect against theft and XSS."
+            }
         }
-      ],
-      "messages": {
-        "pass": "Session cookies are configured with Secure and HttpOnly flags.",
-        "fail": "Cookies lack Secure or HttpOnly flags. Enable them to protect against theft and XSS."
-      }
-    }
-  ]
+    ]
 }

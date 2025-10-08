@@ -34,21 +34,24 @@ Doc: <href=https://magebean.com/documentation>magebean.com/documentation</>
 
 <options=bold>USAGE</>
   <fg=green>php magebean.phar scan --path=/var/www/html</>
-  <fg=green>php magebean.phar scan --path=. --format=html --output=report.html</>
+  <fg=green>php magebean.phar scan --url=https://magento.local</>
+  <fg=green>php magebean.phar scan --path=/var/www/html --url=https://magento.local</>
 
 <options=bold>COMMON OPTIONS</>
-  <fg=yellow>--path=PATH</>                 Path to the Magento 2 root to scan (default: current directory)
-  <fg=yellow>--format=html|json</>          Output format for results (default: html)
-  <fg=yellow>--output=FILE</>               Save results to a file (auto default based on format)
-  <fg=yellow>--cve-data=PATH</>             Path to CVE data (JSON/NDJSON or ZIP bundle)
-  <fg=yellow>--rules=MB-Rxx,MB-Rxx</>       Only run a list of specified rules (e.g., MB-R03,)
+  <fg=yellow>--path=PATH</>                     Path to the Magento 2 root to scan (default: current directory)
+  <fg=yellow>--url=URL</>                       Store URL of the Magento 2 to scan (default: none)
+  <fg=yellow>--format=html|json</>              Output format for results (default: html)
+  <fg=yellow>--output=FILE</>                   Save results to a file (auto default based on format)
+  <fg=yellow>--cve-data=PATH</>                 Path to CVE data (JSON/NDJSON or ZIP bundle)
+  <fg=yellow>--rules=MB-Rxx,MB-Rxx</>           Only run a list of specified rules (e.g., MB-R03,)
+  <fg=yellow>--exclude-rules=MB-Rxx,MB-Rxx</>   Only run a list of specified rules (e.g., MB-R03,)
 
 <options=bold>EXAMPLES</>
   # Scan current directory and print a quick summary
   <fg=green>php magebean.phar scan --path=.</>
 
   # Generate a shareable HTML report
-  <fg=green>php magebean.phar scan --path=/var/www/html --format=html --output=report.html</>
+  <fg=green>php magebean.phar scan --path=/var/www/html --url=https://magento.local --format=html --output=report.html</>
 
   # Use a known CVE data when auditing installed extensions.
   # Download: <href=https://magebean.com/download>magebean.com/download</>
@@ -101,32 +104,12 @@ HELP;
         $pathOpt = (string)($in->getOption('path') ?? '');
         $requestedPath = $pathOpt !== '' ? $pathOpt : getcwd();
         $requestedPath = self::normalize($requestedPath);
-
         $urlOpt = (string)($in->getOption('url') ?? '');
-        if ($urlOpt !== '' && $pathOpt !== '') {
-            $out->writeln('<error>Usage error:</error> You must provide either --path or --url, not both.');
-            return 64; // EX_USAGE
-        }
+        $requestedUrl = $urlOpt !== '' ? $urlOpt : '';
         if ($urlOpt !== '') {
             // URL mode (ExternalMagentoAudit)
             $url = trim($urlOpt);
-            if (!preg_match('/^https?:\\/\\//i', $url)) {
-                $out->writeln('<error>Invalid --url: must start with http:// or https://</error>');
-                return Command::FAILURE;
-            }
-            $format      = (string)$in->getOption('format');
-            $outFile     = (string)($in->getOption('output') ?? '');
-            $standard    = 'magebean';
-            $rulesOpt    = (string)($in->getOption('rules') ?? '');
-
-            if ($outFile === '') {
-                $outFile = match ($format) {
-                    'json'  => 'magebean-report.json',
-                    default => 'magebean-report.html',
-                };
-            }
-
-             // -------------------------
+            // -------------------------
             // Preflight: Magento 2 detect (fail-fast nếu không phải M2)
             // -------------------------
             $det = $this->detectMagento2ByUrl($url, 7000);
@@ -142,92 +125,8 @@ HELP;
                 $out->writeln('<comment>Aborting.</comment> If this is a Magento site behind CDN/WAF that strips headers, try scanning the canonical store domain or whitelist our User-Agent.');
                 return Command::FAILURE;
             }
-            // (tiếp tục scan nếu ok)
-
-            $ctx  = new Context(getcwd(), '', ['url' => $url]);
-            $pack = RulePackLoader::loadExternalMagento();
-
-            $detectConfidence = (int)$det['confidence'];
-            // --rules filter (optional)
-            $requestedIds = [];
-            if ($rulesOpt !== '') {
-                $requestedIds = array_values(array_unique(array_filter(array_map('trim', explode(',', $rulesOpt)))));
-                if ($requestedIds) {
-                    $byId = [];
-                    foreach ($pack['rules'] as $r) {
-                        $byId[strtoupper((string)($r['id'] ?? ''))] = $r;
-                    }
-                    $selected = [];
-                    $unknown  = [];
-                    foreach ($requestedIds as $id) {
-                        $key = strtoupper($id);
-                        if (isset($byId[$key])) $selected[] = $byId[$key];
-                        else $unknown[] = $id;
-                    }
-                    foreach ($unknown as $id) {
-                        $out->writeln(sprintf('<comment>Unknown rule id:</comment> %s', $id));
-                    }
-                    if ($selected) {
-                        $pack['rules'] = $selected;
-                    } else {
-                        $out->writeln('<error>No valid rules matched the --rules filter.</error>');
-                        return Command::FAILURE;
-                    }
-                }
-            }
-
-            if (empty($pack['rules'])) {
-                $out->writeln('<error>No rules found for ExternalMagentoAudit.</error>');
-                return Command::FAILURE;
-            }
-
-            // 1) Scan rules (URL)
-            $runner = new ScanRunner($ctx, $pack);
-            $result = $runner->run();
-            // attach meta
-            $result['meta']['standard']     = $standard;
-            $result['meta']['rules_filter'] = $requestedIds;
-            $result['summary']['path']      = 'URL: ' . $url;
-            // detection meta (đưa ra HTML/JSON/CLI)
-            $result['meta']['detected'] = [
-                'platform'   => 'magento2',
-                'confidence' => $detectConfidence,
-                'signals'    => $det['signals'] ?? [],
-            ];
-            $projectPath = 'URL: ' . $url;
-            // No CVE in URL mode
-            $result['cve_audit'] = null;
-            // Tính overall confidence dựa trên meta từ runner (transport & coverage)
-            $transportOk     = (int)($result['meta']['transport_ok'] ?? 0);
-            $transportTotal  = (int)($result['meta']['transport_total'] ?? 0);
-            $transportPct    = $transportTotal > 0 ? (int)floor(100 * $transportOk / $transportTotal) : 0;
-            $plannedRules    = (int)($result['meta']['planned_rules'] ?? count($pack['rules']));
-            $executedRules   = (int)($result['meta']['executed_rules'] ?? 0);
-            $coveragePct     = $plannedRules > 0 ? (int)floor(100 * $executedRules / $plannedRules) : 0;
-            $overallConf     = (int)round(0.5 * $detectConfidence + 0.3 * $transportPct + 0.2 * $coveragePct);
-            $result['meta']['transport_success_percent'] = $transportPct;
-            $result['meta']['coverage_percent']          = $coveragePct;
-            $result['meta']['overall_confidence']        = $overallConf;
-
-            // 3) Write output (reuse existing templating)
-            // ---------- Pretty console output (mimic sample) ----------
-            $this->renderPrettySummary($out, $result, $projectPath, $outFile);
-
-            // 4) Render export
-            // Write output file (dùng HtmlReporter như --path)
-            if ($format === 'json') {
-                file_put_contents($outFile, json_encode($result, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
-                $out->writeln(sprintf('<info>JSON report written:</info> %s', $outFile));
-            } else {
-                $tpl = $this->resolveTemplatePath();
-                $rep = new HtmlReporter($tpl, (bool)$in->getOption('detail'));
-                $rep->write($result, $outFile);
-            }
-            // Exit code giống nhánh --path (để CI nhận biết fail)
-            $sum = $result['summary'] ?? [];
-            return ((int)($sum['failed'] ?? 0) > 0) ? Command::FAILURE : Command::SUCCESS;
         }
-
+        
         // Nếu path không trỏ tới Magento root, thử leo lên tối đa 4 cấp
         if (!self::isMagentoRoot($requestedPath)) {
             $detected = self::detectMagentoRoot($requestedPath, 4);
@@ -258,6 +157,7 @@ HELP;
 
             // ✅ OK -> bắt đầu scan
             $projectPath = (string)$requestedPath;
+            $projectUrl = (string)$requestedUrl;
             $format      = (string)$in->getOption('format');
             $outFile     = (string)($in->getOption('output') ?? '');
             $cveDataFile = (string)($in->getOption('cve-data') ?? '');
@@ -305,7 +205,10 @@ HELP;
                 }
             }
 
-            $ctx  = new Context($projectPath, $cveDataFile);
+            $ctx  = new Context($projectPath, $projectUrl, $cveDataFile, [
+                'path' => $projectPath,
+                'url' => $projectUrl
+            ]);
 
             $pack = RulePackLoader::loadAll();
 

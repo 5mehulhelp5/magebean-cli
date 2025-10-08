@@ -89,9 +89,15 @@
       "op": "all",
       "checks": [
         {
-          "name": "no_directory_listing",
+          "name": "http_no_directory_listing",
           "args": {
-            "webroot": "pub"
+            "paths": [
+              "/media/",
+              "/static/",
+              "/errors/",
+              "/var/"
+            ],
+            "timeout_ms": 8000
           }
         }
       ],

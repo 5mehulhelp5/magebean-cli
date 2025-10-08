@@ -234,27 +234,54 @@ final class ComposerCheck
         return [true, "composer_risky_fork_offline checked $lock with $meta"];
     }
 
-    public function jsonConstraints(string $rootDir): array
+    public function jsonConstraints(array $args): array
     {
-        $rootDir = rtrim($rootDir, '/');
-        $path = $rootDir . '/composer.json';
-        if (!is_file($path)) {
-            return [];
+        $root = (string)($this->ctx->path ?? '');
+
+        $jsonRel  = is_string($args['json_file'] ?? null) ? $args['json_file'] : 'composer.json';
+        $jsonPath = $this->join($root, $jsonRel);
+
+        // Nếu không thấy ngay tại vị trí dự kiến, thử find-up với chữ ký: findUp(string $path, int $maxDepth)
+        if (!is_file($jsonPath)) {
+            $found = $this->findUp($jsonPath, 6); // ✅ tham số 2 là int
+            if (is_string($found) && $found !== '') {
+                $jsonPath = $found;
+            } else {
+                return [false, [], "{$jsonRel} not found at {$jsonPath}"];
+            }
         }
-        $data = json_decode((string)file_get_contents($path), true);
+
+        $raw = @file_get_contents($jsonPath);
+        if ($raw === false) {
+            return [false, [], "Cannot read {$jsonRel} at {$jsonPath}"];
+        }
+
+        $data = json_decode($raw, true);
         if (!is_array($data)) {
-            return [];
+            $jerr = function_exists('json_last_error_msg') ? json_last_error_msg() : 'unknown JSON error';
+            return [false, [], "Invalid {$jsonRel} at {$jsonPath}: {$jerr}"];
         }
+
         $sections = ['require', 'require-dev', 'conflict', 'replace', 'provide'];
         $out = [];
+
         foreach ($sections as $sec) {
             if (!empty($data[$sec]) && is_array($data[$sec])) {
                 foreach ($data[$sec] as $pkg => $ver) {
-                    $out[$pkg] ??= (string)$ver;
+                    if (!array_key_exists($pkg, $out)) {
+                        // composer.json thường là string; cast đề phòng
+                        $out[$pkg] = (string)$ver;
+                    }
                 }
             }
         }
-        return $out;
+
+        $count = count($out);
+        $msg = $count > 0
+            ? "Collected {$count} constraints from {$jsonRel} at {$jsonPath}"
+            : "No constraints found in {$jsonRel} at {$jsonPath} (sections: " . implode(', ', $sections) . ")";
+
+        return [true, $msg];
     }
 
     public function lockVersions(string $rootDir): array
@@ -282,23 +309,30 @@ final class ComposerCheck
 
     public function jsonKv(array $args): array
     {
-        $root = (string)$this->ctx->path;
+        $root = (string)($this->ctx->path ?? '');
 
         $jsonRel  = is_string($args['json_file'] ?? null) ? $args['json_file'] : 'composer.json';
         $jsonPath = $this->join($root, $jsonRel);
 
+        // Tìm ngay tại vị trí dự kiến; nếu không có thì find-up với chữ ký: findUp(string $path, int $maxDepth)
         if (!is_file($jsonPath)) {
-            if ($found = $this->findUp($jsonPath, 6)) {
+            $found = $this->findUp($jsonPath, 6); // ✅ tham số 2 là int, không truyền basename
+            if (is_string($found) && $found !== '') {
                 $jsonPath = $found;
             } else {
-                return [false, "composer.json not found at {$jsonPath}"];
+                return [false, "{$jsonRel} not found at {$jsonPath}"];
             }
         }
 
-        $raw  = @file_get_contents($jsonPath);
-        $data = is_string($raw) ? json_decode($raw, true) : null;
+        $raw = @file_get_contents($jsonPath);
+        if ($raw === false) {
+            return [false, "Cannot read {$jsonRel} at {$jsonPath}"];
+        }
+
+        $data = json_decode($raw, true);
         if (!is_array($data)) {
-            return [false, "Invalid composer.json at {$jsonPath}"];
+            $jerr = function_exists('json_last_error_msg') ? json_last_error_msg() : 'unknown JSON error';
+            return [false, "Invalid {$jsonRel} at {$jsonPath}: {$jerr}"];
         }
 
         $key = (string)($args['key'] ?? '');
@@ -306,18 +340,16 @@ final class ComposerCheck
             return [false, "Missing 'key' argument (dot-path)"];
         }
 
-        // Traverse dot-path
+        // Traverse dot-path (giữ nguyên wildcard '*' như bạn đang dùng)
         $exist = true;
         $val   = $data;
         foreach (explode('.', $key) as $seg) {
-            // support wildcard '*' to check any child exists
             if ($seg === '*') {
                 if (!is_array($val) || empty($val)) {
                     $exist = false;
                     break;
                 }
-                // For wildcard, consider "exists" true if array has at least one element
-                // If expect/op provided, you could extend to iterate; keep simple for now.
+                // với wildcard hiện tại: coi như tồn tại nếu có ít nhất 1 phần tử
                 $val = reset($val);
                 continue;
             }
@@ -328,16 +360,18 @@ final class ComposerCheck
             $val = $val[$seg];
         }
 
+        // op: chuẩn hoá chữ thường; mặc định 'eq' nếu có 'expect', ngược lại 'exists'
         $op = $args['op'] ?? (array_key_exists('expect', $args) ? 'eq' : 'exists');
+        $op = is_string($op) ? strtolower($op) : 'exists';
 
         if ($op === 'exists') {
             return [$exist, $exist ? "Key exists: {$key}" : "Key missing: {$key}"];
         }
         if ($op === 'not_exists') {
-            return [!$exist, !$exist ? "Key not exists (as expected): {$key}" : "Key unexpectedly present: {$key}"];
+            return [!$exist, !$exist ? "Key does not exist (as expected): {$key}" : "Key unexpectedly present: {$key}"];
         }
 
-        // For eq/neq we require the key to exist
+        // eq/neq yêu cầu key tồn tại
         if (!$exist) {
             return [false, "Key missing for comparison: {$key}"];
         }
@@ -358,6 +392,8 @@ final class ComposerCheck
 
         return [false, "Unsupported op '{$op}'"];
     }
+
+
 
     private function looseEqual(mixed $a, mixed $b): bool
     {

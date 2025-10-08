@@ -85,11 +85,11 @@ final class HtmlReporter
                 // . '<td>' . ($userMsg !== '' ? '<div style="color:#333;margin-top:4px">' . $userMsg . '</div>' : '') . '</td>'
                 . '<td>'
                 . ($userMsg !== '' ? '<div style="color:#333;margin-top:4px">' . $userMsg . '</div>' : '')
-                . (
+                /* . (
                     (!$suppressConfidence && $confVal !== null)
                     ? '<div style="opacity:.8;margin-top:4px"><small' . ($confWhy !== '' ? ' title="' . htmlspecialchars($confWhy, ENT_QUOTES, 'UTF-8') . '"' : '') . '>confidence: ' . $confVal . '%</small></div>'
                     : ''
-                )
+                ) */
                 . '</td>'  /* Quan trọng: đóng ô Message trước khi thêm ô Details */
                 . ($this->showDetails ? '<td>' . $this->renderDetails($f) . '</td>' : '')
                 . '</tr>';
@@ -151,7 +151,7 @@ final class HtmlReporter
 
             $confHtml = '<div class="section"><h3>Scan Confidence</h3>'
                 . '<div>Detected platform: <strong>Magento 2</strong> (confidence ' . $detConf . '%)</div>'
-                . '<div>Overall confidence: <strong>' . $overall . '%</strong> &nbsp;—&nbsp; transport ' . $tPct . '% &middot; coverage ' . $cPct . '%' . ($planned > 0 ? ' (' . $execd . '/' . $planned . ')' : '') . '</div>'
+//                . '<div>Overall confidence: <strong>' . $overall . '%</strong> &nbsp;—&nbsp; transport ' . $tPct . '% &middot; coverage ' . $cPct . '%' . ($planned > 0 ? ' (' . $execd . '/' . $planned . ')' : '') . '</div>'
                 . (!empty($signals) ? '<div style="opacity:.85;margin-top:6px"><small>Signals: ' . htmlspecialchars(implode(' • ', $signals), ENT_QUOTES, 'UTF-8') . '</small></div>' : '')
                 . '</div>';
             $html = str_replace('</body>', $confHtml . '</body>', $html);
