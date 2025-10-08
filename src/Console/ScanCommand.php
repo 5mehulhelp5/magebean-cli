@@ -126,7 +126,7 @@ HELP;
                 return Command::FAILURE;
             }
         }
-        
+
         // Nếu path không trỏ tới Magento root, thử leo lên tối đa 4 cấp
         if (!self::isMagentoRoot($requestedPath)) {
             $detected = self::detectMagentoRoot($requestedPath, 4);
@@ -178,9 +178,26 @@ HELP;
                 };
             }
 
+            $bundleMeta = [];
             if ($cveDataFile !== '') {
                 $isZip = (bool)preg_match('/\.zip$/i', $cveDataFile);
                 if ($isZip) {
+                    $bundleMeta = [];
+                    if ($cveDataFile !== '') {
+                        $isZip = (bool)preg_match('/\.zip$/i', (string)($in->getOption('cve-data') ?? ''));
+                        if ($isZip && class_exists(\ZipArchive::class)) {
+                            $origZip = (string)$in->getOption('cve-data');
+                            $tmpRoot = sys_get_temp_dir() . '/mbbundle_' . bin2hex(random_bytes(4));
+                            @mkdir($tmpRoot, 0777, true);
+                            $zip2 = new \ZipArchive();
+                            if ($zip2->open($origZip) === true) {
+                                $zip2->extractTo($tmpRoot);
+                                $zip2->close();
+                                $bundleMeta = $this->collectBundleMeta($tmpRoot);
+                            }
+                        }
+                    }
+
                     $bm = new BundleManager();
                     $extracted = $bm->extractOsvFileFromZip($cveDataFile);
                     if ($extracted && is_file($extracted)) {
@@ -207,7 +224,8 @@ HELP;
 
             $ctx  = new Context($projectPath, $projectUrl, $cveDataFile, [
                 'path' => $projectPath,
-                'url' => $projectUrl
+                'url' => $projectUrl,
+                'meta' => $bundleMeta,
             ]);
 
             $pack = RulePackLoader::loadAll();
@@ -261,7 +279,7 @@ HELP;
             } else {
                 $result['cve_audit'] = null;
             }
-            
+
             // 3) Write output
             // ---------- Pretty console output (mimic sample) ----------
             $this->renderPrettySummary($out, $result, $projectPath, $outFile);
@@ -616,11 +634,18 @@ HTML;
 
         // 1) Headers đặc trưng Magento 2
         $hasMagentoHdr = false;
-        foreach (['x-magento-tags','x-magento-cache-debug','x-magento-advanced'] as $hk) {
-            if (array_key_exists($hk, $headers)) { $hasMagentoHdr = true; break; }
+        foreach (['x-magento-tags', 'x-magento-cache-debug', 'x-magento-advanced'] as $hk) {
+            if (array_key_exists($hk, $headers)) {
+                $hasMagentoHdr = true;
+                break;
+            }
         }
-        if ($hasMagentoHdr) { $conf += 60; $signals[] = 'Header: X-Magento-* present'; }
-        else { $signals[] = 'Header: X-Magento-* NOT present'; }
+        if ($hasMagentoHdr) {
+            $conf += 60;
+            $signals[] = 'Header: X-Magento-* present';
+        } else {
+            $signals[] = 'Header: X-Magento-* NOT present';
+        }
 
         // 2) Token phổ biến trong HTML/JS của M2
         $bodyLc = strtolower($body);
@@ -636,10 +661,17 @@ HTML;
             '~Magento~i'
         ];
         foreach ($patterns as $rx) {
-            if (preg_match($rx, $bodyLc) === 1) { $hitBody = true; break; }
+            if (preg_match($rx, $bodyLc) === 1) {
+                $hitBody = true;
+                break;
+            }
         }
-        if ($hitBody) { $conf += 40; $signals[] = 'HTML token(s): Magento UI/asset markers found'; }
-        else { $signals[] = 'HTML token(s): no typical Magento markers'; }
+        if ($hitBody) {
+            $conf += 40;
+            $signals[] = 'HTML token(s): Magento UI/asset markers found';
+        } else {
+            $signals[] = 'HTML token(s): no typical Magento markers';
+        }
 
         // 3) URL canonical/asset gợi ý
         $assetHits = [];
@@ -653,7 +685,7 @@ HTML;
             $assetHits[] = '/static/frontend';
         }
         if (preg_match('~/static/_cache/merged/~i', $bodyLc))       $assetHits[] = '/static/_cache/merged';
-        if (preg_match('~luma-icons\\.(woff2|woff|ttf)~i', $bodyLc))$assetHits[] = 'Luma-Icons';
+        if (preg_match('~luma-icons\\.(woff2|woff|ttf)~i', $bodyLc)) $assetHits[] = 'Luma-Icons';
 
         if ($assetHits) {
             // +10 điểm mỗi clue (tối đa +30), riêng Luma-Icons cộng thêm +20 (Magento đặc trưng)
@@ -669,7 +701,10 @@ HTML;
         $nonMagentoHints = 0;
         if (str_contains($bodyLc, 'wp-content') || str_contains($bodyLc, 'wp-json')) $nonMagentoHints++;
         if (str_contains($bodyLc, 'cdn.shopify.com') || str_contains($bodyLc, 'x-shopify')) $nonMagentoHints++;
-        if ($nonMagentoHints > 0) { $conf = max(0, $conf - 40); $signals[] = 'Non-Magento hints present (WordPress/Shopify)'; }
+        if ($nonMagentoHints > 0) {
+            $conf = max(0, $conf - 40);
+            $signals[] = 'Non-Magento hints present (WordPress/Shopify)';
+        }
 
         if ($conf > 100) $conf = 100;
         return ['ok' => $conf >= 60, 'confidence' => $conf, 'signals' => $signals];
@@ -713,7 +748,7 @@ HTML;
             'method' => 'GET',
             'header' => "User-Agent: {$ua}\r\n",
             'ignore_errors' => true,
-            'timeout' => max(1, (int)ceil($timeoutMs/1000)),
+            'timeout' => max(1, (int)ceil($timeoutMs / 1000)),
         ]];
         $ctx = stream_context_create($opts);
         $body = @file_get_contents($url, false, $ctx);
@@ -734,12 +769,41 @@ HTML;
                 $k = strtolower($k);
                 // gộp header trùng (vd: Set-Cookie)
                 if (isset($out[$k])) {
-                    if (is_array($out[$k])) $out[$k][] = $v; else $out[$k] = [$out[$k], $v];
+                    if (is_array($out[$k])) $out[$k][] = $v;
+                    else $out[$k] = [$out[$k], $v];
                 } else {
                     $out[$k] = $v;
                 }
             }
         }
         return $out;
+    }
+
+    private function collectBundleMeta(string $root): array
+    {
+        $map = [];
+        foreach (['data', 'DATA', 'rules', 'RULES'] as $dir) {
+            $base = rtrim($root, '/\\') . DIRECTORY_SEPARATOR . $dir . DIRECTORY_SEPARATOR;
+            if (!is_dir($base)) continue;
+
+            $candidates = [
+                'abandoned'       => 'packagist-abandoned.json',
+                'yanked'          => 'packagist-yanked.json',
+                'release_history' => 'release-history.json',
+                'repo_status'     => 'repo-status.json',
+                'vendor_support'  => 'vendor-support.json',
+                // tuỳ chọn:
+                'kev'             => 'cisa-kev.json',
+                'adobe_core'      => 'adobe-core-advisories.json',
+                'high_risk'       => 'high-risk-modules.json',
+            ];
+            foreach ($candidates as $key => $file) {
+                $p = $base . $file;
+                if (is_file($p)) {
+                    $map[$key] = $p;
+                }
+            }
+        }
+        return $map;
     }
 }

@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace Magebean\Bundle;
 
@@ -16,16 +18,16 @@ final class BundleManager
         $zipPath = realpath($zipPath) ?: $zipPath;
         if (!is_file($zipPath) || !class_exists(\ZipArchive::class)) return null;
 
-        $tmpRoot = sys_get_temp_dir().'/magebean-cve-'.bin2hex(random_bytes(4));
+        // Extract toàn bộ ZIP vào thư mục tạm
+        $tmpRoot = sys_get_temp_dir() . '/magebean-cve-' . bin2hex(random_bytes(4));
         @mkdir($tmpRoot, 0777, true);
 
         $zip = new \ZipArchive();
         if ($zip->open($zipPath) !== true) return null;
-        // extract all entries (kể cả nested dirs)
         $zip->extractTo($tmpRoot);
         $zip->close();
 
-        // duyệt toàn bộ cây sau khi extract; materialize file plain json-like
+        // Duyệt toàn bộ cây sau khi extract; materialize file plain json-like
         $candidates = [];
         $it = new \RecursiveIteratorIterator(
             new \RecursiveDirectoryIterator($tmpRoot, \FilesystemIterator::SKIP_DOTS)
@@ -37,7 +39,17 @@ final class BundleManager
                 $candidates[$plain] = filesize($plain) ?: 0;
             }
         }
-        if (!$candidates) return null;
+
+        if (!$candidates) {
+            // Fallback cho Magebean bundle v1: MANIFEST/ + VULNS/*.json
+            $manifest = $tmpRoot . '/MANIFEST/manifest.json';
+            $vulnDir  = $tmpRoot . '/VULNS';
+            if (is_file($manifest) && is_dir($vulnDir)) {
+                $ndjson = $this->emitNdjsonFromVulnDir($vulnDir);
+                if ($ndjson) return $ndjson;
+            }
+            return null;
+        }
 
         arsort($candidates, SORT_NUMERIC); // largest first
         return array_key_first($candidates);
@@ -55,7 +67,7 @@ final class BundleManager
             @mkdir($outDir, 0777, true);
             try {
                 if (preg_match('/\.(tar\.gz|tgz)$/i', $lower)) {
-                    $tarPath = preg_replace('/\.(tar\.gz|tgz)$/i', '.tar', $path) ?: ($path.'.tar');
+                    $tarPath = preg_replace('/\.(tar\.gz|tgz)$/i', '.tar', $path) ?: ($path . '.tar');
                     if (!$this->gunzipTo($path, $tarPath)) return null;
                     $ph = new \PharData($tarPath);
                 } else {
@@ -66,7 +78,8 @@ final class BundleManager
                 return null;
             }
 
-            $best = null; $bestSize = -1;
+            $best = null;
+            $bestSize = -1;
             $it = new \RecursiveIteratorIterator(
                 new \RecursiveDirectoryIterator($outDir, \FilesystemIterator::SKIP_DOTS)
             );
@@ -75,7 +88,10 @@ final class BundleManager
                 $plain = $this->materializePlainJsonLike($p->getPathname());
                 if ($plain && is_file($plain) && $this->looksLikeJsonOrNdjson($plain)) {
                     $sz = filesize($plain) ?: 0;
-                    if ($sz > $bestSize) { $best = $plain; $bestSize = $sz; }
+                    if ($sz > $bestSize) {
+                        $best = $plain;
+                        $bestSize = $sz;
+                    }
                 }
             }
             return $best;
@@ -83,7 +99,7 @@ final class BundleManager
 
         // 2) Compressed single file (.gz/.bz2) đè trên .json/.ndjson/.jsonl
         if (preg_match('/\.(json|ndjson|jsonl)\.(gz|bz2)$/i', $lower, $m)) {
-            $plain = preg_replace('/\.(gz|bz2)$/i', '', $path) ?: $path.'.out';
+            $plain = preg_replace('/\.(gz|bz2)$/i', '', $path) ?: $path . '.out';
             $ok = strtolower($m[2]) === 'gz'
                 ? $this->gunzipTo($path, $plain)
                 : $this->bunzip2To($path, $plain);
@@ -104,17 +120,22 @@ final class BundleManager
         $data = @file_get_contents($src);
         if ($data !== false) {
             $decoded = @gzdecode($data);
-            if ($decoded !== false && file_put_contents($dst, $decoded)!==false) return true;
+            if ($decoded !== false && file_put_contents($dst, $decoded) !== false) return true;
         }
         $gz = @gzopen($src, 'rb');
         if (!$gz) return false;
-        $out = @fopen($dst, 'wb'); if (!$out) { gzclose($gz); return false; }
+        $out = @fopen($dst, 'wb');
+        if (!$out) {
+            gzclose($gz);
+            return false;
+        }
         while (!gzeof($gz)) {
-            $chunk = gzread($gz, 1<<20);
+            $chunk = gzread($gz, 1 << 20);
             if ($chunk === false) break;
             fwrite($out, $chunk);
         }
-        fclose($out); gzclose($gz);
+        fclose($out);
+        gzclose($gz);
         return is_file($dst);
     }
 
@@ -125,20 +146,24 @@ final class BundleManager
         if ($data === false) return false;
         $decoded = @bzdecompress($data);
         if (!is_string($decoded)) return false;
-        return file_put_contents($dst, $decoded)!==false;
+        return file_put_contents($dst, $decoded) !== false;
     }
 
     private function looksLikeJsonOrNdjson(string $path): bool
     {
-        $fh = @fopen($path, 'rb'); if (!$fh) return false;
-        $buf = fread($fh, 4096); fclose($fh);
+        $fh = @fopen($path, 'rb');
+        if (!$fh) return false;
+        $buf = fread($fh, 4096);
+        fclose($fh);
         if ($buf === false || $buf === '') return false;
 
-        if (preg_match('/^\s*[\{\[]/s', $buf)) return true; // JSON object/array
+        // JSON array/object
+        if (preg_match('/^\s*[\{\[]/s', $buf)) return true;
 
         // NDJSON / JSONL heuristic
         $lines = preg_split('/\r?\n/', $buf);
-        $seen = 0; $jsonish = 0;
+        $seen = 0;
+        $jsonish = 0;
         foreach ($lines as $ln) {
             $ln = ltrim($ln);
             if ($ln === '') continue;
@@ -147,5 +172,47 @@ final class BundleManager
             if ($seen >= 8) break;
         }
         return $jsonish >= 3;
+    }
+
+    /**
+     * Convert toàn bộ VULNS/*.json của bundle v1 thành 1 file NDJSON tạm.
+     * Trả về absolute path tới file NDJSON hoặc null nếu không tạo được.
+     */
+    private function emitNdjsonFromVulnDir(string $vulnDir): ?string
+    {
+        $out = tempnam(sys_get_temp_dir(), 'mb_cve_');
+        if (!$out) return null;
+
+        $fh = @fopen($out, 'wb');
+        if (!$fh) return null;
+
+        $count = 0;
+        $it = new \DirectoryIterator($vulnDir);
+        foreach ($it as $fi) {
+            if ($fi->isDot() || !$fi->isFile()) continue;
+            $name = $fi->getFilename();
+            if (!preg_match('/\.json$/i', $name)) continue;
+
+            $raw = @file_get_contents($fi->getPathname());
+            if ($raw === false || $raw === '') continue;
+
+            $obj = json_decode($raw, true);
+            if (!is_array($obj)) continue;
+
+            // Đảm bảo định dạng advisory kiểu OSV (ComposerCheck::auditOffline cần 'affected')
+            if (empty($obj['affected']) || !is_array($obj['affected'])) continue;
+
+            fwrite($fh, json_encode($obj, JSON_UNESCAPED_SLASHES) . "\n");
+            $count++;
+        }
+
+        fclose($fh);
+
+        if ($count === 0) {
+            @unlink($out);
+            return null;
+        }
+
+        return $out;
     }
 }

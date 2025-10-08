@@ -182,12 +182,6 @@ final class ScanRunner
                 'evidence' => $evidence,
             ];
 
-            // Chỉ gắn confidence khi KHÔNG suppress
-            if (!$suppressConfidence) {
-                [$conf, $confWhy] = $this->estimateConfidenceForRule((array)($rule['checks'] ?? []), $evidence, (string)$status);
-                $finding['confidence'] = $conf;
-                $finding['confidence_reason'] = $confWhy;
-            }
             $findings[] = $finding;
 
             // Đếm theo status để UNKNOWN không bị tính là failed
@@ -237,7 +231,6 @@ final class ScanRunner
         GitHistoryCheck $git,
         CronCheck $cron
     ): array {
-        $path = $this->ctx->path;
 
         // 1) Đưa tất cả http_* về HttpCheck->dispatch()
         if ($name === 'http_header') {
@@ -270,11 +263,12 @@ final class ScanRunner
             'php_array_absent' => $phpc->dispatch($name, $args),
 
             // Composer / Magento / Code / Web / Git
-            'composer_audit'                      => $comp->stub($args),
+            
             'magento_config'                      => $mage->stub($args),
             'code_grep'                           => $code->grep($args),
             'nginx_directive'                     => $web->nginxDirective($args),
             'apache_htaccess_directive'           => $web->apacheDirective($args),
+
             'composer_audit_offline'              => $comp->auditOffline($args),
             'composer_core_advisories_offline'    => $comp->coreAdvisoriesOffline($args),
             'composer_fix_version'                => $comp->fixVersion($args),
@@ -293,6 +287,8 @@ final class ScanRunner
             'composer_json_kv'                    => $comp->jsonKv($args),
             'composer_lock_integrity'             => $comp->lockIntegrity($args),
             'php_array_key_search'                => $phpc->keySearch($args),
+
+            // Git scan
             'git_history_scan'                    => $git->secretScan($args),
 
             // Crontab check
@@ -301,92 +297,5 @@ final class ScanRunner
             // 3) Unknown → trả UNKNOWN (null) thay vì false để khỏi “đè” rule thành FAIL
             default => [null, '[UNKNOWN] Unknown check: ' . $name, []],
         };
-    }
-
-    private function estimateConfidenceForRule(array $checks, array $evidence, string $status): array
-    {
-        $first = is_array($checks[0] ?? null) ? $checks[0] : [];
-        $name  = strtolower((string)($first['name'] ?? ''));
-        $hasUrl = (string)$this->ctx->get('url') !== '';
-
-        // 1) Base theo nhóm check (online/offline)
-        $base = match ($name) {
-            // HTTP exact header/value
-            'http_has_hsts', 'http_cookie_flags',
-            'http_header_equals', 'http_header_in' => 95,
-
-            // HTTP redirects / status gating
-            'http_force_https_redirect', 'http_block_path' => 90,
-
-            // HTTP tls/cert
-            'http_tls_min_version', 'http_tls_cert_days_left' => 85,
-
-            // HTTP html/dom content
-            'http_no_mixed_content', 'http_no_stacktrace' => 80,
-
-            // HTTP absence / probing
-            'http_no_directory_listing', 'http_no_public_artifacts' => 70,
-
-            // HTTP heuristic
-            'http_admin_path_heuristics', 'http_server_banner_not_verbose' => 60,
-
-            // Offline groups (—path)
-            'code_grep' => 70, // heuristic by design
-            'nginx_directive', 'apache_htaccess_directive' => 85,
-
-            default => 75,
-        };
-
-        // Bổ sung theo tiền tố cho offline checks chưa liệt kê cụ thể
-        if ($name !== '') {
-            if (str_starts_with($name, 'fs_') || $name === 'no_directory_listing') {
-                $base = max($base, 85);
-            }
-            if (str_starts_with($name, 'composer_')) {
-                $base = max($base, 85);
-            }
-            if (str_starts_with($name, 'php_')) {
-                $base = max($base, 80);
-            }
-            if ($name === 'git_history_scan') {
-                $base = max($base, 80);
-            }
-            if ($name === 'text_grep' || $name === 'file_grep' || $name === 'grep') {
-                $base = max($base, 70);
-            }
-        }
-
-        // 2) Giảm confidence cho http_* nếu đang chạy --path (không có URL)
-        if (!$hasUrl && str_starts_with($name, 'http_')) {
-            $base = max(0, $base - 40);
-        }
-
-        // 3) UNKNOWN → giảm 20
-        if (strtoupper($status) === 'UNKNOWN') {
-            $base = max(0, $base - 20);
-        }
-
-        // 4) Nếu evidence cho thấy CDN/WAF (server header) → giảm 10
-        $hdrs = [];
-        if (isset($evidence['headers']) && is_array($evidence['headers'])) {
-            $hdrs = array_change_key_case($evidence['headers'], CASE_LOWER);
-        } else {
-            foreach ($evidence as $ev) {
-                if (is_array($ev) && isset($ev['headers']) && is_array($ev['headers'])) {
-                    $hdrs = array_change_key_case($ev['headers'], CASE_LOWER);
-                    break;
-                }
-            }
-        }
-        $server = (string)($hdrs['server'] ?? '');
-        foreach (['cloudflare', 'akamai', 'fastly', 'sucuri', 'incapsula', 'varnish'] as $kw) {
-            if ($server !== '' && stripos($server, $kw) !== false) {
-                $base = max(0, $base - 10);
-                break;
-            }
-        }
-
-        $base = max(0, min(100, (int)$base));
-        return [$base, 'Estimated by check type ' . ($name ?: 'n/a') . ($server ? " (server: {$server})" : '') . (!$hasUrl && str_starts_with($name, 'http_') ? ' [path-mode]' : '')];
     }
 }

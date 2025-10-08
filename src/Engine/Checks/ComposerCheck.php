@@ -15,11 +15,6 @@ final class ComposerCheck
         $this->ctx = $ctx;
     }
 
-    public function stub(array $args): array
-    {
-        return [true, "ComposerCheck stub PASS"];
-    }
-
     public function auditOffline(array $args): array
     {
         // 1. Xác định file CVE data
@@ -159,80 +154,593 @@ final class ComposerCheck
         return is_string($sev) ? $sev : null;
     }
 
+    public function yankedOffline(array $args): array
+    {
+        $lock = $this->ctx->abs($args['lock_file'] ?? 'composer.lock');
+        if (!is_file($lock)) return [null, "[UNKNOWN] composer.lock not found"];
+
+        $metaPath = $this->metaPath($args, 'yanked', 'yanked_meta', 'rules/packagist-yanked.json');
+        if (!$metaPath) return [null, "[UNKNOWN] Yanked metadata not found"];
+
+        $pkgs = $this->readLockPackages($lock);
+        if (!$pkgs) return [null, "[UNKNOWN] Unable to parse composer.lock"];
+
+        $meta = $this->loadJsonSafe($metaPath);
+        if (!$meta || empty($meta['yanked']) || !is_array($meta['yanked'])) {
+            return [null, "[UNKNOWN] Invalid yanked metadata JSON"];
+        }
+
+        $hits = [];
+        foreach ($pkgs as $name => $p) {
+            $ver = $p['version'] ?? '';
+            $ylist = $meta['yanked'][$name] ?? [];
+            if ($ver && is_array($ylist) && in_array($ver, $ylist, true)) {
+                $hits[] = "{$name} {$ver}";
+            }
+        }
+
+        if ($hits) return [false, "Yanked versions present: " . implode(', ', $hits)];
+        return [true, "No yanked versions"];
+    }
+
 
     public function coreAdvisoriesOffline(array $args): array
     {
-        return [true, "composer_core_advisories_offline stub"];
+        $lock = $this->ctx->abs($args['lock_file'] ?? 'composer.lock');
+        $meta = $this->ctx->abs($args['adobe_meta'] ?? 'rules/adobe-core-advisories.json');
+
+        if (!is_file($lock)) return [null, "[UNKNOWN] composer.lock not found"];
+        if (!is_file($meta)) return [null, "[UNKNOWN] Adobe core advisories metadata not found: {$meta}"];
+
+        // TODO: implement: map magento/magento2 & adobe modules -> affected ranges -> FAIL if within affected
+        return [null, "[UNKNOWN] Core advisories check not implemented (meta present)"];
     }
 
     public function fixVersion(array $args): array
     {
-        return [true, "composer_fix_version suggestion stub"];
+        $lock = $this->ctx->abs($args['lock_file'] ?? 'composer.lock');
+        $meta = $this->ctx->abs($args['cve_meta'] ?? 'rules/osv-db.json');
+
+        if (!is_file($lock)) return [null, "[UNKNOWN] composer.lock not found"];
+        if (!is_file($meta)) return [null, "[UNKNOWN] CVE database not found: {$meta}"];
+
+        // TODO: implement: for each affected package, compute minimal non-affected version and propose fix
+        return [null, "[UNKNOWN] Fix-version suggestion not implemented (meta present)"];
     }
 
     public function riskSurfaceTag(array $args): array
     {
-        return [true, "composer_risk_surface_tag stub"];
+        $lock = $this->ctx->abs($args['lock_file'] ?? 'composer.lock');
+        $meta = $this->ctx->abs($args['tags_meta'] ?? 'rules/risk-surface.json');
+
+        if (!is_file($lock)) return [null, "[UNKNOWN] composer.lock not found"];
+        if (!is_file($meta)) return [null, "[UNKNOWN] Risk-surface metadata not found: {$meta}"];
+
+        // TODO: implement: annotate findings or return note; engine may need to surface tags in details
+        return [null, "[UNKNOWN] Risk-surface tagging not implemented (meta present)"];
     }
 
     public function matchList(array $args): array
     {
-        return [true, "composer_match_list stub"];
+        $lock = $this->ctx->abs($args['lock_file'] ?? 'composer.lock');
+        $meta = $this->ctx->abs($args['list_meta'] ?? 'rules/match-list.json');
+        $mode = strtolower($args['mode'] ?? 'deny');
+
+        if (!is_file($lock)) return [null, "[UNKNOWN] composer.lock not found"];
+        if (!is_file($meta)) return [null, "[UNKNOWN] Match-list metadata not found: {$meta}"];
+
+        $pkgs = $this->readLockPackages($lock);
+        if (!$pkgs) return [null, "[UNKNOWN] Unable to parse composer.lock"];
+
+        $cfg = $this->loadJsonSafe($meta);
+        if (!$cfg) return [null, "[UNKNOWN] Invalid match-list JSON"];
+
+        $list = array_change_key_case(array_flip($cfg['packages'] ?? []), CASE_LOWER);
+
+        if ($mode === 'deny') {
+            $hits = [];
+            foreach ($pkgs as $name => $_) {
+                if (isset($list[strtolower($name)])) $hits[] = $name;
+            }
+            if ($hits) {
+                return [false, "Denied packages present: " . implode(', ', $hits)];
+            }
+            return [true, "No denied packages present"];
+        }
+
+        if ($mode === 'allow') {
+            $notAllowed = [];
+            foreach ($pkgs as $name => $_) {
+                if (!isset($list[strtolower($name)])) $notAllowed[] = $name;
+            }
+            if ($notAllowed) {
+                return [false, "Packages not in allow-list: " . implode(', ', $notAllowed)];
+            }
+            return [true, "All packages are in allow-list"];
+        }
+
+        return [null, "[UNKNOWN] Unsupported match-list mode: {$mode}"];
     }
 
     public function constraintsConflict(array $args): array
     {
-        return [true, "composer_constraints_conflict stub"];
+        // --- 0) Input files ---
+        $jsonPath = $this->ctx->abs($args['composer_json'] ?? 'composer.json');
+        if (!is_file($jsonPath)) {
+            return [null, "[UNKNOWN] composer.json not found"];
+        }
+        $cvePath = $this->ctx->cveData;
+        if (!is_string($cvePath) || $cvePath === '' || !is_file($cvePath)) {
+            return [null, "[UNKNOWN] CVE dataset file not found (use --cve-data=...)"];
+        }
+
+        // --- 1) Small helpers (closures to avoid class-level collisions) ---
+        $vercmp = function (string $a, string $b): int {
+            $norm = function (string $v): array {
+                $v = ltrim($v, 'vV');
+                // keep only digits and dots for compare
+                $v = preg_replace('/[^0-9.]/', '.', $v) ?? $v;
+                $parts = array_map('intval', array_filter(explode('.', $v), 'strlen'));
+                while (count($parts) < 3) $parts[] = 0;
+                return $parts;
+            };
+            [$a1, $a2, $a3] = $norm($a);
+            [$b1, $b2, $b3] = $norm($b);
+            if ($a1 !== $b1) return $a1 <=> $b1;
+            if ($a2 !== $b2) return $a2 <=> $b2;
+            if ($a3 !== $b3) return $a3 <=> $b3;
+            return 0;
+        };
+        $nextMajor = function (string $v): string {
+            $v = ltrim($v, 'vV');
+            $p = preg_replace('/[^0-9.]/', '.', $v);
+            $a = array_map('intval', array_filter(explode('.', $p), 'strlen')) + [0, 0, 0];
+            return ($a[0] + 1) . '.0.0';
+        };
+        $nextMinor = function (string $v): string {
+            $v = ltrim($v, 'vV');
+            $p = preg_replace('/[^0-9.]/', '.', $v);
+            $a = array_map('intval', array_filter(explode('.', $p), 'strlen')) + [0, 0, 0];
+            return $a[0] . '.' . ($a[1] + 1) . '.0';
+        };
+        $caretUpper = function (string $v) use ($nextMajor, $vercmp): string {
+            // ^ rules (Composer): ^1.2.3 -> <2.0.0 ; ^0.2.3 -> <0.3.0 ; ^0.0.3 -> <0.0.4
+            $v = ltrim($v, 'vV');
+            $p = preg_replace('/[^0-9.]/', '.', $v);
+            $a = array_map('intval', array_filter(explode('.', $p), 'strlen')) + [0, 0, 0];
+            if ($a[0] > 0) return $nextMajor($v);
+            if ($a[1] > 0) return "0." . ($a[1] + 1) . ".0";
+            return "0.0." . ($a[2] + 1);
+        };
+        $wildcardUpper = function (string $v) use ($nextMajor, $nextMinor): string {
+            // 1.* => <2.0.0 ; 1.2.* => <1.3.0
+            $v = ltrim($v, 'vV');
+            $p = preg_replace('/[^0-9.*]/', '.', $v);
+            $a = explode('.', $p);
+            if (count($a) >= 2 && ($a[1] === '*' || $a[1] === 'x')) {
+                return $nextMajor($v);
+            }
+            return $nextMinor($v);
+        };
+
+        $semverAllowsAtLeast = function (string $constraint, string $fixed) use ($vercmp, $nextMajor, $nextMinor, $caretUpper, $wildcardUpper) {
+            $constraint = trim($constraint);
+            if ($constraint === '' || $constraint === '*') return true;
+
+            // If Composer\Semver available, use exact check: any version >= fixed that satisfies?
+            if (class_exists(\Composer\Semver\Semver::class)) {
+                try {
+                    // quick path: if constraint already allows fixed itself, return true
+                    if (\Composer\Semver\Semver::satisfies($fixed, $constraint)) {
+                        return true;
+                    }
+                    // heuristic: bump fixed a bit and test a few candidates
+                    $cands = [$fixed];
+                    // add same major/minor small bumps
+                    $cands[] = $nextMinor($fixed);
+                    $cands[] = $nextMajor($fixed);
+                    foreach ($cands as $cand) {
+                        if (\Composer\Semver\Semver::satisfies($cand, $constraint)) {
+                            // ensure cand >= fixed
+                            if ($vercmp($cand, $fixed) >= 0) return true;
+                        }
+                    }
+                } catch (\Throwable $e) {
+                    // ignore -> fall back to naive
+                }
+            }
+
+            // Naive solver for common forms:
+            // split OR '||'
+            foreach (preg_split('/\s*\|\|\s*/', $constraint) as $clause) {
+                $clause = trim(str_replace(',', ' ', $clause));
+                if ($clause === '') continue;
+
+                $upper = null;       // string, exclusive unless $upperInclusive
+                $upperInclusive = false;
+                $exactHit = null;    // if exact version in clause
+
+                $tokens = preg_split('/\s+/', $clause);
+                foreach ($tokens as $tok) {
+                    $tok = trim($tok);
+                    if ($tok === '') continue;
+
+                    // 1) Exact version (no operator)
+                    if (preg_match('/^[vV]?\d+(\.\d+){0,2}$/', $tok)) {
+                        $exactHit = $tok;
+                        continue;
+                    }
+
+                    // 2) Wildcards like 1.* or 1.2.*
+                    if (preg_match('/^[vV]?\d+(\.\d+)?\.\*$/', $tok) || preg_match('/^[vV]?\d+\.\*$/', $tok)) {
+                        $u = $wildcardUpper($tok);
+                        if ($upper === null || $vercmp($u, $upper) < 0) {
+                            $upper = $u;
+                            $upperInclusive = false;
+                        }
+                        continue;
+                    }
+
+                    // 3) Caret ^x.y.z
+                    if ($tok[0] === '^') {
+                        $base = substr($tok, 1);
+                        $u = $caretUpper($base);
+                        if ($upper === null || $vercmp($u, $upper) < 0) {
+                            $upper = $u;
+                            $upperInclusive = false;
+                        }
+                        continue;
+                    }
+
+                    // 4) Tilde ~x.y or ~x.y.z
+                    if ($tok[0] === '~') {
+                        $base = substr($tok, 1);
+                        $u = $nextMinor($base);
+                        if ($upper === null || $vercmp($u, $upper) < 0) {
+                            $upper = $u;
+                            $upperInclusive = false;
+                        }
+                        continue;
+                    }
+
+                    // 5) Operators
+                    if (preg_match('/^(>=|>|<=|<|=)\s*([vV]?\d+(?:\.\d+){0,2})$/', $tok, $m)) {
+                        $op = $m[1];
+                        $v = $m[2];
+                        if ($op === '<') {
+                            if ($upper === null || $vercmp($v, $upper) < 0) {
+                                $upper = $v;
+                                $upperInclusive = false;
+                            }
+                        } elseif ($op === '<=') {
+                            if ($upper === null || $vercmp($v, $upper) < 0) {
+                                $upper = $v;
+                                $upperInclusive = true;
+                            } elseif ($upper !== null && $vercmp($v, $upper) === 0) {
+                                // if same U but one is exclusive, keep exclusive
+                                $upperInclusive = $upperInclusive && true;
+                            }
+                        } elseif ($op === '=') {
+                            $exactHit = $v;
+                        } else {
+                            // >= or > only affect lower bound; lower bound never blocks ">= fixed" existence
+                            // leave for simplicity
+                        }
+                        continue;
+                    }
+                }
+
+                // Evaluate the clause
+                if ($exactHit !== null) {
+                    // exact version allowed
+                    return ($vercmp($exactHit, $fixed) >= 0);
+                }
+                if ($upper === null) {
+                    // no upper bound -> there exists some version >= fixed
+                    return true;
+                }
+                // check fixed against upper bound
+                $cmp = $vercmp($fixed, $upper);
+                if ($cmp < 0) {
+                    return true; // fixed is below the (exclusive) upper
+                }
+                if ($cmp === 0 && $upperInclusive) {
+                    return true; // fixed equals inclusive upper
+                }
+                // otherwise this clause cannot accommodate fixed-or-higher
+                // keep checking other OR clauses
+            }
+            return false;
+        };
+
+        // --- 2) Build minimal "fixed version" per package from CVE dataset ---
+        $fixMin = []; // package => minimal fixed version that resolves each CVE; we will take MAX across CVEs
+        $handleRow = function (array $row) use (&$fixMin, $vercmp) {
+            if (empty($row['affected']) || !is_array($row['affected'])) return;
+            foreach ($row['affected'] as $aff) {
+                $pkg = $aff['package']['name'] ?? null;
+                $eco = $aff['package']['ecosystem'] ?? null;
+                if (!$pkg || !$eco) continue;
+                if (strtolower($eco) !== 'packagist') continue;
+                $pkg = strtolower($pkg);
+
+                // collect minimal fixed in this CVE record for this package
+                $minFixedThis = null;
+                if (!empty($aff['ranges']) && is_array($aff['ranges'])) {
+                    foreach ($aff['ranges'] as $rg) {
+                        if (!empty($rg['events']) && is_array($rg['events'])) {
+                            foreach ($rg['events'] as $ev) {
+                                if (!empty($ev['fixed'])) {
+                                    $fx = (string)$ev['fixed'];
+                                    if ($minFixedThis === null || $vercmp($fx, $minFixedThis) < 0) {
+                                        $minFixedThis = $fx;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                if ($minFixedThis !== null) {
+                    if (!isset($fixMin[$pkg]) || $vercmp($minFixedThis, $fixMin[$pkg]) > 0) {
+                        // take MAX across CVEs so that upgrading to this fixes all CVEs seen so far
+                        $fixMin[$pkg] = $minFixedThis;
+                    }
+                }
+            }
+        };
+
+        // read dataset (NDJSON or JSON array)
+        $fh = @fopen($cvePath, 'rb');
+        if (!$fh) return [null, "[UNKNOWN] Unable to open CVE dataset: {$cvePath}"];
+        $peek = fread($fh, 1 << 15) ?: '';
+        fclose($fh);
+
+        if (preg_match('/^\s*\[/', $peek) === 1) {
+            // JSON array
+            $raw = @file_get_contents($cvePath);
+            if ($raw === false || $raw === '') return [null, "[UNKNOWN] Empty CVE dataset"];
+            $arr = json_decode($raw, true);
+            if (!is_array($arr)) return [null, "[UNKNOWN] Invalid CVE JSON"];
+            foreach ($arr as $row) {
+                if (is_array($row)) $handleRow($row);
+            }
+        } else {
+            // NDJSON
+            $fh = @fopen($cvePath, 'rb');
+            if (!$fh) return [null, "[UNKNOWN] Unable to open CVE dataset (ndjson): {$cvePath}"];
+            while (!feof($fh)) {
+                $line = fgets($fh);
+                if ($line === false) break;
+                $line = trim($line);
+                if ($line === '') continue;
+                $row = json_decode($line, true);
+                if (is_array($row)) $handleRow($row);
+            }
+            fclose($fh);
+        }
+
+        if (empty($fixMin)) {
+            return [null, "[UNKNOWN] No fixed-version data in CVE dataset; cannot evaluate constraints"];
+        }
+
+        // --- 3) Load composer.json constraints ---
+        $composer = json_decode((string)file_get_contents($jsonPath), true);
+        if (!is_array($composer)) {
+            return [null, "[UNKNOWN] Invalid composer.json"];
+        }
+        $req = is_array($composer['require'] ?? null) ? $composer['require'] : [];
+        $reqDev = is_array($composer['require-dev'] ?? null) ? $composer['require-dev'] : [];
+        $constraints = [];
+        foreach ([$req, $reqDev] as $bucket) {
+            foreach ($bucket as $name => $con) {
+                $constraints[strtolower((string)$name)] = (string)$con;
+            }
+        }
+        if (empty($constraints)) {
+            return [true, "No constraints to evaluate"];
+        }
+
+        // --- 4) Evaluate conflicts ---
+        $conflicts = [];
+        foreach ($fixMin as $pkg => $minFixed) {
+            if (!isset($constraints[$pkg])) continue; // not directly required by the project
+            $con = $constraints[$pkg];
+            $allows = $semverAllowsAtLeast($con, $minFixed);
+            if (!$allows) {
+                $conflicts[] = "{$pkg} requires '{$con}' but needs >= {$minFixed}";
+            }
+        }
+
+        if (!empty($conflicts)) {
+            return [false, "Constraints block security upgrades: " . implode(' ; ', $conflicts) . " (dataset: {$cvePath})"];
+        }
+
+        return [true, "Composer constraints do not block required security update ranges (dataset: {$cvePath})"];
     }
 
-    public function yankedOffline(array $args): array
-    {
-        return [true, "composer_yanked_offline stub"];
-    }
 
     public function outdatedOffline(array $args): array
     {
-        return [true, "composer_outdated_offline stub"];
+        $lock   = $this->ctx->abs($args['lock_file'] ?? 'composer.lock');
+        $market = $this->ctx->abs($args['market_meta'] ?? $args['release_meta'] ?? 'rules/marketplace-versions.json');
+
+        if (!is_file($lock)) {
+            return [null, "[UNKNOWN] composer.lock not found"];
+        }
+        if (!is_file($market)) {
+            return [null, "[UNKNOWN] Release/marketplace metadata not found: {$market}"];
+        }
+
+        // TODO: Implement thực theo meta format → tạm UNKNOWN
+        return [null, "[UNKNOWN] Outdated check not implemented (meta present)"];
     }
 
     public function advisoryLatency(array $args): array
     {
-        return [true, "composer_advisory_latency stub"];
+        $lock = $this->ctx->abs($args['lock_file'] ?? 'composer.lock');
+        $meta = $this->ctx->abs($args['advisory_meta'] ?? 'rules/advisories.json');
+
+        if (!is_file($lock))  return [null, "[UNKNOWN] composer.lock not found"];
+        if (!is_file($meta))  return [null, "[UNKNOWN] Advisory metadata not found: {$meta}"];
+
+        // TODO: implement real advisory latency evaluation (compare advisory publish_date vs local update/lock date)
+        return [null, "[UNKNOWN] Advisory latency check not implemented (meta present)"];
     }
 
     public function vendorSupportOffline(array $args): array
     {
-        return [true, "composer_vendor_support_offline stub"];
+        $lock = $this->ctx->abs($args['lock_file'] ?? 'composer.lock');
+        if (!is_file($lock)) return [null, "[UNKNOWN] composer.lock not found"];
+
+        $metaPath = $this->metaPath($args, 'vendor_support', 'support_meta', 'rules/vendor-support.json');
+        if (!$metaPath) return [null, "[UNKNOWN] Vendor support metadata not found"];
+
+        $pkgs = $this->readLockPackages($lock);
+        if (!$pkgs) return [null, "[UNKNOWN] Unable to parse composer.lock"];
+
+        $meta = $this->loadJsonSafe($metaPath);
+        if (!$meta) return [null, "[UNKNOWN] Invalid vendor-support metadata JSON"];
+
+        $today = strtotime('today');
+        $eol = [];
+        foreach ($pkgs as $name => $_) {
+            $info = $meta[$name] ?? null;
+            if (!$info) continue;
+            $supported = (bool)($info['supported'] ?? false);
+            $untilStr  = (string)($info['until'] ?? '');
+            $until     = $untilStr !== '' ? strtotime($untilStr) : null;
+
+            if (!$supported) {
+                $eol[] = "{$name} (unsupported)";
+            } elseif ($until && $until < $today) {
+                $eol[] = "{$name} (support ended {$untilStr})";
+            }
+        }
+
+        if ($eol) return [false, "Unsupported/EOL packages: " . implode('; ', $eol)];
+        return [true, "All packages are within vendor support windows"];
     }
+
 
     public function abandonedOffline(array $args): array
     {
         $lock = $this->ctx->abs($args['lock_file'] ?? 'composer.lock');
-        $meta = $this->ctx->abs($args['packagist_meta'] ?? 'rules/packagist-abandoned.json');
-        return [true, "composer_abandoned_offline checked $lock with $meta"];
+        if (!is_file($lock)) return [null, "[UNKNOWN] composer.lock not found"];
+
+        $metaPath = $this->metaPath($args, 'abandoned', 'abandoned_meta', 'rules/packagist-abandoned.json');
+        if (!$metaPath) return [null, "[UNKNOWN] Abandoned metadata not found (bundle or args)"];
+
+        $pkgs = $this->readLockPackages($lock);
+        if (!$pkgs) return [null, "[UNKNOWN] Unable to parse composer.lock"];
+
+        $meta = $this->loadJsonSafe($metaPath);
+        if (!$meta || !isset($meta['abandoned']) || !is_array($meta['abandoned'])) {
+            return [null, "[UNKNOWN] Invalid abandoned metadata JSON: {$metaPath}"];
+        }
+        // Nếu metadata rỗng, coi như KHÔNG đủ dữ liệu => UNKNOWN (tránh PASS giả)
+        if (count($meta['abandoned']) === 0) {
+            return [null, "[UNKNOWN] Abandoned metadata is empty: {$metaPath}"];
+        }
+
+        $aband = $meta['abandoned'];
+        $hits = [];
+        foreach ($pkgs as $name => $_) {
+            if (array_key_exists($name, $aband)) {
+                $replacement = $aband[$name];
+                $hits[] = $replacement ? "{$name} → {$replacement}" : $name;
+            }
+        }
+
+        if ($hits) return [false, "Abandoned packages: " . implode(', ', $hits) . " (meta: {$metaPath})"];
+        return [true, "No abandoned packages (meta: {$metaPath})"];
     }
 
     public function releaseRecencyOffline(array $args): array
     {
-        $lock  = $this->ctx->abs($args['lock_file'] ?? 'composer.lock');
-        $meta  = $this->ctx->abs($args['release_meta'] ?? 'rules/release-history.json');
-        $months = (int)($args['months'] ?? 24);
-        return [true, "composer_release_recency_offline $lock against $meta (max {$months}m)"];
+        $lock = $this->ctx->abs($args['lock_file'] ?? 'composer.lock');
+        if (!is_file($lock)) return [null, "[UNKNOWN] composer.lock not found"];
+
+        $metaPath = $this->metaPath($args, 'release_history', 'release_meta', 'rules/release-history.json');
+        if (!$metaPath) return [null, "[UNKNOWN] Release-history metadata not found"];
+
+        $pkgs = $this->readLockPackages($lock);
+        if (!$pkgs) return [null, "[UNKNOWN] Unable to parse composer.lock"];
+
+        $meta = $this->loadJsonSafe($metaPath);
+        if (!$meta) return [null, "[UNKNOWN] Invalid release-history metadata JSON"];
+
+        $maxAgeDays = (int)($args['max_age_days'] ?? 365);
+        $today = strtotime('today');
+
+        $stale = [];
+        foreach ($pkgs as $name => $p) {
+            $info = $meta[$name] ?? null;
+            if (!$info || empty($info['latest_date'])) continue;
+            $latestDate = strtotime((string)$info['latest_date']);
+            if ($latestDate === false) continue;
+
+            $ageDays = (int)floor(($today - $latestDate) / 86400);
+            if ($ageDays > $maxAgeDays) {
+                $latestVer = (string)($info['latest_version'] ?? '?');
+                $stale[] = "{$name} (latest {$latestVer}, {$ageDays} days old)";
+            }
+        }
+
+        if ($stale) return [false, "Stale releases: " . implode('; ', $stale)];
+        return [true, "No stale releases over {$maxAgeDays} days"];
     }
+
 
     public function repoArchivedOffline(array $args): array
     {
         $lock = $this->ctx->abs($args['lock_file'] ?? 'composer.lock');
-        $meta = $this->ctx->abs($args['repo_meta'] ?? 'rules/repo-status.json');
-        return [true, "composer_repo_archived_offline checked $lock with $meta"];
+        if (!is_file($lock)) return [null, "[UNKNOWN] composer.lock not found"];
+
+        $metaPath = $this->metaPath($args, 'repo_status', 'repo_meta', 'rules/repo-status.json');
+        if (!$metaPath) return [null, "[UNKNOWN] Repo-status metadata not found"];
+
+        $pkgs = $this->readLockPackages($lock);
+        if (!$pkgs) return [null, "[UNKNOWN] Unable to parse composer.lock"];
+
+        $meta = $this->loadJsonSafe($metaPath);
+        if (!$meta) return [null, "[UNKNOWN] Invalid repo-status metadata JSON"];
+
+        $archived = [];
+        foreach ($pkgs as $name => $_) {
+            $st = $meta[$name] ?? null;
+            if ($st && !empty($st['archived'])) $archived[] = $name;
+        }
+
+        if ($archived) return [false, "Archived repositories detected: " . implode(', ', $archived)];
+        return [true, "No archived repositories"];
     }
 
     public function riskyForkOffline(array $args): array
     {
         $lock = $this->ctx->abs($args['lock_file'] ?? 'composer.lock');
-        $meta = $this->ctx->abs($args['repo_meta'] ?? 'rules/repo-status.json');
-        return [true, "composer_risky_fork_offline checked $lock with $meta"];
+        if (!is_file($lock)) return [null, "[UNKNOWN] composer.lock not found"];
+
+        $metaPath = $this->metaPath($args, 'repo_status', 'repo_meta', 'rules/repo-status.json');
+        if (!$metaPath) return [null, "[UNKNOWN] Repo-status metadata not found"];
+
+        $pkgs = $this->readLockPackages($lock);
+        if (!$pkgs) return [null, "[UNKNOWN] Unable to parse composer.lock"];
+
+        $meta = $this->loadJsonSafe($metaPath);
+        if (!$meta) return [null, "[UNKNOWN] Invalid repo-status metadata JSON"];
+
+        $risky = [];
+        foreach ($pkgs as $name => $_) {
+            $st = $meta[$name] ?? null;
+            if ($st && !empty($st['is_fork']) && empty($st['upstream'])) {
+                $risky[] = $name;
+            }
+        }
+
+        if ($risky) return [false, "Risky forks without upstream detected: " . implode(', ', $risky)];
+        return [true, "No risky forks"];
     }
+
 
     public function jsonConstraints(array $args): array
     {
@@ -595,5 +1103,58 @@ final class ComposerCheck
             $dir = $parent;
         }
         return null;
+    }
+
+    /**
+     * Helper: load JSON file safely.
+     */
+    private function loadJsonSafe(string $path): ?array
+    {
+        if (!is_file($path)) {
+            return null;
+        }
+        $raw = @file_get_contents($path);
+        if ($raw === false || $raw === '') {
+            return null;
+        }
+        $data = json_decode($raw, true);
+        return is_array($data) ? $data : null;
+    }
+
+    /**
+     * Helper: read packages from composer.lock
+     */
+    private function readLockPackages(string $lockPath): ?array
+    {
+        $j = $this->loadJsonSafe($lockPath);
+        if (!$j) return null;
+
+        $pkgs = [];
+        foreach (['packages', 'packages-dev'] as $key) {
+            if (!empty($j[$key]) && is_array($j[$key])) {
+                foreach ($j[$key] as $p) {
+                    if (!empty($p['name'])) {
+                        $pkgs[$p['name']] = [
+                            'name'    => $p['name'],
+                            'version' => $p['version'] ?? null,
+                            'source'  => $p['source']['url'] ?? null,
+                            'dist'    => $p['dist']['url'] ?? null,
+                        ];
+                    }
+                }
+            }
+        }
+        return $pkgs;
+    }
+
+    /** Lấy đường dẫn meta trong Context->extra['meta'] hoặc từ args, hoặc default */
+    private function metaPath(array $args, string $metaKey, string $argKey, string $defaultRel): ?string
+    {
+        $meta = $this->ctx->get('meta', []);
+        if (is_array($meta) && !empty($meta[$metaKey]) && is_file($meta[$metaKey])) {
+            return $meta[$metaKey]; // ƯU TIÊN bundle
+        }
+        $fromArgs = $this->ctx->abs($args[$argKey] ?? $defaultRel);
+        return is_file($fromArgs) ? $fromArgs : null;
     }
 }
