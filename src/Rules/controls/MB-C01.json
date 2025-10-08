@@ -53,7 +53,14 @@
           "name": "webroot_hygiene",
           "args": {
             "webroot": "pub",
-            "forbidden": [".git", ".env", ".env.local", "*.bak", "*.old", "*~"]
+            "forbidden": [
+              ".git",
+              ".env",
+              ".env.local",
+              "*.bak",
+              "*.old",
+              "*~"
+            ]
           }
         }
       ],
@@ -72,7 +79,11 @@
         {
           "name": "code_dirs_readonly",
           "args": {
-            "dirs": ["app", "vendor", "lib"]
+            "dirs": [
+              "app",
+              "vendor",
+              "lib"
+            ]
           }
         }
       ],
@@ -86,7 +97,7 @@
       "title": "Directory listing disabled",
       "control": "MB-C01",
       "severity": "medium",
-      "op": "all",
+      "op": "any",
       "checks": [
         {
           "name": "http_no_directory_listing",

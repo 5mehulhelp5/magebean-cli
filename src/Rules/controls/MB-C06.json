@@ -16,6 +16,12 @@
             "path": "system.default.system/full_page_cache/caching_application",
             "equals": 2
           }
+        },
+        {
+          "name": "http_cache_signals",
+          "args": {
+            "timeout_ms": 8000
+          }
         }
       ],
       "messages": {

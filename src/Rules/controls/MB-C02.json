@@ -91,7 +91,7 @@
       "title": "Admin URL exposure restricted",
       "control": "MB-C02",
       "severity": "medium",
-      "op": "any",
+      "op": "all",
       "checks": [
         {
           "name": "php_array_neq",
@@ -99,14 +99,6 @@
             "file": "app/etc/env.php",
             "path": "backend.frontName",
             "not_equals": "admin"
-          }
-        },
-        {
-          "name": "nginx_directive",
-          "args": {
-            "file": "nginx.conf",
-            "directive": "deny|allow",
-            "expects_regex": true
           }
         }
       ],

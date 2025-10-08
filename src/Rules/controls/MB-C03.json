@@ -48,10 +48,8 @@
             "include_ext": [
               "phtml"
             ],
-            "must_match": [
-              "escapeHtml\\(",
-              "escapeHtmlAttr\\(",
-              "\\$block->escapeHtml"
+            "must_not_match": [
+              "(?s)<\\?=\\s*(?![^\\n\\r]*?(?:escapeHtml|escapeHtmlAttr|escapeUrl|escapeJs|escapeCss)\\s*\\().*?\\?>"
             ]
           }
         }
@@ -104,12 +102,12 @@
               "app"
             ],
             "include_ext": [
+              "phtml",
               "php",
-              "phtml"
+              "html"
             ],
-            "must_match": [
-              "form_key",
-              "getFormKey\\("
+            "must_not_match": [
+              "(?is)<form[^>]*method\\s*=\\s*['\\\"]?post['\\\"]?[^>]*>(?![\\s\\S]*?(?:form_key|getFormKey\\s*\\(|<form_key\\b|data-mage-init[^>]*formKey))[\\s\\S]*?<\\/form>"
             ]
           }
         }
@@ -135,9 +133,11 @@
             "include_ext": [
               "php"
             ],
-            "must_match": [
-              "allowlist|whitelist",
-              "CURLOPT_CONNECTTIMEOUT|CURLOPT_TIMEOUT"
+            "must_not_match": [
+              "(?i)\\bcurl_init\\s*\\(\\s*\\$?_?(GET|POST|REQUEST)\\b",
+              "(?i)\\bcurl_setopt\\s*\\([^;\\n]*CURLOPT_URL[^;\\n]*\\$?_?(GET|POST|REQUEST)\\b",
+              "(?i)\\b(file_get_contents|fopen)\\s*\\(\\s*\\$?_?(GET|POST|REQUEST)\\b",
+              "(?i)\\b(fsockopen|stream_socket_client)\\s*\\(\\s*\\$?_?(GET|POST|REQUEST)\\b"
             ]
           }
         }
@@ -246,9 +246,8 @@
             "include_ext": [
               "php"
             ],
-            "must_match": [
-              "(?:realpath|\\$this->fileDriver->getRealPath|resolvePath|DirectoryList)\\(",
-              "(?:basename|pathinfo\\s*\\([^,]+,\\s*PATHINFO_BASENAME)"
+            "must_not_match": [
+              "(?i)(?:file_get_contents|fopen|unlink|copy|rename|include|require|require_once)\\s*\\(\\s*\\$?_?(?:GET|POST|REQUEST|FILES)\\b(?![^;]*?(basename|realpath|resolvePath|DirectoryList))"
             ]
           }
         }
@@ -263,66 +262,7 @@
       "title": "Secure file upload handling",
       "control": "MB-C03",
       "severity": "medium",
-      "op": "all",
-      "checks": [
-        {
-          "name": "code_grep",
-          "args": {
-            "paths": [
-              "app"
-            ],
-            "include_ext": [
-              "php"
-            ],
-            "must_match": [
-              "isAllowedExtension|pathinfo\\s*\\([^,]+,\\s*PATHINFO_EXTENSION\\)|getClientOriginalExtension",
-              "validateMime|mime_content_type|getClientMimeType|finfo_(?:open|file)|getMimeType",
-              "max_file_size|filesize\\(|getSize\\s*\\(|\\$_FILES\\[[^\\]]+\\]\\s*\\[\\s*['\\\"]size['\\\"]\\s*\\]"
-            ]
-          }
-        }
-      ],
-      "messages": {
-        "pass": "File uploads are validated with extension, MIME type, and size checks.",
-        "fail": "File upload handling lacks validation. Add allowed extensions, MIME type checks, and size limits."
-      }
-    },
-    {
-      "id": "MB-R022",
-      "title": "Escaping for JS context",
-      "control": "MB-C03",
-      "severity": "low",
-      "op": "all",
-      "checks": [
-        {
-          "name": "code_grep",
-          "args": {
-            "paths": [
-              "app/design"
-            ],
-            "include_ext": [
-              "phtml",
-              "js",
-              "html"
-            ],
-            "must_match": [
-              "escapeJs\\(",
-              "json_encode\\("
-            ]
-          }
-        }
-      ],
-      "messages": {
-        "pass": "JavaScript context output uses proper escaping.",
-        "fail": "No escaping for JavaScript context detected. Use escapeJs() or json_encode()."
-      }
-    },
-    {
-      "id": "MB-R023",
-      "title": "Use CSPRNG; avoid weak PRNG",
-      "control": "MB-C03",
-      "severity": "high",
-      "op": "all",
+      "op": "any",
       "checks": [
         {
           "name": "code_grep",
@@ -334,8 +274,7 @@
               "php"
             ],
             "must_not_match": [
-              "(?i)(token|otp|one.?time.?password|pass(word)?|reset|nonce|secret|api[_-]?key|key|salt|verify|activation|code)[^\\n;\\)]{0,120}\\b(?:rand|mt_rand|array_rand|shuffle|str_shuffle|uniqid)\\s*\\(",
-              "(?i)\\b(?:rand|mt_rand|array_rand|shuffle|str_shuffle|uniqid)\\s*\\([^\\n;\\)]{0,120}(token|otp|one.?time.?password|pass(word)?|reset|nonce|secret|api[_-]?key|key|salt|verify|activation|code)"
+              "(?is)move_uploaded_file\\s*\\([^;\\n]*\\$_FILES[^;\\n]*\\)(?![^;\\n]{0,300}(?:finfo_(?:open|file)|mime_content_type|get(?:MimeType|ClientMimeType)|validateMime|pathinfo\\s*\\([^,]+,\\s*PATHINFO_BASENAME|PATHINFO_EXTENSION|setAllowedExtensions|checkMimeType|isValid|validateFile))"
             ]
           }
         },
@@ -348,16 +287,135 @@
             "include_ext": [
               "php"
             ],
+            "must_not_match": [
+              "(?is)\\$_FILES\\s*\\[[^\\]]+\\]\\s*\\[\\s*['\\\"]tmp_name['\\\"]\\s*\\][^;\\n]{0,200}\\b(?:copy|rename|file_put_contents|fopen)\\s*\\([^;\\n]*\\)(?![^;\\n]{0,300}(?:finfo_(?:open|file)|mime_content_type|get(?:MimeType|ClientMimeType)|validateMime|pathinfo\\s*\\([^,]+,\\s*PATHINFO_BASENAME|PATHINFO_EXTENSION|setAllowedExtensions|checkMimeType|isValid|validateFile))"
+            ]
+          }
+        },
+        {
+          "name": "code_grep",
+          "optional": true,
+          "args": {
+            "paths": [
+              "app"
+            ],
+            "include_ext": [
+              "php"
+            ],
             "must_match": [
-              "(?i)(token|otp|one.?time.?password|pass(word)?|reset|nonce|secret|api[_-]?key|key|salt|verify|activation|code)[^\\n;\\)]{0,120}\\b(?:random_int|random_bytes|openssl_random_pseudo_bytes)\\s*\\(",
-              "(?i)\\b(?:random_int|random_bytes|openssl_random_pseudo_bytes)\\s*\\([^\\n;\\)]{0,120}(token|otp|one.?time.?password|pass(word)?|reset|nonce|secret|api[_-]?key|key|salt|verify|activation|code)"
+              "(?i)finfo_(?:open|file)|mime_content_type|get(?:MimeType|ClientMimeType)|validateMime|pathinfo\\s*\\([^,]+,\\s*PATHINFO_(?:BASENAME|EXTENSION)|setAllowedExtensions|checkMimeType|isValid|validateFile|\\\\Magento\\\\Framework\\\\File\\\\Uploader|\\\\Magento\\\\MediaStorage\\\\Model\\\\File\\\\Uploader"
             ]
           }
         }
       ],
       "messages": {
-        "pass": "No insecure RNG in security-sensitive contexts, or secure RNG (random_int/random_bytes) is used when generating secrets.",
-        "fail": "Insecure RNG (rand/mt_rand/array_rand/uniqid/shuffle) used near security-sensitive code (token/password/nonce...). Use random_int/random_bytes."
+        "pass": "No unsafe file upload flows detected (user file is validated or uploads not used).",
+        "fail": "Potential unsafe upload: user file moved/stored without nearby MIME/extension validation."
+      }
+    },
+    {
+      "id": "MB-R022",
+      "title": "Escaping for JS context",
+      "control": "MB-C03",
+      "severity": "low",
+      "op": "any",
+      "checks": [
+        {
+          "name": "code_grep",
+          "args": {
+            "paths": [
+              "app/design"
+            ],
+            "include_ext": [
+              "phtml",
+              "html"
+            ],
+            "must_not_match": [
+              "(?is)<script[^>]*>[\\s\\S]*?<\\?=\\s*(?![^?]*?(?:escapeJs|json_encode)\\s*\\()[\\s\\S]*?\\?>[\\s\\S]*?<\\/script>"
+            ]
+          }
+        },
+        {
+          "name": "code_grep",
+          "args": {
+            "paths": [
+              "app/design"
+            ],
+            "include_ext": [
+              "phtml",
+              "html"
+            ],
+            "must_not_match": [
+              "(?is)on[a-z]+\\s*=\\s*['\\\"][^'\\\"]*<\\?=\\s*(?![^?]*?(?:escapeJs|json_encode)\\s*\\()[\\s\\S]*?\\?>[^'\\\"]*['\\\"]"
+            ]
+          }
+        },
+        {
+          "name": "code_grep",
+          "optional": true,
+          "args": {
+            "paths": [
+              "app/design"
+            ],
+            "include_ext": [
+              "phtml",
+              "html",
+              "js"
+            ],
+            "must_match": [
+              "(?:(?:->|::)\\s*)?escapeJs\\s*\\(",
+              "json_encode\\s*\\("
+            ]
+          }
+        }
+      ],
+      "messages": {
+        "pass": "No unescaped dynamic PHP output detected in JavaScript context.",
+        "fail": "Unescaped PHP output found in JavaScript context. Use escapeJs() or json_encode()."
+      }
+    },
+    {
+      "id": "MB-R023",
+      "title": "Use CSPRNG; avoid weak PRNG",
+      "control": "MB-C03",
+      "severity": "high",
+      "op": "any",
+      "checks": [
+        {
+          "name": "code_grep",
+          "args": {
+            "paths": [
+              "app"
+            ],
+            "include_ext": [
+              "php"
+            ],
+            "must_not_match": [
+              "(?i)\\b(token|otp|one.?time.?password|password|passcode|reset|nonce|secret|api[_-]?key|key|salt|verify|activation|verification.?code|auth.?code)\\b[^\\n;\\)]{0,120}\\b(?:rand|mt_rand|array_rand|shuffle|str_shuffle|uniqid)\\s*\\(",
+              "(?i)\\b(?:rand|mt_rand|array_rand|shuffle|str_shuffle|uniqid)\\s*\\([^\\n;\\)]{0,120}\\b(token|otp|one.?time.?password|password|passcode|reset|nonce|secret|api[_-]?key|key|salt|verify|activation|verification.?code|auth.?code)\\b"
+            ]
+          }
+        },
+        {
+          "name": "code_grep",
+          "optional": true,
+          "args": {
+            "paths": [
+              "app"
+            ],
+            "include_ext": [
+              "php"
+            ],
+            "must_match": [
+              "(?i)\\b(token|otp|one.?time.?password|password|passcode|reset|nonce|secret|api[_-]?key|key|salt|verify|activation|verification.?code|auth.?code)\\b[^\\n;\\)]{0,120}\\b(?:random_int|random_bytes|openssl_random_pseudo_bytes)\\s*\\(",
+              "(?i)\\b(?:random_int|random_bytes|openssl_random_pseudo_bytes)\\s*\\([^\\n;\\)]{0,120}\\b(token|otp|one.?time.?password|password|passcode|reset|nonce|secret|api[_-]?key|key|salt|verify|activation|verification.?code|auth.?code)\\b"
+            ]
+          }
+        }
+      ],
+      "messages": {
+        "pass": "No weak PRNG detected near security-sensitive code (or no such code present).",
+        "fail": "Weak PRNG (rand/mt_rand/array_rand/uniqid/shuffle) used near security-sensitive code. Use random_int/random_bytes."
       }
     },
     {
@@ -394,23 +452,8 @@
       "title": "Use Magento APIs for crypto & session",
       "control": "MB-C03",
       "severity": "medium",
-      "op": "any",
+      "op": "all",
       "checks": [
-        {
-          "name": "code_grep",
-          "args": {
-            "paths": [
-              "app"
-            ],
-            "include_ext": [
-              "php"
-            ],
-            "must_match": [
-              "Magento\\\\\\\\Framework\\\\\\\\Encryption|Magento\\\\\\\\Framework\\\\\\\\Encryption\\\\\\\\EncryptorInterface",
-              "Magento\\\\\\\\Framework\\\\\\\\Session"
-            ]
-          }
-        },
         {
           "name": "code_grep",
           "args": {

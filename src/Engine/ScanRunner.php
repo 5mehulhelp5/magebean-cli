@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Magebean\Engine;
 
-use Magebean\Engine\Checks\{FilesystemCheck, PhpConfigCheck, ComposerCheck, MagentoCheck, HttpCheck, CodeSearchCheck, WebServerConfigCheck, GitHistoryCheck};
+use Magebean\Engine\Checks\{FilesystemCheck, PhpConfigCheck, ComposerCheck, MagentoCheck, HttpCheck, CodeSearchCheck, CronCheck, WebServerConfigCheck, GitHistoryCheck};
 
 final class ScanRunner
 {
@@ -26,9 +26,10 @@ final class ScanRunner
         HttpCheck $http,
         CodeSearchCheck $code,
         WebServerConfigCheck $web,
-        GitHistoryCheck $git
+        GitHistoryCheck $git,
+        CronCheck $cron
     ): array {
-        $res = $this->evalCheck($name, $args, $fs, $phpc, $comp, $mage, $http, $code, $web, $git);
+        $res = $this->evalCheck($name, $args, $fs, $phpc, $comp, $mage, $http, $code, $web, $git, $cron);
         if (!is_array($res)) {
             $res = [false, 'Unknown check: ' . $name];
         }
@@ -58,6 +59,7 @@ final class ScanRunner
         $code = new CodeSearchCheck($this->ctx);
         $web  = new WebServerConfigCheck($this->ctx);
         $git  = new GitHistoryCheck($this->ctx);
+        $cron  = new CronCheck($this->ctx);
 
         foreach ($this->pack['rules'] as $rule) {
             $executedRules++;
@@ -85,7 +87,8 @@ final class ScanRunner
                     $http,
                     $code,
                     $web,
-                    $git
+                    $git,
+                    $cron
                 );
 
                 $details[] = [$name, $msg, $cok];
@@ -231,7 +234,8 @@ final class ScanRunner
         HttpCheck $http,
         CodeSearchCheck $code,
         WebServerConfigCheck $web,
-        GitHistoryCheck $git
+        GitHistoryCheck $git,
+        CronCheck $cron
     ): array {
         $path = $this->ctx->path;
 
@@ -290,6 +294,9 @@ final class ScanRunner
             'composer_lock_integrity'             => $comp->lockIntegrity($args),
             'php_array_key_search'                => $phpc->keySearch($args),
             'git_history_scan'                    => $git->secretScan($args),
+
+            // Crontab check
+            'crontab_grep'                        => $cron->crontabGrep($args),
 
             // 3) Unknown → trả UNKNOWN (null) thay vì false để khỏi “đè” rule thành FAIL
             default => [null, '[UNKNOWN] Unknown check: ' . $name, []],

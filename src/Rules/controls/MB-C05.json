@@ -39,6 +39,12 @@
               "^\\s*xdebug\\.mode\\s*="
             ]
           }
+        },
+        {
+          "name": "http_no_xdebug_headers",
+          "args": {
+            "timeout_ms": 8000
+          }
         }
       ],
       "messages": {
@@ -61,11 +67,17 @@
               "display_errors\\s*=\\s*Off"
             ]
           }
+        },
+        {
+          "name": "http_no_stacktrace",
+          "args": {
+            "timeout_ms": 8000
+          }
         }
       ],
       "messages": {
-        "pass": "PHP display_errors is Off.",
-        "fail": "PHP display_errors is On. Set display_errors=Off and log errors to files instead."
+        "pass": "PHP display_errors is Off. No error traces visible.",
+        "fail": "PHP display_errors is On. Set display_errors=Off and log errors to files instead or error/stack trace visible on pages."
       }
     },
     {
@@ -110,6 +122,12 @@
           "name": "fs_exists",
           "args": {
             "path": "var/view_preprocessed"
+          }
+        },
+        {
+          "name": "http_static_assets_deployed",
+          "args": {
+            "timeout_ms": 8000
           }
         }
       ],

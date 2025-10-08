@@ -81,7 +81,7 @@
             "title": "No mixed content (http://) in templates/assets",
             "control": "MB-C04",
             "severity": "medium",
-            "op": "all",
+            "op": "any",
             "checks": [
                 {
                     "name": "code_grep",
@@ -94,10 +94,12 @@
                             "phtml",
                             "js",
                             "html",
-                            "xml"
+                            "xml",
+                            "css",
+                            "less"
                         ],
                         "must_not_match": [
-                            "https?:\\\\/\\\\/[^\\s\"'>]+"
+                            "(src|href|url)\\s*=\\s*['\\\"]http:\\\\\\/\\\\\\/[^'\\\"\\\\]+['\\\"]"
                         ],
                         "max_results": 50
                     }

@@ -10,23 +10,58 @@
       "op": "any",
       "checks": [
         {
-          "name": "text_grep",
+          "name": "crontab_grep",
           "args": {
-            "file": "app/etc/crontab.sample",
-            "must_match": ["bin/magento\\s+cron:run"]
+            "users": [
+              "www-data",
+              "nginx",
+              "apache",
+              "http",
+              "www",
+              "magento",
+              "deploy"
+            ],
+            "patterns": [
+              "(?:^|\\s)(?:php\\s+[^\\n]*?)?bin\\/magento\\s+cron:run\\b",
+              "(?:^|\\s)(?:php\\s+[^\\n]*?)?bin\\/magento\\s+setup:cron:run\\b",
+              "(?:^|\\s)(?:php\\s+[^\\n]*?)?update\\/cron\\.php\\b"
+            ],
+            "timeout_ms": 2500
           }
         },
         {
-          "name": "text_grep",
+          "name": "code_grep",
+          "optional": true,
           "args": {
-            "file": "deploy/cron.txt",
-            "must_match": ["bin/magento\\s+cron:run"]
+            "paths": [
+              ".",
+              "deploy",
+              "docs",
+              ".github",
+              ".gitlab-ci",
+              ".circleci"
+            ],
+            "include_ext": [
+              "sh",
+              "bash",
+              "txt",
+              "md",
+              "conf",
+              "yml",
+              "yaml",
+              "ini",
+              "env",
+              "dockerfile"
+            ],
+            "must_match": [
+              "(?:^|\\s)(?:php\\s+[^\\n]*?)?bin\\/magento\\s+cron:run\\b"
+            ]
           }
         }
       ],
       "messages": {
-        "pass": "Magento cron entries are present in crontab configuration.",
-        "fail": "Magento cron entries are missing. Add 'bin/magento cron:run' to your crontab."
+        "pass": "Found Magento cron run command in repository or deployment docs.",
+        "fail": "No Magento cron entry found in repo or docs. Ensure 'bin/magento cron:run' runs every minute via crontab or scheduler."
       }
     },
     {
@@ -60,7 +95,9 @@
           "name": "text_grep",
           "args": {
             "file": "var/cron/queue.size",
-            "must_not_match": ["^([1-9][0-9]{3,})$"]
+            "must_not_match": [
+              "^([1-9][0-9]{3,})$"
+            ]
           }
         }
       ],
