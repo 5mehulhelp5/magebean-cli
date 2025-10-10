@@ -18,7 +18,7 @@ final class ComposerCheck
     public function auditOffline(array $args): array
     {
         // 1. Xác định file CVE data
-        $cveRel = $this->ctx->cveData !== '' ? $this->ctx->cveData : ($args['cve_db'] ?? '');
+        $cveRel = $this->ctx->cveData !== '' ? $this->ctx->cveData : (is_string($args['cve_db'] ?? null) ? $args['cve_db'] : '');
         if ($cveRel === '') {
             return [null, "[UNKNOWN] Missing CVE data (use --cve-data=path or args.cve_db)"];
         }
@@ -187,22 +187,24 @@ final class ComposerCheck
     public function coreAdvisoriesOffline(array $args): array
     {
         $lock = $this->ctx->abs($args['lock_file'] ?? 'composer.lock');
-        $meta = $this->ctx->abs($args['adobe_meta'] ?? 'rules/adobe-core-advisories.json');
+        $meta = $this->metaPath($args, 'adobe_core', 'adobe_meta', 'DATA/adobe-core-advisories.json')
+             ?? $this->metaPath($args, 'adobe_core', 'adobe_meta', 'rules/adobe-core-advisories.json');
 
         if (!is_file($lock)) return [null, "[UNKNOWN] composer.lock not found"];
-        if (!is_file($meta)) return [null, "[UNKNOWN] Adobe core advisories metadata not found: {$meta}"];
-
-        // TODO: implement: map magento/magento2 & adobe modules -> affected ranges -> FAIL if within affected
-        return [null, "[UNKNOWN] Core advisories check not implemented (meta present)"];
+        if (!$this->safeIsFile($meta)) return [null, "[UNKNOWN] Adobe core advisories metadata not found"];
     }
 
     public function fixVersion(array $args): array
     {
         $lock = $this->ctx->abs($args['lock_file'] ?? 'composer.lock');
-        $meta = $this->ctx->abs($args['cve_meta'] ?? 'rules/osv-db.json');
+        $meta = $this->metaPath($args, 'osv_db', 'cve_meta', 'DATA/osv-db.json')
+            ?? $this->metaPath($args, 'osv_db', 'cve_meta', 'rules/osv-db.json')
+            ?? ($this->ctx->cveData !== '' ? $this->ctx->cveData : null);
 
         if (!is_file($lock)) return [null, "[UNKNOWN] composer.lock not found"];
-        if (!is_file($meta)) return [null, "[UNKNOWN] CVE database not found: {$meta}"];
+        if (!$this->safeIsFile($meta)) {
+            return [null, "[UNKNOWN] CVE database not found (tried DATA/osv-db.json, rules/osv-db.json, Context->cveData)"];
+        }
 
         // TODO: implement: for each affected package, compute minimal non-affected version and propose fix
         return [null, "[UNKNOWN] Fix-version suggestion not implemented (meta present)"];
@@ -211,10 +213,11 @@ final class ComposerCheck
     public function riskSurfaceTag(array $args): array
     {
         $lock = $this->ctx->abs($args['lock_file'] ?? 'composer.lock');
-        $meta = $this->ctx->abs($args['tags_meta'] ?? 'rules/risk-surface.json');
+        $meta = $this->metaPath($args, 'tags', 'tags_meta', 'DATA/risk-surface.json')
+            ?? $this->metaPath($args, 'tags', 'tags_meta', 'rules/risk-surface.json');
 
         if (!is_file($lock)) return [null, "[UNKNOWN] composer.lock not found"];
-        if (!is_file($meta)) return [null, "[UNKNOWN] Risk-surface metadata not found: {$meta}"];
+        if (!$this->safeIsFile($meta)) return [null, "[UNKNOWN] Risk-surface metadata not found"];
 
         // TODO: implement: annotate findings or return note; engine may need to surface tags in details
         return [null, "[UNKNOWN] Risk-surface tagging not implemented (meta present)"];
@@ -223,11 +226,12 @@ final class ComposerCheck
     public function matchList(array $args): array
     {
         $lock = $this->ctx->abs($args['lock_file'] ?? 'composer.lock');
-        $meta = $this->ctx->abs($args['list_meta'] ?? 'rules/match-list.json');
+        $meta = $this->metaPath($args, 'list', 'list_meta', 'DATA/match-list.json')
+            ?? $this->metaPath($args, 'list', 'list_meta', 'rules/match-list.json');
         $mode = strtolower($args['mode'] ?? 'deny');
 
         if (!is_file($lock)) return [null, "[UNKNOWN] composer.lock not found"];
-        if (!is_file($meta)) return [null, "[UNKNOWN] Match-list metadata not found: {$meta}"];
+        if (!$this->safeIsFile($meta)) return [null, "[UNKNOWN] Match-list metadata not found"];
 
         $pkgs = $this->readLockPackages($lock);
         if (!$pkgs) return [null, "[UNKNOWN] Unable to parse composer.lock"];
@@ -562,13 +566,16 @@ final class ComposerCheck
     public function outdatedOffline(array $args): array
     {
         $lock   = $this->ctx->abs($args['lock_file'] ?? 'composer.lock');
-        $market = $this->ctx->abs($args['market_meta'] ?? $args['release_meta'] ?? 'rules/marketplace-versions.json');
+        $market = $this->metaPath($args, 'market', 'market_meta', 'DATA/marketplace-versions.json')
+            ?? $this->metaPath($args, 'market', 'release_meta', 'DATA/marketplace-versions.json')
+            ?? $this->metaPath($args, 'market', 'market_meta', 'rules/marketplace-versions.json')
+            ?? $this->metaPath($args, 'market', 'release_meta', 'rules/marketplace-versions.json');
 
         if (!is_file($lock)) {
             return [null, "[UNKNOWN] composer.lock not found"];
         }
-        if (!is_file($market)) {
-            return [null, "[UNKNOWN] Release/marketplace metadata not found: {$market}"];
+        if (!$this->safeIsFile($market)) {
+            return [null, "[UNKNOWN] Release/marketplace metadata not found"];
         }
 
         // TODO: Implement thực theo meta format → tạm UNKNOWN
@@ -578,10 +585,11 @@ final class ComposerCheck
     public function advisoryLatency(array $args): array
     {
         $lock = $this->ctx->abs($args['lock_file'] ?? 'composer.lock');
-        $meta = $this->ctx->abs($args['advisory_meta'] ?? 'rules/advisories.json');
+        $meta = $this->metaPath($args, 'advisories', 'advisory_meta', 'DATA/advisories.json')
+             ?? $this->metaPath($args, 'advisories', 'advisory_meta', 'rules/advisories.json');
 
         if (!is_file($lock))  return [null, "[UNKNOWN] composer.lock not found"];
-        if (!is_file($meta))  return [null, "[UNKNOWN] Advisory metadata not found: {$meta}"];
+        if (!$this->safeIsFile($meta))  return [null, "[UNKNOWN] Advisory metadata not found"];
 
         // TODO: implement real advisory latency evaluation (compare advisory publish_date vs local update/lock date)
         return [null, "[UNKNOWN] Advisory latency check not implemented (meta present)"];
@@ -1081,9 +1089,10 @@ final class ComposerCheck
      */
     private function join(string $base, string $rel): string
     {
-        if ($rel === '' || $rel === '.') return $base . '/composer.json';
-        if ($rel[0] === '/') return $rel;
-        return $base . '/' . $rel;
+        $base = rtrim($base, '/');
+        if ($rel === '' || $rel === '.') return $base;            // <-- chỉ trả về base dir
+        if ($rel[0] === '/' || preg_match('#^[A-Za-z]:[\\\\/]#', $rel)) return $rel; // hỗ trợ Windows path
+        return $base . '/' . ltrim($rel, '/');
     }
 
     /**
@@ -1150,11 +1159,30 @@ final class ComposerCheck
     /** Lấy đường dẫn meta trong Context->extra['meta'] hoặc từ args, hoặc default */
     private function metaPath(array $args, string $metaKey, string $argKey, string $defaultRel): ?string
     {
-        $meta = $this->ctx->get('meta', []);
-        if (is_array($meta) && !empty($meta[$metaKey]) && is_file($meta[$metaKey])) {
-            return $meta[$metaKey]; // ƯU TIÊN bundle
+        $metaBag = $this->ctx->get('meta', []);
+        if (is_array($metaBag) && !empty($metaBag[$metaKey]) && is_string($metaBag[$metaKey])) {
+            $p = $metaBag[$metaKey];
+            if ($this->safeIsFile($p)) return $p;
         }
-        $fromArgs = $this->ctx->abs($args[$argKey] ?? $defaultRel);
-        return is_file($fromArgs) ? $fromArgs : null;
+        $root = (string)($this->ctx->path ?? getcwd());
+        $cand = $this->safeJoin($root, is_string($args[$argKey] ?? null) ? $args[$argKey] : $defaultRel);
+        return $this->safeIsFile($cand) ? $cand : null;
+    }
+
+    /** Safe wrapper: return false unless $p is a non-empty string and is a file */
+    private function safeIsFile($p): bool
+    {
+        return is_string($p) && $p !== '' && is_file($p);
+    }
+
+    /** Join that tolerates nulls and non-strings defensively */
+    private function safeJoin($base, $rel): ?string
+    {
+        if (!is_string($base)) $base = '';
+        if (!is_string($rel))  return null;
+        $base = rtrim($base, '/');
+        if ($rel === '' || $rel === '.') return $base;
+        if ($rel[0] === '/' || preg_match('#^[A-Za-z]:[\\\\/]#', $rel)) return $rel;
+        return $base . '/' . ltrim($rel, '/');
     }
 }

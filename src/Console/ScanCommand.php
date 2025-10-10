@@ -796,6 +796,10 @@ HTML;
                 'kev'             => 'cisa-kev.json',
                 'adobe_core'      => 'adobe-core-advisories.json',
                 'high_risk'       => 'high-risk-modules.json',
+                'osv_db'          => 'osv-db.json',                   // CVE DB (JSON/NDJSON đã “phẳng”)
+                'list'            => 'match-list.json',               // allow/deny list
+                'tags'            => 'risk-surface.json',             // risk tags
+                'market'          => 'marketplace-versions.json',     // marketplace versions
             ];
             foreach ($candidates as $key => $file) {
                 $p = $base . $file;
