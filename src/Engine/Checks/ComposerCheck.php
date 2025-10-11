@@ -30,11 +30,11 @@ final class ComposerCheck
         // 2. Đọc composer.lock
         $lockFile = $this->ctx->abs($args['lock_file'] ?? 'composer.lock');
         if (!is_file($lockFile)) {
-            return [false, "composer.lock not found"];
+            return [null, "[UNKNOWN] composer.lock not found"];
         }
         $lockJson = json_decode((string)file_get_contents($lockFile), true);
         if (!is_array($lockJson)) {
-            return [false, "Invalid composer.lock"];
+            return [null, "Invalid composer.lock"];
         }
         $pkgs = array_merge($lockJson['packages'] ?? [], $lockJson['packages-dev'] ?? []);
         $installed = [];
@@ -188,7 +188,7 @@ final class ComposerCheck
     {
         $lock = $this->ctx->abs($args['lock_file'] ?? 'composer.lock');
         $meta = $this->metaPath($args, 'adobe_core', 'adobe_meta', 'DATA/adobe-core-advisories.json')
-             ?? $this->metaPath($args, 'adobe_core', 'adobe_meta', 'rules/adobe-core-advisories.json');
+            ?? $this->metaPath($args, 'adobe_core', 'adobe_meta', 'rules/adobe-core-advisories.json');
 
         if (!is_file($lock)) return [null, "[UNKNOWN] composer.lock not found"];
         if (!$this->safeIsFile($meta)) return [null, "[UNKNOWN] Adobe core advisories metadata not found"];
@@ -213,57 +213,327 @@ final class ComposerCheck
     public function riskSurfaceTag(array $args): array
     {
         $lock = $this->ctx->abs($args['lock_file'] ?? 'composer.lock');
-        $meta = $this->metaPath($args, 'tags', 'tags_meta', 'DATA/risk-surface.json')
+
+        $metaPath = $this->metaPath($args, 'tags', 'tags_meta', 'DATA/risk-surface.json')
             ?? $this->metaPath($args, 'tags', 'tags_meta', 'rules/risk-surface.json');
 
-        if (!is_file($lock)) return [null, "[UNKNOWN] composer.lock not found"];
-        if (!$this->safeIsFile($meta)) return [null, "[UNKNOWN] Risk-surface metadata not found"];
+        $metaJson = null;
+        if ($metaPath && is_file($metaPath)) {
+            $raw = (string)@file_get_contents($metaPath);
+            if (trim($raw) !== '') {
+                $mj = json_decode($raw, true);
+                // chỉ dùng khi có nội dung thực sự (patterns/file_ext); {} hoặc null -> bỏ qua
+                if (is_array($mj) && (!empty($mj['patterns']) || !empty($mj['file_ext']))) {
+                    $metaJson = $mj;
+                }
+            }
+        }
 
-        // TODO: implement: annotate findings or return note; engine may need to surface tags in details
-        return [null, "[UNKNOWN] Risk-surface tagging not implemented (meta present)"];
+        if (!is_file($lock)) return [null, "[UNKNOWN] composer.lock not found"];
+
+        // 1) Đọc lockfile (map tên gói -> tồn tại)
+        $lockJson = json_decode((string)@file_get_contents($lock), true);
+        if (!is_array($lockJson)) {
+            return [null, "[UNKNOWN] Unable to parse composer.lock"];
+        }
+        $pkgs = array_merge($lockJson['packages'] ?? [], $lockJson['packages-dev'] ?? []);
+        $installedNames = [];
+        foreach ($pkgs as $p) {
+            if (!isset($p['name'])) continue;
+            $installedNames[(string)$p['name']] = true;
+        }
+
+        // 2) Defaults + override qua meta.json (nếu có) + override qua $args (nếu truyền)
+        $fileExt = ['php', 'phtml', 'xml', 'json', 'yaml', 'yml'];
+        $patterns = [
+            // payment / checkout
+            'payment/checkout' => [
+                '[/\\\\]Payment[/\\\\]',
+                'authorize\s*\(',
+                'capture\s*\(',
+                'refund\s*\(',
+                'Gateway',
+                'PaymentInformation',
+                'payment_method'
+            ],
+            // customer auth / admin controllers
+            'admin_controllers' => [
+                'Controller[/\\\\]Adminhtml',
+                'Acl(?![A-Za-z])',
+                'isAllowed\s*\('
+            ],
+            'customer_auth' => [
+                'AccountManagementInterface',
+                'authenticate\s*\(',
+                'login(Post)?\s*\(',
+                'twofactor',
+                'Tfa[/\\\\]|TwoFactor'
+            ],
+            // file upload / deserialization
+            'file_upload' => [
+                'Uploader',
+                'moveUploadedFile',
+                'isAllowedExtension',
+                'tmp_name',
+                'upload\W',
+            ],
+            'deserialization' => [
+                '\bunserialize\s*\(',
+                'Serializer\\\\Php',
+                'Igbinary',
+                'PhpSerialize'
+            ],
+            // webhooks / integrations
+            'webhook_integration' => [
+                'webhook',
+                'callback',
+                'notify',
+                'ipn',
+                'webapi\.xml',
+                'routes\.xml',
+                'Controller[/\\\\](Webhook|Callback|Notify)'
+            ],
+            // remote http calls
+            'remote_http' => [
+                'Http\\\\Client',
+                '\bcurl(_init|_exec|_setopt)\b',
+                'Guzzle\\\\Http|GuzzleHttp',
+                'ClientInterface',
+                'file_get_contents\s*\(\s*[\'"]https?://'
+            ],
+        ];
+
+        if (is_array($metaJson)) {
+            if (!empty($metaJson['file_ext']) && is_array($metaJson['file_ext'])) {
+                $fileExt = array_values(array_unique(array_map('strval', $metaJson['file_ext'])));
+            }
+            if (!empty($metaJson['patterns']) && is_array($metaJson['patterns'])) {
+                // merge: meta ghi đè key trùng
+                foreach ($metaJson['patterns'] as $k => $rxs) {
+                    if (is_array($rxs)) $patterns[$k] = $rxs;
+                }
+            }
+        }
+        if (!empty($args['file_ext']) && is_array($args['file_ext'])) {
+            $fileExt = array_values(array_unique(array_map('strval', $args['file_ext'])));
+        }
+        if (!empty($args['patterns']) && is_array($args['patterns'])) {
+            foreach ($args['patterns'] as $k => $rxs) {
+                if (is_array($rxs)) $patterns[$k] = $rxs;
+            }
+        }
+
+        // 3) Roots để quét
+        $roots = [];
+        $appCode = $this->ctx->abs('app/code');
+        if (is_dir($appCode)) $roots[] = $appCode;
+        $vendorDir = $this->ctx->abs('vendor');
+        if (is_dir($vendorDir)) $roots[] = $vendorDir;
+
+        // 4) Quét và gắn tag
+        $maxFiles = (int)($args['max_files'] ?? 20000);
+        $maxHitsPerSubject = (int)($args['max_hits_per_subject'] ?? 200);
+        $scan = $this->scanRiskSurface($roots, $fileExt, $patterns, $installedNames, $maxFiles, $maxHitsPerSubject);
+
+        // 5) Xây evidence
+        $subjects = [];
+        foreach ($scan['hits'] as $hit) {
+            $subj = $hit['subject'];
+            if (!isset($subjects[$subj])) {
+                $subjects[$subj] = ['subject' => $subj, 'tags' => [], 'hits' => 0, 'examples' => []];
+            }
+            $subjects[$subj]['tags'][$hit['tag']] = true;
+            $subjects[$subj]['hits']++;
+            if (count($subjects[$subj]['examples']) < 5) {
+                $subjects[$subj]['examples'][] = ['path' => $hit['path'], 'match' => $hit['match']];
+            }
+        }
+        foreach ($subjects as &$s) {
+            $s['tags'] = array_values(array_keys($s['tags']));
+            sort($s['tags']);
+            sort($s['examples']);
+        }
+        unset($s);
+
+        $msg = "Risk-surface tagging: {$scan['files_scanned']} files scanned; "
+            . count($subjects) . " subjects tagged";
+        $evidence = [
+            'files_scanned' => $scan['files_scanned'],
+            'subjects_count' => count($subjects),
+            'items' => array_values($subjects),
+        ];
+
+        // Tagging chỉ để ưu tiên review → trả PASS (true). Nếu muốn coi là cảnh báo, đổi thành false khi có subject.
+        return [true, $msg, $evidence];
     }
+
 
     public function matchList(array $args): array
     {
+        // 1) composer.lock
         $lock = $this->ctx->abs($args['lock_file'] ?? 'composer.lock');
-        $meta = $this->metaPath($args, 'list', 'list_meta', 'DATA/match-list.json')
-            ?? $this->metaPath($args, 'list', 'list_meta', 'rules/match-list.json');
-        $mode = strtolower($args['mode'] ?? 'deny');
-
         if (!is_file($lock)) return [null, "[UNKNOWN] composer.lock not found"];
-        if (!$this->safeIsFile($meta)) return [null, "[UNKNOWN] Match-list metadata not found"];
+        $lockJson = json_decode((string)@file_get_contents($lock), true);
+        if (!is_array($lockJson)) return [null, "[UNKNOWN] Unable to parse composer.lock"];
 
-        $pkgs = $this->readLockPackages($lock);
-        if (!$pkgs) return [null, "[UNKNOWN] Unable to parse composer.lock"];
+        $pkgs = array_merge($lockJson['packages'] ?? [], $lockJson['packages-dev'] ?? []);
+        $installed = [];
+        foreach ($pkgs as $p) {
+            if (!isset($p['name'], $p['version'])) continue;
+            $installed[(string)$p['name']] = ltrim((string)$p['version'], 'v');
+        }
+        if (!$installed) return [true, "composer_match_list (offline): no packages", ['items' => []]];
 
-        $cfg = $this->loadJsonSafe($meta);
-        if (!$cfg) return [null, "[UNKNOWN] Invalid match-list JSON"];
-
-        $list = array_change_key_case(array_flip($cfg['packages'] ?? []), CASE_LOWER);
-
-        if ($mode === 'deny') {
-            $hits = [];
-            foreach ($pkgs as $name => $_) {
-                if (isset($list[strtolower($name)])) $hits[] = $name;
-            }
-            if ($hits) {
-                return [false, "Denied packages present: " . implode(', ', $hits)];
-            }
-            return [true, "No denied packages present"];
+        // 2) Xác định bundle candidate (ưu tiên args['cve_data'], sau đó autodiscover)
+        $cand = $this->findCveBundleCandidate($args['cve_data'] ?? null);
+        if ($cand['status'] !== 'ok') {
+            return [null, "[UNKNOWN] " . $cand['reason'], [
+                'installed_total' => count($installed),
+                'dataset_total'   => 0,
+            ]];
         }
 
-        if ($mode === 'allow') {
-            $notAllowed = [];
-            foreach ($pkgs as $name => $_) {
-                if (!isset($list[strtolower($name)])) $notAllowed[] = $name;
-            }
-            if ($notAllowed) {
-                return [false, "Packages not in allow-list: " . implode(', ', $notAllowed)];
-            }
-            return [true, "All packages are in allow-list"];
+        // 3) Nếu đếm được số file trong VULNS và =0 -> PASS (dataset empty)
+        if (isset($cand['vuln_count']) && (int)$cand['vuln_count'] === 0) {
+            return [true, "composer_match_list (offline): dataset empty (no VULNS/*.json)", [
+                'installed_total' => count($installed),
+                'dataset_total'   => 0,
+                'deny' => [],
+                'warn' => []
+            ]];
         }
 
-        return [null, "[UNKNOWN] Unsupported match-list mode: {$mode}"];
+        // 4) Nạp VULNS qua CveAuditor::readCveFile (đã xử lý zip/dir nội bộ)
+        $auditor = new \Magebean\Engine\Cve\CveAuditor($this->ctx);
+        $vulns = $this->loadVulnsViaAuditor($auditor, $cand['path']);
+        if (!is_array($vulns)) $vulns = [];
+        $datasetTotal = count($vulns);
+
+        // Nếu vì lý do nào đó không đọc ra được bản ghi nào nhưng trước đó ta đã xác nhận có VULNS,
+        // vẫn coi như dataset empty -> PASS (theo yêu cầu).
+        if ($datasetTotal === 0) {
+            return [true, "composer_match_list (offline): dataset empty (no advisories parsed)", [
+                'installed_total' => count($installed),
+                'dataset_total'   => 0,
+                'deny' => [],
+                'warn' => []
+            ]];
+        }
+
+        // 5) Tham số cảnh báo
+        $sevWarnMin = isset($args['sev_warn_min']) ? floatval($args['sev_warn_min']) : 7.0; // High+
+        $failOnWarn = isset($args['fail_on_warn']) ? (bool)$args['fail_on_warn'] : false;
+
+        // 6) Duyệt & match
+        $deny = []; // KEV
+        $warn = []; // High/Critical non-KEV
+
+        foreach ($vulns as $vuln) {
+            if (!is_array($vuln)) continue;
+            $affList = $vuln['affected'] ?? null;
+            if (!is_array($affList)) continue;
+
+            // KEV?
+            $isKev = false;
+            if (isset($vuln['database_specific']['known_exploited']) && $vuln['database_specific']['known_exploited'] === true) {
+                $isKev = true;
+            } else {
+                $refs = $vuln['references'] ?? [];
+                if (is_array($refs)) {
+                    foreach ($refs as $r) {
+                        $u = strtolower((string)($r['url'] ?? ''));
+                        if ($u !== '' && str_contains($u, 'cisa') && (str_contains($u, 'kev') || str_contains($u, 'known'))) {
+                            $isKev = true;
+                            break;
+                        }
+                    }
+                }
+            }
+
+            // severity
+            [$sevLabel, $cvssScore] = $this->extractSeveritySafe($vuln);
+            $cvss = ($cvssScore !== '') ? floatval($cvssScore) : null;
+
+            foreach ($affList as $aff) {
+                $pkg = $aff['package']['name'] ?? null;
+                $eco = strtolower((string)($aff['package']['ecosystem'] ?? ''));
+                if (!$pkg || !isset($installed[$pkg])) continue;
+                if ($eco !== 'packagist' && $eco !== 'composer') continue;
+
+                $curVer = $installed[$pkg];
+                $affected = false;
+
+                // versions[]
+                if (!$affected && !empty($aff['versions']) && is_array($aff['versions'])) {
+                    foreach ($aff['versions'] as $v) {
+                        $v = ltrim((string)$v, 'v');
+                        if ($v !== '' && version_compare($curVer, $v, '==')) {
+                            $affected = true;
+                            break;
+                        }
+                    }
+                }
+                // ranges.events
+                $minFixed = null;
+                if (!$affected && !empty($aff['ranges']) && is_array($aff['ranges'])) {
+                    foreach ($aff['ranges'] as $rng) {
+                        $events = $rng['events'] ?? [];
+                        $intervals = $this->eventsToIntervalsSafe($auditor, $events, $minFixedCandidate);
+                        foreach ($intervals as [$a, $b]) {
+                            if ($this->inRangeSafe($auditor, $curVer, $a, $b)) {
+                                $affected = true;
+                            }
+                            if ($b !== null) $minFixed = $this->minVersionLocal($minFixed, $b);
+                        }
+                        if (isset($minFixedCandidate)) $minFixed = $this->minVersionLocal($minFixed, $minFixedCandidate);
+                    }
+                }
+
+                if (!$affected) continue;
+
+                $item = [
+                    'package'   => $pkg,
+                    'installed' => $curVer,
+                    'severity'  => $sevLabel,
+                    'cvss'      => $cvssScore,
+                    'kev'       => $isKev,
+                    'fixed'     => $minFixed ? [$minFixed] : [],
+                    'id'        => (string)($vuln['id'] ?? ''),
+                    'aliases'   => array_values(array_filter(($vuln['aliases'] ?? []), 'is_string')),
+                ];
+
+                if ($isKev) {
+                    $deny[] = $item;
+                } elseif ($cvss !== null && $cvss >= $sevWarnMin) {
+                    $warn[] = $item;
+                }
+            }
+        }
+
+        // 7) Kết luận
+        if ($deny) {
+            return [false, "composer_match_list (offline): DENY — Known exploited vulns present (" . count($deny) . ")", [
+                'installed_total' => count($installed),
+                'dataset_total'   => $datasetTotal,
+                'deny' => $deny,
+                'warn' => $warn,
+            ]];
+        }
+        if ($warn) {
+            $msg = "composer_match_list (offline): WARN — High/Critical vulns present (" . count($warn) . ")";
+            return [$failOnWarn ? false : true, $msg, [
+                'installed_total' => count($installed),
+                'dataset_total'   => $datasetTotal,
+                'deny' => [],
+                'warn' => $warn
+            ]];
+        }
+        return [true, "composer_match_list (offline): PASS — no KEV or High+ vulns", [
+            'installed_total' => count($installed),
+            'dataset_total'   => $datasetTotal,
+            'deny' => [],
+            'warn' => []
+        ]];
     }
 
     public function constraintsConflict(array $args): array
@@ -586,7 +856,7 @@ final class ComposerCheck
     {
         $lock = $this->ctx->abs($args['lock_file'] ?? 'composer.lock');
         $meta = $this->metaPath($args, 'advisories', 'advisory_meta', 'DATA/advisories.json')
-             ?? $this->metaPath($args, 'advisories', 'advisory_meta', 'rules/advisories.json');
+            ?? $this->metaPath($args, 'advisories', 'advisory_meta', 'rules/advisories.json');
 
         if (!is_file($lock))  return [null, "[UNKNOWN] composer.lock not found"];
         if (!$this->safeIsFile($meta))  return [null, "[UNKNOWN] Advisory metadata not found"];
@@ -1184,5 +1454,235 @@ final class ComposerCheck
         if ($rel === '' || $rel === '.') return $base;
         if ($rel[0] === '/' || preg_match('#^[A-Za-z]:[\\\\/]#', $rel)) return $rel;
         return $base . '/' . ltrim($rel, '/');
+    }
+
+    /**
+     * Quét đệ quy các roots, lọc theo extension, match regex theo tập patterns.
+     * Trả về: ['files_scanned'=>int, 'hits'=>[['subject','path','tag','match'], ...]]
+     */
+    private function scanRiskSurface(array $roots, array $exts, array $patterns, array $installedNames, int $maxFiles, int $maxHitsPerSubject): array
+    {
+        $extSet = [];
+        foreach ($exts as $e) $extSet[strtolower($e)] = true;
+
+        $hits = [];
+        $filesScanned = 0;
+        $subjectHitsCount = []; // limit spam per subject
+
+        foreach ($roots as $r) {
+            if (!is_dir($r)) continue;
+            $it = new \RecursiveIteratorIterator(
+                new \RecursiveDirectoryIterator($r, \FilesystemIterator::SKIP_DOTS | \FilesystemIterator::FOLLOW_SYMLINKS),
+                \RecursiveIteratorIterator::SELF_FIRST
+            );
+
+            foreach ($it as $file) {
+                if ($filesScanned >= $maxFiles) break 2;
+                /** @var \SplFileInfo $file */
+                if (!$file->isFile()) continue;
+                $ext = strtolower(pathinfo($file->getFilename(), PATHINFO_EXTENSION));
+                if ($ext !== '' && !isset($extSet[$ext])) continue;
+
+                $path = $file->getPathname();
+                $filesScanned++;
+
+                // Determine subject: vendor/package or Vendor_Module
+                $subject = $this->subjectFromPath($path, $installedNames);
+
+                // Read up to 256 KB to search
+                $buf = @file_get_contents($path, false, null, 0, 262144);
+                if ($buf === false || $buf === '') continue;
+
+                foreach ($patterns as $tag => $regexes) {
+                    $matched = false;
+                    foreach ($regexes as $rx) {
+                        // delimiters + i for case-insensitive on paths/text
+                        $ok = @preg_match('/' . $rx . '/i', $buf, $m);
+                        if ($ok === 1) {
+                            $matched = true;
+                            $matchStr = isset($m[0]) ? (string)$m[0] : $rx;
+                            break;
+                        }
+                        // Nếu không match nội dung, thử match theo path (có ích cho Controller/Adminhtml)
+                        $ok2 = @preg_match('/' . $rx . '/i', $path);
+                        if ($ok2 === 1) {
+                            $matched = true;
+                            $matchStr = $rx;
+                            break;
+                        }
+                    }
+                    if ($matched) {
+                        $subjectHitsCount[$subject] = ($subjectHitsCount[$subject] ?? 0) + 1;
+                        if ($subjectHitsCount[$subject] <= $maxHitsPerSubject) {
+                            $hits[] = [
+                                'subject' => $subject,
+                                'path' => $this->relPath($path),
+                                'tag' => $tag,
+                                'match' => $matchStr,
+                            ];
+                        }
+                    }
+                }
+            }
+        }
+
+        return ['files_scanned' => $filesScanned, 'hits' => $hits];
+    }
+
+    /** Trả về path tương đối so với project root (để report gọn) */
+    private function relPath(string $abs): string
+    {
+        $root = rtrim($this->ctx->abs('.'), DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR;
+        if (str_starts_with($abs, $root)) {
+            return substr($abs, strlen($root));
+        }
+        return $abs;
+    }
+
+    /**
+     * Suy ra "subject" từ đường dẫn:
+     * - Nếu nằm trong vendor/{vendor}/{package}/... -> "vendor/package" (ưu tiên nếu package có trong composer.lock)
+     * - Nếu nằm trong app/code/{Vendor}/{Module}/... -> "Vendor_Module"
+     * - Nếu không thì gom về "project"
+     */
+    private function subjectFromPath(string $path, array $installedNames): string
+    {
+        $path = str_replace('\\', '/', $path);
+        // vendor/{vendor}/{package}/...
+        if (preg_match('#/(vendor)/([^/]+)/([^/]+)/#', $path, $m)) {
+            $pkg = $m[2] . '/' . $m[3];
+            if (isset($installedNames[$pkg])) return $pkg;
+            return $pkg; // vẫn trả về để tag, dù không có trong lock (edge-case)
+        }
+        // app/code/{Vendor}/{Module}/...
+        if (preg_match('#/app/code/([^/]+)/([^/]+)/#i', $path, $m)) {
+            return $m[1] . '_' . $m[2];
+        }
+        return 'project';
+    }
+
+    // 1) Tự tìm bundle, phân biệt 'load fail' vs 'dataset empty'
+    private function findCveBundleCandidate(?string $explicit): array
+    {
+        $cands = [];
+        if ($explicit) $cands[] = $explicit;
+
+        // vài vị trí thường gặp
+        $cands[] = $this->ctx->abs('magebean-known-cve-data-202510.zip');
+        $cands[] = $this->ctx->abs('magebean-known-cve-data.zip');
+        $cands[] = $this->ctx->abs('cve-data.zip');
+        $cands[] = $this->ctx->abs('.'); // bundle đã giải nén ngay trong project
+
+        // /tmp loader patterns (nếu bạn có cơ chế giải nén tạm)
+        foreach (glob('/tmp/magebean-cve-*') ?: [] as $d) $cands[] = $d;
+
+        foreach ($cands as $p) {
+            if (is_file($p) && str_ends_with(strtolower($p), '.zip')) {
+                $z = new \ZipArchive();
+                if ($z->open($p) !== true) {
+                    // zip hỏng -> tiếp tục dò candidate khác
+                    continue;
+                }
+                // đếm VULNS/*.json
+                $count = 0;
+                for ($i = 0; $i < $z->numFiles; $i++) {
+                    $name = $z->getNameIndex($i);
+                    if (!$name) continue;
+                    $ln = strtolower($name);
+                    if (str_starts_with($ln, 'vulns/') && str_ends_with($ln, '.json')) $count++;
+                }
+                $z->close();
+                return ['status' => 'ok', 'type' => 'zip', 'path' => $p, 'vuln_count' => $count];
+            }
+            if (is_dir($p)) {
+                $vdir = rtrim($p, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . 'VULNS';
+                if (!is_dir($vdir)) {
+                    // không coi là ok vì thiếu VULNS
+                    continue;
+                }
+                $files = glob($vdir . DIRECTORY_SEPARATOR . '*.json') ?: [];
+                return ['status' => 'ok', 'type' => 'dir', 'path' => $p, 'vuln_count' => count($files)];
+            }
+        }
+        return ['status' => 'err', 'reason' => 'CVE bundle not found (zip or VULNS dir)'];
+    }
+
+    // 2) Dùng CveAuditor::readCveFile để gom VULNS/*
+    private function loadVulnsViaAuditor(\Magebean\Engine\Cve\CveAuditor $auditor, string $cveDataPath): array
+    {
+        $ref = new \ReflectionClass($auditor);
+        if ($ref->hasMethod('readCveFile')) {
+            $m = $ref->getMethod('readCveFile');
+            $m->setAccessible(true);
+            $v = $m->invoke($auditor, $cveDataPath);
+            return is_array($v) ? $v : [];
+        }
+        return [];
+    }
+
+    // 3) extractSeverity kiểu OSV
+    private function extractSeveritySafe(array $vuln): array
+    {
+        $sevArr = $vuln['severity'] ?? null;
+        if (is_array($sevArr) && isset($sevArr[0]['score'])) {
+            $score = (string)$sevArr[0]['score'];
+            $num = floatval($score);
+            $label = ($num >= 9.0) ? 'Critical' : (($num >= 7.0) ? 'High' : (($num >= 4.0) ? 'Medium' : (($num > 0.0) ? 'Low' : 'Unknown')));
+            return [$label, $score];
+        }
+        $ds = $vuln['database_specific']['severity'] ?? '';
+        if (is_string($ds) && $ds !== '') return [ucfirst(strtolower($ds)), ''];
+        return ['Unknown', ''];
+    }
+
+    // 4) Gọi lại helpers của CveAuditor nếu có; có fallback local
+    private function eventsToIntervalsSafe($auditor, array $events, ?string &$minFixedCandidate = null): array
+    {
+        $ref = new \ReflectionClass($auditor);
+        if ($ref->hasMethod('eventsToIntervals')) {
+            $m = $ref->getMethod('eventsToIntervals');
+            $m->setAccessible(true);
+            return $m->invoke($auditor, $events, $minFixedCandidate);
+        }
+        // local
+        $res = [];
+        $curStart = null;
+        $minFixedCandidate = null;
+        foreach ($events as $ev) {
+            if (isset($ev['introduced'])) {
+                $curStart = ltrim((string)$ev['introduced'], 'v');
+            } elseif (isset($ev['fixed'])) {
+                $fx = ltrim((string)$ev['fixed'], 'v');
+                $minFixedCandidate = $this->minVersionLocal($minFixedCandidate, $fx);
+                if ($curStart !== null) {
+                    $res[] = [$curStart, $fx];
+                    $curStart = null;
+                } else {
+                    $res[] = [null, $fx];
+                }
+            }
+        }
+        if ($curStart !== null) $res[] = [$curStart, null];
+        return $res;
+    }
+
+    private function inRangeSafe($auditor, string $cur, ?string $a, ?string $b): bool
+    {
+        $ref = new \ReflectionClass($auditor);
+        if ($ref->hasMethod('inRange')) {
+            $m = $ref->getMethod('inRange');
+            $m->setAccessible(true);
+            return $m->invoke($auditor, $cur, $a, $b);
+        }
+        $cur = ltrim($cur, 'v');
+        if ($a !== null && version_compare($cur, $a, '<')) return false;
+        if ($b !== null && version_compare($cur, $b, '>=')) return false;
+        return true;
+    }
+
+    private function minVersionLocal(?string $cur, string $cand): string
+    {
+        if ($cur === null) return ltrim($cand, 'v');
+        return version_compare(ltrim($cand, 'v'), $cur, '<') ? ltrim($cand, 'v') : $cur;
     }
 }

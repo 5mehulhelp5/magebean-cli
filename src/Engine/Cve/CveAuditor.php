@@ -9,6 +9,7 @@ use Magebean\Engine\Context;
 final class CveAuditor
 {
     private Context $ctx;
+
     public function __construct(Context $ctx)
     {
         $this->ctx = $ctx;
@@ -37,7 +38,7 @@ final class CveAuditor
         }
         $installedNames = array_fill_keys(array_keys($installed), true);
 
-        // 2) CVE data
+        // 2) CVE data (from VULNS only)
         $vulns = $this->readCveFile($cveDataPath);
         $datasetTotal = is_array($vulns) ? count($vulns) : 0;
 
@@ -58,6 +59,7 @@ final class CveAuditor
         // 4) match
         $advisoriesTotal = 0;
         foreach ($vulns as $vuln) {
+            if (!is_array($vuln)) continue;
             $affList = $vuln['affected'] ?? null;
             if (!is_array($affList)) continue;
 
@@ -77,6 +79,8 @@ final class CveAuditor
 
                 $curVer = $installed[$pkg];
                 $hit = false;
+
+                // explicit versions list
                 if (!empty($aff['versions']) && is_array($aff['versions'])) {
                     foreach ($aff['versions'] as $v) {
                         $v = ltrim((string)$v, 'v');
@@ -162,81 +166,112 @@ final class CveAuditor
 
     /** --------- helpers --------- */
 
+    /**
+     * Đọc dataset CVE từ đường dẫn chỉ bằng VULNS:
+     * - Nếu là .zip: gom VULNS/*.json trong zip
+     * - Nếu là thư mục bundle hoặc file nằm trong bundle: tìm root rồi gom VULNS/*.json
+     * - Nếu là 1 file JSON đơn lẻ: thử coi như 1 vuln object/list (ít dùng)
+     */
     private function readCveFile(string $path): array
     {
-        $raw = (string)file_get_contents($path);
-        if ($raw === '') return [];
-
-        // 1) Thử parse JSON "nguyên khối"
-        $arr = json_decode($raw, true);
-
-        // Nếu là mảng tuần tự (list) -> OK
-        if (is_array($arr) && $this->isList($arr)) {
-            return $arr;
+        if (is_dir($path)) {
+            return $this->readCveFromBundleDir($path);
         }
-
-        // Nếu là object (assoc) -> unwrap theo các key phổ biến của dump OSV
-        if (is_array($arr) && !$this->isList($arr)) {
-            // Các key thường gặp khi export/batch: vulns, results, advisories, entries, items, data
-            foreach (['vulns', 'results', 'advisories', 'entries', 'items', 'data'] as $k) {
-                if (isset($arr[$k]) && is_array($arr[$k])) {
-                    // Nếu $arr[$k] lại là 1 object có key con tương tự, unwrap tiếp
-                    if (!$this->isList($arr[$k])) {
-                        foreach (['vulns', 'results', 'advisories', 'entries', 'items', 'data'] as $k2) {
-                            if (isset($arr[$k][$k2]) && is_array($arr[$k][$k2])) {
-                                return $arr[$k][$k2];
-                            }
-                        }
+        if (is_file($path) && str_ends_with(strtolower($path), '.zip')) {
+            return $this->readCveZip($path);
+        }
+        if (is_file($path)) {
+            $root = $this->discoverBundleRoot($path);
+            if ($root !== null) {
+                return $this->readCveFromBundleDir($root);
+            }
+            $raw = @file_get_contents($path);
+            if ($raw === false || $raw === '') return [];
+            $arr = json_decode($raw, true);
+            if (is_array($arr)) {
+                if (isset($arr['affected']) || isset($arr['id'])) {
+                    $this->normalizeVulnId($arr);
+                    return [$arr];
+                }
+                if ($this->isList($arr)) {
+                    $out = [];
+                    foreach ($arr as $it) {
+                        if (is_array($it)) { $this->normalizeVulnId($it); $out[] = $it; }
                     }
-                    return $arr[$k];
+                    return $out;
                 }
             }
-
-            // Một số dump embed theo cấu trúc packages[] với mỗi phần tử có "vulns"
-            if (isset($arr['packages']) && is_array($arr['packages'])) {
-                $out = [];
-                foreach ($arr['packages'] as $pkg) {
-                    if (isset($pkg['vulns']) && is_array($pkg['vulns'])) {
-                        foreach ($pkg['vulns'] as $v) $out[] = $v;
-                    }
-                }
-                if ($out) return $out;
-            }
-
-            // Fallback: nếu object có nhiều mảng con là advisories (có 'id' hoặc 'affected'), gom lại
-            $out = [];
-            foreach ($arr as $v) {
-                if (is_array($v)) {
-                    if ($this->isList($v)) {
-                        foreach ($v as $item) {
-                            if (is_array($item) && (isset($item['id']) || isset($item['affected']))) {
-                                $out[] = $item;
-                            }
-                        }
-                    } elseif (isset($v['id']) || isset($v['affected'])) {
-                        $out[] = $v;
-                    }
-                }
-            }
-            if ($out) return $out;
-            // Nếu vẫn không unwrap được, coi như không có dữ liệu usable
             return [];
         }
+        return [];
+    }
 
-        // 2) Fallback NDJSON/JSONL: parse từng dòng
-        $lines = preg_split('/\r?\n/', $raw, -1, PREG_SPLIT_NO_EMPTY);
+    /** Tìm root bundle khi đưa vào 1 file/dir nằm sâu bên trong; root có VULNS/ hoặc DATA/ hoặc MANIFEST/ */
+    private function discoverBundleRoot(string $path): ?string
+    {
+        $p = is_dir($path) ? rtrim($path, DIRECTORY_SEPARATOR) : dirname($path);
+        for ($i = 0; $i < 5; $i++) {
+            if (is_dir($p . '/VULNS') || is_dir($p . '/DATA') || is_dir($p . '/MANIFEST')) {
+                return $p;
+            }
+            $parent = dirname($p);
+            if ($parent === $p) break;
+            $p = $parent;
+        }
+        return null;
+    }
+
+    /** Đọc dataset trong một thư mục bundle đã giải nén: gom VULNS/*.json */
+    private function readCveFromBundleDir(string $root): array
+    {
+        $vulnsDir = rtrim($root, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . 'VULNS';
+        if (!is_dir($vulnsDir)) return [];
         $out = [];
-        foreach ($lines as $ln) {
-            $o = json_decode($ln, true);
-            if (is_array($o)) $out[] = $o;
+        $dh = @opendir($vulnsDir);
+        if ($dh) {
+            while (($fn = readdir($dh)) !== false) {
+                if ($fn === '.' || $fn === '..') continue;
+                if (!str_ends_with(strtolower($fn), '.json')) continue;
+                $full = $vulnsDir . DIRECTORY_SEPARATOR . $fn;
+                $raw = @file_get_contents($full);
+                if ($raw === false) continue;
+                $v = json_decode($raw, true);
+                if (!is_array($v)) continue;
+                $this->normalizeVulnId($v);
+                $out[] = $v;
+            }
+            closedir($dh);
         }
         return $out;
     }
 
-    // --- helpers ---
+    /** Đọc bundle .zip: gom VULNS/*.json trong zip */
+    private function readCveZip(string $zipPath): array
+    {
+        $z = new \ZipArchive();
+        if ($z->open($zipPath) !== true) return [];
+        $out = [];
+        for ($i = 0; $i < $z->numFiles; $i++) {
+            $name = $z->getNameIndex($i);
+            if (!$name) continue;
+            $lname = strtolower($name);
+            if (str_starts_with($lname, 'vulns/') && str_ends_with($lname, '.json')) {
+                $raw = $z->getFromIndex($i);
+                if ($raw === false) continue;
+                $v = json_decode((string)$raw, true);
+                if (!is_array($v)) continue;
+                $this->normalizeVulnId($v);
+                $out[] = $v;
+            }
+        }
+        $z->close();
+        return $out;
+    }
+
+    /** array_is_list tương thích (PHP < 8.1) */
     private function isList(array $a): bool
     {
-        // PHP 8.1 có array_is_list(); tự triển khai nhẹ để tương thích
+        if (function_exists('array_is_list')) return array_is_list($a);
         $i = 0;
         foreach ($a as $k => $_) {
             if ($k !== $i) return false;
@@ -245,6 +280,22 @@ final class CveAuditor
         return true;
     }
 
+    /** Bổ sung id chuẩn nếu thiếu: preferred_id -> vuln_id -> aliases[0] -> 'UNKNOWN' */
+    private function normalizeVulnId(array &$v): void
+    {
+        if (!isset($v['id']) || $v['id'] === '' || $v['id'] === null) {
+            if (isset($v['preferred_id']) && is_string($v['preferred_id']) && $v['preferred_id'] !== '') {
+                $v['id'] = $v['preferred_id']; return;
+            }
+            if (isset($v['vuln_id']) && is_string($v['vuln_id']) && $v['vuln_id'] !== '') {
+                $v['id'] = $v['vuln_id']; return;
+            }
+            if (isset($v['aliases']) && is_array($v['aliases']) && isset($v['aliases'][0]) && is_string($v['aliases'][0])) {
+                $v['id'] = $v['aliases'][0]; return;
+            }
+            $v['id'] = 'UNKNOWN';
+        }
+    }
 
     private function eventsToIntervals(array $events, ?string &$minFixedCandidate = null): array
     {
