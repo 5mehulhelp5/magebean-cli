@@ -151,7 +151,7 @@ final class HtmlReporter
 
             $confHtml = '<div class="section"><h3>Scan Confidence</h3>'
                 . '<div>Detected platform: <strong>Magento 2</strong> (confidence ' . $detConf . '%)</div>'
-//                . '<div>Overall confidence: <strong>' . $overall . '%</strong> &nbsp;—&nbsp; transport ' . $tPct . '% &middot; coverage ' . $cPct . '%' . ($planned > 0 ? ' (' . $execd . '/' . $planned . ')' : '') . '</div>'
+                //                . '<div>Overall confidence: <strong>' . $overall . '%</strong> &nbsp;—&nbsp; transport ' . $tPct . '% &middot; coverage ' . $cPct . '%' . ($planned > 0 ? ' (' . $execd . '/' . $planned . ')' : '') . '</div>'
                 . (!empty($signals) ? '<div style="opacity:.85;margin-top:6px"><small>Signals: ' . htmlspecialchars(implode(' • ', $signals), ENT_QUOTES, 'UTF-8') . '</small></div>' : '')
                 . '</div>';
             $html = str_replace('</body>', $confHtml . '</body>', $html);
@@ -300,18 +300,25 @@ final class HtmlReporter
                 if (is_array($d)) {
                     $line = implode(' — ', array_map(static function ($x) {
                         if (is_array($x)) {
-                            return json_encode($x, JSON_UNESCAPED_SLASHES|JSON_UNESCAPED_UNICODE);
+                            return json_encode($x, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
                         }
                         return (string)$x;
                     }, $d));
-                    $out .= '<div>' . htmlspecialchars($line, ENT_QUOTES, 'UTF-8') . '</div>';
+                    // escape trước, rồi chuyển \n thành <br>
+                    $safe = htmlspecialchars($line, ENT_QUOTES, 'UTF-8');
+                    $safe = nl2br($safe); // <br /> cho newline
+                    $out .= '<div>' . $safe . '</div>';
                 } else {
-                    $out .= '<div>' . htmlspecialchars((string)$d, ENT_QUOTES, 'UTF-8') . '</div>';
+                    $line = (string)$d;
+                    $safe = htmlspecialchars($line, ENT_QUOTES, 'UTF-8');
+                    $safe = nl2br($safe);
+                    $out .= '<div>' . $safe . '</div>';
                 }
             }
         }
         return $out;
     }
+
 
     private function formatTsOrNow($tsOrStr): string
     {

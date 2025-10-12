@@ -792,9 +792,11 @@ HTML;
                 'release_history' => 'release-history.json',
                 'repo_status'     => 'repo-status.json',
                 'vendor_support'  => 'vendor-support.json',
-                // tuỳ chọn:
+                // advisories split by source (new bundle layout)
+                'adobe_core'      => 'advisories-adobe.json',
+                'advisories'      => 'advisories-magento.json',       // default for latency check; falls back to marketplace/thirdparty if needed
+                // optional extras:
                 'kev'             => 'cisa-kev.json',
-                'adobe_core'      => 'adobe-core-advisories.json',
                 'high_risk'       => 'high-risk-modules.json',
                 'osv_db'          => 'osv-db.json',                   // CVE DB (JSON/NDJSON đã “phẳng”)
                 'list'            => 'match-list.json',               // allow/deny list

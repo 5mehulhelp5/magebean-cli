@@ -205,8 +205,8 @@
         }
       ],
       "messages": {
-        "pass": "Installed Marketplace extensions are within the allowed freshness window.",
-        "fail": "Outdated Marketplace extensions detected. Update to a maintained release."
+        "pass": "Installed extensions are within the allowed freshness window.",
+        "fail": "Outdated extensions detected. Update to a maintained release."
       }
     },
     {
