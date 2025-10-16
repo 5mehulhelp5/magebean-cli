@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Magebean\Engine;
 
 use Magebean\Engine\Checks\{FilesystemCheck, PhpConfigCheck, ComposerCheck, MagentoCheck, HttpCheck, CodeSearchCheck, CronCheck, WebServerConfigCheck, GitHistoryCheck};
+use Magebean\Engine\Support\BaseUrlResolver; 
 
 final class ScanRunner
 {
@@ -164,11 +165,6 @@ final class ScanRunner
             if ($status === 'UNKNOWN' && (!isset($finalMsg) || trim((string)$finalMsg) === '')) {
                 $finalMsg = 'CVE file not found (requires --cve-data package)';
             }
-            // Xác định chế độ suppress confidence (path-mode: có path, không có url)
-            $hasUrl  = (string)$this->ctx->get('url') !== '';
-            $hasPath = is_string($this->ctx->path ?? null) && $this->ctx->path !== '';
-            $suppressConfidence = ($hasPath && !$hasUrl) || (bool)$this->ctx->get('suppress_confidence');
-
             $finding = [
                 'id'       => $rule['id'],
                 'title'    => $rule['title'],
