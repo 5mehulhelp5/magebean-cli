@@ -1751,38 +1751,372 @@ final class ComposerCheck
 
     public function vendorSupportOffline(array $args): array
     {
+        // 0) Load composer.lock
         $lock = $this->ctx->abs($args['lock_file'] ?? 'composer.lock');
         if (!is_file($lock)) return [null, "[UNKNOWN] composer.lock not found"];
-
-        $metaPath = $this->metaPath($args, 'vendor_support', 'support_meta', 'DATA/vendor-support.json')
-            ?? $this->metaPath($args, 'vendor_support', 'support_meta', 'rules/vendor-support.json');
-        if (!$metaPath) return [null, "[UNKNOWN] Vendor support metadata not found"];
-
         $pkgs = $this->readLockPackages($lock);
-        if (!$pkgs) return [null, "[UNKNOWN] Unable to parse composer.lock"];
+        if (!$pkgs || !is_array($pkgs)) return [null, "[UNKNOWN] Unable to parse composer.lock"];
 
-        $meta = $this->loadJsonSafe($metaPath);
-        if (!$meta) return [null, "[UNKNOWN] Invalid vendor-support metadata JSON"];
+        $installed = [];
+        foreach ($pkgs as $name => $info) {
+            $v = $info['version'] ?? null;
+            if (is_string($v) && $v !== '') $installed[strtolower($name)] = ltrim($v, 'vV');
+        }
+        if (!$installed) return [true, "No packages in composer.lock (nothing to check)"];
 
-        $today = strtotime('today');
-        $eol = [];
-        foreach ($pkgs as $name => $_) {
-            $info = $meta[$name] ?? null;
-            if (!$info) continue;
-            $supported = (bool)($info['supported'] ?? false);
-            $untilStr  = (string)($info['until'] ?? '');
-            $until     = $untilStr !== '' ? strtotime($untilStr) : null;
+        // 1) Resolve bundle root (zip/dir/path-inside-bundle)
+        $candidates = [];
+        if (!empty($args['vendor_support_meta'])) $candidates[] = (string)$args['vendor_support_meta'];
+        if (!empty($args['cve_data']))           $candidates[] = (string)$args['cve_data'];
+        if (!empty($this->ctx->cveData))         $candidates[] = (string)$this->ctx->cveData;
+        $candidates = array_values(array_unique(array_filter($candidates, fn($p) => is_string($p) && $p !== '')));
 
-            if (!$supported) {
-                $eol[] = "{$name} (unsupported)";
-            } elseif ($until && $until < $today) {
-                $eol[] = "{$name} (support ended {$untilStr})";
+        $normalize = function (string $p): string {
+            if (preg_match('#^/|^[A-Za-z]:[\\\\/]#', $p)) return $p;
+            $abs = $this->ctx->abs($p);
+            return is_string($abs) && $abs !== '' ? $abs : (getcwd() . '/' . $p);
+        };
+        $tried = [];
+        $resolveRoot = function (string $raw) use ($normalize, &$tried) {
+            $p = $normalize($raw);
+            $tried[] = $p;
+            if (is_file($p) && preg_match('/\.zip$/i', $p)) return ['zip', $p];
+            $asDir = is_dir($p) ? $p : dirname($p);
+            $cur = $asDir;
+            for ($i = 0; $i < 5; $i++) {
+                if (is_dir($cur . '/INDEX') || is_dir($cur . '/DATA') || is_dir($cur . '/VULNS') || is_file($cur . '/INDEX/packages-index.json')) {
+                    return ['dir', $cur];
+                }
+                $parent = dirname($cur);
+                if ($parent === $cur) break;
+                $cur = $parent;
+            }
+            if (preg_match('#/(DATA|VULNS|INDEX)/#', $p)) {
+                $root = preg_replace('#/(DATA|VULNS|INDEX)/.*$#', '', $p);
+                if (is_dir($root)) return ['dir', $root];
+            }
+            return null;
+        };
+
+        $bundle = null;
+        foreach ($candidates as $cand) {
+            if (($bundle = $resolveRoot($cand)) !== null) break;
+        }
+        if (!$bundle) {
+            $msg = $tried ? implode(' | ', $tried) : '(no candidates)';
+            return [null, "[UNKNOWN] Vendor-support metadata not found; bundle root unresolved; tried: " . $msg];
+        }
+
+        // 2) Load DATA/vendor-support.json (fallback rules/)
+        $loadText = function (string $rel) use ($bundle) {
+            if ($bundle[0] === 'zip') {
+                $zip = new \ZipArchive();
+                if ($zip->open($bundle[1]) !== true) return null;
+                $idx = $zip->locateName($rel, \ZipArchive::FL_NOCASE);
+                if ($idx === false) {
+                    $zip->close();
+                    return null;
+                }
+                $raw = $zip->getFromIndex($idx);
+                $zip->close();
+                return is_string($raw) ? $raw : null;
+            } else {
+                $path = rtrim($bundle[1], '/') . '/' . $rel;
+                if (!is_file($path)) return null;
+                $raw = @file_get_contents($path);
+                return $raw === false ? null : $raw;
+            }
+        };
+
+        $raw = $loadText('DATA/vendor-support.json') ?? $loadText('rules/vendor-support.json');
+        if ($raw === null) return [null, "[UNKNOWN] Vendor-support metadata not found"];
+
+        // 2.1) Loose JSON decode: strip BOM, comments, trailing commas; retry decode
+        $looseDecode = static function (string $s) {
+            // strip UTF-8 BOM
+            if (substr($s, 0, 3) === "\xEF\xBB\xBF") $s = substr($s, 3);
+            // remove //... and /* ... */
+            $s = preg_replace('#//[^\r\n]*#', '', $s);
+            $s = preg_replace('#/\*.*?\*/#s', '', $s);
+            // remove trailing commas before } or ]
+            $s = preg_replace('#,\s*(}|\])#', '$1', $s);
+            // collapse repeated commas
+            $s = preg_replace('#,\s*,+#', ',', $s);
+            // trim
+            $s = trim($s);
+            $j = json_decode($s, true);
+            if (is_array($j)) return $j;
+            // final fallback: try to decode as empty container aliases
+            if ($s === '' || $s === '{}' || $s === '[]') return [];
+            return null;
+        };
+
+        $j = $looseDecode($raw);
+        if (!is_array($j)) return [null, "[UNKNOWN] Invalid vendor-support metadata JSON"];
+
+        // 3) Normalize payload → rules[pkg][] = ['versions'[], 'constraint', 'eol', 'seol', 'status']
+        $payload = $j;
+        if (isset($j['support']) && (is_array($j['support']) || $j['support'] === [])) $payload = $j['support'];
+        if (isset($j['vendor_support']) && (is_array($j['vendor_support']) || $j['vendor_support'] === [])) $payload = $j['vendor_support'];
+        if (isset($j['vendorSupport']) && (is_array($j['vendorSupport']) || $j['vendorSupport'] === [])) $payload = $j['vendorSupport'];
+
+        $isAssoc = static function (array $a): bool {
+            return array_keys($a) !== range(0, count($a) - 1);
+        };
+        $rules = []; // pkg => list of rule rows
+
+        $addRule = static function (string $pkg, ?array $versions, ?string $constraint, ?string $eol, ?string $seol, ?string $status) use (&$rules) {
+            $pkg = strtolower($pkg);
+            $row = [
+                'versions'   => $versions ?: null,
+                'constraint' => $constraint ?: null,
+                'eol'        => $eol ?: null,
+                'seol'       => $seol ?: null,
+                'status'     => $status ? strtolower($status) : null,
+            ];
+            $rules[$pkg][] = $row;
+        };
+        $canonSeol = static function (?array $row): ?string {
+            if (!$row) return null;
+            foreach (['security_eol', 'securityEOL', 'security-end', 'security_end'] as $k) {
+                if (isset($row[$k]) && is_string($row[$k]) && $row[$k] !== '') return $row[$k];
+            }
+            return null;
+        };
+
+        if ((is_array($payload) && empty($payload)) || ($payload instanceof \stdClass && !get_object_vars($payload))) {
+            return [true, "No vendor-support entries (empty list)"];
+        }
+
+
+        if ($isAssoc((array)$payload)) {
+            foreach ($payload as $pkg => $row) {
+                if (!is_string($pkg)) continue;
+                if (!is_array($row)) continue;
+
+                $eol  = is_string($row['eol'] ?? null) ? $row['eol'] : null;
+                $seol = $canonSeol($row);
+                $status = is_string($row['status'] ?? null) ? $row['status'] : null;
+                if ($eol || $seol || $status) $addRule($pkg, null, null, $eol, $seol, $status);
+
+                if (isset($row['tracks']) && is_array($row['tracks'])) {
+                    foreach ($row['tracks'] as $t) {
+                        if (!is_array($t)) continue;
+                        $vers = null;
+                        if (isset($t['versions']) && is_array($t['versions'])) {
+                            $vers = array_values(array_filter(array_map(fn($v) => is_string($v) ? ltrim($v, 'vV') : '', $t['versions']), fn($v) => $v !== ''));
+                        }
+                        $constraint = is_string($t['constraint'] ?? null) ? $t['constraint'] : null;
+                        $teol  = is_string($t['eol'] ?? null) ? $t['eol'] : null;
+                        $tseol = $canonSeol($t);
+                        $tstat = is_string($t['status'] ?? null) ? $t['status'] : null;
+                        if ($vers || $constraint || $teol || $tseol || $tstat) {
+                            $addRule($pkg, $vers, $constraint, $teol, $tseol, $tstat);
+                        }
+                    }
+                }
+                if (isset($row['versions']) && is_array($row['versions'])) {
+                    foreach ($row['versions'] as $expr => $meta) {
+                        if (!is_array($meta)) continue;
+                        $teol  = is_string($meta['eol'] ?? null) ? $meta['eol'] : null;
+                        $tseol = $canonSeol($meta);
+                        $tstat = is_string($meta['status'] ?? null) ? $meta['status'] : null;
+                        $vlist = null;
+                        if (isset($meta['versions']) && is_array($meta['versions'])) {
+                            $vlist = array_values(array_filter(array_map(fn($v) => is_string($v) ? ltrim($v, 'vV') : '', $meta['versions']), fn($v) => $v !== ''));
+                        }
+                        $addRule($pkg, $vlist, is_string($expr) ? $expr : null, $teol, $tseol, $tstat);
+                    }
+                }
+            }
+        } else {
+            foreach ((array)$payload as $row) {
+                if (!is_array($row)) continue;
+                $pkg = $row['package'] ?? null;
+                if (!is_string($pkg) || $pkg === '') continue;
+
+                $eol  = is_string($row['eol'] ?? null) ? $row['eol'] : null;
+                $seol = $canonSeol($row);
+                $status = is_string($row['status'] ?? null) ? $row['status'] : null;
+                if ($eol || $seol || $status) $addRule($pkg, null, null, $eol, $seol, $status);
+
+                if (isset($row['tracks']) && is_array($row['tracks'])) {
+                    foreach ($row['tracks'] as $t) {
+                        if (!is_array($t)) continue;
+                        $vers = null;
+                        if (isset($t['versions']) && is_array($t['versions'])) {
+                            $vers = array_values(array_filter(array_map(fn($v) => is_string($v) ? ltrim($v, 'vV') : '', $t['versions']), fn($v) => $v !== ''));
+                        }
+                        $constraint = is_string($t['constraint'] ?? null) ? $t['constraint'] : null;
+                        $teol  = is_string($t['eol'] ?? null) ? $t['eol'] : null;
+                        $tseol = $canonSeol($t);
+                        $tstat = is_string($t['status'] ?? null) ? $t['status'] : null;
+                        if ($vers || $constraint || $teol || $tseol || $tstat) {
+                            $addRule($pkg, $vers, $constraint, $teol, $tseol, $tstat);
+                        }
+                    }
+                }
             }
         }
 
-        if ($eol) return [false, "Unsupported/EOL packages: " . implode('; ', $eol)];
-        return [true, "All packages are within vendor support windows"];
+        if (!$rules) {
+            return [true, "No vendor-support entries (empty or no usable rules)"];
+        }
+
+        // 4) Version matching (Composer-like, tối giản + các toán tử phổ biến)
+        $cmp = static fn(string $a, string $b, string $op) => version_compare(ltrim($a, 'vV'), ltrim($b, 'vV'), $op);
+
+        $expandCaret = static function (string $v): array {
+            $v = ltrim($v, 'vV');
+            $parts = array_map('intval', explode('.', $v) + [0, 0, 0]);
+            if ($parts[0] > 0)        $upper = ($parts[0] + 1) . ".0.0";
+            elseif ($parts[1] > 0)    $upper = "0." . ($parts[1] + 1) . ".0";
+            else                      $upper = "0.0." . ($parts[2] + 1);
+            return [">=" . $v, "<" . $upper];
+        };
+        $expandTilde = static function (string $v): array {
+            $v = ltrim($v, 'vV');
+            $parts = explode('.', $v);
+            if (count($parts) === 1) {
+                $upper = ((int)$parts[0] + 1) . ".0.0";
+                $vmin = $parts[0] . ".0.0";
+            } elseif (count($parts) === 2) {
+                $upper = $parts[0] . "." . ((int)$parts[1] + 1) . ".0";
+                $vmin = $parts[0] . "." . $parts[1] . ".0";
+            } else {
+                $upper = $parts[0] . "." . ((int)$parts[1] + 1) . ".0";
+                $vmin = $v;
+            }
+            return [">=" . $vmin, "<" . $upper];
+        };
+        $expandWildcard = static function (string $v): array {
+            $v = ltrim($v, 'vV');
+            $parts = explode('.', str_replace(['x', 'X', '*'], '*', $v));
+            if (count($parts) === 1 || ($parts[1] ?? '') === '*') {
+                $lower = $parts[0] . ".0.0";
+                $upper = ((int)$parts[0] + 1) . ".0.0";
+            } elseif (($parts[2] ?? '') === '*') {
+                $lower = $parts[0] . "." . $parts[1] . ".0";
+                $upper = $parts[0] . "." . ((int)$parts[1] + 1) . ".0";
+            } else {
+                $lower = $v;
+                $upper = null;
+            }
+            return $upper ? [">=" . $lower, "<" . $upper] : [">=" . $lower];
+        };
+
+        $matchExpr = null; // forward decl for recursion
+        $matchExpr = static function (string $iv, string $expr) use (&$matchExpr, $cmp, $expandCaret, $expandTilde, $expandWildcard): bool {
+            foreach (preg_split('/\s*\|\|\s*/', trim($expr)) as $orPart) {
+                if ($orPart === '') continue;
+                $ok = true;
+                $tokens = preg_split('/\s*,\s*|\s+/', trim($orPart));
+                foreach ($tokens as $t) {
+                    if ($t === '') continue;
+                    if ($t[0] === '^') {
+                        foreach ($expandCaret(substr($t, 1)) as $c) if (!$matchExpr($iv, $c)) {
+                            $ok = false;
+                            break;
+                        }
+                        if (!$ok) break;
+                        continue;
+                    }
+                    if ($t[0] === '~') {
+                        foreach ($expandTilde(substr($t, 1)) as $c) if (!$matchExpr($iv, $c)) {
+                            $ok = false;
+                            break;
+                        }
+                        if (!$ok) break;
+                        continue;
+                    }
+                    if (preg_match('/[*xX]/', $t)) {
+                        foreach ($expandWildcard($t) as $c) if (!$matchExpr($iv, $c)) {
+                            $ok = false;
+                            break;
+                        }
+                        if (!$ok) break;
+                        continue;
+                    }
+                    if (preg_match('/^(<=|>=|==|=|!=|<|>)\s*([vV]?\d[\w\.\-\+]*)$/', $t, $m)) {
+                        $op = $m[1] === '=' ? '==' : $m[1];
+                        if (!$cmp($iv, $m[2], $op)) {
+                            $ok = false;
+                            break;
+                        }
+                    } else {
+                        if (!$cmp($iv, $t, '==')) {
+                            $ok = false;
+                            break;
+                        }
+                    }
+                }
+                if ($ok) return true;
+            }
+            return false;
+        };
+
+        $now = new \DateTimeImmutable('now');
+        $parseDate = static function (?string $s): ?\DateTimeImmutable {
+            if (!is_string($s) || $s === '') return null;
+            try {
+                return new \DateTimeImmutable($s);
+            } catch (\Exception $e) {
+                return null;
+            }
+        };
+
+        // 5) Evaluate
+        $hits = [];
+        foreach ($installed as $pkg => $cur) {
+            if (empty($rules[$pkg])) continue;
+
+            foreach ($rules[$pkg] as $r) {
+                $matched = false;
+                if (is_array($r['versions'])) {
+                    $matched = in_array($cur, $r['versions'], true);
+                }
+                if (!$matched && is_string($r['constraint']) && $r['constraint'] !== '') {
+                    $matched = $matchExpr(ltrim($cur, 'vV'), $r['constraint']);
+                }
+                if (!$matched && !$r['versions'] && !$r['constraint']) {
+                    $matched = true; // apply to all versions
+                }
+                if (!$matched) continue;
+
+                $eol  = $parseDate($r['eol']);
+                $seol = $parseDate($r['seol']);
+                $status = $r['status'] ?? null;
+
+                if ($status && in_array($status, ['eol', 'end_of_life', 'unsupported', 'security_eol', 'security-end'], true)) {
+                    $label = ($status === 'security_eol' || $status === 'security-end') ? 'SECURITY-EOL' : 'EOL';
+                    $dateStr = $eol ? $eol->format(DATE_ATOM) : ($seol ? $seol->format(DATE_ATOM) : 'n/a');
+                    $hits[] = "{$pkg} {$cur} — {$label} (since {$dateStr})";
+                    continue;
+                }
+                if ($eol && $now > $eol) {
+                    $hits[] = "{$pkg} {$cur} — EOL on " . $eol->format(DATE_ATOM);
+                    continue;
+                }
+                if ($seol && $now > $seol) {
+                    $hits[] = "{$pkg} {$cur} — SECURITY-EOL on " . $seol->format(DATE_ATOM);
+                    continue;
+                }
+            }
+        }
+
+        if ($hits) {
+            $lines = array_map(fn($s) => ' - ' . $s, $hits);
+            return [false, "Vendor support issues (offline):\n" . implode(PHP_EOL, $lines)];
+        }
+        return [true, "All installed packages are within vendor support"];
     }
+
+    // alias giữ API cũ
+    public function composer_vendor_support_offline(array $args): array
+    {
+        return $this->composerVendorSupportOffline($args);
+    }
+
 
 
     public function abandonedOffline(array $args): array
