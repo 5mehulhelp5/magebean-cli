@@ -50,10 +50,7 @@ final class HtmlReporter
         $rows = '';
 
         foreach ($result['findings'] ?? [] as $f) {
-            $confVal = isset($f['confidence']) ? (int)$f['confidence'] : null;
-            $confWhy = isset($f['confidence_reason']) ? (string)$f['confidence_reason'] : '';
             $id       = htmlspecialchars((string)($f['id'] ?? ''), ENT_QUOTES, 'UTF-8');
-            $control  = htmlspecialchars((string)($f['control'] ?? ''), ENT_QUOTES, 'UTF-8');
             $severity = htmlspecialchars((string)($f['severity'] ?? ''), ENT_QUOTES, 'UTF-8');
             $passed   = (bool)($f['passed'] ?? false);
             $status   = $passed ? 'PASS' : 'FAIL';
@@ -78,13 +75,11 @@ final class HtmlReporter
 
             // Cột nội dung: chỉ in message theo yêu cầu mới
             $rows .= '<tr>'
-                . '<td>' . $id . '</td>'
-                . '<td>' . $control . '</td>'
+                . '<td><a href="https://magebean.com/baseline/' . $id . '" target="_blank">' . $id . '</a></td>'
                 . '<td>' . $severity . '</td>'
                 . '<td class="' . $statusClass . '">' . $status . '</td>'
-                // . '<td>' . ($userMsg !== '' ? '<div style="color:#333;margin-top:4px">' . $userMsg . '</div>' : '') . '</td>'
                 . '<td>'
-                . ($userMsg !== '' ? '<div style="color:#333;margin-top:4px">' . $userMsg . '</div>' : '')
+                . ($userMsg !== '' ? '<div style="color:#333;margin-top:4px; width:300px">' . $userMsg . '</div>' : '')
                 /* . (
                     (!$suppressConfidence && $confVal !== null)
                     ? '<div style="opacity:.8;margin-top:4px"><small' . ($confWhy !== '' ? ' title="' . htmlspecialchars($confWhy, ENT_QUOTES, 'UTF-8') . '"' : '') . '>confidence: ' . $confVal . '%</small></div>'
@@ -142,11 +137,6 @@ final class HtmlReporter
             $meta = (array)($result['meta'] ?? []);
             $det  = (array)($meta['detected'] ?? []);
             $detConf = (int)($det['confidence'] ?? 0);
-            $overall = (int)($meta['overall_confidence'] ?? 0);
-            $tPct    = (int)($meta['transport_success_percent'] ?? 0);
-            $cPct    = (int)($meta['coverage_percent'] ?? 0);
-            $execd   = (int)($meta['executed_rules'] ?? 0);
-            $planned = (int)($meta['planned_rules']  ?? 0);
             $signals = isset($det['signals']) && is_array($det['signals']) ? $det['signals'] : [];
 
             $confHtml = '<div class="section"><h3>Scan Confidence</h3>'
@@ -157,7 +147,7 @@ final class HtmlReporter
             $html = str_replace('</body>', $confHtml . '</body>', $html);
         }
 
-        $footer = '<p>This report was generated using Magebean CLI, based on the <a href="https://magebean.com/documentation/index.html">Magebean Security Baseline v1</a>. Findings are provided for informational and audit purposes only.</p>';
+        $footer = '<p>This report was generated using Magebean CLI, based on the <a href="https://magebean.com/baseline" target="_blank">Magebean Security Baseline v1</a>. Findings are provided for informational and audit purposes only.</p>';
         $html = str_replace('</body>', $footer . '</body>', $html);
 
         // 2) Đảm bảo thư mục output tồn tại
@@ -181,115 +171,151 @@ final class HtmlReporter
 
     private function renderCveSection($cve): string
     {
+        // Summary-first UX: show a compact summary; expand full list on demand in a fixed-height scroll box.
         if (!$cve) {
-            return '<div class="section"><h3>CVE checks skipped</h3>
-            <div>→ Requires CVE Data (--cve-data=magebean-cve-bundle-' . date('Ym') . '.zip)</div>
-            <div>→ Visit <a href="https://magebean.com/download" title="Download">https://magebean.com/download</a></div>
-            </div>';
+            return '<section class="section" id="cve"><h3>CVE Summary</h3>
+                <div style="margin:.5rem 0">CVE checks were skipped.</div>
+                <div>→ Provide a CVE bundle via <code>--cve-data=&lt;bundle.zip&gt;</code> to enable this section.</div>
+            </section>';
         }
-        $sum = $cve['summary'] ?? [];
-        $pkgs = $cve['packages'] ?? [];
 
+        $sum = $cve['summary'] ?? [];
+        $pkgs = is_array($cve['packages'] ?? null) ? $cve['packages'] : [];
+
+        // Compute meta
+        $packagesTotal  = (int)($sum['packages_total'] ?? count($pkgs));
+        $datasetTotal   = (int)($sum['dataset_total'] ?? 0);
+        $affectedTotal  = (int)($sum['packages_affected'] ?? 0);
+
+        // Highest severity + Fixable now
+        $highestSeverity = 'None';
+        $sevOrder = ['None' => 0, 'Low' => 1, 'Medium' => 2, 'High' => 3, 'Critical' => 4];
+        $fixableNow = 0;
+        foreach ($pkgs as $p) {
+            $sev = (string)($p['highest_severity'] ?? 'None');
+            if (!isset($sevOrder[$sev])) $sev = 'None';
+            if ($sevOrder[$sev] > $sevOrder[$highestSeverity]) {
+                $highestSeverity = $sev;
+            }
+            $status = (string)($p['status'] ?? 'PASS'); // FAIL means affected
+            $hint   = (string)($p['upgrade_hint'] ?? '');
+            if ($status === 'FAIL' && $hint !== '') $fixableNow++;
+        }
+
+        // Summary header
         $hdr = sprintf(
-            "<div><strong>Total</strong>: %d packages against %d known CVEs | Affected: %d</div>",
-            (int)($sum['packages_total'] ?? 0),
-            (int)($sum['dataset_total'] ?? 0),
-            (int)($sum['packages_affected'] ?? 0)
+            '<div class="cve-kpis">
+                <div class="kpi"><div class="kpi-label">Packages scanned</div><div class="kpi-value">%d</div></div>
+                <div class="kpi"><div class="kpi-label">Total advisories</div><div class="kpi-value">%d</div></div>
+                <div class="kpi"><div class="kpi-label">Affected packages</div><div class="kpi-value">%d</div></div>
+                <div class="kpi"><div class="kpi-label">Highest severity</div><div class="kpi-value">%s</div></div>
+                <div class="kpi"><div class="kpi-label">Fixable now</div><div class="kpi-value">%d</div></div>
+            </div>',
+            $packagesTotal,
+            $datasetTotal,
+            $affectedTotal,
+            htmlspecialchars($highestSeverity, ENT_QUOTES, 'UTF-8'),
+            $fixableNow
         );
 
-        // Bảng tất cả package
+        // Build full list table (hidden by default)
         $rows = '';
         foreach ($pkgs as $p) {
-            $name = htmlspecialchars((string)$p['name'], ENT_QUOTES, 'UTF-8');
-            $ver  = htmlspecialchars((string)$p['installed'], ENT_QUOTES, 'UTF-8');
+            $name = htmlspecialchars((string)($p['name'] ?? ''), ENT_QUOTES, 'UTF-8');
+            $ver  = htmlspecialchars((string)($p['installed'] ?? ''), ENT_QUOTES, 'UTF-8');
             $stat = (string)($p['status'] ?? 'PASS');
             $advc = (int)($p['advisories_count'] ?? 0);
-            $sev  = htmlspecialchars((string)$p['highest_severity'] ?? 'None', ENT_QUOTES, 'UTF-8');
+            $sev  = htmlspecialchars((string)($p['highest_severity'] ?? 'None'), ENT_QUOTES, 'UTF-8');
             $fx   = htmlspecialchars((string)($p['upgrade_hint'] ?? ''), ENT_QUOTES, 'UTF-8');
-            $cls  = $stat === 'FAIL' ? 'status-fail' : 'status-pass';
+            $cls  = $stat === 'FAIL' ? 'status-fail' : ($stat === 'UNKNOWN' ? 'status-unknown' : 'status-pass');
 
             $rows .= '<tr>'
                 . '<td>' . $name . '</td>'
                 . '<td>' . $ver . '</td>'
-                . '<td class="' . $cls . '">' . $stat . '</td>'
+                . '<td class="' . $cls . '">' . htmlspecialchars($stat, ENT_QUOTES, 'UTF-8') . '</td>'
                 . '<td>' . $advc . '</td>'
                 . '<td>' . $sev . '</td>'
                 . '<td>' . ($fx !== '' ? $fx : '&mdash;') . '</td>'
                 . '</tr>';
         }
 
-        // Details packages FAIL
-        $details = '';
-        foreach ($pkgs as $p) {
-            if (($p['status'] ?? 'PASS') !== 'FAIL') continue;
-            $name = htmlspecialchars((string)$p['name'], ENT_QUOTES, 'UTF-8');
-            $ver  = htmlspecialchars((string)$p['installed'], ENT_QUOTES, 'UTF-8');
-            $cnt  = (int)($p['advisories_count'] ?? 0);
-            $sev  = htmlspecialchars((string)$p['highest_severity'] ?? 'None', ENT_QUOTES, 'UTF-8');
-            $fx   = htmlspecialchars((string)($p['upgrade_hint'] ?? ''), ENT_QUOTES, 'UTF-8');
+        $table = '
+            <div class="cve-list" id="cve-list" style="display:none">
+                <div class="cve-list-toolbar">
+                    <strong>All packages</strong>
+                </div>
+                <div class="cve-list-scroll">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Package</th>
+                                <th>Current</th>
+                                <th>Status</th>
+                                <th>Advisories</th>
+                                <th>Highest</th>
+                                <th>Min fixed</th>
+                            </tr>
+                        </thead>
+                        <tbody>' . $rows . '</tbody>
+                    </table>
+                </div>
+            </div>';
 
-            $advRows = '';
-            foreach (($p['advisories'] ?? []) as $a) {
-                $id  = htmlspecialchars((string)($a['id'] ?? 'ADVISORY'), ENT_QUOTES, 'UTF-8');
-                $sv  = htmlspecialchars((string)($a['severity'] ?? 'Unknown'), ENT_QUOTES, 'UTF-8');
-                $cv  = htmlspecialchars((string)($a['cvss'] ?? ''), ENT_QUOTES, 'UTF-8');
+        // CTA buttons
+        $hasAny = $packagesTotal > 0;
+        $btns = $hasAny
+            ? '<div class="cve-actions">'
+            . ($affectedTotal > 0
+                ? '<span class="status-fail" style="padding:2px 8px;border-radius:10px;margin-right:8px">Attention required</span>'
+                : '<span class="status-pass" style="padding:2px 8px;border-radius:10px;margin-right:8px">No affected packages</span>')
+            . '<button id="btn-cve-toggle" type="button" class="btn btn-link">Show all packages</button></div>'
+            : '';
 
-                $aff = $a['affected'] ?? [];
-                $ranges = $aff['ranges'] ?? [];
-                $vers   = $aff['versions'] ?? [];
-                $parts  = [];
-                foreach ($ranges as $rg) {
-                    $seg = [];
-                    if (!empty($rg['introduced'])) $seg[] = '≥ ' . $rg['introduced'];
-                    if (!empty($rg['fixed']))      $seg[] = '< ' . $rg['fixed'];
-                    $parts[] = implode(', ', $seg);
-                }
-                if ($vers) $parts[] = 'versions: ' . implode(', ', array_slice($vers, 0, 5));
-                $affStr = htmlspecialchars(implode(' | ', $parts), ENT_QUOTES, 'UTF-8');
+        // Minimal CSS + JS scoped to CVE block
+        $css = '<style>
+            #cve .cve-kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin:.5rem 0 1rem}
+            #cve .kpi{background:#f8f9fa;border:1px solid #eee;border-radius:8px;padding:10px}
+            #cve .kpi-label{font-size:.8rem;opacity:.75}
+            #cve .kpi-value{font-weight:700;font-size:1.1rem}
+            #cve .cve-actions{display:flex;gap:10px;align-items:center;margin:.5rem 0 0}
+            #cve .btn{padding:6px 10px;border:1px solid #ccc;border-radius:6px;background:#fff;cursor:pointer}
+            #cve .btn:hover{background:#f0f0f0}
+            #cve .btn-link{border:none;background:transparent;text-decoration:underline;padding:6px 4px}
+            #cve .cve-list{margin-top:.75rem}
+            #cve .cve-list-toolbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:.5rem}
+            #cve .cve-list-scroll{max-height:640px;overflow:auto;border:1px solid #eee;border-radius:8px;padding:8px}
+            #cve .status-pass{color:#1E8449}
+            #cve .status-fail{color:#C0392B}
+            #cve .status-unknown{color:#D68910}
+            @media print{#cve .cve-list,.cve-actions .btn{display:none!important}}
+        </style>';
 
-                $fixed = '';
-                if (!empty($a['fixed_versions'])) {
-                    $fixed = htmlspecialchars(implode(', ', $a['fixed_versions']), ENT_QUOTES, 'UTF-8');
-                }
-
-                $ref = '';
-                $refs = $a['references'] ?? [];
-                if (!empty($refs) && isset($refs[0]['url'])) {
-                    $u = htmlspecialchars((string)$refs[0]['url'], ENT_QUOTES, 'UTF-8');
-                    $ref = '<a href="' . $u . '" target="_blank" rel="noopener">reference</a>';
-                }
-
-                $sumLine = htmlspecialchars((string)($a['summary'] ?? ''), ENT_QUOTES, 'UTF-8');
-
-                $advRows .= '<tr>'
-                    . '<td>' . $id . '</td>'
-                    . '<td>' . $sv . ($cv !== '' ? ' / ' . $cv : '') . '</td>'
-                    . '<td>' . ($affStr !== '' ? $affStr : '&mdash;') . '</td>'
-                    . '<td>' . ($fixed !== '' ? $fixed : '&mdash;') . '</td>'
-                    . '<td>' . ($ref !== '' ? $ref : '&mdash;') . '</td>'
-                    . '<td>' . ($sumLine !== '' ? $sumLine : '&mdash;') . '</td>'
-                    . '</tr>';
+        $js = '<script>(function(){
+            var toggled=false;
+            var btn=document.getElementById("btn-cve-toggle");
+            var list=document.getElementById("cve-list");
+            if(btn && list){
+                btn.addEventListener("click", function(){
+                    toggled = !toggled;
+                    list.style.display = toggled ? "block" : "none";
+                    btn.textContent = toggled ? "Hide list" : "Show all packages";
+                });
             }
+            function collect(){
+                var data=[]; var trs=(list?list.querySelectorAll("tbody tr"):[]);
+                for (var i=0;i<trs.length;i++){
+                    var tds=trs[i].querySelectorAll("td");
+                    data.push({name:tds[0].textContent,ver:tds[1].textContent,stat:tds[2].textContent,advc:tds[3].textContent,sev:tds[4].textContent,fx:tds[5].textContent});
+                }
+                return data;
+            }
+        })();</script>';
 
-            $caption = $name . '@' . $ver . ' — ' . $cnt . ' advisories (Highest: ' . $sev . ')';
-            if ($fx !== '') $caption .= ' — min fix: ' . $fx;
+        $out = '<section class="section" id="cve"><h3>CVE Summary</h3>' . $hdr . $btns . $table . $css . $js . '</section>';
 
-            $details .= '<details class="section"><summary><strong>' . $caption . '</strong></summary>'
-                . '<table style="width:100%;border-collapse:collapse;margin-top:8px">'
-                . '<thead><tr>'
-                . '<th>ID</th><th>Severity / CVSS</th><th>Affected</th><th>Fixed in</th><th>Reference</th><th>Summary</th>'
-                . '</tr></thead><tbody>' . $advRows . '</tbody></table></details>';
-        }
-
-        return '<div class="section">'
-            . '<h3>Known CVE Checks</h3>'
-            . $hdr
-            . '<table style="width:100%;border-collapse:collapse;margin-top:8px">'
-            . '<thead><tr><th>Package</th><th>Installed</th><th>Status</th><th>Advisories</th><th>Highest Severity</th><th>Min Fixed</th></tr></thead>'
-            . '<tbody>' . $rows . '</tbody></table>'
-            . $details
-            . '</div>';
+        return $out;
     }
+
 
     private function renderDetails(array $f): string
     {
@@ -349,7 +375,7 @@ summary{cursor:pointer}
 <div>Rules: {{rules_passed}} / {{rules_total}} ({{rules_passed_percent}}%) — Failed: {{rules_failed}} — Unknown: {{rules_unknown}}</div>
 <div>Findings Overview — Critical: {{findings_critical}} | High: {{findings_high}} | Medium: {{findings_medium}} | Low: {{findings_low}} | Total: {{findings_total}}</div>
 <table>
-<thead><tr><th>ID</th><th>Control</th><th>Severity</th><th>Status</th><th>Message</th></tr></thead>
+<thead><tr><th>ID</th><th>Severity</th><th>Status</th><th>Message</th></tr></thead>
 <tbody>
 {{table}}
 </tbody>
