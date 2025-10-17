@@ -13,13 +13,22 @@
           "name": "webroot_hygiene",
           "args": {
             "webroot": ".",
-            "forbidden": [".env", ".env.local", "*.pem", "*.key"]
+            "forbidden": [
+              ".env",
+              ".env.local",
+              "*.pem",
+              "*.key"
+            ]
           }
         },
         {
           "name": "git_history_scan",
           "args": {
-            "paths": ["app", "env", "pub"],
+            "paths": [
+              "app",
+              "env",
+              "pub"
+            ],
             "patterns": [
               "AKIA[0-9A-Z]{16}",
               "ASIA[0-9A-Z]{16}",
@@ -48,15 +57,27 @@
           "name": "text_grep",
           "args": {
             "file": "app/etc/env.php",
-            "must_not_match": ["http://"]
+            "must_not_match": [
+              "http://"
+            ]
           }
         },
         {
           "name": "code_grep",
           "args": {
-            "paths": ["app"],
-            "include_ext": ["php", "phtml", "js", "html", "xml"],
-            "must_not_match": ["http://[^\\s\"'>]+"]
+            "paths": [
+              "app"
+            ],
+            "include_ext": [
+              "php",
+              "phtml",
+              "js",
+              "html",
+              "xml"
+            ],
+            "must_not_match": [
+              "http://[^\\s\"'>]+"
+            ]
           }
         }
       ],
@@ -91,23 +112,45 @@
       "title": "Webhook signature validation present",
       "control": "MB-C12",
       "severity": "high",
-      "op": "all",
+      "op": "any",
       "checks": [
         {
           "name": "code_grep",
           "args": {
-            "paths": ["app"],
-            "include_ext": ["php"],
+            "paths": [
+              "app",
+              "routes"
+            ],
+            "include_ext": [
+              "php"
+            ],
+            "must_not_match": [
+              "(?:Route::\\s*(?:post|put|patch|any)\\s*\\(\\s*['\"][^'\"]*webhook)",
+              "WebhookController",
+              "handleWebhook\\s*\\("
+            ]
+          }
+        },
+        {
+          "name": "code_grep",
+          "args": {
+            "paths": [
+              "app",
+              "vendor"
+            ],
+            "include_ext": [
+              "php"
+            ],
             "must_match": [
-              "hash_hmac\\(|\\\\Stripe\\\\Webhook::constructEvent",
-              "X-(?:Signature|Hub-Signature|Hub-Signature-256|Stripe-Signature|Shopify-Hmac-Sha256|Slack-Signature|Twilio-Signature|Line-Signature|Twitch-Eventsub-Message-Signature|Webhook-Signature)"
+              "(\\$_SERVER\\[['\"]HTTP_[A-Z0-9_]*SIGNATURE['\"]\\]|->header\\s*\\(\\s*['\"][Xx][-_]?[A-Za-z0-9-]*[Ss]ignature['\"]\\s*\\)|getHeader\\s*\\(\\s*['\"][Xx][^'\"]*[Ss]ignature['\"]\\s*\\))",
+              "(hash_hmac\\s*\\(|hash_equals\\s*\\(|openssl_verify\\s*\\(|sodium_crypto_sign_verify_detached\\s*\\()"
             ]
           }
         }
       ],
       "messages": {
-        "pass": "Webhook handlers validate signatures (HMAC) from providers.",
-        "fail": "Webhook signature validation not detected. Verify MAC using shared secret headers."
+        "pass": "Webhook handlers validate signatures (provider header + secure verification), or no webhook endpoints are present.",
+        "fail": "Webhook signature validation not detected. Verify MAC/signature from provider headers with timing-safe compare."
       }
     },
     {
@@ -115,23 +158,53 @@
       "title": "Outbound connections restricted by allow-list",
       "control": "MB-C12",
       "severity": "medium",
-      "op": "all",
+      "op": "any",
       "checks": [
+        {
+          "name": "system_egress_restricted",
+          "args": {}
+        },
         {
           "name": "code_grep",
           "args": {
-            "paths": ["app"],
-            "include_ext": ["php"],
+            "paths": [
+              "app",
+              "vendor"
+            ],
+            "include_ext": [
+              "php"
+            ],
             "must_match": [
-              "allowed_hosts|allowlist|whitelist",
-              "CURLOPT_(RESOLVE|CONNECTTIMEOUT|TIMEOUT)"
+              "(?is)(allowlist|whitelist|allowed[_-]?(hosts|domains)|trusted[_-]?hosts?|allowedOrigins|originAllow(?:list)?)"
             ]
+          }
+        },
+        {
+          "name": "code_grep",
+          "args": {
+            "paths": [
+              "app",
+              "vendor"
+            ],
+            "include_ext": [
+              "php"
+            ],
+            "must_match": [
+              "CURLOPT_(CONNECTTIMEOUT|TIMEOUT)(?:_MS)?",
+              "->set(?:Connect)?Timeout\\s*\\(",
+              "->setOptions\\s*\\(\\s*\\[.*\\b(connect_)?timeout\\b\\s*=>",
+              "curl_setopt_array\\s*\\(.*CURLOPT_(CONNECTTIMEOUT|TIMEOUT)(?:_MS)?",
+              "->request\\s*\\([^\\)]*\\[.*\\b(connect_)?timeout\\b\\s*=>",
+              "stream_context_create\\s*\\(\\s*\\[.*\\btimeout\\b\\s*=>",
+              "\\bRequestOptions::(CONNECT_TIMEOUT|TIMEOUT)\\b"
+            ],
+            "regex_flags": "is"
           }
         }
       ],
       "messages": {
-        "pass": "Outbound HTTP requests are constrained by allowlists and sane timeouts.",
-        "fail": "No allowlist or timeouts for outbound requests. Add domain allowlists and cURL timeouts."
+        "pass": "Outbound connections are enforced by network policy (egress firewall) or code-level allowlist and timeouts.",
+        "fail": "No egress restriction detected. Enforce outbound allow-list at firewall (UFW/IPTABLES) or in code (allow-listed domains + HTTP timeouts)."
       }
     },
     {
@@ -144,8 +217,12 @@
         {
           "name": "code_grep",
           "args": {
-            "paths": ["app"],
-            "include_ext": ["php"],
+            "paths": [
+              "app"
+            ],
+            "include_ext": [
+              "php"
+            ],
             "must_not_match": [
               "full_card",
               "cvv",
@@ -207,17 +284,23 @@
         {
           "name": "code_grep",
           "args": {
-            "paths": ["app"],
-            "include_ext": ["php", "phtml", "xml"],
+            "paths": [
+              "app"
+            ],
+            "include_ext": [
+              "php",
+              "phtml",
+              "xml"
+            ],
             "must_not_match": [
-               "(?i)INSERT\\s+INTO\\s+.*\\bcore_config_data\\b.*\\b(path|value)\\b.*(api[_-]?key|secret|token)",
+              "(?i)INSERT\\s+INTO\\s+.*\\bcore_config_data\\b.*\\b(path|value)\\b.*(api[_-]?key|secret|token)",
               "(?i)UPDATE\\s+\\bcore_config_data\\b.*\\b(path|value)\\b.*(api[_-]?key|secret|token)",
               "(?i)INSERT\\s+INTO\\s+.*(api[_-]?key|secret|token)",
               "(?i)update\\s+.*(api[_-]?key|secret|token)",
               "(?i)setData\\(\\s*['\\\"](?:payment\\/[^'\\\"]+\\/)?(api[_-]?key|secret|token)",
               "(?i)setValue\\(\\s*['\\\"](?:payment\\/[^'\\\"]+\\/)?(api[_-]?key|secret|token)",
-              "(?i)save\\(\\)\\s*;\\s*\\/\\/.*(api[_-]?key|secret|token).*", 
-              "(?i)Config\\s*\\(.*(api[_-]?key|secret|token).*\\)" 
+              "(?i)save\\(\\)\\s*;\\s*\\/\\/.*(api[_-]?key|secret|token).*",
+              "(?i)Config\\s*\\(.*(api[_-]?key|secret|token).*\\)"
             ]
           }
         }
@@ -237,8 +320,12 @@
         {
           "name": "code_grep",
           "args": {
-            "paths": ["app"],
-            "include_ext": ["php"],
+            "paths": [
+              "app"
+            ],
+            "include_ext": [
+              "php"
+            ],
             "must_match": [
               "mask|redact|sanitize|filter"
             ]

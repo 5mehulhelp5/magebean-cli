@@ -51,6 +51,7 @@ final class HtmlReporter
 
         foreach ($result['findings'] ?? [] as $f) {
             $id       = htmlspecialchars((string)($f['id'] ?? ''), ENT_QUOTES, 'UTF-8');
+            $title    = htmlspecialchars((string)($f['title'] ?? ''), ENT_QUOTES, 'UTF-8');
             $severity = htmlspecialchars((string)($f['severity'] ?? ''), ENT_QUOTES, 'UTF-8');
             $passed   = (bool)($f['passed'] ?? false);
             $status   = $passed ? 'PASS' : 'FAIL';
@@ -79,14 +80,17 @@ final class HtmlReporter
                 . '<td>' . $severity . '</td>'
                 . '<td class="' . $statusClass . '">' . $status . '</td>'
                 . '<td>'
-                . ($userMsg !== '' ? '<div style="color:#333;margin-top:4px; width:300px">' . $userMsg . '</div>' : '')
+                . '<div style="color:#333;margin-top:4px;">' . $title . ' --- '
+                . ($userMsg !== '' ? '(<i>' . $userMsg . '</i>)</div>' : '')
                 /* . (
                     (!$suppressConfidence && $confVal !== null)
                     ? '<div style="opacity:.8;margin-top:4px"><small' . ($confWhy !== '' ? ' title="' . htmlspecialchars($confWhy, ENT_QUOTES, 'UTF-8') . '"' : '') . '>confidence: ' . $confVal . '%</small></div>'
                     : ''
                 ) */
                 . '</td>'  /* Quan trọng: đóng ô Message trước khi thêm ô Details */
-                . ($this->showDetails ? '<td>' . $this->renderDetails($f) . '</td>' : '')
+                . ($this->showDetails ? '<td>' 
+                . $this->renderDetails($f) 
+                . '</td>' : '')
                 . '</tr>';
         }
 

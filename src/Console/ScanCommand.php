@@ -87,8 +87,7 @@ HELP;
             ->addOption('cve-data', null, InputOption::VALUE_OPTIONAL, 'Path to CVE data (JSON/NDJSON or ZIP bundle)')
             ->addOption('standard', null, InputOption::VALUE_OPTIONAL, 'Report standard: magebean (default) | owasp | pci | cwe', 'magebean')
             ->addOption('rules', null, InputOption::VALUE_OPTIONAL, 'Comma-separated rule IDs to run (e.g., MB-R036,MB-R020)')
-            ->addOption('path', null, InputOption::VALUE_OPTIONAL, 'Magento root path (omit to auto-detect from current working directory)', '')
-            ->addOption('url',  null, InputOption::VALUE_OPTIONAL, 'Magento storefront URL to audit (external mode)');
+            ->addOption('path', null, InputOption::VALUE_OPTIONAL, 'Magento root path (omit to auto-detect from current working directory)', '');
     }
 
     public function getHelp(): string
@@ -103,7 +102,7 @@ HELP;
         $pathOpt = (string)($in->getOption('path') ?? '');
         $requestedPath = $pathOpt !== '' ? $pathOpt : getcwd();
         $requestedPath = self::normalize($requestedPath);
-        $urlOpt = (string)$this->autoDetectBaseUrl($pathOpt ?? getcwd());
+        $urlOpt = (string) $this->autoDetectBaseUrl($requestedPath);
         
         $requestedUrl = $urlOpt !== '' ? $urlOpt : '';
         if ($urlOpt !== '') {

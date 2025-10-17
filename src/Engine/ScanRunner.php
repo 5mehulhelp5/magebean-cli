@@ -4,8 +4,7 @@ declare(strict_types=1);
 
 namespace Magebean\Engine;
 
-use Magebean\Engine\Checks\{FilesystemCheck, PhpConfigCheck, ComposerCheck, MagentoCheck, HttpCheck, CodeSearchCheck, CronCheck, WebServerConfigCheck, GitHistoryCheck};
-use Magebean\Engine\Support\BaseUrlResolver; 
+use Magebean\Engine\Checks\{FilesystemCheck, PhpConfigCheck, ComposerCheck, MagentoCheck, HttpCheck, CodeSearchCheck, CronCheck, WebServerConfigCheck, GitHistoryCheck, SystemCheck};
 
 final class ScanRunner
 {
@@ -28,9 +27,10 @@ final class ScanRunner
         CodeSearchCheck $code,
         WebServerConfigCheck $web,
         GitHistoryCheck $git,
-        CronCheck $cron
+        CronCheck $cron,
+        SystemCheck $sys
     ): array {
-        $res = $this->evalCheck($name, $args, $fs, $phpc, $comp, $mage, $http, $code, $web, $git, $cron);
+        $res = $this->evalCheck($name, $args, $fs, $phpc, $comp, $mage, $http, $code, $web, $git, $cron, $sys);
         if (!is_array($res)) {
             $res = [false, 'Unknown check: ' . $name];
         }
@@ -61,6 +61,7 @@ final class ScanRunner
         $web  = new WebServerConfigCheck($this->ctx);
         $git  = new GitHistoryCheck($this->ctx);
         $cron  = new CronCheck($this->ctx);
+        $sys  = new SystemCheck($this->ctx);
 
         foreach ($this->pack['rules'] as $rule) {
             $executedRules++;
@@ -89,7 +90,8 @@ final class ScanRunner
                     $code,
                     $web,
                     $git,
-                    $cron
+                    $cron,
+                    $sys
                 );
 
                 $details[] = [$name, $msg, $cok];
@@ -174,7 +176,6 @@ final class ScanRunner
                 'status'   => $status,
                 'message'  => $finalMsg,
                 'details'  => $details,
-                'details'  => $details,
                 'evidence' => $evidence,
             ];
 
@@ -225,7 +226,8 @@ final class ScanRunner
         CodeSearchCheck $code,
         WebServerConfigCheck $web,
         GitHistoryCheck $git,
-        CronCheck $cron
+        CronCheck $cron,
+        SystemCheck $sys
     ): array {
 
         // 1) Đưa tất cả http_* về HttpCheck->dispatch()
@@ -243,13 +245,17 @@ final class ScanRunner
         // 2) Các check non-HTTP giữ nguyên như cũ
         return match ($name) {
             // Filesystem
-            'fs_no_world_writable' => $fs->noWorldWritable($args),
-            'file_mode_max'        => $fs->fileModeMax($args),
-            'webroot_hygiene'      => $fs->webrootHygiene($args),
-            'code_dirs_readonly'   => $fs->codeDirsReadonly($args),
-            'no_directory_listing' => $fs->noDirectoryListing($args),
-            'fs_exists'            => $fs->fsExists($args),
-            'fs_mtime_max_age'     => $fs->mtimeMaxAge($args),
+            'fs_no_world_writable'                => $fs->noWorldWritable($args),
+            'file_mode_max'                       => $fs->fileModeMax($args),
+            'webroot_hygiene'                     => $fs->webrootHygiene($args),
+            'code_dirs_readonly'                  => $fs->codeDirsReadonly($args),
+            'no_directory_listing'                => $fs->noDirectoryListing($args),
+            'fs_exists'                           => $fs->fsExists($args),
+            'fs_mtime_max_age'                    => $fs->mtimeMaxAge($args),
+
+            // System / egress firewall
+            'system_egress_restricted'            => $sys->egressRestricted($args),
+
 
             // PhpConfig (gom nhóm)
             'php_array_exists',
