@@ -7,10 +7,11 @@ namespace Magebean\Console;
 use Magebean\Engine\Context;
 use Magebean\Engine\ScanRunner;
 use Magebean\Engine\RulePackLoader;
-use Magebean\Engine\Reporting\HtmlReporter;
+use Magebean\Engine\Reporting\{HtmlReporter, JsonReporter, SarifReporter};
 use Magebean\Bundle\BundleManager;
 use Magebean\Engine\Cve\CveAuditor;
 
+use Symfony\Component\Console\Helper\ProgressBar;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -34,18 +35,17 @@ Doc: <href=https://magebean.com/documentation>magebean.com/documentation</>
 
 <options=bold>USAGE</>
   <fg=green>php magebean.phar scan --path=/var/www/html</>
-  <fg=green>php magebean.phar scan --url=https://magento.local</>
   <fg=green>php magebean.phar scan --path=/var/www/html --url=https://magento.local</>
 
 <options=bold>COMMON OPTIONS</>
   <fg=yellow>--path=PATH</>                     Path to the Magento 2 root to scan (default: current directory)
-  <fg=yellow>--url=URL</>                       Store URL of the Magento 2 to scan (default: none)
-  <fg=yellow>--format=html|json</>              Output format for results (default: html)
+  <fg=yellow>--url=URL</>                       Optional store base URL override for HTTP checks
+  <fg=yellow>--format=html|json|sarif</>        Output format for results (default: html)
   <fg=yellow>--output=FILE</>                   Save results to a file (auto default based on format)
   <fg=yellow>--cve-data=PATH</>                 Path to CVE data (JSON/NDJSON or ZIP bundle)
   <fg=yellow>--controls=MB-Cxx,MB-Cxx</>       Only load selected controls (e.g., MB-C01,MB-C05)
-  <fg=yellow>--rules=MB-Rxx,MB-Rxx</>           Only run a list of specified rules (e.g., MB-R03,)
-  <fg=yellow>--exclude-rules=MB-Rxx,MB-Rxx</>   Only run a list of specified rules (e.g., MB-R03,)
+  <fg=yellow>--rules=MB-Rxx,MB-Rxx</>           Only run a list of specified rules (e.g., MB-R036,MB-R020)
+  <fg=yellow>--exclude-rules=MB-Rxx,MB-Rxx</>   Exclude specific rules after loading the pack
 
 <options=bold>EXAMPLES</>
   # Scan current directory and print a quick summary
@@ -82,13 +82,15 @@ HELP;
             ->addUsage('--path=/var/www/html')
             ->addUsage('--path=. --format=html --output=report.html')
             ->addUsage('--path=. --cve-data=./cve/magebean-known-cve-bundle-' . date('Ym') . '.zip')
-            ->addOption('format', null, InputOption::VALUE_REQUIRED, 'Output format: html|json', 'html')
+            ->addOption('format', null, InputOption::VALUE_REQUIRED, 'Output format: html|json|sarif', 'html')
             ->addOption('output', null, InputOption::VALUE_OPTIONAL, 'Output file (auto default by format)')
             ->addOption('detail', null, InputOption::VALUE_NONE, 'Include Details column in HTML report')
             ->addOption('cve-data', null, InputOption::VALUE_OPTIONAL, 'Path to CVE data (JSON/NDJSON or ZIP bundle)')
             ->addOption('standard', null, InputOption::VALUE_OPTIONAL, 'Report standard: magebean (default) | owasp | pci | cwe', 'magebean')
             ->addOption('controls', null, InputOption::VALUE_OPTIONAL, 'Comma-separated control IDs to load (e.g., MB-C01,MB-C05 or MB-01,MB-05)')
             ->addOption('rules', null, InputOption::VALUE_OPTIONAL, 'Comma-separated rule IDs to run (e.g., MB-R036,MB-R020)')
+            ->addOption('exclude-rules', null, InputOption::VALUE_OPTIONAL, 'Comma-separated rule IDs to exclude after loading')
+            ->addOption('url', null, InputOption::VALUE_OPTIONAL, 'Optional base URL override for HTTP checks')
             ->addOption('path', null, InputOption::VALUE_OPTIONAL, 'Magento root path (omit to auto-detect from current working directory)', '');
     }
 
@@ -100,12 +102,15 @@ HELP;
     protected function execute(InputInterface $in, OutputInterface $out): int
     {
         $io = new SymfonyStyle($in, $out);
+        $this->writePhase($out, 1, 6, 'Resolving Magento root and input options');
 
         $pathOpt = (string)($in->getOption('path') ?? '');
         $requestedPath = $pathOpt !== '' ? $pathOpt : getcwd();
         $requestedPath = self::normalize($requestedPath);
-        $urlOpt = (string) $this->autoDetectBaseUrl($requestedPath);
-        
+        $urlOpt = trim((string)($in->getOption('url') ?? ''));
+        if ($urlOpt === '') {
+            $urlOpt = (string)$this->autoDetectBaseUrl($requestedPath);
+        }
         $requestedUrl = $urlOpt !== '' ? $urlOpt : '';
 
         // Nếu path không trỏ tới Magento root, thử leo lên tối đa 4 cấp
@@ -137,13 +142,14 @@ HELP;
             $this->assertMagento2Root($magentoRoot);
 
             // ✅ OK -> bắt đầu scan
-            $projectPath = (string)$requestedPath;
+            $projectPath = (string)$magentoRoot;
             $projectUrl = (string)$requestedUrl;
-            $format      = (string)$in->getOption('format');
+            $format      = strtolower((string)$in->getOption('format'));
             $outFile     = (string)($in->getOption('output') ?? '');
             $cveDataFile = (string)($in->getOption('cve-data') ?? '');
             $standard    = strtolower((string)($in->getOption('standard') ?? 'magebean'));
             $rulesOpt    = (string)($in->getOption('rules') ?? '');
+            $excludeRulesOpt = (string)($in->getOption('exclude-rules') ?? '');
             $controlsOpt = (string)($in->getOption('controls') ?? '');
 
             // validate standard
@@ -152,16 +158,22 @@ HELP;
                 $out->writeln('<error>Invalid --standard. Allowed: magebean | owasp | pci | cwe</error>');
                 return Command::FAILURE;
             }
+            if (!in_array($format, ['html', 'json', 'sarif'], true)) {
+                $out->writeln('<error>Invalid --format. Allowed: html | json | sarif</error>');
+                return Command::FAILURE;
+            }
 
             if ($outFile === '') {
                 $outFile = match ($format) {
                     'json'  => 'magebean-report.json',
+                    'sarif' => 'magebean-report.sarif',
                     default => 'magebean-report.html',
                 };
             }
 
             $bundleMeta = [];
             if ($cveDataFile !== '') {
+                $this->writePhase($out, 2, 6, 'Preparing CVE bundle metadata');
                 $isZip = (bool)preg_match('/\.zip$/i', $cveDataFile);
                 if ($isZip) {
                     $bundleMeta = [];
@@ -202,6 +214,8 @@ HELP;
                         }
                     }
                 }
+            } else {
+                $this->writePhase($out, 2, 6, 'Skipping CVE bundle preparation');
             }
 
             $ctx  = new Context($projectPath, $projectUrl, $cveDataFile, [
@@ -210,6 +224,7 @@ HELP;
                 'meta' => $bundleMeta,
             ]);
 
+            $this->writePhase($out, 3, 6, 'Loading rule pack');
             // normalize controls filter
             $controlsFilter = [];
             if ($controlsOpt !== '') {
@@ -273,14 +288,42 @@ HELP;
                 }
             }
 
+            if ($excludeRulesOpt !== '') {
+                $excludedIds = array_values(array_unique(array_filter(array_map(
+                    static fn(string $id): string => strtoupper(trim($id)),
+                    explode(',', $excludeRulesOpt)
+                ))));
+                if ($excludedIds) {
+                    $pack['rules'] = array_values(array_filter(
+                        $pack['rules'],
+                        static fn(array $rule): bool => !in_array(strtoupper((string)($rule['id'] ?? '')), $excludedIds, true)
+                    ));
+                }
+            }
+
             if (empty($pack['rules'])) {
                 $out->writeln('<error>No rules found. Check rules directory or control filter.</error>');
                 return Command::FAILURE;
             }
 
+            $this->writePhase($out, 4, 6, sprintf('Running %d audit rules', count($pack['rules'])));
+            $ruleProgress = $this->createRuleProgressBar($out, count($pack['rules']));
             // 1) Scan rules
-            $runner = new ScanRunner($ctx, $pack);
+            $runner = new ScanRunner($ctx, $pack, function (array $event) use ($ruleProgress): void {
+                $type = (string)($event['type'] ?? '');
+                if ($type === 'rule_start') {
+                    $ruleProgress->setMessage($this->formatRuleProgressMessage($event));
+                    $ruleProgress->display();
+                    return;
+                }
+                if ($type === 'rule_done') {
+                    $ruleProgress->setMessage($this->formatRuleProgressMessage($event));
+                    $ruleProgress->advance();
+                }
+            });
             $result = $runner->run();
+            $ruleProgress->finish();
+            $out->writeln('');
             // attach meta
             $result['meta']['standard']    = $standard;
             $result['meta']['rules_filter'] = $requestedIds;
@@ -289,21 +332,22 @@ HELP;
 
             // 2) CVE audit (nếu có data)
             if ($cveDataFile !== '' && is_file($cveDataFile)) {
+                $this->writePhase($out, 5, 6, 'Running CVE audit against installed packages');
                 $aud = new CveAuditor($ctx);
                 $result['cve_audit'] = $aud->run($cveDataFile);
             } else {
+                $this->writePhase($out, 5, 6, 'Skipping CVE audit because no dataset was provided');
                 $result['cve_audit'] = null;
             }
 
-            // 3) Write output
-            // ---------- Pretty console output (mimic sample) ----------
-            $this->renderPrettySummary($out, $result, $projectPath, $outFile);
-
-            // 4) Render export
-            // Write output file
+            // 3) Render export
+            $this->writePhase($out, 6, 6, sprintf('Writing %s report to %s', strtoupper($format), $outFile));
             switch ($format) {
                 case 'json':
-                    file_put_contents($outFile, json_encode($result, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
+                    (new JsonReporter())->write($result, $outFile);
+                    break;
+                case 'sarif':
+                    (new SarifReporter())->write($result, $outFile);
                     break;
                 default:
                     $tpl = $this->resolveTemplatePath();
@@ -312,9 +356,10 @@ HELP;
                     break;
             }
 
-            // exit code theo số fail
-            $sum = $result['summary'] ?? [];
-            return ((int)($sum['failed'] ?? 0) > 0) ? Command::FAILURE : Command::SUCCESS;
+            // ---------- Pretty console output (mimic sample) ----------
+            $this->renderPrettySummary($out, $result, $projectPath, $outFile);
+
+            return $this->determineExitCode($result);
 
             // TODO: gọi engine scan của bạn, truyền $magentoRoot vào context
             // $result = $this->scanner->run($magentoRoot, ...);
@@ -523,7 +568,7 @@ summary{cursor:pointer}
 <div>Rules: {{rules_passed}} / {{rules_total}} ({{rules_passed_percent}}%) — Failed: {{rules_failed}}</div>
 <div>Findings (Critical: {{findings_critical}}, High: {{findings_high}}, Medium: {{findings_medium}}, Low: {{findings_low}})</div>
 <table>
-<thead><tr><th>ID</th><th>Control</th><th>Severity</th><th>Status</th><th>Title / Message / Details</th></tr></thead>
+<thead><tr><th>ID</th><th>Severity</th><th>Status</th><th>Title / Message / Details</th></tr></thead>
 <tbody>
 {{table}}
 </tbody>
@@ -867,5 +912,71 @@ HTML;
         }
 
         return $base;
+    }
+
+    private function determineExitCode(array $result): int
+    {
+        $failedFindings = array_filter(
+            $result['findings'] ?? [],
+            static fn(array $finding): bool => strtoupper((string)($finding['status'] ?? '')) === 'FAIL'
+        );
+        if ($failedFindings === []) {
+            return Command::SUCCESS;
+        }
+
+        foreach ($failedFindings as $finding) {
+            if (strtolower((string)($finding['severity'] ?? '')) === 'critical') {
+                return 2;
+            }
+        }
+
+        return Command::FAILURE;
+    }
+
+    private function writePhase(OutputInterface $out, int $current, int $total, string $message): void
+    {
+        if ($out->isQuiet()) {
+            return;
+        }
+
+        $out->writeln(sprintf('<fg=cyan>[%d/%d]</> %s', $current, $total, $message));
+    }
+
+    private function createRuleProgressBar(OutputInterface $out, int $totalRules): ProgressBar
+    {
+        $progress = new ProgressBar($out, max(1, $totalRules));
+        $progress->setFormat(' %current%/%max% [%bar%] %percent:3s%%  %message%');
+        $progress->setMessage('Starting rule scan');
+        $progress->start();
+
+        return $progress;
+    }
+
+    private function formatRuleProgressMessage(array $event): string
+    {
+        $ruleId = (string)($event['rule_id'] ?? '');
+        $control = (string)($event['control'] ?? '');
+        $title = trim((string)($event['title'] ?? ''));
+        $status = strtoupper((string)($event['status'] ?? ''));
+
+        $parts = array_values(array_filter([$ruleId, $control]));
+        $label = implode(' ', $parts);
+        if ($title !== '') {
+            $label .= ($label !== '' ? ' - ' : '') . $this->truncateProgressTitle($title, 70);
+        }
+        if ($status !== '') {
+            $label .= ' [' . $status . ']';
+        }
+
+        return $label !== '' ? $label : 'Scanning rules';
+    }
+
+    private function truncateProgressTitle(string $title, int $maxLength): string
+    {
+        if (strlen($title) <= $maxLength) {
+            return $title;
+        }
+
+        return rtrim(substr($title, 0, $maxLength - 3)) . '...';
     }
 }

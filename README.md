@@ -37,7 +37,7 @@ chmod +x magebean.phar
 ### Option 2: Local development (composer)
 ```bash
 composer install
-php bin/magebean list
+php bin/magebean rules:list
 ```
 
 ---
@@ -51,7 +51,7 @@ php bin/magebean list
   --format=html --output=report.html
 ```
 
-**Supported formats**: `html` (default) | `json`
+**Supported formats**: `html` (default) | `json` | `sarif`
 
 ---
 
@@ -109,9 +109,12 @@ Contact: support@magebean.com
 | Option | Description | Default |
 |---|---|---|
 | `--path` | Magento root to audit | current dir |
+| `--url` | Optional base URL override for HTTP checks | auto-detect |
 | `--format` | `html` \| `json` \| `sarif` | `html` |
-| `--output` | Output file path | `report.html` |
+| `--output` | Output file path | auto by format |
 | `--cve-data` | Path to CVE bundle (optional) | none |
+| `--rules` | Run only selected rule IDs | all |
+| `--exclude-rules` | Exclude selected rule IDs | none |
 
 ---
 
@@ -123,6 +126,9 @@ php bin/magebean scan --path=/path/to/magento --format=html --output=report.html
 
 # run with JSON for CI
 php bin/magebean scan --path=/path --format=json > report.json
+
+# inspect available rules
+php bin/magebean rules:list
 ```
 
 - Reporter templates: `resources/report-template.html`

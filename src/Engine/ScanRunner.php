@@ -10,10 +10,14 @@ final class ScanRunner
 {
     private Context $ctx;
     private array $pack;
-    public function __construct(Context $ctx, array $pack)
+    /** @var null|callable(array): void */
+    private $progressCallback;
+
+    public function __construct(Context $ctx, array $pack, ?callable $progressCallback = null)
     {
         $this->ctx = $ctx;
         $this->pack = $pack;
+        $this->progressCallback = $progressCallback;
     }
 
     private function evalCheckWithEvidence(
@@ -64,6 +68,14 @@ final class ScanRunner
         $sys  = new SystemCheck($this->ctx);
 
         foreach ($this->pack['rules'] as $rule) {
+            $this->notifyProgress([
+                'type' => 'rule_start',
+                'current' => $executedRules + 1,
+                'total' => $plannedRules,
+                'rule_id' => (string)($rule['id'] ?? ''),
+                'title' => (string)($rule['title'] ?? ''),
+                'control' => (string)($rule['control'] ?? ''),
+            ]);
             $executedRules++;
             $op = $rule['op'] ?? 'all';
             // Với 'any' khởi tạo FAIL cho tới khi có check PASS
@@ -187,6 +199,16 @@ final class ScanRunner
             } elseif ($status === 'FAIL') {
                 $failed++;
             } // UNKNOWN: không cộng vào passed/failed
+
+            $this->notifyProgress([
+                'type' => 'rule_done',
+                'current' => $executedRules,
+                'total' => $plannedRules,
+                'rule_id' => (string)($rule['id'] ?? ''),
+                'title' => (string)($rule['title'] ?? ''),
+                'control' => (string)($rule['control'] ?? ''),
+                'status' => $status,
+            ]);
         }
 
         $unknown = 0;
@@ -213,6 +235,13 @@ final class ScanRunner
                 'suppress_confidence' => $suppressConfidence ?? false
             ]
         ];
+    }
+
+    private function notifyProgress(array $event): void
+    {
+        if (is_callable($this->progressCallback)) {
+            ($this->progressCallback)($event);
+        }
     }
 
     private function evalCheck(

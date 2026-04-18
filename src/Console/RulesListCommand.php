@@ -11,9 +11,11 @@ use Magebean\Engine\RulePackLoader;
 
 final class RulesListCommand extends Command
 {
+    protected static $defaultName = 'rules:list';
+
     protected function configure(): void
     {
-        $this->setName('list')
+        $this->setName('rules:list')
             ->addOption('control', null, InputOption::VALUE_OPTIONAL, 'Comma list of controls (e.g. MB-C01,MB-C02)')
             ->addOption('severity', null, InputOption::VALUE_OPTIONAL, 'low|medium|high|critical');
     }

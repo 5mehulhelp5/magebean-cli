@@ -75,18 +75,16 @@ final class HtmlReporter
             }
 
             // Cột nội dung: chỉ in message theo yêu cầu mới
+            $messageParts = ['<div style="color:#333;margin-top:4px;">' . $title . '</div>'];
+            if ($userMsg !== '') {
+                $messageParts[] = '<div style="margin-top:4px;"><i>' . $userMsg . '</i></div>';
+            }
+
             $rows .= '<tr>'
                 . '<td><a href="https://magebean.com/baseline/' . $id . '" target="_blank">' . $id . '</a></td>'
                 . '<td>' . $severity . '</td>'
                 . '<td class="' . $statusClass . '">' . $status . '</td>'
-                . '<td>'
-                . '<div style="color:#333;margin-top:4px;">' . $title . ' --- '
-                . ($userMsg !== '' ? '(<i>' . $userMsg . '</i>)</div>' : '')
-                /* . (
-                    (!$suppressConfidence && $confVal !== null)
-                    ? '<div style="opacity:.8;margin-top:4px"><small' . ($confWhy !== '' ? ' title="' . htmlspecialchars($confWhy, ENT_QUOTES, 'UTF-8') . '"' : '') . '>confidence: ' . $confVal . '%</small></div>'
-                    : ''
-                ) */
+                . '<td>' . implode('', $messageParts)
                 . '</td>'  /* Quan trọng: đóng ô Message trước khi thêm ô Details */
                 . ($this->showDetails ? '<td>' 
                 . $this->renderDetails($f) 

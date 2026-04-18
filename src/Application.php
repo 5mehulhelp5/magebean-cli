@@ -7,12 +7,7 @@ namespace Magebean;
 use Symfony\Component\Console\Application as ConsoleApp;
 use Magebean\Console\{
     ScanCommand,
-    RulesListCommand,
-    RulesValidateCommand,
-    BundleUpdateCommand,
-    LicenseActivateCommand,
-    SelfUpdateCommand,
-    ReportOpenCommand
+    RulesListCommand
 };
 
 final class Application extends ConsoleApp
