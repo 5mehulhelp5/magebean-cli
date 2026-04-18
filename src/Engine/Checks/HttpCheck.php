@@ -326,18 +326,71 @@ final class HttpCheck
     private function noDirectoryListing(array $args): array
     {
         $base = $this->baseUrl();
-        if ($base === '') return [false, 'Missing URL in context'];
+        if ($base === '') return [null, '[UNKNOWN] Missing URL in context'];
         $paths = $args['paths'] ?? ['/media/', '/static/', '/errors/', '/var/'];
+        $timeout = (int)($args['timeout_ms'] ?? 8000);
+        $probed = 0;
+        $unknowns = [];
+
         foreach ($paths as $p) {
-            [$ok, $msg, $ev] = $this->fetch($base . $p, 'GET', [], (int)($args['timeout_ms'] ?? 8000), false);
-            if ($ok === null) continue;
-            if (!$ok) continue;
+            [$ok, $msg, $ev] = $this->fetch($base . $p, 'GET', [], $timeout, false);
+            if ($ok === null) {
+                $unknowns[] = ['path' => $p, 'reason' => $msg];
+                continue;
+            }
+            if (!$ok) {
+                $unknowns[] = ['path' => $p, 'reason' => $msg];
+                continue;
+            }
+
+            $probed++;
+            $status = (int)($ev['status'] ?? 0);
+            $headers = array_change_key_case((array)($ev['headers'] ?? []), CASE_LOWER);
             $b = strtolower((string)($ev['body'] ?? ''));
-            if (str_contains($b, 'index of /') || preg_match('~<title>\s*index of\s*/~i', $b)) {
-                return [false, 'Directory listing enabled at ' . $p, ['path' => $p]];
+            $contentType = strtolower($this->hget($headers, 'content-type'));
+
+            $matchedSignature = null;
+            if ($status === 200 && str_contains($contentType, 'text/html')) {
+                $signatures = [
+                    'index of /',
+                    'directory listing for',
+                    '<title>index of ',
+                    '<h1>index of ',
+                    '<pre><a href=',
+                ];
+                foreach ($signatures as $signature) {
+                    if (str_contains($b, $signature)) {
+                        $matchedSignature = $signature;
+                        break;
+                    }
+                }
+            }
+
+            if ($matchedSignature !== null) {
+                return [
+                    false,
+                    'Directory listing enabled at ' . $p,
+                    [
+                        'path' => $p,
+                        'status' => $status,
+                        'matched_signature' => $matchedSignature,
+                    ]
+                ];
             }
         }
-        return [true, 'No directory listing in common paths', []];
+
+        if ($probed === 0) {
+            return [null, '[UNKNOWN] Could not verify directory listing on any configured path', $unknowns];
+        }
+
+        if ($unknowns !== []) {
+            return [null, '[UNKNOWN] Directory listing check had incomplete coverage', [
+                'probed' => $probed,
+                'unknown_paths' => $unknowns,
+            ]];
+        }
+
+        return [true, 'No directory listing detected in common paths', ['probed' => $probed]];
     }
 
     private function noPublicArtifacts(array $args): array

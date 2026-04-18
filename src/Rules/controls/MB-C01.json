@@ -4,7 +4,7 @@
   "rules": [
     {
       "id": "MB-R001",
-      "title": "No chmod 777 (no world-writable files/dirs)",
+      "title": "No world-writable files or directories",
       "control": "MB-C01",
       "severity": "high",
       "op": "all",
@@ -18,13 +18,13 @@
         }
       ],
       "messages": {
-        "pass": "No world-writable files or directories detected (chmod 777 not found).",
-        "fail": "World-writable files or directories detected. Remove 777 and tighten permissions."
+        "pass": "No world-writable files or directories detected.",
+        "fail": "World-writable files or directories detected. Tighten permissions and remove public write access."
       }
     },
     {
       "id": "MB-R002",
-      "title": "env.php permissions <= 0640",
+      "title": "env.php restricted to owner/group access",
       "control": "MB-C01",
       "severity": "high",
       "op": "all",
@@ -38,8 +38,8 @@
         }
       ],
       "messages": {
-        "pass": "app/etc/env.php permissions are within safe range (<= 0640).",
-        "fail": "app/etc/env.php permissions are too permissive. Set to 0640 (owner read/write, group read)."
+        "pass": "app/etc/env.php is restricted to owner/group access and is not accessible by others.",
+        "fail": "app/etc/env.php is too permissive. Restrict it to 0640 or tighter."
       }
     },
     {
@@ -83,13 +83,14 @@
               "app",
               "vendor",
               "lib"
-            ]
+            ],
+            "max_results": 50
           }
         }
       ],
       "messages": {
         "pass": "Code directories (app, vendor, lib) are not group/other-writable.",
-        "fail": "One or more code directories are group/other-writable. Tighten to read-only for non-owners."
+        "fail": "Writable code paths found in app, vendor, or lib. Remove group/other write permissions."
       }
     },
     {
@@ -97,7 +98,7 @@
       "title": "Directory listing disabled",
       "control": "MB-C01",
       "severity": "medium",
-      "op": "any",
+      "op": "all",
       "checks": [
         {
           "name": "http_no_directory_listing",

@@ -18,34 +18,75 @@ final class FilesystemCheck
     {
         $root = $this->ctx->abs($args['path'] ?? '.');
         $max = (int)($args['max_results'] ?? 50);
+        if (!file_exists($root)) {
+            return [false, "Path not found: {$root}"];
+        }
+
         $offenders = [];
-        $flags = \FilesystemIterator::SKIP_DOTS | \FilesystemIterator::FOLLOW_SYMLINKS;
-        $rii = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($root, $flags));
+        $truncated = false;
+        $flags = \FilesystemIterator::SKIP_DOTS;
+
+        $this->collectWorldWritableOffender($root, $offenders, $max, $truncated);
+
+        $rii = new \RecursiveIteratorIterator(
+            new \RecursiveDirectoryIterator($root, $flags),
+            \RecursiveIteratorIterator::SELF_FIRST
+        );
         foreach ($rii as $file) {
-            $perm = @fileperms((string)$file);
-            if ($perm === false) continue;
-            $perm = $perm & 0777;
-            if (($perm & 0002) === 0002) {
-                $offenders[] = [$file->getPathname(), sprintf('%o', $perm)];
-                if (count($offenders) >= $max) break;
+            if ($file->isLink()) {
+                continue;
+            }
+
+            $this->collectWorldWritableOffender($file->getPathname(), $offenders, $max, $truncated);
+            if ($truncated) {
+                break;
             }
         }
+
         if ($offenders) {
-            $msg = "World-writable found: " . implode(', ', array_map(fn($o) => $o[0] . '(' . $o[1] . ')', $offenders));
-            return [false, $msg];
+            $shown = count($offenders);
+            $msg = "World-writable entries found ({$shown}" . ($truncated ? '+' : '') . " shown): "
+                . implode(', ', array_map(
+                    static fn(array $o): string => $o['path'] . ' [' . $o['type'] . ':' . $o['mode'] . ']',
+                    $offenders
+                ));
+            if ($truncated) {
+                $msg .= ". More offenders exist; increase max_results to inspect additional entries.";
+            }
+            return [false, $msg, $offenders];
         }
-        return [true, "No world-writable files/dirs under {$root}"];
+        return [true, "No world-writable files or directories detected under {$root}"];
     }
 
     public function fileModeMax(array $args): array
     {
         $rel = $args['file'] ?? 'app/etc/env.php';
         $file = $this->ctx->abs($rel);
-        $max = octdec($args['max_octal'] ?? '0640');
+        $allowedModeRaw = (string)($args['max_octal'] ?? '0640');
+        $allowedMode = octdec($allowedModeRaw);
         if (!is_file($file)) return [false, "{$rel} is missing"];
         $perm = fileperms($file) & 0777;
-        if ($perm > $max) return [false, "{$rel} mode " . sprintf('%o', $perm) . " exceeds " . sprintf('%o', $max)];
-        return [true, "{$rel} mode " . sprintf('%o', $perm) . " <= " . sprintf('%o', $max)];
+
+        $extraBits = $perm & (~$allowedMode & 0777);
+        $evidence = [
+            'path' => $file,
+            'observed_mode' => sprintf('%o', $perm),
+            'allowed_mode' => sprintf('%o', $allowedMode),
+        ];
+        if ($extraBits !== 0) {
+            $evidence['excess_bits'] = sprintf('%o', $extraBits);
+            return [
+                false,
+                "{$rel} mode " . sprintf('%o', $perm) . " is more permissive than allowed policy " . sprintf('%o', $allowedMode),
+                $evidence,
+            ];
+        }
+
+        return [
+            true,
+            "{$rel} mode " . sprintf('%o', $perm) . " complies with allowed policy " . sprintf('%o', $allowedMode),
+            $evidence,
+        ];
     }
 
     public function webrootHygiene(array $args): array
@@ -54,42 +95,87 @@ final class FilesystemCheck
         $bad = $args['forbidden'] ?? ['.git', '.env', '.env.local', '*.bak', '*.old', '*~'];
         if (!is_dir($webroot)) return [true, "Webroot {$webroot} not found (skipped)"];
         $matches = [];
-        $max = 50;
-        $rii = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($webroot, \FilesystemIterator::SKIP_DOTS));
-        foreach ($rii as $file) {
-            $name = $file->getFilename();
-            foreach ($bad as $pattern) {
-                $regex = '/^' . str_replace(['*', '?'], ['.*', '.?'], preg_quote($pattern, '/')) . '$/i';
-                if (preg_match($regex, $name)) {
-                    $matches[] = $file->getPathname();
-                    break;
-                }
+        $max = (int)($args['max_results'] ?? 50);
+        $truncated = false;
+
+        $this->collectForbiddenWebrootArtifact($webroot, $bad, $matches, $max, $truncated);
+
+        $iterator = new \RecursiveIteratorIterator(
+            new \RecursiveDirectoryIterator($webroot, \FilesystemIterator::SKIP_DOTS),
+            \RecursiveIteratorIterator::SELF_FIRST,
+            \RecursiveIteratorIterator::CATCH_GET_CHILD
+        );
+        foreach ($iterator as $file) {
+            $path = $file->getPathname();
+            if ($file->isLink()) {
+                continue;
             }
-            if (count($matches) >= $max) break;
+
+            $this->collectForbiddenWebrootArtifact($path, $bad, $matches, $max, $truncated);
+            if ($truncated) {
+                break;
+            }
         }
-        if ($matches) return [false, "Forbidden artifacts in webroot: " . implode(', ', $matches)];
+        if ($matches) {
+            $shown = count($matches);
+            $msg = "Forbidden artifacts found in webroot ({$shown}" . ($truncated ? '+' : '') . " shown): "
+                . implode(', ', array_map(
+                    static fn(array $match): string => $match['path'] . ' [' . $match['type'] . ', pattern:' . $match['pattern'] . ']',
+                    $matches
+                ));
+            if ($truncated) {
+                $msg .= ". More matches exist; increase max_results to inspect additional entries.";
+            }
+            return [false, $msg, $matches];
+        }
         return [true, "Webroot clean: {$webroot}"];
     }
 
     public function codeDirsReadonly(array $args): array
     {
         $dirs = $args['dirs'] ?? ['app', 'vendor', 'lib'];
+        $max = (int)($args['max_results'] ?? 50);
         $off = [];
+        $truncated = false;
         foreach ($dirs as $rel) {
             $path = $this->ctx->abs($rel);
             if (!is_dir($path)) continue;
-            $rii = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($path, \FilesystemIterator::SKIP_DOTS));
-            foreach ($rii as $file) {
-                $perm = @fileperms((string)$file);
-                if ($perm === false) continue;
-                $perm = $perm & 0777;
-                if (($perm & 0022) !== 0) {
-                    $off[] = [$file->getPathname(), sprintf('%o', $perm)];
-                    if (count($off) >= 50) break 2;
+
+            $this->collectNonOwnerWritableCodePath($path, $off, $max, $truncated);
+            if ($truncated) {
+                break;
+            }
+
+            $iterator = new \RecursiveIteratorIterator(
+                new \RecursiveDirectoryIterator($path, \FilesystemIterator::SKIP_DOTS),
+                \RecursiveIteratorIterator::SELF_FIRST,
+                \RecursiveIteratorIterator::CATCH_GET_CHILD
+            );
+            foreach ($iterator as $file) {
+                if ($file->isLink()) {
+                    continue;
+                }
+
+                $this->collectNonOwnerWritableCodePath($file->getPathname(), $off, $max, $truncated);
+                if ($truncated) {
+                    break 2;
                 }
             }
         }
-        if ($off) return [false, "Group/other writable in code dirs: " . implode(', ', array_map(fn($o) => $o[0] . '(' . $o[1] . ')', $off))];
+
+        if ($off) {
+            $shown = count($off);
+            $msg = "Non-owner writable code paths found ({$shown}" . ($truncated ? '+' : '') . " shown): "
+                . implode(', ', array_map(
+                    static fn(array $entry): string => $entry['path'] . ' [' . $entry['type'] . ':' . $entry['mode'] . ']',
+                    $off
+                ));
+            if ($truncated) {
+                $msg .= ". More offenders exist; increase max_results to inspect additional entries.";
+            }
+            return [false, $msg, $off];
+        }
+
         return [true, "Code directories not group/other writable"];
     }
 
@@ -133,5 +219,96 @@ final class FilesystemCheck
 
         $ok = ($age <= $max);
         return [$ok, "mtime age {$age}s (max {$max}s) for $rel"];
+    }
+
+    private function collectWorldWritableOffender(string $path, array &$offenders, int $max, bool &$truncated): void
+    {
+        if ($truncated || is_link($path)) {
+            return;
+        }
+
+        $perm = @fileperms($path);
+        if ($perm === false) {
+            return;
+        }
+
+        $perm = $perm & 0777;
+        if (($perm & 0002) !== 0002) {
+            return;
+        }
+
+        if (count($offenders) >= $max) {
+            $truncated = true;
+            return;
+        }
+
+        $offenders[] = [
+            'path' => $path,
+            'mode' => sprintf('%o', $perm),
+            'type' => is_dir($path) ? 'dir' : 'file',
+        ];
+    }
+
+    private function collectForbiddenWebrootArtifact(string $path, array $patterns, array &$matches, int $max, bool &$truncated): void
+    {
+        if ($truncated || is_link($path)) {
+            return;
+        }
+
+        $name = basename($path);
+        $matchedPattern = null;
+        foreach ($patterns as $pattern) {
+            if ($this->matchesForbiddenArtifact($name, (string)$pattern)) {
+                $matchedPattern = (string)$pattern;
+                break;
+            }
+        }
+        if ($matchedPattern === null) {
+            return;
+        }
+
+        if (count($matches) >= $max) {
+            $truncated = true;
+            return;
+        }
+
+        $matches[] = [
+            'path' => $path,
+            'pattern' => $matchedPattern,
+            'type' => is_dir($path) ? 'dir' : 'file',
+        ];
+    }
+
+    private function matchesForbiddenArtifact(string $name, string $pattern): bool
+    {
+        return fnmatch($pattern, $name, \FNM_PERIOD);
+    }
+
+    private function collectNonOwnerWritableCodePath(string $path, array &$offenders, int $max, bool &$truncated): void
+    {
+        if ($truncated || is_link($path)) {
+            return;
+        }
+
+        $perm = @fileperms($path);
+        if ($perm === false) {
+            return;
+        }
+
+        $perm = $perm & 0777;
+        if (($perm & 0022) === 0) {
+            return;
+        }
+
+        if (count($offenders) >= $max) {
+            $truncated = true;
+            return;
+        }
+
+        $offenders[] = [
+            'path' => $path,
+            'mode' => sprintf('%o', $perm),
+            'type' => is_dir($path) ? 'dir' : 'file',
+        ];
     }
 }
