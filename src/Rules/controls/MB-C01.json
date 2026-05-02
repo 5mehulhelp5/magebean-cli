@@ -35,6 +35,14 @@
             "file": "app/etc/env.php",
             "max_octal": "0640"
           }
+        },
+        {
+          "name": "file_owner_group_matches",
+          "args": {
+            "file": "app/etc/env.php",
+            "owner_reference": ".",
+            "group_reference": "."
+          }
         }
       ],
       "messages": {
@@ -57,6 +65,7 @@
               ".git",
               ".env",
               ".env.local",
+              ".env.*",
               "*.bak",
               "*.old",
               "*~"
@@ -71,7 +80,7 @@
     },
     {
       "id": "MB-R004",
-      "title": "Code directories not group/other-writable",
+      "title": "Code directories are read-only",
       "control": "MB-C01",
       "severity": "high",
       "op": "all",
@@ -89,8 +98,8 @@
         }
       ],
       "messages": {
-        "pass": "Code directories (app, vendor, lib) are not group/other-writable.",
-        "fail": "Writable code paths found in app, vendor, or lib. Remove group/other write permissions."
+        "pass": "Code directories (app, vendor, lib) are read-only.",
+        "fail": "Writable code paths found in app, vendor, or lib. Remove write permissions from code files and directories."
       }
     },
     {

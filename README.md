@@ -135,6 +135,14 @@ Create `.magebean.json` in the Magento root to tune the baseline per project wit
             "file": "app/etc/env.php",
             "max_octal": "0600"
           }
+        },
+        {
+          "name": "file_owner_group_matches",
+          "args": {
+            "file": "app/etc/env.php",
+            "owner_reference": ".",
+            "group_reference": "."
+          }
         }
       ]
     }

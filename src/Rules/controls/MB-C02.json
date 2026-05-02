@@ -10,17 +10,27 @@
       "op": "all",
       "checks": [
         {
-          "name": "php_array_neq",
+          "name": "magento_admin_frontname_strong",
           "args": {
             "file": "app/etc/env.php",
             "path": "backend.frontName",
-            "not_equals": "admin"
+            "min_length": 8,
+            "denylist": [
+              "admin",
+              "backend",
+              "administrator",
+              "adminpanel",
+              "magento",
+              "manage",
+              "cms",
+              "dashboard"
+            ]
           }
         }
       ],
       "messages": {
-        "pass": "Admin path is non-default (not '/admin').",
-        "fail": "Admin path is still '/admin'. Change env.php backend.frontName to a non-guessable value and update web server rules."
+        "pass": "Admin path is non-default and not trivially guessable.",
+        "fail": "Admin path is default, weak, or missing. Change env.php backend.frontName to a non-guessable value and update web server rules."
       }
     },
     {
@@ -31,17 +41,22 @@
       "op": "all",
       "checks": [
         {
-          "name": "php_array_eq",
+          "name": "magento_admin_2fa_enabled",
           "args": {
             "file": "app/etc/config.php",
-            "path": "modules.Magento_TwoFactorAuth",
-            "equals": 1
+            "core_module": "Magento_TwoFactorAuth",
+            "provider_modules": [
+              "Magento_GoogleAuthenticator",
+              "Magento_DuoSecurity",
+              "Magento_U2fKey",
+              "Magento_AdminAdobeImsTwoFactorAuth"
+            ]
           }
         }
       ],
       "messages": {
-        "pass": "Two-Factor Authentication (Magento_TwoFactorAuth) is enabled for admin.",
-        "fail": "Two-Factor Authentication is disabled or missing. Enable Magento_TwoFactorAuth and enforce 2FA for all admin users."
+        "pass": "Two-Factor Authentication core and at least one provider module are enabled for admin.",
+        "fail": "Two-Factor Authentication is disabled, missing, or has no enabled provider module. Enable Magento_TwoFactorAuth and at least one admin 2FA provider."
       }
     },
     {
@@ -52,16 +67,19 @@
       "op": "all",
       "checks": [
         {
-          "name": "php_array_exists",
+          "name": "magento_admin_password_policy_strong",
           "args": {
             "file": "app/etc/config.php",
-            "path": "system.default.admin/security"
+            "base_path": "system.default.admin.security",
+            "min_password_length": 12,
+            "max_lockout_failures": 10,
+            "max_password_lifetime_days": 90
           }
         }
       ],
       "messages": {
-        "pass": "Admin password/security policy is configured (system.default.admin/security present).",
-        "fail": "Admin password/security policy is not configured. Define complexity, history, lockout, and rotation settings under admin/security."
+        "pass": "Admin password/security policy meets minimum strength requirements.",
+        "fail": "Admin password/security policy is weak or incomplete. Define minimum length, lockout, and rotation settings under admin/security."
       }
     },
     {
@@ -72,18 +90,17 @@
       "op": "all",
       "checks": [
         {
-          "name": "php_array_numeric_compare",
+          "name": "magento_admin_session_timeout",
           "args": {
-            "file": "app/etc/env.php",
-            "path": "session.lifetime",
-            "op": "<=",
-            "value": 900
+            "file": "app/etc/config.php",
+            "base_path": "system.default.admin.security",
+            "max_seconds": 900
           }
         }
       ],
       "messages": {
         "pass": "Admin session lifetime is at or below 900 seconds.",
-        "fail": "Admin session lifetime exceeds 900 seconds. Reduce session.lifetime to ≤ 900 for better security."
+        "fail": "Admin session lifetime is missing or exceeds 900 seconds. Reduce admin/security/session_lifetime to ≤ 900 for better security."
       }
     },
     {

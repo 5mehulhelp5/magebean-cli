@@ -41,6 +41,7 @@ final class CheckRegistry
 
         $registry->register('fs_no_world_writable', fn(array $args): array => $fs->noWorldWritable($args));
         $registry->register('file_mode_max', fn(array $args): array => $fs->fileModeMax($args));
+        $registry->register('file_owner_group_matches', fn(array $args): array => $fs->fileOwnerGroupMatches($args));
         $registry->register('webroot_hygiene', fn(array $args): array => $fs->webrootHygiene($args));
         $registry->register('code_dirs_readonly', fn(array $args): array => $fs->codeDirsReadonly($args));
         $registry->register('no_directory_listing', fn(array $args): array => $fs->noDirectoryListing($args));
@@ -55,6 +56,10 @@ final class CheckRegistry
         $registry->register('php_array_key_search', fn(array $args): array => $phpc->keySearch($args));
 
         $registry->register('magento_config', fn(array $args): array => $mage->stub($args));
+        $registry->register('magento_admin_frontname_strong', fn(array $args): array => $mage->adminFrontNameStrong($args));
+        $registry->register('magento_admin_2fa_enabled', fn(array $args): array => $mage->adminTwoFactorAuthEnabled($args));
+        $registry->register('magento_admin_password_policy_strong', fn(array $args): array => $mage->adminPasswordPolicyStrong($args));
+        $registry->register('magento_admin_session_timeout', fn(array $args): array => $mage->adminSessionTimeout($args));
         $registry->register('nginx_directive', fn(array $args): array => $web->nginxDirective($args));
         $registry->register('apache_htaccess_directive', fn(array $args): array => $web->apacheDirective($args));
 

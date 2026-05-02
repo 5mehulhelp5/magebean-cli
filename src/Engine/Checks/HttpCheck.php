@@ -333,7 +333,7 @@ final class HttpCheck
         $unknowns = [];
 
         foreach ($paths as $p) {
-            [$ok, $msg, $ev] = $this->fetch($base . $p, 'GET', [], $timeout, false);
+            [$ok, $msg, $ev] = $this->fetch($base . $p, 'GET', [], $timeout, true);
             if ($ok === null) {
                 $unknowns[] = ['path' => $p, 'reason' => $msg];
                 continue;
@@ -346,11 +346,11 @@ final class HttpCheck
             $probed++;
             $status = (int)($ev['status'] ?? 0);
             $headers = array_change_key_case((array)($ev['headers'] ?? []), CASE_LOWER);
-            $b = strtolower((string)($ev['body'] ?? ''));
+            $b = strtolower(substr((string)($ev['body'] ?? ''), 0, 8192));
             $contentType = strtolower($this->hget($headers, 'content-type'));
 
             $matchedSignature = null;
-            if ($status === 200 && str_contains($contentType, 'text/html')) {
+            if ($status === 200) {
                 $signatures = [
                     'index of /',
                     'directory listing for',
@@ -373,6 +373,8 @@ final class HttpCheck
                     [
                         'path' => $p,
                         'status' => $status,
+                        'content_type' => $contentType,
+                        'final_url' => $ev['final_url'] ?? null,
                         'matched_signature' => $matchedSignature,
                     ]
                 ];

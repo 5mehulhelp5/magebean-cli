@@ -17,7 +17,7 @@ final class FilesystemCheck
     public function noWorldWritable(array $args): array
     {
         $root = $this->ctx->abs($args['path'] ?? '.');
-        $max = (int)($args['max_results'] ?? 50);
+        $max = max(1, (int)($args['max_results'] ?? 50));
         if (!file_exists($root)) {
             return [false, "Path not found: {$root}"];
         }
@@ -89,13 +89,70 @@ final class FilesystemCheck
         ];
     }
 
+    public function fileOwnerGroupMatches(array $args): array
+    {
+        $rel = (string)($args['file'] ?? '');
+        if ($rel === '') {
+            return [false, 'file_owner_group_matches requires file'];
+        }
+
+        $file = $this->ctx->abs($rel);
+        if (!is_file($file)) {
+            return [false, "{$rel} is missing"];
+        }
+
+        $ownerRefRel = (string)($args['owner_reference'] ?? '.');
+        $groupRefRel = (string)($args['group_reference'] ?? $ownerRefRel);
+        $ownerRef = $this->ctx->abs($ownerRefRel);
+        $groupRef = $this->ctx->abs($groupRefRel);
+
+        if (!file_exists($ownerRef)) {
+            return [false, "Owner reference not found: {$ownerRefRel}"];
+        }
+        if (!file_exists($groupRef)) {
+            return [false, "Group reference not found: {$groupRefRel}"];
+        }
+
+        $owner = @fileowner($file);
+        $group = @filegroup($file);
+        $expectedOwner = @fileowner($ownerRef);
+        $expectedGroup = @filegroup($groupRef);
+        if ($owner === false || $group === false || $expectedOwner === false || $expectedGroup === false) {
+            return [false, "Could not stat ownership for {$rel}"];
+        }
+
+        $evidence = [
+            'path' => $file,
+            'owner' => $this->formatIdentity((int)$owner, true),
+            'group' => $this->formatIdentity((int)$group, false),
+            'owner_reference' => $ownerRef,
+            'expected_owner' => $this->formatIdentity((int)$expectedOwner, true),
+            'group_reference' => $groupRef,
+            'expected_group' => $this->formatIdentity((int)$expectedGroup, false),
+        ];
+
+        if ($owner !== $expectedOwner || $group !== $expectedGroup) {
+            return [
+                false,
+                "{$rel} ownership does not match expected application owner/group",
+                $evidence,
+            ];
+        }
+
+        return [
+            true,
+            "{$rel} ownership matches expected application owner/group",
+            $evidence,
+        ];
+    }
+
     public function webrootHygiene(array $args): array
     {
         $webroot = $this->ctx->abs($args['webroot'] ?? 'pub');
         $bad = $args['forbidden'] ?? ['.git', '.env', '.env.local', '*.bak', '*.old', '*~'];
         if (!is_dir($webroot)) return [true, "Webroot {$webroot} not found (skipped)"];
         $matches = [];
-        $max = (int)($args['max_results'] ?? 50);
+        $max = max(1, (int)($args['max_results'] ?? 50));
         $truncated = false;
 
         $this->collectForbiddenWebrootArtifact($webroot, $bad, $matches, $max, $truncated);
@@ -107,11 +164,10 @@ final class FilesystemCheck
         );
         foreach ($iterator as $file) {
             $path = $file->getPathname();
+            $this->collectForbiddenWebrootArtifact($path, $bad, $matches, $max, $truncated);
             if ($file->isLink()) {
                 continue;
             }
-
-            $this->collectForbiddenWebrootArtifact($path, $bad, $matches, $max, $truncated);
             if ($truncated) {
                 break;
             }
@@ -134,14 +190,14 @@ final class FilesystemCheck
     public function codeDirsReadonly(array $args): array
     {
         $dirs = $args['dirs'] ?? ['app', 'vendor', 'lib'];
-        $max = (int)($args['max_results'] ?? 50);
+        $max = max(1, (int)($args['max_results'] ?? 50));
         $off = [];
         $truncated = false;
         foreach ($dirs as $rel) {
             $path = $this->ctx->abs($rel);
             if (!is_dir($path)) continue;
 
-            $this->collectNonOwnerWritableCodePath($path, $off, $max, $truncated);
+            $this->collectWritableCodePath($path, $off, $max, $truncated);
             if ($truncated) {
                 break;
             }
@@ -152,11 +208,7 @@ final class FilesystemCheck
                 \RecursiveIteratorIterator::CATCH_GET_CHILD
             );
             foreach ($iterator as $file) {
-                if ($file->isLink()) {
-                    continue;
-                }
-
-                $this->collectNonOwnerWritableCodePath($file->getPathname(), $off, $max, $truncated);
+                $this->collectWritableCodePath($file->getPathname(), $off, $max, $truncated);
                 if ($truncated) {
                     break 2;
                 }
@@ -165,9 +217,10 @@ final class FilesystemCheck
 
         if ($off) {
             $shown = count($off);
-            $msg = "Non-owner writable code paths found ({$shown}" . ($truncated ? '+' : '') . " shown): "
+            $msg = "Writable code paths found ({$shown}" . ($truncated ? '+' : '') . " shown): "
                 . implode(', ', array_map(
-                    static fn(array $entry): string => $entry['path'] . ' [' . $entry['type'] . ':' . $entry['mode'] . ']',
+                    static fn(array $entry): string => $entry['path'] . ' [' . $entry['type'] . ':' . $entry['mode'] . ']'
+                        . (isset($entry['target']) ? ' -> ' . $entry['target'] : ''),
                     $off
                 ));
             if ($truncated) {
@@ -176,7 +229,7 @@ final class FilesystemCheck
             return [false, $msg, $off];
         }
 
-        return [true, "Code directories not group/other writable"];
+        return [true, "Code directories are read-only"];
     }
 
     public function noDirectoryListing(array $args): array
@@ -249,9 +302,22 @@ final class FilesystemCheck
         ];
     }
 
+    private function formatIdentity(int $id, bool $user): string
+    {
+        $lookup = $user ? 'posix_getpwuid' : 'posix_getgrgid';
+        if (function_exists($lookup)) {
+            $info = $lookup($id);
+            if (is_array($info) && isset($info['name']) && is_string($info['name']) && $info['name'] !== '') {
+                return $info['name'] . " ({$id})";
+            }
+        }
+
+        return (string)$id;
+    }
+
     private function collectForbiddenWebrootArtifact(string $path, array $patterns, array &$matches, int $max, bool &$truncated): void
     {
-        if ($truncated || is_link($path)) {
+        if ($truncated) {
             return;
         }
 
@@ -275,7 +341,7 @@ final class FilesystemCheck
         $matches[] = [
             'path' => $path,
             'pattern' => $matchedPattern,
-            'type' => is_dir($path) ? 'dir' : 'file',
+            'type' => is_link($path) ? 'link' : (is_dir($path) ? 'dir' : 'file'),
         ];
     }
 
@@ -284,19 +350,29 @@ final class FilesystemCheck
         return fnmatch($pattern, $name, \FNM_PERIOD);
     }
 
-    private function collectNonOwnerWritableCodePath(string $path, array &$offenders, int $max, bool &$truncated): void
+    private function collectWritableCodePath(string $path, array &$offenders, int $max, bool &$truncated): void
     {
-        if ($truncated || is_link($path)) {
+        if ($truncated) {
             return;
         }
 
-        $perm = @fileperms($path);
+        $statPath = $path;
+        $target = null;
+        if (is_link($path)) {
+            $target = realpath($path);
+            if ($target === false) {
+                return;
+            }
+            $statPath = $target;
+        }
+
+        $perm = @fileperms($statPath);
         if ($perm === false) {
             return;
         }
 
         $perm = $perm & 0777;
-        if (($perm & 0022) === 0) {
+        if (($perm & 0222) === 0) {
             return;
         }
 
@@ -305,10 +381,15 @@ final class FilesystemCheck
             return;
         }
 
-        $offenders[] = [
+        $entry = [
             'path' => $path,
             'mode' => sprintf('%o', $perm),
-            'type' => is_dir($path) ? 'dir' : 'file',
+            'type' => is_link($path) ? 'link' : (is_dir($statPath) ? 'dir' : 'file'),
         ];
+        if ($target !== null) {
+            $entry['target'] = $target;
+        }
+
+        $offenders[] = $entry;
     }
 }
