@@ -31,6 +31,64 @@ final class RulePackLoader
         }
         return ['controls' => $controls, 'rules' => $rules];
     }
+
+    public static function loadPath(string $path): array
+    {
+        if (is_dir($path)) {
+            $controls = [];
+            $rules = [];
+            foreach (scandir($path) ?: [] as $file) {
+                if (!preg_match('/\.json$/i', $file)) {
+                    continue;
+                }
+                $pack = self::loadFile(rtrim($path, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . $file);
+                $controls = array_merge($controls, $pack['controls'] ?? []);
+                $rules = array_merge($rules, $pack['rules'] ?? []);
+            }
+            return ['controls' => array_values(array_unique($controls)), 'rules' => $rules];
+        }
+
+        return self::loadFile($path);
+    }
+
+    public static function loadFile(string $file): array
+    {
+        if (!is_file($file)) {
+            throw new \RuntimeException("Rule pack not found: {$file}");
+        }
+
+        $data = json_decode((string)file_get_contents($file), true);
+        if (!is_array($data)) {
+            throw new \RuntimeException("Invalid rule pack JSON: {$file}");
+        }
+
+        $controls = [];
+        if (isset($data['control']) && is_scalar($data['control'])) {
+            $controls[] = strtoupper((string)$data['control']);
+        }
+        if (isset($data['controls']) && is_array($data['controls'])) {
+            foreach ($data['controls'] as $control) {
+                if (is_scalar($control)) {
+                    $controls[] = strtoupper((string)$control);
+                }
+            }
+        }
+
+        $rules = [];
+        if (isset($data['rules']) && is_array($data['rules'])) {
+            foreach ($data['rules'] as $rule) {
+                if (is_array($rule)) {
+                    $rules[] = $rule;
+                    if (isset($rule['control']) && is_scalar($rule['control'])) {
+                        $controls[] = strtoupper((string)$rule['control']);
+                    }
+                }
+            }
+        }
+
+        return ['controls' => array_values(array_unique($controls)), 'rules' => $rules];
+    }
+
     public static function loadExternalMagento(): array
     {
         $dir = __DIR__ . '/../Rules/external';

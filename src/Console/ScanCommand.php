@@ -7,6 +7,10 @@ namespace Magebean\Console;
 use Magebean\Engine\Context;
 use Magebean\Engine\ScanRunner;
 use Magebean\Engine\RulePackLoader;
+use Magebean\Engine\ProjectConfigLoader;
+use Magebean\Engine\RulePackMerger;
+use Magebean\Engine\RuleValidator;
+use Magebean\Engine\Checks\CheckRegistry;
 use Magebean\Engine\Reporting\{HtmlReporter, JsonReporter, SarifReporter};
 use Magebean\Bundle\BundleManager;
 use Magebean\Engine\Cve\CveAuditor;
@@ -46,6 +50,7 @@ Doc: <href=https://magebean.com/documentation>magebean.com/documentation</>
   <fg=yellow>--controls=MB-Cxx,MB-Cxx</>       Only load selected controls (e.g., MB-C01,MB-C05)
   <fg=yellow>--rules=MB-Rxx,MB-Rxx</>           Only run a list of specified rules (e.g., MB-R036,MB-R020)
   <fg=yellow>--exclude-rules=MB-Rxx,MB-Rxx</>   Exclude specific rules after loading the pack
+  <fg=yellow>--config=FILE</>                   Project policy file (.magebean.json auto-detected)
 
 <options=bold>EXAMPLES</>
   # Scan current directory and print a quick summary
@@ -90,6 +95,7 @@ HELP;
             ->addOption('controls', null, InputOption::VALUE_OPTIONAL, 'Comma-separated control IDs to load (e.g., MB-C01,MB-C05 or MB-01,MB-05)')
             ->addOption('rules', null, InputOption::VALUE_OPTIONAL, 'Comma-separated rule IDs to run (e.g., MB-R036,MB-R020)')
             ->addOption('exclude-rules', null, InputOption::VALUE_OPTIONAL, 'Comma-separated rule IDs to exclude after loading')
+            ->addOption('config', null, InputOption::VALUE_OPTIONAL, 'Project policy file (.magebean.json or .magebean.yml)')
             ->addOption('url', null, InputOption::VALUE_OPTIONAL, 'Optional base URL override for HTTP checks')
             ->addOption('path', null, InputOption::VALUE_OPTIONAL, 'Magento root path (omit to auto-detect from current working directory)', '');
     }
@@ -151,6 +157,7 @@ HELP;
             $rulesOpt    = (string)($in->getOption('rules') ?? '');
             $excludeRulesOpt = (string)($in->getOption('exclude-rules') ?? '');
             $controlsOpt = (string)($in->getOption('controls') ?? '');
+            $configOpt = trim((string)($in->getOption('config') ?? ''));
 
             // validate standard
             $allowed = ['magebean', 'owasp', 'pci', 'cwe'];
@@ -223,29 +230,21 @@ HELP;
                 'url' => $projectUrl,
                 'meta' => $bundleMeta,
             ]);
+            $registry = CheckRegistry::fromContext($ctx);
 
             $this->writePhase($out, 3, 6, 'Loading rule pack');
+            $configFile = $configOpt !== ''
+                ? self::normalize($this->resolveProjectConfigPath($configOpt, $projectPath))
+                : ProjectConfigLoader::discover($projectPath);
+            $projectConfig = ProjectConfigLoader::load($configFile);
+            if ($configFile !== null) {
+                $out->writeln(sprintf('<info>Loaded Magebean project config:</info> %s', $configFile));
+            }
+
             // normalize controls filter
-            $controlsFilter = [];
+            $controlsFilter = $this->normalizeControlList($projectConfig['include_controls'] ?? []);
             if ($controlsOpt !== '') {
-                $parts = array_map('trim', explode(',', $controlsOpt));
-                $parts = array_values(array_filter($parts, static fn($p) => $p !== ''));
-                $normalized = [];
-                $invalid = [];
-                foreach ($parts as $c) {
-                    $nc = $this->normalizeControlId($c);
-                    if ($nc === '') {
-                        $invalid[] = $c;
-                    } else {
-                        $normalized[] = $nc;
-                    }
-                }
-                if ($invalid) {
-                    $out->writeln('<error>Invalid control id(s): ' . implode(', ', $invalid) . '</error>');
-                    $out->writeln('Expected format: MB-C01 or MB-01');
-                    return Command::FAILURE;
-                }
-                $controlsFilter = array_values(array_unique($normalized));
+                $controlsFilter = $this->normalizeControlList($controlsOpt);
             }
 
             $pack = RulePackLoader::loadAll($controlsFilter);
@@ -258,6 +257,8 @@ HELP;
                     return Command::FAILURE;
                 }
             }
+
+            $pack = RulePackMerger::applyProjectConfig($pack, $projectConfig);
 
             // filter by --rules (comma-separated IDs)
             $requestedIds = [];
@@ -301,6 +302,18 @@ HELP;
                 }
             }
 
+            $validationErrors = RuleValidator::validatePack($pack, $registry);
+            if ($validationErrors) {
+                $out->writeln('<error>Invalid rule pack:</error>');
+                foreach (array_slice($validationErrors, 0, 20) as $error) {
+                    $out->writeln('  - ' . $error);
+                }
+                if (count($validationErrors) > 20) {
+                    $out->writeln(sprintf('  - ... and %d more', count($validationErrors) - 20));
+                }
+                return Command::FAILURE;
+            }
+
             if (empty($pack['rules'])) {
                 $out->writeln('<error>No rules found. Check rules directory or control filter.</error>');
                 return Command::FAILURE;
@@ -320,7 +333,7 @@ HELP;
                     $ruleProgress->setMessage($this->formatRuleProgressMessage($event));
                     $ruleProgress->advance();
                 }
-            });
+            }, $registry);
             $result = $runner->run();
             $ruleProgress->finish();
             $out->writeln('');
@@ -328,6 +341,7 @@ HELP;
             $result['meta']['standard']    = $standard;
             $result['meta']['rules_filter'] = $requestedIds;
             $result['meta']['controls_filter'] = $controlsFilter;
+            $result['meta']['project_config'] = $configFile;
             $result['summary']['path'] = $projectPath;
 
             // 2) CVE audit (nếu có data)
@@ -515,6 +529,61 @@ HELP;
         if (preg_match('/^C(\d{2})$/', $id, $m)) return 'MB-C' . $m[1];
         if (preg_match('/^(\d{2})$/', $id, $m)) return 'MB-C' . $m[1];
         return '';
+    }
+
+    private function normalizeControlList(mixed $raw): array
+    {
+        if (is_string($raw)) {
+            $parts = array_map('trim', explode(',', $raw));
+        } elseif (is_array($raw)) {
+            $parts = $raw;
+        } else {
+            return [];
+        }
+
+        $normalized = [];
+        $invalid = [];
+        foreach ($parts as $control) {
+            if (!is_scalar($control)) {
+                $invalid[] = '[non-scalar]';
+                continue;
+            }
+            $control = trim((string)$control);
+            if ($control === '') {
+                continue;
+            }
+            $nc = $this->normalizeControlId($control);
+            if ($nc === '') {
+                $invalid[] = $control;
+            } else {
+                $normalized[] = $nc;
+            }
+        }
+
+        if ($invalid) {
+            throw new \RuntimeException(
+                'Invalid control id(s): ' . implode(', ', $invalid) . "\nExpected format: MB-C01 or MB-01"
+            );
+        }
+
+        return array_values(array_unique($normalized));
+    }
+
+    private function resolveProjectConfigPath(string $config, string $projectPath): string
+    {
+        if ($config === '') {
+            return $config;
+        }
+        if ($config[0] === '/' || (bool)preg_match('/^[A-Za-z]:[\\\\\\/]/', $config)) {
+            return $config;
+        }
+
+        $cwdCandidate = getcwd() . DIRECTORY_SEPARATOR . $config;
+        if (is_file($cwdCandidate)) {
+            return $cwdCandidate;
+        }
+
+        return rtrim($projectPath, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . $config;
     }
 
     private function sevOrder(string $sev): int

@@ -115,6 +115,64 @@ Contact: support@magebean.com
 | `--cve-data` | Path to CVE bundle (optional) | none |
 | `--rules` | Run only selected rule IDs | all |
 | `--exclude-rules` | Exclude selected rule IDs | none |
+| `--config` | Project policy file (`.magebean.json` auto-detected in Magento root) | auto |
+
+### Project-specific policy
+
+Create `.magebean.json` in the Magento root to tune the baseline per project without changing the CLI:
+
+```json
+{
+  "include_controls": ["MB-C01", "MB-C02", "MB-C03"],
+  "exclude_rules": ["MB-R005"],
+  "override_rules": {
+    "MB-R002": {
+      "severity": "critical",
+      "checks": [
+        {
+          "name": "file_mode_max",
+          "args": {
+            "file": "app/etc/env.php",
+            "max_octal": "0600"
+          }
+        }
+      ]
+    }
+  },
+  "rules": [
+    {
+      "id": "PROJECT-R001",
+      "title": "No project debug module references",
+      "control": "PROJECT",
+      "severity": "high",
+      "op": "all",
+      "checks": [
+        {
+          "name": "code_grep",
+          "args": {
+            "paths": ["app/code"],
+            "must_not_match": ["DebugToolbar"]
+          }
+        }
+      ],
+      "messages": {
+        "pass": "No debug module references detected.",
+        "fail": "Debug module reference detected in project code."
+      }
+    }
+  ]
+}
+```
+
+You can also attach external JSON rule packs:
+
+```json
+{
+  "rule_packs": ["security-rules"]
+}
+```
+
+YAML configs are accepted when the PHP `yaml` extension is installed; JSON is the portable PHAR-safe format.
 
 ---
 

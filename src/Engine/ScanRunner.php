@@ -4,37 +4,29 @@ declare(strict_types=1);
 
 namespace Magebean\Engine;
 
-use Magebean\Engine\Checks\{FilesystemCheck, PhpConfigCheck, ComposerCheck, MagentoCheck, HttpCheck, CodeSearchCheck, CronCheck, WebServerConfigCheck, GitHistoryCheck, SystemCheck};
+use Magebean\Engine\Checks\CheckRegistry;
 
 final class ScanRunner
 {
     private Context $ctx;
     private array $pack;
+    private CheckRegistry $registry;
     /** @var null|callable(array): void */
     private $progressCallback;
 
-    public function __construct(Context $ctx, array $pack, ?callable $progressCallback = null)
+    public function __construct(Context $ctx, array $pack, ?callable $progressCallback = null, ?CheckRegistry $registry = null)
     {
         $this->ctx = $ctx;
         $this->pack = $pack;
+        $this->registry = $registry ?? CheckRegistry::fromContext($ctx);
         $this->progressCallback = $progressCallback;
     }
 
     private function evalCheckWithEvidence(
         string $name,
-        array $args,
-        FilesystemCheck $fs,
-        PhpConfigCheck $phpc,
-        ComposerCheck $comp,
-        MagentoCheck $mage,
-        HttpCheck $http,
-        CodeSearchCheck $code,
-        WebServerConfigCheck $web,
-        GitHistoryCheck $git,
-        CronCheck $cron,
-        SystemCheck $sys
+        array $args
     ): array {
-        $res = $this->evalCheck($name, $args, $fs, $phpc, $comp, $mage, $http, $code, $web, $git, $cron, $sys);
+        $res = $this->registry->run($name, $args);
         if (!is_array($res)) {
             $res = [false, 'Unknown check: ' . $name];
         }
@@ -55,17 +47,6 @@ final class ScanRunner
         $failed = 0;
         $plannedRules = is_array($this->pack['rules'] ?? null) ? count($this->pack['rules']) : 0;
         $executedRules = 0;
-
-        $fs  = new FilesystemCheck($this->ctx);
-        $phpc = new PhpConfigCheck($this->ctx);
-        $comp = new ComposerCheck($this->ctx);
-        $mage = new MagentoCheck($this->ctx);
-        $http = new HttpCheck($this->ctx);
-        $code = new CodeSearchCheck($this->ctx);
-        $web  = new WebServerConfigCheck($this->ctx);
-        $git  = new GitHistoryCheck($this->ctx);
-        $cron  = new CronCheck($this->ctx);
-        $sys  = new SystemCheck($this->ctx);
 
         foreach ($this->pack['rules'] as $rule) {
             $this->notifyProgress([
@@ -93,17 +74,7 @@ final class ScanRunner
 
                 [$cok, $msg, $ev] = $this->evalCheckWithEvidence(
                     $name,
-                    $args,
-                    $fs,
-                    $phpc,
-                    $comp,
-                    $mage,
-                    $http,
-                    $code,
-                    $web,
-                    $git,
-                    $cron,
-                    $sys
+                    $args
                 );
 
                 $details[] = [$name, $msg, $cok];
@@ -216,13 +187,9 @@ final class ScanRunner
             if (($f['status'] ?? '') === 'UNKNOWN') $unknown++;
         }
         // Lấy transport counters từ HttpCheck nếu có (để tính transport_success_percent ở ScanCommand)
-        $transportOk = 0;
-        $transportTotal = 0;
-        if (method_exists($http, 'getTransportCounts')) {
-            $tc = $http->getTransportCounts();
-            $transportOk    = (int)($tc['ok'] ?? 0);
-            $transportTotal = (int)($tc['total'] ?? 0);
-        }
+        $tc = $this->registry->transportCounts();
+        $transportOk    = (int)($tc['ok'] ?? 0);
+        $transportTotal = (int)($tc['total'] ?? 0);
 
         return [
             'summary'  => ['passed' => $passed, 'failed' => $failed, 'unknown' => $unknown, 'total' => count($findings)],
@@ -242,91 +209,5 @@ final class ScanRunner
         if (is_callable($this->progressCallback)) {
             ($this->progressCallback)($event);
         }
-    }
-
-    private function evalCheck(
-        string $name,
-        array $args,
-        FilesystemCheck $fs,
-        PhpConfigCheck $phpc,
-        ComposerCheck $comp,
-        MagentoCheck $mage,
-        HttpCheck $http,
-        CodeSearchCheck $code,
-        WebServerConfigCheck $web,
-        GitHistoryCheck $git,
-        CronCheck $cron,
-        SystemCheck $sys
-    ): array {
-
-        // 1) Đưa tất cả http_* về HttpCheck->dispatch()
-        if ($name === 'http_header') {
-            // backwards-compat nếu còn dùng stub này
-            return $http->stub($args);
-        }
-        if (str_starts_with($name, 'http_')) {
-            return $http->dispatch($name, $args);
-        }
-        if ($name === 'code_grep' || $name === 'text_grep' || $name === 'file_grep' || $name === 'grep') {
-            return $code->grep($args);
-        }
-
-        // 2) Các check non-HTTP giữ nguyên như cũ
-        return match ($name) {
-            // Filesystem
-            'fs_no_world_writable'                => $fs->noWorldWritable($args),
-            'file_mode_max'                       => $fs->fileModeMax($args),
-            'webroot_hygiene'                     => $fs->webrootHygiene($args),
-            'code_dirs_readonly'                  => $fs->codeDirsReadonly($args),
-            'no_directory_listing'                => $fs->noDirectoryListing($args),
-            'fs_exists'                           => $fs->fsExists($args),
-            'fs_mtime_max_age'                    => $fs->mtimeMaxAge($args),
-
-            // System / egress firewall
-            'system_egress_restricted'            => $sys->egressRestricted($args),
-
-
-            // PhpConfig (gom nhóm)
-            'php_array_exists',
-            'php_array_eq',
-            'php_array_neq',
-            'php_array_numeric_compare',
-            'php_array_absent' => $phpc->dispatch($name, $args),
-
-            // Composer / Magento / Code / Web / Git
-            
-            'magento_config'                      => $mage->stub($args),
-            'code_grep'                           => $code->grep($args),
-            'nginx_directive'                     => $web->nginxDirective($args),
-            'apache_htaccess_directive'           => $web->apacheDirective($args),
-
-            'composer_audit_offline'              => $comp->auditOffline($args),
-            'composer_core_advisories_offline'    => $comp->coreAdvisoriesOffline($args),
-            'composer_fix_version'                => $comp->fixVersion($args),
-            'composer_risk_surface_tag'           => $comp->riskSurfaceTag($args),
-            'composer_match_list'                 => $comp->matchList($args),
-            'composer_constraints_conflict'       => $comp->constraintsConflict($args),
-            'composer_yanked_offline'             => $comp->yankedOffline($args),
-            'composer_outdated_offline'           => $comp->outdatedOffline($args),
-            'composer_advisory_latency'           => $comp->advisoryLatency($args),
-            'composer_vendor_support_offline'     => $comp->vendorSupportOffline($args),
-            'composer_abandoned_offline'          => $comp->abandonedOffline($args),
-            'composer_release_recency_offline'    => $comp->releaseRecencyOffline($args),
-            'composer_repo_archived_offline'      => $comp->repoArchivedOffline($args),
-            'composer_risky_fork_offline'         => $comp->riskyForkOffline($args),
-            'composer_json_constraints'           => $comp->jsonConstraints($args),
-            'composer_json_kv'                    => $comp->jsonKv($args),
-            'composer_lock_integrity'             => $comp->lockIntegrity($args),
-            'php_array_key_search'                => $phpc->keySearch($args),
-
-            // Git scan
-            'git_history_scan'                    => $git->secretScan($args),
-
-            // Crontab check
-            'crontab_grep'                        => $cron->crontabGrep($args),
-
-            // 3) Unknown → trả UNKNOWN (null) thay vì false để khỏi “đè” rule thành FAIL
-            default => [null, '[UNKNOWN] Unknown check: ' . $name, []],
-        };
     }
 }
