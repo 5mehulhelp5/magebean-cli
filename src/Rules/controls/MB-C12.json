@@ -369,6 +369,184 @@
         "pass": "Integration docs mention least-privilege scopes and optional IP allowlisting.",
         "fail": "No ACL/scoping guidance found. Document least-privilege permissions and IP allowlists."
       }
+    },
+    {
+      "id": "MB-R082",
+      "title": "No PAN, CVV, or track data stored in database",
+      "control": "MB-C12",
+      "severity": "critical",
+      "op": "all",
+      "checks": [
+        {
+          "name": "code_grep",
+          "args": {
+            "paths": [
+              "app",
+              "app/code"
+            ],
+            "include_ext": [
+              "php",
+              "xml",
+              "sql",
+              "json"
+            ],
+            "must_not_match": [
+              "(?i)\\b(?:cc_number|card_number|credit_card_number|primary_account_number|pan|cvv|cvc|track1|track2|magnetic_stripe)\\b",
+              "(?i)(?:CREATE|ALTER)\\s+TABLE[^;]+\\b(?:cc|card|payment)[^;]+\\b(?:number|cvv|cvc|track|pan)\\b",
+              "(?i)(?:INSERT|UPDATE)\\s+[^;]+\\b(?:cc_number|card_number|cvv|cvc|track1|track2|pan)\\b"
+            ],
+            "max_results": 50
+          }
+        }
+      ],
+      "messages": {
+        "pass": "No database schema or code patterns indicating stored raw cardholder data were detected.",
+        "fail": "Potential raw cardholder data storage detected. Remove PAN/CVV/track storage and use tokenized payment references."
+      }
+    },
+    {
+      "id": "MB-R085",
+      "title": "Payment method scope detection",
+      "control": "MB-C12",
+      "severity": "high",
+      "op": "all",
+      "checks": [
+        {
+          "name": "code_grep",
+          "args": {
+            "paths": [
+              "app",
+              "app/design"
+            ],
+            "include_ext": [
+              "php",
+              "phtml",
+              "js",
+              "xml"
+            ],
+            "must_not_match": [
+              "(?i)\\b(?:direct.?post|raw.?card|card[_-]?number|cc[_-]?number|cvv|cvc)\\b",
+              "(?i)<field[^>]+id\\s*=\\s*['\\\"](?:cc_number|card_number|cvv|cvc)['\\\"]"
+            ],
+            "max_results": 50
+          }
+        }
+      ],
+      "messages": {
+        "pass": "No obvious direct raw-card payment scope patterns detected.",
+        "fail": "Payment method patterns may expand PCI scope. Prefer hosted redirect, hosted fields, or tokenized provider SDKs."
+      }
+    },
+    {
+      "id": "MB-R087",
+      "title": "Payment page script inventory maintained",
+      "control": "MB-C12",
+      "severity": "high",
+      "op": "any",
+      "checks": [
+        {
+          "name": "fs_exists",
+          "args": {
+            "path": ".magebean/payment-scripts.json"
+          }
+        },
+        {
+          "name": "fs_exists",
+          "args": {
+            "path": "docs/payment-script-inventory.md"
+          }
+        },
+        {
+          "name": "code_grep",
+          "args": {
+            "paths": [
+              "app/design",
+              "app/code"
+            ],
+            "include_ext": [
+              "xml",
+              "phtml",
+              "js"
+            ],
+            "must_match": [
+              "(?i)(checkout|payment).{0,120}<script|<script.{0,120}(checkout|payment)|csp_whitelist"
+            ],
+            "max_results": 20
+          }
+        }
+      ],
+      "messages": {
+        "pass": "Payment page script inventory or script source signals are present.",
+        "fail": "No payment page script inventory found. Maintain an approved inventory of scripts loaded on checkout/payment pages."
+      }
+    },
+    {
+      "id": "MB-R088",
+      "title": "Payment page script allowlist and integrity controls",
+      "control": "MB-C12",
+      "severity": "high",
+      "op": "any",
+      "checks": [
+        {
+          "name": "code_grep",
+          "args": {
+            "paths": [
+              "app",
+              "app/design"
+            ],
+            "include_ext": [
+              "xml",
+              "phtml",
+              "html",
+              "js"
+            ],
+            "must_match": [
+              "(?i)(integrity=|sha256-|nonce|csp_whitelist|script-src|report-uri|report-to)"
+            ],
+            "max_results": 20
+          }
+        },
+        {
+          "name": "fs_exists",
+          "args": {
+            "path": ".magebean/payment-script-integrity.json"
+          }
+        }
+      ],
+      "messages": {
+        "pass": "Payment page script allowlist or integrity controls are present.",
+        "fail": "No script allowlist or integrity controls found for payment pages. Add CSP allowlisting, SRI/hashes, nonces, or monitoring evidence."
+      }
+    },
+    {
+      "id": "MB-R092",
+      "title": "Payment webhook endpoint authentication hardening",
+      "control": "MB-C12",
+      "severity": "high",
+      "op": "all",
+      "checks": [
+        {
+          "name": "code_grep",
+          "args": {
+            "paths": [
+              "app/code"
+            ],
+            "include_ext": [
+              "php",
+              "xml"
+            ],
+            "must_not_match": [
+              "(?is)class\\s+\\w+.*?(?:Webhook|Callback|Ipn|Notification).*?function\\s+execute\\s*\\([^)]*\\)\\s*\\{(?:(?!hash_hmac|Signature|signature|webhook_secret|verify|validate|isValid|idempotency).){0,1800}\\b(?:invoice|capture|refund|payment|order|transaction)\\b",
+              "(?is)<route\\b[^>]*url\\s*=\\s*['\\\"][^'\\\"]*(?:webhook|callback|ipn|notification)[^'\\\"]*['\\\"][^>]*>\\s*<service[^>]+resource\\s*=\\s*['\\\"]anonymous['\\\"]"
+            ],
+            "max_results": 50
+          }
+        }
+      ],
+      "messages": {
+        "pass": "No unauthenticated payment webhook endpoint patterns detected.",
+        "fail": "Potential unauthenticated payment webhook/callback detected. Validate signatures, timestamps, replay windows, and idempotency."
+      }
     }
   ]
 }

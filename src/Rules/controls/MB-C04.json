@@ -150,6 +150,83 @@
                 "pass": "Session cookies are configured with Secure and HttpOnly flags.",
                 "fail": "Cookies lack Secure or HttpOnly flags. Enable them to protect against theft and XSS."
             }
+        },
+        {
+            "id": "MB-R089",
+            "title": "Checkout Content Security Policy enforced",
+            "control": "MB-C04",
+            "severity": "high",
+            "op": "any",
+            "checks": [
+                {
+                    "name": "http_csp_present_min",
+                    "args": {
+                        "paths": [
+                            "/checkout/",
+                            "/checkout"
+                        ],
+                        "timeout_ms": 8000
+                    }
+                },
+                {
+                    "name": "code_grep",
+                    "args": {
+                        "paths": [
+                            "app/code",
+                            "app/etc",
+                            "app/design"
+                        ],
+                        "include_ext": [
+                            "xml",
+                            "php",
+                            "phtml"
+                        ],
+                        "must_match": [
+                            "(?i)(content-security-policy|csp_whitelist|script-src|frame-src|connect-src|report-uri|report-to)"
+                        ],
+                        "max_results": 20
+                    }
+                }
+            ],
+            "messages": {
+                "pass": "Checkout CSP signals are present.",
+                "fail": "Checkout CSP could not be verified. Configure strict payment-page CSP and reporting directives."
+            }
+        },
+        {
+            "id": "MB-R096",
+            "title": "Security headers baseline enforced",
+            "control": "MB-C04",
+            "severity": "medium",
+            "op": "all",
+            "checks": [
+                {
+                    "name": "http_clickjacking_protection",
+                    "args": {
+                        "timeout_ms": 8000
+                    }
+                },
+                {
+                    "name": "http_csp_not_overly_permissive",
+                    "args": {
+                        "timeout_ms": 8000
+                    }
+                },
+                {
+                    "name": "http_header_in",
+                    "args": {
+                        "header": "x-content-type-options",
+                        "allowed": [
+                            "nosniff"
+                        ],
+                        "timeout_ms": 8000
+                    }
+                }
+            ],
+            "messages": {
+                "pass": "Baseline browser security headers are present.",
+                "fail": "Security header baseline is incomplete. Configure CSP/frame protection and X-Content-Type-Options."
+            }
         }
     ]
 }

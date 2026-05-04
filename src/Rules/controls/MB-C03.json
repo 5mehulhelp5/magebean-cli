@@ -462,6 +462,205 @@
         "pass": "Magento's built-in APIs are used for encryption and session management.",
         "fail": "Custom crypto/session code found. Use Magento Framework Encryption and Session APIs instead."
       }
+    },
+    {
+      "id": "MB-R086",
+      "title": "No raw card collection in Magento checkout",
+      "control": "MB-C03",
+      "severity": "critical",
+      "op": "all",
+      "checks": [
+        {
+          "name": "code_grep",
+          "args": {
+            "paths": [
+              "app",
+              "app/design"
+            ],
+            "include_ext": [
+              "php",
+              "phtml",
+              "js",
+              "html",
+              "xml"
+            ],
+            "must_not_match": [
+              "(?i)\\b(?:card[_-]?number|cc[_-]?number|creditcard|credit_card|pan|primary.?account.?number|cvv|cvc|card[_-]?security[_-]?code|expiry|exp_month|exp_year)\\b",
+              "(?i)<input[^>]+name\\s*=\\s*['\\\"][^'\\\"]*(?:card|cc|cvv|cvc)[^'\\\"]*['\\\"]"
+            ],
+            "max_results": 50
+          }
+        }
+      ],
+      "messages": {
+        "pass": "No raw card collection patterns detected in custom checkout code.",
+        "fail": "Raw card collection patterns detected. Use hosted payment fields, redirect flows, or tokenized provider SDKs."
+      }
+    },
+    {
+      "id": "MB-R094",
+      "title": "Authorization checks on custom controllers and APIs",
+      "control": "MB-C03",
+      "severity": "high",
+      "op": "all",
+      "checks": [
+        {
+          "name": "code_grep",
+          "args": {
+            "paths": [
+              "app/code"
+            ],
+            "include_ext": [
+              "php",
+              "xml"
+            ],
+            "must_not_match": [
+              "(?is)class\\s+\\w+.*?Controller.*?function\\s+execute\\s*\\([^)]*\\)\\s*\\{(?:(?!ADMIN_RESOURCE|_authorization|AuthorizationInterface|isAllowed|customerSession|isLoggedIn|getCustomerId).){0,1600}\\b(?:order|customer|invoice|shipment|creditmemo|download|export)\\b",
+              "(?is)<route\\b[^>]*url\\s*=\\s*['\\\"][^'\\\"]*(?:order|customer|invoice|export|download)[^'\\\"]*['\\\"][^>]*>\\s*<service[^>]+resource\\s*=\\s*['\\\"]anonymous['\\\"]"
+            ],
+            "max_results": 50
+          }
+        }
+      ],
+      "messages": {
+        "pass": "Custom controllers and APIs include authorization signals for sensitive workflows.",
+        "fail": "Potential missing authorization checks in custom controllers or APIs. Add ACL, ownership, or session authorization checks."
+      }
+    },
+    {
+      "id": "MB-R095",
+      "title": "GraphQL and API exposure minimized",
+      "control": "MB-C03",
+      "severity": "medium",
+      "op": "all",
+      "checks": [
+        {
+          "name": "code_grep",
+          "args": {
+            "paths": [
+              "app/code",
+              "app/etc"
+            ],
+            "include_ext": [
+              "xml",
+              "graphqls",
+              "php"
+            ],
+            "must_not_match": [
+              "(?is)<service[^>]+class\\s*=\\s*['\\\"][^'\\\"]*(?:Order|Customer|Payment|Invoice|Admin|Export)[^'\\\"]*['\\\"][^>]+resource\\s*=\\s*['\\\"]anonymous['\\\"]",
+              "(?i)\\b(?:customer|order|invoice|payment|admin|export)\\w*\\s*:\\s*\\w+\\s*@resolver"
+            ],
+            "max_results": 50
+          }
+        },
+        {
+          "name": "http_graphql_introspection_disabled",
+          "args": {
+            "timeout_ms": 8000
+          }
+        }
+      ],
+      "messages": {
+        "pass": "No high-risk anonymous API exposure or GraphQL introspection signals detected.",
+        "fail": "Potentially excessive API or GraphQL exposure detected. Restrict anonymous access and disable production introspection."
+      }
+    },
+    {
+      "id": "MB-R097",
+      "title": "Secrets are not hardcoded in custom code",
+      "control": "MB-C03",
+      "severity": "high",
+      "op": "all",
+      "checks": [
+        {
+          "name": "code_grep",
+          "args": {
+            "paths": [
+              "app",
+              "app/design"
+            ],
+            "include_ext": [
+              "php",
+              "phtml",
+              "js",
+              "xml",
+              "json",
+              "env",
+              "dist"
+            ],
+            "must_not_match": [
+              "(?i)\\b(?:api[_-]?key|secret|token|private[_-]?key|password|client[_-]?secret)\\b\\s*[:=]\\s*['\\\"][A-Za-z0-9_\\-\\/.+=]{16,}['\\\"]",
+              "-----BEGIN (?:RSA |EC |OPENSSH |)PRIVATE KEY-----"
+            ],
+            "max_results": 50
+          }
+        }
+      ],
+      "messages": {
+        "pass": "No hardcoded secrets detected in custom code paths.",
+        "fail": "Hardcoded secret patterns detected. Move secrets to env.php, environment variables, or a secret manager and rotate exposed values."
+      }
+    },
+    {
+      "id": "MB-R098",
+      "title": "Unsafe XML parsing disabled",
+      "control": "MB-C03",
+      "severity": "high",
+      "op": "all",
+      "checks": [
+        {
+          "name": "code_grep",
+          "args": {
+            "paths": [
+              "app"
+            ],
+            "include_ext": [
+              "php"
+            ],
+            "must_not_match": [
+              "\\bLIBXML_(?:NOENT|DTDLOAD)\\b",
+              "libxml_disable_entity_loader\\s*\\(\\s*false\\s*\\)",
+              "simplexml_load_(?:string|file)\\s*\\([^;]*(?:LIBXML_NOENT|LIBXML_DTDLOAD)",
+              "DOMDocument\\s*\\([^)]*\\)\\s*;[^\\n]{0,200}->\\s*loadXML\\s*\\([^;]*(?:LIBXML_NOENT|LIBXML_DTDLOAD)"
+            ],
+            "max_results": 50
+          }
+        }
+      ],
+      "messages": {
+        "pass": "No unsafe XML entity expansion patterns detected.",
+        "fail": "Unsafe XML parsing patterns detected. Disable external entity loading and avoid entity expansion for untrusted XML."
+      }
+    },
+    {
+      "id": "MB-R099",
+      "title": "File download and export endpoints require authorization",
+      "control": "MB-C03",
+      "severity": "high",
+      "op": "all",
+      "checks": [
+        {
+          "name": "code_grep",
+          "args": {
+            "paths": [
+              "app/code"
+            ],
+            "include_ext": [
+              "php",
+              "xml"
+            ],
+            "must_not_match": [
+              "(?is)class\\s+\\w+.*?Controller.*?function\\s+execute\\s*\\([^)]*\\)\\s*\\{(?:(?!ADMIN_RESOURCE|_authorization|AuthorizationInterface|isAllowed|customerSession|isLoggedIn|getCustomerId).){0,1600}\\b(?:FileFactory|create\\s*\\(|download|export|csv|pdf)\\b",
+              "(?is)<route\\b[^>]*url\\s*=\\s*['\\\"][^'\\\"]*(?:download|export|invoice|report)[^'\\\"]*['\\\"][^>]*>\\s*<service[^>]+resource\\s*=\\s*['\\\"]anonymous['\\\"]"
+            ],
+            "max_results": 50
+          }
+        }
+      ],
+      "messages": {
+        "pass": "No unprotected download or export endpoint patterns detected.",
+        "fail": "Potential unprotected download/export endpoint detected. Add ACL, session, ownership, or signed URL validation."
+      }
     }
   ]
 }

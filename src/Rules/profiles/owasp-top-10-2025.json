@@ -73,6 +73,14 @@
     { "id": "MB-R078", "categories": ["A02"] },
     { "id": "MB-R079", "categories": ["A02"] },
     { "id": "MB-R080", "categories": ["A02"] },
-    { "id": "MB-R081", "categories": ["A02"] }
+    { "id": "MB-R081", "categories": ["A02"] },
+    { "id": "MB-R089", "categories": ["A05"] },
+    { "id": "MB-R091", "categories": ["A05", "A08"] },
+    { "id": "MB-R094", "categories": ["A01"] },
+    { "id": "MB-R095", "categories": ["A01", "A05"] },
+    { "id": "MB-R096", "categories": ["A05"] },
+    { "id": "MB-R097", "categories": ["A02", "A05"] },
+    { "id": "MB-R098", "categories": ["A05", "A08"] },
+    { "id": "MB-R099", "categories": ["A01", "A05"] }
   ]
 }

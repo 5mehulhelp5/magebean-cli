@@ -104,6 +104,116 @@
         "pass": "No PII such as passwords, tokens, or card data is logged.",
         "fail": "Sensitive PII is logged. Remove logging of passwords, tokens, and card details."
       }
+    },
+    {
+      "id": "MB-R084",
+      "title": "No cardholder data in application logs",
+      "control": "MB-C07",
+      "severity": "critical",
+      "op": "all",
+      "checks": [
+        {
+          "name": "code_grep",
+          "args": {
+            "paths": [
+              "var/log",
+              "var/report",
+              "app"
+            ],
+            "include_ext": [
+              "log",
+              "txt",
+              "json",
+              "php"
+            ],
+            "must_not_match": [
+              "(?i)\\b(?:cvv|cvc|card.?security.?code|track\\s*[12]|magnetic.?stripe)\\b",
+              "\\b(?:4[0-9]{12}(?:[0-9]{3})?|5[1-5][0-9]{14}|3[47][0-9]{13}|6(?:011|5[0-9]{2})[0-9]{12})\\b"
+            ],
+            "max_results": 50
+          }
+        }
+      ],
+      "messages": {
+        "pass": "No cardholder data patterns detected in application logs or logging code.",
+        "fail": "Potential cardholder data found in logs or logging code. Remove raw payment data and add masking filters."
+      }
+    },
+    {
+      "id": "MB-R090",
+      "title": "Payment page tamper monitoring readiness",
+      "control": "MB-C07",
+      "severity": "high",
+      "op": "any",
+      "checks": [
+        {
+          "name": "fs_exists",
+          "args": {
+            "path": ".magebean/payment-page-monitoring.json"
+          }
+        },
+        {
+          "name": "fs_exists",
+          "args": {
+            "path": "docs/payment-page-monitoring.md"
+          }
+        },
+        {
+          "name": "code_grep",
+          "args": {
+            "paths": [
+              "app",
+              "app/etc",
+              "app/design"
+            ],
+            "include_ext": [
+              "xml",
+              "php",
+              "phtml",
+              "js"
+            ],
+            "must_match": [
+              "(?i)(report-uri|report-to|securitypolicyviolation|integrity=|sha256-|checksum|file.?integrity|tamper)"
+            ],
+            "max_results": 20
+          }
+        }
+      ],
+      "messages": {
+        "pass": "Payment page tamper monitoring or reporting signals are present.",
+        "fail": "No payment page tamper monitoring evidence found. Add CSP reporting, file integrity monitoring, or documented monitoring."
+      }
+    },
+    {
+      "id": "MB-R093",
+      "title": "PCI manual evidence checklist present",
+      "control": "MB-C07",
+      "severity": "low",
+      "op": "any",
+      "checks": [
+        {
+          "name": "fs_exists",
+          "args": {
+            "path": ".magebean/pci-evidence.md"
+          }
+        },
+        {
+          "name": "fs_exists",
+          "args": {
+            "path": "docs/pci-evidence.md"
+          }
+        },
+        {
+          "name": "fs_exists",
+          "args": {
+            "path": "SECURITY.md"
+          }
+        }
+      ],
+      "messages": {
+        "pass": "PCI evidence documentation is present.",
+        "fail": "No PCI evidence checklist found. Add a project evidence file covering payment scope, SAQ notes, access review, incident response, and vendor responsibilities."
+      }
     }
   ]
 }
