@@ -458,6 +458,51 @@ final class MagentoCheck
         return [false, 'Admin login CAPTCHA/rate-limit protection is weak or missing', $evidence];
     }
 
+    public function httpsEnforced(array $args): array
+    {
+        $files = $args['files'] ?? ['app/etc/config.php', 'app/etc/env.php'];
+        if (!is_array($files)) {
+            $files = ['app/etc/config.php', 'app/etc/env.php'];
+        }
+        $timeoutMs = (int)($args['timeout_ms'] ?? 8000);
+
+        [$adminPath, $adminValue, $adminFile] = $this->firstConfigValue($files, $this->httpsConfigPaths('use_in_adminhtml'));
+        [$frontPath, $frontValue, $frontFile] = $this->firstConfigValue($files, $this->httpsConfigPaths('use_in_frontend'));
+        [$basePath, $baseValue, $baseFile] = $this->firstConfigValue($files, $this->httpsConfigPaths('base_url'));
+
+        $adminOk = $this->truthy($adminValue);
+        $frontOk = $this->truthy($frontValue);
+        $secureBaseOk = is_string($baseValue) && preg_match('~^https://~i', trim($baseValue)) === 1;
+
+        $redirectEvidence = null;
+        $redirectOk = null;
+        $base = $this->baseUrl();
+        if ($base !== '') {
+            $redirectEvidence = $this->httpsRedirectEvidence($base, $timeoutMs);
+            $redirectOk = (bool)($redirectEvidence['ok'] ?? false);
+        }
+
+        $evidence = [
+            'config' => [
+                'admin' => ['file' => $adminFile, 'path' => $adminPath, 'value' => $adminValue, 'ok' => $adminOk],
+                'frontend' => ['file' => $frontFile, 'path' => $frontPath, 'value' => $frontValue, 'ok' => $frontOk],
+                'secure_base_url' => ['file' => $baseFile, 'path' => $basePath, 'value' => $baseValue, 'ok' => $secureBaseOk],
+            ],
+            'http_redirect' => $redirectEvidence,
+        ];
+
+        $configOk = $adminOk && $frontOk && $secureBaseOk;
+        if ($configOk && ($redirectOk === null || $redirectOk === true)) {
+            return [true, 'HTTPS is enforced by Magento secure URL config' . ($redirectOk === true ? ' and HTTP redirect' : ''), $evidence];
+        }
+
+        if (!$configOk) {
+            return [false, 'Magento secure URL configuration is incomplete', $evidence];
+        }
+
+        return [false, 'HTTP entrypoint does not redirect to HTTPS', $evidence];
+    }
+
     private function loadArray(string $relativeFile): array
     {
         $file = $this->ctx->abs($relativeFile);
@@ -534,6 +579,63 @@ final class MagentoCheck
     private function truthy(mixed $value): bool
     {
         return $value === 1 || $value === true || $value === '1' || $value === 'true' || $value === 'yes';
+    }
+
+    private function httpsConfigPaths(string $key): array
+    {
+        return array_values(array_unique([
+            'system.default.web.secure.' . $key,
+            'system/default/web/secure/' . $key,
+            'web.secure.' . $key,
+            'web/secure/' . $key,
+            'default.web.secure.' . $key,
+            'default/web/secure/' . $key,
+        ]));
+    }
+
+    private function firstConfigValue(array $files, array $paths): array
+    {
+        foreach ($files as $file) {
+            if (!is_scalar($file)) {
+                continue;
+            }
+            $relativeFile = (string)$file;
+            $arr = $this->loadArray($relativeFile);
+            if (isset($arr['__ERROR__'])) {
+                continue;
+            }
+            [$path, $value] = $this->firstExistingPath($arr, $paths);
+            if ($path !== null) {
+                return [$path, $value, $relativeFile];
+            }
+        }
+
+        return [null, null, null];
+    }
+
+    private function httpsRedirectEvidence(string $base, int $timeoutMs): array
+    {
+        $http = preg_replace('~^https://~i', 'http://', $base);
+        if (!preg_match('~^http://~i', (string)$http)) {
+            $http = 'http://' . preg_replace('~^https?://~i', '', $base);
+        }
+
+        [$ok, $msg, $ev] = $this->fetch((string)$http, 'GET', [], $timeoutMs, true);
+        if ($ok === null || $ok === false) {
+            return ['ok' => false, 'request_url' => $http, 'message' => $msg, 'evidence' => $ev];
+        }
+
+        $finalUrl = (string)($ev['final_url'] ?? '');
+        $sameHost = parse_url((string)$http, PHP_URL_HOST) === parse_url($finalUrl, PHP_URL_HOST);
+        $redirectOk = preg_match('~^https://~i', $finalUrl) === 1 && $sameHost;
+
+        return [
+            'ok' => $redirectOk,
+            'request_url' => $http,
+            'final_url' => $finalUrl,
+            'status' => $ev['status'] ?? null,
+            'same_host' => $sameHost,
+        ];
     }
 
     private function baseUrl(): string

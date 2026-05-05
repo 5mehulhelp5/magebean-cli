@@ -63,7 +63,7 @@
       "op": "all",
       "checks": [
         {
-          "name": "code_grep",
+          "name": "code_unserialize_safety",
           "args": {
             "paths": [
               "app"
@@ -107,23 +107,17 @@
       "id": "MB-R016",
       "title": "SSRF protections present",
       "control": "MB-C03",
-      "severity": "medium",
+      "severity": "high",
       "op": "all",
       "checks": [
         {
-          "name": "code_grep",
+          "name": "code_ssrf_safeguards",
           "args": {
             "paths": [
               "app"
             ],
             "include_ext": [
               "php"
-            ],
-            "must_not_match": [
-              "(?i)\\bcurl_init\\s*\\(\\s*\\$?_?(GET|POST|REQUEST)\\b",
-              "(?i)\\bcurl_setopt\\s*\\([^;\\n]*CURLOPT_URL[^;\\n]*\\$?_?(GET|POST|REQUEST)\\b",
-              "(?i)\\b(file_get_contents|fopen)\\s*\\(\\s*\\$?_?(GET|POST|REQUEST)\\b",
-              "(?i)\\b(fsockopen|stream_socket_client)\\s*\\(\\s*\\$?_?(GET|POST|REQUEST)\\b"
             ]
           }
         }
@@ -148,9 +142,6 @@
             ],
             "include_ext": [
               "php"
-            ],
-            "must_not_match": [
-              "(?<!->)(?<!::)(?<!function[ \\t])\\b\\\\?unserialize\\s*\\("
             ]
           }
         }
@@ -162,202 +153,123 @@
     },
     {
       "id": "MB-R018",
-      "title": "Command execution functions are not used",
+      "title": "Command execution is guarded",
       "control": "MB-C03",
-      "severity": "high",
+      "severity": "critical",
       "op": "all",
       "checks": [
         {
-          "name": "code_grep",
+          "name": "code_command_execution_safety",
           "args": {
             "paths": [
               "app"
             ],
             "include_ext": [
               "php"
-            ],
-            "must_not_match": [
-              "(?<!->)(?<!::)\\b\\\\?(?:exec|shell_exec|system)\\s*\\("
             ]
           }
         }
       ],
       "messages": {
-        "pass": "No unsafe command execution functions detected.",
-        "fail": "exec(), shell_exec(), or system() calls found. Avoid OS command execution."
+        "pass": "Command execution sinks are absent or guarded by escaping/allow-lists.",
+        "fail": "Unsafe command execution detected. Avoid shell execution or enforce strict allow-lists and escaping."
       }
     },
     {
       "id": "MB-R019",
       "title": "No eval/assert/dynamic execution",
       "control": "MB-C03",
-      "severity": "high",
+      "severity": "critical",
       "op": "all",
       "checks": [
         {
-          "name": "code_grep",
+          "name": "code_dynamic_execution_safety",
           "args": {
             "paths": [
               "app"
             ],
             "include_ext": [
               "php"
-            ],
-            "must_not_match": [
-              "eval\\(",
-              "assert\\(",
-              "create_function\\("
             ]
           }
         }
       ],
       "messages": {
-        "pass": "No dangerous dynamic execution functions detected.",
-        "fail": "Use of eval/assert/create_function detected. Remove or refactor these functions."
+        "pass": "No unsafe dynamic execution patterns detected.",
+        "fail": "Unsafe eval/assert/dynamic include/callable execution detected. Remove or refactor these patterns."
       }
     },
     {
       "id": "MB-R020",
-      "title": "Path traversal protections (sanitization present)",
+      "title": "Path traversal protections",
       "control": "MB-C03",
-      "severity": "medium",
+      "severity": "high",
       "op": "all",
       "checks": [
         {
-          "name": "code_grep",
+          "name": "code_path_traversal_safety",
           "args": {
             "paths": [
               "app"
             ],
             "include_ext": [
               "php"
-            ],
-            "must_not_match": [
-              "(?i)(?:file_get_contents|fopen|unlink|copy|rename|include|require|require_once)\\s*\\(\\s*\\$?_?(?:GET|POST|REQUEST|FILES)\\b(?![^;]*?(basename|realpath|resolvePath|DirectoryList))"
             ]
           }
         }
       ],
       "messages": {
-        "pass": "Path sanitization functions (realpath/basename) are present.",
-        "fail": "No path sanitization functions found. Add realpath() or basename() to prevent traversal."
+        "pass": "File path sinks are absent or guarded against traversal.",
+        "fail": "Potential path traversal sinks found. Normalize paths and enforce base-directory allow-lists."
       }
     },
     {
       "id": "MB-R021",
       "title": "Secure file upload handling",
       "control": "MB-C03",
-      "severity": "medium",
-      "op": "any",
+      "severity": "high",
+      "op": "all",
       "checks": [
         {
-          "name": "code_grep",
+          "name": "code_upload_safety",
           "args": {
             "paths": [
               "app"
             ],
             "include_ext": [
               "php"
-            ],
-            "must_not_match": [
-              "(?is)move_uploaded_file\\s*\\([^;\\n]*\\$_FILES[^;\\n]*\\)(?![^;\\n]{0,300}(?:finfo_(?:open|file)|mime_content_type|get(?:MimeType|ClientMimeType)|validateMime|pathinfo\\s*\\([^,]+,\\s*PATHINFO_BASENAME|PATHINFO_EXTENSION|setAllowedExtensions|checkMimeType|isValid|validateFile))"
-            ]
-          }
-        },
-        {
-          "name": "code_grep",
-          "args": {
-            "paths": [
-              "app"
-            ],
-            "include_ext": [
-              "php"
-            ],
-            "must_not_match": [
-              "(?is)\\$_FILES\\s*\\[[^\\]]+\\]\\s*\\[\\s*['\\\"]tmp_name['\\\"]\\s*\\][^;\\n]{0,200}\\b(?:copy|rename|file_put_contents|fopen)\\s*\\([^;\\n]*\\)(?![^;\\n]{0,300}(?:finfo_(?:open|file)|mime_content_type|get(?:MimeType|ClientMimeType)|validateMime|pathinfo\\s*\\([^,]+,\\s*PATHINFO_BASENAME|PATHINFO_EXTENSION|setAllowedExtensions|checkMimeType|isValid|validateFile))"
-            ]
-          }
-        },
-        {
-          "name": "code_grep",
-          "optional": true,
-          "args": {
-            "paths": [
-              "app"
-            ],
-            "include_ext": [
-              "php"
-            ],
-            "must_match": [
-              "(?i)finfo_(?:open|file)|mime_content_type|get(?:MimeType|ClientMimeType)|validateMime|pathinfo\\s*\\([^,]+,\\s*PATHINFO_(?:BASENAME|EXTENSION)|setAllowedExtensions|checkMimeType|isValid|validateFile|\\\\Magento\\\\Framework\\\\File\\\\Uploader|\\\\Magento\\\\MediaStorage\\\\Model\\\\File\\\\Uploader"
             ]
           }
         }
       ],
       "messages": {
-        "pass": "No unsafe file upload flows detected (user file is validated or uploads not used).",
-        "fail": "Potential unsafe upload: user file moved/stored without nearby MIME/extension validation."
+        "pass": "Upload flows are absent or include validation and storage safeguards.",
+        "fail": "Potential unsafe upload flow. Validate MIME type, extension, size, and destination before storing files."
       }
     },
     {
       "id": "MB-R022",
       "title": "Escaping for JS context",
       "control": "MB-C03",
-      "severity": "low",
-      "op": "any",
+      "severity": "high",
+      "op": "all",
       "checks": [
         {
-          "name": "code_grep",
+          "name": "code_js_context_escaping",
           "args": {
             "paths": [
-              "app/design"
+              "app"
             ],
             "include_ext": [
               "phtml",
               "html"
-            ],
-            "must_not_match": [
-              "(?is)<script[^>]*>[\\s\\S]*?<\\?=\\s*(?![^?]*?(?:escapeJs|json_encode)\\s*\\()[\\s\\S]*?\\?>[\\s\\S]*?<\\/script>"
-            ]
-          }
-        },
-        {
-          "name": "code_grep",
-          "args": {
-            "paths": [
-              "app/design"
-            ],
-            "include_ext": [
-              "phtml",
-              "html"
-            ],
-            "must_not_match": [
-              "(?is)on[a-z]+\\s*=\\s*['\\\"][^'\\\"]*<\\?=\\s*(?![^?]*?(?:escapeJs|json_encode)\\s*\\()[\\s\\S]*?\\?>[^'\\\"]*['\\\"]"
-            ]
-          }
-        },
-        {
-          "name": "code_grep",
-          "optional": true,
-          "args": {
-            "paths": [
-              "app/design"
-            ],
-            "include_ext": [
-              "phtml",
-              "html",
-              "js"
-            ],
-            "must_match": [
-              "(?:(?:->|::)\\s*)?escapeJs\\s*\\(",
-              "json_encode\\s*\\("
             ]
           }
         }
       ],
       "messages": {
-        "pass": "No unescaped dynamic PHP output detected in JavaScript context.",
-        "fail": "Unescaped PHP output found in JavaScript context. Use escapeJs() or json_encode()."
+        "pass": "JavaScript-context PHP output is escaped or encoded.",
+        "fail": "Unescaped PHP output found in JavaScript context. Use escapeJs(), escapeJsQuote(), or JSON encoding."
       }
     },
     {
@@ -365,43 +277,23 @@
       "title": "Use CSPRNG; avoid weak PRNG",
       "control": "MB-C03",
       "severity": "high",
-      "op": "any",
+      "op": "all",
       "checks": [
         {
-          "name": "code_grep",
+          "name": "code_csprng_safety",
           "args": {
             "paths": [
               "app"
             ],
             "include_ext": [
               "php"
-            ],
-            "must_not_match": [
-              "(?i)\\b(token|otp|one.?time.?password|password|passcode|reset|nonce|secret|api[_-]?key|key|salt|verify|activation|verification.?code|auth.?code)\\b[^\\n;\\)]{0,120}\\b(?:rand|mt_rand|array_rand|shuffle|str_shuffle|uniqid)\\s*\\(",
-              "(?i)\\b(?:rand|mt_rand|array_rand|shuffle|str_shuffle|uniqid)\\s*\\([^\\n;\\)]{0,120}\\b(token|otp|one.?time.?password|password|passcode|reset|nonce|secret|api[_-]?key|key|salt|verify|activation|verification.?code|auth.?code)\\b"
-            ]
-          }
-        },
-        {
-          "name": "code_grep",
-          "optional": true,
-          "args": {
-            "paths": [
-              "app"
-            ],
-            "include_ext": [
-              "php"
-            ],
-            "must_match": [
-              "(?i)\\b(token|otp|one.?time.?password|password|passcode|reset|nonce|secret|api[_-]?key|key|salt|verify|activation|verification.?code|auth.?code)\\b[^\\n;\\)]{0,120}\\b(?:random_int|random_bytes|openssl_random_pseudo_bytes)\\s*\\(",
-              "(?i)\\b(?:random_int|random_bytes|openssl_random_pseudo_bytes)\\s*\\([^\\n;\\)]{0,120}\\b(token|otp|one.?time.?password|password|passcode|reset|nonce|secret|api[_-]?key|key|salt|verify|activation|verification.?code|auth.?code)\\b"
             ]
           }
         }
       ],
       "messages": {
-        "pass": "No weak PRNG detected near security-sensitive code (or no such code present).",
-        "fail": "Weak PRNG (rand/mt_rand/array_rand/uniqid/shuffle) used near security-sensitive code. Use random_int/random_bytes."
+        "pass": "No weak PRNG detected in security-sensitive randomness.",
+        "fail": "Weak PRNG used in security-sensitive context. Use random_int() or random_bytes()."
       }
     },
     {
@@ -412,25 +304,20 @@
       "op": "all",
       "checks": [
         {
-          "name": "code_grep",
+          "name": "code_sensitive_logging",
           "args": {
             "paths": [
               "app"
             ],
             "include_ext": [
               "php"
-            ],
-            "must_not_match": [
-              "logger->(info|debug|notice)\\([^)]*password",
-              "logger->(info|debug|notice)\\([^)]*Authorization",
-              "logger->(info|debug|notice)\\([^)]*(card_number|cvv)"
             ]
           }
         }
       ],
       "messages": {
-        "pass": "No sensitive data (passwords, tokens, card details) logged in code.",
-        "fail": "Sensitive data logging detected. Remove logs containing passwords, tokens, or card information."
+        "pass": "No raw sensitive data logging detected.",
+        "fail": "Sensitive data logging detected. Redact passwords, tokens, authorization headers, cookies, and payment data before logging."
       }
     },
     {
@@ -441,26 +328,20 @@
       "op": "all",
       "checks": [
         {
-          "name": "code_grep",
+          "name": "code_magento_api_crypto_session",
           "args": {
             "paths": [
               "app"
             ],
             "include_ext": [
               "php"
-            ],
-            "must_not_match": [
-              "session_start\\(",
-              "\\$_SESSION\\[",
-              "openssl_(?:encrypt|decrypt)\\(",
-              "mcrypt_"
             ]
           }
         }
       ],
       "messages": {
-        "pass": "Magento's built-in APIs are used for encryption and session management.",
-        "fail": "Custom crypto/session code found. Use Magento Framework Encryption and Session APIs instead."
+        "pass": "Magento crypto and session APIs are used.",
+        "fail": "Raw crypto/session API usage found. Use Magento Framework Encryption, Cookie, and Session APIs instead."
       }
     },
     {

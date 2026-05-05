@@ -204,21 +204,24 @@ final class HttpCheck
             $http = 'http://' . preg_replace('~^https?://~i', '', $base);
         }
 
-        [$ok, $msg, $ev] = $this->fetch($http, 'GET', [], (int)($args['timeout_ms'] ?? 8000), false);
+        [$ok, $msg, $ev] = $this->fetch($http, 'GET', [], (int)($args['timeout_ms'] ?? 8000), true);
         if ($ok === null) return [null, $msg, $ev];
         if (!$ok) return [false, $msg, $ev];
 
         $status  = (int)($ev['status'] ?? 0);
         $headers = array_change_key_case((array)($ev['headers'] ?? []), CASE_LOWER);
         $loc     = $this->hget($headers, 'location');
+        $finalUrl = (string)($ev['final_url'] ?? '');
 
-        $isRedirect = in_array($status, [301, 302, 307, 308], true) && stripos($loc, 'https://') === 0;
+        $sameHost = parse_url($http, PHP_URL_HOST) === parse_url($finalUrl, PHP_URL_HOST);
+        $isRedirect = preg_match('~^https://~i', $finalUrl) === 1 && $sameHost;
 
         $evidence = [
             'request_url' => $http,
             'status'      => $status,
             'location'    => $loc,
-            'final_url'   => $ev['final_url'] ?? null,
+            'final_url'   => $finalUrl,
+            'same_host'   => $sameHost,
         ];
 
         return [$isRedirect, $isRedirect ? 'HTTP redirected to HTTPS' : 'No HTTP→HTTPS redirect', $evidence];

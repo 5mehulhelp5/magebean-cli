@@ -41,6 +41,16 @@ final class CheckRegistry
         $registry->register('code_raw_sql', fn(array $args): array => $code->rawSql($args));
         $registry->register('code_phtml_escaped_output', fn(array $args): array => $code->phtmlEscapedOutput($args));
         $registry->register('code_csrf_form_key', fn(array $args): array => $code->csrfFormKey($args));
+        $registry->register('code_ssrf_safeguards', fn(array $args): array => $code->ssrfSafeguards($args));
+        $registry->register('code_unserialize_safety', fn(array $args): array => $code->unserializeSafety($args));
+        $registry->register('code_command_execution_safety', fn(array $args): array => $code->commandExecutionSafety($args));
+        $registry->register('code_dynamic_execution_safety', fn(array $args): array => $code->dynamicExecutionSafety($args));
+        $registry->register('code_path_traversal_safety', fn(array $args): array => $code->pathTraversalSafety($args));
+        $registry->register('code_upload_safety', fn(array $args): array => $code->uploadSafety($args));
+        $registry->register('code_js_context_escaping', fn(array $args): array => $code->jsContextEscaping($args));
+        $registry->register('code_csprng_safety', fn(array $args): array => $code->csprngSafety($args));
+        $registry->register('code_sensitive_logging', fn(array $args): array => $code->sensitiveLogging($args));
+        $registry->register('code_magento_api_crypto_session', fn(array $args): array => $code->magentoApiCryptoSession($args));
 
         $registry->register('fs_no_world_writable', fn(array $args): array => $fs->noWorldWritable($args));
         $registry->register('file_mode_max', fn(array $args): array => $fs->fileModeMax($args));
@@ -65,6 +75,7 @@ final class CheckRegistry
         $registry->register('magento_admin_session_timeout', fn(array $args): array => $mage->adminSessionTimeout($args));
         $registry->register('magento_admin_exposure_restricted', fn(array $args): array => $mage->adminExposureRestricted($args));
         $registry->register('magento_admin_captcha_or_rate_limit', fn(array $args): array => $mage->adminCaptchaOrRateLimit($args));
+        $registry->register('magento_https_enforced', fn(array $args): array => $mage->httpsEnforced($args));
         $registry->register('nginx_directive', fn(array $args): array => $web->nginxDirective($args));
         $registry->register('apache_htaccess_directive', fn(array $args): array => $web->apacheDirective($args));
 

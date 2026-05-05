@@ -7,27 +7,15 @@
             "title": "Force HTTPS in admin and storefront",
             "control": "MB-C04",
             "severity": "high",
-            "op": "any",
+            "op": "all",
             "checks": [
                 {
-                    "name": "php_array_eq",
+                    "name": "magento_https_enforced",
                     "args": {
-                        "file": "app/etc/env.php",
-                        "path": "system.default.web.secure.use_in_adminhtml",
-                        "equals": 1
-                    }
-                },
-                {
-                    "name": "php_array_eq",
-                    "args": {
-                        "file": "app/etc/env.php",
-                        "path": "system.default.web.secure.use_in_frontend",
-                        "equals": 1
-                    }
-                },
-                {
-                    "name": "http_force_https_redirect",
-                    "args": {
+                        "files": [
+                            "app/etc/config.php",
+                            "app/etc/env.php"
+                        ],
                         "timeout_ms": 8000
                     }
                 }
