@@ -503,6 +503,40 @@ final class MagentoCheck
         return [false, 'HTTP entrypoint does not redirect to HTTPS', $evidence];
     }
 
+    public function cookieFlagsSecure(array $args): array
+    {
+        $files = $args['files'] ?? ['app/etc/config.php', 'app/etc/env.php'];
+        if (!is_array($files)) {
+            $files = ['app/etc/config.php', 'app/etc/env.php'];
+        }
+        $allowedSameSite = $args['allowed_samesite'] ?? ['lax', 'strict'];
+        if (!is_array($allowedSameSite)) {
+            $allowedSameSite = ['lax', 'strict'];
+        }
+        $allowedSameSite = array_map(static fn(mixed $value): string => strtolower((string)$value), $allowedSameSite);
+
+        [$securePath, $secureValue, $secureFile] = $this->firstConfigValue($files, $this->cookieConfigPaths('secure'));
+        [$httpOnlyPath, $httpOnlyValue, $httpOnlyFile] = $this->firstConfigValue($files, $this->cookieConfigPaths('httponly'));
+        [$sameSitePath, $sameSiteValue, $sameSiteFile] = $this->firstConfigValue($files, $this->cookieConfigPaths('samesite'));
+
+        $secureOk = $this->truthy($secureValue);
+        $httpOnlyOk = $this->truthy($httpOnlyValue);
+        $sameSiteNormalized = strtolower(trim((string)$sameSiteValue));
+        $sameSiteOk = $sameSiteNormalized !== '' && in_array($sameSiteNormalized, $allowedSameSite, true);
+
+        $evidence = [
+            'secure' => ['file' => $secureFile, 'path' => $securePath, 'value' => $secureValue, 'ok' => $secureOk],
+            'httponly' => ['file' => $httpOnlyFile, 'path' => $httpOnlyPath, 'value' => $httpOnlyValue, 'ok' => $httpOnlyOk],
+            'samesite' => ['file' => $sameSiteFile, 'path' => $sameSitePath, 'value' => $sameSiteValue, 'allowed' => $allowedSameSite, 'ok' => $sameSiteOk],
+        ];
+
+        if ($secureOk && $httpOnlyOk && $sameSiteOk) {
+            return [true, 'Cookie Secure, HttpOnly, and SameSite config are enabled', $evidence];
+        }
+
+        return [false, 'Cookie Secure, HttpOnly, or SameSite config is incomplete', $evidence];
+    }
+
     private function loadArray(string $relativeFile): array
     {
         $file = $this->ctx->abs($relativeFile);
@@ -590,6 +624,23 @@ final class MagentoCheck
             'web/secure/' . $key,
             'default.web.secure.' . $key,
             'default/web/secure/' . $key,
+        ]));
+    }
+
+    private function cookieConfigPaths(string $key): array
+    {
+        $sessionKey = $key === 'samesite' ? 'samesite' : $key;
+        $webCookieKey = $key === 'httponly' ? 'cookie_httponly' : ($key === 'secure' ? 'cookie_secure' : 'cookie_samesite');
+
+        return array_values(array_unique([
+            'session.cookie.' . $sessionKey,
+            'session/cookie/' . $sessionKey,
+            'system.default.session.cookie.' . $sessionKey,
+            'system/default/session/cookie/' . $sessionKey,
+            'system.default.web.cookie.' . $webCookieKey,
+            'system/default/web/cookie/' . $webCookieKey,
+            'web.cookie.' . $webCookieKey,
+            'web/cookie/' . $webCookieKey,
         ]));
     }
 

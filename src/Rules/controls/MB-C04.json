@@ -38,6 +38,17 @@
                         "min_max_age": 15552000,
                         "timeout_ms": 8000
                     }
+                },
+                {
+                    "name": "webserver_hsts_config",
+                    "args": {
+                        "files": [
+                            "nginx.conf",
+                            "pub/.htaccess",
+                            ".htaccess"
+                        ],
+                        "min_max_age": 15552000
+                    }
                 }
             ],
             "messages": {
@@ -69,13 +80,12 @@
             "title": "No mixed content (http://) in templates/assets",
             "control": "MB-C04",
             "severity": "medium",
-            "op": "any",
+            "op": "all",
             "checks": [
                 {
-                    "name": "code_grep",
+                    "name": "code_no_mixed_content",
                     "args": {
                         "paths": [
-                            "app/design",
                             "app"
                         ],
                         "include_ext": [
@@ -86,15 +96,15 @@
                             "css",
                             "less"
                         ],
-                        "must_not_match": [
-                            "(src|href|url)\\s*=\\s*['\\\"]http:\\\\\\/\\\\\\/[^'\\\"\\\\]+['\\\"]"
-                        ],
                         "max_results": 50
                     }
                 },
                 {
                     "name": "http_no_mixed_content",
                     "args": {
+                        "paths": [
+                            "/"
+                        ],
                         "timeout_ms": 8000
                     }
                 }
@@ -112,31 +122,33 @@
             "op": "all",
             "checks": [
                 {
-                    "name": "php_array_eq",
+                    "name": "magento_cookie_flags_secure",
                     "args": {
-                        "file": "app/etc/env.php",
-                        "path": "session.cookie.secure",
-                        "equals": 1
-                    }
-                },
-                {
-                    "name": "php_array_eq",
-                    "args": {
-                        "file": "app/etc/env.php",
-                        "path": "session.cookie.httponly",
-                        "equals": 1
+                        "files": [
+                            "app/etc/config.php",
+                            "app/etc/env.php"
+                        ],
+                        "allowed_samesite": [
+                            "lax",
+                            "strict"
+                        ]
                     }
                 },
                 {
                     "name": "http_cookie_flags",
                     "args": {
+                        "paths": [
+                            "/",
+                            "/customer/account/login",
+                            "/checkout/cart"
+                        ],
                         "timeout_ms": 8000
                     }
                 }
             ],
             "messages": {
-                "pass": "Session cookies are configured with Secure and HttpOnly flags.",
-                "fail": "Cookies lack Secure or HttpOnly flags. Enable them to protect against theft and XSS."
+                "pass": "Session cookies are configured with Secure, HttpOnly, and SameSite flags.",
+                "fail": "Cookies lack Secure, HttpOnly, or SameSite flags. Enable them to protect against theft, XSS, and CSRF."
             }
         },
         {

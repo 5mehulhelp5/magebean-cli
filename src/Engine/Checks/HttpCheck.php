@@ -231,99 +231,236 @@ final class HttpCheck
     {
         $base = $this->baseUrl();
         if ($base === '') return [null, '[UNKNOWN] Missing URL in context'];
-        [$ok, $msg, $ev] = $this->fetch($base, 'GET', [], (int)($args['timeout_ms'] ?? 8000), false);
+        $url = preg_replace('~^http://~i', 'https://', $base);
+        [$ok, $msg, $ev] = $this->fetch((string)$url, 'GET', [], (int)($args['timeout_ms'] ?? 8000), true);
         if ($ok === null) return [null, $msg, $ev];
         if (!$ok) return [false, $msg, $ev];
 
         $h = $this->hget(array_change_key_case((array)($ev['headers'] ?? []), CASE_LOWER), 'strict-transport-security');
-        if ($h === '') return [false, 'HSTS header missing', ['observed' => $h]];
+        $finalUrl = (string)($ev['final_url'] ?? $url);
+        $evidence = [
+            'request_url' => $url,
+            'final_url' => $finalUrl,
+            'observed' => $h,
+            'max_age' => null,
+            'include_subdomains' => stripos($h, 'includesubdomains') !== false,
+            'preload' => stripos($h, 'preload') !== false,
+        ];
+
+        if ($h === '') return [false, 'HSTS header missing', $evidence];
         if (preg_match('~max-age\s*=\s*(\d+)~i', $h, $m)) {
             $min = (int)($args['min_max_age'] ?? 15552000);
-            $ok2 = ((int)$m[1] >= $min);
-            return [$ok2, $ok2 ? 'HSTS present' : 'HSTS max-age too low', ['observed' => $h]];
+            $evidence['max_age'] = (int)$m[1];
+            $evidence['min_max_age'] = $min;
+            $maxAgeOk = ((int)$m[1] >= $min);
+            $includeSubdomainsOk = !(bool)($args['require_include_subdomains'] ?? false) || $evidence['include_subdomains'];
+            $preloadOk = !(bool)($args['require_preload'] ?? false) || $evidence['preload'];
+            $ok2 = $maxAgeOk && $includeSubdomainsOk && $preloadOk;
+            return [$ok2, $ok2 ? 'HSTS present' : 'HSTS policy is incomplete', $evidence];
         }
-        return [false, 'HSTS header missing max-age', ['observed' => $h]];
+        return [false, 'HSTS header missing max-age', $evidence];
     }
 
     private function noMixedContent(array $args): array
     {
         $base = $this->baseUrl();
         if ($base === '') return [null, '[UNKNOWN] Missing URL in context'];
-        [$ok, $msg, $ev] = $this->fetch($base, 'GET', [], (int)($args['timeout_ms'] ?? 8000), false);
-        if ($ok === null) return [null, $msg, $ev];
-        if (!$ok) return [false, $msg, $ev];
+        $paths = $args['paths'] ?? ['/'];
+        if (!is_array($paths)) {
+            $paths = ['/'];
+        }
 
-        $body = (string)($ev['body'] ?? '');
-        // Only count mixed content in attributes or CSS url(), not arbitrary text/JS strings
-        $bad = preg_match('~\b(?:href|src|action|data-src|formaction)\s*=\s*["\']http://~i', $body) === 1
-            || preg_match('~url\(\s*http://~i', $body) === 1;
+        $checked = [];
+        $offenders = [];
+        foreach ($paths as $path) {
+            if (!is_scalar($path)) {
+                continue;
+            }
+            $url = $this->joinUrl($base, (string)$path);
+            [$ok, $msg, $ev] = $this->fetch($url, 'GET', [], (int)($args['timeout_ms'] ?? 8000), true);
+            if ($ok === null) {
+                $checked[] = ['url' => $url, 'ok' => null, 'message' => $msg, 'evidence' => $ev];
+                continue;
+            }
+            if (!$ok) {
+                $checked[] = ['url' => $url, 'ok' => false, 'message' => $msg, 'evidence' => $ev];
+                continue;
+            }
 
-        return [!$bad, $bad ? 'Mixed content (http://) detected in markup' : 'No mixed content in markup', []];
+            $body = (string)($ev['body'] ?? '');
+            $pageOffenders = $this->mixedContentInMarkup($body);
+            $checked[] = ['url' => $url, 'ok' => true, 'status' => $ev['status'] ?? null, 'final_url' => $ev['final_url'] ?? null];
+            foreach ($pageOffenders as $offender) {
+                $offender['page_url'] = $url;
+                $offenders[] = $offender;
+            }
+        }
+
+        if ($offenders !== []) {
+            return [false, 'Mixed content (http://) detected in rendered markup', ['offenders' => $offenders, 'checked' => $checked]];
+        }
+        if ($checked === []) {
+            return [null, '[UNKNOWN] No pages checked for mixed content', []];
+        }
+
+        return [true, 'No mixed content in rendered markup', ['checked' => $checked]];
+    }
+
+    private function mixedContentInMarkup(string $body): array
+    {
+        $offenders = [];
+        $patterns = [
+            'html_attr' => '~\b(?:href|src|action|data-src|formaction|poster|srcset|data-srcset)\s*=\s*([\'"])(?P<url>[^\'"]*http://[^\'"]+)\1~i',
+            'css_url' => '~url\(\s*([\'"]?)(?P<url>http://[^\'")\s]+)\1\s*\)~i',
+        ];
+        foreach ($patterns as $kind => $regex) {
+            $count = preg_match_all($regex, $body, $matches, PREG_OFFSET_CAPTURE | PREG_SET_ORDER);
+            if ($count === false || $count < 1) {
+                continue;
+            }
+            foreach ($matches as $match) {
+                $url = isset($match['url']) && is_array($match['url']) ? (string)$match['url'][0] : '';
+                if (preg_match('~^http://(?:www\.)?(?:w3\.org|schema\.org)/~i', $url) === 1) {
+                    continue;
+                }
+                $offenders[] = [
+                    'kind' => $kind,
+                    'url' => $url,
+                    'snippet' => trim(substr((string)$match[0][0], 0, 240)),
+                ];
+            }
+        }
+
+        return $offenders;
+    }
+
+    private function joinUrl(string $base, string $path): string
+    {
+        if (preg_match('~^https?://~i', $path) === 1) {
+            return $path;
+        }
+
+        return rtrim($base, '/') . '/' . ltrim($path, '/');
+    }
+
+    private function assessCookieFlags(string $cookie, array $sensitive): ?array
+    {
+        $parts = explode(';', $cookie);
+        if ($parts === []) {
+            return null;
+        }
+        [$name,] = array_map('trim', explode('=', $parts[0], 2));
+        $lname = strtolower($name);
+        if (!in_array($lname, $sensitive, true) && !str_contains($lname, 'sess') && !str_contains($lname, 'admin')) {
+            return null;
+        }
+
+        $flags = ' ' . strtolower($cookie) . ' ';
+        $hasSecure = str_contains($flags, ' secure');
+        $hasHttpOnly = str_contains($flags, ' httponly');
+        $sameSite = null;
+        foreach ($parts as $part) {
+            $part = trim($part);
+            if (stripos($part, 'samesite=') === 0) {
+                $sameSite = strtolower(substr($part, 9));
+                break;
+            }
+        }
+
+        $sameSiteOk = in_array($sameSite, ['lax', 'strict'], true) || ($sameSite === 'none' && $hasSecure);
+        $ok = $hasSecure && $hasHttpOnly && $sameSiteOk;
+        $missing = [];
+        if (!$hasSecure) {
+            $missing[] = 'secure';
+        }
+        if (!$hasHttpOnly) {
+            $missing[] = 'httponly';
+        }
+        if (!$sameSiteOk) {
+            $missing[] = 'samesite';
+        }
+
+        return [
+            'name' => $name,
+            'secure' => $hasSecure,
+            'httponly' => $hasHttpOnly,
+            'samesite' => $sameSite,
+            'ok' => $ok,
+            'missing' => $missing,
+        ];
     }
 
     private function cookieFlags(array $args): array
     {
         $base = $this->baseUrl();
         if ($base === '') return [false, 'Missing URL in context'];
-        [$ok, $msg, $ev] = $this->fetch($base, 'GET', [], (int)($args['timeout_ms'] ?? 8000), false);
-        if ($ok === null) return [null, $msg, $ev];
-        if (!$ok) return [false, $msg, $ev];
-
-        $hdrs = array_change_key_case((array)($ev['headers'] ?? []), CASE_LOWER);
-        $setCookies = $hdrs['set-cookie'] ?? [];
-        if (!is_array($setCookies)) $setCookies = $setCookies !== '' ? [$setCookies] : [];
-
-        if (!$setCookies) return [true, 'No cookies observed', []];
+        $paths = $args['paths'] ?? ['/', '/customer/account/login', '/checkout/cart'];
+        if (!is_array($paths)) {
+            $paths = ['/'];
+        }
 
         // Only enforce flags on sensitive cookies
-        $sensitive = [
+        $sensitive = $args['sensitive_cookies'] ?? [
             'phpsessid',
+            'admin',
+            'adminhtml',
+            'backend',
             'frontend',
+            'frontend_cid',
             'private_content_version',
             'mage-cache-sessid',
+            'mage-cache-storage',
+            'mage-cache-storage-section-invalidation',
             'store',
-            'section_data_ids'
+            'section_data_ids',
+            'form_key',
         ];
+        if (!is_array($sensitive)) {
+            $sensitive = [];
+        }
+        $sensitive = array_map(static fn(mixed $value): string => strtolower((string)$value), $sensitive);
 
         $allOk = true;
-        foreach ($setCookies as $cookie) {
-            $parts = explode(';', (string)$cookie);
-            if (count($parts) === 0) continue;
-            [$name,] = array_map('trim', explode('=', $parts[0], 2));
-            $lname = strtolower($name);
+        $checked = [];
+        $observedSensitive = [];
+        $failures = [];
 
-            // Only check sensitive cookies
-            if (!in_array($lname, $sensitive, true)) continue;
+        foreach ($paths as $path) {
+            if (!is_scalar($path)) {
+                continue;
+            }
+            $url = $this->joinUrl($base, (string)$path);
+            [$ok, $msg, $ev] = $this->fetch($url, 'GET', [], (int)($args['timeout_ms'] ?? 8000), true);
+            if ($ok === null || !$ok) {
+                $checked[] = ['url' => $url, 'ok' => $ok, 'message' => $msg, 'evidence' => $ev];
+                continue;
+            }
 
-            $flags = ' ' . strtolower((string)$cookie) . ' '; // pad to match ' secure'/' httponly'
-            $hasSecure   = str_contains($flags, ' secure');
-            $hasHttpOnly = str_contains($flags, ' httponly');
-            $sameSite    = null;
+            $hdrs = array_change_key_case((array)($ev['headers'] ?? []), CASE_LOWER);
+            $setCookies = $hdrs['set-cookie'] ?? [];
+            if (!is_array($setCookies)) $setCookies = $setCookies !== '' ? [$setCookies] : [];
+            $checked[] = ['url' => $url, 'ok' => true, 'status' => $ev['status'] ?? null, 'final_url' => $ev['final_url'] ?? null, 'set_cookie_count' => count($setCookies)];
 
-            foreach ($parts as $p) {
-                $p = trim($p);
-                if (stripos($p, 'samesite=') === 0) {
-                    $sameSite = strtolower(substr($p, 9));
-                    break;
+            foreach ($setCookies as $cookie) {
+                $assessment = $this->assessCookieFlags((string)$cookie, $sensitive);
+                if ($assessment === null) {
+                    continue;
                 }
-            }
-
-            $okFlags = false;
-            if ($sameSite === 'none') {
-                // SameSite=None must be with Secure
-                $okFlags = $hasSecure && $hasHttpOnly;
-            } else {
-                // Lax/Strict (or missing) require Secure+HttpOnly at minimum
-                $okFlags = $hasSecure && $hasHttpOnly && ($sameSite === null || in_array($sameSite, ['lax', 'strict'], true));
-            }
-
-            if (!$okFlags) {
-                $allOk = false;
-                break;
+                $assessment['page_url'] = $url;
+                $observedSensitive[] = $assessment;
+                if (!$assessment['ok']) {
+                    $allOk = false;
+                    $failures[] = $assessment;
+                }
             }
         }
 
-        return [$allOk, $allOk ? 'Sensitive cookies have Secure/HttpOnly/SameSite' : 'Cookie flags missing on sensitive cookies', []];
+        $evidence = ['checked' => $checked, 'sensitive_cookies' => $observedSensitive, 'failures' => $failures];
+        if ($observedSensitive === []) {
+            return [null, '[UNKNOWN] No sensitive cookies observed on probed paths', $evidence];
+        }
+
+        return [$allOk, $allOk ? 'Sensitive cookies have Secure/HttpOnly/SameSite' : 'Cookie flags missing on sensitive cookies', $evidence];
     }
 
     private function noDirectoryListing(array $args): array
@@ -723,18 +860,43 @@ final class HttpCheck
 
         $host = (string)parse_url($base, PHP_URL_HOST);
         if ($host === '') return [null, '[UNKNOWN] Invalid host', []];
+        $port = (int)(parse_url($base, PHP_URL_PORT) ?: 443);
+        $timeout = (int)($args['timeout_s'] ?? 10);
 
-        $probe = $this->probeTlsWithNmap($host, (int)($args['timeout_s'] ?? 10));
-        if (empty($probe['ok'])) {
-            return [null, '[UNKNOWN] TLS probing requires nmap', ['host' => $host, 'err' => $probe['err'] ?? '']];
+        $streamProbe = $this->probeTlsVersionsWithStreams($host, $port, $timeout);
+        $nmapProbe = $this->probeTlsWithNmap($host, $port, $timeout);
+
+        $accepted = $streamProbe['accepted'] ?? [];
+        if (!empty($nmapProbe['ok'])) {
+            $legacy = (array)($nmapProbe['legacy'] ?? []);
+            foreach (['tls1.0', 'tls1.1'] as $version) {
+                if (!empty($legacy[$version])) {
+                    $accepted[$version] = true;
+                }
+            }
         }
 
-        $legacy = (array)$probe['legacy'];
-        $hasLegacy = !empty($legacy['tls1.0']) || !empty($legacy['tls1.1']);
+        $hasLegacy = !empty($accepted['tls1.0']) || !empty($accepted['tls1.1']);
+        $hasModern = !empty($accepted['tls1.2']) || !empty($accepted['tls1.3']);
+        $evidence = [
+            'host' => $host,
+            'port' => $port,
+            'stream_probe' => $streamProbe,
+            'nmap_probe' => $nmapProbe,
+            'accepted' => $accepted,
+        ];
+
+        if (!$hasModern && empty($nmapProbe['ok']) && empty($streamProbe['ok'])) {
+            return [null, '[UNKNOWN] TLS probing failed', $evidence];
+        }
+        if (!$hasModern) {
+            return [false, 'TLS 1.2+ could not be negotiated', $evidence];
+        }
+
         $pass = !$hasLegacy;
         $msg  = $pass ? 'TLS < 1.2 disabled (nmap)' : 'Legacy TLS (1.0/1.1) still accepted (nmap)';
 
-        return [$pass, $msg, ['host' => $host, 'legacy' => $legacy]];
+        return [$pass, $pass ? 'TLS < 1.2 disabled and TLS 1.2+ accepted' : $msg, $evidence];
     }
 
 
@@ -1108,7 +1270,7 @@ final class HttpCheck
         $weak = [];
         $evidences = [];
         foreach ($hosts as $h) {
-            $probe = $this->probeTlsWithNmap($h, (int)($args['timeout_s'] ?? 10));
+            $probe = $this->probeTlsWithNmap($h, 443, (int)($args['timeout_s'] ?? 10));
             if (empty($probe['ok'])) {
                 $evidences[$h] = ['err' => $probe['err'] ?? 'n/a'];
                 continue;
@@ -1125,7 +1287,60 @@ final class HttpCheck
         return [$pass, $msg, ['hosts_checked' => $evidences]];
     }
 
-    private function probeTlsWithNmap(string $host, int $timeout = 10): array
+    private function probeTlsVersionsWithStreams(string $host, int $port, int $timeout = 10): array
+    {
+        $constants = [
+            'tls1.0' => defined('STREAM_CRYPTO_METHOD_TLSv1_0_CLIENT') ? constant('STREAM_CRYPTO_METHOD_TLSv1_0_CLIENT') : null,
+            'tls1.1' => defined('STREAM_CRYPTO_METHOD_TLSv1_1_CLIENT') ? constant('STREAM_CRYPTO_METHOD_TLSv1_1_CLIENT') : null,
+            'tls1.2' => defined('STREAM_CRYPTO_METHOD_TLSv1_2_CLIENT') ? constant('STREAM_CRYPTO_METHOD_TLSv1_2_CLIENT') : null,
+            'tls1.3' => defined('STREAM_CRYPTO_METHOD_TLSv1_3_CLIENT') ? constant('STREAM_CRYPTO_METHOD_TLSv1_3_CLIENT') : null,
+        ];
+
+        $accepted = [];
+        $errors = [];
+        foreach ($constants as $version => $method) {
+            if ($method === null) {
+                $errors[$version] = 'unsupported_by_php';
+                continue;
+            }
+
+            $ctx = stream_context_create([
+                'ssl' => [
+                    'crypto_method' => $method,
+                    'SNI_enabled' => true,
+                    'peer_name' => $host,
+                    'verify_peer' => true,
+                    'verify_peer_name' => true,
+                    'capture_peer_cert' => false,
+                ],
+            ]);
+            $errno = 0;
+            $errstr = '';
+            $client = @stream_socket_client(
+                "tls://{$host}:{$port}",
+                $errno,
+                $errstr,
+                $timeout,
+                STREAM_CLIENT_CONNECT,
+                $ctx
+            );
+            if (is_resource($client)) {
+                $accepted[$version] = true;
+                @fclose($client);
+            } else {
+                $accepted[$version] = false;
+                $errors[$version] = $errstr !== '' ? $errstr : (string)$errno;
+            }
+        }
+
+        return [
+            'ok' => in_array(true, $accepted, true),
+            'accepted' => $accepted,
+            'errors' => $errors,
+        ];
+    }
+
+    private function probeTlsWithNmap(string $host, int $port = 443, int $timeout = 10): array
     {
         $host = trim($host);
         if ($host === '') return ['ok' => false, 'err' => 'empty host'];
@@ -1134,8 +1349,9 @@ final class HttpCheck
         if ($which === '') return ['ok' => false, 'err' => 'nmap not found'];
 
         $cmd = sprintf(
-            '%s --script ssl-enum-ciphers -p 443 %s 2>&1',
+            '%s --script ssl-enum-ciphers -p %d %s 2>&1',
             escapeshellcmd($which),
+            $port,
             escapeshellarg($host)
         );
         $out = @shell_exec($cmd);

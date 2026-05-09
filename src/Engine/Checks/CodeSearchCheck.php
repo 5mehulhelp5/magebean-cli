@@ -579,6 +579,42 @@ final class CodeSearchCheck
         return [true, 'Magento crypto and session APIs are used'];
     }
 
+    public function noMixedContent(array $args): array
+    {
+        $roots = $args['paths'] ?? ['app'];
+        $inc = $args['include_ext'] ?? ['phtml', 'html', 'xml', 'js', 'css', 'less'];
+        $max = max(1, (int)($args['max_results'] ?? 50));
+        $rootsAbs = array_map(fn($p) => $this->ctx->abs($p), $roots);
+
+        $offenders = [];
+        foreach ($this->collectFiles($rootsAbs, $inc) as $file) {
+            $content = @file_get_contents($file);
+            if ($content === false) {
+                continue;
+            }
+
+            foreach ($this->mixedContentFindings($file, $content) as $finding) {
+                $offenders[] = $finding;
+                if (count($offenders) >= $max) {
+                    break 2;
+                }
+            }
+        }
+
+        if ($offenders !== []) {
+            return [
+                false,
+                'Insecure http:// asset references found in: ' . implode(', ', array_map(
+                    static fn(array $match): string => $match['file'] . ':' . $match['line'] . ' [' . $match['kind'] . ']',
+                    $offenders
+                )),
+                $offenders,
+            ];
+        }
+
+        return [true, 'No insecure http:// asset references found in code'];
+    }
+
     private function collectFiles(array $roots, array $inc): array
     {
         $ret = [];
@@ -612,7 +648,8 @@ final class CodeSearchCheck
         ];
 
         foreach ($patterns as $kind => $regex) {
-            if (preg_match_all($regex, $content, $matches, PREG_OFFSET_CAPTURE | PREG_SET_ORDER) !== 1) {
+            $count = preg_match_all($regex, $content, $matches, PREG_OFFSET_CAPTURE | PREG_SET_ORDER);
+            if ($count === false || $count < 1) {
                 continue;
             }
             foreach ($matches as $match) {
@@ -643,7 +680,8 @@ final class CodeSearchCheck
         ];
 
         foreach ($patterns as $kind => $regex) {
-            if (preg_match_all($regex, $content, $matches, PREG_OFFSET_CAPTURE | PREG_SET_ORDER) !== 1) {
+            $count = preg_match_all($regex, $content, $matches, PREG_OFFSET_CAPTURE | PREG_SET_ORDER);
+            if ($count === false || $count < 1) {
                 continue;
             }
 
@@ -730,7 +768,8 @@ final class CodeSearchCheck
         ];
 
         foreach ($patterns as $kind => $regex) {
-            if (preg_match_all($regex, $content, $matches, PREG_OFFSET_CAPTURE | PREG_SET_ORDER) !== 1) {
+            $matchCount = preg_match_all($regex, $content, $matches, PREG_OFFSET_CAPTURE | PREG_SET_ORDER);
+            if ($matchCount === false || $matchCount < 1) {
                 continue;
             }
 
@@ -1049,6 +1088,38 @@ final class CodeSearchCheck
         return $findings;
     }
 
+    private function mixedContentFindings(string $file, string $content): array
+    {
+        $findings = [];
+        $patterns = [
+            'html_attr' => '~(?<!\.)\b(?:src|href|action|formaction|poster|data-src|data-href|data-url|data-mage-init|x-magento-init)\s*=\s*([\'"])(?P<url>http://[^\'"\s<>]+)\1~i',
+            'srcset_attr' => '~\b(?:srcset|data-srcset)\s*=\s*([\'"])(?P<url>[^\'"]*http://[^\'"]+)\1~i',
+            'css_url' => '~url\(\s*([\'"]?)(?P<url>http://[^\'")\s]+)\1\s*\)~i',
+            'js_assignment' => '~(?:\.\s*(?:src|href|action)\s*=|\burl\s*:)\s*([\'"])(?P<url>http://[^\'"\s<>]+)\1~i',
+            'xml_asset' => '~>\s*(?P<url>http://[^<\s]+)\s*<~i',
+        ];
+
+        foreach ($patterns as $kind => $regex) {
+            $mixedContentMatchCount = preg_match_all($regex, $content, $matches, PREG_OFFSET_CAPTURE | PREG_SET_ORDER);
+            if ($mixedContentMatchCount === false || $mixedContentMatchCount < 1) {
+                continue;
+            }
+            foreach ($matches as $match) {
+                $url = isset($match['url']) && is_array($match['url']) ? (string)$match['url'][0] : '';
+                if ($this->isAllowedPlainHttpReference($url)) {
+                    continue;
+                }
+
+                $evidence = $this->matchEvidence($file, $content, $kind, (int)$match[0][1]);
+                $evidence['kind'] = $kind;
+                $evidence['url'] = $url;
+                $findings[] = $evidence;
+            }
+        }
+
+        return $findings;
+    }
+
     /**
      * @return array<int, array{expr:string, offset:int}>
      */
@@ -1359,6 +1430,14 @@ final class CodeSearchCheck
     private function hasMagentoFrameworkCryptoSessionSignal(string $window): bool
     {
         return preg_match('~\b(?:Magento\\\\Framework\\\\Encryption\\\\EncryptorInterface|EncryptorInterface|\\\\Magento\\\\Framework\\\\Session|SessionManagerInterface|SessionManager|CustomerSession|CheckoutSession|BackendSession|FormKey|CookieManagerInterface|CookieMetadataFactory|SessionConfig)\b~i', $window) === 1;
+    }
+
+    private function isAllowedPlainHttpReference(string $url): bool
+    {
+        return preg_match('~^http://(?:www\.)?w3\.org/~i', $url) === 1
+            || preg_match('~^http://(?:www\.)?schema\.org/~i', $url) === 1
+            || preg_match('~^http://localhost(?::\d+)?(?:/|$)~i', $url) === 1
+            || preg_match('~^http://127\.0\.0\.1(?::\d+)?(?:/|$)~', $url) === 1;
     }
 
     private function hasUploadSafeguards(string $window): bool

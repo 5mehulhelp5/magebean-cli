@@ -51,6 +51,7 @@ final class CheckRegistry
         $registry->register('code_csprng_safety', fn(array $args): array => $code->csprngSafety($args));
         $registry->register('code_sensitive_logging', fn(array $args): array => $code->sensitiveLogging($args));
         $registry->register('code_magento_api_crypto_session', fn(array $args): array => $code->magentoApiCryptoSession($args));
+        $registry->register('code_no_mixed_content', fn(array $args): array => $code->noMixedContent($args));
 
         $registry->register('fs_no_world_writable', fn(array $args): array => $fs->noWorldWritable($args));
         $registry->register('file_mode_max', fn(array $args): array => $fs->fileModeMax($args));
@@ -76,8 +77,10 @@ final class CheckRegistry
         $registry->register('magento_admin_exposure_restricted', fn(array $args): array => $mage->adminExposureRestricted($args));
         $registry->register('magento_admin_captcha_or_rate_limit', fn(array $args): array => $mage->adminCaptchaOrRateLimit($args));
         $registry->register('magento_https_enforced', fn(array $args): array => $mage->httpsEnforced($args));
+        $registry->register('magento_cookie_flags_secure', fn(array $args): array => $mage->cookieFlagsSecure($args));
         $registry->register('nginx_directive', fn(array $args): array => $web->nginxDirective($args));
         $registry->register('apache_htaccess_directive', fn(array $args): array => $web->apacheDirective($args));
+        $registry->register('webserver_hsts_config', fn(array $args): array => $web->hstsConfig($args));
 
         $registry->register('composer_audit_offline', fn(array $args): array => $comp->auditOffline($args));
         $registry->register('composer_core_advisories_offline', fn(array $args): array => $comp->coreAdvisoriesOffline($args));
