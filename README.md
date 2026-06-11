@@ -1,6 +1,6 @@
 # Magebean CLI — Magento 2 Security Audit
 
-Audit Magento 2 security, configuration, performance, and extensions from the command line. Generate actionable **HTML/JSON** reports and integrate with CI.
+Audit Magento 2 security, configuration, performance, and extensions from the command line. Generate actionable command-line results and integrate with CI.
 
 > **Goal**: “Audit in minutes. Know exactly what to fix and why.”
 
@@ -13,7 +13,7 @@ Audit Magento 2 security, configuration, performance, and extensions from the co
 - **Performance Signals**: cache effectiveness, DB indexes, static assets, storefront anti‑patterns.
 - **Extension Audit**: parse `composer.lock` to flag vulnerable/abandoned modules (CVE bundle optional).
 - **Offline‑first**: runs locally; privacy by design.
-- **CI‑friendly**: non‑zero exit codes on findings; JSON/SARIF outputs for pipelines.
+- **CI‑friendly**: non‑zero exit codes on findings for pipelines.
 
 ---
 
@@ -45,13 +45,9 @@ php bin/magebean rules:list
 ## 🧪 Quick Start
 
 ```bash
-# HTML report
 ./magebean.phar scan \
-  --path=/var/www/magento \
-  --format=html --output=report.html
+  --path=/var/www/magento
 ```
-
-**Supported formats**: `html` (default) | `json` | `sarif`
 
 ---
 
@@ -60,10 +56,6 @@ php bin/magebean rules:list
 ```
 Magebean Security Audit v1.0    Target: /var/www/magento
 Time: 2025-08-28 11:32    PHP: 8.2    Env: prod
-
-⚠ CVE check skipped
-  → Requires CVE Bundle (--cve-data=magebean-cve-bundle-YYYYMM.zip)
-  → Visit https://magebean.com/downloads
 
 Findings (5)
 [CRITICAL] Magento core outdated — detected 2.4.3, latest 2.4.7-p1
@@ -76,21 +68,18 @@ Summary
 Passed Rules: 76 / 81
 Issues: 1 Critical, 2 High, 2 Medium
 
-→ Report saved to report.html
 Contact: support@magebean.com
 ```
 
 ---
 
-## 📄 HTML Report
+## 📄 Command-Line Results
 
 - **Summary** includes:
   - Completed time, audited path
   - **Rules Checked**: Total, Passed, Failed, **Score %**
   - **Findings Overview** *(counts **failed rules only**)* by severity: **Critical/High/Medium/Low**
-- Table lists **both PASS and FAIL**, with colors:
-  - ✅ PASS: green background
-  - ❌ FAIL: red background
+- Findings are printed directly in the terminal.
 
 ---
 
@@ -110,8 +99,6 @@ Contact: support@magebean.com
 |---|---|---|
 | `--path` | Magento root to audit | current dir |
 | `--url` | Optional base URL override for HTTP checks | auto-detect |
-| `--format` | `html` \| `json` \| `sarif` | `html` |
-| `--output` | Output file path | auto by format |
 | `--cve-data` | Path to CVE bundle (optional) | none |
 | `--rules` | Run only selected rule IDs | all |
 | `--exclude-rules` | Exclude selected rule IDs | none |
@@ -188,17 +175,12 @@ YAML configs are accepted when the PHP `yaml` extension is installed; JSON is th
 
 ```bash
 # run locally
-php bin/magebean scan --path=/path/to/magento --format=html --output=report.html
-
-# run with JSON for CI
-php bin/magebean scan --path=/path --format=json > report.json
+php bin/magebean scan --path=/path/to/magento
 
 # inspect available rules
 php bin/magebean rules:list
 ```
 
-- Reporter templates: `resources/report-template.html`
-- HTML reporter colors: `.status-pass` (green), `.status-fail` (red)
 - Findings Overview counts **failures only**
 
 ---

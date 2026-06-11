@@ -483,15 +483,13 @@ Profiles select a curated subset of baseline rules for a specific assessment len
 - **PCI profile:** Selects PCI DSS readiness rules focused on payment scope, cardholder data leakage, payment-page script integrity, admin hardening, transport security, logging, and dependency risk.
 - **Custom profile:** Allows projects, agencies, or open-source contributors to define their own rule selection and mappings without changing the core rule catalog.
 
-### 4.4 Output Formats
-Magebean CLI supports multiple report formats:
+### 4.4 Command-Line Output
+Magebean CLI prints results directly to the command line:
 
-- **CLI (default):** Human-readable summary directly in the console.
-- **JSON:** Machine-readable output for integration.
-- **HTML/PDF:** Styled reports for auditors and stakeholders.
+- **CLI:** Human-readable summary directly in the console.
 
 ```bash
-./magebean scan --path=/var/www/magento --format=html --output=report.html
+./magebean scan --path=/var/www/magento
 ```
 
 ### 4.5 CI/CD Integration
@@ -507,7 +505,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: Run Magebean Audit
-        run: /path-to-file/magebean.phar scan --path=. --format=json --output=report.json
+        run: /path-to-file/magebean.phar scan --path=.
 ```
 
 ### 4.6 Operational Recommendations
