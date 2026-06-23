@@ -10,7 +10,7 @@
       "op": "all",
       "checks": [
         {
-          "name": "php_array_eq",
+          "name": "magento_production_mode",
           "args": {
             "file": "app/etc/env.php",
             "path": "MAGE_MODE",
@@ -31,12 +31,11 @@
       "op": "all",
       "checks": [
         {
-          "name": "text_grep",
+          "name": "php_xdebug_disabled",
           "args": {
-            "file": "php.ini",
-            "must_not_match": [
-              "zend_extension\\s*=\\s*xdebug",
-              "^\\s*xdebug\\.mode\\s*="
+            "files": [
+              "php.ini",
+              ".user.ini"
             ]
           }
         },
@@ -60,11 +59,11 @@
       "op": "all",
       "checks": [
         {
-          "name": "text_grep",
+          "name": "php_display_errors_disabled",
           "args": {
-            "file": "php.ini",
-            "must_match": [
-              "display_errors\\s*=\\s*Off"
+            "files": [
+              "php.ini",
+              ".user.ini"
             ]
           }
         },
@@ -88,15 +87,12 @@
       "op": "all",
       "checks": [
         {
-          "name": "fs_exists",
+          "name": "fs_di_compiled",
           "args": {
-            "path": "generated/metadata"
-          }
-        },
-        {
-          "name": "fs_exists",
-          "args": {
-            "path": "generated/code"
+            "metadata_path": "generated/metadata",
+            "code_path": "generated/code",
+            "min_metadata_php_files": 1,
+            "min_code_php_files": 1
           }
         }
       ],
@@ -113,15 +109,12 @@
       "op": "all",
       "checks": [
         {
-          "name": "fs_exists",
+          "name": "fs_static_content_deployed",
           "args": {
-            "path": "pub/static"
-          }
-        },
-        {
-          "name": "fs_exists",
-          "args": {
-            "path": "var/view_preprocessed"
+            "static_path": "pub/static",
+            "preprocessed_path": "var/view_preprocessed",
+            "min_static_files": 1,
+            "min_preprocessed_files": 1
           }
         },
         {
@@ -144,18 +137,12 @@
       "op": "any",
       "checks": [
         {
-          "name": "php_array_eq",
+          "name": "php_template_hints_disabled",
           "args": {
             "file": "app/etc/env.php",
-            "path": "system.default.dev/debug/template_hints",
-            "equals": 0
-          }
-        },
-        {
-          "name": "php_array_absent",
-          "args": {
-            "file": "app/etc/env.php",
-            "path": "system.default.dev/debug/template_hints"
+            "paths": [
+              "system.default.dev/debug/template_hints"
+            ]
           }
         }
       ],

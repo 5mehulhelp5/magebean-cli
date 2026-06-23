@@ -15,107 +15,1097 @@ final class ComposerCheck
         $this->ctx = $ctx;
     }
 
-    public function auditOffline(array $args): array
+    public function auditApi(array $args): array
     {
-        // 1. Xác định file CVE data
-        $cveRel = $this->ctx->cveData !== '' ? $this->ctx->cveData : (is_string($args['cve_db'] ?? null) ? $args['cve_db'] : '');
-        if ($cveRel === '') {
-            return [null, "[UNKNOWN] Missing CVE data (use --cve-data=path or args.cve_db)"];
-        }
-        $cvePath = $this->ctx->abs($cveRel);
-        if (!is_file($cvePath)) {
-            return [null, "[UNKNOWN] CVE file not found (requires --cve-data package)"];
+        $lockFile = $this->ctx->abs($args['lock_file'] ?? 'composer.lock');
+        if (!is_file($lockFile)) {
+            return [null, '[UNKNOWN] composer.lock not found'];
         }
 
-        // 2. Đọc composer.lock
+        $installed = $this->readLockPackages($lockFile);
+        if (!$installed || !is_array($installed)) {
+            return [null, '[UNKNOWN] Unable to parse composer.lock'];
+        }
+
+        $installedVers = [];
+        foreach ($installed as $name => $info) {
+            $version = $info['version'] ?? null;
+            if (is_string($version) && $version !== '') {
+                $installedVers[(string)$name] = ltrim($version, 'vV');
+            }
+        }
+        $packageScope = (string)($args['package_scope'] ?? 'all');
+        if ($packageScope === 'adobe_core') {
+            $installedVers = array_filter(
+                $installedVers,
+                fn(string $version, string $name): bool => $this->isAdobeCorePackage($name),
+                ARRAY_FILTER_USE_BOTH
+            );
+        }
+        if (is_array($args['package_names'] ?? null)) {
+            $allowedPackages = array_fill_keys(array_map(
+                static fn(mixed $name): string => strtolower((string)$name),
+                $args['package_names']
+            ), true);
+            $installedVers = array_filter(
+                $installedVers,
+                static fn(string $version, string $name): bool => isset($allowedPackages[strtolower($name)]),
+                ARRAY_FILTER_USE_BOTH
+            );
+        }
+        if ($installedVers === []) {
+            $message = $packageScope === 'adobe_core'
+                ? 'No Adobe/Magento core packages found in composer.lock'
+                : 'No packages in composer.lock (nothing to audit)';
+            return [true, $message, ['package_scope' => $packageScope, 'packages' => 0]];
+        }
+
+        $endpoint = trim((string)($args['endpoint'] ?? $this->ctx->get(
+            'osv_api_url',
+            'https://api.magebean.com/v1/osv/advisories'
+        )));
+        if (!$this->isAllowedAdvisoryEndpoint($endpoint)) {
+            return [null, '[UNKNOWN] Invalid OSV API endpoint; HTTPS is required', ['endpoint' => $endpoint]];
+        }
+
+        $timeoutMs = max(1000, (int)($args['timeout_ms'] ?? 10000));
+        $batchSize = max(1, min(1000, (int)($args['batch_size'] ?? 500)));
+        $allowPrivateHttpFallback = !empty($args['allow_private_http_fallback']);
+        $token = trim((string)($args['token'] ?? $this->ctx->get(
+            'osv_api_token',
+            getenv('MAGEBEAN_OSV_API_TOKEN') ?: ''
+        )));
+
+        $packages = [];
+        foreach ($installedVers as $name => $version) {
+            $packages[] = ['name' => $name, 'version' => $version];
+        }
+
+        $advisories = [];
+        $responses = [];
+        foreach (array_chunk($packages, $batchSize) as $batchIndex => $batch) {
+            $payload = [
+                'schema_version' => 'magebean-osv-request-v1',
+                'ecosystem' => 'Packagist',
+                'packages' => $batch,
+                'client' => [
+                    'name' => 'magebean-cli',
+                    'version' => (string)($args['client_version'] ?? 'dev'),
+                ],
+            ];
+
+            [$transportOk, $transportMessage, $response] = $this->postJson(
+                $endpoint,
+                $payload,
+                $timeoutMs,
+                $token
+            );
+            $requestEndpoint = $endpoint;
+            if (
+                !$transportOk
+                && $allowPrivateHttpFallback
+                && $token === ''
+                && $this->canFallbackToPrivateHttp($endpoint)
+            ) {
+                $requestEndpoint = 'http://' . substr($endpoint, strlen('https://'));
+                [$transportOk, $transportMessage, $response] = $this->postJson(
+                    $requestEndpoint,
+                    $payload,
+                    $timeoutMs,
+                    $token
+                );
+            }
+            if (!$transportOk) {
+                return [
+                    null,
+                    '[UNKNOWN] OSV API request failed: ' . $transportMessage,
+                    [
+                        'endpoint' => $endpoint,
+                        'request_endpoint' => $requestEndpoint,
+                        'batch' => $batchIndex + 1,
+                    ],
+                ];
+            }
+
+            $status = (int)($response['status'] ?? 0);
+            $body = (string)($response['body'] ?? '');
+            $decoded = json_decode($body, true);
+            if ($status !== 200) {
+                $apiMessage = is_array($decoded)
+                    ? (string)($decoded['error']['message'] ?? $decoded['message'] ?? '')
+                    : '';
+                $suffix = $apiMessage !== '' ? ': ' . $apiMessage : '';
+                return [
+                    null,
+                    '[UNKNOWN] OSV API returned HTTP ' . $status . $suffix,
+                    [
+                        'endpoint' => $endpoint,
+                        'request_endpoint' => $requestEndpoint,
+                        'status' => $status,
+                        'batch' => $batchIndex + 1,
+                    ],
+                ];
+            }
+
+            if (!is_array($decoded)) {
+                return [
+                    null,
+                    '[UNKNOWN] OSV API returned invalid JSON',
+                    ['endpoint' => $endpoint, 'batch' => $batchIndex + 1],
+                ];
+            }
+            if (($decoded['schema_version'] ?? null) !== 'magebean-osv-response-v1') {
+                return [
+                    null,
+                    '[UNKNOWN] Unsupported OSV API response schema',
+                    [
+                        'endpoint' => $endpoint,
+                        'schema_version' => $decoded['schema_version'],
+                        'batch' => $batchIndex + 1,
+                    ],
+                ];
+            }
+            if (!array_key_exists('advisories', $decoded) || !is_array($decoded['advisories'])) {
+                return [
+                    null,
+                    '[UNKNOWN] OSV API response is missing advisories array',
+                    ['endpoint' => $endpoint, 'batch' => $batchIndex + 1],
+                ];
+            }
+
+            foreach ($decoded['advisories'] as $advisory) {
+                if (!is_array($advisory)) {
+                    continue;
+                }
+                $key = (string)($advisory['id'] ?? hash('sha256', json_encode($advisory)));
+                if (!isset($advisories[$key])) {
+                    $advisories[$key] = $advisory;
+                    continue;
+                }
+
+                $existingAffected = is_array($advisories[$key]['affected'] ?? null)
+                    ? $advisories[$key]['affected']
+                    : [];
+                $newAffected = is_array($advisory['affected'] ?? null)
+                    ? $advisory['affected']
+                    : [];
+                $advisories[$key]['affected'] = array_merge($existingAffected, $newAffected);
+            }
+            $responses[] = [
+                'batch' => $batchIndex + 1,
+                'request_endpoint' => $requestEndpoint,
+                'packages' => count($batch),
+                'advisories' => count($decoded['advisories']),
+                'dataset_revision' => $decoded['meta']['dataset_revision'] ?? null,
+            ];
+        }
+
+        $sourceEvidence = [
+            'source' => 'magebean_osv_api',
+            'package_scope' => $packageScope,
+            'endpoint' => $endpoint,
+            'packages' => count($installedVers),
+            'responses' => $responses,
+        ];
+
+        if ($advisories === []) {
+            return [
+                true,
+                'No vulnerable packages according to Magebean OSV API (' . count($installedVers) . ' pkgs)',
+                $sourceEvidence,
+            ];
+        }
+
+        return $this->evaluateOsvAdvisories(
+            array_values($advisories),
+            $installedVers,
+            $sourceEvidence
+        );
+    }
+
+    public function coreAdvisoriesApi(array $args): array
+    {
+        $args['package_scope'] = 'adobe_core';
+        return $this->auditApi($args);
+    }
+
+    public function fixVersionApi(array $args): array
+    {
+        $result = $this->auditApi($args);
+        $status = $result[0] ?? null;
+        if ($status !== false) {
+            return $result;
+        }
+
+        $evidence = is_array($result[2] ?? null) ? $result[2] : [];
+        $findings = is_array($evidence['findings'] ?? null) ? $evidence['findings'] : [];
+        if ($findings === []) {
+            return [
+                null,
+                '[UNKNOWN] Vulnerable packages were reported without usable fix evidence',
+                $evidence,
+            ];
+        }
+
+        $messages = [];
+        foreach ($findings as $finding) {
+            if (!is_array($finding)) {
+                continue;
+            }
+            $package = (string)($finding['package'] ?? 'unknown-package');
+            $version = (string)($finding['version'] ?? 'unknown-version');
+            $advisory = (string)($finding['advisory'] ?? 'unknown-advisory');
+            $fixed = (string)($finding['fixed'] ?? '');
+            $message = $package . '@' . $version . ' -> ' . $advisory;
+            $message .= $fixed !== ''
+                ? ', upgrade >= ' . $fixed
+                : ', no fixed version published';
+            $messages[] = $message;
+        }
+
+        if ($messages === []) {
+            return [
+                null,
+                '[UNKNOWN] Vulnerable packages were reported without usable fix evidence',
+                $evidence,
+            ];
+        }
+
+        $visible = array_slice($messages, 0, 20);
+        $message = 'Vulnerable packages require updates: ' . implode('; ', $visible);
+        if (count($messages) > count($visible)) {
+            $message .= '; +' . (count($messages) - count($visible)) . ' more';
+        }
+
+        return [false, $message, $evidence];
+    }
+
+    private function isAdobeCorePackage(string $package): bool
+    {
+        $package = strtolower($package);
+
+        if (str_starts_with($package, 'adobe-commerce/')) {
+            return true;
+        }
+
+        if (!str_starts_with($package, 'magento/')) {
+            return false;
+        }
+
+        $name = substr($package, strlen('magento/'));
+        if (str_starts_with($name, 'module-')) {
+            return true;
+        }
+
+        return in_array($name, [
+            'framework',
+            'magento2-base',
+            'product-community-edition',
+            'product-enterprise-edition',
+            'security-package',
+        ], true);
+    }
+
+    public function auditOffline(array $args): array
+    {
         $lockFile = $this->ctx->abs($args['lock_file'] ?? 'composer.lock');
         if (!is_file($lockFile)) {
             return [null, "[UNKNOWN] composer.lock not found"];
         }
-        $lockJson = json_decode((string)file_get_contents($lockFile), true);
-        if (!is_array($lockJson)) {
-            return [null, "Invalid composer.lock"];
+
+        $installed = $this->readLockPackages($lockFile);
+        if (!$installed || !is_array($installed)) {
+            return [null, "[UNKNOWN] Unable to parse composer.lock"];
         }
-        $pkgs = array_merge($lockJson['packages'] ?? [], $lockJson['packages-dev'] ?? []);
-        $installed = [];
-        foreach ($pkgs as $p) {
-            if (!isset($p['name'], $p['version'])) continue;
-            $ver = ltrim((string)$p['version'], 'v');
-            $installed[$p['name']] = $ver;
+
+        $installedVers = [];
+        foreach ($installed as $name => $info) {
+            $ver = $info['version'] ?? null;
+            if (is_string($ver) && $ver !== '') {
+                $installedVers[$name] = ltrim($ver, 'vV');
+            }
         }
-        if (!$installed) {
+        if (!$installedVers) {
             return [true, "No packages in composer.lock (nothing to audit)"];
         }
 
-        // 3. Đọc CVE data (JSON array hoặc NDJSON)
-        $raw = (string)file_get_contents($cvePath);
-        $cve = json_decode($raw, true);
-        if (!is_array($cve)) {
-            // fallback NDJSON
-            $lines = preg_split('/\r?\n/', $raw, -1, PREG_SPLIT_NO_EMPTY);
-            $cve = [];
-            foreach ($lines as $ln) {
-                $obj = json_decode($ln, true);
-                if (is_array($obj)) $cve[] = $obj;
+        $meta = $this->ctx->get('meta', []);
+        $pathCandidates = [];
+        foreach (['cve_data', 'cve_db', 'osv_db', 'osv'] as $key) {
+            if (is_string($args[$key] ?? null) && $args[$key] !== '') {
+                $pathCandidates[] = (string)$args[$key];
             }
-            if (!$cve) {
-                return [null, "[UNKNOWN] Unrecognized CVE format (expect JSON array or NDJSON)"];
+        }
+        if (is_string($this->ctx->cveData ?? null) && $this->ctx->cveData !== '') {
+            $pathCandidates[] = $this->ctx->cveData;
+        }
+        if (is_array($meta)) {
+            foreach (['osv_db', 'osv', 'cve_data'] as $key) {
+                if (is_string($meta[$key] ?? null) && $meta[$key] !== '') {
+                    $pathCandidates[] = (string)$meta[$key];
+                }
             }
         }
 
-        // 4. So khớp
+        $datasetPath = null;
+        $tried = [];
+        foreach (array_values(array_unique($pathCandidates)) as $candidate) {
+            $path = $this->ctx->abs((string)$candidate);
+            $tried[] = $path;
+            if (is_file($path) || is_dir($path)) {
+                $datasetPath = $path;
+                break;
+            }
+        }
+
+        if ($datasetPath === null) {
+            $bundle = $this->findCveBundleCandidate($args['cve_data'] ?? ($this->ctx->cveData ?: null));
+            if (($bundle['status'] ?? '') === 'ok') {
+                $datasetPath = (string)$bundle['path'];
+                $tried[] = $datasetPath;
+            }
+        }
+
+        if ($datasetPath === null) {
+            return [null, "[UNKNOWN] CVE dataset not found (supply --cve-data bundle or osv-db.json)", ['tried' => $tried]];
+        }
+
+        $auditor = new \Magebean\Engine\Cve\CveAuditor($this->ctx);
+        $vulns = $this->loadVulnsViaAuditor($auditor, $datasetPath);
+        if ($vulns === []) {
+            return [null, "[UNKNOWN] No advisories parsed from CVE dataset", ['dataset' => $datasetPath, 'packages' => count($installedVers)]];
+        }
+
+        return $this->evaluateOsvAdvisories(
+            $vulns,
+            $installedVers,
+            ['source' => 'offline_dataset', 'dataset' => $datasetPath]
+        );
+    }
+
+    private function evaluateOsvAdvisories(array $vulns, array $installedVers, array $sourceEvidence): array
+    {
+        $auditor = new \Magebean\Engine\Cve\CveAuditor($this->ctx);
         $sus = [];
-        foreach ($cve as $vuln) {
-            if (!isset($vuln['affected']) || !is_array($vuln['affected'])) continue;
+        $unassessed = [];
+        $usableAdvisories = 0;
+
+        foreach ($vulns as $vuln) {
+            if (!is_array($vuln) || empty($vuln['affected']) || !is_array($vuln['affected'])) {
+                continue;
+            }
+            $usableAdvisories++;
+
+            [$sevLabel, $cvssScore] = $this->extractSeveritySafe($vuln);
+            $id = (string)($vuln['id'] ?? ($vuln['aliases'][0] ?? 'CVE'));
+            $knownExploited = $this->isKnownExploitedAdvisory($vuln);
+
             foreach ($vuln['affected'] as $aff) {
                 $pkg = $aff['package']['name'] ?? null;
-                $eco = $aff['package']['ecosystem'] ?? null;
-                if (!$pkg || !$eco) continue;
-                $ecoNorm = strtolower((string)$eco);
-                if ($ecoNorm !== 'packagist' && $ecoNorm !== 'composer') continue;
-                if (!array_key_exists($pkg, $installed)) continue;
+                $eco = strtolower((string)($aff['package']['ecosystem'] ?? ''));
+                if (!$pkg || !isset($installedVers[$pkg])) {
+                    continue;
+                }
+                if ($eco !== 'packagist' && $eco !== 'composer') {
+                    continue;
+                }
 
-                $current = $installed[$pkg];
+                $current = $installedVers[$pkg];
                 $hit = false;
+                $fixed = null;
+                $hasVersionEvidence = false;
 
-                // match theo versions liệt kê
                 if (!empty($aff['versions']) && is_array($aff['versions'])) {
-                    foreach ($aff['versions'] as $v) {
-                        $v = ltrim((string)$v, 'v');
-                        if ($v !== '' && version_compare($current, $v, '==')) {
+                    $hasVersionEvidence = true;
+                    foreach ($aff['versions'] as $version) {
+                        $version = ltrim((string)$version, 'vV');
+                        if ($version !== '' && version_compare($current, $version, '==')) {
                             $hit = true;
                             break;
                         }
                     }
                 }
 
-                // match theo ranges
-                if (!$hit && !empty($aff['ranges']) && is_array($aff['ranges'])) {
-                    foreach ($aff['ranges'] as $rng) {
-                        $events = $rng['events'] ?? [];
-                        $intervals = $this->eventsToIntervals($events);
-                        foreach ($intervals as [$a, $b]) {
-                            if ($this->inRange($current, $a, $b)) {
+                if (!empty($aff['ranges']) && is_array($aff['ranges'])) {
+                    foreach ($aff['ranges'] as $range) {
+                        $events = is_array($range['events'] ?? null) ? $range['events'] : [];
+                        if ($events !== []) {
+                            $hasVersionEvidence = true;
+                        }
+                        $fixedCandidate = null;
+                        $intervals = $this->eventsToIntervalsSafe($auditor, $events, $fixedCandidate);
+                        foreach ($intervals as [$start, $end]) {
+                            if ($this->inRangeSafe($auditor, $current, $start, $end)) {
                                 $hit = true;
-                                break 2;
+                                if ($end !== null) {
+                                    $fixed = $this->minVersionLocal($fixed, $end);
+                                }
                             }
                         }
                     }
                 }
 
-                if ($hit) {
-                    $id  = $vuln['id'] ?? ($vuln['aliases'][0] ?? 'CVE');
-                    $sev = $this->extractSeverity($vuln);
-                    $sus[] = $pkg . '@' . $current . ' -> ' . $id . ($sev ? " (" . $sev . ")" : '');
+                if (!$hasVersionEvidence) {
+                    $unassessedKey = strtolower((string)$pkg) . '@' . $current . '|' . $id;
+                    $unassessed[$unassessedKey] = [
+                        'package' => (string)$pkg,
+                        'version' => $current,
+                        'advisory' => $id,
+                        'reason' => 'missing_versions_or_ranges',
+                    ];
+                    continue;
+                }
+
+                if (!$hit) {
+                    continue;
+                }
+
+                $findingKey = strtolower((string)$pkg) . '@' . $current . '|' . $id;
+                $sus[$findingKey] = [
+                    'package' => (string)$pkg,
+                    'version' => $current,
+                    'advisory' => $id,
+                    'published' => is_string($vuln['published'] ?? null)
+                        ? $vuln['published']
+                        : null,
+                    'severity' => $sevLabel,
+                    'cvss' => $cvssScore,
+                    'fixed' => $fixed,
+                    'known_exploited' => $knownExploited,
+                ];
+            }
+        }
+
+        $evidence = $sourceEvidence + [
+            'advisories' => count($vulns),
+            'usable_advisories' => $usableAdvisories,
+            'unassessed_affected_packages' => array_values($unassessed),
+        ];
+        if ($vulns !== [] && $usableAdvisories === 0) {
+            return [null, '[UNKNOWN] No usable OSV advisories found in response', $evidence];
+        }
+
+        $sus = array_values($sus);
+        if ($sus !== []) {
+            $msg = "Vulnerable packages:\n    - " . implode("\n    - ", array_map(
+                static function (array $item): string {
+                    $message = $item['package'] . '@' . $item['version']
+                        . ' -> ' . $item['advisory']
+                        . ' (' . $item['severity'] . ')';
+                    if (is_string($item['fixed'] ?? null) && $item['fixed'] !== '') {
+                        $message .= ', fix >= ' . $item['fixed'];
+                    }
+                    return $message;
+                },
+                $sus
+            ));
+            if ($unassessed !== []) {
+                $msg .= "\n    Version evidence unavailable for "
+                    . count($unassessed) . ' additional affected package/advisory pair(s)';
+            }
+            return [false, $msg, $evidence + ['findings' => $sus]];
+        }
+
+        if ($unassessed !== []) {
+            $details = array_map(
+                static fn(array $item): string => $item['package'] . '@' . $item['version']
+                    . ' -> ' . $item['advisory'] . ' (' . $item['reason'] . ')',
+                array_values($unassessed)
+            );
+            return [
+                null,
+                "[UNKNOWN] Installed packages have advisories without version evidence:\n    - "
+                    . implode("\n    - ", $details),
+                $evidence,
+            ];
+        }
+
+        return [
+            true,
+            'No vulnerable packages according to OSV advisories (' . count($installedVers) . ' pkgs, ' . count($vulns) . ' advisories)',
+            $evidence,
+        ];
+    }
+
+    public function kevAdvisoriesApi(array $args): array
+    {
+        $result = $this->auditApi($args);
+        $status = $result[0] ?? null;
+        if ($status === null || $status === true) {
+            return $result;
+        }
+
+        $evidence = is_array($result[2] ?? null) ? $result[2] : [];
+        $findings = array_values(array_filter(
+            is_array($evidence['findings'] ?? null) ? $evidence['findings'] : [],
+            static fn(mixed $finding): bool => is_array($finding)
+                && !empty($finding['known_exploited'])
+        ));
+
+        $evidence['kev_findings'] = $findings;
+        $evidence['kev_findings_count'] = count($findings);
+        if ($findings === []) {
+            return [
+                true,
+                'No installed package versions match CISA Known Exploited Vulnerabilities',
+                $evidence,
+            ];
+        }
+
+        $visible = array_slice($findings, 0, 20);
+        $message = 'CISA KEV package matches: ' . implode('; ', array_map(
+            static function (array $finding): string {
+                $text = (string)($finding['package'] ?? 'unknown-package')
+                    . '@' . (string)($finding['version'] ?? 'unknown-version')
+                    . ' -> ' . (string)($finding['advisory'] ?? 'unknown-advisory');
+                if (is_string($finding['fixed'] ?? null) && $finding['fixed'] !== '') {
+                    $text .= ', fix >= ' . $finding['fixed'];
+                } else {
+                    $text .= ', no fixed version published';
+                }
+                return $text;
+            },
+            $visible
+        ));
+        if (count($findings) > count($visible)) {
+            $message .= '; +' . (count($findings) - count($visible)) . ' more';
+        }
+
+        return [false, $message, $evidence];
+    }
+
+    public function advisoryLatencyApi(array $args): array
+    {
+        $audit = $this->auditApi($args);
+        $status = $audit[0] ?? null;
+        $evidence = is_array($audit[2] ?? null) ? $audit[2] : [];
+        if ($status === null) {
+            return $audit;
+        }
+        if ($status === true) {
+            return [
+                true,
+                'No unresolved advisories affect installed package versions',
+                $evidence + [
+                    'sla_days' => max(1, (int)($args['latency_days'] ?? 30)),
+                    'open_advisories' => [],
+                ],
+            ];
+        }
+
+        $slaDays = max(1, (int)($args['latency_days'] ?? 30));
+        $now = time();
+        $open = [];
+        $overdue = [];
+        $missingPublished = [];
+        foreach ((array)($evidence['findings'] ?? []) as $finding) {
+            if (!is_array($finding)) {
+                continue;
+            }
+
+            $published = is_string($finding['published'] ?? null)
+                ? trim($finding['published'])
+                : '';
+            $publishedAt = $published !== '' ? strtotime($published) : false;
+            if ($publishedAt === false) {
+                $finding['open_days'] = null;
+                $finding['sla_days'] = $slaDays;
+                $missingPublished[] = $finding;
+                continue;
+            }
+
+            $finding['open_days'] = max(0, (int)floor(($now - $publishedAt) / 86400));
+            $finding['sla_days'] = $slaDays;
+            $finding['overdue'] = $finding['open_days'] > $slaDays;
+            $open[] = $finding;
+            if ($finding['overdue']) {
+                $overdue[] = $finding;
+            }
+        }
+
+        $latencyEvidence = $evidence + [
+            'sla_days' => $slaDays,
+            'open_advisories' => $open,
+            'overdue_advisories' => $overdue,
+            'missing_published_date' => $missingPublished,
+        ];
+
+        if ($overdue !== []) {
+            $visible = array_slice($overdue, 0, 20);
+            $details = array_map(static function (array $finding): string {
+                $text = (string)($finding['package'] ?? 'unknown-package')
+                    . '@' . (string)($finding['version'] ?? 'unknown-version')
+                    . ' -> ' . (string)($finding['advisory'] ?? 'unknown-advisory')
+                    . ' open ' . (string)($finding['open_days'] ?? '?') . ' days';
+                if (is_string($finding['fixed'] ?? null) && $finding['fixed'] !== '') {
+                    $text .= ', update to >= ' . $finding['fixed'];
+                }
+                return $text;
+            }, $visible);
+            $message = 'Unresolved advisories exceed the ' . $slaDays . '-day SLA: '
+                . implode('; ', $details);
+            if (count($overdue) > count($visible)) {
+                $message .= '; +' . (count($overdue) - count($visible)) . ' more';
+            }
+            if ($missingPublished !== []) {
+                $message .= '. Published date unavailable for '
+                    . count($missingPublished) . ' additional advisory match(es)';
+            }
+            return [false, $message, $latencyEvidence];
+        }
+
+        if ($missingPublished !== []) {
+            $visible = array_slice($missingPublished, 0, 20);
+            $details = array_map(
+                static fn(array $finding): string => (string)($finding['package'] ?? 'unknown-package')
+                    . '@' . (string)($finding['version'] ?? 'unknown-version')
+                    . ' -> ' . (string)($finding['advisory'] ?? 'unknown-advisory'),
+                $visible
+            );
+            $message = '[UNKNOWN] Published date unavailable for unresolved advisories: '
+                . implode('; ', $details);
+            if (count($missingPublished) > count($visible)) {
+                $message .= '; +' . (count($missingPublished) - count($visible)) . ' more';
+            }
+            return [null, $message, $latencyEvidence];
+        }
+
+        return [
+            true,
+            count($open) . ' unresolved advisory match(es) remain within the '
+                . $slaDays . '-day remediation SLA',
+            $latencyEvidence,
+        ];
+    }
+
+    public function transitiveAuditApi(array $args): array
+    {
+        $lockFile = $this->ctx->abs($args['lock_file'] ?? 'composer.lock');
+        $composerFile = $this->ctx->abs($args['composer_file'] ?? 'composer.json');
+        if (!is_file($lockFile)) {
+            return [null, '[UNKNOWN] composer.lock not found'];
+        }
+        if (!is_file($composerFile)) {
+            return [null, '[UNKNOWN] composer.json not found; cannot distinguish direct and transitive dependencies'];
+        }
+
+        $lock = $this->loadJsonSafe($lockFile);
+        $composer = $this->loadJsonSafe($composerFile);
+        if (!is_array($lock)) {
+            return [null, '[UNKNOWN] Unable to parse composer.lock'];
+        }
+        if (!is_array($composer)) {
+            return [null, '[UNKNOWN] Unable to parse composer.json'];
+        }
+
+        $direct = [];
+        foreach (['require', 'require-dev'] as $section) {
+            foreach ((array)($composer[$section] ?? []) as $name => $_constraint) {
+                $name = strtolower((string)$name);
+                if (str_contains($name, '/')) {
+                    $direct[$name] = true;
                 }
             }
         }
 
-        if ($sus) {
-            $msg = 'Vulnerable: ' . implode('; ', array_slice($sus, 0, 20));
-            return [false, $msg, $sus];
+        $installed = [];
+        $requiredBy = [];
+        foreach (['packages', 'packages-dev'] as $section) {
+            foreach ((array)($lock[$section] ?? []) as $package) {
+                if (!is_array($package) || !is_string($package['name'] ?? null)) {
+                    continue;
+                }
+                $name = strtolower($package['name']);
+                $installed[$name] = true;
+                foreach ((array)($package['require'] ?? []) as $dependency => $_constraint) {
+                    $dependency = strtolower((string)$dependency);
+                    if (!str_contains($dependency, '/')) {
+                        continue;
+                    }
+                    $requiredBy[$dependency][] = $name;
+                }
+            }
         }
-        return [true, "No vulnerable packages according to CVE data (" . count($installed) . " pkgs)"];
+
+        $transitive = array_values(array_diff(array_keys($installed), array_keys($direct)));
+        sort($transitive, SORT_STRING);
+        if ($transitive === []) {
+            return [
+                true,
+                'No transitive Composer dependencies found',
+                [
+                    'direct_packages' => array_keys($direct),
+                    'transitive_packages' => [],
+                ],
+            ];
+        }
+
+        $args['package_names'] = $transitive;
+        $args['package_scope'] = 'transitive';
+        $result = $this->auditApi($args);
+        $evidence = is_array($result[2] ?? null) ? $result[2] : [];
+        $evidence['direct_packages'] = array_keys($direct);
+        $evidence['transitive_packages'] = $transitive;
+
+        if (is_array($evidence['findings'] ?? null)) {
+            foreach ($evidence['findings'] as &$finding) {
+                if (!is_array($finding)) {
+                    continue;
+                }
+                $package = strtolower((string)($finding['package'] ?? ''));
+                $parents = array_values(array_unique($requiredBy[$package] ?? []));
+                sort($parents, SORT_STRING);
+                $finding['required_by'] = $parents;
+            }
+            unset($finding);
+
+            $visible = array_slice($evidence['findings'], 0, 20);
+            $message = 'Vulnerable transitive dependencies: ' . implode('; ', array_map(
+                static function (array $finding): string {
+                    $text = (string)($finding['package'] ?? 'unknown-package')
+                        . '@' . (string)($finding['version'] ?? 'unknown-version')
+                        . ' -> ' . (string)($finding['advisory'] ?? 'unknown-advisory');
+                    $parents = (array)($finding['required_by'] ?? []);
+                    if ($parents !== []) {
+                        $text .= ', required by ' . implode(', ', $parents);
+                    }
+                    if (is_string($finding['fixed'] ?? null) && $finding['fixed'] !== '') {
+                        $text .= ', fix >= ' . $finding['fixed'];
+                    }
+                    return $text;
+                },
+                $visible
+            ));
+            if (count($evidence['findings']) > count($visible)) {
+                $message .= '; +' . (count($evidence['findings']) - count($visible)) . ' more';
+            }
+            return [false, $message, $evidence];
+        }
+
+        return [$result[0] ?? null, (string)($result[1] ?? ''), $evidence];
+    }
+
+    public function constraintsConflictApi(array $args): array
+    {
+        $composerFile = $this->ctx->abs($args['json_file'] ?? 'composer.json');
+        $lockFile = $this->ctx->abs($args['lock_file'] ?? 'composer.lock');
+        if (!is_file($composerFile)) {
+            return [null, '[UNKNOWN] composer.json not found'];
+        }
+        if (!is_file($lockFile)) {
+            return [null, '[UNKNOWN] composer.lock not found'];
+        }
+
+        $composer = $this->loadJsonSafe($composerFile);
+        $lock = $this->loadJsonSafe($lockFile);
+        if (!is_array($composer)) {
+            return [null, '[UNKNOWN] Unable to parse composer.json'];
+        }
+        if (!is_array($lock)) {
+            return [null, '[UNKNOWN] Unable to parse composer.lock'];
+        }
+
+        $audit = $this->auditApi($args);
+        if (($audit[0] ?? null) !== false) {
+            return $audit;
+        }
+
+        $evidence = is_array($audit[2] ?? null) ? $audit[2] : [];
+        $findings = is_array($evidence['findings'] ?? null) ? $evidence['findings'] : [];
+        $constraintsByPackage = [];
+
+        foreach (['require', 'require-dev'] as $section) {
+            foreach ((array)($composer[$section] ?? []) as $package => $constraint) {
+                $package = strtolower((string)$package);
+                if (!str_contains($package, '/') || !is_string($constraint)) {
+                    continue;
+                }
+                $constraintsByPackage[$package][] = [
+                    'source' => 'root:' . $section,
+                    'constraint' => $constraint,
+                ];
+            }
+        }
+
+        foreach (['packages', 'packages-dev'] as $section) {
+            foreach ((array)($lock[$section] ?? []) as $parent) {
+                if (!is_array($parent) || !is_string($parent['name'] ?? null)) {
+                    continue;
+                }
+                $parentName = strtolower($parent['name']);
+                foreach ((array)($parent['require'] ?? []) as $package => $constraint) {
+                    $package = strtolower((string)$package);
+                    if (!str_contains($package, '/') || !is_string($constraint)) {
+                        continue;
+                    }
+                    $constraintsByPackage[$package][] = [
+                        'source' => $parentName,
+                        'constraint' => $constraint,
+                    ];
+                }
+            }
+        }
+
+        $parser = new \Composer\Semver\VersionParser();
+        $blocked = [];
+        $allowed = [];
+        $notApplicable = [];
+        $errors = [];
+
+        foreach ($findings as $finding) {
+            if (!is_array($finding)) {
+                continue;
+            }
+            $package = strtolower((string)($finding['package'] ?? ''));
+            $fixed = ltrim((string)($finding['fixed'] ?? ''), 'vV');
+            if ($package === '' || $fixed === '') {
+                $notApplicable[] = $finding + [
+                    'reason' => 'no fixed version published; no available security update can be blocked',
+                ];
+                continue;
+            }
+
+            $requirements = $constraintsByPackage[$package] ?? [];
+            if ($requirements === []) {
+                $notApplicable[] = $finding + [
+                    'reason' => 'no requiring constraint found; no blocking constraint identified',
+                    'required_safe_range' => '>=' . $fixed,
+                ];
+                continue;
+            }
+
+            try {
+                $parsed = [];
+                foreach ($requirements as $requirement) {
+                    $parsed[] = $parser->parseConstraints($requirement['constraint']);
+                }
+                $combined = count($parsed) === 1
+                    ? $parsed[0]
+                    : new \Composer\Semver\Constraint\MultiConstraint($parsed, true);
+                $safeRange = $parser->parseConstraints('>=' . $fixed);
+                $allowsSafeVersion = \Composer\Semver\Intervals::haveIntersections($combined, $safeRange);
+            } catch (\Throwable $exception) {
+                $errors[] = $finding + [
+                    'reason' => 'unable to parse constraint: ' . $exception->getMessage(),
+                    'requirements' => $requirements,
+                ];
+                continue;
+            }
+
+            $item = $finding + [
+                'requirements' => $requirements,
+                'required_safe_range' => '>=' . $fixed,
+            ];
+            if ($allowsSafeVersion) {
+                $allowed[] = $item;
+            } else {
+                $blocked[] = $item;
+            }
+        }
+
+        $evidence['blocked'] = $blocked;
+        $evidence['allowed'] = $allowed;
+        $evidence['not_applicable'] = $notApplicable;
+        $evidence['errors'] = $errors;
+
+        if ($blocked !== []) {
+            $visible = array_slice($blocked, 0, 20);
+            $message = 'Composer constraints block security updates: ' . implode('; ', array_map(
+                static function (array $item): string {
+                    $requirements = array_map(
+                        static fn(array $requirement): string => $requirement['source']
+                            . ' requires ' . $requirement['constraint'],
+                        (array)($item['requirements'] ?? [])
+                    );
+                    return (string)($item['package'] ?? 'unknown-package')
+                        . '@' . (string)($item['version'] ?? 'unknown-version')
+                        . ' needs ' . (string)($item['required_safe_range'] ?? '')
+                        . ' but ' . implode(', ', $requirements);
+                },
+                $visible
+            ));
+            if (count($blocked) > count($visible)) {
+                $message .= '; +' . (count($blocked) - count($visible)) . ' more';
+            }
+            return [false, $message, $evidence];
+        }
+
+        if ($errors !== []) {
+            $visible = array_slice($errors, 0, 10);
+            return [
+                null,
+                '[UNKNOWN] Unable to evaluate Composer constraints: ' . implode('; ', array_map(
+                    static fn(array $item): string => (string)($item['package'] ?? 'unknown-package')
+                        . '@' . (string)($item['version'] ?? 'unknown-version')
+                        . ' (' . (string)($item['reason'] ?? 'unknown error') . ')',
+                    $visible
+                )),
+                $evidence,
+            ];
+        }
+
+        $suffix = $notApplicable !== []
+            ? '; ' . count($notApplicable) . ' finding(s) had no applicable blocking constraint'
+            : '';
+        return [
+            true,
+            'Composer constraints allow the required security update ranges' . $suffix,
+            $evidence,
+        ];
+    }
+
+    private function isKnownExploitedAdvisory(array $advisory): bool
+    {
+        if (($advisory['database_specific']['known_exploited'] ?? false) === true) {
+            return true;
+        }
+        if (!empty($advisory['source']['kev'])) {
+            return true;
+        }
+
+        foreach ((array)($advisory['references'] ?? []) as $reference) {
+            $url = strtolower((string)($reference['url'] ?? ''));
+            if ($url !== ''
+                && str_contains($url, 'cisa.gov')
+                && (str_contains($url, 'known-exploited') || str_contains($url, '/kev'))
+            ) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private function isAllowedAdvisoryEndpoint(string $endpoint): bool
+    {
+        $parts = parse_url($endpoint);
+        if (!is_array($parts) || empty($parts['scheme']) || empty($parts['host'])) {
+            return false;
+        }
+
+        $scheme = strtolower((string)$parts['scheme']);
+        if ($scheme === 'https') {
+            return true;
+        }
+
+        $host = strtolower(trim((string)$parts['host'], '[]'));
+        return $scheme === 'http' && in_array($host, ['localhost', '127.0.0.1', '::1'], true);
+    }
+
+    private function canFallbackToPrivateHttp(string $endpoint): bool
+    {
+        $parts = parse_url($endpoint);
+        if (
+            !is_array($parts)
+            || strtolower((string)($parts['scheme'] ?? '')) !== 'https'
+            || empty($parts['host'])
+        ) {
+            return false;
+        }
+
+        $host = strtolower(trim((string)$parts['host'], '[]'));
+        if (in_array($host, ['localhost', '127.0.0.1', '::1'], true)) {
+            return true;
+        }
+
+        $addresses = gethostbynamel($host);
+        if (!is_array($addresses) || $addresses === []) {
+            return false;
+        }
+
+        foreach ($addresses as $address) {
+            if ($this->isPrivateOrLoopbackIpv4($address)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private function isPrivateOrLoopbackIpv4(string $address): bool
+    {
+        $ip = ip2long($address);
+        if ($ip === false) {
+            return false;
+        }
+        $ip = (int)sprintf('%u', $ip);
+
+        foreach ([
+            ['10.0.0.0', '10.255.255.255'],
+            ['127.0.0.0', '127.255.255.255'],
+            ['169.254.0.0', '169.254.255.255'],
+            ['172.16.0.0', '172.31.255.255'],
+            ['192.168.0.0', '192.168.255.255'],
+        ] as [$start, $end]) {
+            $rangeStart = (int)sprintf('%u', ip2long($start));
+            $rangeEnd = (int)sprintf('%u', ip2long($end));
+            if ($ip >= $rangeStart && $ip <= $rangeEnd) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private function postJson(string $url, array $payload, int $timeoutMs, string $token = ''): array
+    {
+        $json = json_encode($payload, JSON_UNESCAPED_SLASHES);
+        if (!is_string($json)) {
+            return [false, 'Unable to encode request JSON', []];
+        }
+
+        $headers = [
+            'Accept: application/json',
+            'Content-Type: application/json',
+            'User-Agent: Magebean-CLI/1.0',
+        ];
+        if ($token !== '') {
+            $headers[] = 'Authorization: Bearer ' . $token;
+        }
+
+        if (function_exists('curl_init')) {
+            $ch = curl_init($url);
+            curl_setopt_array($ch, [
+                CURLOPT_POST => true,
+                CURLOPT_POSTFIELDS => $json,
+                CURLOPT_HTTPHEADER => $headers,
+                CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_TIMEOUT_MS => $timeoutMs,
+                CURLOPT_CONNECTTIMEOUT_MS => min($timeoutMs, 5000),
+                CURLOPT_ENCODING => '',
+            ]);
+            $body = curl_exec($ch);
+            if ($body === false) {
+                $message = curl_error($ch);
+                curl_close($ch);
+                return [false, $message !== '' ? $message : 'cURL request failed', []];
+            }
+            $status = (int)curl_getinfo($ch, CURLINFO_RESPONSE_CODE);
+            curl_close($ch);
+            return [true, '', ['status' => $status, 'body' => (string)$body]];
+        }
+
+        $context = stream_context_create([
+            'http' => [
+                'method' => 'POST',
+                'header' => implode("\r\n", $headers),
+                'content' => $json,
+                'ignore_errors' => true,
+                'timeout' => max(1, (int)ceil($timeoutMs / 1000)),
+            ],
+        ]);
+        $body = @file_get_contents($url, false, $context);
+        $rawHeaders = is_array($http_response_header ?? null) ? $http_response_header : [];
+        $status = 0;
+        foreach ($rawHeaders as $header) {
+            if (preg_match('~^HTTP/\S+\s+(?P<status>\d{3})~i', (string)$header, $match) === 1) {
+                $status = (int)$match['status'];
+            }
+        }
+        if ($body === false) {
+            return [false, 'HTTP stream request failed', ['status' => $status]];
+        }
+
+        return [true, '', ['status' => $status, 'body' => (string)$body]];
     }
 
     // helpers
@@ -354,7 +1344,7 @@ final class ComposerCheck
 
         // ===== 1) Xác định root & vendor-dir =====
         // Root tiêu chuẩn: thư mục chứa lock
-        $root = rtrim(str_replace('\\', '/', dirname($lockPath)), '/'); 
+        $root = rtrim(str_replace('\\', '/', dirname($lockPath)), '/');
         $composerJsonPath = $root . '/composer.json';
         $vendorDirCfg = null;
         if (is_file($composerJsonPath)) {
@@ -676,16 +1666,27 @@ final class ComposerCheck
 
         if (!is_file($lock)) return [null, "[UNKNOWN] composer.lock not found"];
 
-        // 1) Đọc lockfile (map tên gói -> tồn tại)
+        // 1) Read installed Magento extension packages.
         $lockJson = json_decode((string)@file_get_contents($lock), true);
         if (!is_array($lockJson)) {
             return [null, "[UNKNOWN] Unable to parse composer.lock"];
         }
         $pkgs = array_merge($lockJson['packages'] ?? [], $lockJson['packages-dev'] ?? []);
         $installedNames = [];
+        $extensionPackages = [];
+        $installedVersions = [];
         foreach ($pkgs as $p) {
             if (!isset($p['name'])) continue;
-            $installedNames[(string)$p['name']] = true;
+            $name = strtolower((string)$p['name']);
+            $installedNames[$name] = true;
+            $version = ltrim((string)($p['version'] ?? ''), 'vV');
+            if ($version !== '') {
+                $installedVersions[$name] = $version;
+            }
+            $type = strtolower((string)($p['type'] ?? ''));
+            if ($type === 'magento2-module' && !$this->isAdobeCorePackage($name)) {
+                $extensionPackages[$name] = true;
+            }
         }
 
         // 2) Defaults + override qua meta.json (nếu có) + override qua $args (nếu truyền)
@@ -730,20 +1731,16 @@ final class ComposerCheck
             ],
             // webhooks / integrations
             'webhook_integration' => [
-                'webhook',
-                'callback',
-                'notify',
-                'ipn',
-                'webapi\.xml',
-                'routes\.xml',
-                'Controller[/\\\\](Webhook|Callback|Notify)'
+                '\bwebhook\b',
+                '\bcallback\b',
+                '\bipn\b',
+                'Controller[/\\\\](Webhook|Callback|Notify)',
             ],
             // remote http calls
             'remote_http' => [
                 'Http\\\\Client',
                 '\bcurl(_init|_exec|_setopt)\b',
                 'Guzzle\\\\Http|GuzzleHttp',
-                'ClientInterface',
                 'file_get_contents\s*\(\s*[\'"]https?://'
             ],
         ];
@@ -768,12 +1765,44 @@ final class ComposerCheck
             }
         }
 
-        // 3) Roots để quét
+        // 3) Scan custom modules and installed non-core Magento extension packages only.
         $roots = [];
+        $moduleNamesBySubject = [];
         $appCode = $this->ctx->abs('app/code');
         if (is_dir($appCode)) $roots[] = $appCode;
         $vendorDir = $this->ctx->abs('vendor');
-        if (is_dir($vendorDir)) $roots[] = $vendorDir;
+        if (is_dir($vendorDir)) {
+            foreach (array_keys($extensionPackages) as $package) {
+                $packageRoot = $vendorDir . '/' . $package;
+                if (is_dir($packageRoot)) {
+                    $roots[] = $packageRoot;
+                    $moduleNamesBySubject[$package] = $this->magentoModuleNamesForRoot($packageRoot);
+                }
+            }
+        }
+
+        if ($roots === []) {
+            if ($extensionPackages !== []) {
+                return [
+                    null,
+                    '[UNKNOWN] Magento extension source is unavailable; vendor packages from composer.lock cannot be inspected',
+                    [
+                        'extension_packages' => array_keys($extensionPackages),
+                        'scan_roots' => [],
+                    ],
+                ];
+            }
+            return [
+                true,
+                'No custom or third-party Magento modules found to inspect',
+                [
+                    'extension_packages' => [],
+                    'files_scanned' => 0,
+                    'subjects_count' => 0,
+                    'items' => [],
+                ],
+            ];
+        }
 
         // 4) Quét và gắn tag
         $maxFiles = (int)($args['max_files'] ?? 20000);
@@ -800,18 +1829,1415 @@ final class ComposerCheck
         }
         unset($s);
 
-        $msg = "Risk-surface tagging: {$scan['files_scanned']} files scanned; "
-            . count($subjects) . " subjects tagged";
+        if ($subjects === []) {
+            return [
+                true,
+                "No high-risk surfaces detected in {$scan['files_scanned']} inspected files",
+                [
+                    'scan_roots' => array_values($roots),
+                    'extension_packages' => array_keys($extensionPackages),
+                    'files_scanned' => $scan['files_scanned'],
+                    'subjects_count' => 0,
+                    'items' => [],
+                ],
+            ];
+        }
+
+        $enabledModules = $this->enabledMagentoModules();
+        if ($enabledModules === null) {
+            return [
+                null,
+                '[UNKNOWN] Unable to determine enabled Magento modules from app/etc/config.php',
+                [
+                    'scan_roots' => array_values($roots),
+                    'extension_packages' => array_keys($extensionPackages),
+                    'files_scanned' => $scan['files_scanned'],
+                    'subjects_count' => count($subjects),
+                    'items' => array_values($subjects),
+                ],
+            ];
+        }
+
+        $activeSubjects = [];
+        foreach ($subjects as $subject => $item) {
+            $moduleNames = $moduleNamesBySubject[$subject] ?? [$subject];
+            $activeModules = array_values(array_filter(
+                $moduleNames,
+                static fn(string $module): bool => isset($enabledModules[$module])
+            ));
+            $item['module_names'] = $moduleNames;
+            $item['active_modules'] = $activeModules;
+            $item['enabled'] = $activeModules !== [];
+            $subjects[$subject] = $item;
+            if ($item['enabled']) {
+                $activeSubjects[$subject] = $item;
+            }
+        }
+
+        if ($activeSubjects === []) {
+            return [
+                true,
+                'High-risk surfaces were found only in disabled modules',
+                [
+                    'scan_roots' => array_values($roots),
+                    'extension_packages' => array_keys($extensionPackages),
+                    'files_scanned' => $scan['files_scanned'],
+                    'subjects_count' => count($subjects),
+                    'active_subjects_count' => 0,
+                    'items' => array_values($subjects),
+                ],
+            ];
+        }
+
+        $statusPackages = [];
+        foreach (array_keys($activeSubjects) as $subject) {
+            if (isset($installedVersions[$subject])) {
+                $statusPackages[] = [
+                    'name' => $subject,
+                    'version' => $installedVersions[$subject],
+                ];
+            }
+        }
+
+        $statuses = [];
+        if ($statusPackages !== []) {
+            [$statusOk, $statusMessage, $statuses] = $this->fetchPackageStatuses($args, $statusPackages);
+            if (!$statusOk) {
+                return [
+                    null,
+                    '[UNKNOWN] Package status API request failed: ' . $statusMessage,
+                    [
+                        'active_subjects' => array_keys($activeSubjects),
+                        'packages' => $statusPackages,
+                    ],
+                ];
+            }
+        }
+
+        $reportable = [];
+        foreach ($activeSubjects as $subject => $item) {
+            $status = $statuses[$subject] ?? null;
+            $item['package_status'] = $status;
+            $item['outdated'] = is_array($status) && !empty($status['outdated']);
+            $item['abandoned'] = is_array($status) && !empty($status['abandoned']);
+            $activeSubjects[$subject] = $item;
+            $subjects[$subject] = $item;
+            if ($item['outdated'] || $item['abandoned']) {
+                $reportable[$subject] = $item;
+            }
+        }
+
         $evidence = [
+            'scan_roots' => array_values($roots),
+            'extension_packages' => array_keys($extensionPackages),
             'files_scanned' => $scan['files_scanned'],
             'subjects_count' => count($subjects),
+            'active_subjects_count' => count($activeSubjects),
+            'reportable_subjects_count' => count($reportable),
             'items' => array_values($subjects),
         ];
 
-        // Tagging chỉ để ưu tiên review → trả PASS (true). Nếu muốn coi là cảnh báo, đổi thành false khi có subject.
-        return [true, $msg, $evidence];
+        if ($reportable !== []) {
+            $visible = array_slice(array_values($reportable), 0, 20);
+            $details = array_map(
+                static function (array $subject): string {
+                    $status = is_array($subject['package_status'] ?? null)
+                        ? $subject['package_status']
+                        : [];
+                    $reason = !empty($subject['abandoned'])
+                        ? 'abandoned'
+                        : 'outdated ' . ($status['installed'] ?? '?') . ' < ' . ($status['latest'] ?? '?');
+                    return $subject['subject']
+                        . ' [' . implode(', ', $subject['tags']) . '; ' . $reason . ']';
+                },
+                $visible
+            );
+            $message = 'Enabled high-risk modules require attention: ' . implode('; ', $details);
+            if (count($reportable) > count($visible)) {
+                $message .= '; +' . (count($reportable) - count($visible)) . ' more';
+            }
+            return [false, $message, $evidence];
+        }
+
+        return [
+            true,
+            'Enabled high-risk modules are current; disabled or unversioned modules were not reported',
+            $evidence,
+        ];
     }
 
+    private function enabledMagentoModules(): ?array
+    {
+        $path = $this->ctx->abs('app/etc/config.php');
+        if (!is_file($path) || !is_readable($path)) {
+            return null;
+        }
+
+        try {
+            $config = (static fn(string $file): mixed => include $file)($path);
+        } catch (\Throwable) {
+            return null;
+        }
+        if (!is_array($config) || !is_array($config['modules'] ?? null)) {
+            return null;
+        }
+
+        $enabled = [];
+        foreach ($config['modules'] as $module => $state) {
+            if ((int)$state === 1) {
+                $enabled[(string)$module] = true;
+            }
+        }
+        return $enabled;
+    }
+
+    private function magentoModuleNamesForRoot(string $root): array
+    {
+        $registration = rtrim($root, '/') . '/registration.php';
+        if (!is_file($registration)) {
+            return [];
+        }
+        $content = @file_get_contents($registration);
+        if (!is_string($content)) {
+            return [];
+        }
+
+        preg_match_all(
+            '/ComponentRegistrar::MODULE\s*,\s*[\'"]([^\'"]+)[\'"]/',
+            $content,
+            $matches
+        );
+        return array_values(array_unique(array_map('strval', $matches[1] ?? [])));
+    }
+
+    private function fetchPackageStatuses(array $args, array $packages): array
+    {
+        $endpoint = trim((string)($args['status_endpoint'] ?? $this->ctx->get(
+            'package_status_api_url',
+            'https://api.magebean.com/v1/packages/status'
+        )));
+        if (!$this->isAllowedAdvisoryEndpoint($endpoint)) {
+            return [false, 'Invalid package status API endpoint; HTTPS is required', []];
+        }
+
+        $timeoutMs = max(1000, (int)($args['timeout_ms'] ?? 10000));
+        $batchSize = max(1, min(1000, (int)($args['status_batch_size'] ?? $args['batch_size'] ?? 500)));
+        $token = trim((string)($args['token'] ?? $this->ctx->get(
+            'package_status_api_token',
+            getenv('MAGEBEAN_PACKAGE_STATUS_API_TOKEN') ?: ''
+        )));
+
+        $byName = [];
+        foreach (array_chunk($packages, $batchSize) as $batchIndex => $batch) {
+            $requestEndpoint = $endpoint;
+            [$ok, $message, $response] = $this->postJson(
+                $requestEndpoint,
+                [
+                    'schema_version' => 'magebean-package-status-request-v1',
+                    'packages' => $batch,
+                ],
+                $timeoutMs,
+                $token
+            );
+            if (!$ok
+                && !empty($args['allow_private_http_fallback'])
+                && $token === ''
+                && $this->canFallbackToPrivateHttp($endpoint)
+            ) {
+                $requestEndpoint = 'http://' . substr($endpoint, strlen('https://'));
+                [$ok, $message, $response] = $this->postJson(
+                    $requestEndpoint,
+                    [
+                        'schema_version' => 'magebean-package-status-request-v1',
+                        'packages' => $batch,
+                    ],
+                    $timeoutMs,
+                    $token
+                );
+            }
+            if (!$ok) {
+                return [
+                    false,
+                    $message . ' (batch ' . ($batchIndex + 1) . ', packages ' . count($batch) . ')',
+                    [],
+                ];
+            }
+
+            $status = (int)($response['status'] ?? 0);
+            $decoded = json_decode((string)($response['body'] ?? ''), true);
+            if ($status !== 200 || !is_array($decoded)) {
+                return [
+                    false,
+                    'Package status API returned HTTP ' . $status
+                        . ' (batch ' . ($batchIndex + 1) . ', packages ' . count($batch) . ')',
+                    [],
+                ];
+            }
+            if (($decoded['schema_version'] ?? null) !== 'magebean-package-status-response-v1') {
+                return [
+                    false,
+                    'Unsupported package status API response schema'
+                        . ' (batch ' . ($batchIndex + 1) . ')',
+                    [],
+                ];
+            }
+
+            foreach ((array)($decoded['packages'] ?? []) as $package) {
+                if (is_array($package) && is_string($package['name'] ?? null)) {
+                    $byName[strtolower($package['name'])] = $package;
+                }
+            }
+        }
+        return [true, 'Package status loaded (' . count($packages) . ' packages in '
+            . (int)ceil(count($packages) / $batchSize) . ' batch(es))', $byName];
+    }
+
+    public function yankedApi(array $args): array
+    {
+        $lockFile = $this->ctx->abs($args['lock_file'] ?? 'composer.lock');
+        if (!is_file($lockFile)) {
+            return [null, '[UNKNOWN] composer.lock not found'];
+        }
+
+        $installed = $this->readLockPackages($lockFile);
+        if (!is_array($installed) || $installed === []) {
+            return [null, '[UNKNOWN] Unable to parse composer.lock'];
+        }
+
+        $packages = [];
+        foreach ($installed as $name => $info) {
+            $version = ltrim((string)($info['version'] ?? ''), 'vV');
+            if ($version !== '') {
+                $packages[] = ['name' => (string)$name, 'version' => $version];
+            }
+        }
+        if ($packages === []) {
+            return [true, 'No packages in composer.lock (nothing to check)'];
+        }
+
+        [$ok, $message, $statuses] = $this->fetchPackageStatuses($args, $packages);
+        if (!$ok) {
+            return [null, '[UNKNOWN] Package status API request failed: ' . $message];
+        }
+
+        $hits = array_values(array_filter(
+            $statuses,
+            static fn(array $status): bool => !empty($status['yanked'])
+        ));
+        $evidence = [
+            'packages_checked' => count($packages),
+            'yanked_packages' => $hits,
+        ];
+        if ($hits === []) {
+            return [
+                true,
+                'No installed package versions are yanked or withdrawn',
+                $evidence,
+            ];
+        }
+
+        $visible = array_slice($hits, 0, 20);
+        $text = array_map(
+            static fn(array $status): string => (string)($status['name'] ?? 'unknown-package')
+                . '@' . (string)($status['installed'] ?? 'unknown-version'),
+            $visible
+        );
+        $resultMessage = 'Yanked or withdrawn package versions installed: ' . implode('; ', $text);
+        if (count($hits) > count($visible)) {
+            $resultMessage .= '; +' . (count($hits) - count($visible)) . ' more';
+        }
+        return [false, $resultMessage, $evidence];
+    }
+
+    public function marketplaceOutdatedApi(array $args): array
+    {
+        $lockFile = $this->ctx->abs($args['lock_file'] ?? 'composer.lock');
+        if (!is_file($lockFile)) {
+            return [null, '[UNKNOWN] composer.lock not found'];
+        }
+
+        $lock = json_decode((string)@file_get_contents($lockFile), true);
+        if (!is_array($lock)) {
+            return [null, '[UNKNOWN] Unable to parse composer.lock'];
+        }
+
+        $packages = [];
+        foreach (array_merge($lock['packages'] ?? [], $lock['packages-dev'] ?? []) as $package) {
+            if (!is_array($package)
+                || ($package['type'] ?? '') !== 'magento2-module'
+                || !is_string($package['name'] ?? null)
+                || !is_string($package['version'] ?? null)
+                || $this->isAdobeCorePackage($package['name'])
+            ) {
+                continue;
+            }
+
+            $version = ltrim(trim($package['version']), 'vV');
+            if ($version !== '') {
+                $packages[] = [
+                    'name' => strtolower($package['name']),
+                    'version' => $version,
+                ];
+            }
+        }
+
+        if ($packages === []) {
+            return [
+                true,
+                'No third-party Magento Composer modules found in composer.lock',
+                ['packages_checked' => 0, 'scope' => 'non-core magento2-module packages'],
+            ];
+        }
+
+        [$ok, $message, $statuses] = $this->fetchPackageStatuses($args, $packages);
+        if (!$ok) {
+            return [
+                null,
+                '[UNKNOWN] Package status API request failed: ' . $message,
+                ['packages' => $packages],
+            ];
+        }
+
+        $maxAgeDays = max(1, (int)($args['max_age_days'] ?? 365));
+        $now = time();
+        $findings = [];
+        $unassessed = [];
+        $unclassified = [];
+        $excluded = [];
+        $assessed = [];
+
+        foreach ($packages as $package) {
+            $name = $package['name'];
+            $status = $statuses[$name] ?? null;
+            if (!is_array($status) || empty($status['classification_known'])) {
+                $unclassified[] = $package;
+                continue;
+            }
+            if (empty($status['marketplace'])) {
+                $excluded[] = [
+                    'name' => $name,
+                    'version' => $package['version'],
+                    'category' => $status['category'] ?? 'other',
+                ];
+                continue;
+            }
+            if (empty($status['known'])) {
+                $unassessed[] = $package;
+                continue;
+            }
+
+            $latestDate = is_string($status['latest_date'] ?? null)
+                ? trim($status['latest_date'])
+                : '';
+            $latestTimestamp = $latestDate !== '' ? strtotime($latestDate) : false;
+            $ageDays = $latestTimestamp !== false
+                ? max(0, (int)floor(($now - $latestTimestamp) / 86400))
+                : null;
+            $outdated = !empty($status['outdated']);
+            $stale = $ageDays !== null && $ageDays > $maxAgeDays;
+
+            $item = $status;
+            $item['age_days'] = $ageDays;
+            $item['stale'] = $stale;
+            $assessed[] = $item;
+            if ($outdated || $stale) {
+                $findings[] = $item;
+            }
+        }
+
+        $evidence = [
+            'scope' => 'API-classified Marketplace magento2-module packages',
+            'max_age_days' => $maxAgeDays,
+            'packages_checked' => count($packages),
+            'packages_excluded_by_category' => $excluded,
+            'packages_unclassified' => $unclassified,
+            'packages_assessed' => count($assessed),
+            'packages_unassessed' => $unassessed,
+            'findings' => $findings,
+        ];
+
+        if ($findings !== []) {
+            $visible = array_slice($findings, 0, 20);
+            $details = array_map(static function (array $status) use ($maxAgeDays): string {
+                $name = (string)($status['name'] ?? 'unknown-package');
+                $reasons = [];
+                if (!empty($status['outdated'])) {
+                    $reasons[] = (string)($status['installed'] ?? '?')
+                        . ' < ' . (string)($status['latest'] ?? '?');
+                }
+                if (!empty($status['stale'])) {
+                    $reasons[] = 'latest release is '
+                        . (string)($status['age_days'] ?? '?')
+                        . ' days old (limit ' . $maxAgeDays . ')';
+                }
+                return $name . ' [' . implode('; ', $reasons) . ']';
+            }, $visible);
+
+            $resultMessage = 'Third-party Magento modules require maintenance: ' . implode('; ', $details);
+            if (count($findings) > count($visible)) {
+                $resultMessage .= '; +' . (count($findings) - count($visible)) . ' more';
+            }
+            if ($unassessed !== []) {
+                $resultMessage .= '. Metadata unavailable for ' . count($unassessed) . ' additional module(s)';
+            }
+            if ($unclassified !== []) {
+                $resultMessage .= '. Classification unavailable for ' . count($unclassified) . ' additional module(s)';
+            }
+            return [false, $resultMessage, $evidence];
+        }
+
+        if ($unassessed !== [] || $unclassified !== []) {
+            $names = array_map(
+                static fn(array $package): string => $package['name'] . '@' . $package['version'],
+                array_slice(array_merge($unassessed, $unclassified), 0, 20)
+            );
+            $resultMessage = '[UNKNOWN] Marketplace classification or release metadata unavailable for: '
+                . implode('; ', $names);
+            $unknownCount = count($unassessed) + count($unclassified);
+            if ($unknownCount > count($names)) {
+                $resultMessage .= '; +' . ($unknownCount - count($names)) . ' more';
+            }
+            return [null, $resultMessage, $evidence];
+        }
+
+        if ($assessed === []) {
+            return [
+                true,
+                'No API-classified Marketplace extensions found in composer.lock',
+                $evidence,
+            ];
+        }
+
+        return [
+            true,
+            'Third-party Magento modules are current and have a release within the freshness window',
+            $evidence,
+        ];
+    }
+
+    public function directOutdatedApi(array $args): array
+    {
+        $lockFile = $this->ctx->abs($args['lock_file'] ?? 'composer.lock');
+        $jsonFile = $this->ctx->abs($args['json_file'] ?? 'composer.json');
+        if (!is_file($lockFile)) {
+            return [null, '[UNKNOWN] composer.lock not found'];
+        }
+        if (!is_file($jsonFile)) {
+            return [null, '[UNKNOWN] composer.json not found'];
+        }
+
+        $installed = $this->readLockPackages($lockFile);
+        if (!is_array($installed) || $installed === []) {
+            return [null, '[UNKNOWN] Unable to parse composer.lock'];
+        }
+        $composer = json_decode((string)@file_get_contents($jsonFile), true);
+        if (!is_array($composer)) {
+            return [null, '[UNKNOWN] Unable to parse composer.json'];
+        }
+
+        $sections = ['require'];
+        if (!array_key_exists('include_dev', $args) || !empty($args['include_dev'])) {
+            $sections[] = 'require-dev';
+        }
+        $direct = [];
+        foreach ($sections as $section) {
+            foreach ((array)($composer[$section] ?? []) as $name => $constraint) {
+                $name = strtolower(trim((string)$name));
+                if ($name === ''
+                    || $name === 'php'
+                    || str_starts_with($name, 'ext-')
+                    || str_starts_with($name, 'lib-')
+                    || in_array($name, ['composer-plugin-api', 'composer-runtime-api'], true)
+                ) {
+                    continue;
+                }
+                $direct[$name] = [
+                    'name' => $name,
+                    'constraint' => (string)$constraint,
+                    'section' => $section,
+                ];
+            }
+        }
+
+        if ($direct === []) {
+            return [
+                true,
+                'No direct Composer package dependencies found',
+                ['sections' => $sections, 'direct_dependencies' => []],
+            ];
+        }
+
+        $packages = [];
+        $unknown = [];
+        foreach ($direct as $name => $dependency) {
+            $info = $installed[$name] ?? null;
+            $version = is_array($info) ? trim((string)($info['version'] ?? '')) : '';
+            if ($version === '') {
+                $unknown[] = $dependency + ['reason' => 'not_present_in_composer_lock'];
+                continue;
+            }
+            $packages[] = [
+                'name' => $name,
+                'version' => ltrim($version, 'vV'),
+            ];
+        }
+
+        if ($packages === []) {
+            return [
+                null,
+                '[UNKNOWN] No direct dependencies could be resolved from composer.lock',
+                ['sections' => $sections, 'direct_dependencies' => array_values($direct), 'unknown' => $unknown],
+            ];
+        }
+
+        [$ok, $apiMessage, $statuses] = $this->fetchPackageStatuses($args, $packages);
+        if (!$ok) {
+            return [
+                null,
+                '[UNKNOWN] Package status API request failed: ' . $apiMessage,
+                ['packages' => $packages, 'unknown' => $unknown],
+            ];
+        }
+
+        $findings = [];
+        $current = [];
+        foreach ($packages as $package) {
+            $status = $statuses[$package['name']] ?? null;
+            $dependency = $direct[$package['name']];
+            if (!is_array($status)) {
+                $unknown[] = $dependency + [
+                    'installed' => $package['version'],
+                    'reason' => 'missing_status',
+                ];
+                continue;
+            }
+            if (empty($status['release_history_known'])) {
+                $unknown[] = $dependency + [
+                    'installed' => $package['version'],
+                    'reason' => 'release_history_unavailable',
+                ];
+                continue;
+            }
+            $latest = is_string($status['latest'] ?? null) ? trim($status['latest']) : '';
+            if ($latest === '') {
+                $unknown[] = $dependency + [
+                    'installed' => $package['version'],
+                    'reason' => 'latest_stable_version_unavailable',
+                ];
+                continue;
+            }
+
+            $item = $dependency + [
+                'installed' => $package['version'],
+                'latest' => $latest,
+                'latest_date' => is_string($status['latest_date'] ?? null)
+                    ? $status['latest_date']
+                    : null,
+            ];
+            if (!empty($status['outdated'])
+                || version_compare($package['version'], ltrim($latest, 'vV'), '<')
+            ) {
+                $findings[] = $item;
+            } else {
+                $current[] = $item;
+            }
+        }
+
+        $evidence = [
+            'scope' => $sections,
+            'direct_dependencies' => array_values($direct),
+            'packages_assessed' => count($current) + count($findings),
+            'packages_current' => $current,
+            'packages_outdated' => $findings,
+            'packages_unknown' => $unknown,
+        ];
+
+        if ($findings !== []) {
+            $details = array_map(
+                static fn(array $item): string => $item['section'] . ': '
+                    . $item['name'] . '@' . $item['installed']
+                    . ' -> latest ' . $item['latest']
+                    . ' (constraint ' . $item['constraint'] . ')',
+                $findings
+            );
+            $resultMessage = "Outdated direct dependencies:\n    - " . implode("\n    - ", $details);
+            if ($unknown !== []) {
+                $resultMessage .= "\n    Status unavailable for "
+                    . count($unknown) . ' additional direct dependency/dependencies';
+            }
+            return [false, $resultMessage, $evidence];
+        }
+
+        if ($unknown !== []) {
+            $details = array_map(static function (array $item): string {
+                $installed = isset($item['installed']) ? '@' . $item['installed'] : '';
+                return $item['section'] . ': ' . $item['name'] . $installed
+                    . ' (' . $item['reason'] . ')';
+            }, $unknown);
+            return [
+                null,
+                "[UNKNOWN] Direct dependency status unavailable for:\n    - "
+                    . implode("\n    - ", $details),
+                $evidence,
+            ];
+        }
+
+        return [
+            true,
+            'All ' . count($current) . ' direct dependencies use the latest stable release',
+            $evidence,
+        ];
+    }
+
+    public function vendorSupportApi(array $args): array
+    {
+        $lockFile = $this->ctx->abs($args['lock_file'] ?? 'composer.lock');
+        if (!is_file($lockFile)) {
+            return [null, '[UNKNOWN] composer.lock not found'];
+        }
+
+        $lock = json_decode((string)@file_get_contents($lockFile), true);
+        if (!is_array($lock)) {
+            return [null, '[UNKNOWN] Unable to parse composer.lock'];
+        }
+
+        $packages = [];
+        foreach (array_merge($lock['packages'] ?? [], $lock['packages-dev'] ?? []) as $package) {
+            if (!is_array($package)
+                || ($package['type'] ?? '') !== 'magento2-module'
+                || !is_string($package['name'] ?? null)
+                || !is_string($package['version'] ?? null)
+                || $this->isAdobeCorePackage($package['name'])
+            ) {
+                continue;
+            }
+
+            $version = ltrim(trim($package['version']), 'vV');
+            if ($version !== '') {
+                $packages[] = [
+                    'name' => strtolower($package['name']),
+                    'version' => $version,
+                ];
+            }
+        }
+
+        if ($packages === []) {
+            return [
+                true,
+                'No third-party Magento Composer modules found in composer.lock',
+                ['packages_checked' => 0],
+            ];
+        }
+
+        [$ok, $message, $statuses] = $this->fetchPackageStatuses($args, $packages);
+        if (!$ok) {
+            return [
+                null,
+                '[UNKNOWN] Package status API request failed: ' . $message,
+                ['packages' => $packages],
+            ];
+        }
+
+        $supported = [];
+        $unsupported = [];
+        $unknown = [];
+        $excluded = [];
+        foreach ($packages as $package) {
+            $status = $statuses[$package['name']] ?? null;
+            if (!is_array($status) || empty($status['classification_known'])) {
+                $unknown[] = $package + ['reason' => 'classification_unavailable'];
+                continue;
+            }
+            if (empty($status['marketplace'])) {
+                $excluded[] = $package + ['category' => $status['category'] ?? 'other'];
+                continue;
+            }
+
+            $item = [
+                'name' => $package['name'],
+                'installed' => $package['version'],
+                'status' => (string)($status['vendor_support_status'] ?? 'unknown'),
+                'reasons' => array_values(array_map(
+                    'strval',
+                    (array)($status['vendor_support_reasons'] ?? [])
+                )),
+            ];
+            if ($item['status'] === 'unsupported') {
+                $unsupported[] = $item;
+            } elseif ($item['status'] === 'active') {
+                $supported[] = $item;
+            } else {
+                $unknown[] = $item;
+            }
+        }
+
+        $evidence = [
+            'scope' => 'API-classified Marketplace magento2-module packages',
+            'packages_checked' => count($packages),
+            'packages_supported' => $supported,
+            'packages_unsupported' => $unsupported,
+            'packages_unknown' => $unknown,
+            'packages_excluded_by_category' => $excluded,
+        ];
+
+        if ($unsupported !== []) {
+            $visible = array_slice($unsupported, 0, 20);
+            $details = array_map(static function (array $item): string {
+                $reasons = $item['reasons'] !== [] ? implode(', ', $item['reasons']) : 'unsupported';
+                return $item['name'] . '@' . $item['installed'] . ' [' . $reasons . ']';
+            }, $visible);
+            $resultMessage = 'Marketplace extensions without active vendor support: '
+                . implode('; ', $details);
+            if (count($unsupported) > count($visible)) {
+                $resultMessage .= '; +' . (count($unsupported) - count($visible)) . ' more';
+            }
+            if ($unknown !== []) {
+                $resultMessage .= '. Support evidence unavailable for '
+                    . count($unknown) . ' additional extension(s)';
+            }
+            return [false, $resultMessage, $evidence];
+        }
+
+        if ($unknown !== []) {
+            $visible = array_slice($unknown, 0, 20);
+            $details = array_map(
+                static fn(array $item): string => (string)($item['name'] ?? 'unknown-package')
+                    . '@' . (string)($item['installed'] ?? $item['version'] ?? 'unknown-version'),
+                $visible
+            );
+            $resultMessage = '[UNKNOWN] Vendor support evidence unavailable for: '
+                . implode('; ', $details);
+            if (count($unknown) > count($visible)) {
+                $resultMessage .= '; +' . (count($unknown) - count($visible)) . ' more';
+            }
+            return [null, $resultMessage, $evidence];
+        }
+
+        if ($supported === []) {
+            return [
+                true,
+                'No API-classified Marketplace extensions found in composer.lock',
+                $evidence,
+            ];
+        }
+
+        return [
+            true,
+            count($supported) . ' Marketplace extension(s) have active vendor support evidence',
+            $evidence,
+        ];
+    }
+
+    public function abandonedApi(array $args): array
+    {
+        $lockFile = $this->ctx->abs($args['lock_file'] ?? 'composer.lock');
+        if (!is_file($lockFile)) {
+            return [null, '[UNKNOWN] composer.lock not found'];
+        }
+
+        $installed = $this->readLockPackages($lockFile);
+        if (!is_array($installed) || $installed === []) {
+            return [null, '[UNKNOWN] Unable to parse composer.lock'];
+        }
+
+        $packageTypes = is_array($args['package_types'] ?? null)
+            ? array_values(array_filter(array_map(
+                static fn(mixed $type): string => strtolower(trim((string)$type)),
+                $args['package_types']
+            )))
+            : [];
+        $packages = [];
+        foreach ($installed as $name => $info) {
+            $type = strtolower(trim((string)($info['type'] ?? '')));
+            if ($packageTypes !== [] && !in_array($type, $packageTypes, true)) {
+                continue;
+            }
+            $version = ltrim(trim((string)($info['version'] ?? '')), 'vV');
+            if ($version !== '') {
+                $packages[] = [
+                    'name' => strtolower((string)$name),
+                    'version' => $version,
+                    'type' => $type,
+                ];
+            }
+        }
+        if ($packages === []) {
+            return [
+                true,
+                $packageTypes === []
+                    ? 'No packages in composer.lock (nothing to check)'
+                    : 'No installed packages match the requested Composer package types',
+                ['package_types' => $packageTypes, 'packages_checked' => 0],
+            ];
+        }
+
+        [$ok, $message, $statuses] = $this->fetchPackageStatuses($args, $packages);
+        if (!$ok) {
+            return [
+                null,
+                '[UNKNOWN] Package status API request failed: ' . $message,
+                ['package_types' => $packageTypes, 'packages' => $packages],
+            ];
+        }
+
+        $abandoned = [];
+        $unknown = [];
+        foreach ($packages as $package) {
+            $status = $statuses[$package['name']] ?? null;
+            if (!is_array($status) || empty($status['abandoned_status_known'])) {
+                $unknown[] = $package;
+                continue;
+            }
+            if (empty($status['abandoned'])) {
+                continue;
+            }
+
+            $abandoned[] = [
+                'name' => $package['name'],
+                'installed' => $package['version'],
+                'replacement' => is_string($status['replacement'] ?? null)
+                    && trim($status['replacement']) !== ''
+                        ? trim($status['replacement'])
+                        : null,
+            ];
+        }
+
+        $evidence = [
+            'package_types' => $packageTypes,
+            'packages_checked' => count($packages),
+            'abandoned_packages' => $abandoned,
+            'packages_unknown' => $unknown,
+        ];
+        if ($abandoned !== []) {
+            $details = array_map(static function (array $item): string {
+                $text = $item['name'] . '@' . $item['installed'];
+                if (is_string($item['replacement']) && $item['replacement'] !== '') {
+                    $text .= ' -> replace with ' . $item['replacement'];
+                }
+                return $text;
+            }, $abandoned);
+            $resultMessage = "Packages marked abandoned on Packagist:\n    - "
+                . implode("\n    - ", $details);
+            if ($unknown !== []) {
+                $resultMessage .= "\n    Abandoned status unavailable for "
+                    . count($unknown) . ' additional package(s)';
+            }
+            return [false, $resultMessage, $evidence];
+        }
+
+        if ($unknown !== []) {
+            $details = array_map(
+                static fn(array $package): string => $package['name'] . '@' . $package['version'],
+                $unknown
+            );
+            $resultMessage = "[UNKNOWN] Packagist abandoned status unavailable for:\n    - "
+                . implode("\n    - ", $details);
+            return [null, $resultMessage, $evidence];
+        }
+
+        return [
+            true,
+            $packageTypes === []
+                ? 'No installed packages are marked abandoned in the Packagist snapshot'
+                : 'No installed packages in the requested Composer type scope are marked abandoned',
+            $evidence,
+        ];
+    }
+
+    public function releaseRecencyApi(array $args): array
+    {
+        $lockFile = $this->ctx->abs($args['lock_file'] ?? 'composer.lock');
+        if (!is_file($lockFile)) {
+            return [null, '[UNKNOWN] composer.lock not found'];
+        }
+
+        $installed = $this->readLockPackages($lockFile);
+        if (!is_array($installed) || $installed === []) {
+            return [null, '[UNKNOWN] Unable to parse composer.lock'];
+        }
+
+        $packages = [];
+        foreach ($installed as $name => $info) {
+            $version = ltrim(trim((string)($info['version'] ?? '')), 'vV');
+            if ($version !== '') {
+                $packages[] = [
+                    'name' => strtolower((string)$name),
+                    'version' => $version,
+                ];
+            }
+        }
+        if ($packages === []) {
+            return [true, 'No packages in composer.lock (nothing to check)'];
+        }
+
+        [$ok, $message, $statuses] = $this->fetchPackageStatuses($args, $packages);
+        if (!$ok) {
+            return [
+                null,
+                '[UNKNOWN] Package status API request failed: ' . $message,
+                ['packages' => $packages],
+            ];
+        }
+
+        $months = max(1, (int)($args['months'] ?? 24));
+        $cutoff = (new \DateTimeImmutable('now'))->modify('-' . $months . ' months');
+        $now = time();
+        $tracked = [];
+        $stale = [];
+        $unknown = [];
+        $excluded = [];
+
+        foreach ($packages as $package) {
+            $status = $statuses[$package['name']] ?? null;
+            if (!is_array($status)) {
+                $unknown[] = $package + ['reason' => 'missing_status'];
+                continue;
+            }
+            if (empty($status['release_history_known'])) {
+                $excluded[] = $package + ['reason' => 'release_history_unavailable'];
+                continue;
+            }
+
+            $latestDate = is_string($status['latest_date'] ?? null)
+                ? trim($status['latest_date'])
+                : '';
+            try {
+                $latestAt = $latestDate !== '' ? new \DateTimeImmutable($latestDate) : null;
+            } catch (\Exception) {
+                $latestAt = null;
+            }
+            if ($latestAt === null) {
+                $unknown[] = $package + ['reason' => 'latest_date_invalid'];
+                continue;
+            }
+
+            $item = [
+                'name' => $package['name'],
+                'installed' => $package['version'],
+                'latest' => is_string($status['latest'] ?? null) ? $status['latest'] : null,
+                'latest_date' => $latestAt->format(DATE_ATOM),
+                'age_days' => max(0, (int)floor(($now - $latestAt->getTimestamp()) / 86400)),
+            ];
+            $tracked[] = $item;
+            if ($latestAt < $cutoff) {
+                $stale[] = $item;
+            }
+        }
+
+        $evidence = [
+            'months' => $months,
+            'cutoff' => $cutoff->format(DATE_ATOM),
+            'packages_checked' => count($packages),
+            'packages_tracked' => $tracked,
+            'packages_stale' => $stale,
+            'packages_unknown' => $unknown,
+            'packages_excluded_no_release_history' => $excluded,
+        ];
+
+        if ($stale !== []) {
+            $visible = array_slice($stale, 0, 20);
+            $details = array_map(static function (array $item): string {
+                $latest = is_string($item['latest'] ?? null) && $item['latest'] !== ''
+                    ? ' latest ' . $item['latest']
+                    : '';
+                return $item['name'] . '@' . $item['installed']
+                    . $latest
+                    . ', last release ' . $item['age_days'] . ' days ago';
+            }, $visible);
+            $resultMessage = 'Packagist-tracked packages without a release in the last '
+                . $months . " months:\n    - " . implode("\n    - ", $details);
+            if (count($stale) > count($visible)) {
+                $resultMessage .= "\n    - +" . (count($stale) - count($visible)) . ' more';
+            }
+            if ($unknown !== []) {
+                $resultMessage .= "\n    Release recency unavailable for "
+                    . count($unknown) . ' additional package(s)';
+            }
+            return [false, $resultMessage, $evidence];
+        }
+
+        if ($unknown !== []) {
+            $visible = array_slice($unknown, 0, 20);
+            $details = array_map(
+                static fn(array $package): string => $package['name'] . '@' . $package['version'],
+                $visible
+            );
+            $resultMessage = "[UNKNOWN] Release recency unavailable for:\n    - "
+                . implode("\n    - ", $details);
+            if (count($unknown) > count($visible)) {
+                $resultMessage .= "\n    - +" . (count($unknown) - count($visible)) . ' more';
+            }
+            return [null, $resultMessage, $evidence];
+        }
+
+        if ($tracked === []) {
+            return [
+                true,
+                'No Packagist release history is available for installed packages; nothing to assess',
+                $evidence,
+            ];
+        }
+
+        return [
+            true,
+            'Packagist-tracked packages have a release within the last ' . $months . ' months',
+            $evidence,
+        ];
+    }
+
+    public function repoArchivedApi(array $args): array
+    {
+        $lockFile = $this->ctx->abs($args['lock_file'] ?? 'composer.lock');
+        if (!is_file($lockFile)) {
+            return [null, '[UNKNOWN] composer.lock not found'];
+        }
+
+        $installed = $this->readLockPackages($lockFile);
+        if (!is_array($installed) || $installed === []) {
+            return [null, '[UNKNOWN] Unable to parse composer.lock'];
+        }
+
+        $packages = [];
+        foreach ($installed as $name => $info) {
+            $version = ltrim(trim((string)($info['version'] ?? '')), 'vV');
+            if ($version !== '') {
+                $packages[] = [
+                    'name' => strtolower((string)$name),
+                    'version' => $version,
+                    'repository_url' => is_string($info['source'] ?? null)
+                        ? trim($info['source'])
+                        : '',
+                ];
+            }
+        }
+        if ($packages === []) {
+            return [true, 'No packages in composer.lock (nothing to check)'];
+        }
+
+        [$ok, $message, $statuses] = $this->fetchPackageStatuses($args, $packages);
+        if (!$ok) {
+            return [
+                null,
+                '[UNKNOWN] Package status API request failed: ' . $message,
+                ['packages' => $packages],
+            ];
+        }
+
+        $findings = [];
+        $unknown = [];
+        $unassessed = [];
+        $excluded = [];
+        $active = [];
+        foreach ($packages as $package) {
+            $status = $statuses[$package['name']] ?? null;
+            if (!is_array($status)) {
+                $unknown[] = $package + ['reason' => 'missing_status'];
+                continue;
+            }
+
+            if (empty($status['repository_status_known'])) {
+                $reason = trim((string)($status['repository_status_reason'] ?? ''));
+                $item = $package + [
+                    'installed' => $package['version'],
+                    'reason' => $reason !== '' ? $reason : 'repository_status_unavailable',
+                    'repository_url' => is_string($status['repository_url'] ?? null)
+                        ? $status['repository_url']
+                        : null,
+                ];
+                if ($item['reason'] === 'repository_missing') {
+                    $findings[] = $item + [
+                        'archived' => false,
+                        'disabled' => false,
+                        'missing' => true,
+                    ];
+                } elseif ($item['reason'] === 'repository_not_collected') {
+                    $unassessed[] = $item;
+                } elseif (in_array($item['reason'], [
+                    'repository_not_applicable',
+                    'repository_provider_unsupported',
+                ], true)) {
+                    $excluded[] = $item;
+                } else {
+                    $unknown[] = $item;
+                }
+                continue;
+            }
+
+            $item = [
+                'name' => $package['name'],
+                'installed' => $package['version'],
+                'repository_url' => is_string($status['repository_url'] ?? null)
+                    ? trim($status['repository_url'])
+                    : '',
+                'provider' => is_string($status['repository_provider'] ?? null)
+                    ? trim($status['repository_provider'])
+                    : null,
+                'archived' => !empty($status['repository_archived']),
+                'disabled' => !empty($status['repository_disabled']),
+                'missing' => false,
+                'checked_at' => is_string($status['repository_checked_at'] ?? null)
+                    ? $status['repository_checked_at']
+                    : null,
+            ];
+            if ($item['archived'] || $item['disabled']) {
+                $findings[] = $item;
+            } else {
+                $active[] = $item;
+            }
+        }
+
+        $evidence = [
+            'packages_checked' => count($packages),
+            'repositories_active' => $active,
+            'repository_findings' => $findings,
+            'packages_unknown' => $unknown,
+            'packages_unassessed' => $unassessed,
+            'packages_excluded' => $excluded,
+        ];
+
+        if ($findings !== []) {
+            $details = array_map(static function (array $item): string {
+                $states = [];
+                if ($item['archived']) {
+                    $states[] = 'archived';
+                }
+                if ($item['disabled']) {
+                    $states[] = 'disabled';
+                }
+                if ($item['missing']) {
+                    $states[] = 'missing';
+                }
+                $detail = $item['name'] . '@' . $item['installed'] . ' (' . implode(', ', $states) . ')';
+                if ($item['repository_url'] !== '') {
+                    $detail .= "\n      Repository: " . $item['repository_url'];
+                }
+                return $detail;
+            }, $findings);
+            $resultMessage = "Packages from archived, disabled, or missing repositories:\n    - "
+                . implode("\n    - ", $details);
+            if ($unknown !== []) {
+                $resultMessage .= "\n    Repository checks failed for "
+                    . count($unknown) . ' additional package(s)';
+            }
+            if ($unassessed !== []) {
+                $resultMessage .= "\n    Repository status is awaiting collection for "
+                    . count($unassessed) . ' additional package(s)';
+            }
+            return [false, $resultMessage, $evidence];
+        }
+
+        if ($unknown !== []) {
+            $details = array_map(static function (array $item): string {
+                return $item['name'] . '@' . $item['version'] . ' (' . $item['reason'] . ')';
+            }, $unknown);
+            return [
+                null,
+                "[UNKNOWN] Repository status unavailable for:\n    - " . implode("\n    - ", $details),
+                $evidence,
+            ];
+        }
+
+        if ($active === [] && $unassessed !== []) {
+            $details = array_map(static function (array $item): string {
+                return $item['name'] . '@' . $item['version'];
+            }, $unassessed);
+            return [
+                null,
+                "[UNKNOWN] No applicable repository could be assessed; awaiting collection for:\n    - "
+                    . implode("\n    - ", $details),
+                $evidence,
+            ];
+        }
+
+        if ($active === []) {
+            return [
+                true,
+                'No installed packages have an applicable GitHub or GitLab source repository',
+                $evidence,
+            ];
+        }
+
+        $coverage = count($active) . ' repositories assessed';
+        if ($unassessed !== []) {
+            $coverage .= ', ' . count($unassessed) . ' awaiting collection';
+        }
+        return [
+            true,
+            'No assessed packages come from archived, disabled, or missing repositories ('
+                . $coverage . ')',
+            $evidence,
+        ];
+    }
+
+
+    public function riskyForkApi(array $args): array
+    {
+        $lockFile = $this->ctx->abs($args['lock_file'] ?? 'composer.lock');
+        if (!is_file($lockFile)) {
+            return [null, '[UNKNOWN] composer.lock not found'];
+        }
+        $installed = $this->readLockPackages($lockFile);
+        if (!is_array($installed) || $installed === []) {
+            return [null, '[UNKNOWN] Unable to parse composer.lock'];
+        }
+
+        $packages = [];
+        foreach ($installed as $name => $info) {
+            $version = ltrim(trim((string)($info['version'] ?? '')), 'vV');
+            if ($version === '') {
+                continue;
+            }
+            $replaces = [];
+            foreach ((array)($info['replace'] ?? []) as $replacement => $_constraint) {
+                $replacement = strtolower(trim((string)$replacement));
+                if ($replacement !== ''
+                    && $replacement !== strtolower((string)$name)
+                    && str_contains($replacement, '/')
+                    && !str_ends_with($replacement, '-implementation')
+                ) {
+                    $replaces[] = $replacement;
+                }
+            }
+            $packages[] = [
+                'name' => strtolower((string)$name),
+                'version' => $version,
+                'repository_url' => is_string($info['source'] ?? null)
+                    ? trim($info['source'])
+                    : '',
+                'type' => is_string($info['type'] ?? null) ? $info['type'] : null,
+                'replaces' => array_values(array_unique($replaces)),
+            ];
+        }
+        if ($packages === []) {
+            return [true, 'No packages in composer.lock (nothing to check)'];
+        }
+
+        [$ok, $message, $statuses] = $this->fetchPackageStatuses($args, $packages);
+        if (!$ok) {
+            return [null, '[UNKNOWN] Package status API request failed: ' . $message, ['packages' => $packages]];
+        }
+
+        $findings = [];
+        $safe = [];
+        $unknown = [];
+        $excluded = [];
+        foreach ($packages as $package) {
+            $status = $statuses[$package['name']] ?? null;
+            if (!is_array($status)) {
+                if ($package['replaces'] !== []) {
+                    $unknown[] = $package + ['installed' => $package['version'], 'reason' => 'missing_status'];
+                } else {
+                    $excluded[] = $package + ['reason' => 'not_a_replacement_candidate'];
+                }
+                continue;
+            }
+
+            $sourceOverride = !empty($status['repository_source_override_known'])
+                && !empty($status['repository_source_override']);
+            if ($package['replaces'] === [] && !$sourceOverride) {
+                $excluded[] = $package + ['reason' => 'not_a_replacement_candidate'];
+                continue;
+            }
+            if ($package['type'] === 'metapackage' || $package['repository_url'] === '') {
+                $excluded[] = $package + ['reason' => 'repository_not_applicable'];
+                continue;
+            }
+
+            $reason = trim((string)($status['repository_status_reason'] ?? ''));
+            $item = [
+                'name' => $package['name'],
+                'installed' => $package['version'],
+                'repository_url' => (string)($status['repository_url'] ?? $package['repository_url']),
+                'package_repository_url' => is_string($status['package_repository_url'] ?? null)
+                    ? $status['package_repository_url']
+                    : null,
+                'upstream_url' => is_string($status['repository_upstream_url'] ?? null)
+                    ? $status['repository_upstream_url']
+                    : null,
+                'replaces' => $package['replaces'],
+                'source_override' => $sourceOverride,
+                'is_fork' => !empty($status['repository_is_fork']),
+                'trusted' => !empty($status['repository_trusted']),
+            ];
+
+            if ($reason === 'repository_missing') {
+                $findings[] = $item + ['reason' => 'replacement_repository_missing'];
+                continue;
+            }
+            if ($item['trusted']) {
+                $safe[] = $item + ['reason' => 'trusted_repository'];
+                continue;
+            }
+            if ($sourceOverride) {
+                $findings[] = $item + ['reason' => 'untrusted_source_override'];
+                continue;
+            }
+            if (empty($status['repository_status_known']) || empty($status['fork_status_known'])) {
+                $unknown[] = $item + [
+                    'reason' => $reason !== '' ? $reason : 'fork_status_unavailable',
+                ];
+                continue;
+            }
+            if ($item['is_fork']) {
+                $findings[] = $item + [
+                    'reason' => $item['upstream_url'] === null || $item['upstream_url'] === ''
+                        ? 'fork_upstream_missing'
+                        : 'unverified_fork_replacing_upstream',
+                ];
+                continue;
+            }
+            $safe[] = $item + ['reason' => 'replacement_not_from_fork'];
+        }
+
+        $evidence = [
+            'packages_checked' => count($packages),
+            'replacement_candidates_safe' => $safe,
+            'risky_replacements' => $findings,
+            'replacement_candidates_unknown' => $unknown,
+            'packages_excluded' => $excluded,
+        ];
+
+        if ($findings !== []) {
+            $details = array_map(static function (array $item): string {
+                $detail = $item['name'] . '@' . $item['installed'] . ' (' . $item['reason'] . ')';
+                if ($item['replaces'] !== []) {
+                    $detail .= "\n      Replaces: " . implode(', ', $item['replaces']);
+                }
+                $detail .= "\n      Repository: " . $item['repository_url'];
+                if (is_string($item['upstream_url']) && $item['upstream_url'] !== '') {
+                    $detail .= "\n      Upstream: " . $item['upstream_url'];
+                }
+                return $detail;
+            }, $findings);
+            $resultMessage = "Risky replacement repositories detected:\n    - "
+                . implode("\n    - ", $details);
+            if ($unknown !== []) {
+                $resultMessage .= "\n    Fork evidence unavailable for "
+                    . count($unknown) . ' additional candidate(s)';
+            }
+            return [false, $resultMessage, $evidence];
+        }
+
+        if ($unknown !== []) {
+            $details = array_map(static function (array $item): string {
+                return $item['name'] . '@' . $item['installed'] . ' (' . $item['reason'] . ')';
+            }, $unknown);
+            return [
+                null,
+                "[UNKNOWN] Fork evidence unavailable for replacement candidates:\n    - "
+                    . implode("\n    - ", $details),
+                $evidence,
+            ];
+        }
+
+        return [
+            true,
+            $safe === []
+                ? 'No installed packages replace upstream libraries from alternate repositories'
+                : 'No risky forks detected among ' . count($safe) . ' replacement candidate(s)',
+            $evidence,
+        ];
+    }
 
     public function matchList(array $args): array
     {
@@ -2300,47 +4726,130 @@ final class ComposerCheck
         $jsonRel  = is_string($args['json_file'] ?? null) ? $args['json_file'] : 'composer.json';
         $jsonPath = $this->join($root, $jsonRel);
 
-        // Nếu không thấy ngay tại vị trí dự kiến, thử find-up với chữ ký: findUp(string $path, int $maxDepth)
         if (!is_file($jsonPath)) {
-            $found = $this->findUp($jsonPath, 6); // ✅ tham số 2 là int
+            $found = $this->findUp($jsonPath, 6);
             if (is_string($found) && $found !== '') {
                 $jsonPath = $found;
             } else {
-                return [false, [], "{$jsonRel} not found at {$jsonPath}"];
+                return [
+                    null,
+                    "[UNKNOWN] {$jsonRel} not found at {$jsonPath}",
+                    ['json_file' => $jsonPath],
+                ];
             }
         }
 
         $raw = @file_get_contents($jsonPath);
         if ($raw === false) {
-            return [false, [], "Cannot read {$jsonRel} at {$jsonPath}"];
+            return [
+                null,
+                "[UNKNOWN] Cannot read {$jsonRel} at {$jsonPath}",
+                ['json_file' => $jsonPath],
+            ];
         }
 
         $data = json_decode($raw, true);
         if (!is_array($data)) {
             $jerr = function_exists('json_last_error_msg') ? json_last_error_msg() : 'unknown JSON error';
-            return [false, [], "Invalid {$jsonRel} at {$jsonPath}: {$jerr}"];
+            return [
+                null,
+                "[UNKNOWN] Invalid {$jsonRel} at {$jsonPath}: {$jerr}",
+                ['json_file' => $jsonPath, 'json_error' => $jerr],
+            ];
         }
 
-        $sections = ['require', 'require-dev', 'conflict', 'replace', 'provide'];
-        $out = [];
+        $sections = is_array($args['sections'] ?? null)
+            ? array_values(array_filter(array_map('strval', $args['sections'])))
+            : ['require', 'require-dev'];
+        $deny = array_values(array_map(
+            static fn(mixed $value): string => strtolower(trim((string)$value)),
+            (array)($args['deny'] ?? [])
+        ));
+        $denyPrefixes = array_values(array_filter(array_map(
+            static fn(mixed $value): string => strtolower(trim((string)$value)),
+            (array)($args['deny_prefix'] ?? [])
+        )));
+        $denyWildcard = !empty($args['deny_wildcard']);
+        $denyDevConstraints = !empty($args['deny_dev_constraints']);
+        $wildcardPattern = '/(^|[\\s,|()~^<>=])(?:v?\\d+(?:\\.\\d+)*\\.)?(?:\\*|x)(?=$|[\\s,|@()])/i';
+        $devConstraintPattern = '/(^|[\\s,|()~^<>=])'
+            . '(?:dev-[a-z0-9_.\\/-]+|v?\\d+(?:\\.(?:\\d+|x))*-dev)'
+            . '(?=$|[\\s,|@()#])/i';
+        $constraints = [];
+        $findings = [];
 
         foreach ($sections as $sec) {
             if (!empty($data[$sec]) && is_array($data[$sec])) {
                 foreach ($data[$sec] as $pkg => $ver) {
-                    if (!array_key_exists($pkg, $out)) {
-                        // composer.json thường là string; cast đề phòng
-                        $out[$pkg] = (string)$ver;
+                    $package = strtolower(trim((string)$pkg));
+                    $constraint = trim((string)$ver);
+                    $item = [
+                        'section' => $sec,
+                        'package' => $package,
+                        'constraint' => $constraint,
+                    ];
+                    $constraints[] = $item;
+
+                    $reasons = [];
+                    if (in_array(strtolower($constraint), $deny, true)) {
+                        $reasons[] = 'denied_constraint';
+                    }
+                    foreach ($denyPrefixes as $prefix) {
+                        $prefixPattern = '/(^|[\\s,|()~^<>=])'
+                            . preg_quote($prefix, '/') . '/i';
+                        if (preg_match($prefixPattern, $constraint) === 1) {
+                            $reasons[] = 'denied_prefix:' . $prefix;
+                        }
+                    }
+                    $platformPresenceConstraint = str_starts_with($package, 'ext-')
+                        || str_starts_with($package, 'lib-');
+                    if ($denyWildcard
+                        && !$platformPresenceConstraint
+                        && preg_match($wildcardPattern, $constraint) === 1
+                    ) {
+                        $reasons[] = 'wildcard_constraint';
+                    }
+                    if ($denyDevConstraints
+                        && (preg_match($devConstraintPattern, $constraint) === 1
+                            || preg_match('/@dev\\b/i', $constraint) === 1)
+                    ) {
+                        $reasons[] = 'development_constraint';
+                    }
+                    if ($reasons !== []) {
+                        $findings[] = $item + ['reasons' => array_values(array_unique($reasons))];
                     }
                 }
             }
         }
 
-        $count = count($out);
-        $msg = $count > 0
-            ? "Collected {$count} constraints from {$jsonRel} at {$jsonPath}"
-            : "No constraints found in {$jsonRel} at {$jsonPath} (sections: " . implode(', ', $sections) . ")";
+        $evidence = [
+            'json_file' => $jsonPath,
+            'sections' => $sections,
+            'constraints_checked' => count($constraints),
+            'findings' => $findings,
+        ];
+        if ($findings !== []) {
+            $findingMessage = trim((string)($args['finding_message'] ?? ''));
+            if ($findingMessage === '') {
+                $findingMessage = 'Disallowed Composer constraints detected';
+            }
+            $details = array_map(
+                static fn(array $item): string => $item['section'] . ': '
+                    . $item['package'] . ' => ' . $item['constraint'],
+                $findings
+            );
+            return [
+                false,
+                $findingMessage . ":\n    - " . implode("\n    - ", $details),
+                $evidence,
+            ];
+        }
 
-        return [true, $msg];
+        return [
+            true,
+            'No disallowed constraints found across ' . count($constraints) . ' Composer requirement(s)',
+            $evidence,
+        ];
     }
 
     public function lockVersions(string $rootDir): array
@@ -2373,30 +4882,45 @@ final class ComposerCheck
         $jsonRel  = is_string($args['json_file'] ?? null) ? $args['json_file'] : 'composer.json';
         $jsonPath = $this->join($root, $jsonRel);
 
-        // Tìm ngay tại vị trí dự kiến; nếu không có thì find-up với chữ ký: findUp(string $path, int $maxDepth)
         if (!is_file($jsonPath)) {
-            $found = $this->findUp($jsonPath, 6); // ✅ tham số 2 là int, không truyền basename
+            $found = $this->findUp($jsonPath, 6);
             if (is_string($found) && $found !== '') {
                 $jsonPath = $found;
             } else {
-                return [false, "{$jsonRel} not found at {$jsonPath}"];
+                return [
+                    null,
+                    "[UNKNOWN] {$jsonRel} not found at {$jsonPath}",
+                    ['json_file' => $jsonPath],
+                ];
             }
         }
 
         $raw = @file_get_contents($jsonPath);
         if ($raw === false) {
-            return [false, "Cannot read {$jsonRel} at {$jsonPath}"];
+            return [
+                null,
+                "[UNKNOWN] Cannot read {$jsonRel} at {$jsonPath}",
+                ['json_file' => $jsonPath],
+            ];
         }
 
         $data = json_decode($raw, true);
         if (!is_array($data)) {
             $jerr = function_exists('json_last_error_msg') ? json_last_error_msg() : 'unknown JSON error';
-            return [false, "Invalid {$jsonRel} at {$jsonPath}: {$jerr}"];
+            return [
+                null,
+                "[UNKNOWN] Invalid {$jsonRel} at {$jsonPath}: {$jerr}",
+                ['json_file' => $jsonPath, 'json_error' => $jerr],
+            ];
         }
 
-        $key = (string)($args['key'] ?? '');
+        $key = (string)($args['key'] ?? $args['path'] ?? '');
         if ($key === '') {
-            return [false, "Missing 'key' argument (dot-path)"];
+            return [
+                null,
+                "[UNKNOWN] Missing 'key' argument (dot-path)",
+                ['json_file' => $jsonPath],
+            ];
         }
 
         // Traverse dot-path (giữ nguyên wildcard '*' như bạn đang dùng)
@@ -2419,37 +4943,53 @@ final class ComposerCheck
             $val = $val[$seg];
         }
 
-        // op: chuẩn hoá chữ thường; mặc định 'eq' nếu có 'expect', ngược lại 'exists'
-        $op = $args['op'] ?? (array_key_exists('expect', $args) ? 'eq' : 'exists');
+        $hasExpectedValue = array_key_exists('expect', $args) || array_key_exists('equals', $args);
+        $expect = $args['expect'] ?? $args['equals'] ?? null;
+        $op = $args['op'] ?? ($hasExpectedValue ? 'eq' : 'exists');
         $op = is_string($op) ? strtolower($op) : 'exists';
+        $evidence = [
+            'json_file' => $jsonPath,
+            'key' => $key,
+            'exists' => $exist,
+            'actual' => $exist ? $val : null,
+            'expected' => $hasExpectedValue ? $expect : null,
+            'strict' => !empty($args['strict']),
+        ];
 
         if ($op === 'exists') {
-            return [$exist, $exist ? "Key exists: {$key}" : "Key missing: {$key}"];
+            return [$exist, $exist ? "Key exists: {$key}" : "Key missing: {$key}", $evidence];
         }
         if ($op === 'not_exists') {
-            return [!$exist, !$exist ? "Key does not exist (as expected): {$key}" : "Key unexpectedly present: {$key}"];
+            return [
+                !$exist,
+                !$exist ? "Key does not exist (as expected): {$key}" : "Key unexpectedly present: {$key}",
+                $evidence,
+            ];
         }
 
         // eq/neq yêu cầu key tồn tại
         if (!$exist) {
-            return [false, "Key missing for comparison: {$key}"];
+            return [false, "Key missing for comparison: {$key}", $evidence];
         }
 
-        $expect = $args['expect'] ?? null;
-        $equal  = $this->looseEqual($val, $expect);
+        $equal = !empty($args['strict'])
+            ? $val === $expect
+            : $this->looseEqual($val, $expect);
 
         if ($op === 'eq') {
             return [$equal, $equal
                 ? "OK: {$key} == " . $this->printVal($expect)
-                : "Mismatch: {$key}=" . $this->printVal($val) . " != " . $this->printVal($expect)];
+                : "Mismatch: {$key}=" . $this->printVal($val) . " != " . $this->printVal($expect),
+                $evidence];
         }
         if ($op === 'neq') {
             return [!$equal, !$equal
                 ? "OK: {$key} (" . $this->printVal($val) . ") != " . $this->printVal($expect)
-                : "Unexpected equal: {$key} == " . $this->printVal($expect)];
+                : "Unexpected equal: {$key} == " . $this->printVal($expect),
+                $evidence];
         }
 
-        return [false, "Unsupported op '{$op}'"];
+        return [null, "[UNKNOWN] Unsupported op '{$op}'", $evidence];
     }
 
 
@@ -2481,39 +5021,53 @@ final class ComposerCheck
 
     public function lockIntegrity(array $args): array
     {
-        // Args (all optional):
-        //  - lock_file: relative path to composer.lock (default 'composer.lock')
-        //  - json_file: relative path to composer.json (default 'composer.json')
-        //  - installed_file: relative path to vendor/composer/installed.json (default 'vendor/composer/installed.json')
-        // Returns: [bool, string]
-
-        $root = (string)$this->ctx->get('root', '');
         $root = (string)$this->ctx->path;
-
         $lockRel      = is_string($args['lock_file'] ?? null) ? $args['lock_file'] : 'composer.lock';
         $jsonRel      = is_string($args['json_file'] ?? null) ? $args['json_file'] : 'composer.json';
         $installedRel = is_string($args['installed_file'] ?? null) ? $args['installed_file'] : 'vendor/composer/installed.json';
 
-        $lockPath = $this->join($root, $lockRel);
-        if (!is_file($lockPath) && ($found = $this->findUp($lockPath, 3))) {
-            $lockPath = $found;
+        $jsonPath = $this->join($root, $jsonRel);
+        if (!is_file($jsonPath)) {
+            return [null, "[UNKNOWN] composer.json not found at {$jsonPath}", ['json_file' => $jsonPath]];
         }
+        $jsonRaw = @file_get_contents($jsonPath);
+        $json = is_string($jsonRaw) ? json_decode($jsonRaw, true) : null;
+        if (!is_array($json)) {
+            return [
+                null,
+                "[UNKNOWN] Invalid composer.json at {$jsonPath}",
+                ['json_file' => $jsonPath, 'json_error' => json_last_error_msg()],
+            ];
+        }
+
+        $lockPath = $this->join($root, $lockRel);
         if (!is_file($lockPath)) {
-            return [false, "composer.lock not found at {$lockPath}"];
+            return [
+                false,
+                "composer.lock not found at {$lockPath}",
+                ['json_file' => $jsonPath, 'lock_file' => $lockPath, 'problems' => ['lock_missing']],
+            ];
         }
 
         $lockRaw = @file_get_contents($lockPath);
         $lock    = is_string($lockRaw) ? json_decode($lockRaw, true) : null;
         if (!is_array($lock)) {
-            return [false, "Invalid composer.lock at {$lockPath}"];
+            return [
+                false,
+                "Invalid composer.lock at {$lockPath}",
+                ['json_file' => $jsonPath, 'lock_file' => $lockPath, 'problems' => ['lock_invalid']],
+            ];
         }
 
-        // Merge packages + packages-dev into one map name => version
         $pkgs = [];
         $dups = [];
+        $provided = [];
         foreach (['packages', 'packages-dev'] as $bucket) {
-            foreach (($lock[$bucket] ?? []) as $p) {
-                $name = (string)($p['name'] ?? '');
+            foreach ((array)($lock[$bucket] ?? []) as $p) {
+                if (!is_array($p)) {
+                    continue;
+                }
+                $name = strtolower((string)($p['name'] ?? ''));
                 $ver  = (string)($p['version'] ?? '');
                 if ($name === '') {
                     continue;
@@ -2522,93 +5076,147 @@ final class ComposerCheck
                     $dups[$name] = true;
                 }
                 $pkgs[$name] = $ver;
+                foreach (['provide', 'replace'] as $capability) {
+                    foreach ((array)($p[$capability] ?? []) as $providedName => $_constraint) {
+                        $provided[strtolower((string)$providedName)] = $name;
+                    }
+                }
             }
-        }
-        if (empty($pkgs)) {
-            return [false, "composer.lock contains no packages"];
         }
 
         $problems = [];
+        $problemCodes = [];
+        $expectedHash = $this->composerContentHash($json);
+        $actualHash = is_string($lock['content-hash'] ?? null)
+            ? strtolower(trim($lock['content-hash']))
+            : '';
+        if ($actualHash === '') {
+            $problemCodes[] = 'content_hash_missing';
+            $problems[] = 'composer.lock is missing content-hash';
+        } elseif ($expectedHash === null) {
+            return [
+                null,
+                '[UNKNOWN] Unable to calculate Composer content-hash',
+                ['json_file' => $jsonPath, 'lock_file' => $lockPath],
+            ];
+        } elseif (!hash_equals($expectedHash, $actualHash)) {
+            $problemCodes[] = 'content_hash_mismatch';
+            $problems[] = 'content-hash mismatch: lock ' . $actualHash . ', expected ' . $expectedHash;
+        }
 
-        if ($dups) {
+        if ($dups !== []) {
+            $problemCodes[] = 'duplicate_packages';
             $problems[] = 'duplicate package entries in lock: ' . implode(', ', array_keys($dups));
         }
 
-        // Optional: check composer.json requires are present in lock (basic presence check)
-        $jsonPath = $this->join($root, $jsonRel);
-        if (!is_file($jsonPath) && ($found = $this->findUp($jsonPath, 3))) {
-            $jsonPath = $found;
-        }
-        if (is_file($jsonPath)) {
-            $jsonRaw = @file_get_contents($jsonPath);
-            $json    = is_string($jsonRaw) ? json_decode($jsonRaw, true) : null;
-
-            if (is_array($json)) {
-                $required = [];
-                foreach (['require', 'require-dev'] as $sec) {
-                    foreach ((array)($json[$sec] ?? []) as $name => $constraint) {
-                        // Skip platform packages that won’t appear in lock
-                        if ($name === 'php' || str_starts_with((string)$name, 'ext-') || str_starts_with((string)$name, 'lib-')) {
-                            continue;
-                        }
-                        $required[$name] = (string)$constraint;
-                    }
+        $required = [];
+        foreach (['require', 'require-dev'] as $section) {
+            foreach ((array)($json[$section] ?? []) as $name => $constraint) {
+                $name = strtolower((string)$name);
+                if ($name === 'php'
+                    || str_starts_with($name, 'ext-')
+                    || str_starts_with($name, 'lib-')
+                    || in_array($name, ['composer-plugin-api', 'composer-runtime-api'], true)
+                ) {
+                    continue;
                 }
-
-                $missing = [];
-                foreach ($required as $name => $_constraint) {
-                    if (!isset($pkgs[$name])) {
-                        $missing[] = $name;
-                    }
-                }
-                if ($missing) {
-                    $problems[] = 'required packages not present in lock: ' . implode(', ', $missing);
-                }
-
-                // Staleness check: composer.json newer than composer.lock
-                $tJson = @filemtime($jsonPath) ?: 0;
-                $tLock = @filemtime($lockPath) ?: 0;
-                if ($tJson > $tLock) {
-                    $problems[] = 'composer.lock is older than composer.json (run composer update or composer install)';
-                }
-            } else {
-                $problems[] = "invalid composer.json at {$jsonPath}";
+                $required[$name] = ['constraint' => (string)$constraint, 'section' => $section];
             }
-        } else {
-            $problems[] = "composer.json not found (cannot compare requires)";
         }
 
-        // Optional: compare with vendor/composer/installed.json
-        $installedPath = $this->join($root, $installedRel);
-        if (is_file($installedPath)) {
+        $missing = [];
+        foreach ($required as $name => $requirement) {
+            if (!isset($pkgs[$name]) && !isset($provided[$name])) {
+                $missing[] = $name;
+            }
+        }
+        if ($missing !== []) {
+            $problemCodes[] = 'direct_dependencies_missing';
+            $problems[] = 'required packages not present or provided in lock: ' . implode(', ', $missing);
+        }
+
+        $installedComparison = null;
+        if (!empty($args['check_installed'])) {
+            $installedPath = $this->join($root, $installedRel);
+            if (!is_file($installedPath)) {
+                return [
+                    null,
+                    "[UNKNOWN] Installed package metadata not found at {$installedPath}",
+                    ['json_file' => $jsonPath, 'lock_file' => $lockPath, 'installed_file' => $installedPath],
+                ];
+            }
             $instRaw = @file_get_contents($installedPath);
             $installed = is_string($instRaw) ? json_decode($instRaw, true) : null;
-            // installed.json can be either a flat object or use 'packages' key depending on Composer version
+            if (!is_array($installed)) {
+                return [null, "[UNKNOWN] Invalid installed package metadata at {$installedPath}"];
+            }
             $installedPkgs = [];
-            if (is_array($installed)) {
-                $list = $installed['packages'] ?? $installed; // tolerate both shapes
-                foreach ((array)$list as $p) {
-                    $n = (string)($p['name'] ?? '');
-                    if ($n !== '') $installedPkgs[$n] = true;
-                }
+            $list = $installed['packages'] ?? $installed;
+            foreach ((array)$list as $p) {
+                $n = is_array($p) ? strtolower((string)($p['name'] ?? '')) : '';
+                if ($n !== '') $installedPkgs[$n] = true;
             }
-            if ($installedPkgs) {
-                // Warn if lock has pkgs that are not installed (or vice versa)
-                $notInstalled = array_diff_key($pkgs, $installedPkgs);
-                if ($notInstalled) {
-                    $problems[] = 'packages present in lock but not in vendor/composer/installed.json: ' . implode(', ', array_keys($notInstalled));
-                }
+            $notInstalled = array_keys(array_diff_key($pkgs, $installedPkgs));
+            $installedComparison = ['not_installed' => $notInstalled];
+            if ($notInstalled !== []) {
+                $problemCodes[] = 'locked_packages_not_installed';
+                $problems[] = 'packages present in lock but not installed: ' . implode(', ', $notInstalled);
             }
         }
 
-        if ($problems) {
-            // Keep message concise; show first few issues then counts
-            $head = array_slice($problems, 0, 3);
-            $tail = count($problems) > 3 ? ' (+' . (count($problems) - 3) . ' more)' : '';
-            return [false, 'composer.lock integrity issues: ' . implode(' | ', $head) . $tail];
+        $evidence = [
+            'json_file' => $jsonPath,
+            'lock_file' => $lockPath,
+            'expected_content_hash' => $expectedHash,
+            'actual_content_hash' => $actualHash,
+            'locked_packages' => count($pkgs),
+            'direct_requirements' => $required,
+            'provided_packages' => $provided,
+            'duplicate_packages' => array_keys($dups),
+            'missing_direct_requirements' => $missing,
+            'installed_comparison' => $installedComparison,
+            'problem_codes' => $problemCodes,
+        ];
+        if ($problems !== []) {
+            return [
+                false,
+                "composer.lock integrity issues:\n    - " . implode("\n    - ", $problems),
+                $evidence,
+            ];
         }
 
-        return [true, 'composer.lock integrity OK (' . count($pkgs) . ' packages)'];
+        return [
+            true,
+            'composer.lock integrity OK (' . count($pkgs) . ' packages, content-hash verified)',
+            $evidence,
+        ];
+    }
+
+    private function composerContentHash(array $composer): ?string
+    {
+        $relevantKeys = [
+            'name',
+            'version',
+            'require',
+            'require-dev',
+            'conflict',
+            'replace',
+            'provide',
+            'minimum-stability',
+            'prefer-stable',
+            'repositories',
+            'extra',
+        ];
+        $relevant = [];
+        foreach (array_intersect($relevantKeys, array_keys($composer)) as $key) {
+            $relevant[$key] = $composer[$key];
+        }
+        if (isset($composer['config']['platform'])) {
+            $relevant['config']['platform'] = $composer['config']['platform'];
+        }
+        ksort($relevant);
+        $encoded = json_encode($relevant);
+        return is_string($encoded) ? md5($encoded) : null;
     }
 
     // Add these private helpers at the bottom of the class (before closing brace)
@@ -2691,6 +5299,8 @@ final class ComposerCheck
                             'version' => $p['version'] ?? null,
                             'source'  => $p['source']['url'] ?? null,
                             'dist'    => $p['dist']['url'] ?? null,
+                            'type'    => $p['type'] ?? null,
+                            'replace' => is_array($p['replace'] ?? null) ? $p['replace'] : [],
                         ];
                     }
                 }

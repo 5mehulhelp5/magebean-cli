@@ -272,6 +272,8 @@ final class HttpCheck
 
         $checked = [];
         $offenders = [];
+        $successful = 0;
+        $incomplete = [];
         foreach ($paths as $path) {
             if (!is_scalar($path)) {
                 continue;
@@ -279,14 +281,19 @@ final class HttpCheck
             $url = $this->joinUrl($base, (string)$path);
             [$ok, $msg, $ev] = $this->fetch($url, 'GET', [], (int)($args['timeout_ms'] ?? 8000), true);
             if ($ok === null) {
-                $checked[] = ['url' => $url, 'ok' => null, 'message' => $msg, 'evidence' => $ev];
+                $entry = ['url' => $url, 'ok' => null, 'message' => $msg, 'evidence' => $ev];
+                $checked[] = $entry;
+                $incomplete[] = $entry;
                 continue;
             }
             if (!$ok) {
-                $checked[] = ['url' => $url, 'ok' => false, 'message' => $msg, 'evidence' => $ev];
+                $entry = ['url' => $url, 'ok' => false, 'message' => $msg, 'evidence' => $ev];
+                $checked[] = $entry;
+                $incomplete[] = $entry;
                 continue;
             }
 
+            $successful++;
             $body = (string)($ev['body'] ?? '');
             $pageOffenders = $this->mixedContentInMarkup($body);
             $checked[] = ['url' => $url, 'ok' => true, 'status' => $ev['status'] ?? null, 'final_url' => $ev['final_url'] ?? null];
@@ -301,6 +308,12 @@ final class HttpCheck
         }
         if ($checked === []) {
             return [null, '[UNKNOWN] No pages checked for mixed content', []];
+        }
+        if ($successful === 0) {
+            return [null, '[UNKNOWN] Unable to fetch any page for mixed content check', ['checked' => $checked]];
+        }
+        if ($incomplete !== []) {
+            return [null, '[UNKNOWN] Mixed content check had incomplete HTTP coverage', ['checked' => $checked]];
         }
 
         return [true, 'No mixed content in rendered markup', ['checked' => $checked]];
@@ -343,7 +356,7 @@ final class HttpCheck
         return rtrim($base, '/') . '/' . ltrim($path, '/');
     }
 
-    private function assessCookieFlags(string $cookie, array $sensitive): ?array
+    private function assessCookieFlags(string $cookie, array $sensitive, array $allowedSameSite, array $clientReadable): ?array
     {
         $parts = explode(';', $cookie);
         if ($parts === []) {
@@ -351,6 +364,9 @@ final class HttpCheck
         }
         [$name,] = array_map('trim', explode('=', $parts[0], 2));
         $lname = strtolower($name);
+        if (in_array($lname, $clientReadable, true)) {
+            return null;
+        }
         if (!in_array($lname, $sensitive, true) && !str_contains($lname, 'sess') && !str_contains($lname, 'admin')) {
             return null;
         }
@@ -367,7 +383,7 @@ final class HttpCheck
             }
         }
 
-        $sameSiteOk = in_array($sameSite, ['lax', 'strict'], true) || ($sameSite === 'none' && $hasSecure);
+        $sameSiteOk = $sameSite !== null && in_array($sameSite, $allowedSameSite, true);
         $ok = $hasSecure && $hasHttpOnly && $sameSiteOk;
         $missing = [];
         if (!$hasSecure) {
@@ -393,7 +409,7 @@ final class HttpCheck
     private function cookieFlags(array $args): array
     {
         $base = $this->baseUrl();
-        if ($base === '') return [false, 'Missing URL in context'];
+        if ($base === '') return [null, '[UNKNOWN] Missing URL in context', []];
         $paths = $args['paths'] ?? ['/', '/customer/account/login', '/checkout/cart'];
         if (!is_array($paths)) {
             $paths = ['/'];
@@ -407,21 +423,34 @@ final class HttpCheck
             'backend',
             'frontend',
             'frontend_cid',
-            'private_content_version',
-            'mage-cache-sessid',
-            'mage-cache-storage',
-            'mage-cache-storage-section-invalidation',
-            'store',
-            'section_data_ids',
-            'form_key',
         ];
         if (!is_array($sensitive)) {
             $sensitive = [];
         }
         $sensitive = array_map(static fn(mixed $value): string => strtolower((string)$value), $sensitive);
+        $clientReadable = $args['client_readable_cookies'] ?? [
+            'form_key',
+            'store',
+            'private_content_version',
+            'mage-cache-sessid',
+            'mage-cache-storage',
+            'mage-cache-storage-section-invalidation',
+            'section_data_ids',
+        ];
+        if (!is_array($clientReadable)) {
+            $clientReadable = [];
+        }
+        $clientReadable = array_map(static fn(mixed $value): string => strtolower((string)$value), $clientReadable);
+        $allowedSameSite = $args['allowed_samesite'] ?? ['lax', 'strict'];
+        if (!is_array($allowedSameSite)) {
+            $allowedSameSite = ['lax', 'strict'];
+        }
+        $allowedSameSite = array_map(static fn(mixed $value): string => strtolower((string)$value), $allowedSameSite);
 
         $allOk = true;
         $checked = [];
+        $successful = 0;
+        $incomplete = [];
         $observedSensitive = [];
         $failures = [];
 
@@ -432,17 +461,20 @@ final class HttpCheck
             $url = $this->joinUrl($base, (string)$path);
             [$ok, $msg, $ev] = $this->fetch($url, 'GET', [], (int)($args['timeout_ms'] ?? 8000), true);
             if ($ok === null || !$ok) {
-                $checked[] = ['url' => $url, 'ok' => $ok, 'message' => $msg, 'evidence' => $ev];
+                $entry = ['url' => $url, 'ok' => $ok, 'message' => $msg, 'evidence' => $ev];
+                $checked[] = $entry;
+                $incomplete[] = $entry;
                 continue;
             }
 
+            $successful++;
             $hdrs = array_change_key_case((array)($ev['headers'] ?? []), CASE_LOWER);
             $setCookies = $hdrs['set-cookie'] ?? [];
             if (!is_array($setCookies)) $setCookies = $setCookies !== '' ? [$setCookies] : [];
             $checked[] = ['url' => $url, 'ok' => true, 'status' => $ev['status'] ?? null, 'final_url' => $ev['final_url'] ?? null, 'set_cookie_count' => count($setCookies)];
 
             foreach ($setCookies as $cookie) {
-                $assessment = $this->assessCookieFlags((string)$cookie, $sensitive);
+                $assessment = $this->assessCookieFlags((string)$cookie, $sensitive, $allowedSameSite, $clientReadable);
                 if ($assessment === null) {
                     continue;
                 }
@@ -455,9 +487,21 @@ final class HttpCheck
             }
         }
 
-        $evidence = ['checked' => $checked, 'sensitive_cookies' => $observedSensitive, 'failures' => $failures];
+        $evidence = [
+            'checked' => $checked,
+            'sensitive_cookies' => $observedSensitive,
+            'failures' => $failures,
+            'allowed_samesite' => $allowedSameSite,
+            'client_readable_cookies' => $clientReadable,
+        ];
+        if ($successful === 0) {
+            return [null, '[UNKNOWN] Unable to fetch any path for cookie flag check', $evidence];
+        }
         if ($observedSensitive === []) {
             return [null, '[UNKNOWN] No sensitive cookies observed on probed paths', $evidence];
+        }
+        if ($incomplete !== [] && $failures === []) {
+            return [null, '[UNKNOWN] Cookie flag check had incomplete HTTP coverage', $evidence];
         }
 
         return [$allOk, $allOk ? 'Sensitive cookies have Secure/HttpOnly/SameSite' : 'Cookie flags missing on sensitive cookies', $evidence];
@@ -612,7 +656,7 @@ final class HttpCheck
     private function noStacktrace(array $args): array
     {
         $base = $this->baseUrl();
-        if ($base === '') return [false, 'Missing URL in context'];
+        if ($base === '') return [null, '[UNKNOWN] Missing URL in context', []];
 
         $targets = [];
         $targets[] = rtrim($base, '/'); // home
@@ -626,32 +670,51 @@ final class HttpCheck
             . ' at /[A-Za-z0-9._/\-]+\.php:\d+|'
             . '<b>(?:Warning|Notice)</b>:.{0,240} in /[A-Za-z0-9._/\-]+\.php on line \d+)~i';
 
+        $checked = [];
+        $successful = 0;
         foreach ($targets as $u) {
             [$ok, $msg, $ev] = $this->fetch($u, 'GET', ['Accept: text/html'], (int)($args['timeout_ms'] ?? 8000), true);
-            if ($ok !== true) continue;
+            if ($ok !== true) {
+                $checked[] = ['url' => $u, 'ok' => $ok, 'message' => $msg, 'evidence' => $ev];
+                continue;
+            }
+            $successful++;
 
             $hdrs = array_change_key_case((array)($ev['headers'] ?? []), CASE_LOWER);
             $ctype = strtolower($this->hget($hdrs, 'content-type'));
-            if ($ctype && stripos($ctype, 'text/html') === false) continue;
+            $entry = ['url' => $u, 'ok' => true, 'status' => $ev['status'] ?? null, 'final_url' => $ev['final_url'] ?? null, 'content_type' => $ctype];
+            if ($ctype && stripos($ctype, 'text/html') === false) {
+                $checked[] = $entry + ['skipped' => 'non_html'];
+                continue;
+            }
 
             $body = (string)($ev['body'] ?? '');
             // Loại trừ trang WAF/challenge
             $waf = preg_match('~(cloudflare|akamai|fastly|sucuri|incapsula|varnish|attention required|error reference number)~i', substr($body, 0, 8192)) === 1;
-            if ($waf) continue;
+            if ($waf) {
+                $checked[] = $entry + ['skipped' => 'waf_challenge'];
+                continue;
+            }
+
+            $checked[] = $entry;
 
             if (preg_match($pattern, $body) === 1) {
-                return [false, 'Error/stack trace visible on pages', ['url' => $u]];
+                return [false, 'Error/stack trace visible on pages', ['url' => $u, 'checked' => $checked]];
             }
         }
 
-        return [true, 'No error traces observed', []];
+        if ($successful === 0) {
+            return [null, '[UNKNOWN] Unable to fetch any page for stack trace check', ['checked' => $checked]];
+        }
+
+        return [true, 'No error traces observed', ['checked' => $checked]];
     }
 
 
     private function noXdebugHeaders(array $args): array
     {
         $base = $this->baseUrl();
-        if ($base === '') return [false, 'Missing URL in context'];
+        if ($base === '') return [null, '[UNKNOWN] Missing URL in context', []];
         [$ok, $msg, $ev] = $this->fetch($base, 'GET', [], (int)($args['timeout_ms'] ?? 8000), false);
         if ($ok === null) return [null, $msg, $ev];
         if (!$ok) return [false, $msg, $ev];
@@ -861,7 +924,7 @@ final class HttpCheck
         $host = (string)parse_url($base, PHP_URL_HOST);
         if ($host === '') return [null, '[UNKNOWN] Invalid host', []];
         $port = (int)(parse_url($base, PHP_URL_PORT) ?: 443);
-        $timeout = (int)($args['timeout_s'] ?? 10);
+        $timeout = $this->timeoutSeconds($args, 10);
 
         $streamProbe = $this->probeTlsVersionsWithStreams($host, $port, $timeout);
         $nmapProbe = $this->probeTlsWithNmap($host, $port, $timeout);
@@ -1045,10 +1108,10 @@ final class HttpCheck
     private function staticAssetsDeployed(array $args): array
     {
         $base = $this->baseUrl();
-        if ($base === '') return [false, 'Missing URL in context'];
+        if ($base === '') return [null, '[UNKNOWN] Missing URL in context', []];
         [$ok, $msg, $ev] = $this->fetch($base, 'GET', [], (int)($args['timeout_ms'] ?? 8000), true);
         if ($ok === null) return [null, $msg, $ev];
-        if (!$ok) return [false, $msg, $ev];
+        if (!$ok) return [null, '[UNKNOWN] Unable to fetch homepage for static asset check', $ev];
         $body = strtolower((string)($ev['body'] ?? ''));
         $hits = 0;
         if (preg_match('~/static/version\d+/~', $body)) $hits++;
@@ -1056,17 +1119,20 @@ final class HttpCheck
         if (preg_match('~/static/frontend/[^"]+/(en_[a-z]{2}|[a-z]{2}_[A-Z]{2})/~', $body)) $hits++;
         if (preg_match('~luma-icons\.(woff2|woff|ttf)~', $body)) $hits++;
         $pass = $hits >= 2; // cần >=2 tín hiệu để chắc hơn
-        return [$pass, $pass ? 'Static assets deployed/versioned' : 'No strong static asset signals', $ev];
+        if (!$pass) {
+            return [null, '[UNKNOWN] No strong static asset signals on homepage', ['hits' => $hits, 'response' => $ev]];
+        }
+        return [true, 'Static assets deployed/versioned', ['hits' => $hits, 'response' => $ev]];
     }
 
     private function cacheSignals(array $args): array
     {
         $base = $this->baseUrl();
-        if ($base === '') return [false, 'Missing URL in context'];
+        if ($base === '') return [null, '[UNKNOWN] Missing URL in context', []];
         // First fetch
         [$ok1, $msg1, $ev1] = $this->fetch($base, 'GET', [], (int)($args['timeout_ms'] ?? 8000), true);
         if ($ok1 === null) return [null, $msg1, $ev1];
-        if (!$ok1) return [false, $msg1, $ev1];
+        if (!$ok1) return [null, '[UNKNOWN] Unable to fetch homepage for cache signal check', $ev1];
 
         $h1 = array_change_key_case((array)($ev1['headers'] ?? []), CASE_LOWER);
         $age1 = (int)preg_replace('~\D+~', '', $this->hget($h1, 'age')) ?: 0;
@@ -1075,8 +1141,8 @@ final class HttpCheck
 
         // Second fetch
         [$ok2, $msg2, $ev2] = $this->fetch($base, 'GET', [], (int)($args['timeout_ms'] ?? 8000), true);
-        if ($ok2 === null) return [null, $msg2, $ev1];
-        if (!$ok2) return [false, $msg2, $ev1];
+        if ($ok2 === null) return [null, $msg2, ['first_response' => $ev1, 'second_response' => $ev2]];
+        if (!$ok2) return [null, '[UNKNOWN] Unable to repeat homepage fetch for cache signal check', ['first_response' => $ev1, 'second_response' => $ev2]];
 
         $h2 = array_change_key_case((array)($ev2['headers'] ?? []), CASE_LOWER);
         $age2 = (int)preg_replace('~\D+~', '', $this->hget($h2, 'age')) ?: 0;
@@ -1090,7 +1156,24 @@ final class HttpCheck
         if (stripos($via1 . $via2, 'varnish') !== false) $hits++;
 
         $pass = $hits >= 1;
-        return [$pass, $pass ? 'Cache/FPC signals present' : 'No cache/FPC signals', $ev2];
+        $evidence = [
+            'hits' => $hits,
+            'first' => [
+                'status' => $ev1['status'] ?? null,
+                'final_url' => $ev1['final_url'] ?? null,
+                'age' => $age1,
+                'x_cache' => $xc1,
+                'via' => $via1,
+            ],
+            'second' => [
+                'status' => $ev2['status'] ?? null,
+                'final_url' => $ev2['final_url'] ?? null,
+                'age' => $age2,
+                'x_cache' => $xc2,
+                'via' => $via2,
+            ],
+        ];
+        return [$pass, $pass ? 'Cache/FPC signals present' : 'No cache/FPC signals', $evidence];
     }
 
     private function logsProtected(array $args): array
@@ -1309,8 +1392,9 @@ final class HttpCheck
                     'crypto_method' => $method,
                     'SNI_enabled' => true,
                     'peer_name' => $host,
-                    'verify_peer' => true,
-                    'verify_peer_name' => true,
+                    'verify_peer' => false,
+                    'verify_peer_name' => false,
+                    'allow_self_signed' => true,
                     'capture_peer_cert' => false,
                 ],
             ]);
@@ -1349,13 +1433,21 @@ final class HttpCheck
         if ($which === '') return ['ok' => false, 'err' => 'nmap not found'];
 
         $cmd = sprintf(
-            '%s --script ssl-enum-ciphers -p %d %s 2>&1',
+            '%s --host-timeout %ds --script ssl-enum-ciphers -p %d %s 2>&1',
             escapeshellcmd($which),
+            max(1, $timeout),
             $port,
             escapeshellarg($host)
         );
         $out = @shell_exec($cmd);
         if ($out === null || $out === '') return ['ok' => false, 'err' => 'empty nmap output'];
+
+        if (preg_match('/\b(?:host seems down|failed to connect|couldn\'t connect|no route to host|connection refused|timed out|timeout)\b/i', $out)) {
+            return ['ok' => false, 'err' => 'nmap could not connect', 'raw' => $out];
+        }
+        if (!preg_match('/\bTLSv?1\.[0-3]\s*:/i', $out)) {
+            return ['ok' => false, 'err' => 'nmap output has no TLS protocol sections', 'raw' => $out];
+        }
 
 
 
@@ -1383,5 +1475,16 @@ final class HttpCheck
         $has11 = $hasLegacy($out, 'TLSv?1\\.1');
 
         return ['ok' => true, 'legacy' => ['tls1.0' => $has10, 'tls1.1' => $has11], 'raw' => $out];
+    }
+
+    private function timeoutSeconds(array $args, int $default): int
+    {
+        if (isset($args['timeout_s'])) {
+            return max(1, (int)$args['timeout_s']);
+        }
+        if (isset($args['timeout_ms'])) {
+            return max(1, (int)ceil(((int)$args['timeout_ms']) / 1000));
+        }
+        return $default;
     }
 }

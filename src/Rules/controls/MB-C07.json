@@ -10,10 +10,10 @@
       "op": "all",
       "checks": [
         {
-          "name": "webroot_hygiene",
+          "name": "fs_logs_reports_not_in_webroot",
           "args": {
             "webroot": "pub",
-            "forbidden": [
+            "forbidden_paths": [
               "var/log",
               "var/report"
             ]
@@ -33,13 +33,9 @@
       "op": "all",
       "checks": [
         {
-          "name": "text_grep",
+          "name": "fs_log_rotation_configured",
           "args": {
-            "file": "devops/logrotate.conf",
-            "must_match": [
-              "rotate",
-              "compress"
-            ]
+            "file": "devops/logrotate.conf"
           }
         }
       ],
@@ -53,27 +49,22 @@
       "title": "Debug template hints disabled in production",
       "control": "MB-C07",
       "severity": "medium",
-      "op": "any",
+      "op": "all",
       "checks": [
         {
-          "name": "php_array_eq",
+          "name": "php_dev_debug_config_disabled",
           "args": {
             "file": "app/etc/env.php",
-            "path": "system.default.dev/translate_inline/active",
-            "equals": 0
-          }
-        },
-        {
-          "name": "php_array_absent",
-          "args": {
-            "file": "app/etc/env.php",
-            "path": "system.default.dev/translate_inline/active"
+            "paths": [
+              "system.default.dev/translate_inline/active",
+              "system.default.dev/debug/template_hints_storefront"
+            ]
           }
         }
       ],
       "messages": {
         "pass": "Debug template hints are disabled in production.",
-        "fail": "Debug template hints are enabled in production. Set dev/debug/template_hints_storefront to 0."
+        "fail": "Debug developer settings are enabled in production. Disable translate inline and template hints settings."
       }
     },
     {
@@ -84,7 +75,7 @@
       "op": "all",
       "checks": [
         {
-          "name": "code_grep",
+          "name": "code_sensitive_logging",
           "args": {
             "paths": [
               "app"
@@ -92,11 +83,7 @@
             "include_ext": [
               "php"
             ],
-            "must_not_match": [
-              "logger->(info|debug|notice)\\([^)]*password",
-              "logger->(info|debug|notice)\\([^)]*Authorization",
-              "logger->(info|debug|notice)\\([^)]*(card_number|cvv)"
-            ]
+            "max_results": 50
           }
         }
       ],

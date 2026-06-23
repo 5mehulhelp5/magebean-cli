@@ -10,16 +10,18 @@
       "op": "all",
       "checks": [
         {
-          "name": "composer_audit_offline",
+          "name": "composer_audit_api",
           "args": {
             "lock_file": "composer.lock",
-            "cve_db": "rules/osv-db.json"
+            "endpoint": "https://api.magebean.com/v1/osv/advisories",
+            "timeout_ms": 10000,
+            "batch_size": 500,
+            "allow_private_http_fallback": true
           }
         }
       ],
       "messages": {
-        "pass": "No vulnerable packages detected against the offline OSV database.",
-        "fail": "Vulnerable packages found. Upgrade or patch affected versions per OSV advisories."
+        "pass": "No vulnerable packages detected by the Magebean OSV API."
       }
     },
     {
@@ -30,15 +32,18 @@
       "op": "all",
       "checks": [
         {
-          "name": "composer_core_advisories_offline",
+          "name": "composer_core_advisories_api",
           "args": {
-            "lock_file": "composer.lock"
+            "lock_file": "composer.lock",
+            "endpoint": "https://api.magebean.com/v1/osv/advisories",
+            "timeout_ms": 10000,
+            "batch_size": 500,
+            "allow_private_http_fallback": true
           }
         }
       ],
       "messages": {
-        "pass": "No unresolved Adobe core advisories detected.",
-        "fail": "Unresolved Adobe core advisories present. Apply the recommended patches or versions."
+        "pass": "No unresolved Adobe core advisories detected."
       }
     },
     {
@@ -49,21 +54,23 @@
       "op": "all",
       "checks": [
         {
-          "name": "composer_fix_version",
+          "name": "composer_fix_version_api",
           "args": {
             "lock_file": "composer.lock",
-            "cve_db": "rules/osv-db.json"
+            "endpoint": "https://api.magebean.com/v1/osv/advisories",
+            "timeout_ms": 10000,
+            "batch_size": 500,
+            "allow_private_http_fallback": true
           }
         }
       ],
       "messages": {
-        "pass": "Fix versions are available for all known vulnerable packages.",
-        "fail": "Some vulnerable packages lack an applied fix version. Pin or upgrade to the suggested safe version."
+        "pass": "No vulnerable packages require a fixed-version recommendation."
       }
     },
     {
       "id": "MB-R052",
-      "title": "High-risk modules flagged",
+      "title": "Enabled high-risk modules are maintained",
       "control": "MB-C09",
       "severity": "medium",
       "op": "all",
@@ -72,37 +79,32 @@
           "name": "composer_risk_surface_tag",
           "args": {
             "lock_file": "composer.lock",
-            "high_risk_list": "rules/high-risk-modules.json"
+            "status_endpoint": "https://api.magebean.com/v1/packages/status",
+            "timeout_ms": 10000,
+            "allow_private_http_fallback": true
           }
         }
       ],
       "messages": {
-        "pass": "No high-risk modules from the list are installed, or they are acknowledged and controlled.",
-        "fail": "High-risk modules detected. Review, sandbox, restrict scope, or replace with safer alternatives."
+        "pass": "Enabled high-risk modules are current, or detected high-risk modules are disabled."
       }
     },
     {
       "id": "MB-R053",
       "title": "Temporary mitigations documented",
       "control": "MB-C09",
-      "severity": "low",
+      "severity": "medium",
       "op": "all",
       "checks": [
         {
-          "name": "fs_exists",
-          "args": { "path": "SECURITY.md" }
-        },
-        {
-          "name": "text_grep",
+          "name": "security_mitigations_documented",
           "args": {
-            "file": "SECURITY.md",
-            "must_match": ["Mitigation", "Workaround"]
+            "path": "SECURITY.md"
           }
         }
       ],
       "messages": {
-        "pass": "Mitigations/workarounds are documented in SECURITY.md.",
-        "fail": "No documented mitigations. Record temporary workarounds and rollback plans in SECURITY.md."
+        "pass": "Temporary mitigations and their rollback/remediation lifecycle are documented."
       }
     },
     {
@@ -113,58 +115,64 @@
       "op": "all",
       "checks": [
         {
-          "name": "composer_match_list",
+          "name": "composer_kev_advisories_api",
           "args": {
             "lock_file": "composer.lock",
-            "list": "rules/cisa-kev.json"
+            "endpoint": "https://api.magebean.com/v1/osv/advisories",
+            "timeout_ms": 10000,
+            "batch_size": 500,
+            "allow_private_http_fallback": true
           }
         }
       ],
       "messages": {
-        "pass": "No packages match the CISA Known Exploited Vulnerabilities list.",
-        "fail": "Packages on the CISA KEV list detected. Prioritize immediate remediation."
+        "pass": "No installed package versions match the CISA Known Exploited Vulnerabilities catalog."
       }
     },
     {
       "id": "MB-R055",
       "title": "Transitive dependencies checked for CVEs",
       "control": "MB-C09",
-      "severity": "high",
+      "severity": "critical",
       "op": "all",
       "checks": [
         {
-          "name": "composer_audit_offline",
+          "name": "composer_transitive_audit_api",
           "args": {
             "lock_file": "composer.lock",
-            "cve_db": "rules/osv-db.json",
-            "scope": "transitive"
+            "composer_file": "composer.json",
+            "endpoint": "https://api.magebean.com/v1/osv/advisories",
+            "timeout_ms": 10000,
+            "batch_size": 500,
+            "allow_private_http_fallback": true
           }
         }
       ],
       "messages": {
-        "pass": "Transitive dependencies are free from known CVEs in the offline database.",
-        "fail": "Vulnerable transitive dependencies detected. Update constraints to pull safe versions."
+        "pass": "Transitive dependencies are free from known vulnerabilities."
       }
     },
     {
       "id": "MB-R056",
       "title": "No constraints blocking security updates",
       "control": "MB-C09",
-      "severity": "medium",
+      "severity": "high",
       "op": "all",
       "checks": [
         {
-          "name": "composer_constraints_conflict",
+          "name": "composer_constraints_conflict_api",
           "args": {
             "json_file": "composer.json",
             "lock_file": "composer.lock",
-            "advisory_fix": ">=x.y.z"
+            "endpoint": "https://api.magebean.com/v1/osv/advisories",
+            "timeout_ms": 10000,
+            "batch_size": 500,
+            "allow_private_http_fallback": true
           }
         }
       ],
       "messages": {
-        "pass": "Composer constraints do not block required security update ranges.",
-        "fail": "Version constraints block security updates. Relax or adjust constraints to allow patched versions."
+        "pass": "Composer constraints allow all required security update ranges."
       }
     },
     {
@@ -175,77 +183,83 @@
       "op": "all",
       "checks": [
         {
-          "name": "composer_yanked_offline",
+          "name": "composer_yanked_api",
           "args": {
             "lock_file": "composer.lock",
-            "meta": "rules/packagist-yanked.json"
+            "status_endpoint": "https://api.magebean.com/v1/packages/status",
+            "timeout_ms": 10000,
+            "allow_private_http_fallback": true
           }
         }
       ],
       "messages": {
-        "pass": "No yanked or withdrawn packages are installed.",
-        "fail": "Yanked/withdrawn packages detected. Replace or upgrade to a supported release."
+        "pass": "No yanked or withdrawn package versions are installed."
       }
     },
     {
       "id": "MB-R058",
-      "title": "No outdated Marketplace extensions",
+      "title": "Marketplace extensions are current and maintained",
       "control": "MB-C09",
-      "severity": "medium",
+      "severity": "high",
       "op": "all",
       "checks": [
         {
-          "name": "composer_outdated_offline",
+          "name": "composer_marketplace_outdated_api",
           "args": {
             "lock_file": "composer.lock",
-            "market_meta": "rules/marketplace-versions.json",
+            "status_endpoint": "https://api.magebean.com/v1/packages/status",
+            "timeout_ms": 10000,
+            "allow_private_http_fallback": true,
             "max_age_days": 365
           }
         }
       ],
       "messages": {
-        "pass": "Installed extensions are within the allowed freshness window.",
-        "fail": "Outdated extensions detected. Update to a maintained release."
+        "pass": "Marketplace and third-party Magento extensions are current and actively maintained."
       }
     },
     {
       "id": "MB-R059",
-      "title": "Advisories handled in timely manner",
+      "title": "Unresolved advisories are within remediation SLA",
       "control": "MB-C09",
       "severity": "low",
       "op": "all",
       "checks": [
         {
-          "name": "composer_advisory_latency",
+          "name": "composer_advisory_latency_api",
           "args": {
             "lock_file": "composer.lock",
-            "advisories": "rules/osv-db.json"
+            "endpoint": "https://api.magebean.com/v1/osv/advisories",
+            "timeout_ms": 10000,
+            "batch_size": 500,
+            "allow_private_http_fallback": true,
+            "latency_days": 30
           }
         }
       ],
       "messages": {
-        "pass": "Average advisory response time is within the accepted SLA.",
-        "fail": "Advisory response time exceeds target. Tighten triage and patch workflows."
+        "pass": "Installed packages have no overdue unresolved advisories."
       }
     },
     {
       "id": "MB-R060",
-      "title": "No extensions without vendor support",
+      "title": "Marketplace extensions have vendor support evidence",
       "control": "MB-C09",
       "severity": "medium",
       "op": "all",
       "checks": [
         {
-          "name": "composer_vendor_support_offline",
+          "name": "composer_vendor_support_api",
           "args": {
             "lock_file": "composer.lock",
-            "vendor_meta": "rules/vendor-support.json"
+            "status_endpoint": "https://api.magebean.com/v1/packages/status",
+            "timeout_ms": 10000,
+            "allow_private_http_fallback": true
           }
         }
       ],
       "messages": {
-        "pass": "All installed extensions have active vendor support.",
-        "fail": "Unsupported extensions detected. Replace, remove, or fork and maintain internally."
+        "pass": "Installed Marketplace extensions have active vendor support evidence."
       }
     }
   ]

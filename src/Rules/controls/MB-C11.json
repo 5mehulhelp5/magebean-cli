@@ -6,61 +6,65 @@
       "id": "MB-R065",
       "title": "No wildcard constraints in composer.json",
       "control": "MB-C11",
-      "severity": "medium",
+      "severity": "high",
       "op": "all",
       "checks": [
         {
           "name": "composer_json_constraints",
           "args": {
             "json_file": "composer.json",
-            "deny": ["*", "dev-master"]
+            "sections": ["require", "require-dev"],
+            "deny_wildcard": true,
+            "finding_message": "Wildcard Composer constraints detected"
           }
         }
       ],
       "messages": {
-        "pass": "No wildcard or 'dev-master' constraints found in composer.json.",
-        "fail": "Wildcard or 'dev-master' constraints detected. Pin to stable, supported version ranges."
+        "pass": "No wildcard constraints found in composer.json."
       }
     },
     {
       "id": "MB-R066",
       "title": "No dev branches in composer.json",
       "control": "MB-C11",
-      "severity": "medium",
+      "severity": "high",
       "op": "all",
       "checks": [
         {
           "name": "composer_json_constraints",
           "args": {
             "json_file": "composer.json",
-            "deny_prefix": ["dev-"]
+            "sections": ["require", "require-dev"],
+            "deny_dev_constraints": true,
+            "finding_message": "Development Composer constraints detected"
           }
         }
       ],
       "messages": {
-        "pass": "No dev branch constraints (dev-*) are used.",
-        "fail": "Dev branch constraints detected. Replace with tagged releases or stable ranges."
+        "pass": "No development branch or dev-stability constraints are used."
       }
     },
     {
       "id": "MB-R067",
       "title": "prefer-stable=true in composer.json",
       "control": "MB-C11",
-      "severity": "low",
+      "severity": "high",
       "op": "all",
       "checks": [
         {
           "name": "composer_json_kv",
           "args": {
             "json_file": "composer.json",
-            "path": "config.prefer-stable",
-            "equals": true
+            "key": "prefer-stable",
+            "op": "eq",
+            "expect": true,
+            "strict": true
           }
         }
       ],
       "messages": {
-        "pass": "composer.json sets config.prefer-stable=true.",
-        "fail": "prefer-stable is not enabled. Set config.prefer-stable=true to favor stable releases."
+        "pass": "composer.json sets top-level prefer-stable=true.",
+        "fail": "prefer-stable is not enabled. Set top-level prefer-stable=true to favor stable releases."
       }
     },
     {
@@ -71,17 +75,18 @@
       "op": "all",
       "checks": [
         {
-          "name": "composer_audit_offline",
+          "name": "composer_audit_api",
           "args": {
             "lock_file": "composer.lock",
-            "cve_db": "rules/osv-db.json",
-            "fail_on_found": true
+            "endpoint": "https://api.magebean.com/v1/osv/advisories",
+            "timeout_ms": 10000,
+            "batch_size": 500,
+            "allow_private_http_fallback": true
           }
         }
       ],
       "messages": {
-        "pass": "No known vulnerabilities found in composer.lock against the offline database.",
-        "fail": "Known vulnerabilities detected. Update to patched versions per advisories."
+        "pass": "No known vulnerabilities found in composer.lock by the Magebean OSV API."
       }
     },
     {
@@ -92,24 +97,27 @@
       "op": "all",
       "checks": [
         {
-          "name": "composer_outdated_offline",
+          "name": "composer_direct_outdated_api",
           "args": {
             "lock_file": "composer.lock",
-            "release_meta": "rules/release-history.json",
-            "scope": "direct"
+            "json_file": "composer.json",
+            "status_endpoint": "https://api.magebean.com/v1/packages/status",
+            "timeout_ms": 10000,
+            "status_batch_size": 500,
+            "allow_private_http_fallback": true,
+            "include_dev": true
           }
         }
       ],
       "messages": {
-        "pass": "All direct dependencies are within acceptable freshness.",
-        "fail": "Outdated direct dependencies detected. Upgrade primary packages to recent stable releases."
+        "pass": "All assessable direct dependencies use the latest stable release."
       }
     },
     {
       "id": "MB-R070",
       "title": "composer.lock integrity with composer.json",
       "control": "MB-C11",
-      "severity": "high",
+      "severity": "medium",
       "op": "all",
       "checks": [
         {
@@ -121,8 +129,7 @@
         }
       ],
       "messages": {
-        "pass": "composer.lock is in sync with composer.json.",
-        "fail": "composer.lock integrity check failed. Run `composer update` (or `composer install`) to reconcile."
+        "pass": "composer.lock content-hash and direct dependency graph match composer.json."
       }
     },
     {
@@ -133,16 +140,19 @@
       "op": "all",
       "checks": [
         {
-          "name": "composer_abandoned_offline",
+          "name": "composer_abandoned_api",
           "args": {
             "lock_file": "composer.lock",
-            "packagist_meta": "rules/packagist-abandoned.json"
+            "status_endpoint": "https://api.magebean.com/v1/packages/status",
+            "timeout_ms": 10000,
+            "status_batch_size": 500,
+            "allow_private_http_fallback": true,
+            "package_types": ["library"]
           }
         }
       ],
       "messages": {
-        "pass": "No installed libraries are marked as abandoned on Packagist.",
-        "fail": "Abandoned libraries detected. Replace with maintained alternatives."
+        "pass": "No installed PHP libraries are marked as abandoned on Packagist."
       }
     }
   ]

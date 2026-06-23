@@ -7,10 +7,10 @@
       "title": "Crontab entries present (Magento cron)",
       "control": "MB-C08",
       "severity": "medium",
-      "op": "any",
+      "op": "all",
       "checks": [
         {
-          "name": "crontab_grep",
+          "name": "cron_magento_configured",
           "args": {
             "users": [
               "www-data",
@@ -22,21 +22,12 @@
               "deploy"
             ],
             "patterns": [
-              "(?:^|\\s)(?:php\\s+[^\\n]*?)?bin\\/magento\\s+cron:run\\b",
-              "(?:^|\\s)(?:php\\s+[^\\n]*?)?bin\\/magento\\s+setup:cron:run\\b",
-              "(?:^|\\s)(?:php\\s+[^\\n]*?)?update\\/cron\\.php\\b"
+              "(?:^|\\s)(?:php\\s+[^\\n]*?)?bin/magento\\s+cron:run\\b",
+              "(?:^|\\s)(?:php\\s+[^\\n]*?)?bin/magento\\s+setup:cron:run\\b",
+              "(?:^|\\s)(?:php\\s+[^\\n]*?)?update/cron\\.php\\b"
             ],
-            "timeout_ms": 2500
-          }
-        },
-        {
-          "name": "code_grep",
-          "optional": true,
-          "args": {
-            "paths": [
-              ".",
+            "repo_paths": [
               "deploy",
-              "docs",
               ".github",
               ".gitlab-ci",
               ".circleci"
@@ -50,18 +41,16 @@
               "yml",
               "yaml",
               "ini",
-              "env",
-              "dockerfile"
+              "env"
             ],
-            "must_match": [
-              "(?:^|\\s)(?:php\\s+[^\\n]*?)?bin\\/magento\\s+cron:run\\b"
-            ]
+            "timeout_ms": 2500,
+            "max_results": 20
           }
         }
       ],
       "messages": {
-        "pass": "Found Magento cron run command in repository or deployment docs.",
-        "fail": "No Magento cron entry found in repo or docs. Ensure 'bin/magento cron:run' runs every minute via crontab or scheduler."
+        "pass": "Found Magento cron run command in crontab or deployment scheduler configuration.",
+        "fail": "No Magento cron entry found. Ensure 'bin/magento cron:run' runs every minute via crontab or scheduler."
       }
     },
     {
@@ -72,9 +61,13 @@
       "op": "all",
       "checks": [
         {
-          "name": "fs_mtime_max_age",
+          "name": "cron_heartbeat_recent",
           "args": {
-            "file": "var/cron/cron.timestamp",
+            "files": [
+              "var/cron/cron.timestamp",
+              "var/log/cron.log",
+              "var/log/magento.cron.log"
+            ],
             "seconds": 900
           }
         }
@@ -92,12 +85,14 @@
       "op": "all",
       "checks": [
         {
-          "name": "text_grep",
+          "name": "cron_backlog_below_threshold",
           "args": {
-            "file": "var/cron/queue.size",
-            "must_not_match": [
-              "^([1-9][0-9]{3,})$"
-            ]
+            "files": [
+              "var/cron/queue.size",
+              "var/cron/backlog.json",
+              "var/cron/backlog.txt"
+            ],
+            "max": 1000
           }
         }
       ],

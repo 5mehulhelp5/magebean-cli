@@ -110,7 +110,8 @@ final class ScanRunner
                 if ($hasFalse) {
                     $ok = false;
                     $status = 'FAIL';
-                } elseif ($hasUnknown && !$hasTrue) {
+                } elseif ($hasUnknown) {
+                    $ok = null;
                     $status = 'UNKNOWN';
                 } else {
                     $ok = true;

@@ -10,40 +10,36 @@
       "op": "all",
       "checks": [
         {
-          "name": "webroot_hygiene",
-          "args": {
-            "webroot": ".",
-            "forbidden": [
-              ".env",
-              ".env.local",
-              "*.pem",
-              "*.key"
-            ]
-          }
-        },
-        {
           "name": "git_history_scan",
           "args": {
-            "paths": [
-              "app",
-              "env",
-              "pub"
+            "paths": ["."],
+            "exclude_dirs": [
+              ".git",
+              "vendor",
+              "var",
+              "generated",
+              "node_modules",
+              "pub/media",
+              "pub/static",
+              "pub/cache"
             ],
             "patterns": [
               "AKIA[0-9A-Z]{16}",
               "ASIA[0-9A-Z]{16}",
               "AIza[0-9A-Za-z\\-_]{35}",
-              "-----BEGIN( RSA)? PRIVATE KEY-----",
+              "-----BEGIN [A-Z0-9 ]*PRIVATE KEY-----",
               "xox[baprs]-[0-9A-Za-z\\-]{10,48}",
-              "sk_live_[0-9a-zA-Z]{24,}"
+              "sk_live_[0-9a-zA-Z]{24,}",
+              "gh[pousr]_[0-9A-Za-z]{36,255}",
+              "(api[_-]?key|client[_-]?secret|access[_-]?token|password)[[:space:]]*[\"']?[[:space:]]*(=>|=|:)[[:space:]]*[\"'][A-Za-z0-9_./+=-]{16,}[\"']"
             ],
-            "max_results": 20
+            "max_results": 200,
+            "max_file_bytes": 1048576
           }
         }
       ],
       "messages": {
-        "pass": "No secrets detected in the working tree or Git history.",
-        "fail": "Secrets detected in files or Git history. Remove, rotate keys, and purge history with a secure rewrite."
+        "pass": "No secrets detected in the working tree or Git history."
       }
     },
     {
@@ -51,39 +47,37 @@
       "title": "HTTPS-only endpoints configured",
       "control": "MB-C12",
       "severity": "high",
-      "op": "any",
+      "op": "all",
       "checks": [
         {
-          "name": "text_grep",
-          "args": {
-            "file": "app/etc/env.php",
-            "must_not_match": [
-              "http://"
-            ]
-          }
-        },
-        {
-          "name": "code_grep",
+          "name": "code_https_endpoints",
           "args": {
             "paths": [
-              "app"
+              "app/etc",
+              "app/code",
+              "app/design"
             ],
             "include_ext": [
               "php",
               "phtml",
+              "xml",
+              "json",
+              "yaml",
+              "yml",
+              "ini",
               "js",
               "html",
-              "xml"
+              "css"
             ],
-            "must_not_match": [
-              "http://[^\\s\"'>]+"
-            ]
+            "required_files": [
+              "app/etc/env.php"
+            ],
+            "max_results": 200
           }
         }
       ],
       "messages": {
-        "pass": "All configured endpoints use HTTPS (no http:// references).",
-        "fail": "Insecure http:// endpoint references found. Switch to HTTPS."
+        "pass": "All detected configured endpoints use HTTPS."
       }
     },
     {
@@ -94,17 +88,17 @@
       "op": "all",
       "checks": [
         {
-          "name": "php_array_eq",
+          "name": "php_third_party_debug_disabled",
           "args": {
-            "file": "app/etc/env.php",
-            "path": "system.default.dev/debug/debug_logging",
-            "equals": 0
+            "files": [
+              "app/etc/env.php",
+              "app/etc/config.php"
+            ]
           }
         }
       ],
       "messages": {
-        "pass": "Third-party debug/verbose logging is disabled.",
-        "fail": "Third-party debug/verbose logging is enabled. Disable debug_logging in env.php."
+        "pass": "Third-party debug/verbose logging is disabled."
       }
     },
     {
@@ -112,48 +106,28 @@
       "title": "Webhook signature validation present",
       "control": "MB-C12",
       "severity": "high",
-      "op": "any",
+      "op": "all",
       "checks": [
         {
-          "name": "code_grep",
+          "name": "code_webhook_signature_validation",
           "args": {
             "paths": [
-              "app",
+              "app/code",
+              "app/etc",
               "routes"
             ],
             "include_ext": [
-              "php"
+              "php",
+              "xml"
             ],
-            "must_not_match": [
-              "(?:Route::\\s*(?:post|put|patch|any)\\s*\\(\\s*['\"][^'\"]*webhook)",
-              "WebhookController",
-              "handleWebhook\\s*\\("
-            ]
-          }
-        },
-        {
-          "name": "code_grep",
-          "args": {
-            "paths": [
-              "app",
-              "vendor"
-            ],
-            "include_ext": [
-              "php"
-            ],
-            "must_match": [
-              "(\\$_SERVER\\[['\"]HTTP_[A-Z0-9_]*SIGNATURE['\"]\\]|->header\\s*\\(\\s*['\"][Xx][-_]?[A-Za-z0-9-]*[Ss]ignature['\"]\\s*\\)|getHeader\\s*\\(\\s*['\"][Xx][^'\"]*[Ss]ignature['\"]\\s*\\))",
-              "(hash_hmac\\s*\\(|hash_equals\\s*\\(|openssl_verify\\s*\\(|sodium_crypto_sign_verify_detached\\s*\\()"
-            ]
+            "max_results": 100
           }
         }
       ],
       "messages": {
-        "pass": "Webhook handlers validate signatures (provider header + secure verification), or no webhook endpoints are present.",
-        "fail": "Webhook signature validation not detected. Verify MAC/signature from provider headers with timing-safe compare."
+        "pass": "Webhook handlers validate provider signatures, or no webhook endpoints are present."
       }
-    },
-    {
+    },    {
       "id": "MB-R076",
       "title": "Outbound connections restricted by allow-list",
       "control": "MB-C12",

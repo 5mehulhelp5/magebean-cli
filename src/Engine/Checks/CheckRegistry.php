@@ -52,6 +52,8 @@ final class CheckRegistry
         $registry->register('code_sensitive_logging', fn(array $args): array => $code->sensitiveLogging($args));
         $registry->register('code_magento_api_crypto_session', fn(array $args): array => $code->magentoApiCryptoSession($args));
         $registry->register('code_no_mixed_content', fn(array $args): array => $code->noMixedContent($args));
+        $registry->register('code_https_endpoints', fn(array $args): array => $code->httpsEndpoints($args));
+        $registry->register('code_webhook_signature_validation', fn(array $args): array => $code->webhookSignatureValidation($args));
 
         $registry->register('fs_no_world_writable', fn(array $args): array => $fs->noWorldWritable($args));
         $registry->register('file_mode_max', fn(array $args): array => $fs->fileModeMax($args));
@@ -60,7 +62,13 @@ final class CheckRegistry
         $registry->register('code_dirs_readonly', fn(array $args): array => $fs->codeDirsReadonly($args));
         $registry->register('no_directory_listing', fn(array $args): array => $fs->noDirectoryListing($args));
         $registry->register('fs_exists', fn(array $args): array => $fs->fsExists($args));
+        $registry->register('security_mitigations_documented', fn(array $args): array => $fs->securityMitigationsDocumented($args));
+        $registry->register('fs_di_compiled', fn(array $args): array => $fs->diCompiled($args));
+        $registry->register('fs_static_content_deployed', fn(array $args): array => $fs->staticContentDeployed($args));
+        $registry->register('fs_indexers_ready', fn(array $args): array => $fs->indexersReady($args));
         $registry->register('fs_mtime_max_age', fn(array $args): array => $fs->mtimeMaxAge($args));
+        $registry->register('fs_logs_reports_not_in_webroot', fn(array $args): array => $fs->logsReportsNotInWebroot($args));
+        $registry->register('fs_log_rotation_configured', fn(array $args): array => $fs->logRotationConfigured($args));
 
         $registry->register('system_egress_restricted', fn(array $args): array => $sys->egressRestricted($args));
 
@@ -68,6 +76,15 @@ final class CheckRegistry
             $registry->register($name, fn(array $args): array => $phpc->dispatch($name, $args));
         }
         $registry->register('php_array_key_search', fn(array $args): array => $phpc->keySearch($args));
+        $registry->register('php_xdebug_disabled', fn(array $args): array => $phpc->xdebugDisabled($args));
+        $registry->register('php_display_errors_disabled', fn(array $args): array => $phpc->displayErrorsDisabled($args));
+        $registry->register('php_template_hints_disabled', fn(array $args): array => $phpc->templateHintsDisabled($args));
+        $registry->register('php_dev_debug_config_disabled', fn(array $args): array => $phpc->devDebugConfigDisabled($args));
+        $registry->register('php_third_party_debug_disabled', fn(array $args): array => $phpc->thirdPartyDebugDisabled($args));
+        $registry->register('php_full_page_cache_configured', fn(array $args): array => $phpc->fullPageCacheConfigured($args));
+        $registry->register('php_cache_backend_configured', fn(array $args): array => $phpc->cacheBackendConfigured($args));
+        $registry->register('php_session_storage_hardened', fn(array $args): array => $phpc->sessionStorageHardened($args));
+        $registry->register('php_no_file_cache_backend', fn(array $args): array => $phpc->noFileCacheBackend($args));
 
         $registry->register('magento_config', fn(array $args): array => $mage->stub($args));
         $registry->register('magento_admin_frontname_strong', fn(array $args): array => $mage->adminFrontNameStrong($args));
@@ -76,12 +93,28 @@ final class CheckRegistry
         $registry->register('magento_admin_session_timeout', fn(array $args): array => $mage->adminSessionTimeout($args));
         $registry->register('magento_admin_exposure_restricted', fn(array $args): array => $mage->adminExposureRestricted($args));
         $registry->register('magento_admin_captcha_or_rate_limit', fn(array $args): array => $mage->adminCaptchaOrRateLimit($args));
+        $registry->register('magento_production_mode', fn(array $args): array => $mage->productionMode($args));
         $registry->register('magento_https_enforced', fn(array $args): array => $mage->httpsEnforced($args));
         $registry->register('magento_cookie_flags_secure', fn(array $args): array => $mage->cookieFlagsSecure($args));
         $registry->register('nginx_directive', fn(array $args): array => $web->nginxDirective($args));
         $registry->register('apache_htaccess_directive', fn(array $args): array => $web->apacheDirective($args));
         $registry->register('webserver_hsts_config', fn(array $args): array => $web->hstsConfig($args));
 
+        $registry->register('composer_audit_api', fn(array $args): array => $comp->auditApi($args));
+        $registry->register('composer_core_advisories_api', fn(array $args): array => $comp->coreAdvisoriesApi($args));
+        $registry->register('composer_fix_version_api', fn(array $args): array => $comp->fixVersionApi($args));
+        $registry->register('composer_kev_advisories_api', fn(array $args): array => $comp->kevAdvisoriesApi($args));
+        $registry->register('composer_transitive_audit_api', fn(array $args): array => $comp->transitiveAuditApi($args));
+        $registry->register('composer_constraints_conflict_api', fn(array $args): array => $comp->constraintsConflictApi($args));
+        $registry->register('composer_yanked_api', fn(array $args): array => $comp->yankedApi($args));
+        $registry->register('composer_marketplace_outdated_api', fn(array $args): array => $comp->marketplaceOutdatedApi($args));
+        $registry->register('composer_direct_outdated_api', fn(array $args): array => $comp->directOutdatedApi($args));
+        $registry->register('composer_advisory_latency_api', fn(array $args): array => $comp->advisoryLatencyApi($args));
+        $registry->register('composer_vendor_support_api', fn(array $args): array => $comp->vendorSupportApi($args));
+        $registry->register('composer_abandoned_api', fn(array $args): array => $comp->abandonedApi($args));
+        $registry->register('composer_release_recency_api', fn(array $args): array => $comp->releaseRecencyApi($args));
+        $registry->register('composer_repo_archived_api', fn(array $args): array => $comp->repoArchivedApi($args));
+        $registry->register('composer_risky_fork_api', fn(array $args): array => $comp->riskyForkApi($args));
         $registry->register('composer_audit_offline', fn(array $args): array => $comp->auditOffline($args));
         $registry->register('composer_core_advisories_offline', fn(array $args): array => $comp->coreAdvisoriesOffline($args));
         $registry->register('composer_fix_version', fn(array $args): array => $comp->fixVersion($args));
@@ -102,6 +135,9 @@ final class CheckRegistry
 
         $registry->register('git_history_scan', fn(array $args): array => $git->secretScan($args));
         $registry->register('crontab_grep', fn(array $args): array => $cron->crontabGrep($args));
+        $registry->register('cron_magento_configured', fn(array $args): array => $cron->magentoCronConfigured($args));
+        $registry->register('cron_heartbeat_recent', fn(array $args): array => $cron->heartbeatRecent($args));
+        $registry->register('cron_backlog_below_threshold', fn(array $args): array => $cron->backlogBelowThreshold($args));
 
         return $registry;
     }

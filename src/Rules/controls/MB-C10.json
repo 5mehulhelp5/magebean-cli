@@ -10,16 +10,17 @@
       "op": "all",
       "checks": [
         {
-          "name": "composer_abandoned_offline",
+          "name": "composer_abandoned_api",
           "args": {
             "lock_file": "composer.lock",
-            "packagist_meta": "rules/packagist-abandoned.json"
+            "status_endpoint": "https://api.magebean.com/v1/packages/status",
+            "timeout_ms": 10000,
+            "allow_private_http_fallback": true
           }
         }
       ],
       "messages": {
-        "pass": "No installed packages are marked as 'abandoned' on Packagist.",
-        "fail": "Abandoned packages detected. Replace them or switch to the recommended alternatives."
+        "pass": "No installed packages are marked as abandoned in the Packagist snapshot."
       }
     },
     {
@@ -30,37 +31,40 @@
       "op": "all",
       "checks": [
         {
-          "name": "composer_release_recency_offline",
+          "name": "composer_release_recency_api",
           "args": {
             "lock_file": "composer.lock",
-            "release_meta": "rules/release-history.json",
+            "status_endpoint": "https://api.magebean.com/v1/packages/status",
+            "timeout_ms": 10000,
+            "allow_private_http_fallback": true,
             "months": 24
           }
         }
       ],
       "messages": {
-        "pass": "All packages have had a release within the last 24 months.",
-        "fail": "Stale packages found (no release > 24 months). Replace or fork and maintain internally."
+        "pass": "Packagist-tracked packages have had a release within the last 24 months."
       }
     },
     {
       "id": "MB-R063",
-      "title": "No packages from archived repositories",
+      "title": "No packages from archived or disabled repositories",
       "control": "MB-C10",
       "severity": "medium",
       "op": "all",
       "checks": [
         {
-          "name": "composer_repo_archived_offline",
+          "name": "composer_repo_archived_api",
           "args": {
             "lock_file": "composer.lock",
-            "repo_meta": "rules/repo-status.json"
+            "status_endpoint": "https://api.magebean.com/v1/packages/status",
+            "timeout_ms": 10000,
+            "allow_private_http_fallback": true
           }
         }
       ],
       "messages": {
-        "pass": "No installed packages come from archived repositories.",
-        "fail": "Packages from archived repositories detected. Migrate to active upstreams."
+        "pass": "No installed packages come from archived or disabled repositories.",
+        "fail": "Packages from archived or disabled repositories detected. Migrate to active upstreams."
       }
     },
     {
@@ -71,10 +75,12 @@
       "op": "all",
       "checks": [
         {
-          "name": "composer_risky_fork_offline",
+          "name": "composer_risky_fork_api",
           "args": {
             "lock_file": "composer.lock",
-            "repo_meta": "rules/repo-status.json"
+            "status_endpoint": "https://api.magebean.com/v1/packages/status",
+            "timeout_ms": 10000,
+            "allow_private_http_fallback": true
           }
         }
       ],

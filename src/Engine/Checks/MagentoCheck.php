@@ -239,6 +239,37 @@ final class MagentoCheck
         return [true, "Admin password policy meets minimum strength requirements", $evidence];
     }
 
+    public function productionMode(array $args): array
+    {
+        $file = (string)($args['file'] ?? 'app/etc/env.php');
+        $path = (string)($args['path'] ?? 'MAGE_MODE');
+        $expected = strtolower(trim((string)($args['equals'] ?? 'production')));
+
+        $arr = $this->loadArray($file);
+        if (isset($arr['__ERROR__'])) {
+            return [null, '[UNKNOWN] ' . $arr['__ERROR__'], ['file' => $file, 'path' => $path]];
+        }
+
+        $value = $this->getByDotPathFlexible($arr, $path, '__NOT_FOUND__');
+        if ($value === '__NOT_FOUND__') {
+            return [null, "[UNKNOWN] Path '{$path}' not found in {$file}", ['file' => $file, 'path' => $path]];
+        }
+
+        $mode = strtolower(trim((string)$value));
+        $evidence = [
+            'file' => $file,
+            'path' => $path,
+            'observed' => $value,
+            'expected' => $expected,
+        ];
+
+        if ($mode === $expected) {
+            return [true, 'Magento deploy mode is production', $evidence];
+        }
+
+        return [false, "Magento deploy mode is '{$mode}', expected '{$expected}'", $evidence];
+    }
+
     public function adminSessionTimeout(array $args): array
     {
         $file = (string)($args['file'] ?? 'app/etc/config.php');

@@ -187,6 +187,135 @@ final class FilesystemCheck
         return [true, "Webroot clean: {$webroot}"];
     }
 
+    public function logsReportsNotInWebroot(array $args): array
+    {
+        $webrootRel = (string)($args['webroot'] ?? 'pub');
+        $webroot = $this->ctx->abs($webrootRel);
+        if (!is_dir($webroot)) {
+            return [null, '[UNKNOWN] Webroot not found for log/report exposure check', ['webroot' => $webrootRel]];
+        }
+
+        $forbidden = $args['forbidden_paths'] ?? ['var/log', 'var/report'];
+        if (!is_array($forbidden)) {
+            $forbidden = ['var/log', 'var/report'];
+        }
+        $forbidden = array_values(array_filter(array_map(
+            static fn(mixed $value): string => trim(str_replace('\\', '/', (string)$value), '/'),
+            $forbidden
+        )));
+
+        $projectTargets = [];
+        foreach ($forbidden as $relative) {
+            $target = realpath($this->ctx->abs($relative));
+            if ($target !== false) {
+                $projectTargets[$relative] = $target;
+            }
+        }
+
+        $matches = [];
+        $max = max(1, (int)($args['max_results'] ?? 50));
+        $iterator = new \RecursiveIteratorIterator(
+            new \RecursiveDirectoryIterator($webroot, \FilesystemIterator::SKIP_DOTS),
+            \RecursiveIteratorIterator::SELF_FIRST,
+            \RecursiveIteratorIterator::CATCH_GET_CHILD
+        );
+
+        foreach ($iterator as $file) {
+            $path = $file->getPathname();
+            $relative = str_replace('\\', '/', ltrim(substr($path, strlen(rtrim($webroot, DIRECTORY_SEPARATOR))), DIRECTORY_SEPARATOR));
+            foreach ($forbidden as $pattern) {
+                if ($relative === $pattern || str_starts_with($relative, $pattern . '/')) {
+                    $matches[] = [
+                        'path' => $path,
+                        'relative_path' => $relative,
+                        'pattern' => $pattern,
+                        'type' => is_link($path) ? 'link' : (is_dir($path) ? 'dir' : 'file'),
+                    ];
+                    break;
+                }
+            }
+
+            if (is_link($path)) {
+                $target = realpath($path);
+                if ($target !== false) {
+                    foreach ($projectTargets as $pattern => $projectTarget) {
+                        if ($target === $projectTarget || str_starts_with($target, rtrim($projectTarget, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR)) {
+                            $matches[] = [
+                                'path' => $path,
+                                'relative_path' => $relative,
+                                'pattern' => $pattern,
+                                'type' => 'link',
+                                'target' => $target,
+                            ];
+                            break;
+                        }
+                    }
+                }
+            }
+
+            if (count($matches) >= $max) {
+                break;
+            }
+        }
+
+        if ($matches !== []) {
+            return [false, 'Log/report paths are exposed under webroot', ['webroot' => $webrootRel, 'matches' => $matches]];
+        }
+
+        return [true, 'Log and report paths are not exposed under webroot', ['webroot' => $webrootRel, 'checked' => $forbidden]];
+    }
+
+    public function logRotationConfigured(array $args): array
+    {
+        $fileRel = (string)($args['file'] ?? 'devops/logrotate.conf');
+        $file = $this->ctx->abs($fileRel);
+        if (!is_file($file)) {
+            return [false, 'Log rotation configuration file not found', ['file' => $fileRel]];
+        }
+
+        $content = @file_get_contents($file);
+        if ($content === false) {
+            return [null, '[UNKNOWN] Unable to read log rotation configuration', ['file' => $fileRel]];
+        }
+
+        $activeLines = [];
+        foreach (preg_split("~\r?\n~", $content) as $line) {
+            $line = trim(preg_replace('~\s+#.*$~', '', (string)$line) ?? '');
+            if ($line === '' || str_starts_with($line, '#')) {
+                continue;
+            }
+            $activeLines[] = $line;
+        }
+        $active = implode("\n", $activeLines);
+
+        $hasRotate = preg_match('~^\s*rotate\s+\d+\b~mi', $active) === 1;
+        $hasCompress = preg_match('~^\s*(?:delaycompress|compress)\b~mi', $active) === 1;
+        $hasLogTarget = preg_match('~(?:^|\s)(?:/[^{}\s]*var/log/[^{}\s]*|var/log/[^{}\s]*|[^{}\s]*\.log)(?:\s|\{|$)~mi', $active) === 1;
+
+        $evidence = [
+            'file' => $fileRel,
+            'has_rotate' => $hasRotate,
+            'has_compress' => $hasCompress,
+            'has_log_target' => $hasLogTarget,
+        ];
+
+        $missing = [];
+        if (!$hasLogTarget) {
+            $missing[] = 'log target';
+        }
+        if (!$hasRotate) {
+            $missing[] = 'rotate directive';
+        }
+        if (!$hasCompress) {
+            $missing[] = 'compress directive';
+        }
+        if ($missing !== []) {
+            return [false, 'Log rotation configuration is incomplete: missing ' . implode(', ', $missing), $evidence];
+        }
+
+        return [true, 'Log rotation is configured with rotate and compression', $evidence];
+    }
+
     public function codeDirsReadonly(array $args): array
     {
         $dirs = $args['dirs'] ?? ['app', 'vendor', 'lib'];
@@ -257,6 +386,226 @@ final class FilesystemCheck
         return [$ok, ($ok ? 'Exists: ' : 'Not found: ') . $rel];
     }
 
+    public function securityMitigationsDocumented(array $args): array
+    {
+        $rel = trim((string)($args['path'] ?? 'SECURITY.md'));
+        if ($rel === '') {
+            return [false, 'security_mitigations_documented requires path'];
+        }
+
+        $abs = $this->ctx->abs($rel);
+        $evidence = [
+            'path' => $rel,
+            'exists' => is_file($abs),
+            'mitigation_documented' => false,
+            'lifecycle_documented' => false,
+        ];
+        if (!is_file($abs)) {
+            return [false, 'Mitigation document not found: ' . $rel, $evidence];
+        }
+
+        $content = @file_get_contents($abs);
+        if (!is_string($content)) {
+            return [null, '[UNKNOWN] Unable to read mitigation document: ' . $rel, $evidence];
+        }
+
+        $content = trim($content);
+        if ($content === '') {
+            return [false, 'Mitigation document is empty: ' . $rel, $evidence];
+        }
+
+        $hasMitigation = (bool)preg_match(
+            '/\b(mitigation|workaround|temporary\s+(?:control|measure)|compensating\s+control|hotfix)\b/i',
+            $content
+        );
+        $hasLifecycle = (bool)preg_match(
+            '/\b(rollback|revert|expiry|expiration|review\s+date|valid\s+until|permanent\s+fix|upgrade\s+to|remove\s+after)\b/i',
+            $content
+        );
+        $evidence['mitigation_documented'] = $hasMitigation;
+        $evidence['lifecycle_documented'] = $hasLifecycle;
+
+        $missing = [];
+        if (!$hasMitigation) {
+            $missing[] = 'mitigation/workaround action';
+        }
+        if (!$hasLifecycle) {
+            $missing[] = 'rollback, review/expiry, or permanent-fix plan';
+        }
+        if ($missing !== []) {
+            return [
+                false,
+                'Incomplete mitigation documentation in ' . $rel . ': missing ' . implode(' and ', $missing),
+                $evidence,
+            ];
+        }
+
+        return [
+            true,
+            'Temporary mitigations and their rollback/remediation lifecycle are documented in ' . $rel,
+            $evidence,
+        ];
+    }
+
+    public function diCompiled(array $args): array
+    {
+        $metadataRel = (string)($args['metadata_path'] ?? 'generated/metadata');
+        $codeRel = (string)($args['code_path'] ?? 'generated/code');
+        $minMetadataFiles = max(1, (int)($args['min_metadata_php_files'] ?? 1));
+        $minCodeFiles = max(1, (int)($args['min_code_php_files'] ?? 1));
+
+        $metadataAbs = $this->ctx->abs($metadataRel);
+        $codeAbs = $this->ctx->abs($codeRel);
+        $evidence = [
+            'metadata_path' => $metadataRel,
+            'code_path' => $codeRel,
+            'metadata_present' => is_dir($metadataAbs),
+            'code_present' => is_dir($codeAbs),
+            'metadata_php_files' => 0,
+            'code_php_files' => 0,
+        ];
+
+        $missing = [];
+        if (!is_dir($metadataAbs)) {
+            $missing[] = $metadataRel;
+        }
+        if (!is_dir($codeAbs)) {
+            $missing[] = $codeRel;
+        }
+        if ($missing !== []) {
+            return [false, 'Compiled DI directories missing: ' . implode(', ', $missing), $evidence];
+        }
+
+        $metadataCount = $this->countPhpFiles($metadataAbs);
+        $codeCount = $this->countPhpFiles($codeAbs);
+        if ($metadataCount === null || $codeCount === null) {
+            return [null, '[UNKNOWN] Unable to inspect generated DI directories', $evidence];
+        }
+
+        $evidence['metadata_php_files'] = $metadataCount;
+        $evidence['code_php_files'] = $codeCount;
+        $evidence['min_metadata_php_files'] = $minMetadataFiles;
+        $evidence['min_code_php_files'] = $minCodeFiles;
+
+        $failures = [];
+        if ($metadataCount < $minMetadataFiles) {
+            $failures[] = "{$metadataRel} has {$metadataCount} PHP files";
+        }
+        if ($codeCount < $minCodeFiles) {
+            $failures[] = "{$codeRel} has {$codeCount} PHP files";
+        }
+        if ($failures !== []) {
+            return [false, 'Compiled DI output is incomplete: ' . implode('; ', $failures), $evidence];
+        }
+
+        return [true, 'Generated DI metadata and code contain compiled PHP output', $evidence];
+    }
+
+    public function staticContentDeployed(array $args): array
+    {
+        $staticRel = (string)($args['static_path'] ?? 'pub/static');
+        $preprocessedRel = (string)($args['preprocessed_path'] ?? 'var/view_preprocessed');
+        $minStaticFiles = max(1, (int)($args['min_static_files'] ?? 1));
+        $minPreprocessedFiles = max(1, (int)($args['min_preprocessed_files'] ?? 1));
+
+        $staticAbs = $this->ctx->abs($staticRel);
+        $preprocessedAbs = $this->ctx->abs($preprocessedRel);
+        $evidence = [
+            'static_path' => $staticRel,
+            'preprocessed_path' => $preprocessedRel,
+            'static_present' => is_dir($staticAbs),
+            'preprocessed_present' => is_dir($preprocessedAbs),
+            'static_files' => 0,
+            'preprocessed_files' => 0,
+        ];
+
+        $missing = [];
+        if (!is_dir($staticAbs)) {
+            $missing[] = $staticRel;
+        }
+        if (!is_dir($preprocessedAbs)) {
+            $missing[] = $preprocessedRel;
+        }
+        if ($missing !== []) {
+            return [false, 'Static content directories missing: ' . implode(', ', $missing), $evidence];
+        }
+
+        $staticCount = $this->countFiles($staticAbs, ['.htaccess']);
+        $preprocessedCount = $this->countFiles($preprocessedAbs, []);
+        if ($staticCount === null || $preprocessedCount === null) {
+            return [null, '[UNKNOWN] Unable to inspect static content directories', $evidence];
+        }
+
+        $evidence['static_files'] = $staticCount;
+        $evidence['preprocessed_files'] = $preprocessedCount;
+        $evidence['min_static_files'] = $minStaticFiles;
+        $evidence['min_preprocessed_files'] = $minPreprocessedFiles;
+
+        $failures = [];
+        if ($staticCount < $minStaticFiles) {
+            $failures[] = "{$staticRel} has {$staticCount} deployed files";
+        }
+        if ($preprocessedCount < $minPreprocessedFiles) {
+            $failures[] = "{$preprocessedRel} has {$preprocessedCount} preprocessed files";
+        }
+        if ($failures !== []) {
+            return [false, 'Static content output is incomplete: ' . implode('; ', $failures), $evidence];
+        }
+
+        return [true, 'Static content directories contain deployed output', $evidence];
+    }
+
+    public function indexersReady(array $args): array
+    {
+        $rel = (string)($args['file'] ?? 'var/.indexer_status');
+        $abs = $this->ctx->abs($rel);
+        if (!is_file($abs)) {
+            return [null, '[UNKNOWN] Indexer status file not found', ['file' => $rel]];
+        }
+
+        $content = @file_get_contents($abs);
+        if ($content === false) {
+            return [null, '[UNKNOWN] Unable to read indexer status file', ['file' => $rel]];
+        }
+
+        $statuses = [];
+        foreach (preg_split("~\r?\n~", trim($content)) as $line) {
+            $line = trim((string)$line);
+            if ($line === '') {
+                continue;
+            }
+
+            if (str_contains($line, ':')) {
+                [$name, $status] = array_map('trim', explode(':', $line, 2));
+            } else {
+                $parts = preg_split('~\s+~', $line);
+                $status = (string)array_pop($parts);
+                $name = trim(implode(' ', $parts));
+            }
+
+            $normalizedStatus = strtoupper(str_replace([' ', '-'], '_', $status));
+            $statuses[] = [
+                'indexer' => $name !== '' ? $name : null,
+                'status' => $status,
+                'normalized_status' => $normalizedStatus,
+                'ready' => $normalizedStatus === 'READY',
+                'line' => $line,
+            ];
+        }
+
+        if ($statuses === []) {
+            return [null, '[UNKNOWN] Indexer status file is empty', ['file' => $rel]];
+        }
+
+        $failures = array_values(array_filter($statuses, static fn(array $entry): bool => empty($entry['ready'])));
+        $evidence = ['file' => $rel, 'statuses' => $statuses];
+        if ($failures !== []) {
+            return [false, 'Some indexers are not READY', $evidence + ['failures' => $failures]];
+        }
+
+        return [true, 'All observed indexers are READY', $evidence];
+    }
+
     public function mtimeMaxAge(array $args): array
     {
         $rel = (string)($args['file'] ?? '');
@@ -272,6 +621,54 @@ final class FilesystemCheck
 
         $ok = ($age <= $max);
         return [$ok, "mtime age {$age}s (max {$max}s) for $rel"];
+    }
+
+    private function countPhpFiles(string $root): ?int
+    {
+        try {
+            $count = 0;
+            $iterator = new \RecursiveIteratorIterator(
+                new \RecursiveDirectoryIterator($root, \FilesystemIterator::SKIP_DOTS),
+                \RecursiveIteratorIterator::LEAVES_ONLY,
+                \RecursiveIteratorIterator::CATCH_GET_CHILD
+            );
+            foreach ($iterator as $file) {
+                if (!$file->isFile()) {
+                    continue;
+                }
+                if (strtolower(pathinfo($file->getFilename(), PATHINFO_EXTENSION)) === 'php') {
+                    $count++;
+                }
+            }
+            return $count;
+        } catch (\UnexpectedValueException) {
+            return null;
+        }
+    }
+
+    private function countFiles(string $root, array $ignoredBasenames): ?int
+    {
+        try {
+            $ignored = array_flip($ignoredBasenames);
+            $count = 0;
+            $iterator = new \RecursiveIteratorIterator(
+                new \RecursiveDirectoryIterator($root, \FilesystemIterator::SKIP_DOTS),
+                \RecursiveIteratorIterator::LEAVES_ONLY,
+                \RecursiveIteratorIterator::CATCH_GET_CHILD
+            );
+            foreach ($iterator as $file) {
+                if (!$file->isFile()) {
+                    continue;
+                }
+                if (isset($ignored[$file->getFilename()])) {
+                    continue;
+                }
+                $count++;
+            }
+            return $count;
+        } catch (\UnexpectedValueException) {
+            return null;
+        }
     }
 
     private function collectWorldWritableOffender(string $path, array &$offenders, int $max, bool &$truncated): void

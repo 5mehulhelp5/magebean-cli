@@ -615,6 +615,196 @@ final class CodeSearchCheck
         return [true, 'No insecure http:// asset references found in code'];
     }
 
+    public function httpsEndpoints(array $args): array
+    {
+        $roots = $args['paths'] ?? ['app/etc', 'app/code', 'app/design'];
+        $inc = $args['include_ext'] ?? ['php', 'phtml', 'xml', 'json', 'yaml', 'yml', 'ini', 'js', 'html', 'css'];
+        $max = max(1, (int)($args['max_results'] ?? 200));
+        $requiredFiles = array_values(array_unique(array_map('strval', $args['required_files'] ?? [])));
+        $rootsAbs = array_map(fn($p) => $this->ctx->abs($p), $roots);
+
+        $files = $this->collectFiles($rootsAbs, $inc);
+        $seen = [];
+        foreach ($files as $file) {
+            $seen[$this->relativeFile($file)] = true;
+        }
+
+        $missingRequired = [];
+        foreach ($requiredFiles as $requiredFile) {
+            $abs = $this->ctx->abs($requiredFile);
+            if (!is_file($abs)) {
+                $missingRequired[] = $requiredFile;
+                continue;
+            }
+
+            if (!isset($seen[$requiredFile])) {
+                $files[] = $abs;
+                $seen[$requiredFile] = true;
+            }
+        }
+
+        $offenders = [];
+        $unreadable = [];
+        $filesRead = 0;
+        foreach (array_values(array_unique($files)) as $file) {
+            $content = @file_get_contents($file);
+            if ($content === false) {
+                $unreadable[] = $this->relativeFile($file);
+                continue;
+            }
+
+            $filesRead++;
+            foreach ($this->configuredPlainHttpFindings($file, $content) as $finding) {
+                $offenders[] = $finding;
+                if (count($offenders) >= $max) {
+                    break 2;
+                }
+            }
+        }
+
+        $targetUrl = trim($this->ctx->url);
+        if (preg_match('~^http://~i', $targetUrl) === 1 && count($offenders) < $max) {
+            $offenders[] = [
+                'file' => 'scan target URL',
+                'line' => 0,
+                'pattern' => 'target_url',
+                'snippet' => $targetUrl,
+                'kind' => 'target_url',
+                'url' => $targetUrl,
+            ];
+        }
+
+        if ($hasApplicationSignatureValidation) {
+            $failures = array_values(array_filter($failures, static fn(array $failure): bool => !str_starts_with((string)$failure['kind'], 'xml_')));
+        }
+
+        $evidence = [
+            'paths' => array_values($roots),
+            'files_scanned' => $filesRead,
+            'target_url' => $targetUrl,
+            'missing_required_files' => $missingRequired,
+            'unreadable_files' => $unreadable,
+            'insecure_endpoints' => $offenders,
+            'truncated' => count($offenders) >= $max,
+        ];
+
+        if ($offenders !== []) {
+            $lines = ['Configured HTTP endpoints detected:'];
+            foreach ($offenders as $match) {
+                $location = ($match['line'] ?? 0) > 0
+                    ? sprintf('%s:%d', $match['file'], $match['line'])
+                    : (string)$match['file'];
+                $lines[] = sprintf(
+                    '    - %s [%s] %s',
+                    $location,
+                    $match['kind'],
+                    $match['url']
+                );
+            }
+            if ($evidence['truncated']) {
+                $lines[] = sprintf('    - output truncated at %d findings', $max);
+            }
+
+            return [false, implode("\n", $lines), $evidence];
+        }
+
+        if ($filesRead === 0) {
+            return [null, 'HTTPS endpoint scan could not read any target files', $evidence];
+        }
+
+        if ($missingRequired !== [] || $unreadable !== []) {
+            $parts = [];
+            if ($missingRequired !== []) {
+                $parts[] = 'missing required files: ' . implode(', ', $missingRequired);
+            }
+            if ($unreadable !== []) {
+                $parts[] = 'unreadable files: ' . implode(', ', $unreadable);
+            }
+
+            return [null, 'HTTPS endpoint scan incomplete (' . implode('; ', $parts) . ')', $evidence];
+        }
+
+        return [true, 'All detected configured endpoints use HTTPS', $evidence];
+    }
+
+    public function webhookSignatureValidation(array $args): array
+    {
+        $roots = $args['paths'] ?? ['app/code', 'app/etc', 'routes'];
+        $inc = $args['include_ext'] ?? ['php', 'xml'];
+        $max = max(1, (int)($args['max_results'] ?? 100));
+        $rootsAbs = array_map(fn($p) => $this->ctx->abs($p), $roots);
+
+        $handlers = [];
+        $failures = [];
+        $hasApplicationSignatureValidation = false;
+        $filesRead = 0;
+        foreach ($this->collectFiles($rootsAbs, $inc) as $file) {
+            $content = @file_get_contents($file);
+            if ($content === false) {
+                continue;
+            }
+
+            $filesRead++;
+            if (strtolower(pathinfo($file, PATHINFO_EXTENSION)) === 'php'
+                && !empty($this->webhookSignatureEvidence($content, 0)['ok'])) {
+                $hasApplicationSignatureValidation = true;
+            }
+
+            foreach ($this->webhookHandlerFindings($file, $content) as $handler) {
+                $validation = $this->webhookSignatureEvidence($content, (int)$handler['offset']);
+                $handler['signature_evidence'] = $validation;
+                unset($handler['offset']);
+                $handlers[] = $handler;
+                if (empty($validation['ok'])) {
+                    $failures[] = $handler;
+                    if (count($failures) >= $max) {
+                        break 2;
+                    }
+                }
+            }
+        }
+
+        if ($hasApplicationSignatureValidation) {
+            $failures = array_values(array_filter($failures, static fn(array $failure): bool => !str_starts_with((string)$failure['kind'], 'xml_')));
+        }
+
+        $evidence = [
+            'paths' => array_values($roots),
+            'files_scanned' => $filesRead,
+            'has_application_signature_validation' => $hasApplicationSignatureValidation,
+            'handlers' => $handlers,
+            'failures' => $failures,
+            'truncated' => count($failures) >= $max,
+        ];
+
+        if ($filesRead === 0) {
+            return [null, '[UNKNOWN] Webhook signature scan could not read any target files', $evidence];
+        }
+
+        if ($failures !== []) {
+            $lines = ['Webhook handlers without local signature validation evidence:'];
+            foreach ($failures as $failure) {
+                $lines[] = sprintf(
+                    '    - %s:%d [%s] missing %s',
+                    $failure['file'],
+                    $failure['line'],
+                    $failure['kind'],
+                    implode('+', $failure['signature_evidence']['missing'] ?? ['signature_validation'])
+                );
+            }
+            if ($evidence['truncated']) {
+                $lines[] = sprintf('    - output truncated at %d findings', $max);
+            }
+
+            return [false, implode("\n", $lines), $evidence];
+        }
+
+        if ($handlers === []) {
+            return [true, 'No webhook handlers detected in application code', $evidence];
+        }
+
+        return [true, 'Webhook handlers include local signature validation evidence', $evidence];
+    }
     private function collectFiles(array $roots, array $inc): array
     {
         $ret = [];
@@ -1088,6 +1278,188 @@ final class CodeSearchCheck
         return $findings;
     }
 
+    private function webhookHandlerFindings(string $file, string $content): array
+    {
+        $findings = [];
+        $seen = [];
+        $relative = $this->relativeFile($file);
+        $extension = strtolower(pathinfo($file, PATHINFO_EXTENSION));
+        $webhookWord = '(?:webhook|callback|ipn|notification|notify)';
+
+        $patterns = [];
+        if ($extension === 'xml') {
+            $patterns['xml_route'] = '~<route\b[^>]*\burl\s*=\s*([\'\"])(?P<target>[^\'\"]*' . $webhookWord . '[^\'\"]*)\1[^>]*>~i';
+            $patterns['xml_service_anonymous'] = '~<route\b[^>]*\burl\s*=\s*([\'\"])(?P<target>[^\'\"]*)\1[^>]*>\s*<service\b[^>]*\bresource\s*=\s*([\'\"])anonymous\3~is';
+        } else {
+            $patterns['route_registration'] = '~\bRoute::\s*(?:post|put|patch|any)\s*\(\s*([\'\"])(?P<target>[^\'\"]*' . $webhookWord . '[^\'\"]*)\1~i';
+            $patterns['webhook_class'] = '~\bclass\s+\w*' . $webhookWord . '\w*\b~i';
+            $patterns['webhook_method'] = '~\bfunction\s+(?:execute|handleWebhook|webhook|callback|ipn|notify|notification)\s*\(~i';
+        }
+
+        foreach ($patterns as $kind => $regex) {
+            $count = preg_match_all($regex, $content, $matches, PREG_OFFSET_CAPTURE | PREG_SET_ORDER);
+            if ($count === false || $count < 1) {
+                continue;
+            }
+
+            foreach ($matches as $match) {
+                $offset = (int)$match[0][1];
+                $target = isset($match['target']) && is_array($match['target']) ? (string)$match['target'][0] : '';
+                if ($kind === 'webhook_method' && !$this->hasWebhookContext($relative, $content, $offset)) {
+                    continue;
+                }
+                if ($kind === 'xml_service_anonymous' && preg_match('~' . $webhookWord . '~i', $target) !== 1) {
+                    continue;
+                }
+
+                $evidence = $this->matchEvidence($file, $content, $kind, $offset);
+                $key = $evidence['file'] . ':' . $evidence['line'] . ':' . ($target !== '' ? $target : 'handler');
+                if (isset($seen[$key])) {
+                    continue;
+                }
+
+                $seen[$key] = true;
+                $evidence['kind'] = $kind;
+                $evidence['target'] = $target;
+                $evidence['offset'] = $offset;
+                $findings[] = $evidence;
+            }
+        }
+
+        return $findings;
+    }
+
+    private function hasWebhookContext(string $relative, string $content, int $offset): bool
+    {
+        if (preg_match('~(?:webhook|callback|ipn|notification|notify)~i', $relative) === 1) {
+            return true;
+        }
+
+        $window = substr($content, max(0, $offset - 800), 1600);
+        return preg_match('~(?:webhook|callback|ipn|notification|notify)~i', $window) === 1;
+    }
+
+    private function webhookSignatureEvidence(string $content, int $offset): array
+    {
+        $fileWide = $content;
+        $window = substr($content, max(0, $offset - 1600), 3600);
+        $haystack = $window . "\n" . $fileWide;
+
+        $hasHeader = preg_match('~(?:HTTP_[A-Z0-9_]*(?:SIGNATURE|HMAC|TRANSMISSION_SIG)|[\'\"](?:X[-_][^\'\"]*(?:Signature|Hmac|Sha256)|Stripe-Signature|Paypal-Transmission-Sig|X-Hub-Signature-256)[\'\"]|->\s*(?:getHeader|getHeaderLine|header)\s*\(\s*[\'\"][^\'\"]*(?:signature|hmac|transmission-sig)[^\'\"]*[\'\"])~i', $haystack) === 1;
+        $hasTimingSafeCompare = preg_match('~\bhash_equals\s*\(~i', $haystack) === 1;
+        $hasMac = preg_match('~\bhash_hmac\s*\(~i', $haystack) === 1;
+        $hasVerifier = preg_match('~\b(?:openssl_verify|sodium_crypto_sign_verify_detached)\s*\(|\b(?:verifySignature|validateSignature|isSignatureValid|checkSignature|assertSignature|constructEvent)\s*\(~i', $haystack) === 1;
+
+        $ok = ($hasHeader && (($hasMac && $hasTimingSafeCompare) || $hasVerifier))
+            || preg_match('~\bconstructEvent\s*\(~i', $haystack) === 1;
+
+        $missing = [];
+        if (!$hasHeader && preg_match('~\bconstructEvent\s*\(~i', $haystack) !== 1) {
+            $missing[] = 'signature_header';
+        }
+        if (!(($hasMac && $hasTimingSafeCompare) || $hasVerifier)) {
+            $missing[] = 'timing_safe_signature_verify';
+        }
+
+        return [
+            'ok' => $ok,
+            'has_signature_header' => $hasHeader,
+            'has_hmac' => $hasMac,
+            'has_timing_safe_compare' => $hasTimingSafeCompare,
+            'has_verifier' => $hasVerifier,
+            'missing' => $missing,
+        ];
+    }
+    private function configuredPlainHttpFindings(string $file, string $content): array
+    {
+        $findings = [];
+        $extension = strtolower(pathinfo($file, PATHINFO_EXTENSION));
+        $searchable = $this->maskSourceComments($content, $extension);
+        $matchCount = preg_match_all('~http://[^\s\'"<>]+~i', $searchable, $matches, PREG_OFFSET_CAPTURE);
+        if ($matchCount === false || $matchCount < 1) {
+            return [];
+        }
+
+        foreach ($matches[0] as $match) {
+            $rawUrl = (string)$match[0];
+            $offset = (int)$match[1];
+            $url = rtrim($rawUrl, '),.;]');
+            if ($url === '' || $this->isAllowedPlainHttpReference($url)) {
+                continue;
+            }
+
+            $before = substr($searchable, max(0, $offset - 220), min(220, $offset));
+            $after = substr($searchable, $offset + strlen($rawUrl), 220);
+            $kind = $this->configuredHttpContext($file, $before, $after);
+            if ($kind === null) {
+                continue;
+            }
+
+            $evidence = $this->matchEvidence($file, $content, $kind, $offset);
+            $evidence['kind'] = $kind;
+            $evidence['url'] = $url;
+            $findings[] = $evidence;
+        }
+
+        return $findings;
+    }
+
+    private function configuredHttpContext(string $file, string $before, string $after): ?string
+    {
+        if ($this->relativeFile($file) === 'app/etc/env.php') {
+            return 'env_config';
+        }
+
+        $keyPattern = '(?:url|uri|endpoint|host|hostname|base_url|webhook|callback|api_url|wsdl|dsn|service_url)';
+        if (preg_match('~[\'" ]?' . $keyPattern . '[\'" ]?\s*(?:=>|=|:)\s*[\'" ]?\s*$~i', $before) === 1) {
+            return 'named_config';
+        }
+
+        if (preg_match('~(?:set|get|with)?' . $keyPattern . '\s*\([^)]*$~i', $before) === 1) {
+            return 'endpoint_method';
+        }
+
+        if (preg_match('~(?:curl_init|fetch|request|get|post|put|patch|delete|send)\s*\([^)]*$~i', $before) === 1) {
+            return 'http_client_literal';
+        }
+
+        if (preg_match('~<[^>]*' . $keyPattern . '[^>]*>\s*$~i', $before) === 1
+            && preg_match('~^\s*</[^>]+>~', $after) === 1) {
+            return 'xml_config';
+        }
+
+        return null;
+    }
+
+    private function maskSourceComments(string $content, string $extension): string
+    {
+        $replaceWithSpaces = static fn(array $match): string => str_repeat(' ', strlen($match[0]));
+        $masked = preg_replace_callback('~<!--.*?-->~s', $replaceWithSpaces, $content);
+        if ($masked === null) {
+            $masked = $content;
+        }
+
+        if (in_array($extension, ['php', 'phtml', 'js', 'css', 'less'], true)) {
+            $blockMasked = preg_replace_callback('~/\*.*?\*/~s', $replaceWithSpaces, $masked);
+            if ($blockMasked !== null) {
+                $masked = $blockMasked;
+            }
+
+            $lineMasked = preg_replace_callback('~(?<!:)//[^\r\n]*~', $replaceWithSpaces, $masked);
+            if ($lineMasked !== null) {
+                $masked = $lineMasked;
+            }
+        }
+
+        if (in_array($extension, ['php', 'phtml', 'yaml', 'yml', 'ini'], true)) {
+            $hashMasked = preg_replace_callback('~(?m)^[\t ]*#[^\r\n]*~', $replaceWithSpaces, $masked);
+            if ($hashMasked !== null) {
+                $masked = $hashMasked;
+            }
+        }
+
+        return $masked;
+    }
     private function mixedContentFindings(string $file, string $content): array
     {
         $findings = [];
@@ -1606,6 +1978,15 @@ final class CodeSearchCheck
         return str_contains($arg, '.') || str_contains($arg, '$') || str_contains($arg, '{$');
     }
 
+    private function relativeFile(string $file): string
+    {
+        $root = rtrim($this->ctx->path, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR;
+        if (str_starts_with($file, $root)) {
+            return str_replace(DIRECTORY_SEPARATOR, '/', substr($file, strlen($root)));
+        }
+
+        return str_replace(DIRECTORY_SEPARATOR, '/', $file);
+    }
     private function matchEvidence(string $file, string $content, string $pattern, int $offset): array
     {
         $line = substr_count(substr($content, 0, $offset), "\n") + 1;

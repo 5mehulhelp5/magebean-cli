@@ -12,7 +12,6 @@ use Magebean\Engine\ProjectConfigLoader;
 use Magebean\Engine\RulePackMerger;
 use Magebean\Engine\RuleValidator;
 use Magebean\Engine\Checks\CheckRegistry;
-use Magebean\Engine\Reporting\{HtmlReporter, JsonReporter, SarifReporter};
 use Magebean\Bundle\BundleManager;
 use Magebean\Engine\Cve\CveAuditor;
 
@@ -45,8 +44,6 @@ Doc: <href=https://magebean.com/documentation>magebean.com/documentation</>
 <options=bold>COMMON OPTIONS</>
   <fg=yellow>--path=PATH</>                     Path to the Magento 2 root to scan (default: current directory)
   <fg=yellow>--url=URL</>                       Optional store base URL override for HTTP checks
-  <fg=yellow>--format=html|json|sarif</>        Output format for results (default: html)
-  <fg=yellow>--output=FILE</>                   Save results to a file (auto default based on format)
   <fg=yellow>--cve-data=PATH</>                 Path to CVE data (JSON/NDJSON or ZIP bundle)
   <fg=yellow>--profile=owasp|pci|FILE</>        Select a built-in or custom profile (default: baseline/all rules)
   <fg=yellow>--controls=MB-Cxx,MB-Cxx</>       Only load selected controls (e.g., MB-C01,MB-C05)
@@ -58,8 +55,8 @@ Doc: <href=https://magebean.com/documentation>magebean.com/documentation</>
   # Scan current directory and print a quick summary
   <fg=green>php magebean.phar scan --path=.</>
 
-  # Generate a shareable HTML report
-  <fg=green>php magebean.phar scan --path=/var/www/html --url=https://magento.local --format=html --output=report.html</>
+  # Run with a store URL override
+  <fg=green>php magebean.phar scan --path=/var/www/html --url=https://magento.local</>
 
   # Use a known CVE data when auditing installed extensions.
   # Download: <href=https://magebean.com/download>magebean.com/download</>
@@ -70,7 +67,7 @@ Doc: <href=https://magebean.com/documentation>magebean.com/documentation</>
 
 <options=bold>NOTES</>
   • Ensure <fg=yellow>--path</> points to the Magento root that contains app/etc and vendor.
-  • <fg=blue>HTML reports</> are convenient for stakeholders; <fg=yellow>JSON</> can be archived in CI.
+  • Results are printed directly to the command line.
 
 CONTACT: <href=mailto:support@magebean.com>support@magebean.com</>
 
@@ -87,11 +84,9 @@ HELP;
         $this
             ->setDescription('Execute a comprehensive audit for a Magento 2 project using 12 controls and 81 rules.')
             ->addUsage('--path=/var/www/html')
-            ->addUsage('--path=. --format=html --output=report.html')
             ->addUsage('--path=. --cve-data=./cve/magebean-known-cve-bundle-' . date('Ym') . '.zip')
-            ->addOption('format', null, InputOption::VALUE_REQUIRED, 'Output format: html|json|sarif', 'html')
-            ->addOption('output', null, InputOption::VALUE_OPTIONAL, 'Output file (auto default by format)')
-            ->addOption('detail', null, InputOption::VALUE_NONE, 'Include Details column in HTML report')
+            // HTML report output is disabled, so the HTML-only detail option is hidden for now.
+            // ->addOption('detail', null, InputOption::VALUE_NONE, 'Include Details column in HTML report')
             ->addOption('cve-data', null, InputOption::VALUE_OPTIONAL, 'Path to CVE data (JSON/NDJSON or ZIP bundle)')
             ->addOption('standard', null, InputOption::VALUE_OPTIONAL, 'Report standard: magebean (default) | owasp | pci | cwe', 'magebean')
             ->addOption('profile', null, InputOption::VALUE_OPTIONAL, 'Built-in profile alias (owasp|pci) or custom profile JSON path')
@@ -153,8 +148,9 @@ HELP;
             // ✅ OK -> bắt đầu scan
             $projectPath = (string)$magentoRoot;
             $projectUrl = (string)$requestedUrl;
-            $format      = strtolower((string)$in->getOption('format'));
-            $outFile     = (string)($in->getOption('output') ?? '');
+            // Report file output is disabled for now; keep scan results CLI-only.
+            // $format      = 'html';
+            // $outFile     = 'magebean-report.html';
             $cveDataFile = (string)($in->getOption('cve-data') ?? '');
             $standard    = strtolower((string)($in->getOption('standard') ?? 'magebean'));
             $profileOpt  = trim((string)($in->getOption('profile') ?? ''));
@@ -169,19 +165,6 @@ HELP;
                 $out->writeln('<error>Invalid --standard. Allowed: magebean | owasp | pci | cwe</error>');
                 return Command::FAILURE;
             }
-            if (!in_array($format, ['html', 'json', 'sarif'], true)) {
-                $out->writeln('<error>Invalid --format. Allowed: html | json | sarif</error>');
-                return Command::FAILURE;
-            }
-
-            if ($outFile === '') {
-                $outFile = match ($format) {
-                    'json'  => 'magebean-report.json',
-                    'sarif' => 'magebean-report.sarif',
-                    default => 'magebean-report.html',
-                };
-            }
-
             $bundleMeta = [];
             if ($cveDataFile !== '') {
                 $this->writePhase($out, 2, 6, 'Preparing CVE bundle metadata');
@@ -382,23 +365,16 @@ HELP;
             }
 
             // 3) Render export
-            $this->writePhase($out, 6, 6, sprintf('Writing %s report to %s', strtoupper($format), $outFile));
-            switch ($format) {
-                case 'json':
-                    (new JsonReporter())->write($result, $outFile);
-                    break;
-                case 'sarif':
-                    (new SarifReporter())->write($result, $outFile);
-                    break;
-                default:
-                    $tpl = $this->resolveTemplatePath((string)($activeProfile['report_template'] ?? 'standard'));
-                    $rep = new HtmlReporter($tpl, (bool)$in->getOption('detail'));
-                    $rep->write($result, $outFile);
-                    break;
-            }
+            // Report file output is intentionally disabled; Magebean currently
+            // supports command-line output only.
+            // $this->writePhase($out, 6, 6, sprintf('Writing %s report to %s', strtoupper($format), $outFile));
+            // $tpl = $this->resolveTemplatePath((string)($activeProfile['report_template'] ?? 'standard'));
+            // $rep = new HtmlReporter($tpl, (bool)$in->getOption('detail'));
+            // $rep->write($result, $outFile);
 
             // ---------- Pretty console output (mimic sample) ----------
-            $this->renderPrettySummary($out, $result, $projectPath, $outFile);
+            $this->writePhase($out, 6, 6, 'Rendering command-line summary');
+            $this->renderPrettySummary($out, $result, $projectPath);
 
             return $this->determineExitCode($result);
 
@@ -418,7 +394,7 @@ HELP;
         }
     }
 
-    private function renderPrettySummary(OutputInterface $out, array $result, string $path, string $outFile): void
+    private function renderPrettySummary(OutputInterface $out, array $result, string $path): void
     {
         $sum    = $result['summary'] ?? [];
         $total  = (int)($sum['total']  ?? 0);
@@ -487,18 +463,18 @@ HELP;
         // Findings
         $failedFindings = array_values(array_filter(($result['findings'] ?? []), fn($f) => empty($f['passed']) === true));
         usort($failedFindings, fn($a, $b) => $this->sevOrder($a['severity'] ?? 'Low') <=> $this->sevOrder($b['severity'] ?? 'Low'));
-        $top = array_slice($failedFindings, 0, 10);
 
         $out->writeln(sprintf('<options=bold>Findings</> (<fg=red>%d</>)', count($failedFindings)));
-        foreach ($top as $f) {
+        foreach ($failedFindings as $f) {
             $sev   = strtoupper((string)($f['severity'] ?? 'LOW'));
+            $id    = trim((string)($f['id'] ?? ''));
             $title = (string)($f['title'] ?? '');
             $msg   = (string)($f['message'] ?? '');
-            $line  = sprintf('%s %s', $sevBadge($sev), $msg !== '' ? $msg : $title);
+            $text  = $msg !== '' ? $msg : $title;
+            $line  = $id !== ''
+                ? sprintf('%s <href=https://magebean.com/baseline/%2$s>%2$s</> %3$s', $sevBadge($sev), $id, $text)
+                : sprintf('%s %s', $sevBadge($sev), $text);
             $out->writeln('  ' . $line);
-        }
-        if (count($failedFindings) > count($top)) {
-            $out->writeln(sprintf('  <comment>… and %d more</comment>', count($failedFindings) - count($top)));
         }
         $out->writeln('');
 
@@ -535,17 +511,11 @@ HELP;
                     (int)($cs['dataset_total'] ?? 0),
                     (int)($cs['packages_affected'] ?? 0)
                 ));
-            } else {
-                $out->writeln('');
-                $out->writeln('<comment>⚠ CVE checks skipped</comment>');
-                $out->writeln('  → Requires CVE Bundle (<comment>--cve-data=magebean-cve-bundle-YYYYMM.zip</comment>)');
-                $out->writeln('  → Visit <href=https://magebean.com/download>magebean.com/download</>');
             }
         }
 
         // Footer
         $out->writeln('');
-        $out->writeln(sprintf('→ <info>Report saved to</info> <href=file://%1$s>%1$s</>', $outFile));
         $out->writeln('Contact: <href=mailto:support@magebean.com>support@magebean.com</>');
         $out->writeln('');
     }
@@ -1059,12 +1029,10 @@ HTML;
     private function formatRuleProgressMessage(array $event): string
     {
         $ruleId = (string)($event['rule_id'] ?? '');
-        $control = (string)($event['control'] ?? '');
         $title = trim((string)($event['title'] ?? ''));
         $status = strtoupper((string)($event['status'] ?? ''));
 
-        $parts = array_values(array_filter([$ruleId, $control]));
-        $label = implode(' ', $parts);
+        $label = $ruleId;
         if ($title !== '') {
             $label .= ($label !== '' ? ' - ' : '') . $this->truncateProgressTitle($title, 70);
         }
