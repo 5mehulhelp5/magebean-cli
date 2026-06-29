@@ -127,7 +127,8 @@
       "messages": {
         "pass": "Webhook handlers validate provider signatures, or no webhook endpoints are present."
       }
-    },    {
+    },
+    {
       "id": "MB-R076",
       "title": "Outbound connections restricted by allow-list",
       "control": "MB-C12",
@@ -139,46 +140,22 @@
           "args": {}
         },
         {
-          "name": "code_grep",
+          "name": "code_outbound_egress_controls",
           "args": {
             "paths": [
-              "app",
-              "vendor"
+              "app/code",
+              "app/etc"
             ],
             "include_ext": [
               "php"
             ],
-            "must_match": [
-              "(?is)(allowlist|whitelist|allowed[_-]?(hosts|domains)|trusted[_-]?hosts?|allowedOrigins|originAllow(?:list)?)"
-            ]
-          }
-        },
-        {
-          "name": "code_grep",
-          "args": {
-            "paths": [
-              "app",
-              "vendor"
-            ],
-            "include_ext": [
-              "php"
-            ],
-            "must_match": [
-              "CURLOPT_(CONNECTTIMEOUT|TIMEOUT)(?:_MS)?",
-              "->set(?:Connect)?Timeout\\s*\\(",
-              "->setOptions\\s*\\(\\s*\\[.*\\b(connect_)?timeout\\b\\s*=>",
-              "curl_setopt_array\\s*\\(.*CURLOPT_(CONNECTTIMEOUT|TIMEOUT)(?:_MS)?",
-              "->request\\s*\\([^\\)]*\\[.*\\b(connect_)?timeout\\b\\s*=>",
-              "stream_context_create\\s*\\(\\s*\\[.*\\btimeout\\b\\s*=>",
-              "\\bRequestOptions::(CONNECT_TIMEOUT|TIMEOUT)\\b"
-            ],
-            "regex_flags": "is"
+            "max_results": 100
           }
         }
       ],
       "messages": {
-        "pass": "Outbound connections are enforced by network policy (egress firewall) or code-level allowlist and timeouts.",
-        "fail": "No egress restriction detected. Enforce outbound allow-list at firewall (UFW/IPTABLES) or in code (allow-listed domains + HTTP timeouts)."
+        "pass": "Outbound connections are enforced by network policy or each app-level outbound sink has allowlist and timeout controls.",
+        "fail": "No egress restriction detected. Enforce outbound allow-list at firewall or add code-level host allowlists and HTTP timeouts."
       }
     },
     {
@@ -189,26 +166,20 @@
       "op": "all",
       "checks": [
         {
-          "name": "code_grep",
+          "name": "code_pii_minimization",
           "args": {
             "paths": [
-              "app"
+              "app/code"
             ],
             "include_ext": [
               "php"
             ],
-            "must_not_match": [
-              "full_card",
-              "cvv",
-              "ssn",
-              "passport_number"
-            ]
+            "max_results": 100
           }
         }
       ],
       "messages": {
-        "pass": "No direct handling of sensitive PII (e.g., full card, CVV, SSN, passport).",
-        "fail": "Sensitive PII handling detected. Remove or tokenize via a PCI-compliant provider."
+        "pass": "Third-party flows avoid raw sensitive PII or use tokenized/minimized payloads."
       }
     },
     {
@@ -216,28 +187,24 @@
       "title": "Strong TLS ciphers on upstream gateways",
       "control": "MB-C12",
       "severity": "medium",
-      "op": "any",
+      "op": "all",
       "checks": [
         {
-          "name": "nginx_directive",
+          "name": "webserver_tls_ciphers",
           "args": {
-            "file": "nginx.conf",
-            "directive": "ssl_ciphers\\s+.*(TLSv1\\.2|TLSv1\\.3|ECDHE)\\b",
-            "expects_regex": true
-          }
-        },
-        {
-          "name": "apache_htaccess_directive",
-          "args": {
-            "file": "pub/.htaccess",
-            "directive": "SSLCipherSuite\\s+",
-            "expects_regex": true
+            "files": [
+              "nginx.conf",
+              "pub/.htaccess",
+              ".htaccess",
+              "apache.conf"
+            ],
+            "require_protocols": true,
+            "require_ciphers": true
           }
         }
       ],
       "messages": {
-        "pass": "Web server enforces strong TLS ciphers (TLS 1.2/1.3, ECDHE).",
-        "fail": "Weak or unspecified TLS ciphers. Configure strong cipher suites on the web server."
+        "pass": "Web server enforces strong TLS protocols and cipher suites."
       }
     },
     {
@@ -245,43 +212,30 @@
       "title": "API keys stored in env.php (not in DB/plain code)",
       "control": "MB-C12",
       "severity": "high",
-      "op": "any",
+      "op": "all",
       "checks": [
         {
-          "name": "php_array_key_search",
+          "name": "code_api_key_storage",
           "args": {
-            "file": "app/etc/env.php",
-            "key_regex": "(api_)?key|secret|token",
-            "min_found": 1
-          }
-        },
-        {
-          "name": "code_grep",
-          "args": {
+            "env_file": "app/etc/env.php",
             "paths": [
-              "app"
+              "app/code",
+              "app/etc",
+              "app/design",
+              "setup"
             ],
             "include_ext": [
               "php",
               "phtml",
-              "xml"
+              "xml",
+              "sql"
             ],
-            "must_not_match": [
-              "(?i)INSERT\\s+INTO\\s+.*\\bcore_config_data\\b.*\\b(path|value)\\b.*(api[_-]?key|secret|token)",
-              "(?i)UPDATE\\s+\\bcore_config_data\\b.*\\b(path|value)\\b.*(api[_-]?key|secret|token)",
-              "(?i)INSERT\\s+INTO\\s+.*(api[_-]?key|secret|token)",
-              "(?i)update\\s+.*(api[_-]?key|secret|token)",
-              "(?i)setData\\(\\s*['\\\"](?:payment\\/[^'\\\"]+\\/)?(api[_-]?key|secret|token)",
-              "(?i)setValue\\(\\s*['\\\"](?:payment\\/[^'\\\"]+\\/)?(api[_-]?key|secret|token)",
-              "(?i)save\\(\\)\\s*;\\s*\\/\\/.*(api[_-]?key|secret|token).*",
-              "(?i)Config\\s*\\(.*(api[_-]?key|secret|token).*\\)"
-            ]
+            "max_results": 100
           }
         }
       ],
       "messages": {
-        "pass": "API credentials are stored in env.php, not embedded in code or the DB.",
-        "fail": "API keys found in code or DB paths. Move secrets to env.php and rotate compromised keys."
+        "pass": "API credentials are not embedded in code or written to database config paths."
       }
     },
     {
@@ -292,23 +246,20 @@
       "op": "all",
       "checks": [
         {
-          "name": "code_grep",
+          "name": "code_third_party_logging_sanitized",
           "args": {
             "paths": [
-              "app"
+              "app/code"
             ],
             "include_ext": [
               "php"
             ],
-            "must_match": [
-              "mask|redact|sanitize|filter"
-            ]
+            "max_results": 100
           }
         }
       ],
       "messages": {
-        "pass": "Third-party logs apply masking/redaction for sensitive fields.",
-        "fail": "Logs are not sanitized. Add masking or redaction for tokens, emails, and identifiers."
+        "pass": "Third-party logs apply masking/redaction for sensitive fields."
       }
     },
     {
@@ -316,32 +267,25 @@
       "title": "SaaS integrations scoped by ACL (least privilege/IP allowlist)",
       "control": "MB-C12",
       "severity": "low",
-      "op": "any",
+      "op": "all",
       "checks": [
         {
-          "name": "text_grep",
+          "name": "code_saas_integration_scoped",
           "args": {
-            "file": "SECURITY.md",
-            "must_match": [
-              "least privilege|scope",
-              "IP allowlist|CIDR"
-            ]
-          }
-        },
-        {
-          "name": "text_grep",
-          "args": {
-            "file": "docs/integrations.md",
-            "must_match": [
-              "least privilege|scope",
-              "IP allowlist|CIDR"
-            ]
+            "paths": [
+              "app/code",
+              "app/etc"
+            ],
+            "include_ext": [
+              "php",
+              "xml"
+            ],
+            "max_results": 100
           }
         }
       ],
       "messages": {
-        "pass": "Integration docs mention least-privilege scopes and optional IP allowlisting.",
-        "fail": "No ACL/scoping guidance found. Document least-privilege permissions and IP allowlists."
+        "pass": "SaaS integration entry points use least-privilege ACL resources or IP allowlists."
       }
     },
     {
@@ -352,11 +296,14 @@
       "op": "all",
       "checks": [
         {
-          "name": "code_grep",
+          "name": "code_cardholder_data_storage",
           "args": {
             "paths": [
-              "app",
-              "app/code"
+              "app/code",
+              "app/etc",
+              "setup",
+              "dev",
+              "db"
             ],
             "include_ext": [
               "php",
@@ -364,18 +311,12 @@
               "sql",
               "json"
             ],
-            "must_not_match": [
-              "(?i)\\b(?:cc_number|card_number|credit_card_number|primary_account_number|pan|cvv|cvc|track1|track2|magnetic_stripe)\\b",
-              "(?i)(?:CREATE|ALTER)\\s+TABLE[^;]+\\b(?:cc|card|payment)[^;]+\\b(?:number|cvv|cvc|track|pan)\\b",
-              "(?i)(?:INSERT|UPDATE)\\s+[^;]+\\b(?:cc_number|card_number|cvv|cvc|track1|track2|pan)\\b"
-            ],
-            "max_results": 50
+            "max_results": 100
           }
         }
       ],
       "messages": {
-        "pass": "No database schema or code patterns indicating stored raw cardholder data were detected.",
-        "fail": "Potential raw cardholder data storage detected. Remove PAN/CVV/track storage and use tokenized payment references."
+        "pass": "No database schema or code patterns indicating stored raw cardholder data were detected."
       }
     },
     {
@@ -386,10 +327,10 @@
       "op": "all",
       "checks": [
         {
-          "name": "code_grep",
+          "name": "code_payment_method_scope",
           "args": {
             "paths": [
-              "app",
+              "app/code",
               "app/design"
             ],
             "include_ext": [
@@ -398,17 +339,12 @@
               "js",
               "xml"
             ],
-            "must_not_match": [
-              "(?i)\\b(?:direct.?post|raw.?card|card[_-]?number|cc[_-]?number|cvv|cvc)\\b",
-              "(?i)<field[^>]+id\\s*=\\s*['\\\"](?:cc_number|card_number|cvv|cvc)['\\\"]"
-            ],
-            "max_results": 50
+            "max_results": 100
           }
         }
       ],
       "messages": {
-        "pass": "No obvious direct raw-card payment scope patterns detected.",
-        "fail": "Payment method patterns may expand PCI scope. Prefer hosted redirect, hosted fields, or tokenized provider SDKs."
+        "pass": "No obvious direct raw-card payment scope patterns detected."
       }
     },
     {
@@ -416,23 +352,15 @@
       "title": "Payment page script inventory maintained",
       "control": "MB-C12",
       "severity": "high",
-      "op": "any",
+      "op": "all",
       "checks": [
         {
-          "name": "fs_exists",
+          "name": "code_payment_script_inventory",
           "args": {
-            "path": ".magebean/payment-scripts.json"
-          }
-        },
-        {
-          "name": "fs_exists",
-          "args": {
-            "path": "docs/payment-script-inventory.md"
-          }
-        },
-        {
-          "name": "code_grep",
-          "args": {
+            "inventory_files": [
+              ".magebean/payment-scripts.json",
+              "docs/payment-script-inventory.md"
+            ],
             "paths": [
               "app/design",
               "app/code"
@@ -440,18 +368,15 @@
             "include_ext": [
               "xml",
               "phtml",
+              "html",
               "js"
             ],
-            "must_match": [
-              "(?i)(checkout|payment).{0,120}<script|<script.{0,120}(checkout|payment)|csp_whitelist"
-            ],
-            "max_results": 20
+            "max_results": 100
           }
         }
       ],
       "messages": {
-        "pass": "Payment page script inventory or script source signals are present.",
-        "fail": "No payment page script inventory found. Maintain an approved inventory of scripts loaded on checkout/payment pages."
+        "pass": "Payment page script inventory is present, or no custom payment-page script sources were detected."
       }
     },
     {
@@ -459,14 +384,17 @@
       "title": "Payment page script allowlist and integrity controls",
       "control": "MB-C12",
       "severity": "high",
-      "op": "any",
+      "op": "all",
       "checks": [
         {
-          "name": "code_grep",
+          "name": "code_payment_script_integrity",
           "args": {
+            "evidence_files": [
+              ".magebean/payment-script-integrity.json"
+            ],
             "paths": [
-              "app",
-              "app/design"
+              "app/design",
+              "app/code"
             ],
             "include_ext": [
               "xml",
@@ -474,22 +402,12 @@
               "html",
               "js"
             ],
-            "must_match": [
-              "(?i)(integrity=|sha256-|nonce|csp_whitelist|script-src|report-uri|report-to)"
-            ],
-            "max_results": 20
-          }
-        },
-        {
-          "name": "fs_exists",
-          "args": {
-            "path": ".magebean/payment-script-integrity.json"
+            "max_results": 100
           }
         }
       ],
       "messages": {
-        "pass": "Payment page script allowlist or integrity controls are present.",
-        "fail": "No script allowlist or integrity controls found for payment pages. Add CSP allowlisting, SRI/hashes, nonces, or monitoring evidence."
+        "pass": "Payment page script allowlist or integrity controls are present, or no custom payment-page scripts were detected."
       }
     },
     {

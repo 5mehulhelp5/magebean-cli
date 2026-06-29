@@ -54,6 +54,19 @@ final class CheckRegistry
         $registry->register('code_no_mixed_content', fn(array $args): array => $code->noMixedContent($args));
         $registry->register('code_https_endpoints', fn(array $args): array => $code->httpsEndpoints($args));
         $registry->register('code_webhook_signature_validation', fn(array $args): array => $code->webhookSignatureValidation($args));
+        $registry->register('code_outbound_egress_controls', fn(array $args): array => $code->outboundEgressControls($args));
+        $registry->register('code_pii_minimization', fn(array $args): array => $code->piiMinimization($args));
+        $registry->register('code_api_key_storage', fn(array $args): array => $code->apiKeyStorage($args));
+        $registry->register('code_third_party_logging_sanitized', fn(array $args): array => $code->thirdPartyLoggingSanitized($args));
+        $registry->register('code_saas_integration_scoped', fn(array $args): array => $code->saasIntegrationScoped($args));
+        $registry->register('code_cardholder_data_storage', fn(array $args): array => $code->cardholderDataStorage($args));
+        $registry->register('code_cardholder_data_files', fn(array $args): array => $code->cardholderDataFiles($args));
+        $registry->register('code_cardholder_data_logs', fn(array $args): array => $code->cardholderDataLogs($args));
+        $registry->register('code_payment_method_scope', fn(array $args): array => $code->paymentMethodScope($args));
+        $registry->register('code_checkout_raw_card_collection', fn(array $args): array => $code->checkoutRawCardCollection($args));
+        $registry->register('code_payment_script_inventory', fn(array $args): array => $code->paymentScriptInventory($args));
+        $registry->register('code_payment_script_integrity', fn(array $args): array => $code->paymentScriptIntegrity($args));
+        $registry->register('code_checkout_csp_enforced', fn(array $args): array => $code->checkoutCspEnforced($args));
 
         $registry->register('fs_no_world_writable', fn(array $args): array => $fs->noWorldWritable($args));
         $registry->register('file_mode_max', fn(array $args): array => $fs->fileModeMax($args));
@@ -99,6 +112,7 @@ final class CheckRegistry
         $registry->register('nginx_directive', fn(array $args): array => $web->nginxDirective($args));
         $registry->register('apache_htaccess_directive', fn(array $args): array => $web->apacheDirective($args));
         $registry->register('webserver_hsts_config', fn(array $args): array => $web->hstsConfig($args));
+        $registry->register('webserver_tls_ciphers', fn(array $args): array => $web->tlsCiphers($args));
 
         $registry->register('composer_audit_api', fn(array $args): array => $comp->auditApi($args));
         $registry->register('composer_core_advisories_api', fn(array $args): array => $comp->coreAdvisoriesApi($args));

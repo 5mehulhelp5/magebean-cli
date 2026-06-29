@@ -100,30 +100,26 @@
       "op": "all",
       "checks": [
         {
-          "name": "code_grep",
+          "name": "code_cardholder_data_logs",
           "args": {
             "paths": [
               "var/log",
               "var/report",
-              "app"
+              "pub/media/log",
+              "pub/media/report"
             ],
             "include_ext": [
               "log",
               "txt",
               "json",
-              "php"
+              "xml"
             ],
-            "must_not_match": [
-              "(?i)\\b(?:cvv|cvc|card.?security.?code|track\\s*[12]|magnetic.?stripe)\\b",
-              "\\b(?:4[0-9]{12}(?:[0-9]{3})?|5[1-5][0-9]{14}|3[47][0-9]{13}|6(?:011|5[0-9]{2})[0-9]{12})\\b"
-            ],
-            "max_results": 50
+            "max_results": 100
           }
         }
       ],
       "messages": {
-        "pass": "No cardholder data patterns detected in application logs or logging code.",
-        "fail": "Potential cardholder data found in logs or logging code. Remove raw payment data and add masking filters."
+        "pass": "No cardholder data patterns detected in application logs."
       }
     },
     {

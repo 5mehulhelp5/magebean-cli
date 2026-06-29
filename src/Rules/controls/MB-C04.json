@@ -156,41 +156,39 @@
             "title": "Checkout Content Security Policy enforced",
             "control": "MB-C04",
             "severity": "high",
-            "op": "any",
+            "op": "all",
             "checks": [
                 {
-                    "name": "http_csp_present_min",
-                    "args": {
-                        "paths": [
-                            "/checkout/",
-                            "/checkout"
-                        ],
-                        "timeout_ms": 8000
-                    }
-                },
-                {
-                    "name": "code_grep",
+                    "name": "code_checkout_csp_enforced",
                     "args": {
                         "paths": [
                             "app/code",
                             "app/etc",
-                            "app/design"
+                            "app/design",
+                            "pub/.htaccess",
+                            ".htaccess",
+                            "nginx.conf"
                         ],
                         "include_ext": [
                             "xml",
                             "php",
-                            "phtml"
+                            "phtml",
+                            "html",
+                            "conf",
+                            "htaccess"
                         ],
-                        "must_match": [
-                            "(?i)(content-security-policy|csp_whitelist|script-src|frame-src|connect-src|report-uri|report-to)"
+                        "required_directives": [
+                            "script-src",
+                            "connect-src",
+                            "frame-src",
+                            "form-action"
                         ],
-                        "max_results": 20
+                        "require_reporting": true
                     }
                 }
             ],
             "messages": {
-                "pass": "Checkout CSP signals are present.",
-                "fail": "Checkout CSP could not be verified. Configure strict payment-page CSP and reporting directives."
+                "pass": "Checkout CSP includes payment-page script, connection, frame, form-action, and reporting controls."
             }
         },
         {

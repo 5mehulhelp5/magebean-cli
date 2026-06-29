@@ -352,10 +352,10 @@
       "op": "all",
       "checks": [
         {
-          "name": "code_grep",
+          "name": "code_checkout_raw_card_collection",
           "args": {
             "paths": [
-              "app",
+              "app/code",
               "app/design"
             ],
             "include_ext": [
@@ -365,17 +365,12 @@
               "html",
               "xml"
             ],
-            "must_not_match": [
-              "(?i)\\b(?:card[_-]?number|cc[_-]?number|creditcard|credit_card|pan|primary.?account.?number|cvv|cvc|card[_-]?security[_-]?code|expiry|exp_month|exp_year)\\b",
-              "(?i)<input[^>]+name\\s*=\\s*['\\\"][^'\\\"]*(?:card|cc|cvv|cvc)[^'\\\"]*['\\\"]"
-            ],
-            "max_results": 50
+            "max_results": 100
           }
         }
       ],
       "messages": {
-        "pass": "No raw card collection patterns detected in custom checkout code.",
-        "fail": "Raw card collection patterns detected. Use hosted payment fields, redirect flows, or tokenized provider SDKs."
+        "pass": "No raw card collection patterns detected in custom checkout code."
       }
     },
     {
