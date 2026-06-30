@@ -1906,10 +1906,9 @@ final class ComposerCheck
                 return [
                     null,
                     '[UNKNOWN] Package status API request failed: ' . $statusMessage,
-                    [
-                        'active_subjects' => array_keys($activeSubjects),
-                        'packages' => $statusPackages,
-                    ],
+                    $this->packageStatusApiFailureEvidence($statusPackages, [
+                        'active_subjects_checked' => count($activeSubjects),
+                    ]),
                 ];
             }
         }
@@ -2194,7 +2193,7 @@ final class ComposerCheck
             return [
                 null,
                 '[UNKNOWN] Package status API request failed: ' . $message,
-                ['packages' => $packages],
+                $this->packageStatusApiFailureEvidence($packages),
             ];
         }
 
@@ -2395,7 +2394,9 @@ final class ComposerCheck
             return [
                 null,
                 '[UNKNOWN] Package status API request failed: ' . $apiMessage,
-                ['packages' => $packages, 'unknown' => $unknown],
+                $this->packageStatusApiFailureEvidence($packages, [
+                    'unresolved_direct_dependencies' => count($unknown),
+                ]),
             ];
         }
 
@@ -2534,7 +2535,7 @@ final class ComposerCheck
             return [
                 null,
                 '[UNKNOWN] Package status API request failed: ' . $message,
-                ['packages' => $packages],
+                $this->packageStatusApiFailureEvidence($packages),
             ];
         }
 
@@ -2676,7 +2677,9 @@ final class ComposerCheck
             return [
                 null,
                 '[UNKNOWN] Package status API request failed: ' . $message,
-                ['package_types' => $packageTypes, 'packages' => $packages],
+                $this->packageStatusApiFailureEvidence($packages, [
+                    'package_types' => $packageTypes,
+                ]),
             ];
         }
 
@@ -2775,7 +2778,7 @@ final class ComposerCheck
             return [
                 null,
                 '[UNKNOWN] Package status API request failed: ' . $message,
-                ['packages' => $packages],
+                $this->packageStatusApiFailureEvidence($packages),
             ];
         }
 
@@ -2790,7 +2793,11 @@ final class ComposerCheck
         foreach ($packages as $package) {
             $status = $statuses[$package['name']] ?? null;
             if (!is_array($status)) {
-                $unknown[] = $package + ['reason' => 'missing_status'];
+                $unassessed[] = $package + [
+                    'installed' => $package['version'],
+                    'reason' => 'missing_status',
+                    'repository_url' => $package['repository_url'],
+                ];
                 continue;
             }
             if (empty($status['release_history_known'])) {
@@ -2919,7 +2926,7 @@ final class ComposerCheck
             return [
                 null,
                 '[UNKNOWN] Package status API request failed: ' . $message,
-                ['packages' => $packages],
+                $this->packageStatusApiFailureEvidence($packages),
             ];
         }
 
@@ -2931,7 +2938,11 @@ final class ComposerCheck
         foreach ($packages as $package) {
             $status = $statuses[$package['name']] ?? null;
             if (!is_array($status)) {
-                $unknown[] = $package + ['reason' => 'missing_status'];
+                $unassessed[] = $package + [
+                    'installed' => $package['version'],
+                    'reason' => 'missing_status',
+                    'repository_url' => $package['repository_url'],
+                ];
                 continue;
             }
 
@@ -2958,7 +2969,7 @@ final class ComposerCheck
                 ], true)) {
                     $excluded[] = $item;
                 } else {
-                    $unknown[] = $item;
+                    $unassessed[] = $item;
                 }
                 continue;
             }
@@ -3015,52 +3026,43 @@ final class ComposerCheck
             }, $findings);
             $resultMessage = "Packages from archived, disabled, or missing repositories:\n    - "
                 . implode("\n    - ", $details);
-            if ($unknown !== []) {
-                $resultMessage .= "\n    Repository checks failed for "
-                    . count($unknown) . ' additional package(s)';
-            }
             if ($unassessed !== []) {
-                $resultMessage .= "\n    Repository status is awaiting collection for "
+                $resultMessage .= "\n    Repository status is awaiting collection or unavailable for "
                     . count($unassessed) . ' additional package(s)';
+            }
+            if ($excluded !== []) {
+                $resultMessage .= "\n    Repository status is not applicable or unsupported for "
+                    . count($excluded) . ' additional package(s)';
             }
             return [false, $resultMessage, $evidence];
         }
 
-        if ($unknown !== []) {
-            $details = array_map(static function (array $item): string {
-                return $item['name'] . '@' . $item['version'] . ' (' . $item['reason'] . ')';
-            }, $unknown);
-            return [
-                null,
-                "[UNKNOWN] Repository status unavailable for:\n    - " . implode("\n    - ", $details),
-                $evidence,
-            ];
+        $coverageParts = [count($active) . ' repositories assessed'];
+        if ($unassessed !== []) {
+            $coverageParts[] = count($unassessed) . ' awaiting collection or unavailable';
         }
+        if ($excluded !== []) {
+            $coverageParts[] = count($excluded) . ' not applicable or unsupported';
+        }
+        $coverage = implode(', ', $coverageParts);
 
         if ($active === [] && $unassessed !== []) {
-            $details = array_map(static function (array $item): string {
-                return $item['name'] . '@' . $item['version'];
-            }, $unassessed);
             return [
                 null,
-                "[UNKNOWN] No applicable repository could be assessed; awaiting collection for:\n    - "
-                    . implode("\n    - ", $details),
-                $evidence,
+                '[UNKNOWN] Repository status coverage is insufficient to assess archived or disabled repositories ('
+                    . $coverage . ')',
+                $this->repositoryCoverageEvidence($evidence),
             ];
         }
 
         if ($active === []) {
             return [
                 true,
-                'No installed packages have an applicable GitHub or GitLab source repository',
+                'No installed packages have an applicable GitHub or GitLab source repository (' . $coverage . ')',
                 $evidence,
             ];
         }
 
-        $coverage = count($active) . ' repositories assessed';
-        if ($unassessed !== []) {
-            $coverage .= ', ' . count($unassessed) . ' awaiting collection';
-        }
         return [
             true,
             'No assessed packages come from archived, disabled, or missing repositories ('
@@ -3114,7 +3116,7 @@ final class ComposerCheck
 
         [$ok, $message, $statuses] = $this->fetchPackageStatuses($args, $packages);
         if (!$ok) {
-            return [null, '[UNKNOWN] Package status API request failed: ' . $message, ['packages' => $packages]];
+            return [null, '[UNKNOWN] Package status API request failed: ' . $message, $this->packageStatusApiFailureEvidence($packages)];
         }
 
         $findings = [];
@@ -5598,4 +5600,28 @@ final class ComposerCheck
         if ($cur === null) return ltrim($cand, 'v');
         return version_compare(ltrim($cand, 'v'), $cur, '<') ? ltrim($cand, 'v') : $cur;
     }
+
+
+    /** @param array<string,mixed> $evidence */
+    private function repositoryCoverageEvidence(array $evidence): array
+    {
+        return [
+            'packages_checked' => (int)($evidence['packages_checked'] ?? 0),
+            'repositories_assessed' => count((array)($evidence['repositories_active'] ?? [])),
+            'repository_findings' => count((array)($evidence['repository_findings'] ?? [])),
+            'packages_unassessed' => count((array)($evidence['packages_unassessed'] ?? [])),
+            'packages_excluded' => count((array)($evidence['packages_excluded'] ?? [])),
+            'package_list_omitted' => true,
+        ];
+    }
+
+    /** @param list<array<string,mixed>> $packages */
+    private function packageStatusApiFailureEvidence(array $packages, array $extra = []): array
+    {
+        return array_merge([
+            'packages_checked' => count($packages),
+            'package_list_omitted' => true,
+        ], $extra);
+    }
+
 }

@@ -447,6 +447,95 @@ final class FilesystemCheck
         ];
     }
 
+    public function pciManualEvidenceDocumented(array $args): array
+    {
+        $paths = $args['paths'] ?? ['.magebean/pci-evidence.md', 'docs/pci-evidence.md', 'SECURITY.md'];
+        if (!is_array($paths)) {
+            $paths = ['.magebean/pci-evidence.md', 'docs/pci-evidence.md', 'SECURITY.md'];
+        }
+        $requiredTopics = $args['required_topics'] ?? ['payment_scope', 'saq_notes', 'access_review', 'incident_response', 'vendor_responsibilities'];
+        if (!is_array($requiredTopics)) {
+            $requiredTopics = ['payment_scope', 'saq_notes', 'access_review', 'incident_response', 'vendor_responsibilities'];
+        }
+
+        $topicPatterns = [
+            'payment_scope' => '~\b(?:payment\s+scope|cardholder\s+data\s+environment|\bCDE\b|checkout|payment\s+flow|card\s+data|scope\s+(?:summary|boundary))\b~i',
+            'saq_notes' => '~\\b(?:SAQ|self[- ]assessment|merchant\\s+level|attestation|AOC|ROC)\\b~i',
+            'access_review' => '~\b(?:access\s+review|user\s+access|privilege\s+review|admin\s+access|MFA|2FA|least\s+privilege|quarterly\s+review)\b~i',
+            'incident_response' => '~\b(?:incident\s+response|breach|forensic|containment|escalation|security\s+incident|IR\s+plan|response\s+plan)\b~i',
+            'vendor_responsibilities' => '~\b(?:vendor\s+responsibilit(?:y|ies)|service\s+provider|third[- ]party|shared\s+responsibilit(?:y|ies)|processor|gateway|contract|SLA)\b~i',
+        ];
+
+        $required = array_values(array_filter(array_map(static fn(mixed $topic): string => (string)$topic, $requiredTopics)));
+        $found = array_fill_keys($required, false);
+        $documents = [];
+        $readable = 0;
+
+        foreach ($paths as $rel) {
+            $rel = (string)$rel;
+            $abs = $this->ctx->abs($rel);
+            $entry = [
+                'path' => $rel,
+                'exists' => is_file($abs),
+                'readable' => false,
+                'topics' => [],
+            ];
+            if (!is_file($abs)) {
+                $documents[] = $entry;
+                continue;
+            }
+
+            $content = @file_get_contents($abs);
+            if (!is_string($content)) {
+                $documents[] = $entry;
+                continue;
+            }
+
+            $entry['readable'] = true;
+            $readable++;
+            $text = trim($content);
+            foreach ($required as $topic) {
+                $pattern = $topicPatterns[$topic] ?? null;
+                $ok = $pattern !== null && $text !== '' && preg_match($pattern, $text) === 1;
+                $entry['topics'][$topic] = $ok;
+                if ($ok) {
+                    $found[$topic] = true;
+                }
+            }
+            $documents[] = $entry;
+        }
+
+        $missing = array_values(array_filter($required, static fn(string $topic): bool => empty($found[$topic])));
+        $evidence = [
+            'paths' => array_values(array_map('strval', $paths)),
+            'documents' => $documents,
+            'required_topics' => $required,
+            'found_topics' => array_keys(array_filter($found)),
+            'missing_topics' => $missing,
+        ];
+
+        if ($readable === 0) {
+            return [false, 'No readable PCI evidence checklist found', $evidence];
+        }
+
+        if ($missing !== []) {
+            $labels = [
+                'payment_scope' => 'payment scope',
+                'saq_notes' => 'SAQ/PCI notes',
+                'access_review' => 'access review',
+                'incident_response' => 'incident response',
+                'vendor_responsibilities' => 'vendor responsibilities',
+            ];
+            $missingLabels = array_map(static fn(string $topic): string => $labels[$topic] ?? $topic, $missing);
+            return [
+                false,
+                'PCI evidence checklist is incomplete: missing ' . implode(', ', $missingLabels),
+                $evidence,
+            ];
+        }
+
+        return [true, 'PCI evidence checklist covers required manual evidence topics', $evidence];
+    }
     public function diCompiled(array $args): array
     {
         $metadataRel = (string)($args['metadata_path'] ?? 'generated/metadata');

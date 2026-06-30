@@ -418,26 +418,27 @@
       "op": "all",
       "checks": [
         {
-          "name": "code_grep",
+          "name": "code_webhook_signature_validation",
           "args": {
             "paths": [
-              "app/code"
+              "app/code",
+              "app/etc",
+              "routes"
             ],
             "include_ext": [
               "php",
               "xml"
             ],
-            "must_not_match": [
-              "(?is)class\\s+\\w+.*?(?:Webhook|Callback|Ipn|Notification).*?function\\s+execute\\s*\\([^)]*\\)\\s*\\{(?:(?!hash_hmac|Signature|signature|webhook_secret|verify|validate|isValid|idempotency).){0,1800}\\b(?:invoice|capture|refund|payment|order|transaction)\\b",
-              "(?is)<route\\b[^>]*url\\s*=\\s*['\\\"][^'\\\"]*(?:webhook|callback|ipn|notification)[^'\\\"]*['\\\"][^>]*>\\s*<service[^>]+resource\\s*=\\s*['\\\"]anonymous['\\\"]"
-            ],
-            "max_results": 50
+            "payment_only": true,
+            "require_timestamp": true,
+            "require_replay_window": true,
+            "require_idempotency": true,
+            "max_results": 100
           }
         }
       ],
       "messages": {
-        "pass": "No unauthenticated payment webhook endpoint patterns detected.",
-        "fail": "Potential unauthenticated payment webhook/callback detected. Validate signatures, timestamps, replay windows, and idempotency."
+        "pass": "Payment webhook endpoints include signature validation, timestamp/replay protection, and idempotency evidence."
       }
     }
   ]

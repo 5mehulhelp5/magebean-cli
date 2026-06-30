@@ -173,6 +173,122 @@ final class CodeSearchCheck
 
         return [true, 'No raw sensitive PII detected in third-party outbound flows', $evidence];
     }
+
+
+    public function unsafeXmlParsing(array $args): array
+    {
+        $roots = $args['paths'] ?? ['app'];
+        $inc = $args['include_ext'] ?? ['php'];
+        $max = max(1, (int)($args['max_results'] ?? 100));
+        $rootsAbs = array_map(fn($p) => $this->ctx->abs($p), $roots);
+
+        $findings = [];
+        $filesRead = 0;
+        foreach ($this->collectFiles($rootsAbs, $inc) as $file) {
+            $content = @file_get_contents($file);
+            if ($content === false) {
+                continue;
+            }
+
+            $filesRead++;
+            foreach ($this->unsafeXmlParsingFindings($file, $content) as $finding) {
+                $findings[] = $finding;
+                if (count($findings) >= $max) {
+                    break 2;
+                }
+            }
+        }
+
+        $evidence = [
+            'paths' => array_values($roots),
+            'files_scanned' => $filesRead,
+            'findings' => $findings,
+            'truncated' => count($findings) >= $max,
+        ];
+
+        if ($findings !== []) {
+            $lines = ['Unsafe XML parsing patterns detected:'];
+            foreach ($findings as $finding) {
+                $lines[] = sprintf(
+                    '    - %s:%d [%s] %s',
+                    $finding['file'],
+                    $finding['line'],
+                    $finding['kind'],
+                    $finding['snippet']
+                );
+            }
+            if ($evidence['truncated']) {
+                $lines[] = sprintf('    - output truncated at %d findings', $max);
+            }
+
+            return [false, implode("\n", $lines), $evidence];
+        }
+
+        return [true, $filesRead === 0 ? 'No PHP files found to scan for unsafe XML parsing' : 'No unsafe XML entity expansion patterns detected', $evidence];
+    }
+
+    public function hardcodedSecrets(array $args): array
+    {
+        $roots = $args['paths'] ?? ['app', 'app/design'];
+        $inc = $args['include_ext'] ?? ['php', 'phtml', 'js', 'xml', 'json', 'env', 'dist', 'txt', 'pem', 'key', 'yml', 'yaml'];
+        $max = max(1, (int)($args['max_results'] ?? 100));
+        $allowedFiles = $args['allowed_files'] ?? ['app/etc/env.php'];
+        if (!is_array($allowedFiles)) {
+            $allowedFiles = ['app/etc/env.php'];
+        }
+        $allowed = array_fill_keys(array_map('strval', $allowedFiles), true);
+        $rootsAbs = array_map(fn($p) => $this->ctx->abs($p), $roots);
+
+        $findings = [];
+        $filesRead = 0;
+        foreach ($this->collectFiles($rootsAbs, $inc) as $file) {
+            if (isset($allowed[$this->relativeFile($file)])) {
+                continue;
+            }
+            $content = @file_get_contents($file);
+            if ($content === false) {
+                continue;
+            }
+
+            $filesRead++;
+            foreach ($this->hardcodedSecretFindings($file, $content) as $finding) {
+                $findings[] = $finding;
+                if (count($findings) >= $max) {
+                    break 2;
+                }
+            }
+        }
+
+        $findings = $this->dedupeFindings($findings);
+        $evidence = [
+            'paths' => array_values($roots),
+            'allowed_files' => array_values(array_map('strval', $allowedFiles)),
+            'files_scanned' => $filesRead,
+            'findings' => $findings,
+            'truncated' => count($findings) >= $max,
+        ];
+
+        if ($findings !== []) {
+            $lines = ['Hardcoded secrets detected outside approved secret storage:'];
+            foreach ($findings as $finding) {
+                $lines[] = sprintf(
+                    '    - %s:%d [%s] %s',
+                    $finding['file'],
+                    $finding['line'],
+                    $finding['kind'],
+                    $finding['field'] ?? $finding['pattern']
+                );
+            }
+            if ($evidence['truncated']) {
+                $lines[] = sprintf('    - output truncated at %d findings', $max);
+            }
+
+            return [false, implode("\n", $lines), $evidence];
+        }
+
+        return [true, $filesRead === 0 ? 'No custom code/config files found to scan for hardcoded secrets' : 'No hardcoded secrets detected outside approved secret storage', $evidence];
+    }
+
     public function apiKeyStorage(array $args): array
     {
         $roots = $args['paths'] ?? ['app/code', 'app/etc', 'app/design', 'setup'];
@@ -766,6 +882,436 @@ final class CodeSearchCheck
         return [false, implode("\n", $lines), $evidence];
     }
 
+
+    public function apiExposureMinimized(array $args): array
+    {
+        $roots = $args['paths'] ?? ['app/code', 'app/etc'];
+        $inc = $args['include_ext'] ?? ['xml', 'graphqls', 'php'];
+        $max = max(1, (int)($args['max_results'] ?? 100));
+        $rootsAbs = array_map(fn($p) => $this->ctx->abs($p), $roots);
+
+        $files = $this->collectFiles($rootsAbs, $inc);
+        $phpFiles = array_values(array_filter($files, static fn(string $file): bool => strtolower(pathinfo($file, PATHINFO_EXTENSION)) === 'php'));
+        $findings = [];
+        $filesRead = 0;
+        foreach ($files as $file) {
+            $content = @file_get_contents($file);
+            if ($content === false) {
+                continue;
+            }
+
+            $filesRead++;
+            $extension = strtolower(pathinfo($file, PATHINFO_EXTENSION));
+            $scanContent = $this->maskSourceComments($content, $extension);
+            if ($extension === 'xml') {
+                $fileFindings = $this->apiExposureWebapiFindings($file, $content, $scanContent);
+            } elseif ($extension === 'graphqls') {
+                $fileFindings = $this->apiExposureGraphqlFindings($file, $content, $scanContent, $phpFiles);
+            } else {
+                $fileFindings = $this->apiExposurePhpFindings($file, $content, $scanContent);
+            }
+
+            foreach ($fileFindings as $finding) {
+                $findings[] = $finding;
+                if (count($findings) >= $max) {
+                    break 2;
+                }
+            }
+        }
+
+        $evidence = [
+            'paths' => array_values($roots),
+            'files_scanned' => $filesRead,
+            'findings' => $findings,
+            'truncated' => count($findings) >= $max,
+        ];
+
+        if ($findings !== []) {
+            $lines = ['High-risk anonymous API or GraphQL exposure detected:'];
+            foreach ($findings as $finding) {
+                $lines[] = sprintf(
+                    '    - %s:%d [%s] %s',
+                    $finding['file'],
+                    $finding['line'],
+                    $finding['kind'],
+                    $finding['snippet']
+                );
+            }
+            if ($evidence['truncated']) {
+                $lines[] = sprintf('    - output truncated at %d findings', $max);
+            }
+
+            return [false, implode("\n", $lines), $evidence];
+        }
+
+        return [true, $filesRead === 0 ? 'No API or GraphQL files found to scan' : 'No high-risk anonymous API or GraphQL resolver exposure detected', $evidence];
+    }
+
+    public function customAuthorizationChecks(array $args): array
+    {
+        $roots = $args['paths'] ?? ['app/code', 'app/etc'];
+        $inc = $args['include_ext'] ?? ['php', 'xml'];
+        $max = max(1, (int)($args['max_results'] ?? 100));
+        $rootsAbs = array_map(fn($p) => $this->ctx->abs($p), $roots);
+
+        $findings = [];
+        $filesRead = 0;
+        foreach ($this->collectFiles($rootsAbs, $inc) as $file) {
+            $content = @file_get_contents($file);
+            if ($content === false) {
+                continue;
+            }
+
+            $filesRead++;
+            $extension = strtolower(pathinfo($file, PATHINFO_EXTENSION));
+            $scanContent = $this->maskSourceComments($content, $extension);
+            $fileFindings = $extension === 'xml'
+                ? $this->customAuthorizationXmlFindings($file, $content, $scanContent)
+                : $this->customAuthorizationPhpFindings($file, $content, $scanContent);
+            foreach ($fileFindings as $finding) {
+                $findings[] = $finding;
+                if (count($findings) >= $max) {
+                    break 2;
+                }
+            }
+        }
+
+        $evidence = [
+            'paths' => array_values($roots),
+            'files_scanned' => $filesRead,
+            'findings' => $findings,
+            'truncated' => count($findings) >= $max,
+        ];
+
+        if ($findings !== []) {
+            $lines = ['Custom controllers or APIs missing authorization evidence:'];
+            foreach ($findings as $finding) {
+                $lines[] = sprintf(
+                    '    - %s:%d [%s] %s',
+                    $finding['file'],
+                    $finding['line'],
+                    $finding['kind'],
+                    $finding['snippet']
+                );
+            }
+            if ($evidence['truncated']) {
+                $lines[] = sprintf('    - output truncated at %d findings', $max);
+            }
+
+            return [false, implode("\n", $lines), $evidence];
+        }
+
+        return [true, $filesRead === 0 ? 'No custom controller/API files found to scan' : 'No missing authorization evidence detected in sensitive custom controllers or APIs', $evidence];
+    }
+
+
+    public function downloadExportAuthorization(array $args): array
+    {
+        $roots = $args['paths'] ?? ['app/code'];
+        $inc = $args['include_ext'] ?? ['php', 'xml'];
+        $max = max(1, (int)($args['max_results'] ?? 100));
+        $rootsAbs = array_map(fn($p) => $this->ctx->abs($p), $roots);
+
+        $findings = [];
+        $endpointsSeen = 0;
+        $filesRead = 0;
+        foreach ($this->collectFiles($rootsAbs, $inc) as $file) {
+            $content = @file_get_contents($file);
+            if ($content === false) {
+                continue;
+            }
+
+            $filesRead++;
+            $extension = strtolower(pathinfo($file, PATHINFO_EXTENSION));
+            $scanContent = $this->maskSourceComments($content, $extension);
+            $fileFindings = $extension === 'xml'
+                ? $this->downloadExportWebapiFindings($file, $content, $scanContent, $endpointsSeen)
+                : $this->downloadExportControllerFindings($file, $content, $scanContent, $endpointsSeen);
+            foreach ($fileFindings as $finding) {
+                $findings[] = $finding;
+                if (count($findings) >= $max) {
+                    break 2;
+                }
+            }
+        }
+
+        $evidence = [
+            'paths' => array_values($roots),
+            'files_scanned' => $filesRead,
+            'download_export_endpoints_seen' => $endpointsSeen,
+            'findings' => $findings,
+            'truncated' => count($findings) >= $max,
+        ];
+
+        if ($findings !== []) {
+            $lines = ['Download/export endpoints missing authorization evidence:'];
+            foreach ($findings as $finding) {
+                $detail = isset($finding['url']) ? ' ' . $finding['url'] : '';
+                $lines[] = sprintf(
+                    '    - %s:%d [%s]%s %s',
+                    $finding['file'],
+                    $finding['line'],
+                    $finding['kind'],
+                    $detail,
+                    $finding['snippet']
+                );
+            }
+            if ($evidence['truncated']) {
+                $lines[] = sprintf('    - output truncated at %d findings', $max);
+            }
+
+            return [false, implode("\n", $lines), $evidence];
+        }
+
+        if ($filesRead === 0) {
+            return [true, 'No custom download/export files found to scan', $evidence];
+        }
+
+        return [true, $endpointsSeen === 0 ? 'No custom download/export endpoints detected' : 'All detected download/export endpoints include authorization evidence', $evidence];
+    }
+
+    public function mediaExecutableCode(array $args): array
+    {
+        $roots = $args['paths'] ?? ['pub/media', 'pub/import', 'var/import', 'var/export'];
+        $max = max(1, (int)($args['max_results'] ?? 100));
+        $maxFileBytes = max(1024, (int)($args['max_file_bytes'] ?? 1048576));
+        $rootsAbs = array_map(fn($p) => $this->ctx->abs($p), $roots);
+
+        $findings = [];
+        $filesScanned = 0;
+        $filesSkippedLarge = 0;
+        foreach ($this->collectFilesAnyExtension($rootsAbs) as $file) {
+            $size = @filesize($file);
+            if ($size !== false && $size > $maxFileBytes) {
+                $filesSkippedLarge++;
+                continue;
+            }
+
+            $content = @file_get_contents($file);
+            if ($content === false) {
+                continue;
+            }
+
+            $filesScanned++;
+            foreach ($this->mediaExecutableFindings($file, $content) as $finding) {
+                $findings[] = $finding;
+                if (count($findings) >= $max) {
+                    break 2;
+                }
+            }
+        }
+
+        $evidence = [
+            'paths' => array_values($roots),
+            'files_scanned' => $filesScanned,
+            'files_skipped_large' => $filesSkippedLarge,
+            'findings' => $findings,
+            'truncated' => count($findings) >= $max,
+        ];
+
+        if ($findings !== []) {
+            $lines = ['Executable code or script-enabling handlers detected in media/upload paths:'];
+            foreach ($findings as $finding) {
+                $lines[] = sprintf(
+                    '    - %s:%d [%s] %s',
+                    $finding['file'],
+                    $finding['line'],
+                    $finding['kind'],
+                    $finding['snippet']
+                );
+            }
+            if ($evidence['truncated']) {
+                $lines[] = sprintf('    - output truncated at %d findings', $max);
+            }
+
+            return [false, implode("\n", $lines), $evidence];
+        }
+
+        return [true, 'No executable code or script-enabling handlers detected in media/upload paths', $evidence];
+    }
+
+    public function paymentPageTamperMonitoring(array $args): array
+    {
+        $evidenceFiles = $args['evidence_files'] ?? ['.magebean/payment-page-monitoring.json', 'docs/payment-page-monitoring.md'];
+        if (!is_array($evidenceFiles)) {
+            $evidenceFiles = ['.magebean/payment-page-monitoring.json', 'docs/payment-page-monitoring.md'];
+        }
+        $roots = $args['paths'] ?? ['app/code', 'app/etc', 'app/design', 'pub/.htaccess', '.htaccess', 'nginx.conf'];
+        $inc = $args['include_ext'] ?? ['xml', 'php', 'phtml', 'js', 'html', 'conf', 'htaccess'];
+        $rootsAbs = array_map(fn($p) => $this->ctx->abs($p), $roots);
+
+        $signals = [
+            'payment_scope' => false,
+            'csp_reporting' => false,
+            'integrity_baseline' => false,
+            'scheduled_detection' => false,
+            'alerting' => false,
+        ];
+        $locations = [];
+        $evidenceEntries = [];
+
+        foreach ($evidenceFiles as $relative) {
+            $relative = (string)$relative;
+            $entry = $this->paymentPageTamperEvidenceFile($relative);
+            $evidenceEntries[] = $entry;
+            $signals = $this->mergeBooleanSignals($signals, $entry['signals'] ?? []);
+            if (!empty($entry['locations']) && is_array($entry['locations'])) {
+                $locations = array_merge($locations, $entry['locations']);
+            }
+        }
+
+        $files = [];
+        foreach ($rootsAbs as $root) {
+            if (is_file($root)) {
+                $files[] = $root;
+                continue;
+            }
+            if (is_dir($root)) {
+                foreach ($this->collectFiles([$root], $inc) as $file) {
+                    $files[] = $file;
+                }
+            }
+        }
+        $files = array_values(array_unique($files));
+
+        $filesRead = 0;
+        foreach ($files as $file) {
+            $content = @file_get_contents($file);
+            if ($content === false) {
+                continue;
+            }
+            $filesRead++;
+            $entry = $this->paymentPageTamperEvidenceInFile($file, $content);
+            $signals = $this->mergeBooleanSignals($signals, $entry['signals']);
+            if ($entry['locations'] !== []) {
+                $locations = array_merge($locations, $entry['locations']);
+            }
+        }
+
+        $hasCspMonitoring = $signals['payment_scope'] && $signals['csp_reporting'] && $signals['alerting'];
+        $hasIntegrityMonitoring = $signals['payment_scope'] && $signals['integrity_baseline'] && $signals['scheduled_detection'] && $signals['alerting'];
+        $missing = [];
+        if (!$signals['payment_scope']) {
+            $missing[] = 'payment/checkout page scope';
+        }
+        if (!$signals['alerting']) {
+            $missing[] = 'alerting destination or notification workflow';
+        }
+        if (!$signals['csp_reporting'] && !($signals['integrity_baseline'] && $signals['scheduled_detection'])) {
+            $missing[] = 'CSP reporting or scheduled file/script integrity detection';
+        }
+
+        $evidence = [
+            'evidence_files' => $evidenceEntries,
+            'paths' => array_values($roots),
+            'files_scanned' => $filesRead,
+            'signals' => $signals,
+            'locations' => $locations,
+            'missing' => $missing,
+        ];
+
+        if ($hasCspMonitoring || $hasIntegrityMonitoring) {
+            return [true, 'Payment page tamper monitoring has scope, detection/reporting, and alerting evidence', $evidence];
+        }
+
+        $lines = ['Payment page tamper monitoring evidence is incomplete:'];
+        foreach ($missing as $item) {
+            $lines[] = '    - missing ' . $item;
+        }
+        if ($filesRead === 0 && !$this->hasPresentEvidenceFile($evidenceEntries)) {
+            $lines[] = '    - no monitoring evidence files or readable app/config files found';
+        }
+
+        return [false, implode("\n", $lines), $evidence];
+    }
+
+
+    public function securityHeadersBaseline(array $args): array
+    {
+        $roots = $args['paths'] ?? ['app/etc', 'app/code', 'app/design', 'pub/.htaccess', '.htaccess', 'nginx.conf'];
+        $inc = $args['include_ext'] ?? ['xml', 'php', 'phtml', 'html', 'conf', 'htaccess'];
+        $rootsAbs = array_map(fn($p) => $this->ctx->abs($p), $roots);
+
+        $files = [];
+        foreach ($rootsAbs as $root) {
+            if (is_file($root)) {
+                $files[] = $root;
+                continue;
+            }
+            if (is_dir($root)) {
+                foreach ($this->collectFiles([$root], $inc) as $file) {
+                    $files[] = $file;
+                }
+            }
+        }
+        $files = array_values(array_unique($files));
+
+        $signals = [
+            'csp' => false,
+            'csp_not_permissive' => false,
+            'frame_protection' => false,
+            'nosniff' => false,
+        ];
+        $locations = [];
+        $permissive = [];
+        $filesRead = 0;
+        foreach ($files as $file) {
+            $content = @file_get_contents($file);
+            if ($content === false) {
+                continue;
+            }
+            $filesRead++;
+            $evidence = $this->securityHeaderEvidenceInFile($file, $content);
+            foreach ($signals as $key => $_) {
+                $signals[$key] = $signals[$key] || !empty($evidence['signals'][$key]);
+            }
+            $locations = array_merge($locations, $evidence['locations']);
+            $permissive = array_merge($permissive, $evidence['permissive']);
+        }
+
+        if ($permissive !== []) {
+            $signals['csp_not_permissive'] = false;
+        }
+
+        $missing = [];
+        if (!$signals['csp']) {
+            $missing[] = 'Content-Security-Policy';
+        } elseif (!$signals['csp_not_permissive']) {
+            $missing[] = 'non-permissive Content-Security-Policy';
+        }
+        if (!$signals['frame_protection']) {
+            $missing[] = 'X-Frame-Options DENY/SAMEORIGIN or CSP frame-ancestors';
+        }
+        if (!$signals['nosniff']) {
+            $missing[] = 'X-Content-Type-Options nosniff';
+        }
+
+        $evidence = [
+            'paths' => array_values($roots),
+            'files_scanned' => $filesRead,
+            'signals' => $signals,
+            'locations' => $locations,
+            'permissive' => $permissive,
+            'missing' => $missing,
+        ];
+
+        if ($filesRead === 0) {
+            return [false, 'No readable security header configuration files found', $evidence];
+        }
+
+        if ($missing !== [] || $permissive !== []) {
+            $lines = ['Security header baseline is incomplete:'];
+            foreach ($missing as $item) {
+                $lines[] = '    - missing ' . $item;
+            }
+            foreach ($permissive as $issue) {
+                $lines[] = sprintf('    - %s:%d [%s] %s', $issue['file'], $issue['line'], $issue['kind'], $issue['snippet']);
+            }
+            return [false, implode("\n", $lines), $evidence];
+        }
+
+        return [true, 'Security header baseline is configured with CSP, frame protection, and nosniff', $evidence];
+    }
 
     public function checkoutCspEnforced(array $args): array
     {
@@ -1531,7 +2077,16 @@ final class CodeSearchCheck
         $roots = $args['paths'] ?? ['app/code', 'app/etc', 'routes'];
         $inc = $args['include_ext'] ?? ['php', 'xml'];
         $max = max(1, (int)($args['max_results'] ?? 100));
+        $requireTimestamp = (bool)($args['require_timestamp'] ?? false);
+        $requireReplayWindow = (bool)($args['require_replay_window'] ?? false);
+        $requireIdempotency = (bool)($args['require_idempotency'] ?? false);
+        $paymentOnly = (bool)($args['payment_only'] ?? false);
         $rootsAbs = array_map(fn($p) => $this->ctx->abs($p), $roots);
+        $evidenceArgs = [
+            'require_timestamp' => $requireTimestamp,
+            'require_replay_window' => $requireReplayWindow,
+            'require_idempotency' => $requireIdempotency,
+        ];
 
         $handlers = [];
         $failures = [];
@@ -1544,13 +2099,18 @@ final class CodeSearchCheck
             }
 
             $filesRead++;
-            if (strtolower(pathinfo($file, PATHINFO_EXTENSION)) === 'php'
-                && !empty($this->webhookSignatureEvidence($content, 0)['ok'])) {
+            $extension = strtolower(pathinfo($file, PATHINFO_EXTENSION));
+            $scanContent = $this->maskSourceComments($content, $extension);
+            if ($extension === 'php'
+                && !empty($this->webhookSignatureEvidence($scanContent, 0, $evidenceArgs)['ok'])) {
                 $hasApplicationSignatureValidation = true;
             }
 
-            foreach ($this->webhookHandlerFindings($file, $content) as $handler) {
-                $validation = $this->webhookSignatureEvidence($content, (int)$handler['offset']);
+            foreach ($this->webhookHandlerFindings($file, $scanContent) as $handler) {
+                if ($paymentOnly && !$this->hasPaymentWebhookContext($this->relativeFile($file), $scanContent, (int)$handler['offset'], (string)($handler['target'] ?? ''))) {
+                    continue;
+                }
+                $validation = $this->webhookSignatureEvidence($scanContent, (int)$handler['offset'], $evidenceArgs);
                 $handler['signature_evidence'] = $validation;
                 unset($handler['offset']);
                 $handlers[] = $handler;
@@ -1570,6 +2130,10 @@ final class CodeSearchCheck
         $evidence = [
             'paths' => array_values($roots),
             'files_scanned' => $filesRead,
+            'require_timestamp' => $requireTimestamp,
+            'require_replay_window' => $requireReplayWindow,
+            'require_idempotency' => $requireIdempotency,
+            'payment_only' => $paymentOnly,
             'has_application_signature_validation' => $hasApplicationSignatureValidation,
             'handlers' => $handlers,
             'failures' => $failures,
@@ -1581,7 +2145,7 @@ final class CodeSearchCheck
         }
 
         if ($failures !== []) {
-            $lines = ['Webhook handlers without local signature validation evidence:'];
+            $lines = ['Webhook handlers without required authentication hardening evidence:'];
             foreach ($failures as $failure) {
                 $lines[] = sprintf(
                     '    - %s:%d [%s] missing %s',
@@ -1599,10 +2163,14 @@ final class CodeSearchCheck
         }
 
         if ($handlers === []) {
-            return [true, 'No webhook handlers detected in application code', $evidence];
+            return [true, $paymentOnly ? 'No payment webhook handlers detected in application code' : 'No webhook handlers detected in application code', $evidence];
         }
 
-        return [true, 'Webhook handlers include local signature validation evidence', $evidence];
+        $message = ($requireTimestamp || $requireReplayWindow || $requireIdempotency)
+            ? 'Webhook handlers include required authentication hardening evidence'
+            : 'Webhook handlers include local signature validation evidence';
+
+        return [true, $message, $evidence];
     }
     private function collectFiles(array $roots, array $inc): array
     {
@@ -1626,6 +2194,599 @@ final class CodeSearchCheck
     }
 
 
+
+
+    /** @return list<array<string,mixed>> */
+    private function apiExposureWebapiFindings(string $file, string $content, string $scanContent): array
+    {
+        $relative = $this->relativeFile($file);
+        if (!str_ends_with($relative, '/webapi.xml') && !str_ends_with($relative, 'webapi.xml')) {
+            return [];
+        }
+
+        $findings = [];
+        $count = preg_match_all('~<route\b[^>]*\burl\s*=\s*([\'\"])(?P<url>[^\'\"]+)\1[^>]*>(?P<body>.*?)</route>~is', $scanContent, $matches, PREG_OFFSET_CAPTURE | PREG_SET_ORDER);
+        if ($count === false || $count < 1) {
+            return [];
+        }
+
+        foreach ($matches as $match) {
+            $offset = (int)$match[0][1];
+            $url = (string)$match['url'][0];
+            $block = (string)$match[0][0];
+            if (!$this->hasSensitiveAuthorizationWorkflow($url . "\n" . $block)) {
+                continue;
+            }
+            $resources = $this->xmlResourceRefs($block);
+            if ($this->webapiResourcesAuthorizeSensitiveWorkflow($resources, $url)) {
+                continue;
+            }
+
+            $evidence = $this->matchEvidence($file, $content, 'high_risk_webapi_exposure', $offset);
+            $evidence['kind'] = 'high_risk_webapi_exposure';
+            $evidence['url'] = $url;
+            $evidence['resources'] = $resources;
+            $findings[] = $evidence;
+        }
+
+        return $findings;
+    }
+
+    /** @param list<string> $phpFiles @return list<array<string,mixed>> */
+    private function apiExposureGraphqlFindings(string $file, string $content, string $scanContent, array $phpFiles): array
+    {
+        $findings = [];
+        $count = preg_match_all('~(?P<field>\b[A-Za-z_][A-Za-z0-9_]*\b)\s*(?:\([^\)]*\))?\s*:\s*[^\n@#]+@resolver\s*\([^\)]*class\s*:\s*([\'\"])(?P<class>[^\'\"]+)\2[^\)]*\)~i', $scanContent, $matches, PREG_OFFSET_CAPTURE | PREG_SET_ORDER);
+        if ($count === false || $count < 1) {
+            return [];
+        }
+
+        foreach ($matches as $match) {
+            $field = (string)$match['field'][0];
+            $class = ltrim(str_replace('\\\\', '\\', (string)$match['class'][0]), '\\');
+            $offset = (int)$match[0][1];
+            $window = substr($scanContent, max(0, $offset - 500), 1100);
+            if (!$this->hasSensitiveAuthorizationWorkflow($field . "\n" . $class . "\n" . $window)) {
+                continue;
+            }
+            if ($this->graphqlResolverHasAuthEvidence($class, $phpFiles)) {
+                continue;
+            }
+
+            $evidence = $this->matchEvidence($file, $content, 'graphql_resolver_without_auth_evidence', $offset);
+            $evidence['kind'] = 'graphql_resolver_without_auth_evidence';
+            $evidence['field'] = $field;
+            $evidence['resolver'] = $class;
+            $findings[] = $evidence;
+        }
+
+        return $findings;
+    }
+
+    /** @return list<array<string,mixed>> */
+    private function apiExposurePhpFindings(string $file, string $content, string $scanContent): array
+    {
+        $relative = $this->relativeFile($file);
+        if (preg_match('~\b(?:IntrospectionQuery|__schema|__type)\b~i', $scanContent, $match, PREG_OFFSET_CAPTURE) === 1
+            && preg_match('~\b(?:graphql|schema|resolver|introspection)\b~i', $relative . "\n" . $scanContent) === 1
+            && preg_match('~\b(?:disable|disabled|deny|block|production|developerMode|isDevMode|admin)\b~i', substr($scanContent, max(0, (int)$match[0][1] - 500), 1200)) !== 1) {
+            $evidence = $this->matchEvidence($file, $content, 'graphql_introspection_exposure_signal', (int)$match[0][1]);
+            $evidence['kind'] = 'graphql_introspection_exposure_signal';
+            return [$evidence];
+        }
+
+        return [];
+    }
+
+    /** @param list<string> $phpFiles */
+    private function graphqlResolverHasAuthEvidence(string $class, array $phpFiles): bool
+    {
+        $candidate = $this->resolverClassToPath($class);
+        $files = [];
+        if ($candidate !== null) {
+            foreach ($phpFiles as $file) {
+                if (str_ends_with(str_replace('\\', '/', $file), $candidate)) {
+                    $files[] = $file;
+                }
+            }
+        }
+        if ($files === []) {
+            foreach ($phpFiles as $file) {
+                $content = @file_get_contents($file);
+                if (!is_string($content)) {
+                    continue;
+                }
+                $needle = preg_quote(ltrim($class, '\\'), '~');
+                if (preg_match('~(?:namespace\s+' . str_replace('\\\\', '\\\\', $needle) . '\b|class\s+' . preg_quote($this->shortClassName($class), '~') . '\b)~', $content) === 1) {
+                    $files[] = $file;
+                }
+            }
+        }
+
+        foreach ($files as $file) {
+            $content = @file_get_contents($file);
+            if (!is_string($content)) {
+                continue;
+            }
+            $scanContent = $this->maskSourceComments($content, 'php');
+            if ($this->hasGraphqlResolverAuthEvidence($scanContent)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private function hasGraphqlResolverAuthEvidence(string $content): bool
+    {
+        return preg_match('~\b(?:UserContextInterface|getUserId\s*\(|getUserType\s*\(|AuthorizationInterface|isAllowed|isLoggedIn|customerSession|CustomerSession|getCustomerId|GraphQlAuthorizationException|GraphQlAuthenticationException|NoSuchEntityException|authorized|authenticate\s*\()\b~i', $content) === 1;
+    }
+
+    private function resolverClassToPath(string $class): ?string
+    {
+        $class = trim($class, '\\');
+        if ($class === '' || !str_contains($class, '\\')) {
+            return null;
+        }
+        return str_replace('\\', '/', $class) . '.php';
+    }
+
+    private function shortClassName(string $class): string
+    {
+        $class = trim($class, '\\');
+        $pos = strrpos($class, '\\');
+        return $pos === false ? $class : substr($class, $pos + 1);
+    }
+
+
+    /** @return list<array<string,mixed>> */
+    private function customAuthorizationPhpFindings(string $file, string $content, string $scanContent): array
+    {
+        $relative = $this->relativeFile($file);
+        if (!$this->looksLikeCustomControllerFile($relative, $scanContent)) {
+            return [];
+        }
+
+        $findings = [];
+        $count = preg_match_all('~\bfunction\s+execute\s*\([^)]*\)\s*\{~i', $scanContent, $matches, PREG_OFFSET_CAPTURE | PREG_SET_ORDER);
+        if ($count === false || $count < 1) {
+            return [];
+        }
+
+        foreach ($matches as $match) {
+            $offset = (int)$match[0][1];
+            $window = substr($scanContent, max(0, $offset - 1400), 3600);
+            if (!$this->hasSensitiveAuthorizationWorkflow($relative . "\n" . $window)) {
+                continue;
+            }
+            if ($this->hasControllerAuthorizationEvidence($relative, $window, $scanContent)) {
+                continue;
+            }
+
+            $evidence = $this->matchEvidence($file, $content, 'controller_execute_without_authorization', $offset);
+            $evidence['kind'] = 'controller_execute_without_authorization';
+            $findings[] = $evidence;
+        }
+
+        return $findings;
+    }
+
+    /** @return list<array<string,mixed>> */
+    private function customAuthorizationXmlFindings(string $file, string $content, string $scanContent): array
+    {
+        $relative = $this->relativeFile($file);
+        if (!str_ends_with($relative, '/webapi.xml') && !str_ends_with($relative, 'webapi.xml')) {
+            return [];
+        }
+
+        $findings = [];
+        $count = preg_match_all('~<route\b[^>]*\burl\s*=\s*([\'\"])(?P<url>[^\'\"]+)\1[^>]*>(?P<body>.*?)</route>~is', $scanContent, $matches, PREG_OFFSET_CAPTURE | PREG_SET_ORDER);
+        if ($count === false || $count < 1) {
+            return [];
+        }
+
+        foreach ($matches as $match) {
+            $offset = (int)$match[0][1];
+            $url = (string)$match['url'][0];
+            $body = (string)$match['body'][0];
+            $block = (string)$match[0][0];
+            if (!$this->hasSensitiveAuthorizationWorkflow($url . "\n" . $block)) {
+                continue;
+            }
+
+            $resources = $this->xmlResourceRefs($block);
+            if ($this->webapiResourcesAuthorizeSensitiveWorkflow($resources, $url)) {
+                continue;
+            }
+
+            $evidence = $this->matchEvidence($file, $content, 'webapi_route_without_authorization', $offset);
+            $evidence['kind'] = 'webapi_route_without_authorization';
+            $evidence['url'] = $url;
+            $evidence['resources'] = $resources;
+            $findings[] = $evidence;
+        }
+
+        return $findings;
+    }
+
+    private function looksLikeCustomControllerFile(string $relative, string $content): bool
+    {
+        return preg_match('~/Controller/~i', $relative) === 1
+            || preg_match('~\bclass\s+\w*(?:Controller|Action)\w*\b|extends\s+[^\n;]*(?:Action|AbstractAction|Adminhtml|Frontend)~i', $content) === 1;
+    }
+
+    private function hasSensitiveAuthorizationWorkflow(string $text): bool
+    {
+        return preg_match('~\b(?:order|orders|customer|customers|invoice|shipment|creditmemo|refund|download|export|report|address|quote|cart|wishlist|payment|transaction|token|admin)\b~i', $text) === 1;
+    }
+
+    private function hasControllerAuthorizationEvidence(string $relative, string $window, string $fileContent): bool
+    {
+        if (preg_match('~\bconst\s+ADMIN_RESOURCE\s*=\s*([\'\"])(?!Magento_Backend::admin\b|Magento_Adminhtml::admin\b)(?P<resource>[^\'\"]+)\1~i', $fileContent) === 1) {
+            return true;
+        }
+
+        $haystack = $relative . "\n" . $window . "\n" . $fileContent;
+        if (preg_match('~\b(?:_authorization|AuthorizationInterface|isAllowed|_isAllowed|denyAccess|AclInterface|authorize\s*\(|canAccess|isGranted)\b~i', $haystack) === 1) {
+            return true;
+        }
+        if (preg_match('~\b(?:customerSession|CustomerSession|SessionFactory|getCustomerId|isLoggedIn|authenticate\s*\(|loginUrl|customer\/account\/login|CustomerAuthorization)\b~i', $haystack) === 1) {
+            return true;
+        }
+        if (preg_match('~\b(?:getCustomerId\s*\(\s*\)|customer_id|customerId|owner_id|user_id)\b[\s\S]{0,240}(?:===|==|!==|!=|equals?|compare|in_array)|(?:===|==|!==|!=)[\s\S]{0,240}\b(?:getCustomerId\s*\(\s*\)|customer_id|customerId|owner_id|user_id)\b~i', $haystack) === 1) {
+            return true;
+        }
+
+        return false;
+    }
+
+    private function webapiResourcesAuthorizeSensitiveWorkflow(array $resources, string $url): bool
+    {
+        if ($resources === []) {
+            return false;
+        }
+
+        $customerScoped = preg_match('~\b(?:me|mine|my|self|customer)\b~i', $url) === 1;
+        foreach ($resources as $resource) {
+            $resource = trim((string)$resource);
+            if ($resource === '' || preg_match('~^anonymous$~i', $resource) === 1) {
+                continue;
+            }
+            if (preg_match('~^self$~i', $resource) === 1) {
+                if ($customerScoped) {
+                    return true;
+                }
+                continue;
+            }
+            if (preg_match('~^(?:Magento_Webapi::all|Magento_Backend::admin|Magento_Adminhtml::admin)$~i', $resource) === 1 || preg_match('~::all$~i', $resource) === 1) {
+                continue;
+            }
+            return true;
+        }
+
+        return false;
+    }
+
+
+    /** @return list<array<string,mixed>> */
+    private function downloadExportControllerFindings(string $file, string $content, string $scanContent, int &$endpointsSeen): array
+    {
+        $relative = $this->relativeFile($file);
+        if (!$this->looksLikeCustomControllerFile($relative, $scanContent)) {
+            return [];
+        }
+
+        $findings = [];
+        $count = preg_match_all('~\bfunction\s+execute\s*\([^)]*\)\s*\{~i', $scanContent, $matches, PREG_OFFSET_CAPTURE | PREG_SET_ORDER);
+        if ($count === false || $count < 1) {
+            return [];
+        }
+
+        foreach ($matches as $match) {
+            $offset = (int)$match[0][1];
+            $window = substr($scanContent, max(0, $offset - 1400), 4200);
+            if (!$this->hasDownloadExportWorkflow($relative . "\n" . $window)) {
+                continue;
+            }
+
+            $endpointsSeen++;
+            if ($this->hasControllerAuthorizationEvidence($relative, $window, $scanContent)) {
+                continue;
+            }
+
+            $evidence = $this->matchEvidence($file, $content, 'download_export_controller_without_authorization', $offset);
+            $evidence['kind'] = 'download_export_controller_without_authorization';
+            $findings[] = $evidence;
+        }
+
+        return $findings;
+    }
+
+    /** @return list<array<string,mixed>> */
+    private function downloadExportWebapiFindings(string $file, string $content, string $scanContent, int &$endpointsSeen): array
+    {
+        $relative = $this->relativeFile($file);
+        if (!str_ends_with($relative, '/webapi.xml') && !str_ends_with($relative, 'webapi.xml')) {
+            return [];
+        }
+
+        $findings = [];
+        $count = preg_match_all('~<route\b[^>]*\burl\s*=\s*([\'\"])(?P<url>[^\'\"]+)\1[^>]*>(?P<body>.*?)</route>~is', $scanContent, $matches, PREG_OFFSET_CAPTURE | PREG_SET_ORDER);
+        if ($count === false || $count < 1) {
+            return [];
+        }
+
+        foreach ($matches as $match) {
+            $offset = (int)$match[0][1];
+            $url = (string)$match['url'][0];
+            $block = (string)$match[0][0];
+            if (!$this->hasDownloadExportWorkflow($url . "\n" . $block)) {
+                continue;
+            }
+
+            $endpointsSeen++;
+            $resources = $this->xmlResourceRefs($block);
+            if ($this->webapiResourcesAuthorizeDownloadExport($resources, $url)) {
+                continue;
+            }
+
+            $evidence = $this->matchEvidence($file, $content, 'download_export_webapi_without_authorization', $offset);
+            $evidence['kind'] = 'download_export_webapi_without_authorization';
+            $evidence['url'] = $url;
+            $evidence['resources'] = $resources;
+            $findings[] = $evidence;
+        }
+
+        return $findings;
+    }
+
+    private function hasDownloadExportWorkflow(string $text): bool
+    {
+        return preg_match('~\b(?:FileFactory|download|downloadable|export|report|invoice|statement|csv|pdf|xlsx?|zip|Content-Disposition|application/(?:pdf|octet-stream|zip)|text/csv|sendFile|streamDownload|create\s*\([^;]{0,160}\.(?:csv|pdf|xlsx?|zip))\b~i', $text) === 1;
+    }
+
+    private function webapiResourcesAuthorizeDownloadExport(array $resources, string $url): bool
+    {
+        if ($resources === []) {
+            return false;
+        }
+
+        $customerScoped = preg_match('~\b(?:me|mine|my|self|customer)\b~i', $url) === 1;
+        foreach ($resources as $resource) {
+            $resource = trim((string)$resource);
+            if ($resource === '' || preg_match('~^anonymous$~i', $resource) === 1) {
+                continue;
+            }
+            if (preg_match('~^self$~i', $resource) === 1) {
+                if ($customerScoped) {
+                    return true;
+                }
+                continue;
+            }
+            if (preg_match('~^(?:Magento_Webapi::all|Magento_Backend::admin|Magento_Adminhtml::admin)$~i', $resource) === 1 || preg_match('~::all$~i', $resource) === 1) {
+                continue;
+            }
+            return true;
+        }
+
+        return false;
+    }
+
+    /** @param list<string> $roots @return list<string> */
+    private function collectFilesAnyExtension(array $roots): array
+    {
+        $ret = [];
+        foreach ($roots as $root) {
+            if (is_file($root)) {
+                $ret[] = $root;
+                continue;
+            }
+            if (!is_dir($root)) {
+                continue;
+            }
+
+            $rii = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator(
+                $root,
+                \FilesystemIterator::SKIP_DOTS
+            ));
+            foreach ($rii as $f) {
+                if (!$f->isFile()) {
+                    continue;
+                }
+                $ret[] = $f->getPathname();
+            }
+        }
+
+        return $ret;
+    }
+
+    /** @return list<array<string,mixed>> */
+    private function mediaExecutableFindings(string $file, string $content): array
+    {
+        $findings = [];
+        $relative = $this->relativeFile($file);
+        $basename = strtolower(basename($relative));
+        $extension = strtolower(pathinfo($relative, PATHINFO_EXTENSION));
+        $dangerousExtensions = [
+            'php', 'phtml', 'php3', 'php4', 'php5', 'php7', 'php8', 'phar',
+            'cgi', 'pl', 'py', 'rb', 'sh', 'bash', 'zsh', 'ksh',
+            'asp', 'aspx', 'jsp', 'jspx', 'war',
+        ];
+
+        if (in_array($extension, $dangerousExtensions, true)) {
+            $evidence = $this->matchEvidence($file, $content, 'executable_extension', 0);
+            $evidence['kind'] = 'executable_extension';
+            $findings[] = $evidence;
+        }
+
+        $patterns = [
+            'php_open_tag' => '~<\?(?:php|=|\s)~i',
+            'script_shebang' => '~\A#!\s*/(?:usr/bin/env\s+)?(?:php|perl|python\d*|ruby|sh|bash|zsh|ksh|node)\b~i',
+        ];
+        if ($basename === '.htaccess') {
+            $patterns['apache_script_handler'] = '~\b(?:AddHandler|SetHandler|AddType)\b[^\r\n]*(?:php|cgi|perl|python|ruby|application/x-httpd-php)|\bOptions\b[^\r\n]*\+?ExecCGI\b~i';
+        }
+
+        foreach ($patterns as $kind => $regex) {
+            if (preg_match($regex, $content, $match, PREG_OFFSET_CAPTURE) !== 1) {
+                continue;
+            }
+            $evidence = $this->matchEvidence($file, $content, $kind, (int)$match[0][1]);
+            $evidence['kind'] = $kind;
+            $findings[] = $evidence;
+        }
+
+        return $findings;
+    }
+
+    private function paymentPageTamperEvidenceFile(string $relative): array
+    {
+        $path = $this->ctx->abs($relative);
+        $entry = [
+            'file' => $relative,
+            'present' => is_file($path),
+            'readable' => false,
+            'signals' => [
+                'payment_scope' => false,
+                'csp_reporting' => false,
+                'integrity_baseline' => false,
+                'scheduled_detection' => false,
+                'alerting' => false,
+            ],
+            'locations' => [],
+        ];
+
+        if (!is_file($path)) {
+            return $entry;
+        }
+
+        $content = @file_get_contents($path);
+        if ($content === false || trim($content) === '') {
+            return $entry;
+        }
+
+        $entry['readable'] = true;
+        $evidence = $this->paymentPageTamperEvidenceInFile($path, $content);
+        $entry['signals'] = $evidence['signals'];
+        $entry['locations'] = $evidence['locations'];
+
+        return $entry;
+    }
+
+    private function paymentPageTamperEvidenceInFile(string $file, string $content): array
+    {
+        $extension = strtolower(pathinfo($file, PATHINFO_EXTENSION));
+        $scanContent = in_array($extension, ['md', 'markdown', 'json'], true)
+            ? $content
+            : $this->maskSourceComments($content, $extension);
+        $relative = $this->relativeFile($file);
+        $text = $relative . "\n" . $scanContent;
+
+        $patterns = [
+            'payment_scope' => '~\b(?:checkout|payment(?:[-_ ]?page)?|onepage|cart/checkout|hosted[_-]?payment|stripe|paypal|braintree|adyen|authorizenet|authorize(?:\.net)?)\b~i',
+            'csp_reporting' => '~\b(?:report-uri|report-to|SecurityPolicyViolationEvent|content-security-policy-report-only|csp[_/-]?report(?:[_/-]?uri)?|report_uri|report_only)\b~i',
+            'integrity_baseline' => '~\b(?:checksum|sha(?:256|384|512)-?|integrity|subresource integrity|\bsri\b|file[_ -]?integrity|script[_ -]?integrity|baseline|tamper[_ -]?(?:hash|check|detect)|\bfim\b)\b~i',
+            'scheduled_detection' => '~\b(?:cron|schedule|scheduled|hourly|daily|continuous|interval|watcher|monitor(?:ing)?|detector|observer|synthetic|probe|scanner|runbook)\b~i',
+            'alerting' => '~\b(?:alert(?:ing)?|notify|notification|email|slack|msteams|teams|pagerduty|opsgenie|webhook|siem|splunk|datadog|newrelic|sentry|cloudwatch|grafana|incident)\b~i',
+        ];
+
+        $signals = [];
+        $locations = [];
+        foreach ($patterns as $name => $regex) {
+            $signals[$name] = preg_match($regex, $text, $match, PREG_OFFSET_CAPTURE) === 1;
+            if ($signals[$name]) {
+                $offset = (int)$match[0][1] - strlen($relative) - 1;
+                $locations[] = $this->matchEvidence($file, $content, $name, max(0, $offset));
+            }
+        }
+
+        return [
+            'signals' => $signals,
+            'locations' => $locations,
+        ];
+    }
+
+    /** @param array<string,bool> $left @param array<string,bool> $right @return array<string,bool> */
+    private function mergeBooleanSignals(array $left, array $right): array
+    {
+        foreach ($left as $key => $value) {
+            $left[$key] = !empty($value) || !empty($right[$key]);
+        }
+        return $left;
+    }
+
+    private function hasPresentEvidenceFile(array $entries): bool
+    {
+        foreach ($entries as $entry) {
+            if (!empty($entry['present']) && !empty($entry['readable'])) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+
+    private function securityHeaderEvidenceInFile(string $file, string $content): array
+    {
+        $extension = strtolower(pathinfo($file, PATHINFO_EXTENSION));
+        $scanContent = $this->maskSourceComments($content, $extension);
+        $signals = [
+            'csp' => false,
+            'csp_not_permissive' => false,
+            'frame_protection' => false,
+            'nosniff' => false,
+        ];
+        $locations = [];
+        $permissive = [];
+
+        $patterns = [
+            'nosniff' => '~\bX-Content-Type-Options\b[^\r\n;<>]*(?:nosniff)|<header\b[^>]*\bname\s*=\s*([\'\"])X-Content-Type-Options\1[^>]*\bvalue\s*=\s*([\'\"])nosniff\2~i',
+            'x_frame_options' => '~\bX-Frame-Options\b[^\r\n;<>]*(?:DENY|SAMEORIGIN)|<header\b[^>]*\bname\s*=\s*([\'\"])X-Frame-Options\1[^>]*\bvalue\s*=\s*([\'\"])(?:DENY|SAMEORIGIN)\2~i',
+            'frame_ancestors' => '~\bframe-ancestors\b\s+(?![^;\r\n]*\*)[^;\r\n]+~i',
+            'csp_header' => '~\bContent-Security-Policy\b|<header\b[^>]*\bname\s*=\s*([\'\"])Content-Security-Policy\1~i',
+        ];
+
+        foreach ($patterns as $kind => $regex) {
+            if (preg_match($regex, $scanContent, $match, PREG_OFFSET_CAPTURE) !== 1) {
+                continue;
+            }
+            $evidence = $this->matchEvidence($file, $content, $kind, (int)$match[0][1]);
+            $evidence['kind'] = $kind;
+            $locations[] = $evidence;
+            if ($kind === 'nosniff') {
+                $signals['nosniff'] = true;
+            } elseif ($kind === 'x_frame_options' || $kind === 'frame_ancestors') {
+                $signals['frame_protection'] = true;
+                if ($kind === 'frame_ancestors') {
+                    $signals['csp'] = true;
+                }
+            } elseif ($kind === 'csp_header') {
+                $signals['csp'] = true;
+            }
+        }
+
+        $signals['csp_not_permissive'] = $signals['csp'];
+        $badPatterns = [
+            'x_frame_options_allowall' => '~\bX-Frame-Options\b[^\r\n;<>]*ALLOWALL\b~i',
+            'frame_ancestors_wildcard' => '~\bframe-ancestors\b[^;\r\n]*\*~i',
+            'csp_wildcard_default_or_script' => '~\b(?:default-src|script-src|object-src|frame-ancestors)\b[^;\r\n]*\*~i',
+            'csp_unsafe_eval' => '~\bunsafe-eval\b~i',
+        ];
+        foreach ($badPatterns as $kind => $regex) {
+            if (preg_match($regex, $scanContent, $match, PREG_OFFSET_CAPTURE) !== 1) {
+                continue;
+            }
+            $evidence = $this->matchEvidence($file, $content, $kind, (int)$match[0][1]);
+            $evidence['kind'] = $kind;
+            $permissive[] = $evidence;
+        }
+
+        return [
+            'signals' => $signals,
+            'locations' => $locations,
+            'permissive' => $permissive,
+        ];
+    }
 
 
     private function checkoutCspEvidenceInFile(string $file, string $content): array
@@ -2296,6 +3457,138 @@ final class CodeSearchCheck
 
         return $deduped;
     }
+
+
+    /** @return list<array<string,mixed>> */
+    private function unsafeXmlParsingFindings(string $file, string $content): array
+    {
+        $findings = [];
+        $searchable = $this->maskSourceComments($content, strtolower(pathinfo($file, PATHINFO_EXTENSION)));
+        $patterns = [
+            'entity_loader_enabled' => '~\blibxml_disable_entity_loader\s*\(\s*false\s*\)~i',
+            'dangerous_libxml_flags' => '~\bLIBXML_(?:NOENT|DTDLOAD|DTDATTR)\b~i',
+            'dom_resolve_externals' => '~->\s*resolveExternals\s*=\s*true\b~i',
+            'dom_substitute_entities' => '~->\s*substituteEntities\s*=\s*true\b~i',
+            'dom_validate_on_parse' => '~->\s*validateOnParse\s*=\s*true\b~i',
+            'xml_parser_external_entity_handler' => '~\bxml_set_external_entity_ref_handler\s*\(~i',
+            'xmlreader_load_dtd_property' => '~->\s*setParserProperty\s*\(\s*XMLReader::LOADDTD\s*,\s*true\s*\)~i',
+            'xmlreader_subst_entities_property' => '~->\s*setParserProperty\s*\(\s*XMLReader::SUBST_ENTITIES\s*,\s*true\s*\)~i',
+            'dom_xinclude_call' => '~->\s*xinclude\s*\(~i',
+            'doctype_in_dynamic_xml' => '~<\!DOCTYPE\s+[^>]+(?:SYSTEM|PUBLIC|ENTITY)~i',
+        ];
+
+        foreach ($patterns as $kind => $regex) {
+            $count = preg_match_all($regex, $searchable, $matches, PREG_OFFSET_CAPTURE | PREG_SET_ORDER);
+            if ($count === false || $count < 1) {
+                continue;
+            }
+            foreach ($matches as $match) {
+                $offset = (int)$match[0][1];
+                if ($kind === 'dangerous_libxml_flags' && $this->isSafeLibxmlFlagContext($searchable, $offset)) {
+                    continue;
+                }
+                $evidence = $this->matchEvidence($file, $content, $kind, $offset);
+                $evidence['kind'] = $kind;
+                $findings[] = $evidence;
+            }
+        }
+
+        $callPatterns = [
+            'simplexml_load_with_unsafe_flags' => '~\bsimplexml_load_(?:string|file)\s*\([^;\n]*(?:LIBXML_NOENT|LIBXML_DTDLOAD|LIBXML_DTDATTR)~i',
+            'dom_load_with_unsafe_flags' => '~->\s*load(?:XML)?\s*\([^;\n]*(?:LIBXML_NOENT|LIBXML_DTDLOAD|LIBXML_DTDATTR)~i',
+            'xmlreader_open_with_unsafe_flags' => '~\bXMLReader::(?:XML|open)\s*\([^;\n]*(?:LIBXML_NOENT|LIBXML_DTDLOAD|LIBXML_DTDATTR)~i',
+        ];
+        foreach ($callPatterns as $kind => $regex) {
+            $count = preg_match_all($regex, $searchable, $matches, PREG_OFFSET_CAPTURE | PREG_SET_ORDER);
+            if ($count === false || $count < 1) {
+                continue;
+            }
+            foreach ($matches as $match) {
+                $evidence = $this->matchEvidence($file, $content, $kind, (int)$match[0][1]);
+                $evidence['kind'] = $kind;
+                $findings[] = $evidence;
+            }
+        }
+
+        $lineSeen = [];
+        $deduped = [];
+        foreach ($findings as $finding) {
+            $key = ($finding['file'] ?? '') . ':' . ($finding['line'] ?? '') . ':' . ($finding['snippet'] ?? '');
+            if (isset($lineSeen[$key])) {
+                continue;
+            }
+            $lineSeen[$key] = true;
+            $deduped[] = $finding;
+        }
+
+        return $deduped;
+    }
+
+    private function isSafeLibxmlFlagContext(string $content, int $offset): bool
+    {
+        $before = substr($content, max(0, $offset - 120), 120);
+        $after = substr($content, $offset, 220);
+        if (preg_match('~\b(?:LIBXML_NONET|LIBXML_NOERROR|LIBXML_NOWARNING|LIBXML_NOCDATA|LIBXML_COMPACT)\b~i', $after) === 1
+            && preg_match('~\b(?:NOENT|DTDLOAD|DTDATTR)\b~i', $after) !== 1) {
+            return true;
+        }
+        return preg_match('~\b(?:avoid|do not use|forbidden|disallow|deny|unsafe|blocked)\b~i', $before . $after) === 1;
+    }
+
+
+    /** @return list<array<string,mixed>> */
+    private function hardcodedSecretFindings(string $file, string $content): array
+    {
+        $findings = $this->apiKeyStorageFindings($file, $content);
+        $extension = strtolower(pathinfo($file, PATHINFO_EXTENSION));
+        $searchable = $this->maskSourceComments($content, $extension);
+        $patterns = [
+            'private_key_block' => '~-----BEGIN (?:RSA |EC |OPENSSH |DSA |)PRIVATE KEY-----~i',
+            'named_secret_literal' => '~[\'\"]?(?P<field>[A-Za-z0-9_.-]*(?:api[_-]?key|secret|token|client[_-]?secret|access[_-]?token|refresh[_-]?token|private[_-]?key|password|passwd|pwd)[A-Za-z0-9_.-]*)[\'\"]?\s*(?:=>|=|:)\s*[\'\"](?P<value>[A-Za-z0-9_\-\/.+=:$]{12,})[\'\"]~i',
+            'env_secret_literal' => '~(?m)^\s*(?P<field>[A-Z0-9_]*(?:API_KEY|SECRET|TOKEN|CLIENT_SECRET|ACCESS_TOKEN|REFRESH_TOKEN|PRIVATE_KEY|PASSWORD|PASSWD|PWD)[A-Z0-9_]*)\s*=\s*(?P<value>[A-Za-z0-9_\-\/.+=:$]{12,})\s*$~',
+            'bearer_token_literal' => '~\bAuthorization\b\s*(?:=>|=|:)\s*[\'\"]Bearer\s+(?P<value>[A-Za-z0-9_\-\/.+=]{20,})[\'\"]~i',
+        ];
+
+        foreach ($patterns as $kind => $regex) {
+            $count = preg_match_all($regex, $searchable, $matches, PREG_OFFSET_CAPTURE | PREG_SET_ORDER);
+            if ($count === false || $count < 1) {
+                continue;
+            }
+
+            foreach ($matches as $match) {
+                $value = isset($match['value']) && is_array($match['value']) ? (string)$match['value'][0] : 'private-key';
+                if ($kind !== 'private_key_block' && !$this->looksLikeStoredSecretLiteral($value)) {
+                    continue;
+                }
+                $field = isset($match['field']) && is_array($match['field']) ? (string)$match['field'][0] : $kind;
+                $offset = (int)$match[0][1];
+                $evidence = $this->matchEvidence($file, $content, $kind, $offset);
+                $evidence['kind'] = $kind;
+                $evidence['field'] = $field;
+                $evidence['snippet'] = $this->redactSecretSnippet((string)$evidence['snippet']);
+                $findings[] = $evidence;
+            }
+        }
+
+        foreach ($findings as &$finding) {
+            if (isset($finding['snippet'])) {
+                $finding['snippet'] = $this->redactSecretSnippet((string)$finding['snippet']);
+            }
+        }
+        unset($finding);
+
+        return $findings;
+    }
+
+    private function redactSecretSnippet(string $snippet): string
+    {
+        $snippet = preg_replace('~-----BEGIN (?:RSA |EC |OPENSSH |DSA |)PRIVATE KEY-----.*~i', '-----BEGIN PRIVATE KEY----- [REDACTED]', $snippet) ?? $snippet;
+        $snippet = preg_replace('~([\'\"])([A-Za-z0-9_\-\/.+=:$]{8,})(\1)~', '$1[REDACTED]$3', $snippet) ?? $snippet;
+        $snippet = preg_replace('~(=\s*)([A-Za-z0-9_\-\/.+=:$]{8,})~', '$1[REDACTED]', $snippet) ?? $snippet;
+        return $snippet;
+    }
+
+
     private function apiKeyStorageFindings(string $file, string $content): array
     {
         $findings = [];
@@ -3257,26 +4550,51 @@ final class CodeSearchCheck
         return preg_match('~(?:webhook|callback|ipn|notification|notify)~i', $window) === 1;
     }
 
-    private function webhookSignatureEvidence(string $content, int $offset): array
+    private function hasPaymentWebhookContext(string $relative, string $content, int $offset, string $target): bool
     {
+        $window = substr($content, max(0, $offset - 1200), 2400);
+        return preg_match('~\b(?:payment|invoice|capture|refund|order|transaction|checkout|gateway|stripe|paypal|braintree|adyen|klarna|authorizenet|authorize(?:\.net)?)\b~i', $relative . "\n" . $target . "\n" . $window) === 1;
+    }
+
+    private function webhookSignatureEvidence(string $content, int $offset, array $args = []): array
+    {
+        $requireTimestamp = (bool)($args['require_timestamp'] ?? false);
+        $requireReplayWindow = (bool)($args['require_replay_window'] ?? false);
+        $requireIdempotency = (bool)($args['require_idempotency'] ?? false);
         $fileWide = $content;
         $window = substr($content, max(0, $offset - 1600), 3600);
         $haystack = $window . "\n" . $fileWide;
 
-        $hasHeader = preg_match('~(?:HTTP_[A-Z0-9_]*(?:SIGNATURE|HMAC|TRANSMISSION_SIG)|[\'\"](?:X[-_][^\'\"]*(?:Signature|Hmac|Sha256)|Stripe-Signature|Paypal-Transmission-Sig|X-Hub-Signature-256)[\'\"]|->\s*(?:getHeader|getHeaderLine|header)\s*\(\s*[\'\"][^\'\"]*(?:signature|hmac|transmission-sig)[^\'\"]*[\'\"])~i', $haystack) === 1;
+        $constructEvent = preg_match('~\bconstructEvent\s*\(~i', $haystack) === 1;
+        $hasHeader = preg_match('~(?:HTTP_[A-Z0-9_]*(?:SIGNATURE|HMAC|TRANSMISSION_SIG)|[\'\"](?:X[-_][^\'\"]*(?:Signature|Hmac|Sha256|Timestamp|Transmission-Time)|Stripe-Signature|Paypal-Transmission-Sig|Paypal-Transmission-Time|X-Hub-Signature-256)[\'\"]|->\s*(?:getHeader|getHeaderLine|header)\s*\(\s*[\'\"][^\'\"]*(?:signature|hmac|transmission-sig|transmission-time)[^\'\"]*[\'\"])~i', $haystack) === 1;
         $hasTimingSafeCompare = preg_match('~\bhash_equals\s*\(~i', $haystack) === 1;
         $hasMac = preg_match('~\bhash_hmac\s*\(~i', $haystack) === 1;
         $hasVerifier = preg_match('~\b(?:openssl_verify|sodium_crypto_sign_verify_detached)\s*\(|\b(?:verifySignature|validateSignature|isSignatureValid|checkSignature|assertSignature|constructEvent)\s*\(~i', $haystack) === 1;
+        $hasTimestamp = $constructEvent || preg_match('~\b(?:timestamp|timeStamp|transmission[_-]?time|created_at|event_time|request_time)\b|(?:^|[,;\s])t=\d+~i', $haystack) === 1;
+        $hasReplayWindow = $constructEvent || preg_match('~\b(?:replay|tolerance|max[_-]?age|time[_-]?window|expires|ttl|nonce|abs\s*\(|time\s*\(\s*\)|strtotime\s*\(|DateTimeImmutable|300|600|900)\b~i', $haystack) === 1;
+        $hasIdempotency = preg_match('~\b(?:idempotenc(?:y|e)|event[_-]?id|webhook[_-]?id|transaction[_-]?id|request[_-]?id|delivery[_-]?id|transmission[_-]?id|already[_-]?processed|processed[_-]?events?|dedupe|deduplication|unique[_-]?key|lock\s*\(|SELECT\s+.*(?:event|webhook|transaction))\b~i', $haystack) === 1;
 
-        $ok = ($hasHeader && (($hasMac && $hasTimingSafeCompare) || $hasVerifier))
-            || preg_match('~\bconstructEvent\s*\(~i', $haystack) === 1;
+        $signatureOk = ($hasHeader && (($hasMac && $hasTimingSafeCompare) || $hasVerifier)) || $constructEvent;
+        $ok = $signatureOk
+            && (!$requireTimestamp || $hasTimestamp)
+            && (!$requireReplayWindow || $hasReplayWindow)
+            && (!$requireIdempotency || $hasIdempotency);
 
         $missing = [];
-        if (!$hasHeader && preg_match('~\bconstructEvent\s*\(~i', $haystack) !== 1) {
+        if (!$hasHeader && !$constructEvent) {
             $missing[] = 'signature_header';
         }
         if (!(($hasMac && $hasTimingSafeCompare) || $hasVerifier)) {
             $missing[] = 'timing_safe_signature_verify';
+        }
+        if ($requireTimestamp && !$hasTimestamp) {
+            $missing[] = 'timestamp';
+        }
+        if ($requireReplayWindow && !$hasReplayWindow) {
+            $missing[] = 'replay_window';
+        }
+        if ($requireIdempotency && !$hasIdempotency) {
+            $missing[] = 'idempotency';
         }
 
         return [
@@ -3285,6 +4603,9 @@ final class CodeSearchCheck
             'has_hmac' => $hasMac,
             'has_timing_safe_compare' => $hasTimingSafeCompare,
             'has_verifier' => $hasVerifier,
+            'has_timestamp' => $hasTimestamp,
+            'has_replay_window' => $hasReplayWindow,
+            'has_idempotency' => $hasIdempotency,
             'missing' => $missing,
         ];
     }

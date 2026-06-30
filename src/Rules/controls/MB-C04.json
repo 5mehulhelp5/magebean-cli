@@ -199,31 +199,29 @@
             "op": "all",
             "checks": [
                 {
-                    "name": "http_clickjacking_protection",
+                    "name": "code_security_headers_baseline",
                     "args": {
-                        "timeout_ms": 8000
-                    }
-                },
-                {
-                    "name": "http_csp_not_overly_permissive",
-                    "args": {
-                        "timeout_ms": 8000
-                    }
-                },
-                {
-                    "name": "http_header_in",
-                    "args": {
-                        "header": "x-content-type-options",
-                        "allowed": [
-                            "nosniff"
+                        "paths": [
+                            "app/etc",
+                            "app/code",
+                            "app/design",
+                            "pub/.htaccess",
+                            ".htaccess",
+                            "nginx.conf"
                         ],
-                        "timeout_ms": 8000
+                        "include_ext": [
+                            "xml",
+                            "php",
+                            "phtml",
+                            "html",
+                            "conf",
+                            "htaccess"
+                        ]
                     }
                 }
             ],
             "messages": {
-                "pass": "Baseline browser security headers are present.",
-                "fail": "Security header baseline is incomplete. Configure CSP/frame protection and X-Content-Type-Options."
+                "pass": "Baseline browser security headers are configured in application or web server config."
             }
         }
     ]

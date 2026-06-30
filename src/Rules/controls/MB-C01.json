@@ -175,7 +175,7 @@
       "op": "all",
       "checks": [
         {
-          "name": "code_grep",
+          "name": "code_media_executable_code",
           "args": {
             "paths": [
               "pub/media",
@@ -183,22 +183,13 @@
               "var/import",
               "var/export"
             ],
-            "include_ext": [
-              "php",
-              "phtml",
-              "phar"
-            ],
-            "must_not_match": [
-              "<\\?(?:php|=)",
-              "(?i)\\b(?:eval|assert|shell_exec|system|passthru|base64_decode)\\s*\\("
-            ],
-            "max_results": 50
+            "max_results": 100,
+            "max_file_bytes": 1048576
           }
         }
       ],
       "messages": {
-        "pass": "No executable PHP-like code detected in media or upload paths.",
-        "fail": "Executable code detected in media or upload paths. Remove it and block script execution in writable public directories."
+        "pass": "No executable code or script-enabling handlers detected in media or upload paths."
       }
     }
   ]

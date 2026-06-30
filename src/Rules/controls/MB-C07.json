@@ -127,44 +127,37 @@
       "title": "Payment page tamper monitoring readiness",
       "control": "MB-C07",
       "severity": "high",
-      "op": "any",
+      "op": "all",
       "checks": [
         {
-          "name": "fs_exists",
+          "name": "code_payment_page_tamper_monitoring",
           "args": {
-            "path": ".magebean/payment-page-monitoring.json"
-          }
-        },
-        {
-          "name": "fs_exists",
-          "args": {
-            "path": "docs/payment-page-monitoring.md"
-          }
-        },
-        {
-          "name": "code_grep",
-          "args": {
+            "evidence_files": [
+              ".magebean/payment-page-monitoring.json",
+              "docs/payment-page-monitoring.md"
+            ],
             "paths": [
-              "app",
+              "app/code",
               "app/etc",
-              "app/design"
+              "app/design",
+              "pub/.htaccess",
+              ".htaccess",
+              "nginx.conf"
             ],
             "include_ext": [
               "xml",
               "php",
               "phtml",
-              "js"
-            ],
-            "must_match": [
-              "(?i)(report-uri|report-to|securitypolicyviolation|integrity=|sha256-|checksum|file.?integrity|tamper)"
-            ],
-            "max_results": 20
+              "js",
+              "html",
+              "conf",
+              "htaccess"
+            ]
           }
         }
       ],
       "messages": {
-        "pass": "Payment page tamper monitoring or reporting signals are present.",
-        "fail": "No payment page tamper monitoring evidence found. Add CSP reporting, file integrity monitoring, or documented monitoring."
+        "pass": "Payment page tamper monitoring includes payment-page scope, alerting, and CSP reporting or scheduled integrity detection."
       }
     },
     {
@@ -172,30 +165,28 @@
       "title": "PCI manual evidence checklist present",
       "control": "MB-C07",
       "severity": "low",
-      "op": "any",
+      "op": "all",
       "checks": [
         {
-          "name": "fs_exists",
+          "name": "pci_manual_evidence_documented",
           "args": {
-            "path": ".magebean/pci-evidence.md"
-          }
-        },
-        {
-          "name": "fs_exists",
-          "args": {
-            "path": "docs/pci-evidence.md"
-          }
-        },
-        {
-          "name": "fs_exists",
-          "args": {
-            "path": "SECURITY.md"
+            "paths": [
+              ".magebean/pci-evidence.md",
+              "docs/pci-evidence.md",
+              "SECURITY.md"
+            ],
+            "required_topics": [
+              "payment_scope",
+              "saq_notes",
+              "access_review",
+              "incident_response",
+              "vendor_responsibilities"
+            ]
           }
         }
       ],
       "messages": {
-        "pass": "PCI evidence documentation is present.",
-        "fail": "No PCI evidence checklist found. Add a project evidence file covering payment scope, SAQ notes, access review, incident response, and vendor responsibilities."
+        "pass": "PCI evidence documentation covers payment scope, SAQ notes, access review, incident response, and vendor responsibilities."
       }
     }
   ]

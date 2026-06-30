@@ -381,26 +381,22 @@
       "op": "all",
       "checks": [
         {
-          "name": "code_grep",
+          "name": "code_custom_authorization_checks",
           "args": {
             "paths": [
-              "app/code"
+              "app/code",
+              "app/etc"
             ],
             "include_ext": [
               "php",
               "xml"
             ],
-            "must_not_match": [
-              "(?is)class\\s+\\w+.*?Controller.*?function\\s+execute\\s*\\([^)]*\\)\\s*\\{(?:(?!ADMIN_RESOURCE|_authorization|AuthorizationInterface|isAllowed|customerSession|isLoggedIn|getCustomerId).){0,1600}\\b(?:order|customer|invoice|shipment|creditmemo|download|export)\\b",
-              "(?is)<route\\b[^>]*url\\s*=\\s*['\\\"][^'\\\"]*(?:order|customer|invoice|export|download)[^'\\\"]*['\\\"][^>]*>\\s*<service[^>]+resource\\s*=\\s*['\\\"]anonymous['\\\"]"
-            ],
-            "max_results": 50
+            "max_results": 100
           }
         }
       ],
       "messages": {
-        "pass": "Custom controllers and APIs include authorization signals for sensitive workflows.",
-        "fail": "Potential missing authorization checks in custom controllers or APIs. Add ACL, ownership, or session authorization checks."
+        "pass": "Custom controllers and APIs include authorization signals for sensitive workflows."
       }
     },
     {
@@ -411,7 +407,7 @@
       "op": "all",
       "checks": [
         {
-          "name": "code_grep",
+          "name": "code_api_exposure_minimized",
           "args": {
             "paths": [
               "app/code",
@@ -422,23 +418,12 @@
               "graphqls",
               "php"
             ],
-            "must_not_match": [
-              "(?is)<service[^>]+class\\s*=\\s*['\\\"][^'\\\"]*(?:Order|Customer|Payment|Invoice|Admin|Export)[^'\\\"]*['\\\"][^>]+resource\\s*=\\s*['\\\"]anonymous['\\\"]",
-              "(?i)\\b(?:customer|order|invoice|payment|admin|export)\\w*\\s*:\\s*\\w+\\s*@resolver"
-            ],
-            "max_results": 50
-          }
-        },
-        {
-          "name": "http_graphql_introspection_disabled",
-          "args": {
-            "timeout_ms": 8000
+            "max_results": 100
           }
         }
       ],
       "messages": {
-        "pass": "No high-risk anonymous API exposure or GraphQL introspection signals detected.",
-        "fail": "Potentially excessive API or GraphQL exposure detected. Restrict anonymous access and disable production introspection."
+        "pass": "No high-risk anonymous REST API or unauthenticated GraphQL resolver exposure detected."
       }
     },
     {
@@ -449,7 +434,7 @@
       "op": "all",
       "checks": [
         {
-          "name": "code_grep",
+          "name": "code_hardcoded_secrets",
           "args": {
             "paths": [
               "app",
@@ -462,19 +447,22 @@
               "xml",
               "json",
               "env",
-              "dist"
+              "dist",
+              "txt",
+              "pem",
+              "key",
+              "yml",
+              "yaml"
             ],
-            "must_not_match": [
-              "(?i)\\b(?:api[_-]?key|secret|token|private[_-]?key|password|client[_-]?secret)\\b\\s*[:=]\\s*['\\\"][A-Za-z0-9_\\-\\/.+=]{16,}['\\\"]",
-              "-----BEGIN (?:RSA |EC |OPENSSH |)PRIVATE KEY-----"
+            "allowed_files": [
+              "app/etc/env.php"
             ],
-            "max_results": 50
+            "max_results": 100
           }
         }
       ],
       "messages": {
-        "pass": "No hardcoded secrets detected in custom code paths.",
-        "fail": "Hardcoded secret patterns detected. Move secrets to env.php, environment variables, or a secret manager and rotate exposed values."
+        "pass": "No hardcoded secrets detected in custom code paths."
       }
     },
     {
@@ -485,7 +473,7 @@
       "op": "all",
       "checks": [
         {
-          "name": "code_grep",
+          "name": "code_unsafe_xml_parsing",
           "args": {
             "paths": [
               "app"
@@ -493,19 +481,12 @@
             "include_ext": [
               "php"
             ],
-            "must_not_match": [
-              "\\bLIBXML_(?:NOENT|DTDLOAD)\\b",
-              "libxml_disable_entity_loader\\s*\\(\\s*false\\s*\\)",
-              "simplexml_load_(?:string|file)\\s*\\([^;]*(?:LIBXML_NOENT|LIBXML_DTDLOAD)",
-              "DOMDocument\\s*\\([^)]*\\)\\s*;[^\\n]{0,200}->\\s*loadXML\\s*\\([^;]*(?:LIBXML_NOENT|LIBXML_DTDLOAD)"
-            ],
-            "max_results": 50
+            "max_results": 100
           }
         }
       ],
       "messages": {
-        "pass": "No unsafe XML entity expansion patterns detected.",
-        "fail": "Unsafe XML parsing patterns detected. Disable external entity loading and avoid entity expansion for untrusted XML."
+        "pass": "No unsafe XML entity expansion patterns detected."
       }
     },
     {
@@ -516,7 +497,7 @@
       "op": "all",
       "checks": [
         {
-          "name": "code_grep",
+          "name": "code_download_export_authorization",
           "args": {
             "paths": [
               "app/code"
@@ -525,17 +506,12 @@
               "php",
               "xml"
             ],
-            "must_not_match": [
-              "(?is)class\\s+\\w+.*?Controller.*?function\\s+execute\\s*\\([^)]*\\)\\s*\\{(?:(?!ADMIN_RESOURCE|_authorization|AuthorizationInterface|isAllowed|customerSession|isLoggedIn|getCustomerId).){0,1600}\\b(?:FileFactory|create\\s*\\(|download|export|csv|pdf)\\b",
-              "(?is)<route\\b[^>]*url\\s*=\\s*['\\\"][^'\\\"]*(?:download|export|invoice|report)[^'\\\"]*['\\\"][^>]*>\\s*<service[^>]+resource\\s*=\\s*['\\\"]anonymous['\\\"]"
-            ],
-            "max_results": 50
+            "max_results": 100
           }
         }
       ],
       "messages": {
-        "pass": "No unprotected download or export endpoint patterns detected.",
-        "fail": "Potential unprotected download/export endpoint detected. Add ACL, session, ownership, or signed URL validation."
+        "pass": "No unprotected download or export endpoint patterns detected."
       }
     }
   ]

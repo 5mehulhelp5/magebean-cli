@@ -57,6 +57,8 @@ final class CheckRegistry
         $registry->register('code_outbound_egress_controls', fn(array $args): array => $code->outboundEgressControls($args));
         $registry->register('code_pii_minimization', fn(array $args): array => $code->piiMinimization($args));
         $registry->register('code_api_key_storage', fn(array $args): array => $code->apiKeyStorage($args));
+        $registry->register('code_hardcoded_secrets', fn(array $args): array => $code->hardcodedSecrets($args));
+        $registry->register('code_unsafe_xml_parsing', fn(array $args): array => $code->unsafeXmlParsing($args));
         $registry->register('code_third_party_logging_sanitized', fn(array $args): array => $code->thirdPartyLoggingSanitized($args));
         $registry->register('code_saas_integration_scoped', fn(array $args): array => $code->saasIntegrationScoped($args));
         $registry->register('code_cardholder_data_storage', fn(array $args): array => $code->cardholderDataStorage($args));
@@ -67,6 +69,12 @@ final class CheckRegistry
         $registry->register('code_payment_script_inventory', fn(array $args): array => $code->paymentScriptInventory($args));
         $registry->register('code_payment_script_integrity', fn(array $args): array => $code->paymentScriptIntegrity($args));
         $registry->register('code_checkout_csp_enforced', fn(array $args): array => $code->checkoutCspEnforced($args));
+        $registry->register('code_security_headers_baseline', fn(array $args): array => $code->securityHeadersBaseline($args));
+        $registry->register('code_payment_page_tamper_monitoring', fn(array $args): array => $code->paymentPageTamperMonitoring($args));
+        $registry->register('code_media_executable_code', fn(array $args): array => $code->mediaExecutableCode($args));
+        $registry->register('code_custom_authorization_checks', fn(array $args): array => $code->customAuthorizationChecks($args));
+        $registry->register('code_download_export_authorization', fn(array $args): array => $code->downloadExportAuthorization($args));
+        $registry->register('code_api_exposure_minimized', fn(array $args): array => $code->apiExposureMinimized($args));
 
         $registry->register('fs_no_world_writable', fn(array $args): array => $fs->noWorldWritable($args));
         $registry->register('file_mode_max', fn(array $args): array => $fs->fileModeMax($args));
@@ -76,6 +84,7 @@ final class CheckRegistry
         $registry->register('no_directory_listing', fn(array $args): array => $fs->noDirectoryListing($args));
         $registry->register('fs_exists', fn(array $args): array => $fs->fsExists($args));
         $registry->register('security_mitigations_documented', fn(array $args): array => $fs->securityMitigationsDocumented($args));
+        $registry->register('pci_manual_evidence_documented', fn(array $args): array => $fs->pciManualEvidenceDocumented($args));
         $registry->register('fs_di_compiled', fn(array $args): array => $fs->diCompiled($args));
         $registry->register('fs_static_content_deployed', fn(array $args): array => $fs->staticContentDeployed($args));
         $registry->register('fs_indexers_ready', fn(array $args): array => $fs->indexersReady($args));
