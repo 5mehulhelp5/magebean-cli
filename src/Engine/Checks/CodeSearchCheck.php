@@ -128,6 +128,10 @@ final class CodeSearchCheck
         $findings = [];
         $filesRead = 0;
         foreach ($this->collectFiles($rootsAbs, $inc) as $file) {
+            $relativeFile = $this->relativeFile($file);
+            if ($this->isExcludedRelativePath($relativeFile, $excludeDirs)) {
+                continue;
+            }
             $content = @file_get_contents($file);
             if ($content === false) {
                 continue;
@@ -144,6 +148,7 @@ final class CodeSearchCheck
 
         $evidence = [
             'paths' => array_values($roots),
+            'exclude_dirs' => $excludeDirs,
             'files_scanned' => $filesRead,
             'findings' => $findings,
             'truncated' => count($findings) >= $max,
@@ -478,14 +483,22 @@ final class CodeSearchCheck
     }
     public function cardholderDataStorage(array $args): array
     {
-        $roots = $args['paths'] ?? ['app/code', 'app/etc', 'setup', 'dev', 'db'];
+        $roots = $args['paths'] ?? ['app/code', 'app/etc', 'db'];
         $inc = $args['include_ext'] ?? ['php', 'xml', 'sql', 'json'];
         $max = max(1, (int)($args['max_results'] ?? 100));
+        $excludeDirs = array_values(array_filter(array_map(
+            static fn(mixed $path): string => trim(str_replace('\\', '/', (string)$path), '/'),
+            (array)($args['exclude_dirs'] ?? ['setup', 'dev/tests', 'dev/tools', 'vendor', 'var', 'generated', 'pub/static', 'pub/media'])
+        ), static fn(string $path): bool => $path !== ''));
         $rootsAbs = array_map(fn($p) => $this->ctx->abs($p), $roots);
 
         $findings = [];
         $filesRead = 0;
         foreach ($this->collectFiles($rootsAbs, $inc) as $file) {
+            $relativeFile = $this->relativeFile($file);
+            if ($this->isExcludedRelativePath($relativeFile, $excludeDirs)) {
+                continue;
+            }
             $content = @file_get_contents($file);
             if ($content === false) {
                 continue;
@@ -502,6 +515,7 @@ final class CodeSearchCheck
 
         $evidence = [
             'paths' => array_values($roots),
+            'exclude_dirs' => $excludeDirs,
             'files_scanned' => $filesRead,
             'findings' => $findings,
             'truncated' => count($findings) >= $max,
@@ -3360,6 +3374,20 @@ final class CodeSearchCheck
         }
 
         return $findings;
+    }
+
+
+    /** @param list<string> $excludeDirs */
+    private function isExcludedRelativePath(string $relative, array $excludeDirs): bool
+    {
+        $relative = trim(str_replace('\\', '/', $relative), '/');
+        foreach ($excludeDirs as $excludeDir) {
+            $excludeDir = trim(str_replace('\\', '/', (string)$excludeDir), '/');
+            if ($excludeDir !== '' && ($relative === $excludeDir || str_starts_with($relative, $excludeDir . '/'))) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private function cardholderCodeStorageFindings(string $file, string $content, string $searchable, string $relative, string $extension): array

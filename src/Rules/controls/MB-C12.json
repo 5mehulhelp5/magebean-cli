@@ -21,7 +21,10 @@
               "node_modules",
               "pub/media",
               "pub/static",
-              "pub/cache"
+              "pub/cache",
+              "setup",
+              "dev/tests",
+              "dev/tools"
             ],
             "patterns": [
               "AKIA[0-9A-Z]{16}",
@@ -301,8 +304,6 @@
             "paths": [
               "app/code",
               "app/etc",
-              "setup",
-              "dev",
               "db"
             ],
             "include_ext": [

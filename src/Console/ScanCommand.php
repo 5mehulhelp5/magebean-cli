@@ -12,8 +12,6 @@ use Magebean\Engine\ProjectConfigLoader;
 use Magebean\Engine\RulePackMerger;
 use Magebean\Engine\RuleValidator;
 use Magebean\Engine\Checks\CheckRegistry;
-use Magebean\Bundle\BundleManager;
-use Magebean\Engine\Cve\CveAuditor;
 
 use Symfony\Component\Console\Helper\ProgressBar;
 use Symfony\Component\Console\Command\Command;
@@ -35,7 +33,7 @@ Doc: <href=https://magebean.com/documentation>magebean.com/documentation</>
   • <fg=red;options=bold>Security Auditing</> — unsafe code patterns, permissions, world-writable files, XSS, SQLi, SSRF
   • <fg=yellow;options=bold>Configuration Auditing</> — production mode, cache, Elasticsearch, cron jobs, logging/monitoring
   • <fg=blue;options=bold>Performance Insights</> — runtime hotspots, cache effectiveness, DB indexing, static assets
-  • <fg=magenta;options=bold>Extension Auditing</> — parse composer.lock, match against known CVEs, flag abandoned modules
+  • <fg=magenta;options=bold>Extension Auditing</> — parse composer.lock, check package health and repository status
 
 <options=bold>USAGE</>
   <fg=green>php magebean.phar scan --path=/var/www/html</>
@@ -44,7 +42,6 @@ Doc: <href=https://magebean.com/documentation>magebean.com/documentation</>
 <options=bold>COMMON OPTIONS</>
   <fg=yellow>--path=PATH</>                     Path to the Magento 2 root to scan (default: current directory)
   <fg=yellow>--url=URL</>                       Optional store base URL override for HTTP checks
-  <fg=yellow>--cve-data=PATH</>                 Path to CVE data (JSON/NDJSON or ZIP bundle)
   <fg=yellow>--profile=owasp|pci|FILE</>        Select a built-in or custom profile (default: baseline/all rules)
   <fg=yellow>--controls=MB-Cxx,MB-Cxx</>       Only load selected controls (e.g., MB-C01,MB-C05)
   <fg=yellow>--rules=MB-Rxx,MB-Rxx</>           Only run a list of specified rules (e.g., MB-R036,MB-R020)
@@ -57,10 +54,6 @@ Doc: <href=https://magebean.com/documentation>magebean.com/documentation</>
 
   # Run with a store URL override
   <fg=green>php magebean.phar scan --path=/var/www/html --url=https://magento.local</>
-
-  # Use a known CVE data when auditing installed extensions.
-  # Download: <href=https://magebean.com/download>magebean.com/download</>
-  <fg=green>php magebean.phar scan --path=. --cve-data=/downloads/magebean-known-cve-bundle-202509.zip</>
 
 <options=bold>SEE ALSO</>
   <fg=cyan>rules:list</>           List all baseline rules
@@ -84,10 +77,8 @@ HELP;
         $this
             ->setDescription('Execute a comprehensive audit for a Magento 2 project using 12 controls and 81 rules.')
             ->addUsage('--path=/var/www/html')
-            ->addUsage('--path=. --cve-data=./cve/magebean-known-cve-bundle-' . date('Ym') . '.zip')
             // HTML report output is disabled, so the HTML-only detail option is hidden for now.
             // ->addOption('detail', null, InputOption::VALUE_NONE, 'Include Details column in HTML report')
-            ->addOption('cve-data', null, InputOption::VALUE_OPTIONAL, 'Path to CVE data (JSON/NDJSON or ZIP bundle)')
             ->addOption('standard', null, InputOption::VALUE_OPTIONAL, 'Report standard: magebean (default) | owasp | pci | cwe', 'magebean')
             ->addOption('profile', null, InputOption::VALUE_OPTIONAL, 'Built-in profile alias (owasp|pci) or custom profile JSON path')
             ->addOption('controls', null, InputOption::VALUE_OPTIONAL, 'Comma-separated control IDs to load (e.g., MB-C01,MB-C05 or MB-01,MB-05)')
@@ -106,7 +97,7 @@ HELP;
     protected function execute(InputInterface $in, OutputInterface $out): int
     {
         $io = new SymfonyStyle($in, $out);
-        $this->writePhase($out, 1, 6, 'Resolving Magento root and input options');
+        $this->writePhase($out, 1, 4, 'Resolving Magento root and input options');
 
         $pathOpt = (string)($in->getOption('path') ?? '');
         $requestedPath = $pathOpt !== '' ? $pathOpt : getcwd();
@@ -151,7 +142,6 @@ HELP;
             // Report file output is disabled for now; keep scan results CLI-only.
             // $format      = 'html';
             // $outFile     = 'magebean-report.html';
-            $cveDataFile = (string)($in->getOption('cve-data') ?? '');
             $standard    = strtolower((string)($in->getOption('standard') ?? 'magebean'));
             $profileOpt  = trim((string)($in->getOption('profile') ?? ''));
             $rulesOpt    = (string)($in->getOption('rules') ?? '');
@@ -166,60 +156,16 @@ HELP;
                 return Command::FAILURE;
             }
             $bundleMeta = [];
-            if ($cveDataFile !== '') {
-                $this->writePhase($out, 2, 6, 'Preparing CVE bundle metadata');
-                $isZip = (bool)preg_match('/\.zip$/i', $cveDataFile);
-                if ($isZip) {
-                    $bundleMeta = [];
-                    if ($cveDataFile !== '') {
-                        $isZip = (bool)preg_match('/\.zip$/i', (string)($in->getOption('cve-data') ?? ''));
-                        if ($isZip && class_exists(\ZipArchive::class)) {
-                            $origZip = (string)$in->getOption('cve-data');
-                            $tmpRoot = sys_get_temp_dir() . '/mbbundle_' . bin2hex(random_bytes(4));
-                            @mkdir($tmpRoot, 0777, true);
-                            $zip2 = new \ZipArchive();
-                            if ($zip2->open($origZip) === true) {
-                                $zip2->extractTo($tmpRoot);
-                                $zip2->close();
-                                $bundleMeta = $this->collectBundleMeta($tmpRoot);
-                            }
-                        }
-                    }
 
-                    $bm = new BundleManager();
-                    $extracted = $bm->extractOsvFileFromZip($cveDataFile);
-                    if ($extracted && is_file($extracted)) {
-                        $cveDataFile = $extracted;
-                    } else {
-                        $out->writeln('<comment>Warning:</comment> Could not extract JSON/NDJSON from zip (cve-data).');
-                        if (class_exists(\ZipArchive::class)) {
-                            $zip = new \ZipArchive();
-                            if ($zip->open($cveDataFile) === true) {
-                                $out->writeln('  Entries in ZIP:');
-                                $listed = 0;
-                                for ($i = 0; $i < $zip->numFiles && $listed < 50; $i++) {
-                                    $st = $zip->statIndex($i);
-                                    if (!$st) continue;
-                                    $out->writeln('   - ' . $st['name'] . ' (' . $st['size'] . ' bytes)');
-                                    $listed++;
-                                }
-                                $zip->close();
-                            }
-                        }
-                    }
-                }
-            } else {
-                $this->writePhase($out, 2, 6, 'Skipping CVE bundle preparation');
-            }
 
-            $ctx  = new Context($projectPath, $projectUrl, $cveDataFile, [
+            $ctx  = new Context($projectPath, $projectUrl, '', [
                 'path' => $projectPath,
                 'url' => $projectUrl,
                 'meta' => $bundleMeta,
             ]);
             $registry = CheckRegistry::fromContext($ctx);
 
-            $this->writePhase($out, 3, 6, 'Loading rule pack');
+            $this->writePhase($out, 2, 4, 'Loading rule pack');
             $configFile = $configOpt !== ''
                 ? self::normalize($this->resolveProjectConfigPath($configOpt, $projectPath))
                 : ProjectConfigLoader::discover($projectPath);
@@ -328,7 +274,7 @@ HELP;
                 return Command::FAILURE;
             }
 
-            $this->writePhase($out, 4, 6, sprintf('Running %d audit rules', count($pack['rules'])));
+            $this->writePhase($out, 3, 4, sprintf('Running %d audit rules', count($pack['rules'])));
             $ruleProgress = $this->createRuleProgressBar($out, count($pack['rules']));
             // 1) Scan rules
             $runner = new ScanRunner($ctx, $pack, function (array $event) use ($ruleProgress): void {
@@ -354,26 +300,17 @@ HELP;
             $result['meta']['project_config'] = $configFile;
             $result['summary']['path'] = $projectPath;
 
-            // 2) CVE audit (nếu có data)
-            if ($cveDataFile !== '' && is_file($cveDataFile)) {
-                $this->writePhase($out, 5, 6, 'Running CVE audit against installed packages');
-                $aud = new CveAuditor($ctx);
-                $result['cve_audit'] = $aud->run($cveDataFile);
-            } else {
-                $this->writePhase($out, 5, 6, 'Skipping CVE audit because no dataset was provided');
-                $result['cve_audit'] = null;
-            }
+            $result['cve_audit'] = null;
 
-            // 3) Render export
+            // Render export
             // Report file output is intentionally disabled; Magebean currently
             // supports command-line output only.
-            // $this->writePhase($out, 6, 6, sprintf('Writing %s report to %s', strtoupper($format), $outFile));
             // $tpl = $this->resolveTemplatePath((string)($activeProfile['report_template'] ?? 'standard'));
             // $rep = new HtmlReporter($tpl, (bool)$in->getOption('detail'));
             // $rep->write($result, $outFile);
 
             // ---------- Pretty console output (mimic sample) ----------
-            $this->writePhase($out, 6, 6, 'Rendering command-line summary');
+            $this->writePhase($out, 4, 4, 'Rendering command-line summary');
             $this->renderPrettySummary($out, $result, $projectPath);
 
             return $this->determineExitCode($result);
@@ -832,49 +769,6 @@ HTML;
             }
         }
         return $out;
-    }
-
-        private function collectBundleMeta(string $root): array
-    {
-        $map = [];
-        $root = rtrim($root, '/\\');
-
-        // Support both legacy layout (data/, rules/) and new flat layout (files at bundle root)
-        foreach (['', 'data', 'DATA', 'rules', 'RULES'] as $dir) {
-            $base = $root;
-            if ($dir !== '') {
-                $base .= DIRECTORY_SEPARATOR . $dir;
-            }
-            if (!is_dir($base)) continue;
-
-            $candidates = [
-                'abandoned'       => 'packagist-abandoned.json',
-                'yanked'          => 'packagist-yanked.json',
-                'release_history' => 'release-history.json',
-                'repo_status'     => 'repo-status.json',
-                'vendor_support'  => 'vendor-support.json',
-                // advisories split by source (new bundle layout)
-                'osv'             => 'osv-advisories.json',
-                'ghsa'            => 'ghsa-advisories.json',
-                'friendsofphp'    => 'friendsofphp-advisories.json',
-                'snyk'            => 'snyk-advisories.json',
-                // other meta
-                'kev'             => 'cisa-kev.json',
-                'high_risk'       => 'high-risk-modules.json',
-                'osv_db'          => 'osv-db.json',                   // CVE DB (JSON/NDJSON flattened)
-                'list'            => 'match-list.json',               // allow/deny list
-                'tags'            => 'risk-surface.json',             // risk tags
-                'market'          => 'marketplace-versions.json',     // marketplace versions
-            ];
-            foreach ($candidates as $key => $file) {
-                $p = $base . DIRECTORY_SEPARATOR . $file;
-                if (is_file($p) && !isset($map[$key])) {
-                    // First match wins so bundles can ship duplicates in data/, rules/, or root.
-                    $map[$key] = $p;
-                }
-            }
-        }
-        return $map;
     }
 
     private function autoDetectBaseUrl(string $projectPath): string

@@ -41,6 +41,7 @@ final class GitHistoryCheck
             (array)($args['exclude_dirs'] ?? [
                 '.git', 'vendor', 'var', 'generated', 'node_modules',
                 'pub/media', 'pub/static', 'pub/cache',
+                'setup', 'dev/tests', 'dev/tools',
             ])
         )));
         $maxResults = max(1, (int)($args['max_results'] ?? 200));
