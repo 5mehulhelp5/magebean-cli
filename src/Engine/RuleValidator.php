@@ -37,6 +37,18 @@ final class RuleValidator
                 $errors[] = self::label($id, $index) . " has invalid op '{$op}'. Allowed: all, any.";
             }
 
+            if (isset($rule['remediation'])) {
+                if (!is_array($rule['remediation']) || $rule['remediation'] === []) {
+                    $errors[] = self::label($id, $index) . ' remediation must be a non-empty array of strings.';
+                } else {
+                    foreach ($rule['remediation'] as $stepIndex => $step) {
+                        if (!is_string($step) || trim($step) === '') {
+                            $errors[] = self::label($id, $index) . " remediation step #{$stepIndex} must be a non-empty string.";
+                        }
+                    }
+                }
+            }
+
             $checks = $rule['checks'] ?? null;
             if (!is_array($checks) || $checks === []) {
                 $errors[] = self::label($id, $index) . ' must define at least one check.';

@@ -109,10 +109,17 @@ Inconclusive checks do not change the exit code because they are not confirmed f
 
 ## ⚙️ Command Options
 
+Target mode is selected from the explicitly provided options:
+
+- `--url` without `--path`: **REMOTE**; confirm Magento 2 first, then run 10 externally observable rules.
+- `--path` without `--url`: **LOCAL**.
+- `--path` with `--url`: **HYBRID**, combining local and HTTP evidence.
+- No target options: auto-detect a Magento root and run **LOCAL**.
+
 | Option | Description | Default |
 |---|---|---|
-| `--path` | Magento root to audit | current dir |
-| `--url` | Optional base URL override for HTTP checks | auto-detect |
+| `--path` | Magento root to audit | auto-detect in LOCAL mode |
+| `--url` | Absolute HTTP/HTTPS store base URL | none |
 | `--cve-data` | Path to CVE bundle (optional) | none |
 | `--rules` | Run only selected rule IDs | all |
 | `--exclude-rules` | Exclude selected rule IDs | none |
@@ -190,6 +197,9 @@ YAML configs are accepted when the PHP `yaml` extension is installed; JSON is th
 ```bash
 # run locally
 php bin/magebean scan --path=/path/to/magento
+
+# scan a public store without filesystem access
+php bin/magebean scan --url=https://magento-store.com
 
 # inspect available rules
 php bin/magebean rules:list

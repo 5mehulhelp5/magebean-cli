@@ -24,6 +24,10 @@ final class ScanCommand extends Command
 {
     protected static $defaultName = 'scan';
 
+    private const MODE_REMOTE = 'REMOTE';
+    private const MODE_LOCAL = 'LOCAL';
+    private const MODE_HYBRID = 'HYBRID';
+
     /** Keep help text in one place */
     private const HELP = <<<'HELP'
 <fg=cyan;options=bold>Execute a comprehensive audit</> for a Magento 2 project using <fg=green;options=bold>12 controls</> and <fg=green;options=bold>81 rules</>.
@@ -36,29 +40,39 @@ Doc: <href=https://magebean.com/documentation>magebean.com/documentation</>
   • <fg=magenta;options=bold>Extension Auditing</> — parse composer.lock, check package health and repository status
 
 <options=bold>USAGE</>
+  <fg=green>php magebean.phar scan --url=https://magento-store.com</>
   <fg=green>php magebean.phar scan --path=/var/www/html</>
-  <fg=green>php magebean.phar scan --path=/var/www/html --url=https://magento.local</>
+  <fg=green>php magebean.phar scan --path=/var/www/html --url=https://magento-store.com</>
+
+<options=bold>TARGET MODES</>
+  • <fg=blue;options=bold>REMOTE</> — confirms Magento 2 first, then runs 10 public rules
+  • <fg=green;options=bold>LOCAL</> — --path without --url, or no options with root auto-detection
+  • <fg=magenta;options=bold>HYBRID</> — --path and --url; combines local and HTTP evidence
 
 <options=bold>COMMON OPTIONS</>
-  <fg=yellow>--path=PATH</>                     Path to the Magento 2 root to scan (default: current directory)
-  <fg=yellow>--url=URL</>                       Optional store base URL override for HTTP checks
+  <fg=yellow>--path=PATH</>                     Magento 2 root path
+  <fg=yellow>--url=URL</>                       Absolute HTTP/HTTPS store base URL
   <fg=yellow>--profile=owasp|pci|FILE</>        Select a built-in or custom profile (default: baseline/all rules)
   <fg=yellow>--controls=MB-Cxx,MB-Cxx</>       Only load selected controls (e.g., MB-C01,MB-C05)
   <fg=yellow>--rules=MB-Rxx,MB-Rxx</>           Only run a list of specified rules (e.g., MB-R036,MB-R020)
   <fg=yellow>--exclude-rules=MB-Rxx,MB-Rxx</>   Exclude specific rules after loading the pack
-  <fg=yellow>--config=FILE</>                   Project policy file (.magebean.json auto-detected)
+  <fg=yellow>--config=FILE</>                   Project policy file (auto-detected in LOCAL/HYBRID)
 
 <options=bold>EXAMPLES</>
-  # Scan current directory and print a quick summary
-  <fg=green>php magebean.phar scan --path=.</>
+  # Scan a public store without filesystem access
+  <fg=green>php magebean.phar scan --url=https://magento-store.com</>
 
-  # Run with a store URL override
-  <fg=green>php magebean.phar scan --path=/var/www/html --url=https://magento.local</>
+  # Scan a local Magento root
+  <fg=green>php magebean.phar scan --path=/var/www/html</>
+
+  # Combine local and public HTTP evidence
+  <fg=green>php magebean.phar scan --path=/var/www/html --url=https://magento-store.com</>
 
 <options=bold>SEE ALSO</>
   <fg=cyan>rules:list</>           List all baseline rules
 
 <options=bold>NOTES</>
+  • REMOTE findings describe only externally observable behavior.
   • Ensure <fg=yellow>--path</> points to the Magento root that contains app/etc and vendor.
   • Results are printed directly to the command line.
 
@@ -76,7 +90,9 @@ HELP;
     {
         $this
             ->setDescription('Execute a comprehensive audit for a Magento 2 project using 12 controls and 81 rules.')
+            ->addUsage('--url=https://magento-store.com')
             ->addUsage('--path=/var/www/html')
+            ->addUsage('--path=/var/www/html --url=https://magento-store.com')
             // HTML report output is disabled, so the HTML-only detail option is hidden for now.
             // ->addOption('detail', null, InputOption::VALUE_NONE, 'Include Details column in HTML report')
             ->addOption('standard', null, InputOption::VALUE_OPTIONAL, 'Report standard: magebean (default) | owasp | pci | cwe', 'magebean')
@@ -85,7 +101,7 @@ HELP;
             ->addOption('rules', null, InputOption::VALUE_OPTIONAL, 'Comma-separated rule IDs to run (e.g., MB-R036,MB-R020)')
             ->addOption('exclude-rules', null, InputOption::VALUE_OPTIONAL, 'Comma-separated rule IDs to exclude after loading')
             ->addOption('config', null, InputOption::VALUE_OPTIONAL, 'Project policy file (.magebean.json or .magebean.yml)')
-            ->addOption('url', null, InputOption::VALUE_OPTIONAL, 'Optional base URL override for HTTP checks')
+            ->addOption('url', null, InputOption::VALUE_OPTIONAL, 'Absolute store base URL (REMOTE without --path; HYBRID with --path)')
             ->addOption('path', null, InputOption::VALUE_OPTIONAL, 'Magento root path (omit to auto-detect from current working directory)', '');
     }
 
@@ -97,78 +113,124 @@ HELP;
     protected function execute(InputInterface $in, OutputInterface $out): int
     {
         $io = new SymfonyStyle($in, $out);
-        $this->writePhase($out, 1, 4, 'Resolving Magento root and input options');
+        $hasPath = $in->hasParameterOption('--path');
+        $hasUrl = $in->hasParameterOption('--url');
+        $targetMode = $this->resolveTargetMode($hasPath, $hasUrl);
+        $this->writePhase($out, 1, 4, sprintf('Resolving %s target and input options', $targetMode));
 
-        $pathOpt = (string)($in->getOption('path') ?? '');
-        $requestedPath = $pathOpt !== '' ? $pathOpt : getcwd();
-        $requestedPath = self::normalize($requestedPath);
+        $pathOpt = trim((string)($in->getOption('path') ?? ''));
         $urlOpt = trim((string)($in->getOption('url') ?? ''));
-        if ($urlOpt === '') {
-            $urlOpt = (string)$this->autoDetectBaseUrl($requestedPath);
-        }
-        $requestedUrl = $urlOpt !== '' ? $urlOpt : '';
-
-        // Nếu path không trỏ tới Magento root, thử leo lên tối đa 4 cấp
-        if (!self::isMagentoRoot($requestedPath)) {
-            $detected = self::detectMagentoRoot($requestedPath, 4);
-            if ($detected !== null) {
-                $out->writeln(sprintf('<info>Detected Magento root:</info> %s', $detected));
-                $requestedPath = $detected;
-            } else {
-                $out->writeln("<error>Cannot locate Magento root from: {$requestedPath}</error>");
-                $out->writeln('Hint: run from your Magento root or pass --path=/absolute/path/to/magento');
-                return Command::FAILURE;
-            }
-        }
 
         try {
-            // Cho phép tự dò lên trên tối đa 2 cấp nếu user chỉ định nhầm subfolder
-            $magentoRoot = $this->findMagentoRoot($requestedPath, 2);
-
-            if ($magentoRoot === null) {
-                throw new \RuntimeException(
-                    "Not a valid Magento 2 installation.\n" .
-                        "- Expected files: bin/magento, composer.json, app/etc/config.php\n" .
-                        "- Checked: {$requestedPath} (and up to 2 parents)"
-                );
+            if ($hasPath && $pathOpt === '') {
+                throw new \RuntimeException('--path requires a non-empty value.');
+            }
+            if ($hasUrl && $urlOpt === '') {
+                throw new \RuntimeException('--url requires a non-empty HTTP or HTTPS URL.');
             }
 
-            // Xác minh chi tiết (composer.json có magento/framework, bin/magento executable, v.v.)
-            $this->assertMagento2Root($magentoRoot);
+            $requestedUrl = $hasUrl ? $this->normalizeRemoteUrl($urlOpt) : '';
 
-            // ✅ OK -> bắt đầu scan
-            $projectPath = (string)$magentoRoot;
-            $projectUrl = (string)$requestedUrl;
-            // Report file output is disabled for now; keep scan results CLI-only.
-            // $format      = 'html';
-            // $outFile     = 'magebean-report.html';
-            $standard    = strtolower((string)($in->getOption('standard') ?? 'magebean'));
-            $profileOpt  = trim((string)($in->getOption('profile') ?? ''));
-            $rulesOpt    = (string)($in->getOption('rules') ?? '');
+            if ($targetMode === self::MODE_REMOTE) {
+                $projectUrl = $requestedUrl;
+                $projectPath = 'URL:' . $projectUrl;
+            } else {
+                $requestedPath = self::normalize($hasPath ? $pathOpt : (string)getcwd());
+
+                if (!self::isMagentoRoot($requestedPath)) {
+                    $detected = self::detectMagentoRoot($requestedPath, 4);
+                    if ($detected === null) {
+                        throw new \RuntimeException(
+                            "Cannot locate Magento root from: {$requestedPath}\n" .
+                            'Hint: run from your Magento root or pass --path=/absolute/path/to/magento'
+                        );
+                    }
+                    $out->writeln(sprintf('<info>Detected Magento root:</info> %s', $detected));
+                    $requestedPath = $detected;
+                }
+
+                $magentoRoot = $this->findMagentoRoot($requestedPath, 2);
+                if ($magentoRoot === null) {
+                    throw new \RuntimeException(
+                        "Not a valid Magento 2 installation.\n" .
+                        "- Expected files: bin/magento, composer.json, app/etc/config.php\n" .
+                        "- Checked: {$requestedPath} (and up to 2 parents)"
+                    );
+                }
+
+                $this->assertMagento2Root($magentoRoot);
+                $projectPath = (string)$magentoRoot;
+                $projectUrl = $hasUrl
+                    ? $requestedUrl
+                    : (string)$this->autoDetectBaseUrl($projectPath);
+            }
+
+            $out->writeln(sprintf('<info>Target mode:</info> %s', $targetMode));
+
+            $standard = strtolower((string)($in->getOption('standard') ?? 'magebean'));
+            $profileOpt = trim((string)($in->getOption('profile') ?? ''));
+            $rulesOpt = (string)($in->getOption('rules') ?? '');
             $excludeRulesOpt = (string)($in->getOption('exclude-rules') ?? '');
             $controlsOpt = (string)($in->getOption('controls') ?? '');
             $configOpt = trim((string)($in->getOption('config') ?? ''));
 
-            // validate standard
             $allowed = ['magebean', 'owasp', 'pci', 'cwe'];
             if (!in_array($standard, $allowed, true)) {
                 $out->writeln('<error>Invalid --standard. Allowed: magebean | owasp | pci | cwe</error>');
                 return Command::FAILURE;
             }
-            $bundleMeta = [];
 
-
-            $ctx  = new Context($projectPath, $projectUrl, '', [
+            $bundleMeta = ['target_mode' => $targetMode];
+            $ctx = new Context($projectPath, $projectUrl, '', [
                 'path' => $projectPath,
                 'url' => $projectUrl,
                 'meta' => $bundleMeta,
             ]);
             $registry = CheckRegistry::fromContext($ctx);
 
+            $remoteDetection = null;
+            if ($targetMode === self::MODE_REMOTE) {
+                $out->writeln('<info>Preflight:</info> Confirming Magento 2 target');
+                [$fingerprintOk, $fingerprintMessage, $fingerprintEvidence] = $registry->run(
+                    'http_magento_fingerprint',
+                    ['timeout_ms' => 8000]
+                );
+                $fingerprintEvidence = is_array($fingerprintEvidence) ? $fingerprintEvidence : [];
+                $observedSignals = array_values(array_filter(array_map(
+                    static fn(mixed $signal): string => is_scalar($signal) ? (string)$signal : '',
+                    (array)($fingerprintEvidence['signals'] ?? [])
+                )));
+                $detectedVersion = trim((string)($fingerprintEvidence['version'] ?? ''));
+
+                $remoteDetection = [
+                    'confirmed' => $fingerprintOk === true,
+                    'confidence' => $fingerprintOk === true ? 100 : 0,
+                    'message' => (string)$fingerprintMessage,
+                    'signals' => $observedSignals,
+                    'version' => $detectedVersion !== '' ? $detectedVersion : null,
+                    'evidence' => $fingerprintEvidence,
+                ];
+
+                if ($fingerprintOk !== true) {
+                    $this->renderRemoteMagentoInconclusive(
+                        $out,
+                        $projectUrl,
+                        (string)$fingerprintMessage
+                    );
+                    return Command::SUCCESS;
+                }
+
+                $out->writeln('<info>Magento 2 confirmed.</info>');
+                $out->writeln($detectedVersion !== ''
+                    ? sprintf('<info>Magento version:</info> %s', $detectedVersion)
+                    : '<comment>Magento version:</comment> not publicly exposed');
+            }
+
             $this->writePhase($out, 2, 4, 'Loading rule pack');
+            $configBasePath = $targetMode === self::MODE_REMOTE ? (string)getcwd() : $projectPath;
             $configFile = $configOpt !== ''
-                ? self::normalize($this->resolveProjectConfigPath($configOpt, $projectPath))
-                : ProjectConfigLoader::discover($projectPath);
+                ? self::normalize($this->resolveProjectConfigPath($configOpt, $configBasePath))
+                : ($targetMode === self::MODE_REMOTE ? null : ProjectConfigLoader::discover($projectPath));
             $projectConfig = ProjectConfigLoader::load($configFile);
             if ($configFile !== null) {
                 $out->writeln(sprintf('<info>Loaded Magebean project config:</info> %s', $configFile));
@@ -180,31 +242,45 @@ HELP;
                 $controlsFilter = $this->normalizeControlList($controlsOpt);
             }
 
-            $pack = RulePackLoader::loadAll($controlsFilter);
+            $pack = $targetMode === self::MODE_REMOTE
+                ? RulePackLoader::loadExternalMagento($controlsFilter)
+                : RulePackLoader::loadAll($controlsFilter);
 
             if ($controlsFilter) {
                 $loaded = $pack['controls'] ?? [];
                 $missing = array_values(array_diff($controlsFilter, $loaded));
                 if ($missing) {
-                    $out->writeln('<error>Control file(s) not found: ' . implode(', ', $missing) . '</error>');
+                    $message = $targetMode === self::MODE_REMOTE
+                        ? 'Control(s) not supported in REMOTE mode: '
+                        : 'Control file(s) not found: ';
+                    $out->writeln('<error>' . $message . implode(', ', $missing) . '</error>');
                     return Command::FAILURE;
                 }
             }
 
             $pack = RulePackMerger::applyProjectConfig($pack, $projectConfig);
 
-            $activeProfile = [
-                'id' => 'baseline',
-                'title' => 'Magebean Baseline',
-                'description' => 'All enabled rules from the Magebean rule catalog.',
-                'report_template' => 'standard',
-                '_source' => 'builtin:baseline',
-            ];
+            $activeProfile = $targetMode === self::MODE_REMOTE
+                ? [
+                    'id' => 'external',
+                    'title' => 'Magebean External Magento Audit',
+                    'description' => 'Publicly observable checks that require only a store URL.',
+                    'report_template' => 'standard',
+                    '_source' => 'builtin:external',
+                ]
+                : [
+                    'id' => 'baseline',
+                    'title' => 'Magebean Baseline',
+                    'description' => 'All enabled rules from the Magebean rule catalog.',
+                    'report_template' => 'standard',
+                    '_source' => 'builtin:baseline',
+                ];
             if ($profileOpt === '' && in_array($standard, ['owasp', 'pci'], true)) {
                 $profileOpt = $standard;
             }
-            if ($profileOpt !== '' && !in_array(strtolower($profileOpt), ['baseline', 'all', 'magebean'], true)) {
-                $profile = ProfileLoader::load($profileOpt, $projectPath);
+            if ($profileOpt !== '' && !in_array(strtolower($profileOpt), ['baseline', 'all', 'magebean', 'external'], true)) {
+                $profileBasePath = $targetMode === self::MODE_REMOTE ? (string)getcwd() : $projectPath;
+                $profile = ProfileLoader::load($profileOpt, $profileBasePath);
                 $pack = ProfileLoader::apply($pack, $profile);
                 $activeProfile = ProfileLoader::publicMetadata($profile);
                 $standard = (string)($activeProfile['id'] ?? $standard);
@@ -232,7 +308,10 @@ HELP;
                         else $unknown[] = $id;
                     }
                     foreach ($unknown as $id) {
-                        $out->writeln(sprintf('<comment>Unknown rule id:</comment> %s', $id));
+                        $label = $targetMode === self::MODE_REMOTE
+                            ? 'Rule not supported in REMOTE mode:'
+                            : 'Unknown rule id:';
+                        $out->writeln(sprintf('<comment>%s</comment> %s', $label, $id));
                     }
                     if ($selected) {
                         // giữ nguyên controls pack để render/summary, nhưng thay tập rules đã chọn
@@ -293,12 +372,43 @@ HELP;
             $ruleProgress->finish();
             $out->writeln('');
             // attach meta
-            $result['meta']['standard']    = $standard;
-            $result['meta']['profile']     = $activeProfile;
+            $result['meta']['standard'] = $standard;
+            $result['meta']['profile'] = $activeProfile;
+            $result['meta']['target_mode'] = $targetMode;
             $result['meta']['rules_filter'] = $requestedIds;
             $result['meta']['controls_filter'] = $controlsFilter;
             $result['meta']['project_config'] = $configFile;
             $result['summary']['path'] = $projectPath;
+            $result['summary']['url'] = $projectUrl;
+
+            if ($targetMode === self::MODE_REMOTE) {
+                $planned = (int)($result['meta']['planned_rules'] ?? 0);
+                $executed = (int)($result['meta']['executed_rules'] ?? 0);
+                $transportTotal = (int)($result['meta']['transport_total'] ?? 0);
+                $transportOk = (int)($result['meta']['transport_ok'] ?? 0);
+                $coveragePercent = $planned > 0
+                    ? (int)round(($executed / $planned) * 100)
+                    : 0;
+                $transportPercent = $transportTotal > 0
+                    ? (int)round(($transportOk / $transportTotal) * 100)
+                    : 0;
+                $detectionConfidence = (int)($remoteDetection['confidence'] ?? 0);
+
+                $result['meta']['detected'] = $remoteDetection ?? [
+                    'confirmed' => false,
+                    'confidence' => 0,
+                    'message' => 'Magento fingerprint was not checked.',
+                    'signals' => [],
+                ];
+                $result['meta']['coverage_percent'] = $coveragePercent;
+                $result['meta']['transport_success_percent'] = $transportPercent;
+                $result['meta']['overall_confidence'] = (int)round(
+                    ($detectionConfidence * 0.4)
+                    + ($transportPercent * 0.3)
+                    + ($coveragePercent * 0.3)
+                );
+                $result['meta']['assurance'] = 'externally_observable';
+            }
 
             $result['cve_audit'] = null;
 
@@ -331,6 +441,22 @@ HELP;
         }
     }
 
+    private function renderRemoteMagentoInconclusive(
+        OutputInterface $out,
+        string $url,
+        string $reason
+    ): void {
+        $safeUrl = \Symfony\Component\Console\Formatter\OutputFormatter::escape($url);
+        $safeReason = \Symfony\Component\Console\Formatter\OutputFormatter::escape($reason);
+
+        $out->writeln('');
+        $out->writeln('<fg=magenta;options=bold>INCONCLUSIVE: MAGENTO 2 NOT CONFIRMED</>');
+        $out->writeln(sprintf('Target: <fg=green>%s</>', $safeUrl));
+        $out->writeln(sprintf('Reason: <comment>%s</comment>', $safeReason));
+        $out->writeln('No remote audit rules were executed.');
+        $out->writeln('');
+    }
+
     private function renderPrettySummary(OutputInterface $out, array $result, string $path): void
     {
         $sum    = $result['summary'] ?? [];
@@ -339,7 +465,8 @@ HELP;
 
         $env      = strtoupper($this->detectMageMode($path));
         $isExternal = str_starts_with($path, 'URL:');
-        $env        = $isExternal ? 'EXTERNAL' : strtoupper($this->detectMageMode($path));
+        $env = $isExternal ? 'EXTERNAL' : strtoupper($this->detectMageMode($path));
+        $targetOption = $isExternal ? '--url=' . substr($path, 4) . ' ' : '';
         $phpShort = PHP_MAJOR_VERSION . '.' . PHP_MINOR_VERSION;
 
         // Helpers
@@ -375,13 +502,21 @@ HELP;
         if ($isExternal) {
             $det = $result['meta']['detected'] ?? [];
             $detConf = (int)($det['confidence'] ?? 0);
+            $detConfirmed = (bool)($det['confirmed'] ?? false);
+            $detVersion = trim((string)($det['version'] ?? ''));
             $signals = (array)($det['signals'] ?? []);
             $overall = (int)($result['meta']['overall_confidence'] ?? 0);
             $tPct    = (int)($result['meta']['transport_success_percent'] ?? 0);
             $cPct    = (int)($result['meta']['coverage_percent'] ?? 0);
             $planned = (int)($result['meta']['planned_rules'] ?? 0);
             $execd   = (int)($result['meta']['executed_rules'] ?? 0);
-            $out->writeln(sprintf('Detected: <info>Magento 2</info> (confidence <comment>%d%%</comment>)', $detConf));
+            $detectionLabel = $detConfirmed
+                ? '<info>Magento 2</info>'
+                : '<comment>Magento 2 not confirmed</comment>';
+            $out->writeln(sprintf('Detected: %s (confidence <comment>%d%%</comment>)', $detectionLabel, $detConf));
+            $out->writeln($detVersion !== ''
+                ? sprintf('Magento version: <info>%s</info>', $detVersion)
+                : 'Magento version: <comment>not publicly exposed</comment>');
             $out->writeln(sprintf('Scan confidence: <info>%d%%</info> (detect %d, transport %d, coverage %d)', $overall, $detConf, $tPct, $cPct));
             if ($planned > 0) {
                 $out->writeln(sprintf('Coverage: <info>%d/%d</info> rules (%d%%)', $execd, $planned, $cPct));
@@ -470,15 +605,20 @@ HELP;
                 : sprintf('%s%s %s', $statusTag, $sevBadge($sev), $text);
             $out->writeln('  ' . $line);
 
-            if ($showRuleDetails && $status === 'UNKNOWN') {
+            if ($showRuleDetails && in_array($status, ['FAIL', 'UNKNOWN'], true)) {
                 $out->writeln('');
                 $out->writeln(sprintf('  <options=bold>How to resolve %s</>', $id !== '' ? $id : 'this check'));
-                foreach ($this->inconclusiveResolutionSteps($f) as $step) {
+                $resolutionSteps = $status === 'UNKNOWN'
+                    ? $this->inconclusiveResolutionSteps($f)
+                    : $this->failureResolutionSteps($f);
+                foreach ($resolutionSteps as $step) {
                     $out->writeln('    - ' . $step);
                 }
                 if ($id !== '') {
-                    $out->writeln('    - Re-run after resolving the missing evidence:');
-                    $out->writeln(sprintf('      <fg=green>php magebean.phar scan --rules=%s</>', $id));
+                    $out->writeln($status === 'UNKNOWN'
+                        ? '    - Re-run after resolving the missing evidence:'
+                        : '    - Re-run after applying the remediation:');
+                    $out->writeln(sprintf('      <fg=green>php magebean.phar scan %s--rules=%s</>', $targetOption, $id));
                 }
             }
         }
@@ -509,17 +649,17 @@ HELP;
             $out->writeln('<options=bold>Next steps</>');
             if ($exampleRules !== []) {
                 $out->writeln('  Inspect a finding with its evidence and remediation:');
-                $out->writeln(sprintf('    <fg=green>php magebean.phar scan --rules=%s</>', $exampleRules[0]));
+                $out->writeln(sprintf('    <fg=green>php magebean.phar scan %s--rules=%s</>', $targetOption, $exampleRules[0]));
                 if (count($exampleRules) > 1) {
                     $out->writeln('  Inspect multiple findings:');
-                    $out->writeln(sprintf('    <fg=green>php magebean.phar scan --rules=%s</>', implode(',', $exampleRules)));
+                    $out->writeln(sprintf('    <fg=green>php magebean.phar scan %s--rules=%s</>', $targetOption, implode(',', $exampleRules)));
                 }
             }
             if ($inconclusiveFindings !== []) {
                 $inconclusiveId = trim((string)($inconclusiveFindings[0]['id'] ?? ''));
                 if ($inconclusiveId !== '') {
                     $out->writeln('  Resolve an inconclusive check:');
-                    $out->writeln(sprintf('    <fg=green>php magebean.phar scan --rules=%s</>', $inconclusiveId));
+                    $out->writeln(sprintf('    <fg=green>php magebean.phar scan %s--rules=%s</>', $targetOption, $inconclusiveId));
                 }
             }
             $out->writeln('');
@@ -761,6 +901,41 @@ HTML;
                 "composer.json does not look like a Magento 2 project (missing require: magento/framework)."
             );
         }
+    }
+
+    private function resolveTargetMode(bool $hasPath, bool $hasUrl): string
+    {
+        if ($hasUrl && !$hasPath) {
+            return self::MODE_REMOTE;
+        }
+        if ($hasPath && $hasUrl) {
+            return self::MODE_HYBRID;
+        }
+
+        return self::MODE_LOCAL;
+    }
+
+    private function normalizeRemoteUrl(string $url): string
+    {
+        $url = trim($url);
+        if ($url === '' || filter_var($url, FILTER_VALIDATE_URL) === false) {
+            throw new \RuntimeException('Invalid --url. Expected an absolute HTTP or HTTPS URL.');
+        }
+
+        $parts = parse_url($url);
+        $scheme = strtolower((string)($parts['scheme'] ?? ''));
+        $host = (string)($parts['host'] ?? '');
+        if (!in_array($scheme, ['http', 'https'], true) || $host === '') {
+            throw new \RuntimeException('Invalid --url. Only absolute HTTP and HTTPS URLs are supported.');
+        }
+        if (isset($parts['user']) || isset($parts['pass'])) {
+            throw new \RuntimeException('Invalid --url. Credentials in the target URL are not supported.');
+        }
+        if (isset($parts['query']) || isset($parts['fragment'])) {
+            throw new \RuntimeException('Invalid --url. Use a store base URL without a query string or fragment.');
+        }
+
+        return rtrim($url, '/');
     }
 
     private static function normalize(string $p): string
@@ -1111,12 +1286,30 @@ HTML;
                 'Ensure app/code exists and contains the custom PHP files that should be assessed.',
                 'Grant the scan process read permission to app/code and its files.',
             ],
-            default => $this->genericInconclusiveResolutionSteps($message),
+            default => $this->genericInconclusiveResolutionSteps($message, $id),
         };
     }
 
     /** @return list<string> */
-    private function genericInconclusiveResolutionSteps(string $message): array
+    private function failureResolutionSteps(array $finding): array
+    {
+        $steps = array_values(array_filter(
+            (array)($finding['remediation'] ?? []),
+            static fn($step): bool => is_string($step) && trim($step) !== ''
+        ));
+        if ($steps !== []) {
+            return array_map(static fn(string $step): string => trim($step), $steps);
+        }
+
+        return [
+            'Review the failed check message and evidence above.',
+            'Apply the required configuration change, then verify the affected endpoint or file directly.',
+        ];
+    }
+
+
+    /** @return list<string> */
+    private function genericInconclusiveResolutionSteps(string $message, string $id): array
     {
         if (str_contains($message, 'api') || str_contains($message, 'http')) {
             return [
@@ -1131,9 +1324,8 @@ HTML;
             ];
         }
 
-        return [
-            'Review the missing evidence described above and make it available to the scan process.',
-            'Retry the rule to obtain a conclusive Pass or Finding result.',
-        ];
+        return $id !== ''
+            ? ['Review the rule requirements and remediation guidance: https://magebean.com/baseline/' . rawurlencode($id)]
+            : ['Review the rule requirements and remediation guidance at https://magebean.com/baseline'];
     }
 }

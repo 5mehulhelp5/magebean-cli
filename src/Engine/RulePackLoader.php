@@ -89,18 +89,26 @@ final class RulePackLoader
         return ['controls' => array_values(array_unique($controls)), 'rules' => $rules];
     }
 
-    public static function loadExternalMagento(): array
+    public static function loadExternalMagento(array $include = []): array
     {
         $dir = __DIR__ . '/../Rules/external';
         $file = $dir . '/ExternalMagentoAudit.json';
-        $rules = [];
-        $controls = ['MB-C01','MB-C02','MB-C03','MB-C04','MB-C05','MB-C06','MB-C07','MB-C12']; // reference grouping
-        if (is_file($file)) {
-            $data = json_decode((string)file_get_contents($file), true);
-            if (isset($data['rules']) && is_array($data['rules'])) {
-                $rules = $data['rules'];
-            }
+        $pack = self::loadFile($file);
+
+        if ($include === []) {
+            return $pack;
         }
+
+        $rules = array_values(array_filter(
+            $pack['rules'] ?? [],
+            static fn(array $rule): bool => in_array(
+                strtoupper((string)($rule['control'] ?? '')),
+                $include,
+                true
+            )
+        ));
+        $controls = array_values(array_intersect($pack['controls'] ?? [], $include));
+
         return ['controls' => $controls, 'rules' => $rules];
     }
 }

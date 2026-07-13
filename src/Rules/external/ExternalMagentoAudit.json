@@ -1,0 +1,112 @@
+{
+  "controls": ["MB-C01", "MB-C04", "MB-C05", "MB-C06"],
+  "title": "Magebean External Magento Audit",
+  "description": "Publicly observable Magento checks that require only a store URL.",
+  "rules": [
+    {
+      "id": "MB-R005",
+      "title": "Directory listing disabled",
+      "control": "MB-C01",
+      "severity": "medium",
+      "scope": "remote",
+      "op": "all",
+      "checks": [{"name": "http_no_directory_listing", "args": {"paths": ["/media/", "/static/", "/errors/", "/var/"], "timeout_ms": 8000}}],
+      "messages": {"pass": "Directory listing is disabled for public paths.", "fail": "Directory listing is enabled on at least one public path. Disable autoindex/listing."}
+    },
+    {
+      "id": "MB-R026",
+      "title": "HTTP redirects to HTTPS",
+      "control": "MB-C04",
+      "severity": "high",
+      "scope": "remote",
+      "op": "all",
+      "checks": [{"name": "http_force_https_redirect", "args": {"timeout_ms": 8000}}],
+      "messages": {"pass": "HTTP traffic is redirected to HTTPS on the same host.", "fail": "The public HTTP endpoint does not redirect securely to HTTPS on the same host."}
+    },
+    {
+      "id": "MB-R027",
+      "title": "HSTS header is set",
+      "control": "MB-C04",
+      "severity": "medium",
+      "scope": "remote",
+      "op": "all",
+      "checks": [{"name": "http_has_hsts", "args": {"min_max_age": 15552000, "timeout_ms": 8000}}],
+      "messages": {"pass": "HSTS is present on the public HTTPS response.", "fail": "HSTS is missing or incomplete on the public HTTPS response."}
+    },
+    {
+      "id": "MB-R028",
+      "title": "TLS protocols >= 1.2",
+      "control": "MB-C04",
+      "severity": "high",
+      "scope": "remote",
+      "op": "all",
+      "checks": [{"name": "http_tls_min_version", "args": {"timeout_ms": 8000}}],
+      "messages": {"pass": "TLS is configured to use version 1.2 or higher.", "fail": "The public endpoint allows an outdated TLS protocol or does not meet TLS 1.2+."}
+    },
+    {
+      "id": "MB-R029",
+      "title": "No mixed content in rendered storefront",
+      "control": "MB-C04",
+      "severity": "medium",
+      "scope": "remote",
+      "op": "all",
+      "checks": [{"name": "http_no_mixed_content", "args": {"paths": ["/"], "timeout_ms": 8000}}],
+      "messages": {"pass": "No insecure HTTP references were detected in rendered storefront markup.", "fail": "Mixed content was detected in rendered storefront markup."}
+    },
+    {
+      "id": "MB-R030",
+      "title": "Secure flags on publicly observed session cookies",
+      "control": "MB-C04",
+      "severity": "high",
+      "scope": "remote",
+      "op": "all",
+      "checks": [{"name": "http_cookie_flags", "args": {"paths": ["/", "/customer/account/login", "/checkout/cart"], "allowed_samesite": ["lax", "strict"], "timeout_ms": 8000}}],
+      "messages": {"pass": "Observed sensitive cookies use Secure, HttpOnly, and an allowed SameSite policy.", "fail": "At least one observed sensitive cookie is missing a required security flag."}
+    },
+    {
+      "id": "MB-R032",
+      "title": "No Xdebug headers exposed",
+      "control": "MB-C05",
+      "severity": "medium",
+      "scope": "remote",
+      "op": "all",
+      "checks": [{"name": "http_no_xdebug_headers", "args": {"timeout_ms": 8000}}],
+      "remediation": [
+        "Disable or remove the Xdebug zend_extension and xdebug.* settings from the production PHP configuration, then restart PHP-FPM or the web server.",
+        "Remove X-Debug-Token, X-Debug-Token-Link, X-PHPDebug, and other Xdebug-related response headers at the application, web server, reverse proxy, or CDN layer.",
+        "Purge reverse-proxy/CDN caches and verify the public response headers again."
+      ],
+      "messages": {"pass": "No Xdebug headers are exposed by the public endpoint.", "fail": "Xdebug-related headers are exposed by the public endpoint."}
+    },
+    {
+      "id": "MB-R033",
+      "title": "No public error or stack trace disclosure",
+      "control": "MB-C05",
+      "severity": "medium",
+      "scope": "remote",
+      "op": "all",
+      "checks": [{"name": "http_no_stacktrace", "args": {"timeout_ms": 8000}}],
+      "messages": {"pass": "No error or stack trace disclosure was observed on public pages.", "fail": "An error or stack trace was exposed on a public page."}
+    },
+    {
+      "id": "MB-R035",
+      "title": "Static storefront assets are deployed",
+      "control": "MB-C05",
+      "severity": "low",
+      "scope": "remote",
+      "op": "all",
+      "checks": [{"name": "http_static_assets_deployed", "args": {"timeout_ms": 8000}}],
+      "messages": {"pass": "The storefront exposes deployed static assets.", "fail": "Deployed static assets could not be confirmed from the public storefront."}
+    },
+    {
+      "id": "MB-R037",
+      "title": "Public full-page cache signals present",
+      "control": "MB-C06",
+      "severity": "high",
+      "scope": "remote",
+      "op": "all",
+      "checks": [{"name": "http_cache_signals", "args": {"timeout_ms": 8000}}],
+      "messages": {"pass": "Public response headers contain full-page cache signals.", "fail": "Full-page cache signals were not observed on the public endpoint."}
+    }
+  ]
+}

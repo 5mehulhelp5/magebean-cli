@@ -46,6 +46,11 @@
           }
         }
       ],
+      "remediation": [
+        "Disable or remove the Xdebug zend_extension and xdebug.* settings from the production PHP configuration, then restart PHP-FPM or the web server.",
+        "Remove X-Debug-Token, X-Debug-Token-Link, X-PHPDebug, and other Xdebug-related response headers at the application, web server, reverse proxy, or CDN layer.",
+        "Purge reverse-proxy/CDN caches and verify the public response headers again."
+      ],
       "messages": {
         "pass": "Xdebug is not enabled in the production PHP configuration.",
         "fail": "Xdebug settings detected. Remove the zend_extension and xdebug.* directives in production."

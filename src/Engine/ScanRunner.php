@@ -166,6 +166,13 @@ final class ScanRunner
                 $finding['profile'] = $rule['profile'];
             }
 
+            if (isset($rule['remediation']) && is_array($rule['remediation'])) {
+                $finding['remediation'] = array_values(array_filter(
+                    $rule['remediation'],
+                    static fn($step): bool => is_string($step) && trim($step) !== ''
+                ));
+            }
+
             $findings[] = $finding;
 
             // Đếm theo status để UNKNOWN không bị tính là failed

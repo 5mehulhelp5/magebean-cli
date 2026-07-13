@@ -720,9 +720,20 @@ final class HttpCheck
         if (!$ok) return [false, $msg, $ev];
         $h = array_change_key_case((array)($ev['headers'] ?? []), CASE_LOWER);
         $keys = is_array($h) ? array_keys($h) : [];
-        $badKeys = array_filter($keys, fn($k) => str_contains((string)$k, 'x-debug') || str_contains((string)$k, 'x-phpdebug') || str_contains((string)$k, 'xdebug'));
+        $badKeys = array_filter($keys, static function ($key): bool {
+            $key = strtolower((string)$key);
+            return in_array($key, [
+                'x-debug-token',
+                'x-debug-token-link',
+                'x-phpdebug',
+            ], true) || str_contains($key, 'xdebug');
+        });
         $ok2 = empty($badKeys);
-        return [$ok2, $ok2 ? 'No debug headers' : 'Debug headers present: ' . implode(', ', $badKeys), []];
+        return [
+            $ok2,
+            $ok2 ? 'No debug headers' : 'Debug headers present: ' . implode(', ', $badKeys),
+            $ok2 ? [] : ['debug_headers' => array_values($badKeys)],
+        ];
     }
 
     private function adminPathHeuristics(array $args): array
@@ -757,20 +768,116 @@ final class HttpCheck
     private function magentoFingerprint(array $args): array
     {
         $base = $this->baseUrl();
-        if ($base === '') return [false, 'Missing URL in context'];
-        [$ok, $msg, $ev] = $this->fetch($base, 'GET', [], (int)($args['timeout_ms'] ?? 8000), false);
-        if ($ok === null) return [null, $msg, $ev];
-        if (!$ok) return [false, $msg, $ev];
+        if ($base === '') {
+            return [null, '[UNKNOWN] Missing URL in context', []];
+        }
+
+        $timeout = (int)($args['timeout_ms'] ?? 8000);
+        [$ok, $msg, $ev] = $this->fetch($base, 'GET', [], $timeout, true);
+        if ($ok === null) {
+            return [null, $msg, $ev];
+        }
+        if (!$ok) {
+            return [false, $msg, $ev];
+        }
 
         $hdrs = array_change_key_case((array)($ev['headers'] ?? []), CASE_LOWER);
         $body = (string)($ev['body'] ?? '');
+        $normalizedBody = html_entity_decode($body, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+        $normalizedBody = str_replace(['\\/', '&#x2F;', '&#47;'], '/', $normalizedBody);
 
-        $headerHit = isset($hdrs['x-magento-tags']) || isset($hdrs['x-magento-cache-debug']);
-        $bodyHit   = preg_match('~mage-cache-storage|/static/version\d+/|/static/_cache/merged/|Luma-Icons\.(?:woff2|woff|ttf)~i', $body) === 1
-            || preg_match('~/static/frontend/[^"]+/(?:[a-z]{2}_[A-Z]{2}|en_[a-z]{2})/~i', $body) === 1;
+        $cloudflareMitigation = strtolower($this->hget($hdrs, 'cf-mitigated'));
+        $cloudflareChallenge = $cloudflareMitigation === 'challenge'
+            || str_contains($normalizedBody, '/cdn-cgi/challenge-platform/')
+            || str_contains($normalizedBody, 'Enable JavaScript and cookies to continue');
+        if ($cloudflareChallenge) {
+            return [
+                null,
+                '[UNKNOWN] Cloudflare managed challenge blocked Magento 2 fingerprinting',
+                [
+                    'request_url' => $base,
+                    'final_url' => (string)($ev['final_url'] ?? $base),
+                    'status' => (int)($ev['status'] ?? 0),
+                    'blocked_by' => 'cloudflare_managed_challenge',
+                    'cf_ray' => $this->hget($hdrs, 'cf-ray'),
+                ],
+            ];
+        }
 
-        $hit = $headerHit || $bodyHit;
-        return [$hit, $hit ? 'Magento fingerprint detected' : 'No Magento fingerprint', []];
+        $signals = [];
+        foreach (['x-magento-tags', 'x-magento-cache-debug', 'x-magento-vary'] as $header) {
+            if (array_key_exists($header, $hdrs)) {
+                $signals[] = 'response_header:' . $header;
+            }
+        }
+        if (preg_match('~mage-cache-storage|mage-cache-sessid|Magento_Customer/js/customer-data~i', $normalizedBody) === 1) {
+            $signals[] = 'magento_frontend_markup';
+        }
+        if (preg_match('~text/x-magento-init|data-mage-init|Magento_Ui/js|Magento_Theme/js~i', $normalizedBody) === 1) {
+            $signals[] = 'magento_js_bootstrap';
+        }
+        if (preg_match('~/static/version\\d+/|/static/_cache/merged/|Luma-Icons\\.(?:woff2|woff|ttf)~i', $normalizedBody) === 1) {
+            $signals[] = 'magento_static_asset';
+        }
+        if (preg_match('~/static/(?:version\\d+/)?frontend/[^"\'<>\\s?]+/(?:[a-z]{2}_[a-z]{2})/~i', $normalizedBody) === 1) {
+            $signals[] = 'magento_frontend_theme';
+        }
+        if (preg_match('~/static/(?:version\\d+/)?frontend/[^"\'<>\\s?]+/[a-z]{2}_[a-z]{2}/css/[^"\'<>\\s?]+\\.css~i', $normalizedBody) === 1) {
+            $signals[] = 'magento_css_asset_path';
+        }
+        if (
+            preg_match(
+                '~(?:src|href)=["\'][^"\']*(?:requirejs/require(?:\\.min)?\\.js|requirejs-config\\.js|mage/requirejs/mixins\\.js|mage/bootstrap\\.js|Magento_[A-Za-z0-9_]+/js/[^"\']+\\.js)~i',
+                $normalizedBody
+            ) === 1
+        ) {
+            $signals[] = 'magento_js_asset_path';
+        }
+        $signals = array_values(array_unique($signals));
+
+        $version = null;
+        $versionPattern = '~Magento(?:\\s+(?:Open Source|Commerce))?[/\\s:]+(2\\.\\d+\\.\\d+(?:-p\\d+)?)~i';
+        $versionHeader = $this->hget($hdrs, 'x-magento-version');
+        if ($versionHeader !== '' && preg_match('~(2\\.\\d+\\.\\d+(?:-p\\d+)?)~', $versionHeader, $matches) === 1) {
+            $version = $matches[1];
+            $signals[] = 'response_header:x-magento-version';
+        } elseif (preg_match($versionPattern, $body, $matches) === 1) {
+            $version = $matches[1];
+            $signals[] = 'public_version_markup';
+        }
+
+        if ($version === null) {
+            $versionUrl = $this->joinUrl($base, '/magento_version');
+            [$versionOk, , $versionEvidence] = $this->fetch($versionUrl, 'GET', [], $timeout, true);
+            $versionBody = (string)($versionEvidence['body'] ?? '');
+            if (
+                $versionOk === true
+                && (int)($versionEvidence['status'] ?? 0) === 200
+                && preg_match($versionPattern, $versionBody, $matches) === 1
+            ) {
+                $version = $matches[1];
+                $signals[] = 'public_endpoint:/magento_version';
+            }
+        }
+
+        $confirmed = $signals !== [];
+        $evidence = [
+            'request_url' => $base,
+            'final_url' => (string)($ev['final_url'] ?? $base),
+            'status' => (int)($ev['status'] ?? 0),
+            'signals' => array_values(array_unique($signals)),
+            'version' => $version,
+        ];
+
+        if (!$confirmed) {
+            return [false, 'Magento 2 fingerprint not found in the public response', $evidence];
+        }
+
+        $message = $version !== null
+            ? 'Magento 2 confirmed (version ' . $version . ')'
+            : 'Magento 2 confirmed; version is not publicly exposed';
+
+        return [true, $message, $evidence];
     }
 
     // === Additional generic header checks ===
