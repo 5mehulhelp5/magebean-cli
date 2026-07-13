@@ -397,46 +397,133 @@ HELP;
         }
         $out->writeln('');
 
-        // Findings
-        $failedFindings = array_values(array_filter(($result['findings'] ?? []), fn($f) => empty($f['passed']) === true));
-        usort($failedFindings, fn($a, $b) => $this->sevOrder($a['severity'] ?? 'Low') <=> $this->sevOrder($b['severity'] ?? 'Low'));
+        // Findings requiring attention
+        $attentionFindings = array_values(array_filter(
+            ($result['findings'] ?? []),
+            static fn(array $finding): bool => empty($finding['passed'])
+        ));
+        usort($attentionFindings, fn($a, $b) => $this->sevOrder($a['severity'] ?? 'Low') <=> $this->sevOrder($b['severity'] ?? 'Low'));
+        $inconclusiveFindings = array_values(array_filter(
+            $attentionFindings,
+            static fn(array $finding): bool => strtoupper((string)($finding['status'] ?? '')) === 'UNKNOWN'
+        ));
+        $confirmedFindings = array_values(array_filter(
+            $attentionFindings,
+            static fn(array $finding): bool => strtoupper((string)($finding['status'] ?? '')) !== 'UNKNOWN'
+        ));
 
-        $out->writeln(sprintf('<options=bold>Findings</> (<fg=red>%d</>)', count($failedFindings)));
-        foreach ($failedFindings as $f) {
-            $sev   = strtoupper((string)($f['severity'] ?? 'LOW'));
-            $id    = trim((string)($f['id'] ?? ''));
-            $title = (string)($f['title'] ?? '');
-            $msg   = (string)($f['message'] ?? '');
-            $text  = $msg !== '' ? $msg : $title;
-            $line  = $id !== ''
-                ? sprintf('%s <href=https://magebean.com/baseline/%2$s>%2$s</> %3$s', $sevBadge($sev), $id, $text)
-                : sprintf('%s %s', $sevBadge($sev), $text);
-            $out->writeln('  ' . $line);
-        }
-        $out->writeln('');
-
-        // Severity counts
         $sevCounts = ['critical' => 0, 'high' => 0, 'medium' => 0, 'low' => 0];
-        foreach ($failedFindings as $f) {
+        foreach ($confirmedFindings as $f) {
             $k = strtolower((string)($f['severity'] ?? 'low'));
             if (!isset($sevCounts[$k])) $k = 'low';
             $sevCounts[$k]++;
         }
 
-        // Summary (colored)
-        $out->writeln('<options=bold>Summary</>');
-        $out->writeln(sprintf('Passed Rules: <info>%d</info> / <info>%d</info>', $passed, $total));
+        // Summary first, so the result remains visible even for long audits.
+        $auditStatus = $confirmedFindings !== []
+            ? '<fg=yellow;options=bold>AUDIT COMPLETE · ATTENTION REQUIRED</>'
+            : ($inconclusiveFindings !== []
+                ? '<fg=magenta;options=bold>AUDIT COMPLETE · INCONCLUSIVE</>'
+                : '<info>AUDIT COMPLETE</info>');
+        $out->writeln($auditStatus);
         $out->writeln(sprintf(
-            'Issues: %s %d Critical</> | %s %d High</> | %s %d Medium</> | %s %d Low</>',
-            '<fg=white;bg=red;options=bold>',
-            $sevCounts['critical'],
-            '<fg=red;options=bold>',
-            $sevCounts['high'],
-            '<fg=yellow;options=bold>',
-            $sevCounts['medium'],
-            '<fg=blue;options=bold>',
-            $sevCounts['low'],
+            '<info>%d</info> / <info>%d</info> checks passed · <fg=yellow;options=bold>%d findings</> · <fg=magenta;options=bold>%d inconclusive</>',
+            $passed,
+            $total,
+            count($confirmedFindings),
+            count($inconclusiveFindings)
         ));
+        if ($confirmedFindings !== []) {
+            $out->writeln(sprintf(
+                '%s %d Critical</> | %s %d High</> | %s %d Medium</> | %s %d Low</>',
+                '<fg=white;bg=red;options=bold>',
+                $sevCounts['critical'],
+                '<fg=red;options=bold>',
+                $sevCounts['high'],
+                '<fg=yellow;options=bold>',
+                $sevCounts['medium'],
+                '<fg=blue;options=bold>',
+                $sevCounts['low'],
+            ));
+        }
+        $out->writeln('');
+
+        $rulesFilter = array_values(array_filter((array)($result['meta']['rules_filter'] ?? [])));
+        $showRuleDetails = $rulesFilter !== [];
+        if ($showRuleDetails) {
+            $out->writeln(sprintf('<options=bold>Rule details</> (<fg=yellow>%d</>)', count($attentionFindings)));
+        } elseif ($confirmedFindings !== []) {
+            $out->writeln(sprintf('<options=bold>Findings</> (<fg=yellow>%d</>)', count($confirmedFindings)));
+        }
+
+        $findingsToRender = $showRuleDetails ? $attentionFindings : $confirmedFindings;
+        foreach ($findingsToRender as $f) {
+            $sev = strtoupper((string)($f['severity'] ?? 'LOW'));
+            $id = trim((string)($f['id'] ?? ''));
+            $status = strtoupper((string)($f['status'] ?? ''));
+            $text = $showRuleDetails
+                ? $this->detailedFindingMessage($f)
+                : $this->compactFindingDescription($f);
+            $statusTag = $status === 'UNKNOWN' ? '<fg=magenta;options=bold>[INCONCLUSIVE]</> ' : '';
+            $line = $id !== ''
+                ? sprintf('%s%s <href=https://magebean.com/baseline/%3$s>%3$s</> %4$s', $statusTag, $sevBadge($sev), $id, $text)
+                : sprintf('%s%s %s', $statusTag, $sevBadge($sev), $text);
+            $out->writeln('  ' . $line);
+
+            if ($showRuleDetails && $status === 'UNKNOWN') {
+                $out->writeln('');
+                $out->writeln(sprintf('  <options=bold>How to resolve %s</>', $id !== '' ? $id : 'this check'));
+                foreach ($this->inconclusiveResolutionSteps($f) as $step) {
+                    $out->writeln('    - ' . $step);
+                }
+                if ($id !== '') {
+                    $out->writeln('    - Re-run after resolving the missing evidence:');
+                    $out->writeln(sprintf('      <fg=green>php magebean.phar scan --rules=%s</>', $id));
+                }
+            }
+        }
+
+        if (!$showRuleDetails && $inconclusiveFindings !== []) {
+            $out->writeln('');
+            $out->writeln(sprintf(
+                '<options=bold>Inconclusive checks</> (<fg=magenta>%d</>)',
+                count($inconclusiveFindings)
+            ));
+            foreach ($inconclusiveFindings as $f) {
+                $sev = strtoupper((string)($f['severity'] ?? 'LOW'));
+                $id = trim((string)($f['id'] ?? ''));
+                $text = $this->compactFindingDescription($f);
+                $line = $id !== ''
+                    ? sprintf('<fg=magenta;options=bold>[INCONCLUSIVE]</> %1$s <href=https://magebean.com/baseline/%2$s>%2$s</> %3$s', $sevBadge($sev), $id, $text)
+                    : sprintf('<fg=magenta;options=bold>[INCONCLUSIVE]</> %s %s', $sevBadge($sev), $text);
+                $out->writeln('  ' . $line);
+            }
+        }
+        $out->writeln('');
+
+        if (!$showRuleDetails && ($confirmedFindings !== [] || $inconclusiveFindings !== [])) {
+            $exampleRules = array_values(array_filter(array_map(
+                static fn(array $finding): string => trim((string)($finding['id'] ?? '')),
+                array_slice($confirmedFindings, 0, 2)
+            )));
+            $out->writeln('<options=bold>Next steps</>');
+            if ($exampleRules !== []) {
+                $out->writeln('  Inspect a finding with its evidence and remediation:');
+                $out->writeln(sprintf('    <fg=green>php magebean.phar scan --rules=%s</>', $exampleRules[0]));
+                if (count($exampleRules) > 1) {
+                    $out->writeln('  Inspect multiple findings:');
+                    $out->writeln(sprintf('    <fg=green>php magebean.phar scan --rules=%s</>', implode(',', $exampleRules)));
+                }
+            }
+            if ($inconclusiveFindings !== []) {
+                $inconclusiveId = trim((string)($inconclusiveFindings[0]['id'] ?? ''));
+                if ($inconclusiveId !== '') {
+                    $out->writeln('  Resolve an inconclusive check:');
+                    $out->writeln(sprintf('    <fg=green>php magebean.phar scan --rules=%s</>', $inconclusiveId));
+                }
+            }
+            $out->writeln('');
+        }
 
         // CVE console:
         if (!$isExternal) {
@@ -944,5 +1031,109 @@ HTML;
         }
 
         return rtrim(substr($title, 0, $maxLength - 3)) . '...';
+    }
+
+    private function compactFindingDescription(array $finding): string
+    {
+        $message = trim((string)($finding['message'] ?? ''));
+        $message = preg_replace('/^\[UNKNOWN\]\s*/', '', $message) ?? $message;
+        if ($message === '') {
+            return trim((string)($finding['title'] ?? ''));
+        }
+
+        // Check messages commonly use the first line as their description and
+        // subsequent lines for paths, packages, or other supporting evidence.
+        $firstLine = trim((string)strtok($message, "\r\n"));
+        if ($firstLine !== $message) {
+            return rtrim($firstLine, ': ');
+        }
+
+        // Some checks append large package/advisory lists on the same line.
+        // Hide that payload in the default view while preserving ordinary
+        // descriptions such as "HTTP error: certificate problem".
+        if (preg_match('/^(.+?):\s+(.+)$/s', $firstLine, $parts) === 1) {
+            $detail = $parts[2];
+            if (
+                str_contains($detail, ' -> ')
+                || str_contains($detail, '; ')
+                || preg_match('/\S+@\S+/', $detail) === 1
+            ) {
+                return rtrim(trim($parts[1]), ': ');
+            }
+        }
+
+        return $firstLine;
+    }
+
+    private function detailedFindingMessage(array $finding): string
+    {
+        $message = trim((string)($finding['message'] ?? ''));
+        $message = preg_replace('/^\[UNKNOWN\]\s*/', '', $message) ?? $message;
+        return $message !== '' ? $message : trim((string)($finding['title'] ?? ''));
+    }
+
+    /** @return list<string> */
+    private function inconclusiveResolutionSteps(array $finding): array
+    {
+        $id = strtoupper(trim((string)($finding['id'] ?? '')));
+        $message = strtolower((string)($finding['message'] ?? ''));
+
+        return match ($id) {
+            'MB-R027' => [
+                'Use a trusted TLS certificate, or install and trust the local CA when scanning a development URL.',
+                'Confirm the HTTPS response includes a Strict-Transport-Security header with max-age >= 15552000.',
+            ],
+            'MB-R033' => [
+                'Add a readable php.ini or .user.ini to the Magento root with display_errors=Off.',
+                'If the rule also checks a URL, confirm application error pages do not expose stack traces.',
+            ],
+            'MB-R039' => [
+                'Run bin/magento indexer:status and resolve indexers that are not ready.',
+                'Provide readable normalized indexer evidence at var/.indexer_status using one "indexer: READY" entry per line.',
+            ],
+            'MB-R047' => [
+                'Ensure Magento cron is running and updates var/cron/cron.timestamp, var/log/cron.log, or var/log/magento.cron.log.',
+                'Make at least one heartbeat file readable and newer than 900 seconds when the scan runs.',
+            ],
+            'MB-R048' => [
+                'Export a numeric cron backlog metric to var/cron/queue.size, var/cron/backlog.json, or var/cron/backlog.txt.',
+                'Make the metric file readable and verify its value can be parsed before re-running the rule.',
+            ],
+            'MB-R061', 'MB-R063' => [
+                'Verify HTTPS connectivity to api.magebean.com/v1/packages/status from the scan environment.',
+                'Allow the endpoint through any proxy or firewall, then retry the rule.',
+            ],
+            'MB-R072' => [
+                'Run the scan against the original Git checkout that contains its .git metadata, not a copied release directory.',
+                'Ensure the scanner can read .git and the repository history.',
+            ],
+            'MB-R077' => [
+                'Ensure app/code exists and contains the custom PHP files that should be assessed.',
+                'Grant the scan process read permission to app/code and its files.',
+            ],
+            default => $this->genericInconclusiveResolutionSteps($message),
+        };
+    }
+
+    /** @return list<string> */
+    private function genericInconclusiveResolutionSteps(string $message): array
+    {
+        if (str_contains($message, 'api') || str_contains($message, 'http')) {
+            return [
+                'Verify network, DNS, TLS, proxy, and authentication requirements for the reported endpoint.',
+                'Retry the rule after the endpoint is reachable from the scan environment.',
+            ];
+        }
+        if (str_contains($message, 'not found') || str_contains($message, 'unable to read')) {
+            return [
+                'Restore the missing input named in the message and make it readable by the scan process.',
+                'Retry the rule after confirming the file or directory exists under the scan target.',
+            ];
+        }
+
+        return [
+            'Review the missing evidence described above and make it available to the scan process.',
+            'Retry the rule to obtain a conclusive Pass or Finding result.',
+        ];
     }
 }

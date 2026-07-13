@@ -271,11 +271,9 @@ final class ComposerCheck
             ];
         }
 
-        $visible = array_slice($messages, 0, 20);
-        $message = 'Vulnerable packages require updates: ' . implode('; ', $visible);
-        if (count($messages) > count($visible)) {
-            $message .= '; +' . (count($messages) - count($visible)) . ' more';
-        }
+        $visible = $messages;
+        $message = "Vulnerable packages require updates:\n    - "
+            . implode("\n    - ", $visible);
 
         return [false, $message, $evidence];
     }
@@ -500,8 +498,13 @@ final class ComposerCheck
                 $sus
             ));
             if ($unassessed !== []) {
-                $msg .= "\n    Version evidence unavailable for "
-                    . count($unassessed) . ' additional affected package/advisory pair(s)';
+                $unassessedDetails = array_map(
+                    static fn(array $item): string => $item['package'] . '@' . $item['version']
+                        . ' -> ' . $item['advisory'] . ' (' . $item['reason'] . ')',
+                    array_values($unassessed)
+                );
+                $msg .= "\n    Version evidence unavailable for:\n    - "
+                    . implode("\n    - ", $unassessedDetails);
             }
             return [false, $msg, $evidence + ['findings' => $sus]];
         }
@@ -552,8 +555,9 @@ final class ComposerCheck
             ];
         }
 
-        $visible = array_slice($findings, 0, 20);
-        $message = 'CISA KEV package matches: ' . implode('; ', array_map(
+        $visible = $findings;
+        $message = "CISA KEV package matches:\n    - "
+            . implode("\n    - ", array_map(
             static function (array $finding): string {
                 $text = (string)($finding['package'] ?? 'unknown-package')
                     . '@' . (string)($finding['version'] ?? 'unknown-version')
@@ -567,9 +571,6 @@ final class ComposerCheck
             },
             $visible
         ));
-        if (count($findings) > count($visible)) {
-            $message .= '; +' . (count($findings) - count($visible)) . ' more';
-        }
 
         return [false, $message, $evidence];
     }
@@ -631,7 +632,7 @@ final class ComposerCheck
         ];
 
         if ($overdue !== []) {
-            $visible = array_slice($overdue, 0, 20);
+            $visible = $overdue;
             $details = array_map(static function (array $finding): string {
                 $text = (string)($finding['package'] ?? 'unknown-package')
                     . '@' . (string)($finding['version'] ?? 'unknown-version')
@@ -642,31 +643,31 @@ final class ComposerCheck
                 }
                 return $text;
             }, $visible);
-            $message = 'Unresolved advisories exceed the ' . $slaDays . '-day SLA: '
-                . implode('; ', $details);
-            if (count($overdue) > count($visible)) {
-                $message .= '; +' . (count($overdue) - count($visible)) . ' more';
-            }
+            $message = 'Unresolved advisories exceed the ' . $slaDays . "-day SLA:\n    - "
+                . implode("\n    - ", $details);
             if ($missingPublished !== []) {
-                $message .= '. Published date unavailable for '
-                    . count($missingPublished) . ' additional advisory match(es)';
+                $missingDetails = array_map(
+                    static fn(array $finding): string => (string)($finding['package'] ?? 'unknown-package')
+                        . '@' . (string)($finding['version'] ?? 'unknown-version')
+                        . ' -> ' . (string)($finding['advisory'] ?? 'unknown-advisory'),
+                    $missingPublished
+                );
+                $message .= "\n    Published date unavailable for:\n    - "
+                    . implode("\n    - ", $missingDetails);
             }
             return [false, $message, $latencyEvidence];
         }
 
         if ($missingPublished !== []) {
-            $visible = array_slice($missingPublished, 0, 20);
+            $visible = $missingPublished;
             $details = array_map(
                 static fn(array $finding): string => (string)($finding['package'] ?? 'unknown-package')
                     . '@' . (string)($finding['version'] ?? 'unknown-version')
                     . ' -> ' . (string)($finding['advisory'] ?? 'unknown-advisory'),
                 $visible
             );
-            $message = '[UNKNOWN] Published date unavailable for unresolved advisories: '
-                . implode('; ', $details);
-            if (count($missingPublished) > count($visible)) {
-                $message .= '; +' . (count($missingPublished) - count($visible)) . ' more';
-            }
+            $message = "[UNKNOWN] Published date unavailable for unresolved advisories:\n    - "
+                . implode("\n    - ", $details);
             return [null, $message, $latencyEvidence];
         }
 
@@ -759,8 +760,9 @@ final class ComposerCheck
             }
             unset($finding);
 
-            $visible = array_slice($evidence['findings'], 0, 20);
-            $message = 'Vulnerable transitive dependencies: ' . implode('; ', array_map(
+            $visible = $evidence['findings'];
+            $message = "Vulnerable transitive dependencies:\n    - "
+                . implode("\n    - ", array_map(
                 static function (array $finding): string {
                     $text = (string)($finding['package'] ?? 'unknown-package')
                         . '@' . (string)($finding['version'] ?? 'unknown-version')
@@ -776,9 +778,6 @@ final class ComposerCheck
                 },
                 $visible
             ));
-            if (count($evidence['findings']) > count($visible)) {
-                $message .= '; +' . (count($evidence['findings']) - count($visible)) . ' more';
-            }
             return [false, $message, $evidence];
         }
 
@@ -909,8 +908,9 @@ final class ComposerCheck
         $evidence['errors'] = $errors;
 
         if ($blocked !== []) {
-            $visible = array_slice($blocked, 0, 20);
-            $message = 'Composer constraints block security updates: ' . implode('; ', array_map(
+            $visible = $blocked;
+            $message = "Composer constraints block security updates:\n    - "
+                . implode("\n    - ", array_map(
                 static function (array $item): string {
                     $requirements = array_map(
                         static fn(array $requirement): string => $requirement['source']
@@ -924,17 +924,15 @@ final class ComposerCheck
                 },
                 $visible
             ));
-            if (count($blocked) > count($visible)) {
-                $message .= '; +' . (count($blocked) - count($visible)) . ' more';
-            }
             return [false, $message, $evidence];
         }
 
         if ($errors !== []) {
-            $visible = array_slice($errors, 0, 10);
+            $visible = $errors;
             return [
                 null,
-                '[UNKNOWN] Unable to evaluate Composer constraints: ' . implode('; ', array_map(
+                "[UNKNOWN] Unable to evaluate Composer constraints:\n    - "
+                    . implode("\n    - ", array_map(
                     static fn(array $item): string => (string)($item['package'] ?? 'unknown-package')
                         . '@' . (string)($item['version'] ?? 'unknown-version')
                         . ' (' . (string)($item['reason'] ?? 'unknown error') . ')',
@@ -1312,7 +1310,8 @@ final class ComposerCheck
         }
 
         if ($hits) {
-            return [false, "Yanked versions installed: " . implode('; ', $hits) . " (meta: {$metaPath})"];
+            return [false, "Yanked versions installed:\n    - "
+                . implode("\n    - ", $hits) . "\n    Metadata: {$metaPath}"];
         }
         return [true, "No yanked versions installed (meta: {$metaPath})"];
     }
@@ -1469,8 +1468,8 @@ final class ComposerCheck
 
         // ===== 5) Kết quả + evidence =====
         if ($hits) {
-            return [false, 'Core advisories flagged: ' . implode('; ', $hits)
-                . " — lock={$lockPath}; vendor={$vendor}; core_pkgs_scanned={$coreCount}"];
+            return [false, "Core advisories flagged:\n    - " . implode("\n    - ", $hits)
+                . "\n    lock={$lockPath}; vendor={$vendor}; core_pkgs_scanned={$coreCount}"];
         }
 
         return [true, "No core advisories found (offline scan). lock={$lockPath}; vendor={$vendor}; core_pkgs_scanned={$coreCount}"];
@@ -1642,7 +1641,7 @@ final class ComposerCheck
 
         $parts = [];
         foreach ($suggest as $pkg => [$cur, $tgt]) $parts[] = "{$pkg} {$cur} -> >= {$tgt}";
-        return [false, "Suggest fixed versions: " . implode('; ', $parts)];
+        return [false, "Suggest fixed versions:\n    - " . implode("\n    - ", $parts)];
     }
 
     public function riskSurfaceTag(array $args): array
@@ -1937,7 +1936,7 @@ final class ComposerCheck
         ];
 
         if ($reportable !== []) {
-            $visible = array_slice(array_values($reportable), 0, 20);
+            $visible = array_values($reportable);
             $details = array_map(
                 static function (array $subject): string {
                     $status = is_array($subject['package_status'] ?? null)
@@ -1951,10 +1950,8 @@ final class ComposerCheck
                 },
                 $visible
             );
-            $message = 'Enabled high-risk modules require attention: ' . implode('; ', $details);
-            if (count($reportable) > count($visible)) {
-                $message .= '; +' . (count($reportable) - count($visible)) . ' more';
-            }
+            $message = "Enabled high-risk modules require attention:\n    - "
+                . implode("\n    - ", $details);
             return [false, $message, $evidence];
         }
 
@@ -2135,16 +2132,14 @@ final class ComposerCheck
             ];
         }
 
-        $visible = array_slice($hits, 0, 20);
+        $visible = $hits;
         $text = array_map(
             static fn(array $status): string => (string)($status['name'] ?? 'unknown-package')
                 . '@' . (string)($status['installed'] ?? 'unknown-version'),
             $visible
         );
-        $resultMessage = 'Yanked or withdrawn package versions installed: ' . implode('; ', $text);
-        if (count($hits) > count($visible)) {
-            $resultMessage .= '; +' . (count($hits) - count($visible)) . ' more';
-        }
+        $resultMessage = "Yanked or withdrawn package versions installed:\n    - "
+            . implode("\n    - ", $text);
         return [false, $resultMessage, $evidence];
     }
 
@@ -2256,7 +2251,7 @@ final class ComposerCheck
         ];
 
         if ($findings !== []) {
-            $visible = array_slice($findings, 0, 20);
+            $visible = $findings;
             $details = array_map(static function (array $status) use ($maxAgeDays): string {
                 $name = (string)($status['name'] ?? 'unknown-package');
                 $reasons = [];
@@ -2272,15 +2267,23 @@ final class ComposerCheck
                 return $name . ' [' . implode('; ', $reasons) . ']';
             }, $visible);
 
-            $resultMessage = 'Third-party Magento modules require maintenance: ' . implode('; ', $details);
-            if (count($findings) > count($visible)) {
-                $resultMessage .= '; +' . (count($findings) - count($visible)) . ' more';
-            }
+            $resultMessage = "Third-party Magento modules require maintenance:\n    - "
+                . implode("\n    - ", $details);
             if ($unassessed !== []) {
-                $resultMessage .= '. Metadata unavailable for ' . count($unassessed) . ' additional module(s)';
+                $unassessedDetails = array_map(
+                    static fn(array $package): string => $package['name'] . '@' . $package['version'],
+                    $unassessed
+                );
+                $resultMessage .= "\n    Release metadata unavailable for:\n    - "
+                    . implode("\n    - ", $unassessedDetails);
             }
             if ($unclassified !== []) {
-                $resultMessage .= '. Classification unavailable for ' . count($unclassified) . ' additional module(s)';
+                $unclassifiedDetails = array_map(
+                    static fn(array $package): string => $package['name'] . '@' . $package['version'],
+                    $unclassified
+                );
+                $resultMessage .= "\n    Marketplace classification unavailable for:\n    - "
+                    . implode("\n    - ", $unclassifiedDetails);
             }
             return [false, $resultMessage, $evidence];
         }
@@ -2288,14 +2291,10 @@ final class ComposerCheck
         if ($unassessed !== [] || $unclassified !== []) {
             $names = array_map(
                 static fn(array $package): string => $package['name'] . '@' . $package['version'],
-                array_slice(array_merge($unassessed, $unclassified), 0, 20)
+                array_merge($unassessed, $unclassified)
             );
-            $resultMessage = '[UNKNOWN] Marketplace classification or release metadata unavailable for: '
-                . implode('; ', $names);
-            $unknownCount = count($unassessed) + count($unclassified);
-            if ($unknownCount > count($names)) {
-                $resultMessage .= '; +' . ($unknownCount - count($names)) . ' more';
-            }
+            $resultMessage = "[UNKNOWN] Marketplace classification or release metadata unavailable for:\n    - "
+                . implode("\n    - ", $names);
             return [null, $resultMessage, $evidence];
         }
 
@@ -2463,8 +2462,13 @@ final class ComposerCheck
             );
             $resultMessage = "Outdated direct dependencies:\n    - " . implode("\n    - ", $details);
             if ($unknown !== []) {
-                $resultMessage .= "\n    Status unavailable for "
-                    . count($unknown) . ' additional direct dependency/dependencies';
+                $unknownDetails = array_map(static function (array $item): string {
+                    $installed = isset($item['installed']) ? '@' . $item['installed'] : '';
+                    return $item['section'] . ': ' . $item['name'] . $installed
+                        . ' (' . $item['reason'] . ')';
+                }, $unknown);
+                $resultMessage .= "\n    Direct dependency status unavailable for:\n    - "
+                    . implode("\n    - ", $unknownDetails);
             }
             return [false, $resultMessage, $evidence];
         }
@@ -2582,35 +2586,34 @@ final class ComposerCheck
         ];
 
         if ($unsupported !== []) {
-            $visible = array_slice($unsupported, 0, 20);
+            $visible = $unsupported;
             $details = array_map(static function (array $item): string {
                 $reasons = $item['reasons'] !== [] ? implode(', ', $item['reasons']) : 'unsupported';
                 return $item['name'] . '@' . $item['installed'] . ' [' . $reasons . ']';
             }, $visible);
-            $resultMessage = 'Marketplace extensions without active vendor support: '
-                . implode('; ', $details);
-            if (count($unsupported) > count($visible)) {
-                $resultMessage .= '; +' . (count($unsupported) - count($visible)) . ' more';
-            }
+            $resultMessage = "Marketplace extensions without active vendor support:\n    - "
+                . implode("\n    - ", $details);
             if ($unknown !== []) {
-                $resultMessage .= '. Support evidence unavailable for '
-                    . count($unknown) . ' additional extension(s)';
+                $unknownDetails = array_map(
+                    static fn(array $item): string => (string)($item['name'] ?? 'unknown-package')
+                        . '@' . (string)($item['installed'] ?? $item['version'] ?? 'unknown-version'),
+                    $unknown
+                );
+                $resultMessage .= "\n    Vendor support evidence unavailable for:\n    - "
+                    . implode("\n    - ", $unknownDetails);
             }
             return [false, $resultMessage, $evidence];
         }
 
         if ($unknown !== []) {
-            $visible = array_slice($unknown, 0, 20);
+            $visible = $unknown;
             $details = array_map(
                 static fn(array $item): string => (string)($item['name'] ?? 'unknown-package')
                     . '@' . (string)($item['installed'] ?? $item['version'] ?? 'unknown-version'),
                 $visible
             );
-            $resultMessage = '[UNKNOWN] Vendor support evidence unavailable for: '
-                . implode('; ', $details);
-            if (count($unknown) > count($visible)) {
-                $resultMessage .= '; +' . (count($unknown) - count($visible)) . ' more';
-            }
+            $resultMessage = "[UNKNOWN] Vendor support evidence unavailable for:\n    - "
+                . implode("\n    - ", $details);
             return [null, $resultMessage, $evidence];
         }
 
@@ -2722,8 +2725,12 @@ final class ComposerCheck
             $resultMessage = "Packages marked abandoned on Packagist:\n    - "
                 . implode("\n    - ", $details);
             if ($unknown !== []) {
-                $resultMessage .= "\n    Abandoned status unavailable for "
-                    . count($unknown) . ' additional package(s)';
+                $unknownDetails = array_map(
+                    static fn(array $package): string => $package['name'] . '@' . $package['version'],
+                    $unknown
+                );
+                $resultMessage .= "\n    Packages not assessed for abandoned status:\n    - "
+                    . implode("\n    - ", $unknownDetails);
             }
             return [false, $resultMessage, $evidence];
         }
@@ -2842,7 +2849,7 @@ final class ComposerCheck
         ];
 
         if ($stale !== []) {
-            $visible = array_slice($stale, 0, 20);
+            $visible = $stale;
             $details = array_map(static function (array $item): string {
                 $latest = is_string($item['latest'] ?? null) && $item['latest'] !== ''
                     ? ' latest ' . $item['latest']
@@ -2853,27 +2860,25 @@ final class ComposerCheck
             }, $visible);
             $resultMessage = 'Packagist-tracked packages without a release in the last '
                 . $months . " months:\n    - " . implode("\n    - ", $details);
-            if (count($stale) > count($visible)) {
-                $resultMessage .= "\n    - +" . (count($stale) - count($visible)) . ' more';
-            }
             if ($unknown !== []) {
-                $resultMessage .= "\n    Release recency unavailable for "
-                    . count($unknown) . ' additional package(s)';
+                $unknownDetails = array_map(
+                    static fn(array $package): string => $package['name'] . '@' . $package['version'],
+                    $unknown
+                );
+                $resultMessage .= "\n    Release recency unavailable for:\n    - "
+                    . implode("\n    - ", $unknownDetails);
             }
             return [false, $resultMessage, $evidence];
         }
 
         if ($unknown !== []) {
-            $visible = array_slice($unknown, 0, 20);
+            $visible = $unknown;
             $details = array_map(
                 static fn(array $package): string => $package['name'] . '@' . $package['version'],
                 $visible
             );
             $resultMessage = "[UNKNOWN] Release recency unavailable for:\n    - "
                 . implode("\n    - ", $details);
-            if (count($unknown) > count($visible)) {
-                $resultMessage .= "\n    - +" . (count($unknown) - count($visible)) . ' more';
-            }
             return [null, $resultMessage, $evidence];
         }
 
@@ -3027,12 +3032,22 @@ final class ComposerCheck
             $resultMessage = "Packages from archived, disabled, or missing repositories:\n    - "
                 . implode("\n    - ", $details);
             if ($unassessed !== []) {
-                $resultMessage .= "\n    Repository status is awaiting collection or unavailable for "
-                    . count($unassessed) . ' additional package(s)';
+                $unassessedDetails = array_map(static function (array $item): string {
+                    return $item['name']
+                        . '@' . ($item['installed'] ?? $item['version'] ?? 'unknown-version')
+                        . ' (' . ($item['reason'] ?? 'status unavailable') . ')';
+                }, $unassessed);
+                $resultMessage .= "\n    Repository status awaiting collection or unavailable for:\n    - "
+                    . implode("\n    - ", $unassessedDetails);
             }
             if ($excluded !== []) {
-                $resultMessage .= "\n    Repository status is not applicable or unsupported for "
-                    . count($excluded) . ' additional package(s)';
+                $excludedDetails = array_map(static function (array $item): string {
+                    return $item['name']
+                        . '@' . ($item['installed'] ?? $item['version'] ?? 'unknown-version')
+                        . ' (' . ($item['reason'] ?? 'not applicable') . ')';
+                }, $excluded);
+                $resultMessage .= "\n    Repository status not applicable or unsupported for:\n    - "
+                    . implode("\n    - ", $excludedDetails);
             }
             return [false, $resultMessage, $evidence];
         }
@@ -3214,8 +3229,12 @@ final class ComposerCheck
             $resultMessage = "Risky replacement repositories detected:\n    - "
                 . implode("\n    - ", $details);
             if ($unknown !== []) {
-                $resultMessage .= "\n    Fork evidence unavailable for "
-                    . count($unknown) . ' additional candidate(s)';
+                $unknownDetails = array_map(static function (array $item): string {
+                    return $item['name'] . '@' . $item['installed']
+                        . ' (' . $item['reason'] . ')';
+                }, $unknown);
+                $resultMessage .= "\n    Fork evidence unavailable for:\n    - "
+                    . implode("\n    - ", $unknownDetails);
             }
             return [false, $resultMessage, $evidence];
         }
@@ -4663,7 +4682,7 @@ final class ComposerCheck
             }
         }
 
-        if ($stale) return [false, "Stale releases: " . implode('; ', $stale)];
+        if ($stale) return [false, "Stale releases:\n    - " . implode("\n    - ", $stale)];
         return [true, "No stale releases over {$maxAgeDays} days"];
     }
 

@@ -54,19 +54,31 @@ php bin/magebean rules:list
 ## 🖥️ CLI Output Template
 
 ```
-Magebean Security Audit v1.0    Target: /var/www/magento
-Time: 2025-08-28 11:32    PHP: 8.2    Env: prod
+Magebean Security Audit v1.0        Target: /var/www/magento
+Standard: MAGEBEAN
+Profile: Magebean Baseline
+Time: 2026-07-13 05:39   PHP: 8.4   Env: PRODUCTION
 
-Findings (5)
-[CRITICAL] Magento core outdated — detected 2.4.3, latest 2.4.7-p1
-[HIGH]     Admin route is default (/admin)
-[HIGH]     Admin 2FA disabled
-[MEDIUM]   Folder permission /pub/media is 777
-[MEDIUM]   Full Page Cache disabled/misconfigured
+AUDIT COMPLETE · ATTENTION REQUIRED
 
-Summary
-Passed Rules: 76 / 81
-Issues: 1 Critical, 2 High, 2 Medium
+76 / 81 checks passed · 4 findings · 1 inconclusive
+1 Critical | 2 High | 1 Medium | 0 Low
+
+Findings (4)
+  [CRITICAL] MB-R091 Executable handlers detected in media/upload paths
+  [HIGH] MB-R006 Admin path is default, weak, or missing
+  [HIGH] MB-R007 Admin 2FA is disabled
+  [MEDIUM] MB-R038 Cache backend is using file-based storage
+
+Inconclusive checks (1)
+  [INCONCLUSIVE] [MEDIUM] MB-R039 Indexer status file not found
+
+Next steps
+  Inspect a finding with its evidence and remediation:
+    php magebean.phar scan --rules=MB-R091
+
+  Resolve an inconclusive check:
+    php magebean.phar scan --rules=MB-R039
 
 Contact: support@magebean.com
 ```
@@ -75,19 +87,21 @@ Contact: support@magebean.com
 
 ## 📄 Command-Line Results
 
-- **Summary** includes:
-  - Completed time, audited path
-  - **Rules Checked**: Total, Passed, Failed, **Score %**
-  - **Findings Overview** *(counts **failed rules only**)* by severity: **Critical/High/Medium/Low**
-- Findings are printed directly in the terminal.
+- The summary reports passed checks, confirmed findings, inconclusive checks, and confirmed-finding severity counts separately.
+- The default output lists every finding with its existing description, without verbose evidence or package/path lists.
+- Use `--rules=MB-R0xx` to inspect one rule with its full evidence and remediation details.
+- Inconclusive rule details include contextual `How to resolve` steps and a re-run command.
+- Multiple rules can be inspected with a comma-separated filter such as `--rules=MB-R091,MB-R006`.
 
 ---
 
 ## 🔢 Exit Codes
 
-- `0` – no failed findings
-- `1` – has `High`/`Medium`/`Low` failed findings
-- `2` – has `Critical` failed findings
+- `0` – no confirmed findings
+- `1` – has confirmed `High`/`Medium`/`Low` findings
+- `2` – has confirmed `Critical` findings
+
+Inconclusive checks do not change the exit code because they are not confirmed findings.
 
 > Adjust policy in `ScanCommand` if your team prefers a different threshold.
 

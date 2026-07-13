@@ -144,7 +144,7 @@ final class ScanRunner
                         fn($d) => $d[1],
                         array_filter($details, fn($d) => $d[2] === false)
                     ));
-                    $finalMsg = $bad ? implode(' | ', array_slice($bad, 0, 2)) : 'Rule failed';
+                    $finalMsg = $bad ? implode("\n", $bad) : 'Rule requires attention';
                 }
             }
 
