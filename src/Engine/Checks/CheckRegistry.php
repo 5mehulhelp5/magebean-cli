@@ -124,6 +124,7 @@ final class CheckRegistry
         $registry->register('webserver_tls_ciphers', fn(array $args): array => $web->tlsCiphers($args));
 
         $registry->register('composer_audit_api', fn(array $args): array => $comp->auditApi($args));
+        $registry->register('composer_adobe_security_patches_api', fn(array $args): array => $comp->adobeSecurityPatchesApi($args));
         $registry->register('composer_core_advisories_api', fn(array $args): array => $comp->coreAdvisoriesApi($args));
         $registry->register('composer_fix_version_api', fn(array $args): array => $comp->fixVersionApi($args));
         $registry->register('composer_kev_advisories_api', fn(array $args): array => $comp->kevAdvisoriesApi($args));

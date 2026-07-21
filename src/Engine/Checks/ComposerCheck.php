@@ -223,10 +223,167 @@ final class ComposerCheck
         );
     }
 
+    public function adobeSecurityPatchesApi(array $args): array
+    {
+        $lockFile = $this->ctx->abs($args['lock_file'] ?? 'composer.lock');
+        if (!is_file($lockFile)) {
+            return [null, '[UNKNOWN] composer.lock not found'];
+        }
+
+        $installed = $this->readLockPackages($lockFile);
+        if (!$installed) {
+            return [null, '[UNKNOWN] Unable to parse composer.lock'];
+        }
+
+        $product = null;
+        $version = null;
+        foreach ([
+            'magento/product-enterprise-edition' => 'adobe-commerce',
+            'magento/product-community-edition' => 'magento-open-source',
+        ] as $package => $candidateProduct) {
+            if (!empty($installed[$package]['version'])) {
+                $product = $candidateProduct;
+                $version = ltrim((string)$installed[$package]['version'], 'vV');
+                break;
+            }
+        }
+        if ($version === null && !empty($installed['magento/magento2-base']['version'])) {
+            $product = 'magento-open-source';
+            $version = ltrim((string)$installed['magento/magento2-base']['version'], 'vV');
+        }
+        if ($product === null || $version === null) {
+            return [null, '[UNKNOWN] Magento product version was not found in composer.lock'];
+        }
+
+        $endpoint = trim((string)($args['endpoint'] ?? $this->ctx->get(
+            'adobe_patch_api_url',
+            'https://api.magebean.com/v1/adobe/security-patches'
+        )));
+        if (!$this->isAllowedAdvisoryEndpoint($endpoint)) {
+            return [null, '[UNKNOWN] Invalid Adobe patch API endpoint; HTTPS is required', ['endpoint' => $endpoint]];
+        }
+
+        $payload = [
+            'schema_version' => 'magebean-adobe-patch-request-v1',
+            'product' => $product,
+            'installed_version' => $version,
+            'evidence' => $this->collectAdobePatchEvidence($installed),
+            'client' => ['name' => 'magebean-cli', 'version' => (string)($args['client_version'] ?? 'dev')],
+        ];
+        $timeoutMs = max(1000, (int)($args['timeout_ms'] ?? 10000));
+        $token = trim((string)($args['token'] ?? $this->ctx->get(
+            'adobe_patch_api_token',
+            getenv('MAGEBEAN_ADOBE_PATCH_API_TOKEN') ?: ''
+        )));
+        [$ok, $message, $response] = $this->postJson($endpoint, $payload, $timeoutMs, $token);
+        $requestEndpoint = $endpoint;
+        if (!$ok && !empty($args['allow_private_http_fallback']) && $token === ''
+            && $this->canFallbackToPrivateHttp($endpoint)) {
+            $requestEndpoint = 'http://' . substr($endpoint, strlen('https://'));
+            [$ok, $message, $response] = $this->postJson($requestEndpoint, $payload, $timeoutMs, $token);
+        }
+        if (!$ok) {
+            return [null, '[UNKNOWN] Adobe patch API request failed: ' . $message, [
+                'endpoint' => $endpoint,
+                'request_endpoint' => $requestEndpoint,
+                'product' => $product,
+                'installed_version' => $version,
+            ]];
+        }
+
+        $statusCode = (int)($response['status'] ?? 0);
+        $decoded = json_decode((string)($response['body'] ?? ''), true);
+        if ($statusCode !== 200 || !is_array($decoded)) {
+            return [null, '[UNKNOWN] Adobe patch API returned HTTP ' . $statusCode, [
+                'endpoint' => $endpoint,
+                'status' => $statusCode,
+            ]];
+        }
+        if (($decoded['schema_version'] ?? null) === 'magebean-adobe-patch-response-v1') {
+            $decoded = $this->applyAdobeFingerprintEvidence($decoded);
+        }
+        if (($decoded['schema_version'] ?? null) !== 'magebean-adobe-patch-response-v1') {
+            return [null, '[UNKNOWN] Unsupported Adobe patch API response schema', [
+                'endpoint' => $endpoint,
+                'schema_version' => $decoded['schema_version'] ?? null,
+            ]];
+        }
+
+        $evidence = [
+            'source' => 'magebean_adobe_patch_api',
+            'endpoint' => $endpoint,
+            'request_endpoint' => $requestEndpoint,
+            'product' => $product,
+            'installed_version' => $version,
+            'branch' => $decoded['branch'] ?? null,
+            'latest_security_version' => $decoded['latest_security_version'] ?? null,
+            'missing_patches' => is_array($decoded['missing_patches'] ?? null)
+                ? $decoded['missing_patches']
+                : [],
+            'satisfied_by_alternatives' => is_array($decoded['satisfied_by_alternatives'] ?? null)
+                ? $decoded['satisfied_by_alternatives']
+                : [],
+            'dataset_generated_at' => $decoded['dataset_generated_at'] ?? null,
+            'lifecycle' => $decoded['lifecycle'] ?? null,
+            'recommended_latest_branch' => $decoded['recommended_latest_branch'] ?? null,
+        ];
+
+        if (($decoded['status'] ?? null) === 'unsupported_branch') {
+            $evidence['supported_branches'] = $decoded['supported_branches'] ?? [];
+            $reason = (string)($decoded['reason'] ?? 'lifecycle_not_covered');
+            $supportEnd = (string)($decoded['lifecycle']['security_support_end'] ?? '');
+            $recommended = (string)($decoded['recommended_latest_branch'] ?? '');
+            $message = 'Magento branch ' . ($decoded['branch'] ?? $version)
+                . ($reason === 'security_support_ended'
+                    ? ' no longer receives Adobe security fixes'
+                    : ' is not covered by the current Adobe lifecycle dataset');
+            if ($supportEnd !== '') $message .= ' (security support ended ' . $supportEnd . ')';
+            if ($recommended !== '') $message .= '; upgrade to a supported release line such as ' . $recommended;
+            return [false, $message, $evidence];
+        }
+        if (($decoded['status'] ?? null) === 'current') {
+            $latest = (string)($decoded['latest_security_version'] ?? $version);
+            $satisfiedCount = count((array)($decoded['satisfied_by_alternatives'] ?? []));
+            $message = 'Adobe security patch status: installed ' . $version
+                . '; latest for branch ' . $latest . '; no missing patches';
+            if ($satisfiedCount > 0) {
+                $message .= '; ' . $satisfiedCount . ' advisory patch(es) verified by alternative evidence';
+            }
+            return [true, $message, $evidence];
+        }
+        if (($decoded['status'] ?? null) !== 'outdated' || $evidence['missing_patches'] === []) {
+            return [null, '[UNKNOWN] Adobe patch API returned an incomplete status', $evidence];
+        }
+
+        $items = [];
+        foreach ($evidence['missing_patches'] as $patch) {
+            if (!is_array($patch)) continue;
+            $advisory = (string)($patch['advisory'] ?? 'Adobe security patch');
+            $fixed = (string)($patch['fixed_version'] ?? 'unknown');
+            $items[] = $advisory . ' (update to ' . $fixed . ')';
+        }
+
+        $satisfiedItems = [];
+        foreach ((array)$evidence['satisfied_by_alternatives'] as $advisory => $proof) {
+            if (!is_array($proof)) continue;
+            $label = (string)($proof['label'] ?? $proof['verification'] ?? $proof['type'] ?? 'verified evidence');
+            $satisfiedItems[] = $advisory . ' via ' . $label;
+        }
+        $message = 'Adobe security patch status: installed ' . $version
+            . '; latest for branch ' . (string)($evidence['latest_security_version'] ?? 'unknown')
+            . "\nMissing:\n - " . implode("\n - ", $items);
+        if ($satisfiedItems !== []) {
+            $message .= "\nAlready satisfied by alternative evidence:\n - "
+                . implode("\n - ", $satisfiedItems);
+        }
+
+        return [false, $message, $evidence];
+    }
+
+    /** @deprecated Use adobeSecurityPatchesApi(); retained for custom rule compatibility. */
     public function coreAdvisoriesApi(array $args): array
     {
-        $args['package_scope'] = 'adobe_core';
-        return $this->auditApi($args);
+        return $this->adobeSecurityPatchesApi($args);
     }
 
     public function fixVersionApi(array $args): array
@@ -5302,6 +5459,240 @@ final class ComposerCheck
         return is_array($data) ? $data : null;
     }
 
+    private function applyAdobeFingerprintEvidence(array $response): array
+    {
+        $remaining = [];
+        $satisfied = is_array($response['satisfied_by_alternatives'] ?? null)
+            ? $response['satisfied_by_alternatives']
+            : [];
+
+        foreach ((array)($response['missing_patches'] ?? []) as $patch) {
+            if (!is_array($patch)) continue;
+            $proof = null;
+            foreach ((array)($patch['alternative_rules'] ?? []) as $rule) {
+                if (!is_array($rule) || ($rule['type'] ?? null) !== 'file_sha256') continue;
+                $relative = str_replace('\\', '/', trim((string)($rule['path'] ?? '')));
+                $expected = strtolower((string)($rule['patched_sha256'] ?? $rule['sha256'] ?? ''));
+                if ($relative === '' || str_starts_with($relative, '/') || str_contains($relative, '../')
+                    || !preg_match('/^[a-f0-9]{64}$/', $expected)) {
+                    continue;
+                }
+                $absolute = $this->ctx->abs($relative);
+                if (!is_file($absolute)) continue;
+                $actual = hash_file('sha256', $absolute);
+                if (is_string($actual) && hash_equals($expected, strtolower($actual))) {
+                    $proof = [
+                        'type' => 'file_sha256',
+                        'label' => $rule['label'] ?? null,
+                        'path' => $relative,
+                        'sha256' => $actual,
+                        'verification' => 'patched file fingerprint matched',
+                        'source_url' => $rule['source_url'] ?? null,
+                    ];
+                    break;
+                }
+            }
+            if ($proof === null) {
+                $remaining[] = $patch;
+                continue;
+            }
+            $advisory = (string)($patch['advisory'] ?? 'unknown');
+            $satisfied[$advisory] = $proof;
+        }
+
+        $response['missing_patches'] = $remaining;
+        $response['satisfied_by_alternatives'] = $satisfied;
+        if (($response['status'] ?? null) === 'outdated' && $remaining === []) {
+            $response['status'] = 'current';
+        }
+        return $response;
+    }
+    private function collectAdobePatchEvidence(array $installed): array
+    {
+        $packages = [];
+        foreach ($installed as $name => $info) {
+            if (is_string($info['version'] ?? null) && $info['version'] !== '') {
+                $packages[strtolower((string)$name)] = ltrim((string)$info['version'], 'vV');
+            }
+        }
+
+        $artifacts = $this->qualityPatchArtifacts();
+        foreach (array_merge($this->composerPatchArtifacts(), $this->localPatchArtifacts()) as $artifact) {
+            $artifacts[] = $artifact;
+        }
+
+        return [
+            'packages' => $packages,
+            'patch_artifacts' => $artifacts,
+        ];
+    }
+
+    private function qualityPatchArtifacts(): array
+    {
+        $binary = $this->ctx->abs('vendor/bin/magento-patches');
+        if (!is_file($binary) || !function_exists('proc_open')) {
+            return [];
+        }
+
+        [$exitCode, $output] = $this->runReadOnlyProcess([PHP_BINARY, $binary, 'status'], $this->ctx->path);
+        if ($exitCode !== 0 || $output === '') {
+            return [];
+        }
+
+        $artifacts = [];
+        foreach (preg_split('/\R/', $output) ?: [] as $line) {
+            if (!preg_match('/\b([A-Z][A-Z0-9]+(?:-[A-Z0-9]+)+)\b.*\b(Applied|Not applied|N\/A)\b/i', $line, $match)) {
+                continue;
+            }
+            $status = strtolower($match[2]);
+            $artifacts[] = [
+                'path' => 'vendor/bin/magento-patches',
+                'identifiers' => [strtoupper($match[1])],
+                'applied' => $status === 'applied',
+                'verification' => 'magento-patches status',
+                'status' => $status,
+            ];
+        }
+        return $artifacts;
+    }
+
+    private function composerPatchArtifacts(): array
+    {
+        $lockPath = $this->ctx->abs('patches.lock.json');
+        if (!is_file($lockPath)) return [];
+        $document = json_decode((string)@file_get_contents($lockPath), true);
+        if (!is_array($document)) return [];
+
+        $artifacts = [];
+        $walk = function (mixed $node) use (&$walk, &$artifacts): void {
+            if (!is_array($node)) return;
+            $description = (string)($node['description'] ?? '');
+            $url = (string)($node['url'] ?? '');
+            $sha256 = strtolower((string)($node['sha256'] ?? ''));
+            if ($description !== '' || $url !== '' || $sha256 !== '') {
+                preg_match_all(
+                    '/\b(?:APSB\d{2}-\d+|(?:ACSD|MDVA|MC|MAGETWO|MAGECLOUD|MCLOUD|VULN)-?[A-Z0-9-]+)\b/i',
+                    $description . ' ' . $url,
+                    $matches
+                );
+                $artifacts[] = [
+                    'path' => $url !== '' ? $url : 'patches.lock.json',
+                    'identifiers' => array_values(array_unique(array_map('strtoupper', $matches[0] ?? []))),
+                    'sha256' => preg_match('/^[a-f0-9]{64}$/', $sha256) ? $sha256 : null,
+                    'applied' => true,
+                    'verification' => 'cweagans patches.lock.json',
+                ];
+            }
+            foreach ($node as $child) {
+                if (is_array($child)) $walk($child);
+            }
+        };
+        $walk($document['patches'] ?? $document);
+        return $artifacts;
+    }
+    private function localPatchArtifacts(): array
+    {
+        $paths = [];
+        foreach (glob($this->ctx->abs('*.patch')) ?: [] as $path) {
+            if (is_file($path)) $paths[$path] = true;
+        }
+
+        $hotfixDir = $this->ctx->abs('m2-hotfixes');
+        if (is_dir($hotfixDir)) {
+            try {
+                $iterator = new \RecursiveIteratorIterator(
+                    new \RecursiveDirectoryIterator($hotfixDir, \FilesystemIterator::SKIP_DOTS)
+                );
+                foreach ($iterator as $file) {
+                    if ($file->isFile() && strtolower($file->getExtension()) === 'patch') {
+                        $paths[$file->getPathname()] = true;
+                    }
+                }
+            } catch (\Throwable) {
+                // Unreadable patch directories produce no evidence.
+            }
+        }
+
+        $artifacts = [];
+        foreach (array_keys($paths) as $path) {
+            $size = @filesize($path);
+            if (!is_int($size) || $size <= 0 || $size > 10 * 1024 * 1024) continue;
+            $content = (string)@file_get_contents($path);
+            preg_match_all(
+                '/\b(?:APSB\d{2}-\d+|(?:ACSD|MDVA|MC|MAGETWO|MAGECLOUD|MCLOUD|VULN)-?[A-Z0-9-]+)\b/i',
+                basename($path) . "\n" . substr($content, 0, 1024 * 1024),
+                $matches
+            );
+            $identifiers = array_values(array_unique(array_map('strtoupper', $matches[0] ?? [])));
+            [$exitCode] = $this->runReadOnlyProcess(
+                ['patch', '--dry-run', '--reverse', '--silent', '-p1', '-i', $path],
+                $this->ctx->path
+            );
+            if ($exitCode !== 0) {
+                [$exitCode] = $this->runReadOnlyProcess(
+                    ['patch', '--dry-run', '--reverse', '--silent', '-p2', '-i', $path],
+                    $this->ctx->path
+                );
+            }
+            $relative = str_starts_with($path, $this->ctx->path . DIRECTORY_SEPARATOR)
+                ? substr($path, strlen($this->ctx->path) + 1)
+                : basename($path);
+            $artifacts[] = [
+                'path' => $relative,
+                'identifiers' => $identifiers,
+                'sha256' => hash_file('sha256', $path) ?: null,
+                'applied' => $exitCode === 0,
+                'verification' => $exitCode === 0
+                    ? 'reverse patch dry-run succeeded'
+                    : 'patch file present but applied state was not proven',
+            ];
+        }
+        return $artifacts;
+    }
+
+    private function runReadOnlyProcess(array $command, string $cwd): array
+    {
+        if (!function_exists('proc_open')) return [127, ''];
+        $pipes = [];
+        $process = @proc_open(
+            $command,
+            [0 => ['pipe', 'r'], 1 => ['pipe', 'w'], 2 => ['pipe', 'w']],
+            $pipes,
+            $cwd,
+            null,
+            ['bypass_shell' => true]
+        );
+        if (!is_resource($process)) return [127, ''];
+        fclose($pipes[0]);
+        stream_set_blocking($pipes[1], false);
+        stream_set_blocking($pipes[2], false);
+        $stdout = '';
+        $stderr = '';
+        $deadline = microtime(true) + 15.0;
+        $exitCode = null;
+        do {
+            $stdout .= (string)stream_get_contents($pipes[1]);
+            $stderr .= (string)stream_get_contents($pipes[2]);
+            $status = proc_get_status($process);
+            if (!$status['running']) {
+                $exitCode = (int)$status['exitcode'];
+                break;
+            }
+            if (microtime(true) >= $deadline) {
+                proc_terminate($process);
+                $exitCode = 124;
+                break;
+            }
+            usleep(20000);
+        } while (true);
+        $stdout .= (string)stream_get_contents($pipes[1]);
+        $stderr .= (string)stream_get_contents($pipes[2]);
+        fclose($pipes[1]);
+        fclose($pipes[2]);
+        $closedExitCode = proc_close($process);
+        if ($exitCode === null || $exitCode < 0) $exitCode = $closedExitCode;
+        return [$exitCode, trim($stdout . "\n" . $stderr)];
+    }
     /**
      * Helper: read packages from composer.lock
      */

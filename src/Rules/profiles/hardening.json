@@ -1,0 +1,19 @@
+{
+  "id": "hardening",
+  "aliases": ["production", "production-hardening"],
+  "title": "Magento Production Hardening",
+  "description": "Deep production security, code, configuration, operations, dependency, and integration checks, excluding payment-specific compliance evidence.",
+  "report_template": "standard",
+  "include": {
+    "controls": [
+      "MB-C01", "MB-C02", "MB-C03", "MB-C04", "MB-C05", "MB-C06",
+      "MB-C07", "MB-C08", "MB-C09", "MB-C10", "MB-C11", "MB-C12"
+    ]
+  },
+  "exclude": {
+    "rules": [
+      "MB-R082", "MB-R083", "MB-R084", "MB-R085", "MB-R086", "MB-R087",
+      "MB-R088", "MB-R090", "MB-R092", "MB-R093"
+    ]
+  }
+}

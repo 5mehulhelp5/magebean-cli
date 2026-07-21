@@ -1,0 +1,14 @@
+{
+  "id": "standard",
+  "aliases": ["default", "basic", "best-practices"],
+  "title": "Magento Basic Best Practices",
+  "description": "Fast, low-noise checks for basic Magento production security and operational readiness.",
+  "report_template": "standard",
+  "rules": [
+    "MB-R001", "MB-R002", "MB-R003", "MB-R005",
+    "MB-R006", "MB-R007", "MB-R008", "MB-R011",
+    "MB-R026", "MB-R028", "MB-R029", "MB-R030",
+    "MB-R031", "MB-R032", "MB-R033", "MB-R035",
+    "MB-R037", "MB-R046", "MB-R049", "MB-R050", "MB-R072"
+  ]
+}

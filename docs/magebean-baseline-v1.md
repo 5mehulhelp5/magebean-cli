@@ -321,8 +321,8 @@ It defines the scope, intended audience, and objectives of applying the 12 Contr
 - **MB-R049 — CVE match via OSV (Critical, A06)**
   *Description:* Installed extensions must be scanned against OSV.dev and other vulnerability databases for known CVEs. Unpatched vulnerabilities in third-party modules are one of the top entry points for attackers. Regularly check advisories and flag modules with unresolved security issues.
 
-- **MB-R050 — Core module advisories flagged (Critical, A06)**
-  *Description:* Vulnerabilities in official Magento core modules or Adobe-maintained packages must be tracked and patched immediately. Exploits against core components are widely weaponized, making this category highly critical. Automated scanning should alert whenever core advisories apply to the current version.
+- **MB-R050 — Adobe security patches applied (Critical, A06)**
+  *Description:* Verifies each applicable Adobe security release using multiple evidence sources: Magento release level, Quality Patches Tool status, Cloud Patches package constraints, verified m2-hotfixes or Composer patch artifacts, and published patched-file fingerprints. A patch file is not accepted merely because it exists; local patch artifacts must be proven applied with a reverse dry-run. Findings remain UNKNOWN when customized code cannot be verified.
 
 - **MB-R051 — Suggest fixed versions (High, A06)**
   *Description:* When vulnerabilities are detected, stores should identify the patched version that resolves the issue. Providing recommended fixed versions helps developers upgrade quickly and avoid insecure builds. This minimizes exposure windows by guiding remediation paths clearly.
@@ -467,7 +467,7 @@ Run a scan against a Magento 2 installation:
 ```
 
 - `--path` specifies the root directory of the Magento 2 project.
-- Without a profile, the tool will apply the full baseline catalog: all 12 Controls and 99 Rules.
+- Without a profile, the tool applies the 21-rule `standard` profile for a fast, low-noise production check. Use `--profile=baseline` to run the full catalog.
 
 ### 4.3 Profile-based Scans
 Profiles select a curated subset of baseline rules for a specific assessment lens. Rules remain canonical `MB-Rxxx` entries in the baseline catalog, while each profile provides selection, mapping, and report metadata.
@@ -476,11 +476,15 @@ Profiles select a curated subset of baseline rules for a specific assessment len
 ./magebean.phar scan --path=/var/www/magento --profile=owasp
 ./magebean.phar scan --path=/var/www/magento --profile=pci
 ./magebean.phar scan --path=/var/www/magento --profile=.magebean/profiles/acme.json
+./magebean.phar scan --path=/var/www/magento --profile=hardening
+./magebean.phar scan --path=/var/www/magento --profile=baseline
 ```
 
-- **Baseline scan:** Runs all enabled rules from the 99-rule catalog.
+- **Standard profile (default):** Runs 21 fast, low-noise Magento production readiness checks.
 - **OWASP profile:** Selects application security rules mapped to OWASP Top 10 categories.
 - **PCI profile:** Selects PCI DSS readiness rules focused on payment scope, cardholder data leakage, payment-page script integrity, admin hardening, transport security, logging, and dependency risk.
+- **Hardening profile:** Runs deep production checks while excluding payment-specific compliance evidence.
+- **Baseline profile:** Runs all enabled rules from the 99-rule catalog.
 - **Custom profile:** Allows projects, agencies, or open-source contributors to define their own rule selection and mappings without changing the core rule catalog.
 
 ### 4.4 Command-Line Output

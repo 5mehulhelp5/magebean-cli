@@ -25,7 +25,7 @@ final class ProfileLoader
         return self::normalize($data);
     }
 
-    public static function apply(array $pack, array $profile): array
+    public static function apply(array $pack, array $profile, bool $ignoreUnknownRules = false): array
     {
         $rules = $pack['rules'] ?? [];
         if (!is_array($rules)) {
@@ -57,7 +57,7 @@ final class ProfileLoader
                 }
                 $selected[] = self::withProfileMetadata($byId[$id], $profile, $id);
             }
-            if ($unknown) {
+            if ($unknown && !$ignoreUnknownRules) {
                 throw new \RuntimeException(sprintf(
                     'Profile "%s" references unknown rule id(s): %s',
                     (string)($profile['id'] ?? 'custom'),

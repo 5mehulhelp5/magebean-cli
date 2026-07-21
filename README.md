@@ -49,6 +49,8 @@ php bin/magebean rules:list
   --path=/var/www/magento
 ```
 
+`scan` and `rules:list` use the 21-rule `standard` profile by default. Select `owasp`, `pci`, or `hardening` with `--profile`, or use `--profile=baseline` for the full catalog.
+
 ---
 
 ## 🖥️ CLI Output Template

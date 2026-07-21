@@ -30,51 +30,81 @@ final class ScanCommand extends Command
 
     /** Keep help text in one place */
     private const HELP = <<<'HELP'
-<fg=cyan;options=bold>Execute a comprehensive audit</> for a Magento 2 project using <fg=green;options=bold>12 controls</> and <fg=green;options=bold>81 rules</>.
-Doc: <href=https://magebean.com/documentation>magebean.com/documentation</>
-
-<options=bold>What it checks</>
-  • <fg=red;options=bold>Security Auditing</> — unsafe code patterns, permissions, world-writable files, XSS, SQLi, SSRF
-  • <fg=yellow;options=bold>Configuration Auditing</> — production mode, cache, Elasticsearch, cron jobs, logging/monitoring
-  • <fg=blue;options=bold>Performance Insights</> — runtime hotspots, cache effectiveness, DB indexing, static assets
-  • <fg=magenta;options=bold>Extension Auditing</> — parse composer.lock, check package health and repository status
+<fg=cyan;options=bold>Audit Magento 2 production readiness</> using a catalog of <fg=green;options=bold>12 controls</> and <fg=green;options=bold>99 rules</>.
+The default <fg=green;options=bold>standard</> profile runs 21 fast, low-noise checks.
+Docs: <href=https://magebean.com/documentation>magebean.com/documentation</>
 
 <options=bold>USAGE</>
-  <fg=green>php magebean.phar scan --url=https://magento-store.com</>
-  <fg=green>php magebean.phar scan --path=/var/www/html</>
-  <fg=green>php magebean.phar scan --path=/var/www/html --url=https://magento-store.com</>
+  <fg=green>php magebean.phar scan [--path=PATH] [--url=URL] [options]</>
 
 <options=bold>TARGET MODES</>
-  • <fg=blue;options=bold>REMOTE</> — confirms Magento 2 first, then runs 10 public rules
-  • <fg=green;options=bold>LOCAL</> — --path without --url, or no options with root auto-detection
-  • <fg=magenta;options=bold>HYBRID</> — --path and --url; combines local and HTTP evidence
+  • <fg=green;options=bold>LOCAL</> — --path only, or omit both target options to auto-detect the Magento root
+  • <fg=blue;options=bold>REMOTE</> — --url only; verifies Magento and runs externally observable rules
+  • <fg=magenta;options=bold>HYBRID</> — --path plus --url; combines local and HTTP evidence
+  • Standard contains 21 local rules and 9 applicable remote rules.
+  • Use --profile=baseline remotely to run all 10 external rules.
 
-<options=bold>COMMON OPTIONS</>
-  <fg=yellow>--path=PATH</>                     Magento 2 root path
-  <fg=yellow>--url=URL</>                       Absolute HTTP/HTTPS store base URL
-  <fg=yellow>--profile=owasp|pci|FILE</>        Select a built-in or custom profile (default: baseline/all rules)
-  <fg=yellow>--controls=MB-Cxx,MB-Cxx</>       Only load selected controls (e.g., MB-C01,MB-C05)
-  <fg=yellow>--rules=MB-Rxx,MB-Rxx</>           Only run a list of specified rules (e.g., MB-R036,MB-R020)
-  <fg=yellow>--exclude-rules=MB-Rxx,MB-Rxx</>   Exclude specific rules after loading the pack
-  <fg=yellow>--config=FILE</>                   Project policy file (auto-detected in LOCAL/HYBRID)
+<options=bold>PROFILES</>
+  <fg=yellow>standard</>   Default; 21 basic production security and operations checks.
+  <fg=yellow>owasp</>      Application-security checks mapped to OWASP Top 10 2025.
+  <fg=yellow>pci</>        PCI DSS v4.0.1 payment readiness; not a certification.
+  <fg=yellow>hardening</>  89 deep production, code, dependency, integration, and operations checks.
+  <fg=yellow>baseline</>   All 99 local rules. Aliases: all, magebean.
+  <fg=yellow>FILE</>       Custom JSON path or a profile under .magebean/profiles.
+
+<options=bold>COMMAND OPTIONS</>
+  <fg=yellow>--path=PATH</>                     Magento root. Omit to search from the current directory.
+  <fg=yellow>--url=URL</>                       Absolute storefront URL; selects REMOTE or HYBRID mode.
+  <fg=yellow>--profile=PROFILE|FILE</>          Built-in or custom profile. Default: standard.
+  <fg=yellow>--controls=MB-Cxx,MB-Cxx</>       Restrict the loaded pack to control IDs.
+  <fg=yellow>--rules=MB-Rxxx,MB-Rxxx</>         Run only rules present in the selected profile.
+  <fg=yellow>--exclude-rules=MB-Rxxx,...</>     Remove rules after profile and project configuration.
+  <fg=yellow>--config=FILE</>                   Project policy file; auto-detected in LOCAL/HYBRID.
+  <fg=yellow>--standard=NAME</>                 Legacy selector: magebean, owasp, pci, or cwe.
+                                          Prefer --profile; explicit --profile takes precedence.
+
+<options=bold>GLOBAL OPTIONS</>
+  <fg=yellow>-h, --help</>           Show help.
+  <fg=yellow>-V, --version</>        Show version.
+  <fg=yellow>-q, --quiet</>          Show errors only.
+  <fg=yellow>--silent</>             Suppress all output.
+  <fg=yellow>--ansi|--no-ansi</>     Force or disable ANSI formatting.
+  <fg=yellow>-n, --no-interaction</> Disable interactive questions.
+  <fg=yellow>-v|vv|vvv</>            Increase verbosity.
 
 <options=bold>EXAMPLES</>
-  # Scan a public store without filesystem access
-  <fg=green>php magebean.phar scan --url=https://magento-store.com</>
+  # Default standard scan with Magento root auto-detection
+  <fg=green>php magebean.phar scan</>
 
-  # Scan a local Magento root
-  <fg=green>php magebean.phar scan --path=/var/www/html</>
+  # LOCAL, REMOTE, and HYBRID scans
+  <fg=green>php magebean.phar scan --path=/var/www/magento</>
+  <fg=green>php magebean.phar scan --url=https://store.example.com</>
+  <fg=green>php magebean.phar scan --path=/var/www/magento --url=https://store.example.com</>
 
-  # Combine local and public HTTP evidence
-  <fg=green>php magebean.phar scan --path=/var/www/html --url=https://magento-store.com</>
+  # Application security, payment readiness, deep hardening, or full catalog
+  <fg=green>php magebean.phar scan --path=/var/www/magento --profile=owasp</>
+  <fg=green>php magebean.phar scan --path=/var/www/magento --profile=pci</>
+  <fg=green>php magebean.phar scan --path=/var/www/magento --profile=hardening</>
+  <fg=green>php magebean.phar scan --path=/var/www/magento --profile=baseline</>
 
-<options=bold>SEE ALSO</>
-  <fg=cyan>rules:list</>           List all baseline rules
+  # Rule and control filters
+  <fg=green>php magebean.phar scan --path=/var/www/magento --rules=MB-R031,MB-R037</>
+  <fg=green>php magebean.phar scan --path=/var/www/magento --profile=baseline --rules=MB-R020</>
+  <fg=green>php magebean.phar scan --path=/var/www/magento --profile=hardening --controls=MB-C01,MB-C05</>
+  <fg=green>php magebean.phar scan --path=/var/www/magento --config=.magebean.yml --exclude-rules=MB-R032</>
+
+<options=bold>SELECTION ORDER</>
+  Target pack → project policy → profile → --rules → --exclude-rules.
+  Filters reduce a profile; they do not add rules outside it. Use baseline to select any catalog rule.
 
 <options=bold>NOTES</>
-  • REMOTE findings describe only externally observable behavior.
-  • Ensure <fg=yellow>--path</> points to the Magento root that contains app/etc and vendor.
-  • Results are printed directly to the command line.
+  • REMOTE results cover only publicly observable behavior; local-only checks are omitted.
+  • --path must point to, or be below, a Magento root containing app/etc and vendor.
+  • Unknown rule IDs in a custom profile fail validation against a full local pack.
+  • Confirmed findings determine the process exit code.
+
+<options=bold>SEE ALSO</>
+  <fg=cyan>rules:list --help</>  List and filter rules by profile, control, and severity.
 
 CONTACT: <href=mailto:support@magebean.com>support@magebean.com</>
 
@@ -89,14 +119,14 @@ HELP;
     protected function configure(): void
     {
         $this
-            ->setDescription('Execute a comprehensive audit for a Magento 2 project using 12 controls and 81 rules.')
+            ->setDescription('Audit Magento 2 production readiness using 12 controls and a 99-rule catalog (standard: 21 rules).')
             ->addUsage('--url=https://magento-store.com')
             ->addUsage('--path=/var/www/html')
             ->addUsage('--path=/var/www/html --url=https://magento-store.com')
             // HTML report output is disabled, so the HTML-only detail option is hidden for now.
             // ->addOption('detail', null, InputOption::VALUE_NONE, 'Include Details column in HTML report')
-            ->addOption('standard', null, InputOption::VALUE_OPTIONAL, 'Report standard: magebean (default) | owasp | pci | cwe', 'magebean')
-            ->addOption('profile', null, InputOption::VALUE_OPTIONAL, 'Built-in profile alias (owasp|pci) or custom profile JSON path')
+            ->addOption('standard', null, InputOption::VALUE_OPTIONAL, 'Legacy report selector: magebean (default) | owasp | pci | cwe; prefer --profile', 'magebean')
+            ->addOption('profile', null, InputOption::VALUE_OPTIONAL, 'Profile: standard (default) | owasp | pci | hardening | baseline | custom JSON')
             ->addOption('controls', null, InputOption::VALUE_OPTIONAL, 'Comma-separated control IDs to load (e.g., MB-C01,MB-C05 or MB-01,MB-05)')
             ->addOption('rules', null, InputOption::VALUE_OPTIONAL, 'Comma-separated rule IDs to run (e.g., MB-R036,MB-R020)')
             ->addOption('exclude-rules', null, InputOption::VALUE_OPTIONAL, 'Comma-separated rule IDs to exclude after loading')
@@ -275,13 +305,15 @@ HELP;
                     'report_template' => 'standard',
                     '_source' => 'builtin:baseline',
                 ];
-            if ($profileOpt === '' && in_array($standard, ['owasp', 'pci'], true)) {
-                $profileOpt = $standard;
+            if ($profileOpt === '') {
+                $profileOpt = in_array($standard, ['owasp', 'pci'], true) ? $standard : 'standard';
             }
             if ($profileOpt !== '' && !in_array(strtolower($profileOpt), ['baseline', 'all', 'magebean', 'external'], true)) {
                 $profileBasePath = $targetMode === self::MODE_REMOTE ? (string)getcwd() : $projectPath;
                 $profile = ProfileLoader::load($profileOpt, $profileBasePath);
-                $pack = ProfileLoader::apply($pack, $profile);
+                $profileCanBePartial = $targetMode === self::MODE_REMOTE
+                    || $controlsFilter !== [] || $projectConfig !== [];
+                $pack = ProfileLoader::apply($pack, $profile, $profileCanBePartial);
                 $activeProfile = ProfileLoader::publicMetadata($profile);
                 $standard = (string)($activeProfile['id'] ?? $standard);
                 $out->writeln(sprintf(
