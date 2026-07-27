@@ -1,6 +1,6 @@
 {
-  "id": "standard",
-  "aliases": ["default", "basic", "best-practices"],
+  "id": "basic",
+  "aliases": ["default", "best-practices"],
   "title": "Magento Basic Best Practices",
   "description": "Fast, low-noise checks for basic Magento production security and operational readiness.",
   "report_template": "standard",

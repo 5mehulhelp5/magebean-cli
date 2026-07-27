@@ -467,7 +467,7 @@ Run a scan against a Magento 2 installation:
 ```
 
 - `--path` specifies the root directory of the Magento 2 project.
-- Without a profile, the tool applies the 21-rule `standard` profile for a fast, low-noise production check. Use `--profile=baseline` to run the full catalog.
+- Without a profile, the tool applies the 21-rule `basic` profile for a fast, low-noise production check. Use `--profile=baseline` to run the full catalog.
 
 ### 4.3 Profile-based Scans
 Profiles select a curated subset of baseline rules for a specific assessment lens. Rules remain canonical `MB-Rxxx` entries in the baseline catalog, while each profile provides selection, mapping, and report metadata.
@@ -480,7 +480,7 @@ Profiles select a curated subset of baseline rules for a specific assessment len
 ./magebean.phar scan --path=/var/www/magento --profile=baseline
 ```
 
-- **Standard profile (default):** Runs 21 fast, low-noise Magento production readiness checks.
+- **Basic profile (default):** Runs 21 fast, low-noise Magento production readiness checks.
 - **OWASP profile:** Selects application security rules mapped to OWASP Top 10 categories.
 - **PCI profile:** Selects PCI DSS readiness rules focused on payment scope, cardholder data leakage, payment-page script integrity, admin hardening, transport security, logging, and dependency risk.
 - **Hardening profile:** Runs deep production checks while excluding payment-specific compliance evidence.

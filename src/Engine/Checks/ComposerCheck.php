@@ -263,11 +263,12 @@ final class ComposerCheck
             return [null, '[UNKNOWN] Invalid Adobe patch API endpoint; HTTPS is required', ['endpoint' => $endpoint]];
         }
 
+        $localPatchEvidence = $this->collectAdobePatchEvidence($installed);
         $payload = [
             'schema_version' => 'magebean-adobe-patch-request-v1',
             'product' => $product,
             'installed_version' => $version,
-            'evidence' => $this->collectAdobePatchEvidence($installed),
+            'evidence' => $localPatchEvidence,
             'client' => ['name' => 'magebean-cli', 'version' => (string)($args['client_version'] ?? 'dev')],
         ];
         $timeoutMs = max(1000, (int)($args['timeout_ms'] ?? 10000));
@@ -326,6 +327,7 @@ final class ComposerCheck
             'dataset_generated_at' => $decoded['dataset_generated_at'] ?? null,
             'lifecycle' => $decoded['lifecycle'] ?? null,
             'recommended_latest_branch' => $decoded['recommended_latest_branch'] ?? null,
+            'local_patch_evidence' => $localPatchEvidence,
         ];
 
         if (($decoded['status'] ?? null) === 'unsupported_branch') {
@@ -344,10 +346,25 @@ final class ComposerCheck
         if (($decoded['status'] ?? null) === 'current') {
             $latest = (string)($decoded['latest_security_version'] ?? $version);
             $satisfiedCount = count((array)($decoded['satisfied_by_alternatives'] ?? []));
+            $notApplied = array_values(array_filter(
+                (array)($localPatchEvidence['patch_artifacts'] ?? []),
+                static fn(mixed $artifact): bool => is_array($artifact)
+                    && ($artifact['status'] ?? null) === 'not applied'
+            ));
             $message = 'Adobe security patch status: installed ' . $version
-                . '; latest for branch ' . $latest . '; no missing patches';
+                . '; latest for branch ' . $latest . '; no missing security release patches';
             if ($satisfiedCount > 0) {
                 $message .= '; ' . $satisfiedCount . ' advisory patch(es) verified by alternative evidence';
+            }
+            if ($notApplied !== []) {
+                $ids = [];
+                foreach (array_slice($notApplied, 0, 10) as $artifact) {
+                    $ids[] = (string)(($artifact['identifiers'][0] ?? 'unknown-patch'));
+                }
+                $message .= "\nQuality Patches Tool also reports " . count($notApplied)
+                    . " optional/unmapped patch(es) as Not applied (not scored by R050): "
+                    . implode(', ', $ids);
+                if (count($notApplied) > 10) $message .= ', ...';
             }
             return [true, $message, $evidence];
         }

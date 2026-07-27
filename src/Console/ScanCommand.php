@@ -31,7 +31,7 @@ final class ScanCommand extends Command
     /** Keep help text in one place */
     private const HELP = <<<'HELP'
 <fg=cyan;options=bold>Audit Magento 2 production readiness</> using a catalog of <fg=green;options=bold>12 controls</> and <fg=green;options=bold>99 rules</>.
-The default <fg=green;options=bold>standard</> profile runs 21 fast, low-noise checks.
+The default <fg=green;options=bold>basic</> profile runs 21 fast, low-noise checks.
 Docs: <href=https://magebean.com/documentation>magebean.com/documentation</>
 
 <options=bold>USAGE</>
@@ -41,11 +41,11 @@ Docs: <href=https://magebean.com/documentation>magebean.com/documentation</>
   • <fg=green;options=bold>LOCAL</> — --path only, or omit both target options to auto-detect the Magento root
   • <fg=blue;options=bold>REMOTE</> — --url only; verifies Magento and runs externally observable rules
   • <fg=magenta;options=bold>HYBRID</> — --path plus --url; combines local and HTTP evidence
-  • Standard contains 21 local rules and 9 applicable remote rules.
+  • Basic contains 21 local rules and 9 applicable remote rules.
   • Use --profile=baseline remotely to run all 10 external rules.
 
 <options=bold>PROFILES</>
-  <fg=yellow>standard</>   Default; 21 basic production security and operations checks.
+  <fg=yellow>basic</>      Default; 21 basic production security and operations checks.
   <fg=yellow>owasp</>      Application-security checks mapped to OWASP Top 10 2025.
   <fg=yellow>pci</>        PCI DSS v4.0.1 payment readiness; not a certification.
   <fg=yellow>hardening</>  89 deep production, code, dependency, integration, and operations checks.
@@ -55,7 +55,7 @@ Docs: <href=https://magebean.com/documentation>magebean.com/documentation</>
 <options=bold>COMMAND OPTIONS</>
   <fg=yellow>--path=PATH</>                     Magento root. Omit to search from the current directory.
   <fg=yellow>--url=URL</>                       Absolute storefront URL; selects REMOTE or HYBRID mode.
-  <fg=yellow>--profile=PROFILE|FILE</>          Built-in or custom profile. Default: standard.
+  <fg=yellow>--profile=PROFILE|FILE</>          Built-in or custom profile. Default: basic.
   <fg=yellow>--controls=MB-Cxx,MB-Cxx</>       Restrict the loaded pack to control IDs.
   <fg=yellow>--rules=MB-Rxxx,MB-Rxxx</>         Run only rules present in the selected profile.
   <fg=yellow>--exclude-rules=MB-Rxxx,...</>     Remove rules after profile and project configuration.
@@ -73,7 +73,7 @@ Docs: <href=https://magebean.com/documentation>magebean.com/documentation</>
   <fg=yellow>-v|vv|vvv</>            Increase verbosity.
 
 <options=bold>EXAMPLES</>
-  # Default standard scan with Magento root auto-detection
+  # Default basic scan with Magento root auto-detection
   <fg=green>php magebean.phar scan</>
 
   # LOCAL, REMOTE, and HYBRID scans
@@ -119,14 +119,14 @@ HELP;
     protected function configure(): void
     {
         $this
-            ->setDescription('Audit Magento 2 production readiness using 12 controls and a 99-rule catalog (standard: 21 rules).')
+            ->setDescription('Audit Magento 2 production readiness using 12 controls and a 99-rule catalog (basic: 21 rules).')
             ->addUsage('--url=https://magento-store.com')
             ->addUsage('--path=/var/www/html')
             ->addUsage('--path=/var/www/html --url=https://magento-store.com')
             // HTML report output is disabled, so the HTML-only detail option is hidden for now.
             // ->addOption('detail', null, InputOption::VALUE_NONE, 'Include Details column in HTML report')
             ->addOption('standard', null, InputOption::VALUE_OPTIONAL, 'Legacy report selector: magebean (default) | owasp | pci | cwe; prefer --profile', 'magebean')
-            ->addOption('profile', null, InputOption::VALUE_OPTIONAL, 'Profile: standard (default) | owasp | pci | hardening | baseline | custom JSON')
+            ->addOption('profile', null, InputOption::VALUE_OPTIONAL, 'Profile: basic (default) | owasp | pci | hardening | baseline | custom JSON')
             ->addOption('controls', null, InputOption::VALUE_OPTIONAL, 'Comma-separated control IDs to load (e.g., MB-C01,MB-C05 or MB-01,MB-05)')
             ->addOption('rules', null, InputOption::VALUE_OPTIONAL, 'Comma-separated rule IDs to run (e.g., MB-R036,MB-R020)')
             ->addOption('exclude-rules', null, InputOption::VALUE_OPTIONAL, 'Comma-separated rule IDs to exclude after loading')
@@ -306,7 +306,7 @@ HELP;
                     '_source' => 'builtin:baseline',
                 ];
             if ($profileOpt === '') {
-                $profileOpt = in_array($standard, ['owasp', 'pci'], true) ? $standard : 'standard';
+                $profileOpt = in_array($standard, ['owasp', 'pci'], true) ? $standard : 'basic';
             }
             if ($profileOpt !== '' && !in_array(strtolower($profileOpt), ['baseline', 'all', 'magebean', 'external'], true)) {
                 $profileBasePath = $targetMode === self::MODE_REMOTE ? (string)getcwd() : $projectPath;
@@ -528,7 +528,7 @@ HELP;
         $standard = (string)($result['meta']['standard'] ?? 'magebean');
         $profile = (array)($result['meta']['profile'] ?? []);
         $profileTitle = (string)($profile['title'] ?? $profile['id'] ?? 'Magebean Baseline');
-        $out->writeln(sprintf('Standard: <info>%s</info>', strtoupper($standard)));
+        $out->writeln(sprintf('Profile ID: <info>%s</info>', strtoupper($standard)));
         $out->writeln(sprintf('Profile: <info>%s</info>', $profileTitle));
         $out->writeln(sprintf('Time: <comment>%s</comment>   PHP: <info>%s</info>   Env: %s', date('Y-m-d H:i'), $phpShort, $envTag($env)));
         if ($isExternal) {

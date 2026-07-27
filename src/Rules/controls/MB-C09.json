@@ -40,10 +40,7 @@
             "allow_private_http_fallback": true
           }
         }
-      ],
-      "messages": {
-        "pass": "All applicable Adobe security patch releases are applied."
-      }
+      ]
     },
     {
       "id": "MB-R051",

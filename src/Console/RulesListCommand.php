@@ -18,7 +18,7 @@ final class RulesListCommand extends Command
 List Magebean rules after applying a profile and optional control/severity filters.
 
 PROFILES
-  standard   Default; 21 basic production-readiness rules.
+  basic      Default; 21 basic production-readiness rules.
   owasp      77 application-security rules mapped to OWASP Top 10 2025.
   pci        69 PCI DSS v4.0.1 payment-readiness rules.
   hardening  89 deep production-hardening rules.
@@ -26,7 +26,7 @@ PROFILES
   FILE       Custom profile JSON path or a profile under .magebean/profiles.
 
 OPTIONS
-  --profile=PROFILE|FILE       Select the profile. Default: standard.
+  --profile=PROFILE|FILE       Select the profile. Default: basic.
   --control=MB-Cxx,MB-Cxx     Keep only the listed controls.
   --severity=LEVEL             Keep low, medium, high, or critical rules.
   -h, --help                   Show this help.
@@ -56,7 +56,7 @@ HELP;
             ->addUsage('--profile=owasp --severity=critical')
             ->setHelp(self::HELP)
             ->addOption('control', null, InputOption::VALUE_OPTIONAL, 'Comma list of controls (e.g. MB-C01,MB-C02)')
-            ->addOption('profile', null, InputOption::VALUE_OPTIONAL, 'Profile: standard (default) | owasp | pci | hardening | baseline | custom JSON')
+            ->addOption('profile', null, InputOption::VALUE_OPTIONAL, 'Profile: basic (default) | owasp | pci | hardening | baseline | custom JSON')
             ->addOption('severity', null, InputOption::VALUE_OPTIONAL, 'low|medium|high|critical');
     }
     protected function execute(InputInterface $in, OutputInterface $out): int
@@ -64,7 +64,7 @@ HELP;
         $controlsOpt = (string)($in->getOption('control') ?? '');
         $profileOpt = trim((string)($in->getOption('profile') ?? ''));
         if ($profileOpt === '') {
-            $profileOpt = 'standard';
+            $profileOpt = 'basic';
         }
         $controls = $controlsOpt ? array_map('trim', explode(',', $controlsOpt)) : [];
         $pack = RulePackLoader::loadAll($controls);
