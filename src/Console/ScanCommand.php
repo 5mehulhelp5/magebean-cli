@@ -498,7 +498,9 @@ HELP;
         $env      = strtoupper($this->detectMageMode($path));
         $isExternal = str_starts_with($path, 'URL:');
         $env = $isExternal ? 'EXTERNAL' : strtoupper($this->detectMageMode($path));
-        $targetOption = $isExternal ? '--url=' . substr($path, 4) . ' ' : '';
+        $targetOption = $isExternal
+            ? '--url=' . substr($path, 4) . ' '
+            : '--path=' . escapeshellarg($path) . ' ';
         $phpShort = PHP_MAJOR_VERSION . '.' . PHP_MINOR_VERSION;
 
         // Helpers
@@ -614,6 +616,11 @@ HELP;
             ));
         }
         $out->writeln('');
+        $out->writeln('<options=bold>Status guide</>');
+        $out->writeln('  <fg=green;options=bold>PASS</>          Check completed and no issue was detected.');
+        $out->writeln('  <fg=red;options=bold>FAIL</>          Check completed and found an issue requiring attention.');
+        $out->writeln('  <fg=magenta;options=bold>INCONCLUSIVE</>  Required evidence or access was unavailable; this does not mean the check passed.');
+        $out->writeln('');
 
         $rulesFilter = array_values(array_filter((array)($result['meta']['rules_filter'] ?? [])));
         $showRuleDetails = $rulesFilter !== [];
@@ -637,6 +644,20 @@ HELP;
                 : sprintf('%s%s %s', $statusTag, $sevBadge($sev), $text);
             $out->writeln('  ' . $line);
 
+            if ($id === 'MB-R072' && $status === 'UNKNOWN') {
+                $out->writeln('    Git history was not verified; INCONCLUSIVE does not mean the history is clean.');
+                $out->writeln('    Run this rule against the original source checkout containing .git:');
+                $out->writeln("      <fg=green>php magebean.phar scan --path='/path/to/magento-source' --rules=MB-R072</>");
+            }
+
+            if (!$showRuleDetails && $id === 'MB-R049' && $status === 'FAIL') {
+                $out->writeln('    Run this command to list affected packages and advisories:');
+                $out->writeln(sprintf(
+                    '      <fg=green>php magebean.phar scan %s--rules=MB-R049</>',
+                    $targetOption
+                ));
+            }
+
             if ($showRuleDetails && in_array($status, ['FAIL', 'UNKNOWN'], true)) {
                 $out->writeln('');
                 $out->writeln(sprintf('  <options=bold>How to resolve %s</>', $id !== '' ? $id : 'this check'));
@@ -646,7 +667,7 @@ HELP;
                 foreach ($resolutionSteps as $step) {
                     $out->writeln('    - ' . $step);
                 }
-                if ($id !== '') {
+                if ($id !== '' && !($id === 'MB-R072' && $status === 'UNKNOWN')) {
                     $out->writeln($status === 'UNKNOWN'
                         ? '    - Re-run after resolving the missing evidence:'
                         : '    - Re-run after applying the remediation:');
@@ -669,6 +690,11 @@ HELP;
                     ? sprintf('<fg=magenta;options=bold>[INCONCLUSIVE]</> %1$s <href=https://magebean.com/baseline/%2$s>%2$s</> %3$s', $sevBadge($sev), $id, $text)
                     : sprintf('<fg=magenta;options=bold>[INCONCLUSIVE]</> %s %s', $sevBadge($sev), $text);
                 $out->writeln('  ' . $line);
+                if ($id === 'MB-R072') {
+                    $out->writeln('    Git history was not verified; INCONCLUSIVE does not mean the history is clean.');
+                    $out->writeln('    Run this rule against the original source checkout containing .git:');
+                    $out->writeln("      <fg=green>php magebean.phar scan --path='/path/to/magento-source' --rules=MB-R072</>");
+                }
             }
         }
         $out->writeln('');

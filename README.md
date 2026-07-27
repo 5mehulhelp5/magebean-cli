@@ -49,7 +49,9 @@ php bin/magebean rules:list
   --path=/var/www/magento
 ```
 
-`scan` and `rules:list` use the 21-rule `standard` profile by default. Select `owasp`, `pci`, or `hardening` with `--profile`, or use `--profile=baseline` for the full catalog.
+`scan` and `rules:list` use the 21-rule `basic` profile by default. Select `owasp`, `pci`, or `hardening` with `--profile`, or use `--profile=baseline` for the full catalog.
+
+See [CLI Reference](docs/cli-reference.md) for all commands, options, profiles, target modes, and examples.
 
 ---
 
@@ -57,7 +59,7 @@ php bin/magebean rules:list
 
 ```
 Magebean Security Audit v1.0        Target: /var/www/magento
-Standard: MAGEBEAN
+Profile ID: BASIC
 Profile: Magebean Baseline
 Time: 2026-07-13 05:39   PHP: 8.4   Env: PRODUCTION
 

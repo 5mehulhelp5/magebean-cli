@@ -659,7 +659,21 @@ final class ComposerCheck
 
         $sus = array_values($sus);
         if ($sus !== []) {
-            $msg = "Vulnerable packages:\n    - " . implode("\n    - ", array_map(
+            $vulnerablePackages = array_values(array_unique(array_map(
+                static fn(array $item): string => (string)$item['package'],
+                $sus
+            )));
+            $vulnerablePackageCount = count($vulnerablePackages);
+            $findingCount = count($sus);
+            $packageLabel = $vulnerablePackageCount === 1 ? 'package' : 'packages';
+            $findingLabel = $findingCount === 1 ? 'advisory match' : 'advisory matches';
+            $msg = sprintf(
+                '%d vulnerable %s found (%d %s):',
+                $vulnerablePackageCount,
+                $packageLabel,
+                $findingCount,
+                $findingLabel
+            ) . "\n    - " . implode("\n    - ", array_map(
                 static function (array $item): string {
                     $message = $item['package'] . '@' . $item['version']
                         . ' -> ' . $item['advisory']
@@ -680,7 +694,12 @@ final class ComposerCheck
                 $msg .= "\n    Version evidence unavailable for:\n    - "
                     . implode("\n    - ", $unassessedDetails);
             }
-            return [false, $msg, $evidence + ['findings' => $sus]];
+            return [false, $msg, $evidence + [
+                'findings' => $sus,
+                'vulnerable_packages' => $vulnerablePackages,
+                'vulnerable_packages_count' => $vulnerablePackageCount,
+                'advisory_matches_count' => $findingCount,
+            ]];
         }
 
         if ($unassessed !== []) {
