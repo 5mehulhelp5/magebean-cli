@@ -568,7 +568,6 @@ final class ComposerCheck
             }
             $usableAdvisories++;
 
-            [$sevLabel, $cvssScore] = $this->extractSeveritySafe($vuln);
             $id = (string)($vuln['id'] ?? ($vuln['aliases'][0] ?? 'CVE'));
             $knownExploited = $this->isKnownExploitedAdvisory($vuln);
 
@@ -582,6 +581,7 @@ final class ComposerCheck
                     continue;
                 }
 
+                [$sevLabel, $cvssScore, $cvssVector] = $this->extractSeveritySafe($vuln, $aff);
                 $current = $installedVers[$pkg];
                 $hit = false;
                 $fixed = null;
@@ -642,6 +642,7 @@ final class ComposerCheck
                         : null,
                     'severity' => $sevLabel,
                     'cvss' => $cvssScore,
+                    'cvss_vector' => $cvssVector,
                     'fixed' => $fixed,
                     'known_exploited' => $knownExploited,
                 ];
@@ -677,7 +678,11 @@ final class ComposerCheck
                 static function (array $item): string {
                     $message = $item['package'] . '@' . $item['version']
                         . ' -> ' . $item['advisory']
-                        . ' (' . $item['severity'] . ')';
+                        . ' (' . $item['severity'];
+                    if (is_string($item['cvss'] ?? null) && $item['cvss'] !== '') {
+                        $message .= ' · CVSS ' . $item['cvss'];
+                    }
+                    $message .= ')';
                     if (is_string($item['fixed'] ?? null) && $item['fixed'] !== '') {
                         $message .= ', fix >= ' . $item['fixed'];
                     }
@@ -3535,16 +3540,14 @@ final class ComposerCheck
                 }
             }
 
-            // severity
-            [$sevLabel, $cvssScore] = $this->extractSeveritySafe($vuln);
-            $cvss = ($cvssScore !== '') ? floatval($cvssScore) : null;
-
             foreach ($affList as $aff) {
                 $pkg = $aff['package']['name'] ?? null;
                 $eco = strtolower((string)($aff['package']['ecosystem'] ?? ''));
                 if (!$pkg || !isset($installed[$pkg])) continue;
                 if ($eco !== 'packagist' && $eco !== 'composer') continue;
 
+                [$sevLabel, $cvssScore, $cvssVector] = $this->extractSeveritySafe($vuln, $aff);
+                $cvss = ($cvssScore !== '') ? (float)$cvssScore : null;
                 $curVer = $installed[$pkg];
                 $affected = false;
 
@@ -3581,6 +3584,7 @@ final class ComposerCheck
                     'installed' => $curVer,
                     'severity'  => $sevLabel,
                     'cvss'      => $cvssScore,
+                    'cvss_vector' => $cvssVector,
                     'kev'       => $isKev,
                     'fixed'     => $minFixed ? [$minFixed] : [],
                     'id'        => (string)($vuln['id'] ?? ''),
@@ -5951,19 +5955,11 @@ final class ComposerCheck
         return [];
     }
 
-    // 3) extractSeverity kiểu OSV
-    private function extractSeveritySafe(array $vuln): array
+    /** @return array{0: string, 1: string, 2: string} */
+    private function extractSeveritySafe(array $vuln, ?array $affected = null): array
     {
-        $sevArr = $vuln['severity'] ?? null;
-        if (is_array($sevArr) && isset($sevArr[0]['score'])) {
-            $score = (string)$sevArr[0]['score'];
-            $num = floatval($score);
-            $label = ($num >= 9.0) ? 'Critical' : (($num >= 7.0) ? 'High' : (($num >= 4.0) ? 'Medium' : (($num > 0.0) ? 'Low' : 'Unknown')));
-            return [$label, $score];
-        }
-        $ds = $vuln['database_specific']['severity'] ?? '';
-        if (is_string($ds) && $ds !== '') return [ucfirst(strtolower($ds)), ''];
-        return ['Unknown', ''];
+        $severity = \Magebean\Engine\Cve\OsvSeverity::resolve($vuln, $affected);
+        return [$severity['label'], $severity['score'], $severity['vector']];
     }
 
         /**

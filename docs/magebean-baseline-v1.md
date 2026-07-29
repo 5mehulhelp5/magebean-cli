@@ -7,7 +7,7 @@
 ---
 
 ## Introduction
-The **Magebean Security Baseline** defines 12 Controls and 99 Logic Rules to evaluate the security, configuration, dependency hygiene, payment-page integrity, and compliance readiness of Magento 2 stores.
+The **Magebean Security Baseline** defines 12 Controls and 101 Logic Rules to evaluate the security, configuration, dependency hygiene, payment-page integrity, and compliance readiness of Magento 2 stores.
 These controls provide concrete verification steps for Magento application security and can be selected through assessment profiles such as OWASP Top 10 and PCI DSS readiness.
 
 This baseline is designed to be implemented with the magebean-cli tool, which provides automated validation, reporting, and CI/CD integration.
@@ -18,7 +18,7 @@ This baseline is designed to be implemented with the magebean-cli tool, which pr
 
 ## Chapter 1. Key Terminology
 
-The **Magebean Security Baseline v1** defines a set of **12 Controls** and **99 Rules** for auditing security, configuration, payment flows, and operations in Magento 2.
+The **Magebean Security Baseline v1** defines a set of **12 Controls** and **101 Rules** for auditing security, configuration, payment flows, and operations in Magento 2.
 This chapter introduces the key terms used throughout the document, designed for readers who may not be familiar with audit and AppSec terminology.
 
 ---
@@ -53,7 +53,7 @@ This chapter introduces the key terms used throughout the document, designed for
 ---
 
 ### 1.4 Baseline
-- **Definition:** A **Baseline** in the Magebean context is the complete rule catalog consisting of **12 Controls** and **99 Rules**. It represents the full recommended security and readiness reference for a Magento 2 deployment.
+- **Definition:** A **Baseline** in the Magebean context is the complete rule catalog consisting of **12 Controls** and **101 Rules**. It represents the full recommended security and readiness reference for a Magento 2 deployment.
 - **Role:** The baseline serves as a reference framework for developers, agencies, and merchants to assess and improve their security posture. Profiles select relevant rules from this catalog for a specific assessment lens, such as OWASP Top 10 or PCI DSS readiness.
 
 ### 1.5 Profile
@@ -74,7 +74,7 @@ This chapter introduces the key terms used throughout the document, designed for
 ## Chapter 2. Scope & Objectives
 
 The **Magebean Security Baseline** is designed to establish a minimum security standard for Magento 2 deployments.
-It defines the scope, intended audience, and objectives of applying the 12 Controls and 99 Rules.
+It defines the scope, intended audience, and objectives of applying the 12 Controls and 101 Rules.
 
 ### 2.1 Scope
 - **System Components:** Magento 2 application codebase, extensions, server configuration, dependencies, and integrations.
@@ -98,7 +98,7 @@ It defines the scope, intended audience, and objectives of applying the 12 Contr
 
 ## Magebean 12 Controls
 - **MB-C01** File & Folder Permissions (7 rules)
-- **MB-C02** Admin Hardening (6 rules)
+- **MB-C02** Admin Hardening (8 rules)
 - **MB-C03** Secure Coding Practices (20 rules)
 - **MB-C04** HTTPS & TLS Enforcement (7 rules)
 - **MB-C05** Production Mode & Deployment Hygiene (6 rules)
@@ -110,11 +110,11 @@ It defines the scope, intended audience, and objectives of applying the 12 Contr
 - **MB-C11** Composer Dependency Hygiene (7 rules)
 - **MB-C12** Third-party Config Security (15 rules)
 
-**Catalog expansion summary:** Magebean Baseline v1 grows from the original 81-rule catalog to 99 rules by adding 12 PCI-aware ecommerce readiness rules and 6 OWASP-focused application security rules. The control model remains stable at 12 controls; profiles select relevant rules from the shared catalog rather than introducing separate control sets.
+**Catalog expansion summary:** Magebean Baseline v1 grows from the original 81-rule catalog to 101 rules by adding 12 PCI-aware ecommerce readiness rules, 6 OWASP-focused application security rules, and 2 Admin ACL governance rules. The control model remains stable at 12 controls; profiles select relevant rules from the shared catalog rather than introducing separate control sets.
 
 ---
 
-## Rule Catalog (99 Rules)
+## Rule Catalog (101 Rules)
 
 ### MB-C01 File & Folder Permissions (7 rules)
 
@@ -139,7 +139,7 @@ It defines the scope, intended audience, and objectives of applying the 12 Contr
 - **MB-R091 — No executable code in media or upload paths (Critical, A05/A08)**
   *Description:* Public upload and media directories must not contain executable PHP, PHTML, or server-side scripts. Attackers frequently abuse upload flaws to plant web shells, which can lead to payment-page skimming or full store compromise. Enforce web server execution blocking and scan writable public paths for suspicious executable artifacts.
 
-### MB-C02 Admin Hardening (6 rules)
+### MB-C02 Admin Hardening (8 rules)
 
 - **MB-R006 — Non-default admin path (High, A07)**
   *Description:* The default `/admin` path is predictable and targeted by bots and automated scanners. Configuring a custom backend route significantly reduces attack surface. It forces attackers to guess the admin location, improving security against brute-force and credential stuffing attempts.
@@ -158,6 +158,12 @@ It defines the scope, intended audience, and objectives of applying the 12 Contr
 
 - **MB-R011 — Login rate-limit (Medium, A07)**
   *Description:* Implement rate-limiting or CAPTCHA to prevent unlimited login attempts on the admin panel. Brute-force and credential stuffing are common attack vectors. Throttling login attempts helps slow automated attacks and improves defense-in-depth when combined with strong credentials.
+
+- **MB-R100 — Admin role assignments are valid (High, A01/A07)**
+  *Description:* Every active Magento Admin user must be assigned to a valid, active authorization role, and role relationships must not reference missing users, missing parent roles, or otherwise orphaned records. Validate the relationships across `admin_user`, `authorization_role`, and `authorization_rule` so that administrative access is explicit, reviewable, and consistently enforced. Unassigned users and broken role relationships can create unpredictable access behavior or conceal stale privileged accounts. If the required database evidence is unavailable, the automated check must return `UNKNOWN` rather than assuming the configuration is secure.
+
+- **MB-R101 — Global Admin ACL limited to approved roles (High, A01/A07)**
+  *Description:* Magento Admin roles granted global access through `Magento_Backend::all` must be limited to explicitly approved break-glass or super-administrator roles and their authorized users. All other roles should use least-privilege resource assignments appropriate to their operational responsibilities. The audit must identify each globally privileged role and the users who inherit it, and compare them with the project-approved exception policy. Missing approval evidence or unapproved global access must fail the rule; unavailable database evidence must produce an `UNKNOWN` result.
 
 ### MB-C03 Secure Coding Practices (20 rules)
 
@@ -484,7 +490,7 @@ Profiles select a curated subset of baseline rules for a specific assessment len
 - **OWASP profile:** Selects application security rules mapped to OWASP Top 10 categories.
 - **PCI profile:** Selects PCI DSS readiness rules focused on payment scope, cardholder data leakage, payment-page script integrity, admin hardening, transport security, logging, and dependency risk.
 - **Hardening profile:** Runs deep production checks while excluding payment-specific compliance evidence.
-- **Baseline profile:** Runs all enabled rules from the 99-rule catalog.
+- **Baseline profile:** Runs all enabled rules from the 101-rule catalog.
 - **Custom profile:** Allows projects, agencies, or open-source contributors to define their own rule selection and mappings without changing the core rule catalog.
 
 ### 4.4 Command-Line Output
@@ -560,7 +566,7 @@ This chapter explains the rating system to help prioritize remediation.
 A structured review process to evaluate a Magento system against Controls and Rules. In Magebean CLI, an audit is executed via automated scans.
 
 **Baseline**
-The complete Magebean rule catalog consisting of 12 Controls and 99 Rules. It provides a reference point for measuring Magento 2 security posture and readiness signals.
+The complete Magebean rule catalog consisting of 12 Controls and 101 Rules. It provides a reference point for measuring Magento 2 security posture and readiness signals.
 
 **Control**
 A high-level category of checks that represents a key security or compliance area (e.g., Admin Hardening, HTTPS Enforcement).

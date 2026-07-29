@@ -152,6 +152,52 @@
         "pass": "CAPTCHA, reCAPTCHA, or login lockout protection is enabled for admin authentication.",
         "fail": "CAPTCHA/rate-limiting protection is weak or missing. Enable admin CAPTCHA, reCAPTCHA, or login lockout controls."
       }
+    },
+    {
+      "id": "MB-R100",
+      "title": "Admin role assignments are valid",
+      "control": "MB-C02",
+      "severity": "high",
+      "op": "all",
+      "checks": [
+        {
+          "name": "magento_admin_role_assignments_valid",
+          "args": {
+            "env_file": "app/etc/env.php"
+          }
+        }
+      ],
+      "messages": {
+        "pass": "Active Magento Admin users have valid role and ACL assignments.",
+        "fail": "Invalid Magento Admin user, role, or ACL relationships were detected. Repair orphaned assignments and ensure every active admin user inherits a role with explicit ACL rules."
+      }
+    },
+    {
+      "id": "MB-R101",
+      "title": "Global Admin ACL limited to approved roles",
+      "control": "MB-C02",
+      "severity": "high",
+      "op": "all",
+      "checks": [
+        {
+          "name": "magento_admin_global_acl_restricted",
+          "args": {
+            "env_file": "app/etc/env.php",
+            "global_resources": [
+              "Magento_Backend::all",
+              "Magento_Adminhtml::all"
+            ],
+            "approved_global_role_ids": [],
+            "approved_global_role_names": [],
+            "approved_global_user_ids": [],
+            "approved_global_usernames": []
+          }
+        }
+      ],
+      "messages": {
+        "pass": "Global Magento Admin ACL access is limited to approved roles and users.",
+        "fail": "Unapproved roles or users inherit global Magento Admin ACL access. Remove Magento_Backend::all or document narrowly scoped break-glass exceptions."
+      }
     }
   ]
 }

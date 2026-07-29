@@ -63,7 +63,6 @@ final class CveAuditor
             $affList = $vuln['affected'] ?? null;
             if (!is_array($affList)) continue;
 
-            [$sevLabel, $cvssScore] = $this->extractSeverity($vuln);
             $idPrimary = $this->primaryId($vuln);
             $aliases   = array_values(array_filter(($vuln['aliases'] ?? []), 'is_string'));
             $summary   = (string)($vuln['summary'] ?? '');
@@ -77,6 +76,9 @@ final class CveAuditor
                 if (!$pkg || !isset($installedNames[$pkg])) continue;
                 if ($eco !== 'packagist' && $eco !== 'composer') continue;
 
+                $severity = OsvSeverity::resolve($vuln, $aff);
+                $sevLabel = $severity['label'];
+                $cvssScore = $severity['score'];
                 $curVer = $installed[$pkg];
                 $hit = false;
 
@@ -114,6 +116,7 @@ final class CveAuditor
                         'aliases' => $aliases,
                         'severity' => $sevLabel,
                         'cvss' => $cvssScore,
+                        'cvss_vector' => $severity['vector'],
                         'affected' => $this->compactAffected($aff),
                         'fixed_versions' => $minFixed ? [$minFixed] : [],
                         'published' => $pub,
@@ -355,33 +358,6 @@ final class CveAuditor
             }
         }
         return $out;
-    }
-
-    /** returns [label, score] */
-    private function extractSeverity(array $vuln): array
-    {
-        $sevArr = $vuln['severity'] ?? null;
-        if (is_array($sevArr) && isset($sevArr[0]['score'])) {
-            $score = (string)$sevArr[0]['score'];
-            $num = floatval($score);
-            $label = $this->labelByCvss($num);
-            return [$label, $score];
-        }
-        $ds = $vuln['database_specific']['severity'] ?? '';
-        if (is_string($ds) && $ds !== '') {
-            $label = ucfirst(strtolower($ds));
-            return [$label, ''];
-        }
-        return ['Unknown', ''];
-    }
-
-    private function labelByCvss(float $v): string
-    {
-        if ($v >= 9.0) return 'Critical';
-        if ($v >= 7.0) return 'High';
-        if ($v >= 4.0) return 'Medium';
-        if ($v > 0.0)  return 'Low';
-        return 'Unknown';
     }
 
     private function maxSeverity(string $a, string $b): string

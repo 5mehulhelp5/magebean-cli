@@ -23,6 +23,7 @@ final class CheckRegistry
         $phpc = new PhpConfigCheck($ctx);
         $comp = new ComposerCheck($ctx);
         $mage = new MagentoCheck($ctx);
+        $adminAcl = new AdminAclCheck($ctx);
         $http = new HttpCheck($ctx);
         $code = new CodeSearchCheck($ctx);
         $web = new WebServerConfigCheck($ctx);
@@ -115,6 +116,8 @@ final class CheckRegistry
         $registry->register('magento_admin_session_timeout', fn(array $args): array => $mage->adminSessionTimeout($args));
         $registry->register('magento_admin_exposure_restricted', fn(array $args): array => $mage->adminExposureRestricted($args));
         $registry->register('magento_admin_captcha_or_rate_limit', fn(array $args): array => $mage->adminCaptchaOrRateLimit($args));
+        $registry->register('magento_admin_role_assignments_valid', fn(array $args): array => $adminAcl->roleAssignmentsValid($args));
+        $registry->register('magento_admin_global_acl_restricted', fn(array $args): array => $adminAcl->globalAclRestricted($args));
         $registry->register('magento_production_mode', fn(array $args): array => $mage->productionMode($args));
         $registry->register('magento_https_enforced', fn(array $args): array => $mage->httpsEnforced($args));
         $registry->register('magento_cookie_flags_secure', fn(array $args): array => $mage->cookieFlagsSecure($args));

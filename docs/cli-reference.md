@@ -1,6 +1,6 @@
 # Magebean CLI Reference
 
-Magebean CLI audits Magento 2 production readiness using a catalog of 12 controls and 99 rules.
+Magebean CLI audits Magento 2 production readiness using a catalog of 12 controls and 101 rules.
 
 Current CLI version:
 
@@ -69,7 +69,7 @@ When neither `--path` nor `--url` is supplied, Magebean searches for a Magento r
 | `owasp` | 77 | Application-security checks mapped to OWASP Top 10 2025. |
 | `pci` | 69 | PCI DSS v4.0.1 payment-readiness checks; not a certification. |
 | `hardening` | 89 | Deep production, code, dependency, integration, and operations checks. |
-| `baseline` | 99 | Full local catalog. Aliases: `all`, `magebean`. |
+| `baseline` | 101 | Full local catalog. Aliases: `all`, `magebean`. |
 | `FILE` | Custom | JSON profile path or a profile in `.magebean/profiles`. |
 
 If `--profile` is omitted, Magebean uses `basic`.
@@ -88,7 +88,7 @@ php magebean.phar scan --profile=basic
 | `--url=URL` | Absolute storefront URL. Selects Remote or Hybrid mode. |
 | `--profile=PROFILE\|FILE` | Built-in or custom profile. Default: `basic`. |
 | `--controls=MB-Cxx,...` | Restrict the loaded rule pack to control IDs. |
-| `--rules=MB-Rxxx,...` | Run only listed rules that exist in the selected profile. |
+| `--rules=MB-Rxxx,...` | Run listed rule IDs directly from the available catalog and bypass profile selection. |
 | `--exclude-rules=MB-Rxxx,...` | Remove listed rules after profile and project configuration. |
 | `--config=FILE` | Project policy file. Local scans auto-detect `.magebean.json` or `.magebean.yml`. |
 | `--standard=NAME` | Legacy report selector: `magebean`, `owasp`, `pci`, or `cwe`. Prefer `--profile`. |
@@ -114,18 +114,16 @@ Magebean applies selection in this order:
 ```text
 Target rule pack
 → project policy
-→ profile
-→ --rules
+→ explicit `--rules` selection or profile selection
 → --exclude-rules
 ```
 
-Filters only reduce the selected profile. For example, a rule outside `basic` is not added by `--rules`; select `baseline` first:
+When `--rules` is provided, Magebean bypasses profile selection and resolves the requested IDs directly from the available catalog. A separate `--profile` value is ignored for that scan:
 
 ```bash
 php magebean.phar scan \
   --path=/var/www/magento \
-  --profile=baseline \
-  --rules=MB-R020
+  --rules=MB-R100,MB-R101
 ```
 
 ### Examples

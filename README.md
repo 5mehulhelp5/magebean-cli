@@ -184,6 +184,27 @@ Create `.magebean.json` in the Magento root to tune the baseline per project wit
 }
 ```
 
+For MB-R101, explicitly document approved global Admin ACL exceptions by overriding its check arguments. Both the role and every active user inheriting that role must be approved:
+
+```json
+{
+  "override_rules": {
+    "MB-R101": {
+      "checks": [
+        {
+          "name": "magento_admin_global_acl_restricted",
+          "args": {
+            "env_file": "app/etc/env.php",
+            "approved_global_role_names": ["Emergency Administrators"],
+            "approved_global_usernames": ["breakglass.admin"]
+          }
+        }
+      ]
+    }
+  }
+}
+```
+
 You can also attach external JSON rule packs:
 
 ```json

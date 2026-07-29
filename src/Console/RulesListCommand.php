@@ -22,7 +22,7 @@ PROFILES
   owasp      77 application-security rules mapped to OWASP Top 10 2025.
   pci        69 PCI DSS v4.0.1 payment-readiness rules.
   hardening  89 deep production-hardening rules.
-  baseline   All 99 local catalog rules. Aliases: all, magebean.
+  baseline   All 101 local catalog rules. Aliases: all, magebean.
   FILE       Custom profile JSON path or a profile under .magebean/profiles.
 
 OPTIONS

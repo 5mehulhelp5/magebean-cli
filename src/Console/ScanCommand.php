@@ -30,7 +30,7 @@ final class ScanCommand extends Command
 
     /** Keep help text in one place */
     private const HELP = <<<'HELP'
-<fg=cyan;options=bold>Audit Magento 2 production readiness</> using a catalog of <fg=green;options=bold>12 controls</> and <fg=green;options=bold>99 rules</>.
+<fg=cyan;options=bold>Audit Magento 2 production readiness</> using a catalog of <fg=green;options=bold>12 controls</> and <fg=green;options=bold>101 rules</>.
 The default <fg=green;options=bold>basic</> profile runs 21 fast, low-noise checks.
 Docs: <href=https://magebean.com/documentation>magebean.com/documentation</>
 
@@ -49,7 +49,7 @@ Docs: <href=https://magebean.com/documentation>magebean.com/documentation</>
   <fg=yellow>owasp</>      Application-security checks mapped to OWASP Top 10 2025.
   <fg=yellow>pci</>        PCI DSS v4.0.1 payment readiness; not a certification.
   <fg=yellow>hardening</>  89 deep production, code, dependency, integration, and operations checks.
-  <fg=yellow>baseline</>   All 99 local rules. Aliases: all, magebean.
+  <fg=yellow>baseline</>   All 101 local rules. Aliases: all, magebean.
   <fg=yellow>FILE</>       Custom JSON path or a profile under .magebean/profiles.
 
 <options=bold>COMMAND OPTIONS</>
@@ -57,7 +57,7 @@ Docs: <href=https://magebean.com/documentation>magebean.com/documentation</>
   <fg=yellow>--url=URL</>                       Absolute storefront URL; selects REMOTE or HYBRID mode.
   <fg=yellow>--profile=PROFILE|FILE</>          Built-in or custom profile. Default: basic.
   <fg=yellow>--controls=MB-Cxx,MB-Cxx</>       Restrict the loaded pack to control IDs.
-  <fg=yellow>--rules=MB-Rxxx,MB-Rxxx</>         Run only rules present in the selected profile.
+  <fg=yellow>--rules=MB-Rxxx,MB-Rxxx</>         Run listed rule IDs directly from the available catalog; bypasses profile selection.
   <fg=yellow>--exclude-rules=MB-Rxxx,...</>     Remove rules after profile and project configuration.
   <fg=yellow>--config=FILE</>                   Project policy file; auto-detected in LOCAL/HYBRID.
   <fg=yellow>--standard=NAME</>                 Legacy selector: magebean, owasp, pci, or cwe.
@@ -89,13 +89,13 @@ Docs: <href=https://magebean.com/documentation>magebean.com/documentation</>
 
   # Rule and control filters
   <fg=green>php magebean.phar scan --path=/var/www/magento --rules=MB-R031,MB-R037</>
-  <fg=green>php magebean.phar scan --path=/var/www/magento --profile=baseline --rules=MB-R020</>
+  <fg=green>php magebean.phar scan --path=/var/www/magento --rules=MB-R020</>
   <fg=green>php magebean.phar scan --path=/var/www/magento --profile=hardening --controls=MB-C01,MB-C05</>
   <fg=green>php magebean.phar scan --path=/var/www/magento --config=.magebean.yml --exclude-rules=MB-R032</>
 
 <options=bold>SELECTION ORDER</>
-  Target pack → project policy → profile → --rules → --exclude-rules.
-  Filters reduce a profile; they do not add rules outside it. Use baseline to select any catalog rule.
+  Target pack → project policy → (--rules OR profile) → --exclude-rules.
+  --rules bypasses profile selection and selects IDs directly from the available catalog.
 
 <options=bold>NOTES</>
   • REMOTE results cover only publicly observable behavior; local-only checks are omitted.
@@ -119,7 +119,7 @@ HELP;
     protected function configure(): void
     {
         $this
-            ->setDescription('Audit Magento 2 production readiness using 12 controls and a 99-rule catalog (basic: 21 rules).')
+            ->setDescription('Audit Magento 2 production readiness using 12 controls and a 101-rule catalog (basic: 21 rules).')
             ->addUsage('--url=https://magento-store.com')
             ->addUsage('--path=/var/www/html')
             ->addUsage('--path=/var/www/html --url=https://magento-store.com')
@@ -305,22 +305,32 @@ HELP;
                     'report_template' => 'standard',
                     '_source' => 'builtin:baseline',
                 ];
-            if ($profileOpt === '') {
-                $profileOpt = in_array($standard, ['owasp', 'pci'], true) ? $standard : 'basic';
-            }
-            if ($profileOpt !== '' && !in_array(strtolower($profileOpt), ['baseline', 'all', 'magebean', 'external'], true)) {
-                $profileBasePath = $targetMode === self::MODE_REMOTE ? (string)getcwd() : $projectPath;
-                $profile = ProfileLoader::load($profileOpt, $profileBasePath);
-                $profileCanBePartial = $targetMode === self::MODE_REMOTE
-                    || $controlsFilter !== [] || $projectConfig !== [];
-                $pack = ProfileLoader::apply($pack, $profile, $profileCanBePartial);
-                $activeProfile = ProfileLoader::publicMetadata($profile);
-                $standard = (string)($activeProfile['id'] ?? $standard);
-                $out->writeln(sprintf(
-                    '<info>Loaded profile:</info> %s (%d rules)',
-                    (string)($activeProfile['id'] ?? $profileOpt),
-                    count($pack['rules'] ?? [])
-                ));
+            $hasExplicitRuleSelection = trim($rulesOpt) !== '';
+            if ($hasExplicitRuleSelection) {
+                $standard = 'explicit-rules';
+                $activeProfile['id'] = 'explicit-rules';
+                $activeProfile['title'] = 'Explicit Rule Selection';
+                $activeProfile['description'] = 'Rules explicitly selected from the available catalog with --rules.';
+                $activeProfile['_source'] = 'cli:--rules';
+                $out->writeln('<info>Profile selection bypassed:</info> explicit --rules selection');
+            } else {
+                if ($profileOpt === '') {
+                    $profileOpt = in_array($standard, ['owasp', 'pci'], true) ? $standard : 'basic';
+                }
+                if ($profileOpt !== '' && !in_array(strtolower($profileOpt), ['baseline', 'all', 'magebean', 'external'], true)) {
+                    $profileBasePath = $targetMode === self::MODE_REMOTE ? (string)getcwd() : $projectPath;
+                    $profile = ProfileLoader::load($profileOpt, $profileBasePath);
+                    $profileCanBePartial = $targetMode === self::MODE_REMOTE
+                        || $controlsFilter !== [] || $projectConfig !== [];
+                    $pack = ProfileLoader::apply($pack, $profile, $profileCanBePartial);
+                    $activeProfile = ProfileLoader::publicMetadata($profile);
+                    $standard = (string)($activeProfile['id'] ?? $standard);
+                    $out->writeln(sprintf(
+                        '<info>Loaded profile:</info> %s (%d rules)',
+                        (string)($activeProfile['id'] ?? $profileOpt),
+                        count($pack['rules'] ?? [])
+                    ));
+                }
             }
 
             // filter by --rules (comma-separated IDs)
