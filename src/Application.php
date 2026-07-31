@@ -12,10 +12,13 @@ use Magebean\Console\{
 
 final class Application extends ConsoleApp
 {
+    public const VERSION = '1.0.0';
+    public const BASELINE_VERSION = '1.0';
+
     public function __construct()
     {
         $name = 'Magebean CLI — Magento 2 Security Audit';
-        parent::__construct($name, '0.1.0');
+        parent::__construct($name, self::VERSION);
         $this->add(new ScanCommand());
         $this->add(new RulesListCommand());
     }
@@ -24,7 +27,9 @@ final class Application extends ConsoleApp
     {
         return parent::getLongVersion()
             . PHP_EOL
-            . 'A practical Magento 2 security audit tool powered by Magebean Baseline V1.'
+            . 'A practical Magento 2 security audit tool powered by Magebean Baseline v'
+            . self::BASELINE_VERSION
+            . '.'
             . PHP_EOL;
     }
 }

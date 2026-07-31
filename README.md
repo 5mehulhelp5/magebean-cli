@@ -12,7 +12,7 @@ Audit Magento 2 security, configuration, performance, and extensions from the co
 - **Config Audit**: production mode, cache, Elasticsearch/OpenSearch, cron, logging/monitoring.
 - **Performance Signals**: cache effectiveness, DB indexes, static assets, storefront anti‑patterns.
 - **Extension Audit**: parse `composer.lock` to flag vulnerable/abandoned modules (CVE bundle optional).
-- **Offline‑first**: runs locally; privacy by design.
+- **Local-first**: most checks run locally. API-backed checks send endpoint-specific package or Magento version metadata documented in [API data disclosure](docs/api-reference.md#data-disclosure).
 - **CI‑friendly**: non‑zero exit codes on findings for pipelines.
 
 ---
@@ -58,7 +58,7 @@ See [CLI Reference](docs/cli-reference.md) for all commands, options, profiles, 
 ## 🖥️ CLI Output Template
 
 ```
-Magebean Security Audit v1.0        Target: /var/www/magento
+Magebean CLI v1.0.0 — Security Audit (Baseline v1.0)        Target: /var/www/magento
 Profile ID: BASIC
 Profile: Magebean Baseline
 Time: 2026-07-13 05:39   PHP: 8.4   Env: PRODUCTION

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Magebean\Console;
 
+use Magebean\Application;
 use Magebean\Engine\Context;
 use Magebean\Engine\ScanRunner;
 use Magebean\Engine\RulePackLoader;
@@ -536,7 +537,12 @@ HELP;
 
         // Header
         $out->writeln('');
-        $out->writeln(sprintf('<fg=cyan;options=bold>Magebean Security Audit v1.0</>        Target: <fg=green>%s</>', $path));
+        $out->writeln(sprintf(
+            '<fg=cyan;options=bold>Magebean CLI v%s — Security Audit (Baseline v%s)</>        Target: <fg=green>%s</>',
+            Application::VERSION,
+            Application::BASELINE_VERSION,
+            $path
+        ));
         $standard = (string)($result['meta']['standard'] ?? 'magebean');
         $profile = (array)($result['meta']['profile'] ?? []);
         $profileTitle = (string)($profile['title'] ?? $profile['id'] ?? 'Magebean Baseline');

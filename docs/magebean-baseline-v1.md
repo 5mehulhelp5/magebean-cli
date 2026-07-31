@@ -522,7 +522,7 @@ jobs:
 - **Audit Frequency:** Run baseline audits before every release and weekly on production environments.
 - **Remediation Workflow:** Prioritize fixes for *Critical* and *High* severity findings.
 - **Version Control:** Store reports in CI artifacts for traceability and compliance.
-- **Offline Mode:** Magebean CLI runs fully offline to preserve privacy; CVE databases can be updated manually when needed.
+- **Local and API-backed operation:** Most checks run locally. Rules backed by Magebean APIs send endpoint-specific package or Magento version metadata when selected; Adobe package and patch alternatives are evaluated locally. See the [API data disclosure](api-reference.md#data-disclosure). Blocking those requests can cause the affected rules to return `UNKNOWN`.
 
 ---
 

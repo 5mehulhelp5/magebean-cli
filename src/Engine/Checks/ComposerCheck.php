@@ -268,7 +268,10 @@ final class ComposerCheck
             'schema_version' => 'magebean-adobe-patch-request-v1',
             'product' => $product,
             'installed_version' => $version,
-            'evidence' => $localPatchEvidence,
+            'evidence' => [
+                'packages' => (object)[],
+                'patch_artifacts' => [],
+            ],
             'client' => ['name' => 'magebean-cli', 'version' => (string)($args['client_version'] ?? 'dev')],
         ];
         $timeoutMs = max(1000, (int)($args['timeout_ms'] ?? 10000));
@@ -301,7 +304,7 @@ final class ComposerCheck
             ]];
         }
         if (($decoded['schema_version'] ?? null) === 'magebean-adobe-patch-response-v1') {
-            $decoded = $this->applyAdobeFingerprintEvidence($decoded);
+            $decoded = $this->applyAdobeFingerprintEvidence($decoded, $localPatchEvidence);
         }
         if (($decoded['schema_version'] ?? null) !== 'magebean-adobe-patch-response-v1') {
             return [null, '[UNKNOWN] Unsupported Adobe patch API response schema', [
@@ -5499,7 +5502,7 @@ final class ComposerCheck
         return is_array($data) ? $data : null;
     }
 
-    private function applyAdobeFingerprintEvidence(array $response): array
+    private function applyAdobeFingerprintEvidence(array $response, array $localEvidence = []): array
     {
         $remaining = [];
         $satisfied = is_array($response['satisfied_by_alternatives'] ?? null)
@@ -5509,8 +5512,59 @@ final class ComposerCheck
         foreach ((array)($response['missing_patches'] ?? []) as $patch) {
             if (!is_array($patch)) continue;
             $proof = null;
+
             foreach ((array)($patch['alternative_rules'] ?? []) as $rule) {
-                if (!is_array($rule) || ($rule['type'] ?? null) !== 'file_sha256') continue;
+                if (!is_array($rule)) continue;
+                $type = (string)($rule['type'] ?? '');
+
+                if ($type === 'package_constraint') {
+                    $package = strtolower(trim((string)($rule['package'] ?? '')));
+                    $constraint = trim((string)($rule['constraint'] ?? ''));
+                    $version = $localEvidence['packages'][$package] ?? null;
+                    if (is_string($version) && $constraint !== '') {
+                        try {
+                            if (\Composer\Semver\Semver::satisfies($version, $constraint)) {
+                                $proof = [
+                                    'type' => $type,
+                                    'label' => $rule['label'] ?? null,
+                                    'package' => $package,
+                                    'version' => $version,
+                                    'constraint' => $constraint,
+                                    'verification' => 'installed package constraint matched locally',
+                                    'source_url' => $rule['source_url'] ?? null,
+                                ];
+                                break;
+                            }
+                        } catch (\Throwable) {
+                            // Invalid constraints cannot satisfy an alternative.
+                        }
+                    }
+                    continue;
+                }
+
+                if ($type === 'patch_identifier') {
+                    $pattern = strtolower(trim((string)($rule['pattern'] ?? '')));
+                    foreach ((array)($localEvidence['patch_artifacts'] ?? []) as $artifact) {
+                        if (!is_array($artifact) || empty($artifact['applied']) || $pattern === '') continue;
+                        $haystack = strtolower(implode(' ', array_merge(
+                            [(string)($artifact['path'] ?? '')],
+                            array_map('strval', (array)($artifact['identifiers'] ?? []))
+                        )));
+                        if ($haystack !== '' && str_contains($haystack, $pattern)) {
+                            $proof = [
+                                'type' => $type,
+                                'label' => $rule['label'] ?? null,
+                                'identifier' => $pattern,
+                                'verification' => 'applied patch identifier matched locally',
+                                'source_url' => $rule['source_url'] ?? null,
+                            ];
+                            break 2;
+                        }
+                    }
+                    continue;
+                }
+
+                if ($type !== 'file_sha256') continue;
                 $relative = str_replace('\\', '/', trim((string)($rule['path'] ?? '')));
                 $expected = strtolower((string)($rule['patched_sha256'] ?? $rule['sha256'] ?? ''));
                 if ($relative === '' || str_starts_with($relative, '/') || str_contains($relative, '../')
@@ -5522,16 +5576,17 @@ final class ComposerCheck
                 $actual = hash_file('sha256', $absolute);
                 if (is_string($actual) && hash_equals($expected, strtolower($actual))) {
                     $proof = [
-                        'type' => 'file_sha256',
+                        'type' => $type,
                         'label' => $rule['label'] ?? null,
                         'path' => $relative,
                         'sha256' => $actual,
-                        'verification' => 'patched file fingerprint matched',
+                        'verification' => 'patched file fingerprint matched locally',
                         'source_url' => $rule['source_url'] ?? null,
                     ];
                     break;
                 }
             }
+
             if ($proof === null) {
                 $remaining[] = $patch;
                 continue;
