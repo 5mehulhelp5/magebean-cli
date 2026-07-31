@@ -5,7 +5,7 @@ Magebean CLI audits Magento 2 production readiness using a catalog of 12 control
 Current CLI version:
 
 ```text
-Magebean CLI — Magento 2 Security Audit 0.1.0
+Magebean CLI — Magento 2 Security Audit 1.0.0
 ```
 
 ## Invocation
@@ -119,6 +119,8 @@ Target rule pack
 ```
 
 When `--rules` is provided, Magebean bypasses profile selection and resolves the requested IDs directly from the available catalog. A separate `--profile` value is ignored for that scan:
+
+With `--rules`, the summary renders every selected rule, including PASS, FAIL, and INCONCLUSIVE. Each rule includes a `Detail` block with the underlying check name, status, and full multiline message. Without `--rules`, the summary remains compact.
 
 ```bash
 php magebean.phar scan \

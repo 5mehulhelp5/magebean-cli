@@ -588,6 +588,8 @@ HELP;
             static fn(array $finding): bool => empty($finding['passed'])
         ));
         usort($attentionFindings, fn($a, $b) => $this->sevOrder($a['severity'] ?? 'Low') <=> $this->sevOrder($b['severity'] ?? 'Low'));
+        $allFindings = array_values((array)($result['findings'] ?? []));
+        usort($allFindings, fn($a, $b) => $this->sevOrder($a['severity'] ?? 'Low') <=> $this->sevOrder($b['severity'] ?? 'Low'));
         $inconclusiveFindings = array_values(array_filter(
             $attentionFindings,
             static fn(array $finding): bool => strtoupper((string)($finding['status'] ?? '')) === 'UNKNOWN'
@@ -641,12 +643,12 @@ HELP;
         $rulesFilter = array_values(array_filter((array)($result['meta']['rules_filter'] ?? [])));
         $showRuleDetails = $rulesFilter !== [];
         if ($showRuleDetails) {
-            $out->writeln(sprintf('<options=bold>Rule details</> (<fg=yellow>%d</>)', count($attentionFindings)));
+            $out->writeln(sprintf('<options=bold>Rule details</> (<fg=yellow>%d</>)', count($allFindings)));
         } elseif ($confirmedFindings !== []) {
             $out->writeln(sprintf('<options=bold>Findings</> (<fg=yellow>%d</>)', count($confirmedFindings)));
         }
 
-        $findingsToRender = $showRuleDetails ? $attentionFindings : $confirmedFindings;
+        $findingsToRender = $showRuleDetails ? $allFindings : $confirmedFindings;
         foreach ($findingsToRender as $f) {
             $sev = strtoupper((string)($f['severity'] ?? 'LOW'));
             $id = trim((string)($f['id'] ?? ''));
@@ -654,7 +656,13 @@ HELP;
             $text = $showRuleDetails
                 ? $this->detailedFindingMessage($f)
                 : $this->compactFindingDescription($f);
-            $statusTag = $status === 'UNKNOWN' ? '<fg=magenta;options=bold>[INCONCLUSIVE]</> ' : '';
+            $statusTag = $showRuleDetails
+                ? match ($status) {
+                    'PASS' => '<fg=green;options=bold>[PASS]</> ',
+                    'UNKNOWN' => '<fg=magenta;options=bold>[INCONCLUSIVE]</> ',
+                    default => '<fg=red;options=bold>[FAIL]</> ',
+                }
+                : '';
             $line = $id !== ''
                 ? sprintf('%s%s <href=https://magebean.com/baseline/%3$s>%3$s</> %4$s', $statusTag, $sevBadge($sev), $id, $text)
                 : sprintf('%s%s %s', $statusTag, $sevBadge($sev), $text);
@@ -672,6 +680,10 @@ HELP;
                     '      <fg=green>php magebean.phar scan %s--rules=MB-R049</>',
                     $targetOption
                 ));
+            }
+
+            if ($showRuleDetails) {
+                $this->renderCheckDetails($out, $f);
             }
 
             if ($showRuleDetails && in_array($status, ['FAIL', 'UNKNOWN'], true)) {
@@ -1319,6 +1331,40 @@ HTML;
         $message = trim((string)($finding['message'] ?? ''));
         $message = preg_replace('/^\[UNKNOWN\]\s*/', '', $message) ?? $message;
         return $message !== '' ? $message : trim((string)($finding['title'] ?? ''));
+    }
+
+    private function renderCheckDetails(OutputInterface $out, array $finding): void
+    {
+        $items = is_array($finding['detail'] ?? null) ? $finding['detail'] : [];
+        if ($items === []) {
+            foreach ((array)($finding['details'] ?? []) as $legacy) {
+                if (!is_array($legacy)) continue;
+                $items[] = [
+                    'check' => (string)($legacy[0] ?? ''),
+                    'message' => (string)($legacy[1] ?? ''),
+                    'status' => ($legacy[2] ?? null) === true
+                        ? 'PASS'
+                        : (($legacy[2] ?? null) === false ? 'FAIL' : 'UNKNOWN'),
+                ];
+            }
+        }
+        if ($items === []) return;
+
+        $out->writeln('    <options=bold>Detail</>');
+        foreach ($items as $item) {
+            if (!is_array($item)) continue;
+            $check = trim((string)($item['check'] ?? 'check'));
+            $status = strtoupper(trim((string)($item['status'] ?? 'UNKNOWN')));
+            $message = trim((string)($item['message'] ?? ''));
+            $lines = preg_split('/\R/', $message) ?: [];
+            $first = array_shift($lines) ?: '';
+            $out->writeln(sprintf('      - %s [%s]: %s', $check, $status, $first));
+            foreach ($lines as $line) {
+                if (trim($line) !== '') {
+                    $out->writeln('        ' . rtrim($line));
+                }
+            }
+        }
     }
 
     /** @return list<string> */

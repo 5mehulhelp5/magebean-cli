@@ -93,7 +93,7 @@ Contact: support@magebean.com
 
 - The summary reports passed checks, confirmed findings, inconclusive checks, and confirmed-finding severity counts separately.
 - The default output lists every finding with its existing description, without verbose evidence or package/path lists.
-- Use `--rules=MB-R0xx` to inspect one rule with its full evidence and remediation details.
+- Use `--rules=MB-R0xx` to inspect one rule with every selected result (including PASS), per-check status and full messages, plus remediation for FAIL or INCONCLUSIVE.
 - Inconclusive rule details include contextual `How to resolve` steps and a re-run command.
 - Multiple rules can be inspected with a comma-separated filter such as `--rules=MB-R091,MB-R006`.
 

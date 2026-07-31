@@ -151,6 +151,17 @@ final class ScanRunner
             if ($status === 'UNKNOWN' && (!isset($finalMsg) || trim((string)$finalMsg) === '')) {
                 $finalMsg = 'CVE file not found (requires --cve-data package)';
             }
+            $detail = array_map(
+                static fn(array $item): array => [
+                    'check' => (string)($item[0] ?? ''),
+                    'status' => ($item[2] ?? null) === true
+                        ? 'PASS'
+                        : (($item[2] ?? null) === false ? 'FAIL' : 'UNKNOWN'),
+                    'message' => (string)($item[1] ?? ''),
+                ],
+                $details
+            );
+
             $finding = [
                 'id'       => $rule['id'],
                 'title'    => $rule['title'],
@@ -159,6 +170,7 @@ final class ScanRunner
                 'passed'   => $ok,
                 'status'   => $status,
                 'message'  => $finalMsg,
+                'detail'   => $detail,
                 'details'  => $details,
                 'evidence' => $evidence,
             ];
