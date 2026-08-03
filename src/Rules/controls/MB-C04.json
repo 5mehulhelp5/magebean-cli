@@ -27,7 +27,7 @@
         },
         {
             "id": "MB-R027",
-            "title": "HSTS header is set",
+            "title": "HSTS max-age is at least one year",
             "control": "MB-C04",
             "severity": "medium",
             "op": "any",
@@ -35,7 +35,7 @@
                 {
                     "name": "http_has_hsts",
                     "args": {
-                        "min_max_age": 15552000,
+                        "min_max_age": 31536000,
                         "timeout_ms": 8000
                     }
                 },
@@ -47,13 +47,13 @@
                             "pub/.htaccess",
                             ".htaccess"
                         ],
-                        "min_max_age": 15552000
+                        "min_max_age": 31536000
                     }
                 }
             ],
             "messages": {
-                "pass": "HSTS (Strict-Transport-Security) header is configured.",
-                "fail": "HSTS header is missing. Add Strict-Transport-Security to enforce HTTPS on clients."
+                "pass": "HSTS is configured with max-age of at least 31536000 seconds.",
+                "fail": "HSTS is missing or max-age is shorter than one year. Configure Strict-Transport-Security with max-age of at least 31536000 seconds."
             }
         },
         {
@@ -116,7 +116,7 @@
         },
         {
             "id": "MB-R030",
-            "title": "Secure cookies: Secure + HttpOnly enabled",
+            "title": "Sensitive cookies use Secure, HttpOnly, and SameSite",
             "control": "MB-C04",
             "severity": "high",
             "op": "all",
@@ -147,8 +147,8 @@
                 }
             ],
             "messages": {
-                "pass": "Session cookies are configured with Secure, HttpOnly, and SameSite flags.",
-                "fail": "Cookies lack Secure, HttpOnly, or SameSite flags. Enable them to protect against theft, XSS, and CSRF."
+                "pass": "Observed sensitive cookies and Magento cookie configuration use Secure, HttpOnly, and an allowed SameSite policy.",
+                "fail": "A sensitive cookie or Magento cookie setting lacks Secure, HttpOnly, or an allowed SameSite policy. Cookie-name prefix requirements require separate evidence."
             }
         },
         {

@@ -67,6 +67,7 @@ final class ScanRunner
             $hasTrue = false;
             $hasFalse = false;
             $hasUnknown = false;
+            $hasManualReview = false;
 
             foreach ($rule['checks'] as $chk) {
                 $name = $chk['name'];
@@ -95,12 +96,17 @@ final class ScanRunner
                     $hasFalse = true;
                 } else {
                     $hasUnknown = true;
+                    if (str_starts_with($msg, '[MANUAL_REVIEW]')) {
+                        $hasManualReview = true;
+                    }
                 }
             }
 
             if ($op === 'any') {
                 if ($ok) {
                     $status = 'PASS';
+                } elseif ($hasManualReview) {
+                    $status = 'MANUAL_REVIEW';
                 } elseif ($hasUnknown && !$hasFalse) {
                     $status = 'UNKNOWN';
                 } else {
@@ -110,6 +116,9 @@ final class ScanRunner
                 if ($hasFalse) {
                     $ok = false;
                     $status = 'FAIL';
+                } elseif ($hasManualReview) {
+                    $ok = null;
+                    $status = 'MANUAL_REVIEW';
                 } elseif ($hasUnknown) {
                     $ok = null;
                     $status = 'UNKNOWN';
@@ -120,7 +129,13 @@ final class ScanRunner
             }
             $msgPass = $rule['messages']['pass'] ?? null;
             $msgFail = $rule['messages']['fail'] ?? null;
-            if ($status === 'UNKNOWN') {
+            if ($status === 'MANUAL_REVIEW') {
+                $manualMsgs = array_values(array_map(
+                    fn($d) => preg_replace('/^\[MANUAL_REVIEW\]\s*/', '', (string)$d[1]),
+                    array_filter($details, fn($d) => is_string($d[1]) && str_starts_with($d[1], '[MANUAL_REVIEW]'))
+                ));
+                $finalMsg = $manualMsgs[0] ?? 'Human manual review and supporting evidence are required.';
+            } elseif ($status === 'UNKNOWN') {
                 $unkMsgs = array_values(array_map(
                     fn($d) => $d[1],
                     array_filter($details, fn($d) => ($d[2] === null) || (is_string($d[1]) && str_starts_with((string)$d[1], '[UNKNOWN]')))
@@ -154,9 +169,11 @@ final class ScanRunner
             $detail = array_map(
                 static fn(array $item): array => [
                     'check' => (string)($item[0] ?? ''),
-                    'status' => ($item[2] ?? null) === true
+                    'status' => is_string($item[1] ?? null) && str_starts_with((string)$item[1], '[MANUAL_REVIEW]')
+                        ? 'MANUAL_REVIEW'
+                        : (($item[2] ?? null) === true
                         ? 'PASS'
-                        : (($item[2] ?? null) === false ? 'FAIL' : 'UNKNOWN'),
+                        : (($item[2] ?? null) === false ? 'FAIL' : 'UNKNOWN')),
                     'message' => (string)($item[1] ?? ''),
                 ],
                 $details
@@ -206,8 +223,10 @@ final class ScanRunner
         }
 
         $unknown = 0;
+        $manualReview = 0;
         foreach ($findings as $f) {
             if (($f['status'] ?? '') === 'UNKNOWN') $unknown++;
+            if (($f['status'] ?? '') === 'MANUAL_REVIEW') $manualReview++;
         }
         // Lấy transport counters từ HttpCheck nếu có (để tính transport_success_percent ở ScanCommand)
         $tc = $this->registry->transportCounts();
@@ -215,7 +234,7 @@ final class ScanRunner
         $transportTotal = (int)($tc['total'] ?? 0);
 
         return [
-            'summary'  => ['passed' => $passed, 'failed' => $failed, 'unknown' => $unknown, 'total' => count($findings)],
+            'summary'  => ['passed' => $passed, 'failed' => $failed, 'unknown' => $unknown, 'manual_review' => $manualReview, 'total' => count($findings)],
             'findings' => $findings,
             'meta'     => [
                 'planned_rules'  => $plannedRules,

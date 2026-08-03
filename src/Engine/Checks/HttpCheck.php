@@ -249,7 +249,7 @@ final class HttpCheck
 
         if ($h === '') return [false, 'HSTS header missing', $evidence];
         if (preg_match('~max-age\s*=\s*(\d+)~i', $h, $m)) {
-            $min = (int)($args['min_max_age'] ?? 15552000);
+            $min = (int)($args['min_max_age'] ?? 31536000);
             $evidence['max_age'] = (int)$m[1];
             $evidence['min_max_age'] = $min;
             $maxAgeOk = ((int)$m[1] >= $min);

@@ -33,6 +33,18 @@ final class CheckRegistry
 
         $registry->services['http'] = $http;
 
+        $registry->register('human_manual_review_required', static function (array $args): array {
+            $requirement = trim((string)($args['requirement'] ?? ''));
+            $review = trim((string)($args['review'] ?? 'Human review and supporting evidence are required.'));
+            $message = '[MANUAL_REVIEW] ' . $review;
+            return [null, $message, [
+                'manual_review' => true,
+                'requirement' => $requirement,
+                'review' => $review,
+                'evidence_needed' => array_values((array)($args['evidence_needed'] ?? [])),
+            ]];
+        });
+
         $registry->register('http_header', fn(array $args): array => $http->stub($args));
         $registry->registerPrefix('http_', fn(string $name, array $args): array => $http->dispatch($name, $args));
 

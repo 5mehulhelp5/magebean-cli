@@ -19,10 +19,11 @@ List Magebean rules after applying a profile and optional control/severity filte
 
 PROFILES
   basic      Default; 21 basic production-readiness rules.
+  asvs-l1    60 OWASP ASVS 5.0 Level 1 mapped rules; partial automated coverage.
   owasp      77 application-security rules mapped to OWASP Top 10 2025.
   pci        69 PCI DSS v4.0.1 payment-readiness rules.
   hardening  89 deep production-hardening rules.
-  baseline   All 101 local catalog rules. Aliases: all, magebean.
+  baseline   All 135 local catalog rules. Aliases: all, magebean.
   FILE       Custom profile JSON path or a profile under .magebean/profiles.
 
 OPTIONS
@@ -39,6 +40,7 @@ OPTIONS
 
 EXAMPLES
   php magebean.phar rules:list
+  php magebean.phar rules:list --profile=asvs-l1
   php magebean.phar rules:list --profile=hardening
   php magebean.phar rules:list --profile=baseline --control=MB-C03
   php magebean.phar rules:list --profile=owasp --severity=critical
@@ -56,7 +58,7 @@ HELP;
             ->addUsage('--profile=owasp --severity=critical')
             ->setHelp(self::HELP)
             ->addOption('control', null, InputOption::VALUE_OPTIONAL, 'Comma list of controls (e.g. MB-C01,MB-C02)')
-            ->addOption('profile', null, InputOption::VALUE_OPTIONAL, 'Profile: basic (default) | owasp | pci | hardening | baseline | custom JSON')
+            ->addOption('profile', null, InputOption::VALUE_OPTIONAL, 'Profile: basic (default) | asvs-l1 | owasp | pci | hardening | baseline | custom JSON')
             ->addOption('severity', null, InputOption::VALUE_OPTIONAL, 'low|medium|high|critical');
     }
     protected function execute(InputInterface $in, OutputInterface $out): int

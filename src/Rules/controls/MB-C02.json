@@ -61,7 +61,7 @@
     },
     {
       "id": "MB-R008",
-      "title": "Strong password policy enforced",
+      "title": "Admin passwords require at least 8 characters",
       "control": "MB-C02",
       "severity": "high",
       "op": "all",
@@ -71,15 +71,13 @@
           "args": {
             "file": "app/etc/config.php",
             "base_path": "system.default.admin.security",
-            "min_password_length": 12,
-            "max_lockout_failures": 10,
-            "max_password_lifetime_days": 90
+            "min_password_length": 8
           }
         }
       ],
       "messages": {
-        "pass": "Admin password/security policy meets minimum strength requirements.",
-        "fail": "Admin password/security policy is weak or incomplete. Define minimum length, lockout, and rotation settings under admin/security."
+        "pass": "Admin password policy requires at least 8 characters.",
+        "fail": "Admin password minimum length is missing or lower than 8 characters. Configure a minimum of 8 characters; 15 or more is strongly recommended."
       }
     },
     {

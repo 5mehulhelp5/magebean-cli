@@ -11,6 +11,9 @@ final class SarifReporter implements Reporter
         $runs = [];
         foreach ($result['findings'] as $f) {
             $runs[] = ['ruleId' => $f['id'], 'level' => $f['passed'] ? 'note' : 'error', 'message' => ['text' => $f['title']]];
+            if (strtoupper((string)($f['status'] ?? '')) !== 'FAIL') {
+                continue;
+            }
         }
         $sarif = ['version' => '2.1.0', 'runs' => [['results' => $runs]]];
         file_put_contents($outFile, json_encode($sarif, JSON_PRETTY_PRINT));

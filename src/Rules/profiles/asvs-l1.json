@@ -1,0 +1,1196 @@
+{
+  "id": "asvs-l1",
+  "title": "Magebean ASVS-Aligned Level 1",
+  "description": "OWASP ASVS 5.0 Level 1 mapping with partial automated coverage. This profile does not claim OWASP certification or full ASVS compliance.",
+  "standard": {
+    "id": "owasp-asvs",
+    "version": "5.0.0",
+    "level": 1,
+    "alignment": "ASVS-aligned"
+  },
+  "coverage_summary": {
+    "total_requirements": 70,
+    "automated": 15,
+    "partially_automated": 15,
+    "manual_review": 28,
+    "not_yet_covered": 12
+  },
+  "report_template": "owasp",
+  "rules": [
+    {
+      "id": "MB-R008",
+      "evidence_type": "automated",
+      "mappings": [
+        {
+          "requirement": "6.2.1",
+          "coverage": "AUTOMATED"
+        }
+      ]
+    },
+    {
+      "id": "MB-R011",
+      "evidence_type": "automated",
+      "mappings": [
+        {
+          "requirement": "6.3.1",
+          "coverage": "PARTIALLY_AUTOMATED"
+        }
+      ]
+    },
+    {
+      "id": "MB-R012",
+      "evidence_type": "automated",
+      "mappings": [
+        {
+          "requirement": "1.2.4",
+          "coverage": "PARTIALLY_AUTOMATED"
+        }
+      ]
+    },
+    {
+      "id": "MB-R013",
+      "evidence_type": "automated",
+      "mappings": [
+        {
+          "requirement": "1.2.1",
+          "coverage": "PARTIALLY_AUTOMATED"
+        }
+      ]
+    },
+    {
+      "id": "MB-R014",
+      "evidence_type": "automated",
+      "mappings": [
+        {
+          "requirement": "2.2.2",
+          "coverage": "PARTIALLY_AUTOMATED"
+        }
+      ]
+    },
+    {
+      "id": "MB-R015",
+      "evidence_type": "automated",
+      "mappings": [
+        {
+          "requirement": "3.5.1",
+          "coverage": "PARTIALLY_AUTOMATED"
+        }
+      ]
+    },
+    {
+      "id": "MB-R016",
+      "evidence_type": "automated",
+      "mappings": [
+        {
+          "requirement": "1.2.2",
+          "coverage": "PARTIALLY_AUTOMATED"
+        },
+        {
+          "requirement": "5.3.2",
+          "coverage": "PARTIALLY_AUTOMATED"
+        }
+      ]
+    },
+    {
+      "id": "MB-R018",
+      "evidence_type": "automated",
+      "mappings": [
+        {
+          "requirement": "1.2.5",
+          "coverage": "PARTIALLY_AUTOMATED"
+        }
+      ]
+    },
+    {
+      "id": "MB-R019",
+      "evidence_type": "automated",
+      "mappings": [
+        {
+          "requirement": "1.3.2",
+          "coverage": "AUTOMATED"
+        }
+      ]
+    },
+    {
+      "id": "MB-R020",
+      "evidence_type": "automated",
+      "mappings": [
+        {
+          "requirement": "1.2.2",
+          "coverage": "PARTIALLY_AUTOMATED"
+        },
+        {
+          "requirement": "5.3.2",
+          "coverage": "PARTIALLY_AUTOMATED"
+        }
+      ]
+    },
+    {
+      "id": "MB-R021",
+      "evidence_type": "automated",
+      "mappings": [
+        {
+          "requirement": "5.2.1",
+          "coverage": "PARTIALLY_AUTOMATED"
+        },
+        {
+          "requirement": "5.2.2",
+          "coverage": "PARTIALLY_AUTOMATED"
+        },
+        {
+          "requirement": "5.3.1",
+          "coverage": "AUTOMATED"
+        },
+        {
+          "requirement": "5.3.2",
+          "coverage": "PARTIALLY_AUTOMATED"
+        }
+      ]
+    },
+    {
+      "id": "MB-R022",
+      "evidence_type": "automated",
+      "mappings": [
+        {
+          "requirement": "1.2.3",
+          "coverage": "AUTOMATED"
+        }
+      ]
+    },
+    {
+      "id": "MB-R025",
+      "evidence_type": "automated",
+      "mappings": [
+        {
+          "requirement": "11.3.2",
+          "coverage": "PARTIALLY_AUTOMATED"
+        }
+      ]
+    },
+    {
+      "id": "MB-R026",
+      "evidence_type": "automated",
+      "mappings": [
+        {
+          "requirement": "12.2.1",
+          "coverage": "AUTOMATED"
+        }
+      ]
+    },
+    {
+      "id": "MB-R027",
+      "evidence_type": "automated",
+      "mappings": [
+        {
+          "requirement": "3.4.1",
+          "coverage": "AUTOMATED"
+        }
+      ]
+    },
+    {
+      "id": "MB-R028",
+      "evidence_type": "automated",
+      "mappings": [
+        {
+          "requirement": "12.1.1",
+          "coverage": "AUTOMATED"
+        }
+      ]
+    },
+    {
+      "id": "MB-R030",
+      "evidence_type": "automated",
+      "mappings": [
+        {
+          "requirement": "3.3.1",
+          "coverage": "PARTIALLY_AUTOMATED"
+        }
+      ]
+    },
+    {
+      "id": "MB-R049",
+      "evidence_type": "automated",
+      "mappings": [
+        {
+          "requirement": "15.2.1",
+          "coverage": "AUTOMATED"
+        }
+      ]
+    },
+    {
+      "id": "MB-R050",
+      "evidence_type": "automated",
+      "mappings": [
+        {
+          "requirement": "15.2.1",
+          "coverage": "AUTOMATED"
+        }
+      ]
+    },
+    {
+      "id": "MB-R059",
+      "evidence_type": "automated",
+      "mappings": [
+        {
+          "requirement": "15.2.1",
+          "coverage": "AUTOMATED"
+        }
+      ]
+    },
+    {
+      "id": "MB-R073",
+      "evidence_type": "automated",
+      "mappings": [
+        {
+          "requirement": "12.2.1",
+          "coverage": "AUTOMATED"
+        }
+      ]
+    },
+    {
+      "id": "MB-R091",
+      "evidence_type": "automated",
+      "mappings": [
+        {
+          "requirement": "5.3.1",
+          "coverage": "AUTOMATED"
+        }
+      ]
+    },
+    {
+      "id": "MB-R094",
+      "evidence_type": "automated",
+      "mappings": [
+        {
+          "requirement": "8.2.1",
+          "coverage": "PARTIALLY_AUTOMATED"
+        }
+      ]
+    },
+    {
+      "id": "MB-R096",
+      "evidence_type": "automated",
+      "mappings": [
+        {
+          "requirement": "3.2.1",
+          "coverage": "PARTIALLY_AUTOMATED"
+        }
+      ]
+    },
+    {
+      "id": "MB-R098",
+      "evidence_type": "automated",
+      "mappings": [
+        {
+          "requirement": "1.5.1",
+          "coverage": "AUTOMATED"
+        }
+      ]
+    },
+    {
+      "id": "MB-R099",
+      "evidence_type": "automated",
+      "mappings": [
+        {
+          "requirement": "8.2.1",
+          "coverage": "PARTIALLY_AUTOMATED"
+        }
+      ]
+    },
+    {
+      "id": "MB-R102",
+      "evidence_type": "manual",
+      "mappings": [
+        {
+          "requirement": "2.1.1",
+          "coverage": "MANUAL_REVIEW"
+        }
+      ]
+    },
+    {
+      "id": "MB-R103",
+      "evidence_type": "manual",
+      "mappings": [
+        {
+          "requirement": "2.3.1",
+          "coverage": "MANUAL_REVIEW"
+        }
+      ]
+    },
+    {
+      "id": "MB-R104",
+      "evidence_type": "manual",
+      "mappings": [
+        {
+          "requirement": "6.1.1",
+          "coverage": "MANUAL_REVIEW"
+        }
+      ]
+    },
+    {
+      "id": "MB-R105",
+      "evidence_type": "manual",
+      "mappings": [
+        {
+          "requirement": "6.2.2",
+          "coverage": "MANUAL_REVIEW"
+        }
+      ]
+    },
+    {
+      "id": "MB-R106",
+      "evidence_type": "manual",
+      "mappings": [
+        {
+          "requirement": "6.2.3",
+          "coverage": "MANUAL_REVIEW"
+        }
+      ]
+    },
+    {
+      "id": "MB-R107",
+      "evidence_type": "manual",
+      "mappings": [
+        {
+          "requirement": "6.2.5",
+          "coverage": "MANUAL_REVIEW"
+        }
+      ]
+    },
+    {
+      "id": "MB-R108",
+      "evidence_type": "manual",
+      "mappings": [
+        {
+          "requirement": "6.2.6",
+          "coverage": "MANUAL_REVIEW"
+        }
+      ]
+    },
+    {
+      "id": "MB-R109",
+      "evidence_type": "manual",
+      "mappings": [
+        {
+          "requirement": "6.2.7",
+          "coverage": "MANUAL_REVIEW"
+        }
+      ]
+    },
+    {
+      "id": "MB-R110",
+      "evidence_type": "manual",
+      "mappings": [
+        {
+          "requirement": "6.2.8",
+          "coverage": "MANUAL_REVIEW"
+        }
+      ]
+    },
+    {
+      "id": "MB-R111",
+      "evidence_type": "manual",
+      "mappings": [
+        {
+          "requirement": "6.4.1",
+          "coverage": "MANUAL_REVIEW"
+        }
+      ]
+    },
+    {
+      "id": "MB-R112",
+      "evidence_type": "manual",
+      "mappings": [
+        {
+          "requirement": "6.4.2",
+          "coverage": "MANUAL_REVIEW"
+        }
+      ]
+    },
+    {
+      "id": "MB-R113",
+      "evidence_type": "manual",
+      "mappings": [
+        {
+          "requirement": "7.2.1",
+          "coverage": "MANUAL_REVIEW"
+        }
+      ]
+    },
+    {
+      "id": "MB-R114",
+      "evidence_type": "manual",
+      "mappings": [
+        {
+          "requirement": "7.2.2",
+          "coverage": "MANUAL_REVIEW"
+        }
+      ]
+    },
+    {
+      "id": "MB-R115",
+      "evidence_type": "manual",
+      "mappings": [
+        {
+          "requirement": "7.2.3",
+          "coverage": "MANUAL_REVIEW"
+        }
+      ]
+    },
+    {
+      "id": "MB-R116",
+      "evidence_type": "manual",
+      "mappings": [
+        {
+          "requirement": "7.2.4",
+          "coverage": "MANUAL_REVIEW"
+        }
+      ]
+    },
+    {
+      "id": "MB-R117",
+      "evidence_type": "manual",
+      "mappings": [
+        {
+          "requirement": "7.4.1",
+          "coverage": "MANUAL_REVIEW"
+        }
+      ]
+    },
+    {
+      "id": "MB-R118",
+      "evidence_type": "manual",
+      "mappings": [
+        {
+          "requirement": "7.4.2",
+          "coverage": "MANUAL_REVIEW"
+        }
+      ]
+    },
+    {
+      "id": "MB-R119",
+      "evidence_type": "manual",
+      "mappings": [
+        {
+          "requirement": "8.1.1",
+          "coverage": "MANUAL_REVIEW"
+        }
+      ]
+    },
+    {
+      "id": "MB-R120",
+      "evidence_type": "manual",
+      "mappings": [
+        {
+          "requirement": "8.2.2",
+          "coverage": "MANUAL_REVIEW"
+        }
+      ]
+    },
+    {
+      "id": "MB-R121",
+      "evidence_type": "manual",
+      "mappings": [
+        {
+          "requirement": "8.3.1",
+          "coverage": "MANUAL_REVIEW"
+        }
+      ]
+    },
+    {
+      "id": "MB-R122",
+      "evidence_type": "manual",
+      "mappings": [
+        {
+          "requirement": "10.4.1",
+          "coverage": "MANUAL_REVIEW"
+        }
+      ]
+    },
+    {
+      "id": "MB-R123",
+      "evidence_type": "manual",
+      "mappings": [
+        {
+          "requirement": "10.4.2",
+          "coverage": "MANUAL_REVIEW"
+        }
+      ]
+    },
+    {
+      "id": "MB-R124",
+      "evidence_type": "manual",
+      "mappings": [
+        {
+          "requirement": "10.4.3",
+          "coverage": "MANUAL_REVIEW"
+        }
+      ]
+    },
+    {
+      "id": "MB-R125",
+      "evidence_type": "manual",
+      "mappings": [
+        {
+          "requirement": "10.4.4",
+          "coverage": "MANUAL_REVIEW"
+        }
+      ]
+    },
+    {
+      "id": "MB-R126",
+      "evidence_type": "manual",
+      "mappings": [
+        {
+          "requirement": "10.4.5",
+          "coverage": "MANUAL_REVIEW"
+        }
+      ]
+    },
+    {
+      "id": "MB-R127",
+      "evidence_type": "manual",
+      "mappings": [
+        {
+          "requirement": "14.3.1",
+          "coverage": "MANUAL_REVIEW"
+        }
+      ]
+    },
+    {
+      "id": "MB-R128",
+      "evidence_type": "manual",
+      "mappings": [
+        {
+          "requirement": "15.1.1",
+          "coverage": "MANUAL_REVIEW"
+        }
+      ]
+    },
+    {
+      "id": "MB-R129",
+      "evidence_type": "manual",
+      "mappings": [
+        {
+          "requirement": "15.3.1",
+          "coverage": "MANUAL_REVIEW"
+        }
+      ]
+    },
+    {
+      "id": "MB-R130",
+      "evidence_type": "automated",
+      "mappings": [
+        {
+          "requirement": "3.4.2",
+          "coverage": "AUTOMATED"
+        },
+        {
+          "requirement": "3.5.2",
+          "coverage": "AUTOMATED"
+        }
+      ]
+    },
+    {
+      "id": "MB-R131",
+      "evidence_type": "automated",
+      "mappings": [
+        {
+          "requirement": "4.4.1",
+          "coverage": "AUTOMATED"
+        }
+      ]
+    },
+    {
+      "id": "MB-R132",
+      "evidence_type": "automated",
+      "mappings": [
+        {
+          "requirement": "11.3.1",
+          "coverage": "AUTOMATED"
+        },
+        {
+          "requirement": "11.3.2",
+          "coverage": "PARTIALLY_AUTOMATED"
+        }
+      ]
+    },
+    {
+      "id": "MB-R133",
+      "evidence_type": "automated",
+      "mappings": [
+        {
+          "requirement": "14.2.1",
+          "coverage": "PARTIALLY_AUTOMATED"
+        }
+      ]
+    },
+    {
+      "id": "MB-R134",
+      "evidence_type": "automated",
+      "mappings": [
+        {
+          "requirement": "13.4.1",
+          "coverage": "AUTOMATED"
+        }
+      ]
+    },
+    {
+      "id": "MB-R135",
+      "evidence_type": "automated",
+      "mappings": [
+        {
+          "requirement": "12.2.2",
+          "coverage": "AUTOMATED"
+        }
+      ]
+    }
+  ],
+  "requirement_coverage": [
+    {
+      "id": "1.2.1",
+      "status": "PARTIALLY_AUTOMATED",
+      "rules": [
+        "MB-R013"
+      ],
+      "note": "PHTML output escaping is checked; header and CSS contexts still need review."
+    },
+    {
+      "id": "1.2.2",
+      "status": "PARTIALLY_AUTOMATED",
+      "rules": [
+        "MB-R016",
+        "MB-R020"
+      ],
+      "note": "SSRF and path safeguards provide partial evidence; URL construction allowlists are not fully verified."
+    },
+    {
+      "id": "1.2.3",
+      "status": "AUTOMATED",
+      "rules": [
+        "MB-R022"
+      ],
+      "note": "JavaScript-context escaping patterns are checked."
+    },
+    {
+      "id": "1.2.4",
+      "status": "PARTIALLY_AUTOMATED",
+      "rules": [
+        "MB-R012"
+      ],
+      "note": "Unsafe raw SQL patterns are checked; runtime query behavior is not exhaustively proven."
+    },
+    {
+      "id": "1.2.5",
+      "status": "PARTIALLY_AUTOMATED",
+      "rules": [
+        "MB-R018"
+      ],
+      "note": "Command execution sinks and guards are checked statically."
+    },
+    {
+      "id": "1.3.1",
+      "status": "NOT_YET_COVERED",
+      "rules": [],
+      "note": "Trusted HTML sanitization needs a dedicated implementation-aware check."
+    },
+    {
+      "id": "1.3.2",
+      "status": "AUTOMATED",
+      "rules": [
+        "MB-R019"
+      ],
+      "note": "Dynamic execution patterns are checked."
+    },
+    {
+      "id": "1.5.1",
+      "status": "AUTOMATED",
+      "rules": [
+        "MB-R098"
+      ],
+      "note": "Unsafe XML entity expansion patterns are checked."
+    },
+    {
+      "id": "2.1.1",
+      "status": "MANUAL_REVIEW",
+      "rules": [
+        "MB-R102"
+      ],
+      "note": "Input validation documentation requires human review."
+    },
+    {
+      "id": "2.2.1",
+      "status": "NOT_YET_COVERED",
+      "rules": [],
+      "note": "Business-critical validation enforcement needs dedicated code and workflow verification."
+    },
+    {
+      "id": "2.2.2",
+      "status": "PARTIALLY_AUTOMATED",
+      "rules": [
+        "MB-R014"
+      ],
+      "note": "Direct request superglobal use is checked; complete trusted-layer validation is not proven."
+    },
+    {
+      "id": "2.3.1",
+      "status": "MANUAL_REVIEW",
+      "rules": [
+        "MB-R103"
+      ],
+      "note": "Business workflow sequence requires authenticated human testing."
+    },
+    {
+      "id": "3.2.1",
+      "status": "PARTIALLY_AUTOMATED",
+      "rules": [
+        "MB-R096"
+      ],
+      "note": "nosniff and browser security headers are checked; response-by-response rendering remains incomplete."
+    },
+    {
+      "id": "3.2.2",
+      "status": "NOT_YET_COVERED",
+      "rules": [],
+      "note": "Safe text-only DOM rendering needs a dedicated frontend sink check."
+    },
+    {
+      "id": "3.3.1",
+      "status": "PARTIALLY_AUTOMATED",
+      "rules": [
+        "MB-R030"
+      ],
+      "note": "Secure, HttpOnly, and SameSite are checked; cookie-name prefixes are not yet verified."
+    },
+    {
+      "id": "3.4.1",
+      "status": "AUTOMATED",
+      "rules": [
+        "MB-R027"
+      ],
+      "note": "HSTS max-age of at least one year is verified."
+    },
+    {
+      "id": "3.4.2",
+      "status": "AUTOMATED",
+      "rules": [
+        "MB-R130"
+      ],
+      "note": "Wildcard-with-credentials CORS behavior is verified."
+    },
+    {
+      "id": "3.5.1",
+      "status": "PARTIALLY_AUTOMATED",
+      "rules": [
+        "MB-R015"
+      ],
+      "note": "Magento form_key use is checked in forms."
+    },
+    {
+      "id": "3.5.2",
+      "status": "AUTOMATED",
+      "rules": [
+        "MB-R130"
+      ],
+      "note": "CORS preflight behavior is probed."
+    },
+    {
+      "id": "3.5.3",
+      "status": "NOT_YET_COVERED",
+      "rules": [],
+      "note": "State-changing safe-method endpoints need a dedicated route check."
+    },
+    {
+      "id": "4.1.1",
+      "status": "NOT_YET_COVERED",
+      "rules": [],
+      "note": "Content-Type and charset need response-aware verification."
+    },
+    {
+      "id": "4.4.1",
+      "status": "AUTOMATED",
+      "rules": [
+        "MB-R131"
+      ],
+      "note": "Non-local ws:// literals are rejected."
+    },
+    {
+      "id": "5.2.1",
+      "status": "PARTIALLY_AUTOMATED",
+      "rules": [
+        "MB-R021"
+      ],
+      "note": "Upload flows are checked for a size-limit safeguard."
+    },
+    {
+      "id": "5.2.2",
+      "status": "PARTIALLY_AUTOMATED",
+      "rules": [
+        "MB-R021"
+      ],
+      "note": "Upload flows are checked for MIME and extension validation safeguards."
+    },
+    {
+      "id": "5.3.1",
+      "status": "AUTOMATED",
+      "rules": [
+        "MB-R021",
+        "MB-R091"
+      ],
+      "note": "Upload storage safeguards and executable files in upload paths are checked."
+    },
+    {
+      "id": "5.3.2",
+      "status": "PARTIALLY_AUTOMATED",
+      "rules": [
+        "MB-R020",
+        "MB-R021",
+        "MB-R016"
+      ],
+      "note": "Traversal, upload destination, and SSRF safeguards provide partial coverage."
+    },
+    {
+      "id": "6.1.1",
+      "status": "MANUAL_REVIEW",
+      "rules": [
+        "MB-R104"
+      ],
+      "note": "Anti-automation policy requires human review."
+    },
+    {
+      "id": "6.2.1",
+      "status": "AUTOMATED",
+      "rules": [
+        "MB-R008"
+      ],
+      "note": "Admin password minimum length of eight is checked."
+    },
+    {
+      "id": "6.2.2",
+      "status": "MANUAL_REVIEW",
+      "rules": [
+        "MB-R105"
+      ],
+      "note": "Password-change availability requires authenticated testing."
+    },
+    {
+      "id": "6.2.3",
+      "status": "MANUAL_REVIEW",
+      "rules": [
+        "MB-R106"
+      ],
+      "note": "Current-password verification requires authenticated testing."
+    },
+    {
+      "id": "6.2.4",
+      "status": "NOT_YET_COVERED",
+      "rules": [],
+      "note": "Common-password denylist enforcement needs a dedicated check."
+    },
+    {
+      "id": "6.2.5",
+      "status": "MANUAL_REVIEW",
+      "rules": [
+        "MB-R107"
+      ],
+      "note": "Composition-rule behavior requires policy and UI review."
+    },
+    {
+      "id": "6.2.6",
+      "status": "MANUAL_REVIEW",
+      "rules": [
+        "MB-R108"
+      ],
+      "note": "Password masking requires UI review."
+    },
+    {
+      "id": "6.2.7",
+      "status": "MANUAL_REVIEW",
+      "rules": [
+        "MB-R109"
+      ],
+      "note": "Password-manager and paste support require browser testing."
+    },
+    {
+      "id": "6.2.8",
+      "status": "MANUAL_REVIEW",
+      "rules": [
+        "MB-R110"
+      ],
+      "note": "Exact password processing requires implementation and boundary testing."
+    },
+    {
+      "id": "6.3.1",
+      "status": "PARTIALLY_AUTOMATED",
+      "rules": [
+        "MB-R011"
+      ],
+      "note": "Magento rate limiting or CAPTCHA configuration is checked."
+    },
+    {
+      "id": "6.3.2",
+      "status": "NOT_YET_COVERED",
+      "rules": [],
+      "note": "Default account detection needs account data evidence."
+    },
+    {
+      "id": "6.4.1",
+      "status": "MANUAL_REVIEW",
+      "rules": [
+        "MB-R111"
+      ],
+      "note": "Initial credential lifecycle requires workflow review."
+    },
+    {
+      "id": "6.4.2",
+      "status": "MANUAL_REVIEW",
+      "rules": [
+        "MB-R112"
+      ],
+      "note": "Recovery and hint behavior require workflow review."
+    },
+    {
+      "id": "7.2.1",
+      "status": "MANUAL_REVIEW",
+      "rules": [
+        "MB-R113"
+      ],
+      "note": "Trusted backend session validation requires architecture review."
+    },
+    {
+      "id": "7.2.2",
+      "status": "MANUAL_REVIEW",
+      "rules": [
+        "MB-R114"
+      ],
+      "note": "Dynamic session token behavior requires runtime evidence."
+    },
+    {
+      "id": "7.2.3",
+      "status": "MANUAL_REVIEW",
+      "rules": [
+        "MB-R115"
+      ],
+      "note": "Session token entropy requires generator evidence."
+    },
+    {
+      "id": "7.2.4",
+      "status": "MANUAL_REVIEW",
+      "rules": [
+        "MB-R116"
+      ],
+      "note": "Session rotation requires authenticated testing."
+    },
+    {
+      "id": "7.4.1",
+      "status": "MANUAL_REVIEW",
+      "rules": [
+        "MB-R117"
+      ],
+      "note": "Logout and expiry invalidation require authenticated testing."
+    },
+    {
+      "id": "7.4.2",
+      "status": "MANUAL_REVIEW",
+      "rules": [
+        "MB-R118"
+      ],
+      "note": "Disabled-account session termination requires multi-session testing."
+    },
+    {
+      "id": "8.1.1",
+      "status": "MANUAL_REVIEW",
+      "rules": [
+        "MB-R119"
+      ],
+      "note": "Authorization documentation requires human review."
+    },
+    {
+      "id": "8.2.1",
+      "status": "PARTIALLY_AUTOMATED",
+      "rules": [
+        "MB-R094",
+        "MB-R099"
+      ],
+      "note": "Function-level authorization signals are checked in custom endpoints."
+    },
+    {
+      "id": "8.2.2",
+      "status": "MANUAL_REVIEW",
+      "rules": [
+        "MB-R120"
+      ],
+      "note": "Object-level IDOR and BOLA require authenticated cross-user testing."
+    },
+    {
+      "id": "8.3.1",
+      "status": "MANUAL_REVIEW",
+      "rules": [
+        "MB-R121"
+      ],
+      "note": "Trusted-layer authorization enforcement requires architecture and bypass review."
+    },
+    {
+      "id": "9.1.1",
+      "status": "NOT_YET_COVERED",
+      "rules": [],
+      "note": "JWT or self-contained token signature verification needs a dedicated check."
+    },
+    {
+      "id": "9.1.2",
+      "status": "NOT_YET_COVERED",
+      "rules": [],
+      "note": "JWT algorithm allowlisting needs a dedicated check."
+    },
+    {
+      "id": "9.1.3",
+      "status": "NOT_YET_COVERED",
+      "rules": [],
+      "note": "Trusted token verification key sources need a dedicated check."
+    },
+    {
+      "id": "9.2.1",
+      "status": "NOT_YET_COVERED",
+      "rules": [],
+      "note": "Token nbf and exp validation needs a dedicated check."
+    },
+    {
+      "id": "10.4.1",
+      "status": "MANUAL_REVIEW",
+      "rules": [
+        "MB-R122"
+      ],
+      "note": "OAuth authorization-server applicability and redirect behavior require review."
+    },
+    {
+      "id": "10.4.2",
+      "status": "MANUAL_REVIEW",
+      "rules": [
+        "MB-R123"
+      ],
+      "note": "OAuth authorization-code replay requires runtime testing when applicable."
+    },
+    {
+      "id": "10.4.3",
+      "status": "MANUAL_REVIEW",
+      "rules": [
+        "MB-R124"
+      ],
+      "note": "OAuth authorization-code lifetime requires configuration evidence when applicable."
+    },
+    {
+      "id": "10.4.4",
+      "status": "MANUAL_REVIEW",
+      "rules": [
+        "MB-R125"
+      ],
+      "note": "OAuth grants per client require configuration review when applicable."
+    },
+    {
+      "id": "10.4.5",
+      "status": "MANUAL_REVIEW",
+      "rules": [
+        "MB-R126"
+      ],
+      "note": "Refresh-token replay defenses require runtime and configuration evidence when applicable."
+    },
+    {
+      "id": "11.3.1",
+      "status": "AUTOMATED",
+      "rules": [
+        "MB-R132"
+      ],
+      "note": "Explicit ECB, PKCS#1 v1.5 encryption, and mcrypt patterns are rejected."
+    },
+    {
+      "id": "11.3.2",
+      "status": "PARTIALLY_AUTOMATED",
+      "rules": [
+        "MB-R025",
+        "MB-R132"
+      ],
+      "note": "Unsafe raw crypto and explicitly insecure modes are checked; full approved-algorithm proof is incomplete."
+    },
+    {
+      "id": "11.4.1",
+      "status": "NOT_YET_COVERED",
+      "rules": [],
+      "note": "Cryptographic hash-purpose analysis needs a dedicated check."
+    },
+    {
+      "id": "12.1.1",
+      "status": "AUTOMATED",
+      "rules": [
+        "MB-R028"
+      ],
+      "note": "TLS 1.2 or newer is checked."
+    },
+    {
+      "id": "12.2.1",
+      "status": "AUTOMATED",
+      "rules": [
+        "MB-R026",
+        "MB-R073"
+      ],
+      "note": "Public and configured application endpoints are checked for HTTPS."
+    },
+    {
+      "id": "12.2.2",
+      "status": "AUTOMATED",
+      "rules": [
+        "MB-R135"
+      ],
+      "note": "Certificate trust and validity are verified by the TLS probe."
+    },
+    {
+      "id": "13.4.1",
+      "status": "AUTOMATED",
+      "rules": [
+        "MB-R134"
+      ],
+      "note": "Public VCS metadata and sensitive deployment artifacts are probed."
+    },
+    {
+      "id": "14.2.1",
+      "status": "PARTIALLY_AUTOMATED",
+      "rules": [
+        "MB-R133"
+      ],
+      "note": "Literal sensitive query-string values are checked in custom code."
+    },
+    {
+      "id": "14.3.1",
+      "status": "MANUAL_REVIEW",
+      "rules": [
+        "MB-R127"
+      ],
+      "note": "Client-side authenticated data cleanup requires browser testing."
+    },
+    {
+      "id": "15.1.1",
+      "status": "MANUAL_REVIEW",
+      "rules": [
+        "MB-R128"
+      ],
+      "note": "Dependency remediation policy requires human review."
+    },
+    {
+      "id": "15.2.1",
+      "status": "AUTOMATED",
+      "rules": [
+        "MB-R049",
+        "MB-R050",
+        "MB-R059"
+      ],
+      "note": "Known vulnerabilities, Adobe patches, and remediation SLA are checked."
+    },
+    {
+      "id": "15.3.1",
+      "status": "MANUAL_REVIEW",
+      "rules": [
+        "MB-R129"
+      ],
+      "note": "Response field minimization requires API and data review."
+    }
+  ]
+}

@@ -63,6 +63,7 @@ final class HtmlReporter
             $statusClass = match ($status) {
                 'PASS' => 'status-pass',
                 'FAIL' => 'status-fail',
+                'MANUAL_REVIEW' => 'status-manual-review',
                 'UNKNOWN' => 'status-unknown',
                 default => 'status-fail'
             };
@@ -372,6 +373,7 @@ body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;paddin
 table{width:100%;border-collapse:collapse;margin-top:12px}
 td,th{border:1px solid #eee;padding:8px;vertical-align:top}
 .status-pass{color:#0a0;font-weight:bold}
+.status-manual-review{color:#087f8c;font-weight:bold}
 .status-unknown{color:#a80;font-weight:bold}
 .status-fail{color:#a00;background:#fdeaea;font-weight:600;text-align:center}
 summary{cursor:pointer}

@@ -1,0 +1,243 @@
+{
+  "control": "MB-C14",
+  "title": "ASVS Web, Transport & Cryptography Verification",
+  "description": "Automated verification rules added for OWASP ASVS 5.0 coverage gaps.",
+  "rules": [
+    {
+      "id": "MB-R130",
+      "title": "CORS origins and preflight behavior are safe",
+      "control": "MB-C14",
+      "severity": "high",
+      "op": "all",
+      "verification": "automated",
+      "requirements": [
+        {
+          "standard": "OWASP-ASVS",
+          "version": "5.0.0",
+          "id": "3.4.2",
+          "level": 1
+        },
+        {
+          "standard": "OWASP-ASVS",
+          "version": "5.0.0",
+          "id": "3.5.2",
+          "level": 1
+        }
+      ],
+      "checks": [
+        {
+          "name": "http_cors_no_wildcard_with_credentials",
+          "args": {
+            "timeout_ms": 8000
+          }
+        },
+        {
+          "name": "http_cors_preflight_safe",
+          "args": {
+            "origin": "https://magebean.invalid",
+            "method": "POST",
+            "timeout_ms": 8000
+          }
+        }
+      ],
+      "messages": {
+        "pass": "CORS does not combine wildcard origins with credentials and preflight behavior is constrained.",
+        "fail": "CORS origin or preflight behavior is unsafe. Use an explicit origin allowlist and prevent simple-request bypasses."
+      }
+    },
+    {
+      "id": "MB-R131",
+      "title": "WebSocket endpoints use WSS",
+      "control": "MB-C14",
+      "severity": "high",
+      "op": "all",
+      "verification": "automated",
+      "requirements": [
+        {
+          "standard": "OWASP-ASVS",
+          "version": "5.0.0",
+          "id": "4.4.1",
+          "level": 1
+        }
+      ],
+      "checks": [
+        {
+          "name": "code_grep",
+          "args": {
+            "paths": [
+              "app",
+              "app/design"
+            ],
+            "include_ext": [
+              "php",
+              "phtml",
+              "js",
+              "html",
+              "xml",
+              "json"
+            ],
+            "must_not_match": [
+              "\\bws:\\/\\/(?!localhost\\b|127\\.0\\.0\\.1\\b|\\[::1\\])"
+            ],
+            "max_results": 100
+          }
+        }
+      ],
+      "messages": {
+        "pass": "No insecure non-local WebSocket endpoint was detected.",
+        "fail": "An insecure ws:// endpoint was detected. Use wss:// for WebSocket transport."
+      }
+    },
+    {
+      "id": "MB-R132",
+      "title": "Known insecure cryptographic modes and padding are not used",
+      "control": "MB-C14",
+      "severity": "high",
+      "op": "all",
+      "verification": "automated",
+      "requirements": [
+        {
+          "standard": "OWASP-ASVS",
+          "version": "5.0.0",
+          "id": "11.3.1",
+          "level": 1
+        },
+        {
+          "standard": "OWASP-ASVS",
+          "version": "5.0.0",
+          "id": "11.3.2",
+          "level": 1
+        },
+        {
+          "standard": "OWASP-ASVS",
+          "version": "5.0.0",
+          "id": "11.4.1",
+          "level": 1
+        }
+      ],
+      "checks": [
+        {
+          "name": "code_grep",
+          "args": {
+            "paths": [
+              "app"
+            ],
+            "include_ext": [
+              "php",
+              "phtml",
+              "js",
+              "xml"
+            ],
+            "must_not_match": [
+              "\\b(?:aes[-_ ]?\\d*[-_ ]?ecb|des[-_ ]?ecb|openssl_public_encrypt\\s*\\([^;]*OPENSSL_PKCS1_PADDING|mcrypt_(?:encrypt|decrypt|module_open))\\b"
+            ],
+            "max_results": 100
+          }
+        }
+      ],
+      "messages": {
+        "pass": "No explicitly insecure ECB, PKCS#1 v1.5 encryption, or legacy mcrypt pattern was detected.",
+        "fail": "An insecure cryptographic mode, padding scheme, or legacy primitive was detected."
+      }
+    },
+    {
+      "id": "MB-R133",
+      "title": "Sensitive values are not embedded in URL query strings",
+      "control": "MB-C14",
+      "severity": "high",
+      "op": "all",
+      "verification": "automated",
+      "requirements": [
+        {
+          "standard": "OWASP-ASVS",
+          "version": "5.0.0",
+          "id": "14.2.1",
+          "level": 1
+        }
+      ],
+      "checks": [
+        {
+          "name": "code_grep",
+          "args": {
+            "paths": [
+              "app",
+              "app/design"
+            ],
+            "include_ext": [
+              "php",
+              "phtml",
+              "js",
+              "html",
+              "xml"
+            ],
+            "must_not_match": [
+              "https?:\\/\\/[^\\s\\\"'<>?]+\\?[^\\s\\\"'<>]*(?:password|passwd|access_token|refresh_token|session(?:_?id)?|api_?key|secret|authorization)="
+            ],
+            "max_results": 100
+          }
+        }
+      ],
+      "messages": {
+        "pass": "No sensitive credential or session value was detected in literal URL query strings.",
+        "fail": "Sensitive data appears in a URL query string. Move credentials and tokens to an approved header or request body."
+      }
+    },
+    {
+      "id": "MB-R134",
+      "title": "Production does not expose source-control metadata",
+      "control": "MB-C14",
+      "severity": "high",
+      "op": "all",
+      "verification": "automated",
+      "requirements": [
+        {
+          "standard": "OWASP-ASVS",
+          "version": "5.0.0",
+          "id": "13.4.1",
+          "level": 1
+        }
+      ],
+      "checks": [
+        {
+          "name": "http_no_vcs_misc",
+          "args": {
+            "timeout_ms": 8000
+          }
+        }
+      ],
+      "messages": {
+        "pass": "No public source-control metadata or sensitive deployment artifact was detected.",
+        "fail": "Source-control metadata or a sensitive deployment artifact is publicly accessible."
+      }
+    },
+    {
+      "id": "MB-R135",
+      "title": "Public TLS certificate is valid and not expired",
+      "control": "MB-C14",
+      "severity": "high",
+      "op": "all",
+      "verification": "automated",
+      "requirements": [
+        {
+          "standard": "OWASP-ASVS",
+          "version": "5.0.0",
+          "id": "12.2.2",
+          "level": 1
+        }
+      ],
+      "checks": [
+        {
+          "name": "http_tls_cert_days_left",
+          "args": {
+            "min_days": 1,
+            "timeout_ms": 8000
+          }
+        }
+      ],
+      "messages": {
+        "pass": "The public TLS certificate is trusted by the scan environment and remains valid.",
+        "fail": "The public TLS certificate is untrusted, invalid, expired, or expires too soon."
+      }
+    }
+  ]
+}

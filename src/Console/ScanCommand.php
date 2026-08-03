@@ -31,7 +31,7 @@ final class ScanCommand extends Command
 
     /** Keep help text in one place */
     private const HELP = <<<'HELP'
-<fg=cyan;options=bold>Audit Magento 2 production readiness</> using a catalog of <fg=green;options=bold>12 controls</> and <fg=green;options=bold>101 rules</>.
+<fg=cyan;options=bold>Audit Magento 2 production readiness</> using selectable Magebean security profiles.
 The default <fg=green;options=bold>basic</> profile runs 21 fast, low-noise checks.
 Docs: <href=https://magebean.com/documentation>magebean.com/documentation</>
 
@@ -47,10 +47,11 @@ Docs: <href=https://magebean.com/documentation>magebean.com/documentation</>
 
 <options=bold>PROFILES</>
   <fg=yellow>basic</>      Default; 21 basic production security and operations checks.
+  <fg=yellow>asvs-l1</>    OWASP ASVS 5.0 Level 1 mapping; includes automated and manual-review checks.
   <fg=yellow>owasp</>      Application-security checks mapped to OWASP Top 10 2025.
   <fg=yellow>pci</>        PCI DSS v4.0.1 payment readiness; not a certification.
   <fg=yellow>hardening</>  89 deep production, code, dependency, integration, and operations checks.
-  <fg=yellow>baseline</>   All 101 local rules. Aliases: all, magebean.
+  <fg=yellow>baseline</>   All 135 local rules. Aliases: all, magebean.
   <fg=yellow>FILE</>       Custom JSON path or a profile under .magebean/profiles.
 
 <options=bold>COMMAND OPTIONS</>
@@ -82,7 +83,8 @@ Docs: <href=https://magebean.com/documentation>magebean.com/documentation</>
   <fg=green>php magebean.phar scan --url=https://store.example.com</>
   <fg=green>php magebean.phar scan --path=/var/www/magento --url=https://store.example.com</>
 
-  # Application security, payment readiness, deep hardening, or full catalog
+  # ASVS Level 1, application security, payment readiness, deep hardening, or full catalog
+  <fg=green>php magebean.phar scan --path=/var/www/magento --profile=asvs-l1</>
   <fg=green>php magebean.phar scan --path=/var/www/magento --profile=owasp</>
   <fg=green>php magebean.phar scan --path=/var/www/magento --profile=pci</>
   <fg=green>php magebean.phar scan --path=/var/www/magento --profile=hardening</>
@@ -120,14 +122,14 @@ HELP;
     protected function configure(): void
     {
         $this
-            ->setDescription('Audit Magento 2 production readiness using 12 controls and a 101-rule catalog (basic: 21 rules).')
+            ->setDescription('Audit Magento 2 security using selectable Magebean security profiles.')
             ->addUsage('--url=https://magento-store.com')
             ->addUsage('--path=/var/www/html')
             ->addUsage('--path=/var/www/html --url=https://magento-store.com')
             // HTML report output is disabled, so the HTML-only detail option is hidden for now.
             // ->addOption('detail', null, InputOption::VALUE_NONE, 'Include Details column in HTML report')
             ->addOption('standard', null, InputOption::VALUE_OPTIONAL, 'Legacy report selector: magebean (default) | owasp | pci | cwe; prefer --profile', 'magebean')
-            ->addOption('profile', null, InputOption::VALUE_OPTIONAL, 'Profile: basic (default) | owasp | pci | hardening | baseline | custom JSON')
+            ->addOption('profile', null, InputOption::VALUE_OPTIONAL, 'Profile: basic (default) | asvs-l1 | owasp | pci | hardening | baseline | custom JSON')
             ->addOption('controls', null, InputOption::VALUE_OPTIONAL, 'Comma-separated control IDs to load (e.g., MB-C01,MB-C05 or MB-01,MB-05)')
             ->addOption('rules', null, InputOption::VALUE_OPTIONAL, 'Comma-separated rule IDs to run (e.g., MB-R036,MB-R020)')
             ->addOption('exclude-rules', null, InputOption::VALUE_OPTIONAL, 'Comma-separated rule IDs to exclude after loading')
@@ -596,7 +598,11 @@ HELP;
         ));
         $confirmedFindings = array_values(array_filter(
             $attentionFindings,
-            static fn(array $finding): bool => strtoupper((string)($finding['status'] ?? '')) !== 'UNKNOWN'
+            static fn(array $finding): bool => strtoupper((string)($finding['status'] ?? '')) === 'FAIL'
+        ));
+        $manualReviewFindings = array_values(array_filter(
+            $attentionFindings,
+            static fn(array $finding): bool => strtoupper((string)($finding['status'] ?? '')) === 'MANUAL_REVIEW'
         ));
 
         $sevCounts = ['critical' => 0, 'high' => 0, 'medium' => 0, 'low' => 0];
@@ -609,15 +615,18 @@ HELP;
         // Summary first, so the result remains visible even for long audits.
         $auditStatus = $confirmedFindings !== []
             ? '<fg=yellow;options=bold>AUDIT COMPLETE · ATTENTION REQUIRED</>'
-            : ($inconclusiveFindings !== []
+            : ($manualReviewFindings !== []
+                ? '<fg=cyan;options=bold>AUDIT COMPLETE · HUMAN REVIEW REQUIRED</>'
+                : ($inconclusiveFindings !== []
                 ? '<fg=magenta;options=bold>AUDIT COMPLETE · INCONCLUSIVE</>'
-                : '<info>AUDIT COMPLETE</info>');
+                : '<info>AUDIT COMPLETE</info>'));
         $out->writeln($auditStatus);
         $out->writeln(sprintf(
-            '<info>%d</info> / <info>%d</info> checks passed · <fg=yellow;options=bold>%d findings</> · <fg=magenta;options=bold>%d inconclusive</>',
+            '<info>%d</info> / <info>%d</info> checks passed · <fg=yellow;options=bold>%d findings</> · <fg=cyan;options=bold>%d manual review</> · <fg=magenta;options=bold>%d inconclusive</>',
             $passed,
             $total,
             count($confirmedFindings),
+            count($manualReviewFindings),
             count($inconclusiveFindings)
         ));
         if ($confirmedFindings !== []) {
@@ -636,6 +645,7 @@ HELP;
         $out->writeln('');
         $out->writeln('<options=bold>Status guide</>');
         $out->writeln('  <fg=green;options=bold>PASS</>          Check completed and no issue was detected.');
+        $out->writeln('  <fg=cyan;options=bold>MANUAL REVIEW</> Human judgment or supporting evidence is required; this is not an automated failure.');
         $out->writeln('  <fg=red;options=bold>FAIL</>          Check completed and found an issue requiring attention.');
         $out->writeln('  <fg=magenta;options=bold>INCONCLUSIVE</>  Required evidence or access was unavailable; this does not mean the check passed.');
         $out->writeln('');
@@ -644,11 +654,11 @@ HELP;
         $showRuleDetails = $rulesFilter !== [];
         if ($showRuleDetails) {
             $out->writeln(sprintf('<options=bold>Rule details</> (<fg=yellow>%d</>)', count($allFindings)));
-        } elseif ($confirmedFindings !== []) {
-            $out->writeln(sprintf('<options=bold>Findings</> (<fg=yellow>%d</>)', count($confirmedFindings)));
+        } elseif ($confirmedFindings !== [] || $manualReviewFindings !== []) {
+            $out->writeln(sprintf('<options=bold>Results requiring attention</> (<fg=yellow>%d</>)', count($confirmedFindings) + count($manualReviewFindings)));
         }
 
-        $findingsToRender = $showRuleDetails ? $allFindings : $confirmedFindings;
+        $findingsToRender = $showRuleDetails ? $allFindings : array_merge($confirmedFindings, $manualReviewFindings);
         foreach ($findingsToRender as $f) {
             $sev = strtoupper((string)($f['severity'] ?? 'LOW'));
             $id = trim((string)($f['id'] ?? ''));
@@ -659,10 +669,13 @@ HELP;
             $statusTag = $showRuleDetails
                 ? match ($status) {
                     'PASS' => '<fg=green;options=bold>[PASS]</> ',
+                    'MANUAL_REVIEW' => '<fg=cyan;options=bold>[MANUAL REVIEW]</> ',
                     'UNKNOWN' => '<fg=magenta;options=bold>[INCONCLUSIVE]</> ',
                     default => '<fg=red;options=bold>[FAIL]</> ',
                 }
-                : '';
+                : ($status === 'MANUAL_REVIEW'
+                    ? '<fg=cyan;options=bold>[MANUAL REVIEW]</> '
+                    : '');
             $line = $id !== ''
                 ? sprintf('%s%s <href=https://magebean.com/baseline/%3$s>%3$s</> %4$s', $statusTag, $sevBadge($sev), $id, $text)
                 : sprintf('%s%s %s', $statusTag, $sevBadge($sev), $text);

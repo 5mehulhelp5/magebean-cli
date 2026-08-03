@@ -49,7 +49,7 @@ php bin/magebean rules:list
   --path=/var/www/magento
 ```
 
-`scan` and `rules:list` use the 21-rule `basic` profile by default. Select `owasp`, `pci`, or `hardening` with `--profile`, or use `--profile=baseline` for the full catalog.
+`scan` and `rules:list` use the 21-rule `basic` profile by default. Select `asvs-l1`, `owasp`, `pci`, or `hardening` with `--profile`, or use `--profile=baseline` for the full catalog. The `asvs-l1` profile maps OWASP ASVS 5.0 Level 1 and reports both automated findings and requirements that need human review.
 
 See [CLI Reference](docs/cli-reference.md) for all commands, options, profiles, target modes, and examples.
 

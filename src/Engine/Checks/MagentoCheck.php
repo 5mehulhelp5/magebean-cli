@@ -160,9 +160,9 @@ final class MagentoCheck
     {
         $file = (string)($args['file'] ?? 'app/etc/config.php');
         $basePath = (string)($args['base_path'] ?? 'system.default.admin.security');
-        $minLength = (int)($args['min_password_length'] ?? 12);
-        $maxLockoutFailures = (int)($args['max_lockout_failures'] ?? 10);
-        $maxPasswordLifetimeDays = (int)($args['max_password_lifetime_days'] ?? 90);
+        $minLength = (int)($args['min_password_length'] ?? 8);
+        $maxLockoutFailures = isset($args['max_lockout_failures']) ? (int)$args['max_lockout_failures'] : null;
+        $maxPasswordLifetimeDays = isset($args['max_password_lifetime_days']) ? (int)$args['max_password_lifetime_days'] : null;
 
         $arr = $this->loadArray($file);
         if (isset($arr['__ERROR__'])) {
@@ -194,6 +194,16 @@ final class MagentoCheck
                 'op' => 'truthy',
             ],
         ];
+
+        // Authentication throttling belongs to MB-R011. Password expiry and
+        // forced changes are optional project policy, not ASVS 5.0 L1
+        // password-strength criteria.
+        if ($maxLockoutFailures === null) {
+            unset($checks['lockout_failures'], $checks['lockout_threshold']);
+        }
+        if ($maxPasswordLifetimeDays === null) {
+            unset($checks['password_lifetime'], $checks['password_is_forced']);
+        }
 
         $evidence = [
             'file' => $file,
@@ -233,10 +243,10 @@ final class MagentoCheck
         }
 
         if ($evidence['failures'] !== []) {
-            return [false, "Admin password policy is weak or incomplete", $evidence];
+            return [false, "Admin password policy does not meet the configured criteria", $evidence];
         }
 
-        return [true, "Admin password policy meets minimum strength requirements", $evidence];
+        return [true, "Admin password policy meets the configured criteria", $evidence];
     }
 
     public function productionMode(array $args): array

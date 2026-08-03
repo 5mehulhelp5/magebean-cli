@@ -66,11 +66,14 @@ When neither `--path` nor `--url` is supplied, Magebean searches for a Magento r
 | Profile | Rules | Purpose |
 |---|---:|---|
 | `basic` | 21 | Default fast, low-noise production security and operations check. |
+| `asvs-l1` | 60 | OWASP ASVS 5.0 Level 1 mapping with automated and manual-review rules. |
 | `owasp` | 77 | Application-security checks mapped to OWASP Top 10 2025. |
 | `pci` | 69 | PCI DSS v4.0.1 payment-readiness checks; not a certification. |
 | `hardening` | 89 | Deep production, code, dependency, integration, and operations checks. |
-| `baseline` | 101 | Full local catalog. Aliases: `all`, `magebean`. |
+| `baseline` | 135 | Full local catalog. Aliases: `all`, `magebean`. |
 | `FILE` | Custom | JSON profile path or a profile in `.magebean/profiles`. |
+
+The `asvs-l1` mapping covers all 70 Level 1 requirements: 15 automated, 15 partially automated, 28 manual-review, and 12 currently without a mapped rule. This is an evidence-oriented scan profile, not an ASVS certification.
 
 If `--profile` is omitted, Magebean uses `basic`.
 

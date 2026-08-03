@@ -322,7 +322,7 @@
     },
     {
       "id": "MB-R025",
-      "title": "Use Magento APIs for crypto & session",
+      "title": "No unsafe raw crypto or session APIs in custom code",
       "control": "MB-C03",
       "severity": "medium",
       "op": "all",
@@ -340,8 +340,8 @@
         }
       ],
       "messages": {
-        "pass": "Magento crypto and session APIs are used.",
-        "fail": "Raw crypto/session API usage found. Use Magento Framework Encryption, Cookie, and Session APIs instead."
+        "pass": "No unsafe raw crypto or session API usage was detected in the scanned custom code.",
+        "fail": "Potentially unsafe raw crypto or session API usage was found. Use approved algorithms and Magento Framework encryption, cookie, and session APIs."
       }
     },
     {
@@ -375,7 +375,7 @@
     },
     {
       "id": "MB-R094",
-      "title": "Authorization checks on custom controllers and APIs",
+      "title": "Custom controllers and APIs include function-level authorization",
       "control": "MB-C03",
       "severity": "high",
       "op": "all",
@@ -396,7 +396,7 @@
         }
       ],
       "messages": {
-        "pass": "Custom controllers and APIs include authorization signals for sensitive workflows."
+        "pass": "No missing function-level authorization evidence was detected in sensitive custom controllers or APIs. Object-level authorization requires separate verification."
       }
     },
     {
