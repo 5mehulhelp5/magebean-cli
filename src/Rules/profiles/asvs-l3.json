@@ -1,0 +1,2083 @@
+{
+    "id": "asvs-l3",
+    "title": "Magebean ASVS-Aligned Level 3",
+    "description": "OWASP ASVS 5.0 Level 3 cumulative mapping. Inherits Level 2 and requires substantial independent human assurance; Magebean CLI does not certify or attest compliance.",
+    "inherits": [
+        "asvs-l2"
+    ],
+    "standard": {
+        "id": "owasp-asvs",
+        "version": "5.0.0",
+        "level": 3,
+        "alignment": "ASVS-aligned"
+    },
+    "coverage_summary": {
+        "total_requirements": 345,
+        "level_1_inherited": 70,
+        "level_2_inherited": 183,
+        "level_3_additions": 92,
+        "automated": 16,
+        "partially_automated": 70,
+        "manual_review": 170,
+        "context_required": 77,
+        "not_applicable": 0,
+        "not_yet_covered": 12
+    },
+    "report_template": "owasp",
+    "rules": [
+        {
+            "id": "MB-R276",
+            "evidence_type": "manual",
+            "mappings": [
+                {
+                    "requirement": "1.2.10",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ]
+        },
+        {
+            "id": "MB-R277",
+            "evidence_type": "manual",
+            "mappings": [
+                {
+                    "requirement": "1.3.12",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ]
+        },
+        {
+            "id": "MB-R278",
+            "evidence_type": "manual",
+            "mappings": [
+                {
+                    "requirement": "1.5.3",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ]
+        },
+        {
+            "id": "MB-R279",
+            "evidence_type": "manual",
+            "mappings": [
+                {
+                    "requirement": "2.3.5",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ],
+            "applicability": {
+                "capability": "high_value_operations"
+            }
+        },
+        {
+            "id": "MB-R280",
+            "evidence_type": "manual",
+            "mappings": [
+                {
+                    "requirement": "2.4.2",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ],
+            "applicability": {
+                "capability": "high_value_operations"
+            }
+        },
+        {
+            "id": "MB-R281",
+            "evidence_type": "manual",
+            "mappings": [
+                {
+                    "requirement": "3.1.1",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ]
+        },
+        {
+            "id": "MB-R282",
+            "evidence_type": "manual",
+            "mappings": [
+                {
+                    "requirement": "3.2.3",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ]
+        },
+        {
+            "id": "MB-R283",
+            "evidence_type": "manual",
+            "mappings": [
+                {
+                    "requirement": "3.3.5",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ]
+        },
+        {
+            "id": "MB-R284",
+            "evidence_type": "manual",
+            "mappings": [
+                {
+                    "requirement": "3.4.7",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ]
+        },
+        {
+            "id": "MB-R285",
+            "evidence_type": "manual",
+            "mappings": [
+                {
+                    "requirement": "3.4.8",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ]
+        },
+        {
+            "id": "MB-R286",
+            "evidence_type": "manual",
+            "mappings": [
+                {
+                    "requirement": "3.5.6",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ]
+        },
+        {
+            "id": "MB-R287",
+            "evidence_type": "manual",
+            "mappings": [
+                {
+                    "requirement": "3.5.7",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ]
+        },
+        {
+            "id": "MB-R288",
+            "evidence_type": "manual",
+            "mappings": [
+                {
+                    "requirement": "3.5.8",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ]
+        },
+        {
+            "id": "MB-R289",
+            "evidence_type": "manual",
+            "mappings": [
+                {
+                    "requirement": "3.6.1",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ],
+            "applicability": {
+                "capability": "external_assets"
+            }
+        },
+        {
+            "id": "MB-R290",
+            "evidence_type": "manual",
+            "mappings": [
+                {
+                    "requirement": "3.7.3",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ]
+        },
+        {
+            "id": "MB-R291",
+            "evidence_type": "manual",
+            "mappings": [
+                {
+                    "requirement": "3.7.4",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ]
+        },
+        {
+            "id": "MB-R292",
+            "evidence_type": "manual",
+            "mappings": [
+                {
+                    "requirement": "3.7.5",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ]
+        },
+        {
+            "id": "MB-R293",
+            "evidence_type": "manual",
+            "mappings": [
+                {
+                    "requirement": "4.1.4",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ]
+        },
+        {
+            "id": "MB-R294",
+            "evidence_type": "manual",
+            "mappings": [
+                {
+                    "requirement": "4.1.5",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ]
+        },
+        {
+            "id": "MB-R295",
+            "evidence_type": "manual",
+            "mappings": [
+                {
+                    "requirement": "4.2.2",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ]
+        },
+        {
+            "id": "MB-R296",
+            "evidence_type": "manual",
+            "mappings": [
+                {
+                    "requirement": "4.2.3",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ]
+        },
+        {
+            "id": "MB-R297",
+            "evidence_type": "manual",
+            "mappings": [
+                {
+                    "requirement": "4.2.4",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ]
+        },
+        {
+            "id": "MB-R298",
+            "evidence_type": "manual",
+            "mappings": [
+                {
+                    "requirement": "4.2.5",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ]
+        },
+        {
+            "id": "MB-R299",
+            "evidence_type": "manual",
+            "mappings": [
+                {
+                    "requirement": "5.2.4",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ],
+            "applicability": {
+                "capability": "file_handling"
+            }
+        },
+        {
+            "id": "MB-R300",
+            "evidence_type": "manual",
+            "mappings": [
+                {
+                    "requirement": "5.2.5",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ],
+            "applicability": {
+                "capability": "file_handling"
+            }
+        },
+        {
+            "id": "MB-R301",
+            "evidence_type": "manual",
+            "mappings": [
+                {
+                    "requirement": "5.2.6",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ],
+            "applicability": {
+                "capability": "file_handling"
+            }
+        },
+        {
+            "id": "MB-R302",
+            "evidence_type": "manual",
+            "mappings": [
+                {
+                    "requirement": "5.3.3",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ],
+            "applicability": {
+                "capability": "file_handling"
+            }
+        },
+        {
+            "id": "MB-R303",
+            "evidence_type": "manual",
+            "mappings": [
+                {
+                    "requirement": "6.3.5",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ]
+        },
+        {
+            "id": "MB-R304",
+            "evidence_type": "manual",
+            "mappings": [
+                {
+                    "requirement": "6.3.6",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ]
+        },
+        {
+            "id": "MB-R305",
+            "evidence_type": "manual",
+            "mappings": [
+                {
+                    "requirement": "6.3.7",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ]
+        },
+        {
+            "id": "MB-R306",
+            "evidence_type": "manual",
+            "mappings": [
+                {
+                    "requirement": "6.3.8",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ]
+        },
+        {
+            "id": "MB-R307",
+            "evidence_type": "manual",
+            "mappings": [
+                {
+                    "requirement": "6.4.5",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ]
+        },
+        {
+            "id": "MB-R308",
+            "evidence_type": "manual",
+            "mappings": [
+                {
+                    "requirement": "6.4.6",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ]
+        },
+        {
+            "id": "MB-R309",
+            "evidence_type": "manual",
+            "mappings": [
+                {
+                    "requirement": "6.5.6",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ]
+        },
+        {
+            "id": "MB-R310",
+            "evidence_type": "manual",
+            "mappings": [
+                {
+                    "requirement": "6.5.7",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ],
+            "applicability": {
+                "capability": "biometric_authentication"
+            }
+        },
+        {
+            "id": "MB-R311",
+            "evidence_type": "manual",
+            "mappings": [
+                {
+                    "requirement": "6.5.8",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ]
+        },
+        {
+            "id": "MB-R312",
+            "evidence_type": "manual",
+            "mappings": [
+                {
+                    "requirement": "6.6.4",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ]
+        },
+        {
+            "id": "MB-R313",
+            "evidence_type": "manual",
+            "mappings": [
+                {
+                    "requirement": "6.7.1",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ],
+            "applicability": {
+                "capability": "cryptographic_authentication"
+            }
+        },
+        {
+            "id": "MB-R314",
+            "evidence_type": "manual",
+            "mappings": [
+                {
+                    "requirement": "6.7.2",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ],
+            "applicability": {
+                "capability": "cryptographic_authentication"
+            }
+        },
+        {
+            "id": "MB-R315",
+            "evidence_type": "manual",
+            "mappings": [
+                {
+                    "requirement": "7.5.3",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ],
+            "applicability": {
+                "capability": "high_value_operations"
+            }
+        },
+        {
+            "id": "MB-R316",
+            "evidence_type": "manual",
+            "mappings": [
+                {
+                    "requirement": "8.1.3",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ]
+        },
+        {
+            "id": "MB-R317",
+            "evidence_type": "manual",
+            "mappings": [
+                {
+                    "requirement": "8.1.4",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ]
+        },
+        {
+            "id": "MB-R318",
+            "evidence_type": "manual",
+            "mappings": [
+                {
+                    "requirement": "8.2.4",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ]
+        },
+        {
+            "id": "MB-R319",
+            "evidence_type": "manual",
+            "mappings": [
+                {
+                    "requirement": "8.3.2",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ]
+        },
+        {
+            "id": "MB-R320",
+            "evidence_type": "manual",
+            "mappings": [
+                {
+                    "requirement": "8.3.3",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ]
+        },
+        {
+            "id": "MB-R321",
+            "evidence_type": "manual",
+            "mappings": [
+                {
+                    "requirement": "8.4.2",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ]
+        },
+        {
+            "id": "MB-R322",
+            "evidence_type": "manual",
+            "mappings": [
+                {
+                    "requirement": "10.2.3",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ],
+            "applicability": {
+                "capability": "oauth_oidc"
+            }
+        },
+        {
+            "id": "MB-R323",
+            "evidence_type": "manual",
+            "mappings": [
+                {
+                    "requirement": "10.3.5",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ],
+            "applicability": {
+                "capability": "oauth_oidc"
+            }
+        },
+        {
+            "id": "MB-R324",
+            "evidence_type": "manual",
+            "mappings": [
+                {
+                    "requirement": "10.4.12",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ],
+            "applicability": {
+                "capability": "oauth_oidc"
+            }
+        },
+        {
+            "id": "MB-R325",
+            "evidence_type": "manual",
+            "mappings": [
+                {
+                    "requirement": "10.4.13",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ],
+            "applicability": {
+                "capability": "oauth_oidc"
+            }
+        },
+        {
+            "id": "MB-R326",
+            "evidence_type": "manual",
+            "mappings": [
+                {
+                    "requirement": "10.4.14",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ],
+            "applicability": {
+                "capability": "oauth_oidc"
+            }
+        },
+        {
+            "id": "MB-R327",
+            "evidence_type": "manual",
+            "mappings": [
+                {
+                    "requirement": "10.4.15",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ],
+            "applicability": {
+                "capability": "oauth_oidc"
+            }
+        },
+        {
+            "id": "MB-R328",
+            "evidence_type": "manual",
+            "mappings": [
+                {
+                    "requirement": "10.4.16",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ],
+            "applicability": {
+                "capability": "oauth_oidc"
+            }
+        },
+        {
+            "id": "MB-R329",
+            "evidence_type": "manual",
+            "mappings": [
+                {
+                    "requirement": "11.1.3",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ]
+        },
+        {
+            "id": "MB-R330",
+            "evidence_type": "manual",
+            "mappings": [
+                {
+                    "requirement": "11.1.4",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ]
+        },
+        {
+            "id": "MB-R331",
+            "evidence_type": "manual",
+            "mappings": [
+                {
+                    "requirement": "11.2.4",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ]
+        },
+        {
+            "id": "MB-R332",
+            "evidence_type": "manual",
+            "mappings": [
+                {
+                    "requirement": "11.2.5",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ]
+        },
+        {
+            "id": "MB-R333",
+            "evidence_type": "manual",
+            "mappings": [
+                {
+                    "requirement": "11.3.4",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ]
+        },
+        {
+            "id": "MB-R334",
+            "evidence_type": "manual",
+            "mappings": [
+                {
+                    "requirement": "11.3.5",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ]
+        },
+        {
+            "id": "MB-R335",
+            "evidence_type": "manual",
+            "mappings": [
+                {
+                    "requirement": "11.5.2",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ]
+        },
+        {
+            "id": "MB-R336",
+            "evidence_type": "manual",
+            "mappings": [
+                {
+                    "requirement": "11.6.2",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ]
+        },
+        {
+            "id": "MB-R337",
+            "evidence_type": "manual",
+            "mappings": [
+                {
+                    "requirement": "11.7.1",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ]
+        },
+        {
+            "id": "MB-R338",
+            "evidence_type": "manual",
+            "mappings": [
+                {
+                    "requirement": "11.7.2",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ]
+        },
+        {
+            "id": "MB-R339",
+            "evidence_type": "manual",
+            "mappings": [
+                {
+                    "requirement": "12.1.4",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ]
+        },
+        {
+            "id": "MB-R340",
+            "evidence_type": "manual",
+            "mappings": [
+                {
+                    "requirement": "12.1.5",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ]
+        },
+        {
+            "id": "MB-R341",
+            "evidence_type": "manual",
+            "mappings": [
+                {
+                    "requirement": "12.3.5",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ]
+        },
+        {
+            "id": "MB-R342",
+            "evidence_type": "manual",
+            "mappings": [
+                {
+                    "requirement": "13.1.2",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ]
+        },
+        {
+            "id": "MB-R343",
+            "evidence_type": "manual",
+            "mappings": [
+                {
+                    "requirement": "13.1.3",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ]
+        },
+        {
+            "id": "MB-R344",
+            "evidence_type": "manual",
+            "mappings": [
+                {
+                    "requirement": "13.1.4",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ]
+        },
+        {
+            "id": "MB-R345",
+            "evidence_type": "manual",
+            "mappings": [
+                {
+                    "requirement": "13.2.6",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ]
+        },
+        {
+            "id": "MB-R346",
+            "evidence_type": "manual",
+            "mappings": [
+                {
+                    "requirement": "13.3.3",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ]
+        },
+        {
+            "id": "MB-R347",
+            "evidence_type": "manual",
+            "mappings": [
+                {
+                    "requirement": "13.3.4",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ]
+        },
+        {
+            "id": "MB-R348",
+            "evidence_type": "manual",
+            "mappings": [
+                {
+                    "requirement": "13.4.6",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ]
+        },
+        {
+            "id": "MB-R349",
+            "evidence_type": "manual",
+            "mappings": [
+                {
+                    "requirement": "13.4.7",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ]
+        },
+        {
+            "id": "MB-R350",
+            "evidence_type": "manual",
+            "mappings": [
+                {
+                    "requirement": "14.2.5",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ]
+        },
+        {
+            "id": "MB-R351",
+            "evidence_type": "manual",
+            "mappings": [
+                {
+                    "requirement": "14.2.6",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ]
+        },
+        {
+            "id": "MB-R352",
+            "evidence_type": "manual",
+            "mappings": [
+                {
+                    "requirement": "14.2.7",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ]
+        },
+        {
+            "id": "MB-R353",
+            "evidence_type": "manual",
+            "mappings": [
+                {
+                    "requirement": "14.2.8",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ]
+        },
+        {
+            "id": "MB-R354",
+            "evidence_type": "manual",
+            "mappings": [
+                {
+                    "requirement": "15.1.4",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ]
+        },
+        {
+            "id": "MB-R355",
+            "evidence_type": "manual",
+            "mappings": [
+                {
+                    "requirement": "15.1.5",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ]
+        },
+        {
+            "id": "MB-R356",
+            "evidence_type": "manual",
+            "mappings": [
+                {
+                    "requirement": "15.2.4",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ]
+        },
+        {
+            "id": "MB-R357",
+            "evidence_type": "manual",
+            "mappings": [
+                {
+                    "requirement": "15.2.5",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ]
+        },
+        {
+            "id": "MB-R358",
+            "evidence_type": "manual",
+            "mappings": [
+                {
+                    "requirement": "15.4.1",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ]
+        },
+        {
+            "id": "MB-R359",
+            "evidence_type": "manual",
+            "mappings": [
+                {
+                    "requirement": "15.4.2",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ]
+        },
+        {
+            "id": "MB-R360",
+            "evidence_type": "manual",
+            "mappings": [
+                {
+                    "requirement": "15.4.3",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ]
+        },
+        {
+            "id": "MB-R361",
+            "evidence_type": "manual",
+            "mappings": [
+                {
+                    "requirement": "15.4.4",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ]
+        },
+        {
+            "id": "MB-R362",
+            "evidence_type": "manual",
+            "mappings": [
+                {
+                    "requirement": "16.5.4",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ]
+        },
+        {
+            "id": "MB-R363",
+            "evidence_type": "manual",
+            "mappings": [
+                {
+                    "requirement": "17.1.2",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ],
+            "applicability": {
+                "capability": "webrtc"
+            }
+        },
+        {
+            "id": "MB-R364",
+            "evidence_type": "manual",
+            "mappings": [
+                {
+                    "requirement": "17.2.5",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ],
+            "applicability": {
+                "capability": "webrtc"
+            }
+        },
+        {
+            "id": "MB-R365",
+            "evidence_type": "manual",
+            "mappings": [
+                {
+                    "requirement": "17.2.6",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ],
+            "applicability": {
+                "capability": "webrtc"
+            }
+        },
+        {
+            "id": "MB-R366",
+            "evidence_type": "manual",
+            "mappings": [
+                {
+                    "requirement": "17.2.7",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ],
+            "applicability": {
+                "capability": "webrtc"
+            }
+        },
+        {
+            "id": "MB-R367",
+            "evidence_type": "manual",
+            "mappings": [
+                {
+                    "requirement": "17.2.8",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ],
+            "applicability": {
+                "capability": "webrtc"
+            }
+        },
+        {
+            "id": "MB-R089",
+            "evidence_type": "automated",
+            "mappings": [
+                {
+                    "requirement": "3.4.7",
+                    "coverage": "PARTIALLY_AUTOMATED"
+                }
+            ]
+        },
+        {
+            "id": "MB-R087",
+            "evidence_type": "automated",
+            "mappings": [
+                {
+                    "requirement": "3.6.1",
+                    "coverage": "PARTIALLY_AUTOMATED"
+                }
+            ]
+        },
+        {
+            "id": "MB-R088",
+            "evidence_type": "automated",
+            "mappings": [
+                {
+                    "requirement": "3.6.1",
+                    "coverage": "PARTIALLY_AUTOMATED"
+                }
+            ]
+        },
+        {
+            "id": "MB-R368",
+            "evidence_type": "automated",
+            "mappings": [
+                {
+                    "requirement": "3.7.4",
+                    "coverage": "PARTIALLY_AUTOMATED"
+                }
+            ]
+        },
+        {
+            "id": "MB-R274",
+            "evidence_type": "automated",
+            "mappings": [
+                {
+                    "requirement": "4.1.4",
+                    "coverage": "PARTIALLY_AUTOMATED"
+                }
+            ]
+        },
+        {
+            "id": "MB-R369",
+            "evidence_type": "automated",
+            "mappings": [
+                {
+                    "requirement": "4.1.4",
+                    "coverage": "PARTIALLY_AUTOMATED"
+                }
+            ]
+        },
+        {
+            "id": "MB-R025",
+            "evidence_type": "automated",
+            "mappings": [
+                {
+                    "requirement": "11.1.3",
+                    "coverage": "PARTIALLY_AUTOMATED"
+                }
+            ]
+        },
+        {
+            "id": "MB-R132",
+            "evidence_type": "automated",
+            "mappings": [
+                {
+                    "requirement": "11.1.3",
+                    "coverage": "PARTIALLY_AUTOMATED"
+                }
+            ]
+        },
+        {
+            "id": "MB-R370",
+            "evidence_type": "automated",
+            "mappings": [
+                {
+                    "requirement": "13.4.6",
+                    "coverage": "PARTIALLY_AUTOMATED"
+                }
+            ]
+        },
+        {
+            "id": "MB-R003",
+            "evidence_type": "automated",
+            "mappings": [
+                {
+                    "requirement": "13.4.7",
+                    "coverage": "PARTIALLY_AUTOMATED"
+                }
+            ]
+        },
+        {
+            "id": "MB-R134",
+            "evidence_type": "automated",
+            "mappings": [
+                {
+                    "requirement": "13.4.7",
+                    "coverage": "PARTIALLY_AUTOMATED"
+                }
+            ]
+        },
+        {
+            "id": "MB-R063",
+            "evidence_type": "automated",
+            "mappings": [
+                {
+                    "requirement": "15.2.4",
+                    "coverage": "PARTIALLY_AUTOMATED"
+                }
+            ]
+        },
+        {
+            "id": "MB-R064",
+            "evidence_type": "automated",
+            "mappings": [
+                {
+                    "requirement": "15.2.4",
+                    "coverage": "PARTIALLY_AUTOMATED"
+                }
+            ]
+        }
+    ],
+    "requirement_coverage": [
+        {
+            "id": "1.2.10",
+            "title": "CSV and formula injection",
+            "status": "MANUAL_REVIEW",
+            "rules": [
+                "MB-R276"
+            ],
+            "note": "Independent human assessment and documented evidence are mandatory; Magebean CLI cannot determine compliance."
+        },
+        {
+            "id": "1.3.12",
+            "title": "ReDoS prevention",
+            "status": "MANUAL_REVIEW",
+            "rules": [
+                "MB-R277"
+            ],
+            "note": "Independent human assessment and documented evidence are mandatory; Magebean CLI cannot determine compliance."
+        },
+        {
+            "id": "1.5.3",
+            "title": "Consistent parser behavior",
+            "status": "MANUAL_REVIEW",
+            "rules": [
+                "MB-R278"
+            ],
+            "note": "Independent human assessment and documented evidence are mandatory; Magebean CLI cannot determine compliance."
+        },
+        {
+            "id": "2.3.5",
+            "title": "Multi-user approval",
+            "status": "CONTEXT_REQUIRED",
+            "rules": [
+                "MB-R279"
+            ],
+            "note": "The mandatory human-assessment rule is activated only when capability \"high_value_operations\" is enabled.",
+            "applicability": {
+                "capability": "high_value_operations",
+                "default": "CONTEXT_REQUIRED"
+            }
+        },
+        {
+            "id": "2.4.2",
+            "title": "Human transaction timing",
+            "status": "CONTEXT_REQUIRED",
+            "rules": [
+                "MB-R280"
+            ],
+            "note": "The mandatory human-assessment rule is activated only when capability \"high_value_operations\" is enabled.",
+            "applicability": {
+                "capability": "high_value_operations",
+                "default": "CONTEXT_REQUIRED"
+            }
+        },
+        {
+            "id": "3.1.1",
+            "title": "Browser-security requirements",
+            "status": "MANUAL_REVIEW",
+            "rules": [
+                "MB-R281"
+            ],
+            "note": "Independent human assessment and documented evidence are mandatory; Magebean CLI cannot determine compliance."
+        },
+        {
+            "id": "3.2.3",
+            "title": "DOM-clobbering defense",
+            "status": "MANUAL_REVIEW",
+            "rules": [
+                "MB-R282"
+            ],
+            "note": "Independent human assessment and documented evidence are mandatory; Magebean CLI cannot determine compliance."
+        },
+        {
+            "id": "3.3.5",
+            "title": "Cookie-size limit",
+            "status": "MANUAL_REVIEW",
+            "rules": [
+                "MB-R283"
+            ],
+            "note": "Independent human assessment and documented evidence are mandatory; Magebean CLI cannot determine compliance."
+        },
+        {
+            "id": "3.4.7",
+            "title": "CSP violation reporting",
+            "status": "PARTIALLY_AUTOMATED",
+            "rules": [
+                "MB-R089",
+                "MB-R284"
+            ],
+            "note": "Automated or existing Magebean evidence is combined with mandatory human assessment; Magebean CLI does not attest full compliance."
+        },
+        {
+            "id": "3.4.8",
+            "title": "Cross-Origin-Opener-Policy",
+            "status": "MANUAL_REVIEW",
+            "rules": [
+                "MB-R285"
+            ],
+            "note": "Independent human assessment and documented evidence are mandatory; Magebean CLI cannot determine compliance."
+        },
+        {
+            "id": "3.5.6",
+            "title": "Disable JSONP",
+            "status": "MANUAL_REVIEW",
+            "rules": [
+                "MB-R286"
+            ],
+            "note": "Independent human assessment and documented evidence are mandatory; Magebean CLI cannot determine compliance."
+        },
+        {
+            "id": "3.5.7",
+            "title": "No authorized data in scripts",
+            "status": "MANUAL_REVIEW",
+            "rules": [
+                "MB-R287"
+            ],
+            "note": "Independent human assessment and documented evidence are mandatory; Magebean CLI cannot determine compliance."
+        },
+        {
+            "id": "3.5.8",
+            "title": "Authorized-resource embedding",
+            "status": "MANUAL_REVIEW",
+            "rules": [
+                "MB-R288"
+            ],
+            "note": "Independent human assessment and documented evidence are mandatory; Magebean CLI cannot determine compliance."
+        },
+        {
+            "id": "3.6.1",
+            "title": "External asset integrity",
+            "status": "PARTIALLY_AUTOMATED",
+            "rules": [
+                "MB-R087",
+                "MB-R088",
+                "MB-R289"
+            ],
+            "note": "Automated or existing Magebean evidence is combined with mandatory human assessment; Magebean CLI does not attest full compliance.",
+            "applicability": {
+                "capability": "external_assets",
+                "default": "CONTEXT_REQUIRED"
+            }
+        },
+        {
+            "id": "3.7.3",
+            "title": "External-redirect warning",
+            "status": "MANUAL_REVIEW",
+            "rules": [
+                "MB-R290"
+            ],
+            "note": "Independent human assessment and documented evidence are mandatory; Magebean CLI cannot determine compliance."
+        },
+        {
+            "id": "3.7.4",
+            "title": "HSTS preload",
+            "status": "PARTIALLY_AUTOMATED",
+            "rules": [
+                "MB-R368",
+                "MB-R291"
+            ],
+            "note": "Automated or existing Magebean evidence is combined with mandatory human assessment; Magebean CLI does not attest full compliance."
+        },
+        {
+            "id": "3.7.5",
+            "title": "Unsupported-browser handling",
+            "status": "MANUAL_REVIEW",
+            "rules": [
+                "MB-R292"
+            ],
+            "note": "Independent human assessment and documented evidence are mandatory; Magebean CLI cannot determine compliance."
+        },
+        {
+            "id": "4.1.4",
+            "title": "HTTP-method allowlist",
+            "status": "PARTIALLY_AUTOMATED",
+            "rules": [
+                "MB-R274",
+                "MB-R369",
+                "MB-R293"
+            ],
+            "note": "Automated or existing Magebean evidence is combined with mandatory human assessment; Magebean CLI does not attest full compliance."
+        },
+        {
+            "id": "4.1.5",
+            "title": "Message-level signatures",
+            "status": "MANUAL_REVIEW",
+            "rules": [
+                "MB-R294"
+            ],
+            "note": "Independent human assessment and documented evidence are mandatory; Magebean CLI cannot determine compliance."
+        },
+        {
+            "id": "4.2.2",
+            "title": "Correct Content-Length generation",
+            "status": "MANUAL_REVIEW",
+            "rules": [
+                "MB-R295"
+            ],
+            "note": "Independent human assessment and documented evidence are mandatory; Magebean CLI cannot determine compliance."
+        },
+        {
+            "id": "4.2.3",
+            "title": "HTTP/2 and HTTP/3 header restrictions",
+            "status": "MANUAL_REVIEW",
+            "rules": [
+                "MB-R296"
+            ],
+            "note": "Independent human assessment and documented evidence are mandatory; Magebean CLI cannot determine compliance."
+        },
+        {
+            "id": "4.2.4",
+            "title": "Reject CR/LF in modern HTTP headers",
+            "status": "MANUAL_REVIEW",
+            "rules": [
+                "MB-R297"
+            ],
+            "note": "Independent human assessment and documented evidence are mandatory; Magebean CLI cannot determine compliance."
+        },
+        {
+            "id": "4.2.5",
+            "title": "Outbound message-size validation",
+            "status": "MANUAL_REVIEW",
+            "rules": [
+                "MB-R298"
+            ],
+            "note": "Independent human assessment and documented evidence are mandatory; Magebean CLI cannot determine compliance."
+        },
+        {
+            "id": "5.2.4",
+            "title": "Per-user storage quotas",
+            "status": "CONTEXT_REQUIRED",
+            "rules": [
+                "MB-R299"
+            ],
+            "note": "The mandatory human-assessment rule is activated only when capability \"file_handling\" is enabled.",
+            "applicability": {
+                "capability": "file_handling",
+                "default": "CONTEXT_REQUIRED"
+            }
+        },
+        {
+            "id": "5.2.5",
+            "title": "Archive symlink restrictions",
+            "status": "CONTEXT_REQUIRED",
+            "rules": [
+                "MB-R300"
+            ],
+            "note": "The mandatory human-assessment rule is activated only when capability \"file_handling\" is enabled.",
+            "applicability": {
+                "capability": "file_handling",
+                "default": "CONTEXT_REQUIRED"
+            }
+        },
+        {
+            "id": "5.2.6",
+            "title": "Image pixel limits",
+            "status": "CONTEXT_REQUIRED",
+            "rules": [
+                "MB-R301"
+            ],
+            "note": "The mandatory human-assessment rule is activated only when capability \"file_handling\" is enabled.",
+            "applicability": {
+                "capability": "file_handling",
+                "default": "CONTEXT_REQUIRED"
+            }
+        },
+        {
+            "id": "5.3.3",
+            "title": "Ignore archive paths",
+            "status": "CONTEXT_REQUIRED",
+            "rules": [
+                "MB-R302"
+            ],
+            "note": "The mandatory human-assessment rule is activated only when capability \"file_handling\" is enabled.",
+            "applicability": {
+                "capability": "file_handling",
+                "default": "CONTEXT_REQUIRED"
+            }
+        },
+        {
+            "id": "6.3.5",
+            "title": "Suspicious-attempt notifications",
+            "status": "MANUAL_REVIEW",
+            "rules": [
+                "MB-R303"
+            ],
+            "note": "Independent human assessment and documented evidence are mandatory; Magebean CLI cannot determine compliance."
+        },
+        {
+            "id": "6.3.6",
+            "title": "No email authentication factor",
+            "status": "MANUAL_REVIEW",
+            "rules": [
+                "MB-R304"
+            ],
+            "note": "Independent human assessment and documented evidence are mandatory; Magebean CLI cannot determine compliance."
+        },
+        {
+            "id": "6.3.7",
+            "title": "Authentication-change notifications",
+            "status": "MANUAL_REVIEW",
+            "rules": [
+                "MB-R305"
+            ],
+            "note": "Independent human assessment and documented evidence are mandatory; Magebean CLI cannot determine compliance."
+        },
+        {
+            "id": "6.3.8",
+            "title": "Account-enumeration resistance",
+            "status": "MANUAL_REVIEW",
+            "rules": [
+                "MB-R306"
+            ],
+            "note": "Independent human assessment and documented evidence are mandatory; Magebean CLI cannot determine compliance."
+        },
+        {
+            "id": "6.4.5",
+            "title": "Expiring-factor renewal",
+            "status": "MANUAL_REVIEW",
+            "rules": [
+                "MB-R307"
+            ],
+            "note": "Independent human assessment and documented evidence are mandatory; Magebean CLI cannot determine compliance."
+        },
+        {
+            "id": "6.4.6",
+            "title": "Admin-assisted reset without password knowledge",
+            "status": "MANUAL_REVIEW",
+            "rules": [
+                "MB-R308"
+            ],
+            "note": "Independent human assessment and documented evidence are mandatory; Magebean CLI cannot determine compliance."
+        },
+        {
+            "id": "6.5.6",
+            "title": "Factor revocation",
+            "status": "MANUAL_REVIEW",
+            "rules": [
+                "MB-R309"
+            ],
+            "note": "Independent human assessment and documented evidence are mandatory; Magebean CLI cannot determine compliance."
+        },
+        {
+            "id": "6.5.7",
+            "title": "Biometrics as secondary factor",
+            "status": "CONTEXT_REQUIRED",
+            "rules": [
+                "MB-R310"
+            ],
+            "note": "The mandatory human-assessment rule is activated only when capability \"biometric_authentication\" is enabled.",
+            "applicability": {
+                "capability": "biometric_authentication",
+                "default": "CONTEXT_REQUIRED"
+            }
+        },
+        {
+            "id": "6.5.8",
+            "title": "Trusted TOTP clock",
+            "status": "MANUAL_REVIEW",
+            "rules": [
+                "MB-R311"
+            ],
+            "note": "Independent human assessment and documented evidence are mandatory; Magebean CLI cannot determine compliance."
+        },
+        {
+            "id": "6.6.4",
+            "title": "Push-bombing defense",
+            "status": "MANUAL_REVIEW",
+            "rules": [
+                "MB-R312"
+            ],
+            "note": "Independent human assessment and documented evidence are mandatory; Magebean CLI cannot determine compliance."
+        },
+        {
+            "id": "6.7.1",
+            "title": "Protect authentication certificates",
+            "status": "CONTEXT_REQUIRED",
+            "rules": [
+                "MB-R313"
+            ],
+            "note": "The mandatory human-assessment rule is activated only when capability \"cryptographic_authentication\" is enabled.",
+            "applicability": {
+                "capability": "cryptographic_authentication",
+                "default": "CONTEXT_REQUIRED"
+            }
+        },
+        {
+            "id": "6.7.2",
+            "title": "Strong challenge nonce",
+            "status": "CONTEXT_REQUIRED",
+            "rules": [
+                "MB-R314"
+            ],
+            "note": "The mandatory human-assessment rule is activated only when capability \"cryptographic_authentication\" is enabled.",
+            "applicability": {
+                "capability": "cryptographic_authentication",
+                "default": "CONTEXT_REQUIRED"
+            }
+        },
+        {
+            "id": "7.5.3",
+            "title": "Step-up for highly sensitive operations",
+            "status": "CONTEXT_REQUIRED",
+            "rules": [
+                "MB-R315"
+            ],
+            "note": "The mandatory human-assessment rule is activated only when capability \"high_value_operations\" is enabled.",
+            "applicability": {
+                "capability": "high_value_operations",
+                "default": "CONTEXT_REQUIRED"
+            }
+        },
+        {
+            "id": "8.1.3",
+            "title": "Contextual-attribute inventory",
+            "status": "MANUAL_REVIEW",
+            "rules": [
+                "MB-R316"
+            ],
+            "note": "Independent human assessment and documented evidence are mandatory; Magebean CLI cannot determine compliance."
+        },
+        {
+            "id": "8.1.4",
+            "title": "Adaptive decision policy",
+            "status": "MANUAL_REVIEW",
+            "rules": [
+                "MB-R317"
+            ],
+            "note": "Independent human assessment and documented evidence are mandatory; Magebean CLI cannot determine compliance."
+        },
+        {
+            "id": "8.2.4",
+            "title": "Continuous adaptive controls",
+            "status": "MANUAL_REVIEW",
+            "rules": [
+                "MB-R318"
+            ],
+            "note": "Independent human assessment and documented evidence are mandatory; Magebean CLI cannot determine compliance."
+        },
+        {
+            "id": "8.3.2",
+            "title": "Immediate authorization changes",
+            "status": "MANUAL_REVIEW",
+            "rules": [
+                "MB-R319"
+            ],
+            "note": "Independent human assessment and documented evidence are mandatory; Magebean CLI cannot determine compliance."
+        },
+        {
+            "id": "8.3.3",
+            "title": "End-user permission propagation",
+            "status": "MANUAL_REVIEW",
+            "rules": [
+                "MB-R320"
+            ],
+            "note": "Independent human assessment and documented evidence are mandatory; Magebean CLI cannot determine compliance."
+        },
+        {
+            "id": "8.4.2",
+            "title": "Layered administrative access",
+            "status": "MANUAL_REVIEW",
+            "rules": [
+                "MB-R321"
+            ],
+            "note": "Independent human assessment and documented evidence are mandatory; Magebean CLI cannot determine compliance."
+        },
+        {
+            "id": "10.2.3",
+            "title": "Client scope minimization",
+            "status": "CONTEXT_REQUIRED",
+            "rules": [
+                "MB-R322"
+            ],
+            "note": "The mandatory human-assessment rule is activated only when capability \"oauth_oidc\" is enabled.",
+            "applicability": {
+                "capability": "oauth_oidc",
+                "default": "CONTEXT_REQUIRED"
+            }
+        },
+        {
+            "id": "10.3.5",
+            "title": "Sender-constrained access tokens",
+            "status": "CONTEXT_REQUIRED",
+            "rules": [
+                "MB-R323"
+            ],
+            "note": "The mandatory human-assessment rule is activated only when capability \"oauth_oidc\" is enabled.",
+            "applicability": {
+                "capability": "oauth_oidc",
+                "default": "CONTEXT_REQUIRED"
+            }
+        },
+        {
+            "id": "10.4.12",
+            "title": "Restrict response mode",
+            "status": "CONTEXT_REQUIRED",
+            "rules": [
+                "MB-R324"
+            ],
+            "note": "The mandatory human-assessment rule is activated only when capability \"oauth_oidc\" is enabled.",
+            "applicability": {
+                "capability": "oauth_oidc",
+                "default": "CONTEXT_REQUIRED"
+            }
+        },
+        {
+            "id": "10.4.13",
+            "title": "PAR for code grant",
+            "status": "CONTEXT_REQUIRED",
+            "rules": [
+                "MB-R325"
+            ],
+            "note": "The mandatory human-assessment rule is activated only when capability \"oauth_oidc\" is enabled.",
+            "applicability": {
+                "capability": "oauth_oidc",
+                "default": "CONTEXT_REQUIRED"
+            }
+        },
+        {
+            "id": "10.4.14",
+            "title": "Proof-of-possession tokens",
+            "status": "CONTEXT_REQUIRED",
+            "rules": [
+                "MB-R326"
+            ],
+            "note": "The mandatory human-assessment rule is activated only when capability \"oauth_oidc\" is enabled.",
+            "applicability": {
+                "capability": "oauth_oidc",
+                "default": "CONTEXT_REQUIRED"
+            }
+        },
+        {
+            "id": "10.4.15",
+            "title": "Protect authorization details",
+            "status": "CONTEXT_REQUIRED",
+            "rules": [
+                "MB-R327"
+            ],
+            "note": "The mandatory human-assessment rule is activated only when capability \"oauth_oidc\" is enabled.",
+            "applicability": {
+                "capability": "oauth_oidc",
+                "default": "CONTEXT_REQUIRED"
+            }
+        },
+        {
+            "id": "10.4.16",
+            "title": "Strong confidential-client authentication",
+            "status": "CONTEXT_REQUIRED",
+            "rules": [
+                "MB-R328"
+            ],
+            "note": "The mandatory human-assessment rule is activated only when capability \"oauth_oidc\" is enabled.",
+            "applicability": {
+                "capability": "oauth_oidc",
+                "default": "CONTEXT_REQUIRED"
+            }
+        },
+        {
+            "id": "11.1.3",
+            "title": "Cryptographic discovery",
+            "status": "PARTIALLY_AUTOMATED",
+            "rules": [
+                "MB-R025",
+                "MB-R132",
+                "MB-R329"
+            ],
+            "note": "Automated or existing Magebean evidence is combined with mandatory human assessment; Magebean CLI does not attest full compliance."
+        },
+        {
+            "id": "11.1.4",
+            "title": "Cryptographic migration plan",
+            "status": "MANUAL_REVIEW",
+            "rules": [
+                "MB-R330"
+            ],
+            "note": "Independent human assessment and documented evidence are mandatory; Magebean CLI cannot determine compliance."
+        },
+        {
+            "id": "11.2.4",
+            "title": "Constant-time operations",
+            "status": "MANUAL_REVIEW",
+            "rules": [
+                "MB-R331"
+            ],
+            "note": "Independent human assessment and documented evidence are mandatory; Magebean CLI cannot determine compliance."
+        },
+        {
+            "id": "11.2.5",
+            "title": "Secure cryptographic failure",
+            "status": "MANUAL_REVIEW",
+            "rules": [
+                "MB-R332"
+            ],
+            "note": "Independent human assessment and documented evidence are mandatory; Magebean CLI cannot determine compliance."
+        },
+        {
+            "id": "11.3.4",
+            "title": "Unique nonce and IV",
+            "status": "MANUAL_REVIEW",
+            "rules": [
+                "MB-R333"
+            ],
+            "note": "Independent human assessment and documented evidence are mandatory; Magebean CLI cannot determine compliance."
+        },
+        {
+            "id": "11.3.5",
+            "title": "Encrypt-then-MAC",
+            "status": "MANUAL_REVIEW",
+            "rules": [
+                "MB-R334"
+            ],
+            "note": "Independent human assessment and documented evidence are mandatory; Magebean CLI cannot determine compliance."
+        },
+        {
+            "id": "11.5.2",
+            "title": "Randomness under load",
+            "status": "MANUAL_REVIEW",
+            "rules": [
+                "MB-R335"
+            ],
+            "note": "Independent human assessment and documented evidence are mandatory; Magebean CLI cannot determine compliance."
+        },
+        {
+            "id": "11.6.2",
+            "title": "Secure key exchange",
+            "status": "MANUAL_REVIEW",
+            "rules": [
+                "MB-R336"
+            ],
+            "note": "Independent human assessment and documented evidence are mandatory; Magebean CLI cannot determine compliance."
+        },
+        {
+            "id": "11.7.1",
+            "title": "Memory encryption",
+            "status": "MANUAL_REVIEW",
+            "rules": [
+                "MB-R337"
+            ],
+            "note": "Independent human assessment and documented evidence are mandatory; Magebean CLI cannot determine compliance."
+        },
+        {
+            "id": "11.7.2",
+            "title": "Processing minimization",
+            "status": "MANUAL_REVIEW",
+            "rules": [
+                "MB-R338"
+            ],
+            "note": "Independent human assessment and documented evidence are mandatory; Magebean CLI cannot determine compliance."
+        },
+        {
+            "id": "12.1.4",
+            "title": "Certificate revocation",
+            "status": "MANUAL_REVIEW",
+            "rules": [
+                "MB-R339"
+            ],
+            "note": "Independent human assessment and documented evidence are mandatory; Magebean CLI cannot determine compliance."
+        },
+        {
+            "id": "12.1.5",
+            "title": "Encrypted Client Hello",
+            "status": "MANUAL_REVIEW",
+            "rules": [
+                "MB-R340"
+            ],
+            "note": "Independent human assessment and documented evidence are mandatory; Magebean CLI cannot determine compliance."
+        },
+        {
+            "id": "12.3.5",
+            "title": "Strong internal service identity",
+            "status": "MANUAL_REVIEW",
+            "rules": [
+                "MB-R341"
+            ],
+            "note": "Independent human assessment and documented evidence are mandatory; Magebean CLI cannot determine compliance."
+        },
+        {
+            "id": "13.1.2",
+            "title": "Connection-limit policy",
+            "status": "MANUAL_REVIEW",
+            "rules": [
+                "MB-R342"
+            ],
+            "note": "Independent human assessment and documented evidence are mandatory; Magebean CLI cannot determine compliance."
+        },
+        {
+            "id": "13.1.3",
+            "title": "External-resource strategy",
+            "status": "MANUAL_REVIEW",
+            "rules": [
+                "MB-R343"
+            ],
+            "note": "Independent human assessment and documented evidence are mandatory; Magebean CLI cannot determine compliance."
+        },
+        {
+            "id": "13.1.4",
+            "title": "Critical-secret rotation policy",
+            "status": "MANUAL_REVIEW",
+            "rules": [
+                "MB-R344"
+            ],
+            "note": "Independent human assessment and documented evidence are mandatory; Magebean CLI cannot determine compliance."
+        },
+        {
+            "id": "13.2.6",
+            "title": "Enforce connection configuration",
+            "status": "MANUAL_REVIEW",
+            "rules": [
+                "MB-R345"
+            ],
+            "note": "Independent human assessment and documented evidence are mandatory; Magebean CLI cannot determine compliance."
+        },
+        {
+            "id": "13.3.3",
+            "title": "Isolated cryptographic module",
+            "status": "MANUAL_REVIEW",
+            "rules": [
+                "MB-R346"
+            ],
+            "note": "Independent human assessment and documented evidence are mandatory; Magebean CLI cannot determine compliance."
+        },
+        {
+            "id": "13.3.4",
+            "title": "Secret expiration and rotation",
+            "status": "MANUAL_REVIEW",
+            "rules": [
+                "MB-R347"
+            ],
+            "note": "Independent human assessment and documented evidence are mandatory; Magebean CLI cannot determine compliance."
+        },
+        {
+            "id": "13.4.6",
+            "title": "Hide backend versions",
+            "status": "PARTIALLY_AUTOMATED",
+            "rules": [
+                "MB-R370",
+                "MB-R348"
+            ],
+            "note": "Automated or existing Magebean evidence is combined with mandatory human assessment; Magebean CLI does not attest full compliance."
+        },
+        {
+            "id": "13.4.7",
+            "title": "Served-file extension allowlist",
+            "status": "PARTIALLY_AUTOMATED",
+            "rules": [
+                "MB-R003",
+                "MB-R134",
+                "MB-R349"
+            ],
+            "note": "Automated or existing Magebean evidence is combined with mandatory human assessment; Magebean CLI does not attest full compliance."
+        },
+        {
+            "id": "14.2.5",
+            "title": "Web-cache-deception defense",
+            "status": "MANUAL_REVIEW",
+            "rules": [
+                "MB-R350"
+            ],
+            "note": "Independent human assessment and documented evidence are mandatory; Magebean CLI cannot determine compliance."
+        },
+        {
+            "id": "14.2.6",
+            "title": "Sensitive-data minimization",
+            "status": "MANUAL_REVIEW",
+            "rules": [
+                "MB-R351"
+            ],
+            "note": "Independent human assessment and documented evidence are mandatory; Magebean CLI cannot determine compliance."
+        },
+        {
+            "id": "14.2.7",
+            "title": "Retention enforcement",
+            "status": "MANUAL_REVIEW",
+            "rules": [
+                "MB-R352"
+            ],
+            "note": "Independent human assessment and documented evidence are mandatory; Magebean CLI cannot determine compliance."
+        },
+        {
+            "id": "14.2.8",
+            "title": "File metadata removal",
+            "status": "MANUAL_REVIEW",
+            "rules": [
+                "MB-R353"
+            ],
+            "note": "Independent human assessment and documented evidence are mandatory; Magebean CLI cannot determine compliance."
+        },
+        {
+            "id": "15.1.4",
+            "title": "Risky-component inventory",
+            "status": "MANUAL_REVIEW",
+            "rules": [
+                "MB-R354"
+            ],
+            "note": "Independent human assessment and documented evidence are mandatory; Magebean CLI cannot determine compliance."
+        },
+        {
+            "id": "15.1.5",
+            "title": "Dangerous-functionality inventory",
+            "status": "MANUAL_REVIEW",
+            "rules": [
+                "MB-R355"
+            ],
+            "note": "Independent human assessment and documented evidence are mandatory; Magebean CLI cannot determine compliance."
+        },
+        {
+            "id": "15.2.4",
+            "title": "Dependency-confusion defense",
+            "status": "PARTIALLY_AUTOMATED",
+            "rules": [
+                "MB-R063",
+                "MB-R064",
+                "MB-R356"
+            ],
+            "note": "Automated or existing Magebean evidence is combined with mandatory human assessment; Magebean CLI does not attest full compliance."
+        },
+        {
+            "id": "15.2.5",
+            "title": "Isolation around high-risk code",
+            "status": "MANUAL_REVIEW",
+            "rules": [
+                "MB-R357"
+            ],
+            "note": "Independent human assessment and documented evidence are mandatory; Magebean CLI cannot determine compliance."
+        },
+        {
+            "id": "15.4.1",
+            "title": "Thread-safe shared objects",
+            "status": "MANUAL_REVIEW",
+            "rules": [
+                "MB-R358"
+            ],
+            "note": "Independent human assessment and documented evidence are mandatory; Magebean CLI cannot determine compliance."
+        },
+        {
+            "id": "15.4.2",
+            "title": "Atomic state checks",
+            "status": "MANUAL_REVIEW",
+            "rules": [
+                "MB-R359"
+            ],
+            "note": "Independent human assessment and documented evidence are mandatory; Magebean CLI cannot determine compliance."
+        },
+        {
+            "id": "15.4.3",
+            "title": "Consistent locking",
+            "status": "MANUAL_REVIEW",
+            "rules": [
+                "MB-R360"
+            ],
+            "note": "Independent human assessment and documented evidence are mandatory; Magebean CLI cannot determine compliance."
+        },
+        {
+            "id": "15.4.4",
+            "title": "Prevent thread starvation",
+            "status": "MANUAL_REVIEW",
+            "rules": [
+                "MB-R361"
+            ],
+            "note": "Independent human assessment and documented evidence are mandatory; Magebean CLI cannot determine compliance."
+        },
+        {
+            "id": "16.5.4",
+            "title": "Last-resort exception handler",
+            "status": "MANUAL_REVIEW",
+            "rules": [
+                "MB-R362"
+            ],
+            "note": "Independent human assessment and documented evidence are mandatory; Magebean CLI cannot determine compliance."
+        },
+        {
+            "id": "17.1.2",
+            "title": "TURN resource-exhaustion defense",
+            "status": "CONTEXT_REQUIRED",
+            "rules": [
+                "MB-R363"
+            ],
+            "note": "The mandatory human-assessment rule is activated only when capability \"webrtc\" is enabled.",
+            "applicability": {
+                "capability": "webrtc",
+                "default": "CONTEXT_REQUIRED"
+            }
+        },
+        {
+            "id": "17.2.5",
+            "title": "SRTP flood resilience",
+            "status": "CONTEXT_REQUIRED",
+            "rules": [
+                "MB-R364"
+            ],
+            "note": "The mandatory human-assessment rule is activated only when capability \"webrtc\" is enabled.",
+            "applicability": {
+                "capability": "webrtc",
+                "default": "CONTEXT_REQUIRED"
+            }
+        },
+        {
+            "id": "17.2.6",
+            "title": "DTLS ClientHello race defense",
+            "status": "CONTEXT_REQUIRED",
+            "rules": [
+                "MB-R365"
+            ],
+            "note": "The mandatory human-assessment rule is activated only when capability \"webrtc\" is enabled.",
+            "applicability": {
+                "capability": "webrtc",
+                "default": "CONTEXT_REQUIRED"
+            }
+        },
+        {
+            "id": "17.2.7",
+            "title": "Recording resilience",
+            "status": "CONTEXT_REQUIRED",
+            "rules": [
+                "MB-R366"
+            ],
+            "note": "The mandatory human-assessment rule is activated only when capability \"webrtc\" is enabled.",
+            "applicability": {
+                "capability": "webrtc",
+                "default": "CONTEXT_REQUIRED"
+            }
+        },
+        {
+            "id": "17.2.8",
+            "title": "DTLS fingerprint validation",
+            "status": "CONTEXT_REQUIRED",
+            "rules": [
+                "MB-R367"
+            ],
+            "note": "The mandatory human-assessment rule is activated only when capability \"webrtc\" is enabled.",
+            "applicability": {
+                "capability": "webrtc",
+                "default": "CONTEXT_REQUIRED"
+            }
+        }
+    ]
+}

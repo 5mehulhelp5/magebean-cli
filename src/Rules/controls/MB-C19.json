@@ -1,0 +1,91 @@
+{
+    "control": "MB-C19",
+    "title": "ASVS Level 3 Automated Verification",
+    "description": "Focused HTTP checks that provide partial evidence for OWASP ASVS 5.0 Level 3 requirements.",
+    "rules": [
+        {
+            "id": "MB-R368",
+            "title": "HSTS policy is preload-ready",
+            "control": "MB-C19",
+            "severity": "medium",
+            "op": "all",
+            "requirements": [
+                {
+                    "standard": "OWASP-ASVS",
+                    "version": "5.0.0",
+                    "id": "3.7.4",
+                    "level": 3
+                }
+            ],
+            "checks": [
+                {
+                    "name": "http_hsts_preload_ready",
+                    "args": {
+                        "min_max_age": 31536000,
+                        "require_include_subdomains": true,
+                        "require_preload": true,
+                        "timeout_ms": 8000
+                    }
+                }
+            ],
+            "messages": {
+                "pass": "HSTS policy is configured with preload-ready directives.",
+                "fail": "HSTS policy is not preload-ready; registry submission still requires independent confirmation."
+            }
+        },
+        {
+            "id": "MB-R369",
+            "title": "Public endpoint does not advertise unsafe HTTP methods",
+            "control": "MB-C19",
+            "severity": "medium",
+            "op": "all",
+            "requirements": [
+                {
+                    "standard": "OWASP-ASVS",
+                    "version": "5.0.0",
+                    "id": "4.1.4",
+                    "level": 3
+                }
+            ],
+            "checks": [
+                {
+                    "name": "http_options_not_overly_verbose",
+                    "args": {
+                        "timeout_ms": 8000
+                    }
+                }
+            ],
+            "messages": {
+                "pass": "Public endpoint does not advertise unsafe HTTP methods.",
+                "fail": "Public endpoint advertises one or more unsafe HTTP methods."
+            }
+        },
+        {
+            "id": "MB-R370",
+            "title": "Backend server banner does not expose a detailed version",
+            "control": "MB-C19",
+            "severity": "low",
+            "op": "all",
+            "requirements": [
+                {
+                    "standard": "OWASP-ASVS",
+                    "version": "5.0.0",
+                    "id": "13.4.6",
+                    "level": 3
+                }
+            ],
+            "checks": [
+                {
+                    "name": "http_server_banner_not_verbose",
+                    "args": {
+                        "timeout_ms": 8000
+                    }
+                }
+            ],
+            "messages": {
+                "pass": "Backend server banner does not expose a detailed version.",
+                "fail": "Backend server banner exposes detailed version information."
+            }
+        }
+    ]
+}

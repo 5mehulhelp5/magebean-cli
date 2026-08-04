@@ -1098,7 +1098,7 @@ final class HttpCheck
     private function hstsPreloadReady(array $args): array
     {
         $base = $this->baseUrl();
-        if ($base === '') return [false, 'Missing URL in context'];
+        if ($base === '') return [null, '[UNKNOWN] Missing URL in context', []];
         [$ok, $msg, $ev] = $this->fetch($base, 'GET', [], (int)($args['timeout_ms'] ?? 8000), false);
         if ($ok === null) return [null, $msg, $ev];
         if (!$ok) return [false, $msg, $ev];
@@ -1146,7 +1146,7 @@ final class HttpCheck
     private function serverBannerNotVerbose(array $args): array
     {
         $base = $this->baseUrl();
-        if ($base === '') return [false, 'Missing URL in context'];
+        if ($base === '') return [null, '[UNKNOWN] Missing URL in context', []];
         [$ok, $msg, $ev] = $this->fetch($base, 'GET', [], (int)($args['timeout_ms'] ?? 8000), false);
         if ($ok === null) return [null, $msg, $ev];
         if (!$ok) return [false, $msg, $ev];

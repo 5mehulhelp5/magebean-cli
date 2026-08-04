@@ -24,8 +24,9 @@ foreach (['MB-C13.json', 'MB-C15.json', 'MB-C16.json'] as $file) {
             !str_contains($review, 'Review the application design, implementation, configuration, tests, and supporting evidence to verify:'),
             ($rule['id'] ?? $file) . ' still uses the verbose review prefix'
         );
-        assertManualEnglish(str_contains($review, 'MANDATORY HUMAN ASSESSMENT'), ($rule['id'] ?? $file) . ' lacks mandatory-assessment wording');
-        assertManualEnglish(str_contains($review, 'Magebean CLI cannot determine or attest compliance'), ($rule['id'] ?? $file) . ' lacks CLI limitation disclaimer');
+        assertManualEnglish(str_starts_with($review, 'Human assessment scope'), ($rule['id'] ?? $file) . ' lacks a concrete assessment scope');
+        assertManualEnglish(!str_contains($review, 'MANDATORY HUMAN ASSESSMENT'), ($rule['id'] ?? $file) . ' repeats status wording in its description');
+        assertManualEnglish(!str_contains($review, 'Magebean CLI cannot determine or attest compliance'), ($rule['id'] ?? $file) . ' repeats the CLI limitation disclaimer');
         assertManualEnglish(
             preg_match('/[^\x09\x0A\x0D\x20-\x7E]/', $review) !== 1,
             ($rule['id'] ?? $file) . ' review guidance contains non-English/non-ASCII text: ' . $review

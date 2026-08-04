@@ -1,6 +1,6 @@
 # Magebean CLI Reference
 
-Magebean CLI audits Magento 2 production readiness using a catalog of 12 controls and 101 rules.
+Magebean CLI audits Magento 2 production readiness using a catalog of 19 controls and 370 rules: 113 automated and 257 requiring human verification.
 
 Current CLI version:
 
@@ -68,13 +68,16 @@ When neither `--path` nor `--url` is supplied, Magebean searches for a Magento r
 | `basic` | 21 | Default fast, low-noise production security and operations check. |
 | `asvs-l1` | 32 default / 60 with manual | Level 1 mapping; manual-review rules require `--include-manual-review`. |
 | `asvs-l2` | 73 default / 183 with manual | Cumulative Level 2 mapping; manual and contextual reviews are opt-in. |
+| `asvs-l3` | 80 default / 259 with manual | Cumulative Level 3 mapping; substantial independent human assurance is mandatory. |
 | `owasp` | 77 | Application-security checks mapped to OWASP Top 10 2025. |
 | `pci` | 69 | PCI DSS v4.0.1 payment-readiness checks; not a certification. |
 | `hardening` | 89 | Deep production, code, dependency, integration, and operations checks. |
-| `baseline` | 110 default / 275 with manual | Full local catalog. Aliases: `all`, `magebean`. |
+| `baseline` | 113 default / 370 with manual | Full local catalog. Aliases: `all`, `magebean`. |
 | `FILE` | Custom | JSON profile path or a profile in `.magebean/profiles`. |
 
 The `asvs-l1` mapping covers all 70 Level 1 requirements: 15 automated, 15 partially automated, 28 manual-review, and 12 currently without a mapped rule. This is an evidence-oriented scan profile, not an ASVS certification.
+
+The cumulative `asvs-l3` mapping covers all 345 ASVS 5.0 requirements: 70 Level 1, 183 Level 2, and 92 Level 3 additions. It selects 80 non-manual rules by default and 259 non-contextual rules with `--include-manual-review`. Level 3 human-assessment results use the `HUMAN VERIFICATION REQUIRED` status and provide the specific assessment scope for each requirement.
 
 The cumulative `asvs-l2` mapping covers 253 requirements. By default it selects 73 automated or partially automated rules. Add `--include-manual-review` to select 183 non-contextual rules. Set capabilities explicitly to activate relevant conditional reviews:
 

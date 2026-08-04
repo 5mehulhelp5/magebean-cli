@@ -1,0 +1,3112 @@
+{
+  "control": "MB-C18",
+  "title": "ASVS Level 3 Human Assurance",
+  "description": "Mandatory independent human-assessment rules for OWASP ASVS 5.0 Level 3 requirements that Magebean CLI cannot fully verify or attest.",
+  "rules": [
+    {
+      "id": "MB-R276",
+      "title": "ASVS 1.2.10 CSV and formula injection",
+      "control": "MB-C18",
+      "severity": "medium",
+      "op": "all",
+      "verification": "manual",
+      "requirements": [
+        {
+          "standard": "OWASP-ASVS",
+          "version": "5.0.0",
+          "id": "1.2.10",
+          "level": 3
+        }
+      ],
+      "checks": [
+        {
+          "name": "human_manual_review_required",
+          "args": {
+            "requirement": "ASVS 5.0.0 1.2.10",
+            "review": "Human assessment scope: The application is protected against CSV and Formula Injection. The application must follow the escaping rules defined in RFC 4180 sections 2.6 and 2.7 when exporting CSV content. Additionally, when exporting to CSV or other spreadsheet formats (such as XLS, XLSX, or ODF), special characters (including '=', '+', '-', '@', '\\t'(tab), and '\\0'(null character)) must be escaped with a single quote if they appear as the first character in a field value.",
+            "evidence_needed": [
+              "Relevant architecture, policy, implementation, configuration, or controlled test evidence",
+              "Applicability and threat-model rationale",
+              "Independent reviewer conclusion and approval"
+            ]
+          }
+        }
+      ],
+      "messages": {
+        "manual_review": "NOT VERIFIED BY MAGEBEAN CLI. Independent human assessment and documented supporting evidence are mandatory before this requirement can be considered satisfied."
+      }
+    },
+    {
+      "id": "MB-R277",
+      "title": "ASVS 1.3.12 ReDoS prevention",
+      "control": "MB-C18",
+      "severity": "medium",
+      "op": "all",
+      "verification": "manual",
+      "requirements": [
+        {
+          "standard": "OWASP-ASVS",
+          "version": "5.0.0",
+          "id": "1.3.12",
+          "level": 3
+        }
+      ],
+      "checks": [
+        {
+          "name": "human_manual_review_required",
+          "args": {
+            "requirement": "ASVS 5.0.0 1.3.12",
+            "review": "Human assessment scope: Regular expressions are free from elements causing exponential backtracking, and ensure untrusted input is sanitized to mitigate ReDoS or Runaway Regex attacks.",
+            "evidence_needed": [
+              "Relevant architecture, policy, implementation, configuration, or controlled test evidence",
+              "Applicability and threat-model rationale",
+              "Independent reviewer conclusion and approval"
+            ]
+          }
+        }
+      ],
+      "messages": {
+        "manual_review": "NOT VERIFIED BY MAGEBEAN CLI. Independent human assessment and documented supporting evidence are mandatory before this requirement can be considered satisfied."
+      }
+    },
+    {
+      "id": "MB-R278",
+      "title": "ASVS 1.5.3 Consistent parser behavior",
+      "control": "MB-C18",
+      "severity": "medium",
+      "op": "all",
+      "verification": "manual",
+      "requirements": [
+        {
+          "standard": "OWASP-ASVS",
+          "version": "5.0.0",
+          "id": "1.5.3",
+          "level": 3
+        }
+      ],
+      "checks": [
+        {
+          "name": "human_manual_review_required",
+          "args": {
+            "requirement": "ASVS 5.0.0 1.5.3",
+            "review": "Human assessment scope: Different parsers used in the application for the same data type (e.g., JSON parsers, XML parsers, URL parsers), perform parsing in a consistent way and use the same character encoding mechanism to avoid issues such as JSON Interoperability vulnerabilities or different URI or file parsing behavior being exploited in Remote File Inclusion (RFI) or Server-side Request Forgery (SSRF) attacks.",
+            "evidence_needed": [
+              "Relevant architecture, policy, implementation, configuration, or controlled test evidence",
+              "Applicability and threat-model rationale",
+              "Independent reviewer conclusion and approval"
+            ]
+          }
+        }
+      ],
+      "messages": {
+        "manual_review": "NOT VERIFIED BY MAGEBEAN CLI. Independent human assessment and documented supporting evidence are mandatory before this requirement can be considered satisfied."
+      }
+    },
+    {
+      "id": "MB-R279",
+      "title": "ASVS 2.3.5 Multi-user approval (when high_value_operations is used)",
+      "control": "MB-C18",
+      "severity": "medium",
+      "op": "all",
+      "verification": "manual",
+      "requirements": [
+        {
+          "standard": "OWASP-ASVS",
+          "version": "5.0.0",
+          "id": "2.3.5",
+          "level": 3
+        }
+      ],
+      "checks": [
+        {
+          "name": "human_manual_review_required",
+          "args": {
+            "requirement": "ASVS 5.0.0 2.3.5",
+            "review": "Human assessment scope for enabled capability \"high_value_operations\": High-value business logic flows require multi-user approval to prevent unauthorized or accidental actions. This could include but is not limited to large monetary transfers, contract approvals, access to classified information, or safety overrides in manufacturing.",
+            "evidence_needed": [
+              "Relevant architecture, policy, implementation, configuration, or controlled test evidence",
+              "Applicability and threat-model rationale",
+              "Independent reviewer conclusion and approval"
+            ]
+          }
+        }
+      ],
+      "messages": {
+        "manual_review": "NOT VERIFIED BY MAGEBEAN CLI. Independent human assessment and documented supporting evidence are mandatory before this requirement can be considered satisfied."
+      },
+      "applicability": {
+        "capability": "high_value_operations"
+      }
+    },
+    {
+      "id": "MB-R280",
+      "title": "ASVS 2.4.2 Human transaction timing (when high_value_operations is used)",
+      "control": "MB-C18",
+      "severity": "medium",
+      "op": "all",
+      "verification": "manual",
+      "requirements": [
+        {
+          "standard": "OWASP-ASVS",
+          "version": "5.0.0",
+          "id": "2.4.2",
+          "level": 3
+        }
+      ],
+      "checks": [
+        {
+          "name": "human_manual_review_required",
+          "args": {
+            "requirement": "ASVS 5.0.0 2.4.2",
+            "review": "Human assessment scope for enabled capability \"high_value_operations\": Business logic flows require realistic human timing, preventing excessively rapid transaction submissions.",
+            "evidence_needed": [
+              "Relevant architecture, policy, implementation, configuration, or controlled test evidence",
+              "Applicability and threat-model rationale",
+              "Independent reviewer conclusion and approval"
+            ]
+          }
+        }
+      ],
+      "messages": {
+        "manual_review": "NOT VERIFIED BY MAGEBEAN CLI. Independent human assessment and documented supporting evidence are mandatory before this requirement can be considered satisfied."
+      },
+      "applicability": {
+        "capability": "high_value_operations"
+      }
+    },
+    {
+      "id": "MB-R281",
+      "title": "ASVS 3.1.1 Browser-security requirements",
+      "control": "MB-C18",
+      "severity": "medium",
+      "op": "all",
+      "verification": "manual",
+      "requirements": [
+        {
+          "standard": "OWASP-ASVS",
+          "version": "5.0.0",
+          "id": "3.1.1",
+          "level": 3
+        }
+      ],
+      "checks": [
+        {
+          "name": "human_manual_review_required",
+          "args": {
+            "requirement": "ASVS 5.0.0 3.1.1",
+            "review": "Human assessment scope: Application documentation states the expected security features that browsers using the application must support (such as HTTPS, HTTP Strict Transport Security (HSTS), Content Security Policy (CSP), and other relevant HTTP security mechanisms). It must also define how the application must behave when some of these features are not available (such as warning the user or blocking access).",
+            "evidence_needed": [
+              "Relevant architecture, policy, implementation, configuration, or controlled test evidence",
+              "Applicability and threat-model rationale",
+              "Independent reviewer conclusion and approval"
+            ]
+          }
+        }
+      ],
+      "messages": {
+        "manual_review": "NOT VERIFIED BY MAGEBEAN CLI. Independent human assessment and documented supporting evidence are mandatory before this requirement can be considered satisfied."
+      }
+    },
+    {
+      "id": "MB-R282",
+      "title": "ASVS 3.2.3 DOM-clobbering defense",
+      "control": "MB-C18",
+      "severity": "medium",
+      "op": "all",
+      "verification": "manual",
+      "requirements": [
+        {
+          "standard": "OWASP-ASVS",
+          "version": "5.0.0",
+          "id": "3.2.3",
+          "level": 3
+        }
+      ],
+      "checks": [
+        {
+          "name": "human_manual_review_required",
+          "args": {
+            "requirement": "ASVS 5.0.0 3.2.3",
+            "review": "Human assessment scope: The application avoids DOM clobbering when using client-side JavaScript by employing explicit variable declarations, performing strict type checking, avoiding storing global variables on the document object, and implementing namespace isolation.",
+            "evidence_needed": [
+              "Relevant architecture, policy, implementation, configuration, or controlled test evidence",
+              "Applicability and threat-model rationale",
+              "Independent reviewer conclusion and approval"
+            ]
+          }
+        }
+      ],
+      "messages": {
+        "manual_review": "NOT VERIFIED BY MAGEBEAN CLI. Independent human assessment and documented supporting evidence are mandatory before this requirement can be considered satisfied."
+      }
+    },
+    {
+      "id": "MB-R283",
+      "title": "ASVS 3.3.5 Cookie-size limit",
+      "control": "MB-C18",
+      "severity": "medium",
+      "op": "all",
+      "verification": "manual",
+      "requirements": [
+        {
+          "standard": "OWASP-ASVS",
+          "version": "5.0.0",
+          "id": "3.3.5",
+          "level": 3
+        }
+      ],
+      "checks": [
+        {
+          "name": "human_manual_review_required",
+          "args": {
+            "requirement": "ASVS 5.0.0 3.3.5",
+            "review": "Human assessment scope: When the application writes a cookie, the cookie name and value length combined are not over 4096 bytes. Overly large cookies will not be stored by the browser and therefore not sent with requests, preventing the user from using application functionality which relies on that cookie.",
+            "evidence_needed": [
+              "Relevant architecture, policy, implementation, configuration, or controlled test evidence",
+              "Applicability and threat-model rationale",
+              "Independent reviewer conclusion and approval"
+            ]
+          }
+        }
+      ],
+      "messages": {
+        "manual_review": "NOT VERIFIED BY MAGEBEAN CLI. Independent human assessment and documented supporting evidence are mandatory before this requirement can be considered satisfied."
+      }
+    },
+    {
+      "id": "MB-R284",
+      "title": "ASVS 3.4.7 CSP violation reporting",
+      "control": "MB-C18",
+      "severity": "medium",
+      "op": "all",
+      "verification": "manual",
+      "requirements": [
+        {
+          "standard": "OWASP-ASVS",
+          "version": "5.0.0",
+          "id": "3.4.7",
+          "level": 3
+        }
+      ],
+      "checks": [
+        {
+          "name": "human_manual_review_required",
+          "args": {
+            "requirement": "ASVS 5.0.0 3.4.7",
+            "review": "Human assessment scope: The Content-Security-Policy header field specifies a location to report violations.",
+            "evidence_needed": [
+              "Relevant architecture, policy, implementation, configuration, or controlled test evidence",
+              "Applicability and threat-model rationale",
+              "Independent reviewer conclusion and approval"
+            ]
+          }
+        }
+      ],
+      "messages": {
+        "manual_review": "NOT VERIFIED BY MAGEBEAN CLI. Independent human assessment and documented supporting evidence are mandatory before this requirement can be considered satisfied."
+      }
+    },
+    {
+      "id": "MB-R285",
+      "title": "ASVS 3.4.8 Cross-Origin-Opener-Policy",
+      "control": "MB-C18",
+      "severity": "medium",
+      "op": "all",
+      "verification": "manual",
+      "requirements": [
+        {
+          "standard": "OWASP-ASVS",
+          "version": "5.0.0",
+          "id": "3.4.8",
+          "level": 3
+        }
+      ],
+      "checks": [
+        {
+          "name": "human_manual_review_required",
+          "args": {
+            "requirement": "ASVS 5.0.0 3.4.8",
+            "review": "Human assessment scope: All HTTP responses that initiate a document rendering (such as responses with Content-Type text/html), include the Cross-Origin-Opener-Policy header field with the same-origin directive or the same-origin-allow-popups directive as required. This prevents attacks that abuse shared access to Window objects, such as tabnabbing and frame counting.",
+            "evidence_needed": [
+              "Relevant architecture, policy, implementation, configuration, or controlled test evidence",
+              "Applicability and threat-model rationale",
+              "Independent reviewer conclusion and approval"
+            ]
+          }
+        }
+      ],
+      "messages": {
+        "manual_review": "NOT VERIFIED BY MAGEBEAN CLI. Independent human assessment and documented supporting evidence are mandatory before this requirement can be considered satisfied."
+      }
+    },
+    {
+      "id": "MB-R286",
+      "title": "ASVS 3.5.6 Disable JSONP",
+      "control": "MB-C18",
+      "severity": "medium",
+      "op": "all",
+      "verification": "manual",
+      "requirements": [
+        {
+          "standard": "OWASP-ASVS",
+          "version": "5.0.0",
+          "id": "3.5.6",
+          "level": 3
+        }
+      ],
+      "checks": [
+        {
+          "name": "human_manual_review_required",
+          "args": {
+            "requirement": "ASVS 5.0.0 3.5.6",
+            "review": "Human assessment scope: JSONP functionality is not enabled anywhere across the application to avoid Cross-Site Script Inclusion (XSSI) attacks.",
+            "evidence_needed": [
+              "Relevant architecture, policy, implementation, configuration, or controlled test evidence",
+              "Applicability and threat-model rationale",
+              "Independent reviewer conclusion and approval"
+            ]
+          }
+        }
+      ],
+      "messages": {
+        "manual_review": "NOT VERIFIED BY MAGEBEAN CLI. Independent human assessment and documented supporting evidence are mandatory before this requirement can be considered satisfied."
+      }
+    },
+    {
+      "id": "MB-R287",
+      "title": "ASVS 3.5.7 No authorized data in scripts",
+      "control": "MB-C18",
+      "severity": "medium",
+      "op": "all",
+      "verification": "manual",
+      "requirements": [
+        {
+          "standard": "OWASP-ASVS",
+          "version": "5.0.0",
+          "id": "3.5.7",
+          "level": 3
+        }
+      ],
+      "checks": [
+        {
+          "name": "human_manual_review_required",
+          "args": {
+            "requirement": "ASVS 5.0.0 3.5.7",
+            "review": "Human assessment scope: Data requiring authorization is not included in script resource responses, like JavaScript files, to prevent Cross-Site Script Inclusion (XSSI) attacks.",
+            "evidence_needed": [
+              "Relevant architecture, policy, implementation, configuration, or controlled test evidence",
+              "Applicability and threat-model rationale",
+              "Independent reviewer conclusion and approval"
+            ]
+          }
+        }
+      ],
+      "messages": {
+        "manual_review": "NOT VERIFIED BY MAGEBEAN CLI. Independent human assessment and documented supporting evidence are mandatory before this requirement can be considered satisfied."
+      }
+    },
+    {
+      "id": "MB-R288",
+      "title": "ASVS 3.5.8 Authorized-resource embedding",
+      "control": "MB-C18",
+      "severity": "medium",
+      "op": "all",
+      "verification": "manual",
+      "requirements": [
+        {
+          "standard": "OWASP-ASVS",
+          "version": "5.0.0",
+          "id": "3.5.8",
+          "level": 3
+        }
+      ],
+      "checks": [
+        {
+          "name": "human_manual_review_required",
+          "args": {
+            "requirement": "ASVS 5.0.0 3.5.8",
+            "review": "Human assessment scope: Authenticated resources (such as images, videos, scripts, and other documents) can be loaded or embedded on behalf of the user only when intended. This can be accomplished by strict validation of the Sec-Fetch-* HTTP request header fields to ensure that the request did not originate from an inappropriate cross-origin call, or by setting a restrictive Cross-Origin-Resource-Policy HTTP response header field to instruct the browser to block returned content.",
+            "evidence_needed": [
+              "Relevant architecture, policy, implementation, configuration, or controlled test evidence",
+              "Applicability and threat-model rationale",
+              "Independent reviewer conclusion and approval"
+            ]
+          }
+        }
+      ],
+      "messages": {
+        "manual_review": "NOT VERIFIED BY MAGEBEAN CLI. Independent human assessment and documented supporting evidence are mandatory before this requirement can be considered satisfied."
+      }
+    },
+    {
+      "id": "MB-R289",
+      "title": "ASVS 3.6.1 External asset integrity (when external_assets is used)",
+      "control": "MB-C18",
+      "severity": "medium",
+      "op": "all",
+      "verification": "manual",
+      "requirements": [
+        {
+          "standard": "OWASP-ASVS",
+          "version": "5.0.0",
+          "id": "3.6.1",
+          "level": 3
+        }
+      ],
+      "checks": [
+        {
+          "name": "human_manual_review_required",
+          "args": {
+            "requirement": "ASVS 5.0.0 3.6.1",
+            "review": "Human assessment scope for enabled capability \"external_assets\": Client-side assets, such as JavaScript libraries, CSS, or web fonts, are only hosted externally (e.g., on a Content Delivery Network) if the resource is static and versioned and Subresource Integrity (SRI) is used to validate the integrity of the asset. If this is not possible, there should be a documented security decision to justify this for each resource.",
+            "evidence_needed": [
+              "Relevant architecture, policy, implementation, configuration, or controlled test evidence",
+              "Applicability and threat-model rationale",
+              "Independent reviewer conclusion and approval"
+            ]
+          }
+        }
+      ],
+      "messages": {
+        "manual_review": "NOT VERIFIED BY MAGEBEAN CLI. Independent human assessment and documented supporting evidence are mandatory before this requirement can be considered satisfied."
+      },
+      "applicability": {
+        "capability": "external_assets"
+      }
+    },
+    {
+      "id": "MB-R290",
+      "title": "ASVS 3.7.3 External-redirect warning",
+      "control": "MB-C18",
+      "severity": "medium",
+      "op": "all",
+      "verification": "manual",
+      "requirements": [
+        {
+          "standard": "OWASP-ASVS",
+          "version": "5.0.0",
+          "id": "3.7.3",
+          "level": 3
+        }
+      ],
+      "checks": [
+        {
+          "name": "human_manual_review_required",
+          "args": {
+            "requirement": "ASVS 5.0.0 3.7.3",
+            "review": "Human assessment scope: The application shows a notification when the user is being redirected to a URL outside of the application's control, with an option to cancel the navigation.",
+            "evidence_needed": [
+              "Relevant architecture, policy, implementation, configuration, or controlled test evidence",
+              "Applicability and threat-model rationale",
+              "Independent reviewer conclusion and approval"
+            ]
+          }
+        }
+      ],
+      "messages": {
+        "manual_review": "NOT VERIFIED BY MAGEBEAN CLI. Independent human assessment and documented supporting evidence are mandatory before this requirement can be considered satisfied."
+      }
+    },
+    {
+      "id": "MB-R291",
+      "title": "ASVS 3.7.4 HSTS preload",
+      "control": "MB-C18",
+      "severity": "medium",
+      "op": "all",
+      "verification": "manual",
+      "requirements": [
+        {
+          "standard": "OWASP-ASVS",
+          "version": "5.0.0",
+          "id": "3.7.4",
+          "level": 3
+        }
+      ],
+      "checks": [
+        {
+          "name": "human_manual_review_required",
+          "args": {
+            "requirement": "ASVS 5.0.0 3.7.4",
+            "review": "Human assessment scope: The application's top-level domain (e.g., site.tld) is added to the public preload list for HTTP Strict Transport Security (HSTS). This ensures that the use of TLS for the application is built directly into the main browsers, rather than relying only on the Strict-Transport-Security response header field.",
+            "evidence_needed": [
+              "Relevant architecture, policy, implementation, configuration, or controlled test evidence",
+              "Applicability and threat-model rationale",
+              "Independent reviewer conclusion and approval"
+            ]
+          }
+        }
+      ],
+      "messages": {
+        "manual_review": "NOT VERIFIED BY MAGEBEAN CLI. Independent human assessment and documented supporting evidence are mandatory before this requirement can be considered satisfied."
+      }
+    },
+    {
+      "id": "MB-R292",
+      "title": "ASVS 3.7.5 Unsupported-browser handling",
+      "control": "MB-C18",
+      "severity": "medium",
+      "op": "all",
+      "verification": "manual",
+      "requirements": [
+        {
+          "standard": "OWASP-ASVS",
+          "version": "5.0.0",
+          "id": "3.7.5",
+          "level": 3
+        }
+      ],
+      "checks": [
+        {
+          "name": "human_manual_review_required",
+          "args": {
+            "requirement": "ASVS 5.0.0 3.7.5",
+            "review": "Human assessment scope: The application behaves as documented (such as warning the user or blocking access) if the browser used to access the application does not support the expected security features.",
+            "evidence_needed": [
+              "Relevant architecture, policy, implementation, configuration, or controlled test evidence",
+              "Applicability and threat-model rationale",
+              "Independent reviewer conclusion and approval"
+            ]
+          }
+        }
+      ],
+      "messages": {
+        "manual_review": "NOT VERIFIED BY MAGEBEAN CLI. Independent human assessment and documented supporting evidence are mandatory before this requirement can be considered satisfied."
+      }
+    },
+    {
+      "id": "MB-R293",
+      "title": "ASVS 4.1.4 HTTP-method allowlist",
+      "control": "MB-C18",
+      "severity": "high",
+      "op": "all",
+      "verification": "manual",
+      "requirements": [
+        {
+          "standard": "OWASP-ASVS",
+          "version": "5.0.0",
+          "id": "4.1.4",
+          "level": 3
+        }
+      ],
+      "checks": [
+        {
+          "name": "human_manual_review_required",
+          "args": {
+            "requirement": "ASVS 5.0.0 4.1.4",
+            "review": "Human assessment scope: Only HTTP methods that are explicitly supported by the application or its API (including OPTIONS during preflight requests) can be used and that unused methods are blocked.",
+            "evidence_needed": [
+              "Relevant architecture, policy, implementation, configuration, or controlled test evidence",
+              "Applicability and threat-model rationale",
+              "Independent reviewer conclusion and approval"
+            ]
+          }
+        }
+      ],
+      "messages": {
+        "manual_review": "NOT VERIFIED BY MAGEBEAN CLI. Independent human assessment and documented supporting evidence are mandatory before this requirement can be considered satisfied."
+      }
+    },
+    {
+      "id": "MB-R294",
+      "title": "ASVS 4.1.5 Message-level signatures",
+      "control": "MB-C18",
+      "severity": "high",
+      "op": "all",
+      "verification": "manual",
+      "requirements": [
+        {
+          "standard": "OWASP-ASVS",
+          "version": "5.0.0",
+          "id": "4.1.5",
+          "level": 3
+        }
+      ],
+      "checks": [
+        {
+          "name": "human_manual_review_required",
+          "args": {
+            "requirement": "ASVS 5.0.0 4.1.5",
+            "review": "Human assessment scope: Per-message digital signatures are used to provide additional assurance on top of transport protections for requests or transactions which are highly sensitive or which traverse a number of systems.",
+            "evidence_needed": [
+              "Relevant architecture, policy, implementation, configuration, or controlled test evidence",
+              "Applicability and threat-model rationale",
+              "Independent reviewer conclusion and approval"
+            ]
+          }
+        }
+      ],
+      "messages": {
+        "manual_review": "NOT VERIFIED BY MAGEBEAN CLI. Independent human assessment and documented supporting evidence are mandatory before this requirement can be considered satisfied."
+      }
+    },
+    {
+      "id": "MB-R295",
+      "title": "ASVS 4.2.2 Correct Content-Length generation",
+      "control": "MB-C18",
+      "severity": "high",
+      "op": "all",
+      "verification": "manual",
+      "requirements": [
+        {
+          "standard": "OWASP-ASVS",
+          "version": "5.0.0",
+          "id": "4.2.2",
+          "level": 3
+        }
+      ],
+      "checks": [
+        {
+          "name": "human_manual_review_required",
+          "args": {
+            "requirement": "ASVS 5.0.0 4.2.2",
+            "review": "Human assessment scope: When generating HTTP messages, the Content-Length header field does not conflict with the length of the content as determined by the framing of the HTTP protocol, in order to prevent request smuggling attacks.",
+            "evidence_needed": [
+              "Relevant architecture, policy, implementation, configuration, or controlled test evidence",
+              "Applicability and threat-model rationale",
+              "Independent reviewer conclusion and approval"
+            ]
+          }
+        }
+      ],
+      "messages": {
+        "manual_review": "NOT VERIFIED BY MAGEBEAN CLI. Independent human assessment and documented supporting evidence are mandatory before this requirement can be considered satisfied."
+      }
+    },
+    {
+      "id": "MB-R296",
+      "title": "ASVS 4.2.3 HTTP/2 and HTTP/3 header restrictions",
+      "control": "MB-C18",
+      "severity": "high",
+      "op": "all",
+      "verification": "manual",
+      "requirements": [
+        {
+          "standard": "OWASP-ASVS",
+          "version": "5.0.0",
+          "id": "4.2.3",
+          "level": 3
+        }
+      ],
+      "checks": [
+        {
+          "name": "human_manual_review_required",
+          "args": {
+            "requirement": "ASVS 5.0.0 4.2.3",
+            "review": "Human assessment scope: The application does not send nor accept HTTP/2 or HTTP/3 messages with connection-specific header fields such as Transfer-Encoding to prevent response splitting and header injection attacks.",
+            "evidence_needed": [
+              "Relevant architecture, policy, implementation, configuration, or controlled test evidence",
+              "Applicability and threat-model rationale",
+              "Independent reviewer conclusion and approval"
+            ]
+          }
+        }
+      ],
+      "messages": {
+        "manual_review": "NOT VERIFIED BY MAGEBEAN CLI. Independent human assessment and documented supporting evidence are mandatory before this requirement can be considered satisfied."
+      }
+    },
+    {
+      "id": "MB-R297",
+      "title": "ASVS 4.2.4 Reject CR/LF in modern HTTP headers",
+      "control": "MB-C18",
+      "severity": "high",
+      "op": "all",
+      "verification": "manual",
+      "requirements": [
+        {
+          "standard": "OWASP-ASVS",
+          "version": "5.0.0",
+          "id": "4.2.4",
+          "level": 3
+        }
+      ],
+      "checks": [
+        {
+          "name": "human_manual_review_required",
+          "args": {
+            "requirement": "ASVS 5.0.0 4.2.4",
+            "review": "Human assessment scope: The application only accepts HTTP/2 and HTTP/3 requests where the header fields and values do not contain any CR (\\r), LF (\\n), or CRLF (\\r\\n) sequences, to prevent header injection attacks.",
+            "evidence_needed": [
+              "Relevant architecture, policy, implementation, configuration, or controlled test evidence",
+              "Applicability and threat-model rationale",
+              "Independent reviewer conclusion and approval"
+            ]
+          }
+        }
+      ],
+      "messages": {
+        "manual_review": "NOT VERIFIED BY MAGEBEAN CLI. Independent human assessment and documented supporting evidence are mandatory before this requirement can be considered satisfied."
+      }
+    },
+    {
+      "id": "MB-R298",
+      "title": "ASVS 4.2.5 Outbound message-size validation",
+      "control": "MB-C18",
+      "severity": "high",
+      "op": "all",
+      "verification": "manual",
+      "requirements": [
+        {
+          "standard": "OWASP-ASVS",
+          "version": "5.0.0",
+          "id": "4.2.5",
+          "level": 3
+        }
+      ],
+      "checks": [
+        {
+          "name": "human_manual_review_required",
+          "args": {
+            "requirement": "ASVS 5.0.0 4.2.5",
+            "review": "Human assessment scope: If the application (backend or frontend) builds and sends requests, it uses validation, sanitization, or other mechanisms to avoid creating URIs (such as for API calls) or HTTP request header fields (such as Authorization or Cookie), which are too long to be accepted by the receiving component. This could cause a denial of service, such as when sending an overly long request (e.g., a long cookie header field), which results in the server always responding with an error status.",
+            "evidence_needed": [
+              "Relevant architecture, policy, implementation, configuration, or controlled test evidence",
+              "Applicability and threat-model rationale",
+              "Independent reviewer conclusion and approval"
+            ]
+          }
+        }
+      ],
+      "messages": {
+        "manual_review": "NOT VERIFIED BY MAGEBEAN CLI. Independent human assessment and documented supporting evidence are mandatory before this requirement can be considered satisfied."
+      }
+    },
+    {
+      "id": "MB-R299",
+      "title": "ASVS 5.2.4 Per-user storage quotas (when file_handling is used)",
+      "control": "MB-C18",
+      "severity": "medium",
+      "op": "all",
+      "verification": "manual",
+      "requirements": [
+        {
+          "standard": "OWASP-ASVS",
+          "version": "5.0.0",
+          "id": "5.2.4",
+          "level": 3
+        }
+      ],
+      "checks": [
+        {
+          "name": "human_manual_review_required",
+          "args": {
+            "requirement": "ASVS 5.0.0 5.2.4",
+            "review": "Human assessment scope for enabled capability \"file_handling\": A file size quota and maximum number of files per user are enforced to ensure that a single user cannot fill up the storage with too many files, or excessively large files.",
+            "evidence_needed": [
+              "Relevant architecture, policy, implementation, configuration, or controlled test evidence",
+              "Applicability and threat-model rationale",
+              "Independent reviewer conclusion and approval"
+            ]
+          }
+        }
+      ],
+      "messages": {
+        "manual_review": "NOT VERIFIED BY MAGEBEAN CLI. Independent human assessment and documented supporting evidence are mandatory before this requirement can be considered satisfied."
+      },
+      "applicability": {
+        "capability": "file_handling"
+      }
+    },
+    {
+      "id": "MB-R300",
+      "title": "ASVS 5.2.5 Archive symlink restrictions (when file_handling is used)",
+      "control": "MB-C18",
+      "severity": "medium",
+      "op": "all",
+      "verification": "manual",
+      "requirements": [
+        {
+          "standard": "OWASP-ASVS",
+          "version": "5.0.0",
+          "id": "5.2.5",
+          "level": 3
+        }
+      ],
+      "checks": [
+        {
+          "name": "human_manual_review_required",
+          "args": {
+            "requirement": "ASVS 5.0.0 5.2.5",
+            "review": "Human assessment scope for enabled capability \"file_handling\": The application does not allow uploading compressed files containing symlinks unless this is specifically required (in which case it will be necessary to enforce an allowlist of the files that can be symlinked to).",
+            "evidence_needed": [
+              "Relevant architecture, policy, implementation, configuration, or controlled test evidence",
+              "Applicability and threat-model rationale",
+              "Independent reviewer conclusion and approval"
+            ]
+          }
+        }
+      ],
+      "messages": {
+        "manual_review": "NOT VERIFIED BY MAGEBEAN CLI. Independent human assessment and documented supporting evidence are mandatory before this requirement can be considered satisfied."
+      },
+      "applicability": {
+        "capability": "file_handling"
+      }
+    },
+    {
+      "id": "MB-R301",
+      "title": "ASVS 5.2.6 Image pixel limits (when file_handling is used)",
+      "control": "MB-C18",
+      "severity": "medium",
+      "op": "all",
+      "verification": "manual",
+      "requirements": [
+        {
+          "standard": "OWASP-ASVS",
+          "version": "5.0.0",
+          "id": "5.2.6",
+          "level": 3
+        }
+      ],
+      "checks": [
+        {
+          "name": "human_manual_review_required",
+          "args": {
+            "requirement": "ASVS 5.0.0 5.2.6",
+            "review": "Human assessment scope for enabled capability \"file_handling\": The application rejects uploaded images with a pixel size larger than the maximum allowed, to prevent pixel flood attacks.",
+            "evidence_needed": [
+              "Relevant architecture, policy, implementation, configuration, or controlled test evidence",
+              "Applicability and threat-model rationale",
+              "Independent reviewer conclusion and approval"
+            ]
+          }
+        }
+      ],
+      "messages": {
+        "manual_review": "NOT VERIFIED BY MAGEBEAN CLI. Independent human assessment and documented supporting evidence are mandatory before this requirement can be considered satisfied."
+      },
+      "applicability": {
+        "capability": "file_handling"
+      }
+    },
+    {
+      "id": "MB-R302",
+      "title": "ASVS 5.3.3 Ignore archive paths (when file_handling is used)",
+      "control": "MB-C18",
+      "severity": "medium",
+      "op": "all",
+      "verification": "manual",
+      "requirements": [
+        {
+          "standard": "OWASP-ASVS",
+          "version": "5.0.0",
+          "id": "5.3.3",
+          "level": 3
+        }
+      ],
+      "checks": [
+        {
+          "name": "human_manual_review_required",
+          "args": {
+            "requirement": "ASVS 5.0.0 5.3.3",
+            "review": "Human assessment scope for enabled capability \"file_handling\": Server-side file processing, such as file decompression, ignores user-provided path information to prevent vulnerabilities such as zip slip.",
+            "evidence_needed": [
+              "Relevant architecture, policy, implementation, configuration, or controlled test evidence",
+              "Applicability and threat-model rationale",
+              "Independent reviewer conclusion and approval"
+            ]
+          }
+        }
+      ],
+      "messages": {
+        "manual_review": "NOT VERIFIED BY MAGEBEAN CLI. Independent human assessment and documented supporting evidence are mandatory before this requirement can be considered satisfied."
+      },
+      "applicability": {
+        "capability": "file_handling"
+      }
+    },
+    {
+      "id": "MB-R303",
+      "title": "ASVS 6.3.5 Suspicious-attempt notifications",
+      "control": "MB-C18",
+      "severity": "high",
+      "op": "all",
+      "verification": "manual",
+      "requirements": [
+        {
+          "standard": "OWASP-ASVS",
+          "version": "5.0.0",
+          "id": "6.3.5",
+          "level": 3
+        }
+      ],
+      "checks": [
+        {
+          "name": "human_manual_review_required",
+          "args": {
+            "requirement": "ASVS 5.0.0 6.3.5",
+            "review": "Human assessment scope: Users are notified of suspicious authentication attempts (successful or unsuccessful). This may include authentication attempts from an unusual location or client, partially successful authentication (only one of multiple factors), an authentication attempt after a long period of inactivity or a successful authentication after several unsuccessful attempts.",
+            "evidence_needed": [
+              "Relevant architecture, policy, implementation, configuration, or controlled test evidence",
+              "Applicability and threat-model rationale",
+              "Independent reviewer conclusion and approval"
+            ]
+          }
+        }
+      ],
+      "messages": {
+        "manual_review": "NOT VERIFIED BY MAGEBEAN CLI. Independent human assessment and documented supporting evidence are mandatory before this requirement can be considered satisfied."
+      }
+    },
+    {
+      "id": "MB-R304",
+      "title": "ASVS 6.3.6 No email authentication factor",
+      "control": "MB-C18",
+      "severity": "high",
+      "op": "all",
+      "verification": "manual",
+      "requirements": [
+        {
+          "standard": "OWASP-ASVS",
+          "version": "5.0.0",
+          "id": "6.3.6",
+          "level": 3
+        }
+      ],
+      "checks": [
+        {
+          "name": "human_manual_review_required",
+          "args": {
+            "requirement": "ASVS 5.0.0 6.3.6",
+            "review": "Human assessment scope: Email is not used as either a single-factor or multi-factor authentication mechanism.",
+            "evidence_needed": [
+              "Relevant architecture, policy, implementation, configuration, or controlled test evidence",
+              "Applicability and threat-model rationale",
+              "Independent reviewer conclusion and approval"
+            ]
+          }
+        }
+      ],
+      "messages": {
+        "manual_review": "NOT VERIFIED BY MAGEBEAN CLI. Independent human assessment and documented supporting evidence are mandatory before this requirement can be considered satisfied."
+      }
+    },
+    {
+      "id": "MB-R305",
+      "title": "ASVS 6.3.7 Authentication-change notifications",
+      "control": "MB-C18",
+      "severity": "high",
+      "op": "all",
+      "verification": "manual",
+      "requirements": [
+        {
+          "standard": "OWASP-ASVS",
+          "version": "5.0.0",
+          "id": "6.3.7",
+          "level": 3
+        }
+      ],
+      "checks": [
+        {
+          "name": "human_manual_review_required",
+          "args": {
+            "requirement": "ASVS 5.0.0 6.3.7",
+            "review": "Human assessment scope: Users are notified after updates to authentication details, such as credential resets or modification of the username or email address.",
+            "evidence_needed": [
+              "Relevant architecture, policy, implementation, configuration, or controlled test evidence",
+              "Applicability and threat-model rationale",
+              "Independent reviewer conclusion and approval"
+            ]
+          }
+        }
+      ],
+      "messages": {
+        "manual_review": "NOT VERIFIED BY MAGEBEAN CLI. Independent human assessment and documented supporting evidence are mandatory before this requirement can be considered satisfied."
+      }
+    },
+    {
+      "id": "MB-R306",
+      "title": "ASVS 6.3.8 Account-enumeration resistance",
+      "control": "MB-C18",
+      "severity": "high",
+      "op": "all",
+      "verification": "manual",
+      "requirements": [
+        {
+          "standard": "OWASP-ASVS",
+          "version": "5.0.0",
+          "id": "6.3.8",
+          "level": 3
+        }
+      ],
+      "checks": [
+        {
+          "name": "human_manual_review_required",
+          "args": {
+            "requirement": "ASVS 5.0.0 6.3.8",
+            "review": "Human assessment scope: Valid users cannot be deduced from failed authentication challenges, such as by basing on error messages, HTTP response codes, or different response times. Registration and forgot password functionality must also have this protection.",
+            "evidence_needed": [
+              "Relevant architecture, policy, implementation, configuration, or controlled test evidence",
+              "Applicability and threat-model rationale",
+              "Independent reviewer conclusion and approval"
+            ]
+          }
+        }
+      ],
+      "messages": {
+        "manual_review": "NOT VERIFIED BY MAGEBEAN CLI. Independent human assessment and documented supporting evidence are mandatory before this requirement can be considered satisfied."
+      }
+    },
+    {
+      "id": "MB-R307",
+      "title": "ASVS 6.4.5 Expiring-factor renewal",
+      "control": "MB-C18",
+      "severity": "high",
+      "op": "all",
+      "verification": "manual",
+      "requirements": [
+        {
+          "standard": "OWASP-ASVS",
+          "version": "5.0.0",
+          "id": "6.4.5",
+          "level": 3
+        }
+      ],
+      "checks": [
+        {
+          "name": "human_manual_review_required",
+          "args": {
+            "requirement": "ASVS 5.0.0 6.4.5",
+            "review": "Human assessment scope: Renewal instructions for authentication mechanisms which expire are sent with enough time to be carried out before the old authentication mechanism expires, configuring automated reminders if necessary.",
+            "evidence_needed": [
+              "Relevant architecture, policy, implementation, configuration, or controlled test evidence",
+              "Applicability and threat-model rationale",
+              "Independent reviewer conclusion and approval"
+            ]
+          }
+        }
+      ],
+      "messages": {
+        "manual_review": "NOT VERIFIED BY MAGEBEAN CLI. Independent human assessment and documented supporting evidence are mandatory before this requirement can be considered satisfied."
+      }
+    },
+    {
+      "id": "MB-R308",
+      "title": "ASVS 6.4.6 Admin-assisted reset without password knowledge",
+      "control": "MB-C18",
+      "severity": "high",
+      "op": "all",
+      "verification": "manual",
+      "requirements": [
+        {
+          "standard": "OWASP-ASVS",
+          "version": "5.0.0",
+          "id": "6.4.6",
+          "level": 3
+        }
+      ],
+      "checks": [
+        {
+          "name": "human_manual_review_required",
+          "args": {
+            "requirement": "ASVS 5.0.0 6.4.6",
+            "review": "Human assessment scope: Administrative users can initiate the password reset process for the user, but that this does not allow them to change or choose the user's password. This prevents a situation where they know the user's password.",
+            "evidence_needed": [
+              "Relevant architecture, policy, implementation, configuration, or controlled test evidence",
+              "Applicability and threat-model rationale",
+              "Independent reviewer conclusion and approval"
+            ]
+          }
+        }
+      ],
+      "messages": {
+        "manual_review": "NOT VERIFIED BY MAGEBEAN CLI. Independent human assessment and documented supporting evidence are mandatory before this requirement can be considered satisfied."
+      }
+    },
+    {
+      "id": "MB-R309",
+      "title": "ASVS 6.5.6 Factor revocation",
+      "control": "MB-C18",
+      "severity": "high",
+      "op": "all",
+      "verification": "manual",
+      "requirements": [
+        {
+          "standard": "OWASP-ASVS",
+          "version": "5.0.0",
+          "id": "6.5.6",
+          "level": 3
+        }
+      ],
+      "checks": [
+        {
+          "name": "human_manual_review_required",
+          "args": {
+            "requirement": "ASVS 5.0.0 6.5.6",
+            "review": "Human assessment scope: Any authentication factor (including physical devices) can be revoked in case of theft or other loss.",
+            "evidence_needed": [
+              "Relevant architecture, policy, implementation, configuration, or controlled test evidence",
+              "Applicability and threat-model rationale",
+              "Independent reviewer conclusion and approval"
+            ]
+          }
+        }
+      ],
+      "messages": {
+        "manual_review": "NOT VERIFIED BY MAGEBEAN CLI. Independent human assessment and documented supporting evidence are mandatory before this requirement can be considered satisfied."
+      }
+    },
+    {
+      "id": "MB-R310",
+      "title": "ASVS 6.5.7 Biometrics as secondary factor (when biometric_authentication is used)",
+      "control": "MB-C18",
+      "severity": "high",
+      "op": "all",
+      "verification": "manual",
+      "requirements": [
+        {
+          "standard": "OWASP-ASVS",
+          "version": "5.0.0",
+          "id": "6.5.7",
+          "level": 3
+        }
+      ],
+      "checks": [
+        {
+          "name": "human_manual_review_required",
+          "args": {
+            "requirement": "ASVS 5.0.0 6.5.7",
+            "review": "Human assessment scope for enabled capability \"biometric_authentication\": Biometric authentication mechanisms are only used as secondary factors together with either something you have or something you know.",
+            "evidence_needed": [
+              "Relevant architecture, policy, implementation, configuration, or controlled test evidence",
+              "Applicability and threat-model rationale",
+              "Independent reviewer conclusion and approval"
+            ]
+          }
+        }
+      ],
+      "messages": {
+        "manual_review": "NOT VERIFIED BY MAGEBEAN CLI. Independent human assessment and documented supporting evidence are mandatory before this requirement can be considered satisfied."
+      },
+      "applicability": {
+        "capability": "biometric_authentication"
+      }
+    },
+    {
+      "id": "MB-R311",
+      "title": "ASVS 6.5.8 Trusted TOTP clock",
+      "control": "MB-C18",
+      "severity": "high",
+      "op": "all",
+      "verification": "manual",
+      "requirements": [
+        {
+          "standard": "OWASP-ASVS",
+          "version": "5.0.0",
+          "id": "6.5.8",
+          "level": 3
+        }
+      ],
+      "checks": [
+        {
+          "name": "human_manual_review_required",
+          "args": {
+            "requirement": "ASVS 5.0.0 6.5.8",
+            "review": "Human assessment scope: Time-based one-time passwords (TOTPs) are checked based on a time source from a trusted service and not from an untrusted or client provided time.",
+            "evidence_needed": [
+              "Relevant architecture, policy, implementation, configuration, or controlled test evidence",
+              "Applicability and threat-model rationale",
+              "Independent reviewer conclusion and approval"
+            ]
+          }
+        }
+      ],
+      "messages": {
+        "manual_review": "NOT VERIFIED BY MAGEBEAN CLI. Independent human assessment and documented supporting evidence are mandatory before this requirement can be considered satisfied."
+      }
+    },
+    {
+      "id": "MB-R312",
+      "title": "ASVS 6.6.4 Push-bombing defense",
+      "control": "MB-C18",
+      "severity": "high",
+      "op": "all",
+      "verification": "manual",
+      "requirements": [
+        {
+          "standard": "OWASP-ASVS",
+          "version": "5.0.0",
+          "id": "6.6.4",
+          "level": 3
+        }
+      ],
+      "checks": [
+        {
+          "name": "human_manual_review_required",
+          "args": {
+            "requirement": "ASVS 5.0.0 6.6.4",
+            "review": "Human assessment scope: Where push notifications are used for multi-factor authentication, rate limiting is used to prevent push bombing attacks. Number matching may also mitigate this risk.",
+            "evidence_needed": [
+              "Relevant architecture, policy, implementation, configuration, or controlled test evidence",
+              "Applicability and threat-model rationale",
+              "Independent reviewer conclusion and approval"
+            ]
+          }
+        }
+      ],
+      "messages": {
+        "manual_review": "NOT VERIFIED BY MAGEBEAN CLI. Independent human assessment and documented supporting evidence are mandatory before this requirement can be considered satisfied."
+      }
+    },
+    {
+      "id": "MB-R313",
+      "title": "ASVS 6.7.1 Protect authentication certificates (when cryptographic_authentication is used)",
+      "control": "MB-C18",
+      "severity": "high",
+      "op": "all",
+      "verification": "manual",
+      "requirements": [
+        {
+          "standard": "OWASP-ASVS",
+          "version": "5.0.0",
+          "id": "6.7.1",
+          "level": 3
+        }
+      ],
+      "checks": [
+        {
+          "name": "human_manual_review_required",
+          "args": {
+            "requirement": "ASVS 5.0.0 6.7.1",
+            "review": "Human assessment scope for enabled capability \"cryptographic_authentication\": The certificates used to verify cryptographic authentication assertions are stored in a way protects them from modification.",
+            "evidence_needed": [
+              "Relevant architecture, policy, implementation, configuration, or controlled test evidence",
+              "Applicability and threat-model rationale",
+              "Independent reviewer conclusion and approval"
+            ]
+          }
+        }
+      ],
+      "messages": {
+        "manual_review": "NOT VERIFIED BY MAGEBEAN CLI. Independent human assessment and documented supporting evidence are mandatory before this requirement can be considered satisfied."
+      },
+      "applicability": {
+        "capability": "cryptographic_authentication"
+      }
+    },
+    {
+      "id": "MB-R314",
+      "title": "ASVS 6.7.2 Strong challenge nonce (when cryptographic_authentication is used)",
+      "control": "MB-C18",
+      "severity": "high",
+      "op": "all",
+      "verification": "manual",
+      "requirements": [
+        {
+          "standard": "OWASP-ASVS",
+          "version": "5.0.0",
+          "id": "6.7.2",
+          "level": 3
+        }
+      ],
+      "checks": [
+        {
+          "name": "human_manual_review_required",
+          "args": {
+            "requirement": "ASVS 5.0.0 6.7.2",
+            "review": "Human assessment scope for enabled capability \"cryptographic_authentication\": The challenge nonce is at least 64 bits in length, and statistically unique or unique over the lifetime of the cryptographic device.",
+            "evidence_needed": [
+              "Relevant architecture, policy, implementation, configuration, or controlled test evidence",
+              "Applicability and threat-model rationale",
+              "Independent reviewer conclusion and approval"
+            ]
+          }
+        }
+      ],
+      "messages": {
+        "manual_review": "NOT VERIFIED BY MAGEBEAN CLI. Independent human assessment and documented supporting evidence are mandatory before this requirement can be considered satisfied."
+      },
+      "applicability": {
+        "capability": "cryptographic_authentication"
+      }
+    },
+    {
+      "id": "MB-R315",
+      "title": "ASVS 7.5.3 Step-up for highly sensitive operations (when high_value_operations is used)",
+      "control": "MB-C18",
+      "severity": "high",
+      "op": "all",
+      "verification": "manual",
+      "requirements": [
+        {
+          "standard": "OWASP-ASVS",
+          "version": "5.0.0",
+          "id": "7.5.3",
+          "level": 3
+        }
+      ],
+      "checks": [
+        {
+          "name": "human_manual_review_required",
+          "args": {
+            "requirement": "ASVS 5.0.0 7.5.3",
+            "review": "Human assessment scope for enabled capability \"high_value_operations\": The application requires further authentication with at least one factor or secondary verification before performing highly sensitive transactions or operations.",
+            "evidence_needed": [
+              "Relevant architecture, policy, implementation, configuration, or controlled test evidence",
+              "Applicability and threat-model rationale",
+              "Independent reviewer conclusion and approval"
+            ]
+          }
+        }
+      ],
+      "messages": {
+        "manual_review": "NOT VERIFIED BY MAGEBEAN CLI. Independent human assessment and documented supporting evidence are mandatory before this requirement can be considered satisfied."
+      },
+      "applicability": {
+        "capability": "high_value_operations"
+      }
+    },
+    {
+      "id": "MB-R316",
+      "title": "ASVS 8.1.3 Contextual-attribute inventory",
+      "control": "MB-C18",
+      "severity": "high",
+      "op": "all",
+      "verification": "manual",
+      "requirements": [
+        {
+          "standard": "OWASP-ASVS",
+          "version": "5.0.0",
+          "id": "8.1.3",
+          "level": 3
+        }
+      ],
+      "checks": [
+        {
+          "name": "human_manual_review_required",
+          "args": {
+            "requirement": "ASVS 5.0.0 8.1.3",
+            "review": "Human assessment scope: The application's documentation defines the environmental and contextual attributes (including but not limited to, time of day, user location, IP address, or device) that are used in the application to make security decisions, including those pertaining to authentication and authorization.",
+            "evidence_needed": [
+              "Relevant architecture, policy, implementation, configuration, or controlled test evidence",
+              "Applicability and threat-model rationale",
+              "Independent reviewer conclusion and approval"
+            ]
+          }
+        }
+      ],
+      "messages": {
+        "manual_review": "NOT VERIFIED BY MAGEBEAN CLI. Independent human assessment and documented supporting evidence are mandatory before this requirement can be considered satisfied."
+      }
+    },
+    {
+      "id": "MB-R317",
+      "title": "ASVS 8.1.4 Adaptive decision policy",
+      "control": "MB-C18",
+      "severity": "high",
+      "op": "all",
+      "verification": "manual",
+      "requirements": [
+        {
+          "standard": "OWASP-ASVS",
+          "version": "5.0.0",
+          "id": "8.1.4",
+          "level": 3
+        }
+      ],
+      "checks": [
+        {
+          "name": "human_manual_review_required",
+          "args": {
+            "requirement": "ASVS 5.0.0 8.1.4",
+            "review": "Human assessment scope: Authentication and authorization documentation defines how environmental and contextual factors are used in decision-making, in addition to function-level, data-specific, and field-level authorization. This should include the attributes evaluated, thresholds for risk, and actions taken (e.g., allow, challenge, deny, step-up authentication).",
+            "evidence_needed": [
+              "Relevant architecture, policy, implementation, configuration, or controlled test evidence",
+              "Applicability and threat-model rationale",
+              "Independent reviewer conclusion and approval"
+            ]
+          }
+        }
+      ],
+      "messages": {
+        "manual_review": "NOT VERIFIED BY MAGEBEAN CLI. Independent human assessment and documented supporting evidence are mandatory before this requirement can be considered satisfied."
+      }
+    },
+    {
+      "id": "MB-R318",
+      "title": "ASVS 8.2.4 Continuous adaptive controls",
+      "control": "MB-C18",
+      "severity": "high",
+      "op": "all",
+      "verification": "manual",
+      "requirements": [
+        {
+          "standard": "OWASP-ASVS",
+          "version": "5.0.0",
+          "id": "8.2.4",
+          "level": 3
+        }
+      ],
+      "checks": [
+        {
+          "name": "human_manual_review_required",
+          "args": {
+            "requirement": "ASVS 5.0.0 8.2.4",
+            "review": "Human assessment scope: Adaptive security controls based on a consumer's environmental and contextual attributes (such as time of day, location, IP address, or device) are implemented for authentication and authorization decisions, as defined in the application's documentation. These controls must be applied when the consumer tries to start a new session and also during an existing session.",
+            "evidence_needed": [
+              "Relevant architecture, policy, implementation, configuration, or controlled test evidence",
+              "Applicability and threat-model rationale",
+              "Independent reviewer conclusion and approval"
+            ]
+          }
+        }
+      ],
+      "messages": {
+        "manual_review": "NOT VERIFIED BY MAGEBEAN CLI. Independent human assessment and documented supporting evidence are mandatory before this requirement can be considered satisfied."
+      }
+    },
+    {
+      "id": "MB-R319",
+      "title": "ASVS 8.3.2 Immediate authorization changes",
+      "control": "MB-C18",
+      "severity": "high",
+      "op": "all",
+      "verification": "manual",
+      "requirements": [
+        {
+          "standard": "OWASP-ASVS",
+          "version": "5.0.0",
+          "id": "8.3.2",
+          "level": 3
+        }
+      ],
+      "checks": [
+        {
+          "name": "human_manual_review_required",
+          "args": {
+            "requirement": "ASVS 5.0.0 8.3.2",
+            "review": "Human assessment scope: Changes to values on which authorization decisions are made are applied immediately. Where changes cannot be applied immediately, (such as when relying on data in self-contained tokens), there must be mitigating controls to alert when a consumer performs an action when they are no longer authorized to do so and revert the change. Note that this alternative would not mitigate information leakage.",
+            "evidence_needed": [
+              "Relevant architecture, policy, implementation, configuration, or controlled test evidence",
+              "Applicability and threat-model rationale",
+              "Independent reviewer conclusion and approval"
+            ]
+          }
+        }
+      ],
+      "messages": {
+        "manual_review": "NOT VERIFIED BY MAGEBEAN CLI. Independent human assessment and documented supporting evidence are mandatory before this requirement can be considered satisfied."
+      }
+    },
+    {
+      "id": "MB-R320",
+      "title": "ASVS 8.3.3 End-user permission propagation",
+      "control": "MB-C18",
+      "severity": "high",
+      "op": "all",
+      "verification": "manual",
+      "requirements": [
+        {
+          "standard": "OWASP-ASVS",
+          "version": "5.0.0",
+          "id": "8.3.3",
+          "level": 3
+        }
+      ],
+      "checks": [
+        {
+          "name": "human_manual_review_required",
+          "args": {
+            "requirement": "ASVS 5.0.0 8.3.3",
+            "review": "Human assessment scope: Access to an object is based on the originating subject's (e.g. consumer's) permissions, not on the permissions of any intermediary or service acting on their behalf. For example, if a consumer calls a web service using a self-contained token for authentication, and the service then requests data from a different service, the second service will use the consumer's token, rather than a machine-to-machine token from the first service, to make permission decisions.",
+            "evidence_needed": [
+              "Relevant architecture, policy, implementation, configuration, or controlled test evidence",
+              "Applicability and threat-model rationale",
+              "Independent reviewer conclusion and approval"
+            ]
+          }
+        }
+      ],
+      "messages": {
+        "manual_review": "NOT VERIFIED BY MAGEBEAN CLI. Independent human assessment and documented supporting evidence are mandatory before this requirement can be considered satisfied."
+      }
+    },
+    {
+      "id": "MB-R321",
+      "title": "ASVS 8.4.2 Layered administrative access",
+      "control": "MB-C18",
+      "severity": "high",
+      "op": "all",
+      "verification": "manual",
+      "requirements": [
+        {
+          "standard": "OWASP-ASVS",
+          "version": "5.0.0",
+          "id": "8.4.2",
+          "level": 3
+        }
+      ],
+      "checks": [
+        {
+          "name": "human_manual_review_required",
+          "args": {
+            "requirement": "ASVS 5.0.0 8.4.2",
+            "review": "Human assessment scope: Access to administrative interfaces incorporates multiple layers of security, including continuous consumer identity verification, device security posture assessment, and contextual risk analysis, ensuring that network location or trusted endpoints are not the sole factors for authorization even though they may reduce the likelihood of unauthorized access.",
+            "evidence_needed": [
+              "Relevant architecture, policy, implementation, configuration, or controlled test evidence",
+              "Applicability and threat-model rationale",
+              "Independent reviewer conclusion and approval"
+            ]
+          }
+        }
+      ],
+      "messages": {
+        "manual_review": "NOT VERIFIED BY MAGEBEAN CLI. Independent human assessment and documented supporting evidence are mandatory before this requirement can be considered satisfied."
+      }
+    },
+    {
+      "id": "MB-R322",
+      "title": "ASVS 10.2.3 Client scope minimization (when oauth_oidc is used)",
+      "control": "MB-C18",
+      "severity": "high",
+      "op": "all",
+      "verification": "manual",
+      "requirements": [
+        {
+          "standard": "OWASP-ASVS",
+          "version": "5.0.0",
+          "id": "10.2.3",
+          "level": 3
+        }
+      ],
+      "checks": [
+        {
+          "name": "human_manual_review_required",
+          "args": {
+            "requirement": "ASVS 5.0.0 10.2.3",
+            "review": "Human assessment scope for enabled capability \"oauth_oidc\": The OAuth client only requests the required scopes (or other authorization parameters) in requests to the authorization server.",
+            "evidence_needed": [
+              "Relevant architecture, policy, implementation, configuration, or controlled test evidence",
+              "Applicability and threat-model rationale",
+              "Independent reviewer conclusion and approval"
+            ]
+          }
+        }
+      ],
+      "messages": {
+        "manual_review": "NOT VERIFIED BY MAGEBEAN CLI. Independent human assessment and documented supporting evidence are mandatory before this requirement can be considered satisfied."
+      },
+      "applicability": {
+        "capability": "oauth_oidc"
+      }
+    },
+    {
+      "id": "MB-R323",
+      "title": "ASVS 10.3.5 Sender-constrained access tokens (when oauth_oidc is used)",
+      "control": "MB-C18",
+      "severity": "high",
+      "op": "all",
+      "verification": "manual",
+      "requirements": [
+        {
+          "standard": "OWASP-ASVS",
+          "version": "5.0.0",
+          "id": "10.3.5",
+          "level": 3
+        }
+      ],
+      "checks": [
+        {
+          "name": "human_manual_review_required",
+          "args": {
+            "requirement": "ASVS 5.0.0 10.3.5",
+            "review": "Human assessment scope for enabled capability \"oauth_oidc\": The resource server prevents the use of stolen access tokens or replay of access tokens (from unauthorized parties) by requiring sender-constrained access tokens, either Mutual TLS for OAuth 2 or OAuth 2 Demonstration of Proof of Possession (DPoP).",
+            "evidence_needed": [
+              "Relevant architecture, policy, implementation, configuration, or controlled test evidence",
+              "Applicability and threat-model rationale",
+              "Independent reviewer conclusion and approval"
+            ]
+          }
+        }
+      ],
+      "messages": {
+        "manual_review": "NOT VERIFIED BY MAGEBEAN CLI. Independent human assessment and documented supporting evidence are mandatory before this requirement can be considered satisfied."
+      },
+      "applicability": {
+        "capability": "oauth_oidc"
+      }
+    },
+    {
+      "id": "MB-R324",
+      "title": "ASVS 10.4.12 Restrict response mode (when oauth_oidc is used)",
+      "control": "MB-C18",
+      "severity": "high",
+      "op": "all",
+      "verification": "manual",
+      "requirements": [
+        {
+          "standard": "OWASP-ASVS",
+          "version": "5.0.0",
+          "id": "10.4.12",
+          "level": 3
+        }
+      ],
+      "checks": [
+        {
+          "name": "human_manual_review_required",
+          "args": {
+            "requirement": "ASVS 5.0.0 10.4.12",
+            "review": "Human assessment scope for enabled capability \"oauth_oidc\": For a given client, the authorization server only allows the 'response_mode'value that this client needs to use. For example, by having the authorization server validate this value against the expected values or by using pushed authorization request (PAR) or JWT-secured Authorization Request (JAR).",
+            "evidence_needed": [
+              "Relevant architecture, policy, implementation, configuration, or controlled test evidence",
+              "Applicability and threat-model rationale",
+              "Independent reviewer conclusion and approval"
+            ]
+          }
+        }
+      ],
+      "messages": {
+        "manual_review": "NOT VERIFIED BY MAGEBEAN CLI. Independent human assessment and documented supporting evidence are mandatory before this requirement can be considered satisfied."
+      },
+      "applicability": {
+        "capability": "oauth_oidc"
+      }
+    },
+    {
+      "id": "MB-R325",
+      "title": "ASVS 10.4.13 PAR for code grant (when oauth_oidc is used)",
+      "control": "MB-C18",
+      "severity": "high",
+      "op": "all",
+      "verification": "manual",
+      "requirements": [
+        {
+          "standard": "OWASP-ASVS",
+          "version": "5.0.0",
+          "id": "10.4.13",
+          "level": 3
+        }
+      ],
+      "checks": [
+        {
+          "name": "human_manual_review_required",
+          "args": {
+            "requirement": "ASVS 5.0.0 10.4.13",
+            "review": "Human assessment scope for enabled capability \"oauth_oidc\": Grant type 'code'is always used together with pushed authorization requests (PAR).",
+            "evidence_needed": [
+              "Relevant architecture, policy, implementation, configuration, or controlled test evidence",
+              "Applicability and threat-model rationale",
+              "Independent reviewer conclusion and approval"
+            ]
+          }
+        }
+      ],
+      "messages": {
+        "manual_review": "NOT VERIFIED BY MAGEBEAN CLI. Independent human assessment and documented supporting evidence are mandatory before this requirement can be considered satisfied."
+      },
+      "applicability": {
+        "capability": "oauth_oidc"
+      }
+    },
+    {
+      "id": "MB-R326",
+      "title": "ASVS 10.4.14 Proof-of-possession tokens (when oauth_oidc is used)",
+      "control": "MB-C18",
+      "severity": "high",
+      "op": "all",
+      "verification": "manual",
+      "requirements": [
+        {
+          "standard": "OWASP-ASVS",
+          "version": "5.0.0",
+          "id": "10.4.14",
+          "level": 3
+        }
+      ],
+      "checks": [
+        {
+          "name": "human_manual_review_required",
+          "args": {
+            "requirement": "ASVS 5.0.0 10.4.14",
+            "review": "Human assessment scope for enabled capability \"oauth_oidc\": The authorization server issues only sender-constrained (Proof-of-Possession) access tokens, either with certificate-bound access tokens using mutual TLS (mTLS) or DPoP-bound access tokens (Demonstration of Proof of Possession).",
+            "evidence_needed": [
+              "Relevant architecture, policy, implementation, configuration, or controlled test evidence",
+              "Applicability and threat-model rationale",
+              "Independent reviewer conclusion and approval"
+            ]
+          }
+        }
+      ],
+      "messages": {
+        "manual_review": "NOT VERIFIED BY MAGEBEAN CLI. Independent human assessment and documented supporting evidence are mandatory before this requirement can be considered satisfied."
+      },
+      "applicability": {
+        "capability": "oauth_oidc"
+      }
+    },
+    {
+      "id": "MB-R327",
+      "title": "ASVS 10.4.15 Protect authorization details (when oauth_oidc is used)",
+      "control": "MB-C18",
+      "severity": "high",
+      "op": "all",
+      "verification": "manual",
+      "requirements": [
+        {
+          "standard": "OWASP-ASVS",
+          "version": "5.0.0",
+          "id": "10.4.15",
+          "level": 3
+        }
+      ],
+      "checks": [
+        {
+          "name": "human_manual_review_required",
+          "args": {
+            "requirement": "ASVS 5.0.0 10.4.15",
+            "review": "Human assessment scope for enabled capability \"oauth_oidc\": For a server-side client (which is not executed on the end-user device), the authorization server ensures that the 'authorization_details' parameter value is from the client backend and that the user has not tampered with it. For example, by requiring the usage of pushed authorization request (PAR) or JWT-secured Authorization Request (JAR).",
+            "evidence_needed": [
+              "Relevant architecture, policy, implementation, configuration, or controlled test evidence",
+              "Applicability and threat-model rationale",
+              "Independent reviewer conclusion and approval"
+            ]
+          }
+        }
+      ],
+      "messages": {
+        "manual_review": "NOT VERIFIED BY MAGEBEAN CLI. Independent human assessment and documented supporting evidence are mandatory before this requirement can be considered satisfied."
+      },
+      "applicability": {
+        "capability": "oauth_oidc"
+      }
+    },
+    {
+      "id": "MB-R328",
+      "title": "ASVS 10.4.16 Strong confidential-client authentication (when oauth_oidc is used)",
+      "control": "MB-C18",
+      "severity": "high",
+      "op": "all",
+      "verification": "manual",
+      "requirements": [
+        {
+          "standard": "OWASP-ASVS",
+          "version": "5.0.0",
+          "id": "10.4.16",
+          "level": 3
+        }
+      ],
+      "checks": [
+        {
+          "name": "human_manual_review_required",
+          "args": {
+            "requirement": "ASVS 5.0.0 10.4.16",
+            "review": "Human assessment scope for enabled capability \"oauth_oidc\": The client is confidential and the authorization server requires the use of strong client authentication methods (based on public-key cryptography and resistant to replay attacks), such as mutual TLS ( 'tls_client_auth', 'self_signed_tls_client_auth') or private key JWT ( 'private_key_jwt').",
+            "evidence_needed": [
+              "Relevant architecture, policy, implementation, configuration, or controlled test evidence",
+              "Applicability and threat-model rationale",
+              "Independent reviewer conclusion and approval"
+            ]
+          }
+        }
+      ],
+      "messages": {
+        "manual_review": "NOT VERIFIED BY MAGEBEAN CLI. Independent human assessment and documented supporting evidence are mandatory before this requirement can be considered satisfied."
+      },
+      "applicability": {
+        "capability": "oauth_oidc"
+      }
+    },
+    {
+      "id": "MB-R329",
+      "title": "ASVS 11.1.3 Cryptographic discovery",
+      "control": "MB-C18",
+      "severity": "high",
+      "op": "all",
+      "verification": "manual",
+      "requirements": [
+        {
+          "standard": "OWASP-ASVS",
+          "version": "5.0.0",
+          "id": "11.1.3",
+          "level": 3
+        }
+      ],
+      "checks": [
+        {
+          "name": "human_manual_review_required",
+          "args": {
+            "requirement": "ASVS 5.0.0 11.1.3",
+            "review": "Human assessment scope: Cryptographic discovery mechanisms are employed to identify all instances of cryptography in the system, including encryption, hashing, and signing operations.",
+            "evidence_needed": [
+              "Relevant architecture, policy, implementation, configuration, or controlled test evidence",
+              "Applicability and threat-model rationale",
+              "Independent reviewer conclusion and approval"
+            ]
+          }
+        }
+      ],
+      "messages": {
+        "manual_review": "NOT VERIFIED BY MAGEBEAN CLI. Independent human assessment and documented supporting evidence are mandatory before this requirement can be considered satisfied."
+      }
+    },
+    {
+      "id": "MB-R330",
+      "title": "ASVS 11.1.4 Cryptographic migration plan",
+      "control": "MB-C18",
+      "severity": "high",
+      "op": "all",
+      "verification": "manual",
+      "requirements": [
+        {
+          "standard": "OWASP-ASVS",
+          "version": "5.0.0",
+          "id": "11.1.4",
+          "level": 3
+        }
+      ],
+      "checks": [
+        {
+          "name": "human_manual_review_required",
+          "args": {
+            "requirement": "ASVS 5.0.0 11.1.4",
+            "review": "Human assessment scope: A cryptographic inventory is maintained. This must include a documented plan that outlines the migration path to new cryptographic standards, such as post-quantum cryptography, in order to react to future threats.",
+            "evidence_needed": [
+              "Relevant architecture, policy, implementation, configuration, or controlled test evidence",
+              "Applicability and threat-model rationale",
+              "Independent reviewer conclusion and approval"
+            ]
+          }
+        }
+      ],
+      "messages": {
+        "manual_review": "NOT VERIFIED BY MAGEBEAN CLI. Independent human assessment and documented supporting evidence are mandatory before this requirement can be considered satisfied."
+      }
+    },
+    {
+      "id": "MB-R331",
+      "title": "ASVS 11.2.4 Constant-time operations",
+      "control": "MB-C18",
+      "severity": "high",
+      "op": "all",
+      "verification": "manual",
+      "requirements": [
+        {
+          "standard": "OWASP-ASVS",
+          "version": "5.0.0",
+          "id": "11.2.4",
+          "level": 3
+        }
+      ],
+      "checks": [
+        {
+          "name": "human_manual_review_required",
+          "args": {
+            "requirement": "ASVS 5.0.0 11.2.4",
+            "review": "Human assessment scope: All cryptographic operations are constant-time, with no 'short-circuit'operations in comparisons, calculations, or returns, to avoid leaking information.",
+            "evidence_needed": [
+              "Relevant architecture, policy, implementation, configuration, or controlled test evidence",
+              "Applicability and threat-model rationale",
+              "Independent reviewer conclusion and approval"
+            ]
+          }
+        }
+      ],
+      "messages": {
+        "manual_review": "NOT VERIFIED BY MAGEBEAN CLI. Independent human assessment and documented supporting evidence are mandatory before this requirement can be considered satisfied."
+      }
+    },
+    {
+      "id": "MB-R332",
+      "title": "ASVS 11.2.5 Secure cryptographic failure",
+      "control": "MB-C18",
+      "severity": "high",
+      "op": "all",
+      "verification": "manual",
+      "requirements": [
+        {
+          "standard": "OWASP-ASVS",
+          "version": "5.0.0",
+          "id": "11.2.5",
+          "level": 3
+        }
+      ],
+      "checks": [
+        {
+          "name": "human_manual_review_required",
+          "args": {
+            "requirement": "ASVS 5.0.0 11.2.5",
+            "review": "Human assessment scope: All cryptographic modules fail securely, and errors are handled in a way that does not enable vulnerabilities, such as Padding Oracle attacks.",
+            "evidence_needed": [
+              "Relevant architecture, policy, implementation, configuration, or controlled test evidence",
+              "Applicability and threat-model rationale",
+              "Independent reviewer conclusion and approval"
+            ]
+          }
+        }
+      ],
+      "messages": {
+        "manual_review": "NOT VERIFIED BY MAGEBEAN CLI. Independent human assessment and documented supporting evidence are mandatory before this requirement can be considered satisfied."
+      }
+    },
+    {
+      "id": "MB-R333",
+      "title": "ASVS 11.3.4 Unique nonce and IV",
+      "control": "MB-C18",
+      "severity": "high",
+      "op": "all",
+      "verification": "manual",
+      "requirements": [
+        {
+          "standard": "OWASP-ASVS",
+          "version": "5.0.0",
+          "id": "11.3.4",
+          "level": 3
+        }
+      ],
+      "checks": [
+        {
+          "name": "human_manual_review_required",
+          "args": {
+            "requirement": "ASVS 5.0.0 11.3.4",
+            "review": "Human assessment scope: Nonces, initialization vectors, and other single-use numbers are not used for more than one encryption key and data-element pair. The method of generation must be appropriate for the algorithm being used.",
+            "evidence_needed": [
+              "Relevant architecture, policy, implementation, configuration, or controlled test evidence",
+              "Applicability and threat-model rationale",
+              "Independent reviewer conclusion and approval"
+            ]
+          }
+        }
+      ],
+      "messages": {
+        "manual_review": "NOT VERIFIED BY MAGEBEAN CLI. Independent human assessment and documented supporting evidence are mandatory before this requirement can be considered satisfied."
+      }
+    },
+    {
+      "id": "MB-R334",
+      "title": "ASVS 11.3.5 Encrypt-then-MAC",
+      "control": "MB-C18",
+      "severity": "high",
+      "op": "all",
+      "verification": "manual",
+      "requirements": [
+        {
+          "standard": "OWASP-ASVS",
+          "version": "5.0.0",
+          "id": "11.3.5",
+          "level": 3
+        }
+      ],
+      "checks": [
+        {
+          "name": "human_manual_review_required",
+          "args": {
+            "requirement": "ASVS 5.0.0 11.3.5",
+            "review": "Human assessment scope: Any combination of an encryption algorithm and a MAC algorithm is operating in encrypt-then-MAC mode.",
+            "evidence_needed": [
+              "Relevant architecture, policy, implementation, configuration, or controlled test evidence",
+              "Applicability and threat-model rationale",
+              "Independent reviewer conclusion and approval"
+            ]
+          }
+        }
+      ],
+      "messages": {
+        "manual_review": "NOT VERIFIED BY MAGEBEAN CLI. Independent human assessment and documented supporting evidence are mandatory before this requirement can be considered satisfied."
+      }
+    },
+    {
+      "id": "MB-R335",
+      "title": "ASVS 11.5.2 Randomness under load",
+      "control": "MB-C18",
+      "severity": "high",
+      "op": "all",
+      "verification": "manual",
+      "requirements": [
+        {
+          "standard": "OWASP-ASVS",
+          "version": "5.0.0",
+          "id": "11.5.2",
+          "level": 3
+        }
+      ],
+      "checks": [
+        {
+          "name": "human_manual_review_required",
+          "args": {
+            "requirement": "ASVS 5.0.0 11.5.2",
+            "review": "Human assessment scope: The random number generation mechanism in use is designed to work securely, even under heavy demand.",
+            "evidence_needed": [
+              "Relevant architecture, policy, implementation, configuration, or controlled test evidence",
+              "Applicability and threat-model rationale",
+              "Independent reviewer conclusion and approval"
+            ]
+          }
+        }
+      ],
+      "messages": {
+        "manual_review": "NOT VERIFIED BY MAGEBEAN CLI. Independent human assessment and documented supporting evidence are mandatory before this requirement can be considered satisfied."
+      }
+    },
+    {
+      "id": "MB-R336",
+      "title": "ASVS 11.6.2 Secure key exchange",
+      "control": "MB-C18",
+      "severity": "high",
+      "op": "all",
+      "verification": "manual",
+      "requirements": [
+        {
+          "standard": "OWASP-ASVS",
+          "version": "5.0.0",
+          "id": "11.6.2",
+          "level": 3
+        }
+      ],
+      "checks": [
+        {
+          "name": "human_manual_review_required",
+          "args": {
+            "requirement": "ASVS 5.0.0 11.6.2",
+            "review": "Human assessment scope: Approved cryptographic algorithms are used for key exchange (such as Diffie-Hellman) with a focus on ensuring that key exchange mechanisms use secure parameters. This will prevent attacks on the key establishment process which could lead to adversary-in-the-middle attacks or cryptographic breaks.",
+            "evidence_needed": [
+              "Relevant architecture, policy, implementation, configuration, or controlled test evidence",
+              "Applicability and threat-model rationale",
+              "Independent reviewer conclusion and approval"
+            ]
+          }
+        }
+      ],
+      "messages": {
+        "manual_review": "NOT VERIFIED BY MAGEBEAN CLI. Independent human assessment and documented supporting evidence are mandatory before this requirement can be considered satisfied."
+      }
+    },
+    {
+      "id": "MB-R337",
+      "title": "ASVS 11.7.1 Memory encryption",
+      "control": "MB-C18",
+      "severity": "high",
+      "op": "all",
+      "verification": "manual",
+      "requirements": [
+        {
+          "standard": "OWASP-ASVS",
+          "version": "5.0.0",
+          "id": "11.7.1",
+          "level": 3
+        }
+      ],
+      "checks": [
+        {
+          "name": "human_manual_review_required",
+          "args": {
+            "requirement": "ASVS 5.0.0 11.7.1",
+            "review": "Human assessment scope: Full memory encryption is in use that protects sensitive data while it is in use, preventing access by unauthorized users or processes.",
+            "evidence_needed": [
+              "Relevant architecture, policy, implementation, configuration, or controlled test evidence",
+              "Applicability and threat-model rationale",
+              "Independent reviewer conclusion and approval"
+            ]
+          }
+        }
+      ],
+      "messages": {
+        "manual_review": "NOT VERIFIED BY MAGEBEAN CLI. Independent human assessment and documented supporting evidence are mandatory before this requirement can be considered satisfied."
+      }
+    },
+    {
+      "id": "MB-R338",
+      "title": "ASVS 11.7.2 Processing minimization",
+      "control": "MB-C18",
+      "severity": "high",
+      "op": "all",
+      "verification": "manual",
+      "requirements": [
+        {
+          "standard": "OWASP-ASVS",
+          "version": "5.0.0",
+          "id": "11.7.2",
+          "level": 3
+        }
+      ],
+      "checks": [
+        {
+          "name": "human_manual_review_required",
+          "args": {
+            "requirement": "ASVS 5.0.0 11.7.2",
+            "review": "Human assessment scope: Data minimization ensures the minimal amount of data is exposed during processing, and ensure that data is encrypted immediately after use or as soon as feasible.",
+            "evidence_needed": [
+              "Relevant architecture, policy, implementation, configuration, or controlled test evidence",
+              "Applicability and threat-model rationale",
+              "Independent reviewer conclusion and approval"
+            ]
+          }
+        }
+      ],
+      "messages": {
+        "manual_review": "NOT VERIFIED BY MAGEBEAN CLI. Independent human assessment and documented supporting evidence are mandatory before this requirement can be considered satisfied."
+      }
+    },
+    {
+      "id": "MB-R339",
+      "title": "ASVS 12.1.4 Certificate revocation",
+      "control": "MB-C18",
+      "severity": "high",
+      "op": "all",
+      "verification": "manual",
+      "requirements": [
+        {
+          "standard": "OWASP-ASVS",
+          "version": "5.0.0",
+          "id": "12.1.4",
+          "level": 3
+        }
+      ],
+      "checks": [
+        {
+          "name": "human_manual_review_required",
+          "args": {
+            "requirement": "ASVS 5.0.0 12.1.4",
+            "review": "Human assessment scope: Proper certification revocation, such as Online Certificate Status Protocol (OCSP) Stapling, is enabled and configured.",
+            "evidence_needed": [
+              "Relevant architecture, policy, implementation, configuration, or controlled test evidence",
+              "Applicability and threat-model rationale",
+              "Independent reviewer conclusion and approval"
+            ]
+          }
+        }
+      ],
+      "messages": {
+        "manual_review": "NOT VERIFIED BY MAGEBEAN CLI. Independent human assessment and documented supporting evidence are mandatory before this requirement can be considered satisfied."
+      }
+    },
+    {
+      "id": "MB-R340",
+      "title": "ASVS 12.1.5 Encrypted Client Hello",
+      "control": "MB-C18",
+      "severity": "high",
+      "op": "all",
+      "verification": "manual",
+      "requirements": [
+        {
+          "standard": "OWASP-ASVS",
+          "version": "5.0.0",
+          "id": "12.1.5",
+          "level": 3
+        }
+      ],
+      "checks": [
+        {
+          "name": "human_manual_review_required",
+          "args": {
+            "requirement": "ASVS 5.0.0 12.1.5",
+            "review": "Human assessment scope: Encrypted Client Hello (ECH) is enabled in the application's TLS settings to prevent exposure of sensitive metadata, such as the Server Name Indication (SNI), during TLS handshake processes.",
+            "evidence_needed": [
+              "Relevant architecture, policy, implementation, configuration, or controlled test evidence",
+              "Applicability and threat-model rationale",
+              "Independent reviewer conclusion and approval"
+            ]
+          }
+        }
+      ],
+      "messages": {
+        "manual_review": "NOT VERIFIED BY MAGEBEAN CLI. Independent human assessment and documented supporting evidence are mandatory before this requirement can be considered satisfied."
+      }
+    },
+    {
+      "id": "MB-R341",
+      "title": "ASVS 12.3.5 Strong internal service identity",
+      "control": "MB-C18",
+      "severity": "high",
+      "op": "all",
+      "verification": "manual",
+      "requirements": [
+        {
+          "standard": "OWASP-ASVS",
+          "version": "5.0.0",
+          "id": "12.3.5",
+          "level": 3
+        }
+      ],
+      "checks": [
+        {
+          "name": "human_manual_review_required",
+          "args": {
+            "requirement": "ASVS 5.0.0 12.3.5",
+            "review": "Human assessment scope: Services communicating internally within a system (intra-service communications) use strong authentication to ensure that each endpoint is verified. Strong authentication methods, such as TLS client authentication, must be employed to ensure identity, using public-key infrastructure and mechanisms that are resistant to replay attacks. For microservice architectures, consider using a service mesh to simplify certificate management and enhance security.",
+            "evidence_needed": [
+              "Relevant architecture, policy, implementation, configuration, or controlled test evidence",
+              "Applicability and threat-model rationale",
+              "Independent reviewer conclusion and approval"
+            ]
+          }
+        }
+      ],
+      "messages": {
+        "manual_review": "NOT VERIFIED BY MAGEBEAN CLI. Independent human assessment and documented supporting evidence are mandatory before this requirement can be considered satisfied."
+      }
+    },
+    {
+      "id": "MB-R342",
+      "title": "ASVS 13.1.2 Connection-limit policy",
+      "control": "MB-C18",
+      "severity": "high",
+      "op": "all",
+      "verification": "manual",
+      "requirements": [
+        {
+          "standard": "OWASP-ASVS",
+          "version": "5.0.0",
+          "id": "13.1.2",
+          "level": 3
+        }
+      ],
+      "checks": [
+        {
+          "name": "human_manual_review_required",
+          "args": {
+            "requirement": "ASVS 5.0.0 13.1.2",
+            "review": "Human assessment scope: For each service the application uses, the documentation defines the maximum number of concurrent connections (e.g., connection pool limits) and how the application behaves when that limit is reached, including any fallback or recovery mechanisms, to prevent denial of service conditions.",
+            "evidence_needed": [
+              "Relevant architecture, policy, implementation, configuration, or controlled test evidence",
+              "Applicability and threat-model rationale",
+              "Independent reviewer conclusion and approval"
+            ]
+          }
+        }
+      ],
+      "messages": {
+        "manual_review": "NOT VERIFIED BY MAGEBEAN CLI. Independent human assessment and documented supporting evidence are mandatory before this requirement can be considered satisfied."
+      }
+    },
+    {
+      "id": "MB-R343",
+      "title": "ASVS 13.1.3 External-resource strategy",
+      "control": "MB-C18",
+      "severity": "high",
+      "op": "all",
+      "verification": "manual",
+      "requirements": [
+        {
+          "standard": "OWASP-ASVS",
+          "version": "5.0.0",
+          "id": "13.1.3",
+          "level": 3
+        }
+      ],
+      "checks": [
+        {
+          "name": "human_manual_review_required",
+          "args": {
+            "requirement": "ASVS 5.0.0 13.1.3",
+            "review": "Human assessment scope: The application documentation defines resource-management strategies for every external system or service it uses (e.g., databases, file handles, threads, HTTP connections). This should include resource-release procedures, timeout settings, failure handling, and where retry logic is implemented, specifying retry limits, delays, and back-off algorithms. For synchronous HTTP request-response operations it should mandate short timeouts and either disable retries or strictly limit retries to prevent cascading delays and resource exhaustion.",
+            "evidence_needed": [
+              "Relevant architecture, policy, implementation, configuration, or controlled test evidence",
+              "Applicability and threat-model rationale",
+              "Independent reviewer conclusion and approval"
+            ]
+          }
+        }
+      ],
+      "messages": {
+        "manual_review": "NOT VERIFIED BY MAGEBEAN CLI. Independent human assessment and documented supporting evidence are mandatory before this requirement can be considered satisfied."
+      }
+    },
+    {
+      "id": "MB-R344",
+      "title": "ASVS 13.1.4 Critical-secret rotation policy",
+      "control": "MB-C18",
+      "severity": "high",
+      "op": "all",
+      "verification": "manual",
+      "requirements": [
+        {
+          "standard": "OWASP-ASVS",
+          "version": "5.0.0",
+          "id": "13.1.4",
+          "level": 3
+        }
+      ],
+      "checks": [
+        {
+          "name": "human_manual_review_required",
+          "args": {
+            "requirement": "ASVS 5.0.0 13.1.4",
+            "review": "Human assessment scope: The application's documentation defines the secrets that are critical for the security of the application and a schedule for rotating them, based on the organization's threat model and business requirements.",
+            "evidence_needed": [
+              "Relevant architecture, policy, implementation, configuration, or controlled test evidence",
+              "Applicability and threat-model rationale",
+              "Independent reviewer conclusion and approval"
+            ]
+          }
+        }
+      ],
+      "messages": {
+        "manual_review": "NOT VERIFIED BY MAGEBEAN CLI. Independent human assessment and documented supporting evidence are mandatory before this requirement can be considered satisfied."
+      }
+    },
+    {
+      "id": "MB-R345",
+      "title": "ASVS 13.2.6 Enforce connection configuration",
+      "control": "MB-C18",
+      "severity": "high",
+      "op": "all",
+      "verification": "manual",
+      "requirements": [
+        {
+          "standard": "OWASP-ASVS",
+          "version": "5.0.0",
+          "id": "13.2.6",
+          "level": 3
+        }
+      ],
+      "checks": [
+        {
+          "name": "human_manual_review_required",
+          "args": {
+            "requirement": "ASVS 5.0.0 13.2.6",
+            "review": "Human assessment scope: Where the application connects to separate services, it follows the documented configuration for each connection, such as maximum parallel connections, behavior when maximum allowed connections is reached, connection timeouts, and retry strategies.",
+            "evidence_needed": [
+              "Relevant architecture, policy, implementation, configuration, or controlled test evidence",
+              "Applicability and threat-model rationale",
+              "Independent reviewer conclusion and approval"
+            ]
+          }
+        }
+      ],
+      "messages": {
+        "manual_review": "NOT VERIFIED BY MAGEBEAN CLI. Independent human assessment and documented supporting evidence are mandatory before this requirement can be considered satisfied."
+      }
+    },
+    {
+      "id": "MB-R346",
+      "title": "ASVS 13.3.3 Isolated cryptographic module",
+      "control": "MB-C18",
+      "severity": "high",
+      "op": "all",
+      "verification": "manual",
+      "requirements": [
+        {
+          "standard": "OWASP-ASVS",
+          "version": "5.0.0",
+          "id": "13.3.3",
+          "level": 3
+        }
+      ],
+      "checks": [
+        {
+          "name": "human_manual_review_required",
+          "args": {
+            "requirement": "ASVS 5.0.0 13.3.3",
+            "review": "Human assessment scope: All cryptographic operations are performed using an isolated security module (such as a vault or hardware security module) to securely manage and protect key material from exposure outside of the security module.",
+            "evidence_needed": [
+              "Relevant architecture, policy, implementation, configuration, or controlled test evidence",
+              "Applicability and threat-model rationale",
+              "Independent reviewer conclusion and approval"
+            ]
+          }
+        }
+      ],
+      "messages": {
+        "manual_review": "NOT VERIFIED BY MAGEBEAN CLI. Independent human assessment and documented supporting evidence are mandatory before this requirement can be considered satisfied."
+      }
+    },
+    {
+      "id": "MB-R347",
+      "title": "ASVS 13.3.4 Secret expiration and rotation",
+      "control": "MB-C18",
+      "severity": "high",
+      "op": "all",
+      "verification": "manual",
+      "requirements": [
+        {
+          "standard": "OWASP-ASVS",
+          "version": "5.0.0",
+          "id": "13.3.4",
+          "level": 3
+        }
+      ],
+      "checks": [
+        {
+          "name": "human_manual_review_required",
+          "args": {
+            "requirement": "ASVS 5.0.0 13.3.4",
+            "review": "Human assessment scope: Secrets are configured to expire and be rotated based on the application's documentation.",
+            "evidence_needed": [
+              "Relevant architecture, policy, implementation, configuration, or controlled test evidence",
+              "Applicability and threat-model rationale",
+              "Independent reviewer conclusion and approval"
+            ]
+          }
+        }
+      ],
+      "messages": {
+        "manual_review": "NOT VERIFIED BY MAGEBEAN CLI. Independent human assessment and documented supporting evidence are mandatory before this requirement can be considered satisfied."
+      }
+    },
+    {
+      "id": "MB-R348",
+      "title": "ASVS 13.4.6 Hide backend versions",
+      "control": "MB-C18",
+      "severity": "high",
+      "op": "all",
+      "verification": "manual",
+      "requirements": [
+        {
+          "standard": "OWASP-ASVS",
+          "version": "5.0.0",
+          "id": "13.4.6",
+          "level": 3
+        }
+      ],
+      "checks": [
+        {
+          "name": "human_manual_review_required",
+          "args": {
+            "requirement": "ASVS 5.0.0 13.4.6",
+            "review": "Human assessment scope: The application does not expose detailed version information of backend components.",
+            "evidence_needed": [
+              "Relevant architecture, policy, implementation, configuration, or controlled test evidence",
+              "Applicability and threat-model rationale",
+              "Independent reviewer conclusion and approval"
+            ]
+          }
+        }
+      ],
+      "messages": {
+        "manual_review": "NOT VERIFIED BY MAGEBEAN CLI. Independent human assessment and documented supporting evidence are mandatory before this requirement can be considered satisfied."
+      }
+    },
+    {
+      "id": "MB-R349",
+      "title": "ASVS 13.4.7 Served-file extension allowlist",
+      "control": "MB-C18",
+      "severity": "high",
+      "op": "all",
+      "verification": "manual",
+      "requirements": [
+        {
+          "standard": "OWASP-ASVS",
+          "version": "5.0.0",
+          "id": "13.4.7",
+          "level": 3
+        }
+      ],
+      "checks": [
+        {
+          "name": "human_manual_review_required",
+          "args": {
+            "requirement": "ASVS 5.0.0 13.4.7",
+            "review": "Human assessment scope: The web tier is configured to only serve files with specific file extensions to prevent unintentional information, configuration, and source code leakage.",
+            "evidence_needed": [
+              "Relevant architecture, policy, implementation, configuration, or controlled test evidence",
+              "Applicability and threat-model rationale",
+              "Independent reviewer conclusion and approval"
+            ]
+          }
+        }
+      ],
+      "messages": {
+        "manual_review": "NOT VERIFIED BY MAGEBEAN CLI. Independent human assessment and documented supporting evidence are mandatory before this requirement can be considered satisfied."
+      }
+    },
+    {
+      "id": "MB-R350",
+      "title": "ASVS 14.2.5 Web-cache-deception defense",
+      "control": "MB-C18",
+      "severity": "medium",
+      "op": "all",
+      "verification": "manual",
+      "requirements": [
+        {
+          "standard": "OWASP-ASVS",
+          "version": "5.0.0",
+          "id": "14.2.5",
+          "level": 3
+        }
+      ],
+      "checks": [
+        {
+          "name": "human_manual_review_required",
+          "args": {
+            "requirement": "ASVS 5.0.0 14.2.5",
+            "review": "Human assessment scope: Caching mechanisms are configured to only cache responses which have the expected content type for that resource and do not contain sensitive, dynamic content. The web server should return a 404 or 302 response when a non-existent file is accessed rather than returning a different, valid file. This should prevent Web Cache Deception attacks.",
+            "evidence_needed": [
+              "Relevant architecture, policy, implementation, configuration, or controlled test evidence",
+              "Applicability and threat-model rationale",
+              "Independent reviewer conclusion and approval"
+            ]
+          }
+        }
+      ],
+      "messages": {
+        "manual_review": "NOT VERIFIED BY MAGEBEAN CLI. Independent human assessment and documented supporting evidence are mandatory before this requirement can be considered satisfied."
+      }
+    },
+    {
+      "id": "MB-R351",
+      "title": "ASVS 14.2.6 Sensitive-data minimization",
+      "control": "MB-C18",
+      "severity": "medium",
+      "op": "all",
+      "verification": "manual",
+      "requirements": [
+        {
+          "standard": "OWASP-ASVS",
+          "version": "5.0.0",
+          "id": "14.2.6",
+          "level": 3
+        }
+      ],
+      "checks": [
+        {
+          "name": "human_manual_review_required",
+          "args": {
+            "requirement": "ASVS 5.0.0 14.2.6",
+            "review": "Human assessment scope: The application only returns the minimum required sensitive data for the application's functionality. For example, only returning some of the digits of a credit card number and not the full number. If the complete data is required, it should be masked in the user interface unless the user specifically views it.",
+            "evidence_needed": [
+              "Relevant architecture, policy, implementation, configuration, or controlled test evidence",
+              "Applicability and threat-model rationale",
+              "Independent reviewer conclusion and approval"
+            ]
+          }
+        }
+      ],
+      "messages": {
+        "manual_review": "NOT VERIFIED BY MAGEBEAN CLI. Independent human assessment and documented supporting evidence are mandatory before this requirement can be considered satisfied."
+      }
+    },
+    {
+      "id": "MB-R352",
+      "title": "ASVS 14.2.7 Retention enforcement",
+      "control": "MB-C18",
+      "severity": "medium",
+      "op": "all",
+      "verification": "manual",
+      "requirements": [
+        {
+          "standard": "OWASP-ASVS",
+          "version": "5.0.0",
+          "id": "14.2.7",
+          "level": 3
+        }
+      ],
+      "checks": [
+        {
+          "name": "human_manual_review_required",
+          "args": {
+            "requirement": "ASVS 5.0.0 14.2.7",
+            "review": "Human assessment scope: Sensitive information is subject to data retention classification, ensuring that outdated or unnecessary data is deleted automatically, on a defined schedule, or as the situation requires.",
+            "evidence_needed": [
+              "Relevant architecture, policy, implementation, configuration, or controlled test evidence",
+              "Applicability and threat-model rationale",
+              "Independent reviewer conclusion and approval"
+            ]
+          }
+        }
+      ],
+      "messages": {
+        "manual_review": "NOT VERIFIED BY MAGEBEAN CLI. Independent human assessment and documented supporting evidence are mandatory before this requirement can be considered satisfied."
+      }
+    },
+    {
+      "id": "MB-R353",
+      "title": "ASVS 14.2.8 File metadata removal",
+      "control": "MB-C18",
+      "severity": "medium",
+      "op": "all",
+      "verification": "manual",
+      "requirements": [
+        {
+          "standard": "OWASP-ASVS",
+          "version": "5.0.0",
+          "id": "14.2.8",
+          "level": 3
+        }
+      ],
+      "checks": [
+        {
+          "name": "human_manual_review_required",
+          "args": {
+            "requirement": "ASVS 5.0.0 14.2.8",
+            "review": "Human assessment scope: Sensitive information is removed from the metadata of user-submitted files unless storage is consented to by the user.",
+            "evidence_needed": [
+              "Relevant architecture, policy, implementation, configuration, or controlled test evidence",
+              "Applicability and threat-model rationale",
+              "Independent reviewer conclusion and approval"
+            ]
+          }
+        }
+      ],
+      "messages": {
+        "manual_review": "NOT VERIFIED BY MAGEBEAN CLI. Independent human assessment and documented supporting evidence are mandatory before this requirement can be considered satisfied."
+      }
+    },
+    {
+      "id": "MB-R354",
+      "title": "ASVS 15.1.4 Risky-component inventory",
+      "control": "MB-C18",
+      "severity": "medium",
+      "op": "all",
+      "verification": "manual",
+      "requirements": [
+        {
+          "standard": "OWASP-ASVS",
+          "version": "5.0.0",
+          "id": "15.1.4",
+          "level": 3
+        }
+      ],
+      "checks": [
+        {
+          "name": "human_manual_review_required",
+          "args": {
+            "requirement": "ASVS 5.0.0 15.1.4",
+            "review": "Human assessment scope: Application documentation highlights third-party libraries which are considered to be \"risky components\".",
+            "evidence_needed": [
+              "Relevant architecture, policy, implementation, configuration, or controlled test evidence",
+              "Applicability and threat-model rationale",
+              "Independent reviewer conclusion and approval"
+            ]
+          }
+        }
+      ],
+      "messages": {
+        "manual_review": "NOT VERIFIED BY MAGEBEAN CLI. Independent human assessment and documented supporting evidence are mandatory before this requirement can be considered satisfied."
+      }
+    },
+    {
+      "id": "MB-R355",
+      "title": "ASVS 15.1.5 Dangerous-functionality inventory",
+      "control": "MB-C18",
+      "severity": "medium",
+      "op": "all",
+      "verification": "manual",
+      "requirements": [
+        {
+          "standard": "OWASP-ASVS",
+          "version": "5.0.0",
+          "id": "15.1.5",
+          "level": 3
+        }
+      ],
+      "checks": [
+        {
+          "name": "human_manual_review_required",
+          "args": {
+            "requirement": "ASVS 5.0.0 15.1.5",
+            "review": "Human assessment scope: Application documentation highlights parts of the application where \"dangerous functionality\"is being used.",
+            "evidence_needed": [
+              "Relevant architecture, policy, implementation, configuration, or controlled test evidence",
+              "Applicability and threat-model rationale",
+              "Independent reviewer conclusion and approval"
+            ]
+          }
+        }
+      ],
+      "messages": {
+        "manual_review": "NOT VERIFIED BY MAGEBEAN CLI. Independent human assessment and documented supporting evidence are mandatory before this requirement can be considered satisfied."
+      }
+    },
+    {
+      "id": "MB-R356",
+      "title": "ASVS 15.2.4 Dependency-confusion defense",
+      "control": "MB-C18",
+      "severity": "medium",
+      "op": "all",
+      "verification": "manual",
+      "requirements": [
+        {
+          "standard": "OWASP-ASVS",
+          "version": "5.0.0",
+          "id": "15.2.4",
+          "level": 3
+        }
+      ],
+      "checks": [
+        {
+          "name": "human_manual_review_required",
+          "args": {
+            "requirement": "ASVS 5.0.0 15.2.4",
+            "review": "Human assessment scope: Third-party components and all of their transitive dependencies are included from the expected repository, whether internally owned or an external source, and that there is no risk of a dependency confusion attack.",
+            "evidence_needed": [
+              "Relevant architecture, policy, implementation, configuration, or controlled test evidence",
+              "Applicability and threat-model rationale",
+              "Independent reviewer conclusion and approval"
+            ]
+          }
+        }
+      ],
+      "messages": {
+        "manual_review": "NOT VERIFIED BY MAGEBEAN CLI. Independent human assessment and documented supporting evidence are mandatory before this requirement can be considered satisfied."
+      }
+    },
+    {
+      "id": "MB-R357",
+      "title": "ASVS 15.2.5 Isolation around high-risk code",
+      "control": "MB-C18",
+      "severity": "medium",
+      "op": "all",
+      "verification": "manual",
+      "requirements": [
+        {
+          "standard": "OWASP-ASVS",
+          "version": "5.0.0",
+          "id": "15.2.5",
+          "level": 3
+        }
+      ],
+      "checks": [
+        {
+          "name": "human_manual_review_required",
+          "args": {
+            "requirement": "ASVS 5.0.0 15.2.5",
+            "review": "Human assessment scope: The application implements additional protections around parts of the application which are documented as containing \"dangerous functionality\"or using third-party libraries considered to be \"risky components\". This could include techniques such as sandboxing, encapsulation, containerization or network level isolation to delay and deter attackers who compromise one part of an application from pivoting elsewhere in the application.",
+            "evidence_needed": [
+              "Relevant architecture, policy, implementation, configuration, or controlled test evidence",
+              "Applicability and threat-model rationale",
+              "Independent reviewer conclusion and approval"
+            ]
+          }
+        }
+      ],
+      "messages": {
+        "manual_review": "NOT VERIFIED BY MAGEBEAN CLI. Independent human assessment and documented supporting evidence are mandatory before this requirement can be considered satisfied."
+      }
+    },
+    {
+      "id": "MB-R358",
+      "title": "ASVS 15.4.1 Thread-safe shared objects",
+      "control": "MB-C18",
+      "severity": "medium",
+      "op": "all",
+      "verification": "manual",
+      "requirements": [
+        {
+          "standard": "OWASP-ASVS",
+          "version": "5.0.0",
+          "id": "15.4.1",
+          "level": 3
+        }
+      ],
+      "checks": [
+        {
+          "name": "human_manual_review_required",
+          "args": {
+            "requirement": "ASVS 5.0.0 15.4.1",
+            "review": "Human assessment scope: Shared objects in multi-threaded code (such as caches, files, or in-memory objects accessed by multiple threads) are accessed safely by using thread-safe types and synchronization mechanisms like locks or semaphores to avoid race conditions and data corruption.",
+            "evidence_needed": [
+              "Relevant architecture, policy, implementation, configuration, or controlled test evidence",
+              "Applicability and threat-model rationale",
+              "Independent reviewer conclusion and approval"
+            ]
+          }
+        }
+      ],
+      "messages": {
+        "manual_review": "NOT VERIFIED BY MAGEBEAN CLI. Independent human assessment and documented supporting evidence are mandatory before this requirement can be considered satisfied."
+      }
+    },
+    {
+      "id": "MB-R359",
+      "title": "ASVS 15.4.2 Atomic state checks",
+      "control": "MB-C18",
+      "severity": "medium",
+      "op": "all",
+      "verification": "manual",
+      "requirements": [
+        {
+          "standard": "OWASP-ASVS",
+          "version": "5.0.0",
+          "id": "15.4.2",
+          "level": 3
+        }
+      ],
+      "checks": [
+        {
+          "name": "human_manual_review_required",
+          "args": {
+            "requirement": "ASVS 5.0.0 15.4.2",
+            "review": "Human assessment scope: Checks on a resource's state, such as its existence or permissions, and the actions that depend on them are performed as a single atomic operation to prevent time-of-check to time-of-use (TOCTOU) race conditions. For example, checking if a file exists before opening it, or verifying a user's access before granting it.",
+            "evidence_needed": [
+              "Relevant architecture, policy, implementation, configuration, or controlled test evidence",
+              "Applicability and threat-model rationale",
+              "Independent reviewer conclusion and approval"
+            ]
+          }
+        }
+      ],
+      "messages": {
+        "manual_review": "NOT VERIFIED BY MAGEBEAN CLI. Independent human assessment and documented supporting evidence are mandatory before this requirement can be considered satisfied."
+      }
+    },
+    {
+      "id": "MB-R360",
+      "title": "ASVS 15.4.3 Consistent locking",
+      "control": "MB-C18",
+      "severity": "medium",
+      "op": "all",
+      "verification": "manual",
+      "requirements": [
+        {
+          "standard": "OWASP-ASVS",
+          "version": "5.0.0",
+          "id": "15.4.3",
+          "level": 3
+        }
+      ],
+      "checks": [
+        {
+          "name": "human_manual_review_required",
+          "args": {
+            "requirement": "ASVS 5.0.0 15.4.3",
+            "review": "Human assessment scope: Locks are used consistently to avoid threads getting stuck, whether by waiting on each other or retrying endlessly, and that locking logic stays within the code responsible for managing the resource to ensure locks cannot be inadvertently or maliciously modified by external classes or code.",
+            "evidence_needed": [
+              "Relevant architecture, policy, implementation, configuration, or controlled test evidence",
+              "Applicability and threat-model rationale",
+              "Independent reviewer conclusion and approval"
+            ]
+          }
+        }
+      ],
+      "messages": {
+        "manual_review": "NOT VERIFIED BY MAGEBEAN CLI. Independent human assessment and documented supporting evidence are mandatory before this requirement can be considered satisfied."
+      }
+    },
+    {
+      "id": "MB-R361",
+      "title": "ASVS 15.4.4 Prevent thread starvation",
+      "control": "MB-C18",
+      "severity": "medium",
+      "op": "all",
+      "verification": "manual",
+      "requirements": [
+        {
+          "standard": "OWASP-ASVS",
+          "version": "5.0.0",
+          "id": "15.4.4",
+          "level": 3
+        }
+      ],
+      "checks": [
+        {
+          "name": "human_manual_review_required",
+          "args": {
+            "requirement": "ASVS 5.0.0 15.4.4",
+            "review": "Human assessment scope: Resource allocation policies prevent thread starvation by ensuring fair access to resources, such as by leveraging thread pools, allowing lower-priority threads to proceed within a reasonable timeframe.",
+            "evidence_needed": [
+              "Relevant architecture, policy, implementation, configuration, or controlled test evidence",
+              "Applicability and threat-model rationale",
+              "Independent reviewer conclusion and approval"
+            ]
+          }
+        }
+      ],
+      "messages": {
+        "manual_review": "NOT VERIFIED BY MAGEBEAN CLI. Independent human assessment and documented supporting evidence are mandatory before this requirement can be considered satisfied."
+      }
+    },
+    {
+      "id": "MB-R362",
+      "title": "ASVS 16.5.4 Last-resort exception handler",
+      "control": "MB-C18",
+      "severity": "medium",
+      "op": "all",
+      "verification": "manual",
+      "requirements": [
+        {
+          "standard": "OWASP-ASVS",
+          "version": "5.0.0",
+          "id": "16.5.4",
+          "level": 3
+        }
+      ],
+      "checks": [
+        {
+          "name": "human_manual_review_required",
+          "args": {
+            "requirement": "ASVS 5.0.0 16.5.4",
+            "review": "Human assessment scope: A \"last resort\"error handler is defined which will catch all unhandled exceptions. This is both to avoid losing error details that must go to log files and to ensure that an error does not take down the entire application process, leading to a loss of availability.",
+            "evidence_needed": [
+              "Relevant architecture, policy, implementation, configuration, or controlled test evidence",
+              "Applicability and threat-model rationale",
+              "Independent reviewer conclusion and approval"
+            ]
+          }
+        }
+      ],
+      "messages": {
+        "manual_review": "NOT VERIFIED BY MAGEBEAN CLI. Independent human assessment and documented supporting evidence are mandatory before this requirement can be considered satisfied."
+      }
+    },
+    {
+      "id": "MB-R363",
+      "title": "ASVS 17.1.2 TURN resource-exhaustion defense (when webrtc is used)",
+      "control": "MB-C18",
+      "severity": "high",
+      "op": "all",
+      "verification": "manual",
+      "requirements": [
+        {
+          "standard": "OWASP-ASVS",
+          "version": "5.0.0",
+          "id": "17.1.2",
+          "level": 3
+        }
+      ],
+      "checks": [
+        {
+          "name": "human_manual_review_required",
+          "args": {
+            "requirement": "ASVS 5.0.0 17.1.2",
+            "review": "Human assessment scope for enabled capability \"webrtc\": The Traversal Using Relays around NAT (TURN) service is not susceptible to resource exhaustion when legitimate users attempt to open a large number of ports on the TURN server.",
+            "evidence_needed": [
+              "Relevant architecture, policy, implementation, configuration, or controlled test evidence",
+              "Applicability and threat-model rationale",
+              "Independent reviewer conclusion and approval"
+            ]
+          }
+        }
+      ],
+      "messages": {
+        "manual_review": "NOT VERIFIED BY MAGEBEAN CLI. Independent human assessment and documented supporting evidence are mandatory before this requirement can be considered satisfied."
+      },
+      "applicability": {
+        "capability": "webrtc"
+      }
+    },
+    {
+      "id": "MB-R364",
+      "title": "ASVS 17.2.5 SRTP flood resilience (when webrtc is used)",
+      "control": "MB-C18",
+      "severity": "high",
+      "op": "all",
+      "verification": "manual",
+      "requirements": [
+        {
+          "standard": "OWASP-ASVS",
+          "version": "5.0.0",
+          "id": "17.2.5",
+          "level": 3
+        }
+      ],
+      "checks": [
+        {
+          "name": "human_manual_review_required",
+          "args": {
+            "requirement": "ASVS 5.0.0 17.2.5",
+            "review": "Human assessment scope for enabled capability \"webrtc\": The media server is able to continue processing incoming media traffic during a flood of Secure Real-time Transport Protocol (SRTP) packets from legitimate users.",
+            "evidence_needed": [
+              "Relevant architecture, policy, implementation, configuration, or controlled test evidence",
+              "Applicability and threat-model rationale",
+              "Independent reviewer conclusion and approval"
+            ]
+          }
+        }
+      ],
+      "messages": {
+        "manual_review": "NOT VERIFIED BY MAGEBEAN CLI. Independent human assessment and documented supporting evidence are mandatory before this requirement can be considered satisfied."
+      },
+      "applicability": {
+        "capability": "webrtc"
+      }
+    },
+    {
+      "id": "MB-R365",
+      "title": "ASVS 17.2.6 DTLS ClientHello race defense (when webrtc is used)",
+      "control": "MB-C18",
+      "severity": "high",
+      "op": "all",
+      "verification": "manual",
+      "requirements": [
+        {
+          "standard": "OWASP-ASVS",
+          "version": "5.0.0",
+          "id": "17.2.6",
+          "level": 3
+        }
+      ],
+      "checks": [
+        {
+          "name": "human_manual_review_required",
+          "args": {
+            "requirement": "ASVS 5.0.0 17.2.6",
+            "review": "Human assessment scope for enabled capability \"webrtc\": The media server is not susceptible to the \"ClientHello\"Race Condition vulnerability in Datagram Transport Layer Security (DTLS) by checking if the media server is publicly known to be vulnerable or by performing the race condition test.",
+            "evidence_needed": [
+              "Relevant architecture, policy, implementation, configuration, or controlled test evidence",
+              "Applicability and threat-model rationale",
+              "Independent reviewer conclusion and approval"
+            ]
+          }
+        }
+      ],
+      "messages": {
+        "manual_review": "NOT VERIFIED BY MAGEBEAN CLI. Independent human assessment and documented supporting evidence are mandatory before this requirement can be considered satisfied."
+      },
+      "applicability": {
+        "capability": "webrtc"
+      }
+    },
+    {
+      "id": "MB-R366",
+      "title": "ASVS 17.2.7 Recording resilience (when webrtc is used)",
+      "control": "MB-C18",
+      "severity": "high",
+      "op": "all",
+      "verification": "manual",
+      "requirements": [
+        {
+          "standard": "OWASP-ASVS",
+          "version": "5.0.0",
+          "id": "17.2.7",
+          "level": 3
+        }
+      ],
+      "checks": [
+        {
+          "name": "human_manual_review_required",
+          "args": {
+            "requirement": "ASVS 5.0.0 17.2.7",
+            "review": "Human assessment scope for enabled capability \"webrtc\": Any audio or video recording mechanisms associated with the media server are able to continue processing incoming media traffic during a flood of Secure Real-time Transport Protocol (SRTP) packets from legitimate users.",
+            "evidence_needed": [
+              "Relevant architecture, policy, implementation, configuration, or controlled test evidence",
+              "Applicability and threat-model rationale",
+              "Independent reviewer conclusion and approval"
+            ]
+          }
+        }
+      ],
+      "messages": {
+        "manual_review": "NOT VERIFIED BY MAGEBEAN CLI. Independent human assessment and documented supporting evidence are mandatory before this requirement can be considered satisfied."
+      },
+      "applicability": {
+        "capability": "webrtc"
+      }
+    },
+    {
+      "id": "MB-R367",
+      "title": "ASVS 17.2.8 DTLS fingerprint validation (when webrtc is used)",
+      "control": "MB-C18",
+      "severity": "high",
+      "op": "all",
+      "verification": "manual",
+      "requirements": [
+        {
+          "standard": "OWASP-ASVS",
+          "version": "5.0.0",
+          "id": "17.2.8",
+          "level": 3
+        }
+      ],
+      "checks": [
+        {
+          "name": "human_manual_review_required",
+          "args": {
+            "requirement": "ASVS 5.0.0 17.2.8",
+            "review": "Human assessment scope for enabled capability \"webrtc\": The Datagram Transport Layer Security (DTLS) certificate is checked against the Session Description Protocol (SDP) fingerprint attribute, terminating the media stream if the check fails, to ensure the authenticity of the media stream.",
+            "evidence_needed": [
+              "Relevant architecture, policy, implementation, configuration, or controlled test evidence",
+              "Applicability and threat-model rationale",
+              "Independent reviewer conclusion and approval"
+            ]
+          }
+        }
+      ],
+      "messages": {
+        "manual_review": "NOT VERIFIED BY MAGEBEAN CLI. Independent human assessment and documented supporting evidence are mandatory before this requirement can be considered satisfied."
+      },
+      "applicability": {
+        "capability": "webrtc"
+      }
+    }
+  ]
+}

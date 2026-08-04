@@ -49,7 +49,9 @@ php bin/magebean rules:list
   --path=/var/www/magento
 ```
 
-`scan` and `rules:list` use the 21-rule `basic` profile by default. Select `asvs-l1`, `asvs-l2`, `owasp`, `pci`, or `hardening` with `--profile`, or use `--profile=baseline` for the full catalog. The `asvs-l1` and `asvs-l2` profiles exclude manual-review rules by default; add `--include-manual-review` when human evidence collection is desired.
+The current rule library contains **19 controls and 370 rules**: **113 automated** and **257 marked `HUMAN VERIFICATION REQUIRED`**.
+
+`scan` and `rules:list` use the 21-rule `basic` profile by default. Select `asvs-l1`, `asvs-l2`, `asvs-l3`, `owasp`, `pci`, or `hardening` with `--profile`, or use `--profile=baseline` for the full catalog. The `asvs-l1`, `asvs-l2`, and `asvs-l3` profiles exclude manual-review rules by default; add `--include-manual-review` when human evidence collection is desired.
 
 See [CLI Reference](docs/cli-reference.md) for all commands, options, profiles, target modes, and examples.
 

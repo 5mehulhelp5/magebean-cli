@@ -32,6 +32,6 @@ assertManualFlag(str_contains($manualOutput, 'MB-R136'), 'Manual rule missing wh
 
 $baseline = new CommandTester($command);
 $baseline->execute(['--profile' => 'baseline', '--no-ansi' => true]);
-assertManualFlag(str_contains($baseline->getDisplay(), 'Total Rules Listed: 110'), 'Baseline must exclude manual rules by default');
+assertManualFlag(str_contains($baseline->getDisplay(), 'Total Rules Listed: 113'), 'Baseline must exclude manual rules by default');
 
 echo "ManualReviewFlagTest: PASS\n";

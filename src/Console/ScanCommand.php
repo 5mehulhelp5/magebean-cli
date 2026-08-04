@@ -49,10 +49,11 @@ Docs: <href=https://magebean.com/documentation>magebean.com/documentation</>
   <fg=yellow>basic</>      Default; 21 basic production security and operations checks.
   <fg=yellow>asvs-l1</>    32 default automated rules; 28 manual-review rules require --include-manual-review.
   <fg=yellow>asvs-l2</>    73 default automated rules; manual/contextual rules are opt-in.
+  <fg=yellow>asvs-l3</>    80 default rules; 259 with non-contextual mandatory human assessment.
   <fg=yellow>owasp</>      Application-security checks mapped to OWASP Top 10 2025.
   <fg=yellow>pci</>        PCI DSS v4.0.1 payment readiness; not a certification.
   <fg=yellow>hardening</>  89 deep production, code, dependency, integration, and operations checks.
-  <fg=yellow>baseline</>   110 automated rules by default; 275 including manual review. Aliases: all, magebean.
+  <fg=yellow>baseline</>   113 automated rules by default; 370 including manual review. Aliases: all, magebean.
   <fg=yellow>FILE</>       Custom JSON path or a profile under .magebean/profiles.
 
 <options=bold>COMMAND OPTIONS</>
@@ -89,6 +90,7 @@ Docs: <href=https://magebean.com/documentation>magebean.com/documentation</>
   # ASVS Level 1, application security, payment readiness, deep hardening, or full catalog
   <fg=green>php magebean.phar scan --path=/var/www/magento --profile=asvs-l1</>
   <fg=green>php magebean.phar scan --path=/var/www/magento --url=https://store.example.com --profile=asvs-l2 --include-manual-review --capabilities=graphql</>
+  <fg=green>php magebean.phar scan --path=/var/www/magento --url=https://store.example.com --profile=asvs-l3 --include-manual-review</>
   <fg=green>php magebean.phar scan --path=/var/www/magento --profile=owasp</>
   <fg=green>php magebean.phar scan --path=/var/www/magento --profile=pci</>
   <fg=green>php magebean.phar scan --path=/var/www/magento --profile=hardening</>
@@ -133,7 +135,7 @@ HELP;
             // HTML report output is disabled, so the HTML-only detail option is hidden for now.
             // ->addOption('detail', null, InputOption::VALUE_NONE, 'Include Details column in HTML report')
             ->addOption('standard', null, InputOption::VALUE_OPTIONAL, 'Legacy report selector: magebean (default) | owasp | pci | cwe; prefer --profile', 'magebean')
-            ->addOption('profile', null, InputOption::VALUE_OPTIONAL, 'Profile: basic (default) | asvs-l1 | asvs-l2 | owasp | pci | hardening | baseline | custom JSON')
+            ->addOption('profile', null, InputOption::VALUE_OPTIONAL, 'Profile: basic (default) | asvs-l1 | asvs-l2 | asvs-l3 | owasp | pci | hardening | baseline | custom JSON')
             ->addOption('include-manual-review', null, InputOption::VALUE_NONE, 'Include human manual-review rules (excluded by default)')
             ->addOption('capabilities', null, InputOption::VALUE_OPTIONAL, 'Comma-separated application capabilities used to activate contextual profile rules')
             ->addOption('controls', null, InputOption::VALUE_OPTIONAL, 'Comma-separated control IDs to load (e.g., MB-C01,MB-C05 or MB-01,MB-05)')

@@ -21,10 +21,11 @@ PROFILES
   basic      Default; 21 basic production-readiness rules.
   asvs-l1    32 rules by default; 60 with --include-manual-review.
   asvs-l2    73 rules by default; manual and contextual rules are opt-in.
+  asvs-l3    80 rules by default; 259 with non-contextual mandatory human assessment.
   owasp      77 application-security rules mapped to OWASP Top 10 2025.
   pci        69 PCI DSS v4.0.1 payment-readiness rules.
   hardening  89 deep production-hardening rules.
-  baseline   110 automated rules by default; 275 including manual review. Aliases: all, magebean.
+  baseline   113 automated rules by default; 370 including manual review. Aliases: all, magebean.
   FILE       Custom profile JSON path or a profile under .magebean/profiles.
 
 OPTIONS
@@ -45,6 +46,7 @@ EXAMPLES
   php magebean.phar rules:list
   php magebean.phar rules:list --profile=asvs-l1
   php magebean.phar rules:list --profile=asvs-l2 --include-manual-review --capabilities=oauth_oidc
+  php magebean.phar rules:list --profile=asvs-l3 --include-manual-review
   php magebean.phar rules:list --profile=hardening
   php magebean.phar rules:list --profile=baseline --control=MB-C03
   php magebean.phar rules:list --profile=owasp --severity=critical
@@ -64,7 +66,7 @@ HELP;
             ->addOption('include-manual-review', null, InputOption::VALUE_NONE, 'Include human manual-review rules (excluded by default)')
             ->addOption('capabilities', null, InputOption::VALUE_OPTIONAL, 'Comma list of application capabilities for contextual rules')
             ->addOption('control', null, InputOption::VALUE_OPTIONAL, 'Comma list of controls (e.g. MB-C01,MB-C02)')
-            ->addOption('profile', null, InputOption::VALUE_OPTIONAL, 'Profile: basic (default) | asvs-l1 | asvs-l2 | owasp | pci | hardening | baseline | custom JSON')
+            ->addOption('profile', null, InputOption::VALUE_OPTIONAL, 'Profile: basic (default) | asvs-l1 | asvs-l2 | asvs-l3 | owasp | pci | hardening | baseline | custom JSON')
             ->addOption('severity', null, InputOption::VALUE_OPTIONAL, 'low|medium|high|critical');
     }
     protected function execute(InputInterface $in, OutputInterface $out): int
