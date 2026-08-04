@@ -134,7 +134,7 @@ final class ScanRunner
                     fn($d) => preg_replace('/^\[MANUAL_REVIEW\]\s*/', '', (string)$d[1]),
                     array_filter($details, fn($d) => is_string($d[1]) && str_starts_with($d[1], '[MANUAL_REVIEW]'))
                 ));
-                $finalMsg = $manualMsgs[0] ?? 'Human manual review and supporting evidence are required.';
+                $finalMsg = $manualMsgs[0] ?? 'NOT VERIFIED BY MAGEBEAN CLI. Independent human assessment and documented supporting evidence are mandatory.';
             } elseif ($status === 'UNKNOWN') {
                 $unkMsgs = array_values(array_map(
                     fn($d) => $d[1],

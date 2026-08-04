@@ -49,7 +49,7 @@ php bin/magebean rules:list
   --path=/var/www/magento
 ```
 
-`scan` and `rules:list` use the 21-rule `basic` profile by default. Select `asvs-l1`, `owasp`, `pci`, or `hardening` with `--profile`, or use `--profile=baseline` for the full catalog. The `asvs-l1` profile maps OWASP ASVS 5.0 Level 1 and reports both automated findings and requirements that need human review.
+`scan` and `rules:list` use the 21-rule `basic` profile by default. Select `asvs-l1`, `asvs-l2`, `owasp`, `pci`, or `hardening` with `--profile`, or use `--profile=baseline` for the full catalog. The `asvs-l1` and `asvs-l2` profiles exclude manual-review rules by default; add `--include-manual-review` when human evidence collection is desired.
 
 See [CLI Reference](docs/cli-reference.md) for all commands, options, profiles, target modes, and examples.
 
@@ -128,6 +128,8 @@ Target mode is selected from the explicitly provided options:
 | `--rules` | Run only selected rule IDs | all |
 | `--exclude-rules` | Exclude selected rule IDs | none |
 | `--config` | Project policy file (`.magebean.json` auto-detected in Magento root) | auto |
+| `--include-manual-review` | Include human-review rules | off |
+| `--capabilities` | Enable contextual profile rules, such as `graphql` or `oauth_oidc` | none |
 
 ### Project-specific policy
 
@@ -135,6 +137,11 @@ Create `.magebean.json` in the Magento root to tune the baseline per project wit
 
 ```json
 {
+  "capabilities": {
+    "graphql": true,
+    "oauth_oidc": false,
+    "webrtc": false
+  },
   "include_controls": ["MB-C01", "MB-C02", "MB-C03"],
   "exclude_rules": ["MB-R005"],
   "override_rules": {

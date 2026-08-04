@@ -55,8 +55,8 @@ $render->setAccessible(true);
 $render->invoke(new ScanCommand(), $output, $result, __DIR__);
 $text = $output->fetch();
 
-assertManualReview(str_contains($text, 'HUMAN REVIEW REQUIRED'), 'Console summary must announce required human review');
-assertManualReview(str_contains($text, '[MANUAL REVIEW]'), 'Console result must label the manual-review rule');
+assertManualReview(str_contains($text, 'HUMAN VERIFICATION REQUIRED'), 'Console summary must announce required human review');
+assertManualReview(str_contains($text, '[HUMAN VERIFICATION REQUIRED]'), 'Console result must label the manual-review rule');
 assertManualReview(str_contains($text, 'MB-R102'), 'Console result must show the manual-review rule ID');
 
 echo "ManualReviewTest: PASS\n";

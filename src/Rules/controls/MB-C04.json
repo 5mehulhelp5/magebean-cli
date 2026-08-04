@@ -181,14 +181,16 @@
                             "script-src",
                             "connect-src",
                             "frame-src",
-                            "form-action"
+                            "form-action",
+                            "object-src",
+                            "base-uri"
                         ],
                         "require_reporting": true
                     }
                 }
             ],
             "messages": {
-                "pass": "Checkout CSP includes payment-page script, connection, frame, form-action, and reporting controls."
+                "pass": "Checkout CSP includes payment-page script, connection, frame, form-action, object, base-URI, and reporting controls."
             }
         },
         {

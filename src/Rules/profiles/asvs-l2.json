@@ -1,0 +1,4170 @@
+{
+    "id": "asvs-l2",
+    "title": "Magebean ASVS-Aligned Level 2",
+    "description": "OWASP ASVS 5.0 Level 2 cumulative mapping. Inherits Level 1 and provides conservative partial coverage; this is not an OWASP certification or compliance claim.",
+    "inherits": [
+        "asvs-l1"
+    ],
+    "standard": {
+        "id": "owasp-asvs",
+        "version": "5.0.0",
+        "level": 2,
+        "alignment": "ASVS-aligned"
+    },
+    "coverage_summary": {
+        "total_requirements": 253,
+        "level_1_inherited": 70,
+        "level_2_additions": 183,
+        "automated": 16,
+        "partially_automated": 62,
+        "manual_review": 108,
+        "context_required": 55,
+        "not_applicable": 0,
+        "not_yet_covered": 12
+    },
+    "report_template": "owasp",
+    "rules": [
+        {
+            "id": "MB-R016",
+            "evidence_type": "automated",
+            "mappings": [
+                {
+                    "requirement": "1.3.6",
+                    "coverage": "PARTIALLY_AUTOMATED"
+                }
+            ]
+        },
+        {
+            "id": "MB-R017",
+            "evidence_type": "automated",
+            "mappings": [
+                {
+                    "requirement": "1.5.2",
+                    "coverage": "PARTIALLY_AUTOMATED"
+                }
+            ]
+        },
+        {
+            "id": "MB-R011",
+            "evidence_type": "automated",
+            "mappings": [
+                {
+                    "requirement": "2.4.1",
+                    "coverage": "PARTIALLY_AUTOMATED"
+                },
+                {
+                    "requirement": "6.6.3",
+                    "coverage": "PARTIALLY_AUTOMATED"
+                }
+            ]
+        },
+        {
+            "id": "MB-R030",
+            "evidence_type": "automated",
+            "mappings": [
+                {
+                    "requirement": "3.3.2",
+                    "coverage": "PARTIALLY_AUTOMATED"
+                },
+                {
+                    "requirement": "3.3.4",
+                    "coverage": "PARTIALLY_AUTOMATED"
+                }
+            ]
+        },
+        {
+            "id": "MB-R089",
+            "evidence_type": "automated",
+            "mappings": [
+                {
+                    "requirement": "3.4.3",
+                    "coverage": "PARTIALLY_AUTOMATED"
+                }
+            ]
+        },
+        {
+            "id": "MB-R096",
+            "evidence_type": "automated",
+            "mappings": [
+                {
+                    "requirement": "3.4.4",
+                    "coverage": "PARTIALLY_AUTOMATED"
+                },
+                {
+                    "requirement": "3.4.6",
+                    "coverage": "PARTIALLY_AUTOMATED"
+                }
+            ]
+        },
+        {
+            "id": "MB-R049",
+            "evidence_type": "automated",
+            "mappings": [
+                {
+                    "requirement": "3.7.1",
+                    "coverage": "PARTIALLY_AUTOMATED"
+                },
+                {
+                    "requirement": "15.1.2",
+                    "coverage": "PARTIALLY_AUTOMATED"
+                }
+            ]
+        },
+        {
+            "id": "MB-R058",
+            "evidence_type": "automated",
+            "mappings": [
+                {
+                    "requirement": "3.7.1",
+                    "coverage": "PARTIALLY_AUTOMATED"
+                },
+                {
+                    "requirement": "15.1.2",
+                    "coverage": "PARTIALLY_AUTOMATED"
+                }
+            ]
+        },
+        {
+            "id": "MB-R062",
+            "evidence_type": "automated",
+            "mappings": [
+                {
+                    "requirement": "3.7.1",
+                    "coverage": "PARTIALLY_AUTOMATED"
+                }
+            ]
+        },
+        {
+            "id": "MB-R026",
+            "evidence_type": "automated",
+            "mappings": [
+                {
+                    "requirement": "4.1.2",
+                    "coverage": "PARTIALLY_AUTOMATED"
+                }
+            ]
+        },
+        {
+            "id": "MB-R095",
+            "evidence_type": "automated",
+            "mappings": [
+                {
+                    "requirement": "4.3.1",
+                    "coverage": "PARTIALLY_AUTOMATED"
+                },
+                {
+                    "requirement": "4.3.2",
+                    "coverage": "PARTIALLY_AUTOMATED"
+                },
+                {
+                    "requirement": "13.4.5",
+                    "coverage": "PARTIALLY_AUTOMATED"
+                }
+            ]
+        },
+        {
+            "id": "MB-R130",
+            "evidence_type": "automated",
+            "mappings": [
+                {
+                    "requirement": "4.4.2",
+                    "coverage": "PARTIALLY_AUTOMATED"
+                }
+            ]
+        },
+        {
+            "id": "MB-R021",
+            "evidence_type": "automated",
+            "mappings": [
+                {
+                    "requirement": "5.2.3",
+                    "coverage": "PARTIALLY_AUTOMATED"
+                },
+                {
+                    "requirement": "5.4.2",
+                    "coverage": "PARTIALLY_AUTOMATED"
+                }
+            ]
+        },
+        {
+            "id": "MB-R099",
+            "evidence_type": "automated",
+            "mappings": [
+                {
+                    "requirement": "5.4.1",
+                    "coverage": "PARTIALLY_AUTOMATED"
+                },
+                {
+                    "requirement": "5.4.2",
+                    "coverage": "PARTIALLY_AUTOMATED"
+                },
+                {
+                    "requirement": "8.2.3",
+                    "coverage": "PARTIALLY_AUTOMATED"
+                }
+            ]
+        },
+        {
+            "id": "MB-R007",
+            "evidence_type": "automated",
+            "mappings": [
+                {
+                    "requirement": "6.3.3",
+                    "coverage": "PARTIALLY_AUTOMATED"
+                }
+            ]
+        },
+        {
+            "id": "MB-R009",
+            "evidence_type": "automated",
+            "mappings": [
+                {
+                    "requirement": "7.3.1",
+                    "coverage": "PARTIALLY_AUTOMATED"
+                }
+            ]
+        },
+        {
+            "id": "MB-R094",
+            "evidence_type": "automated",
+            "mappings": [
+                {
+                    "requirement": "8.2.3",
+                    "coverage": "PARTIALLY_AUTOMATED"
+                }
+            ]
+        },
+        {
+            "id": "MB-R100",
+            "evidence_type": "automated",
+            "mappings": [
+                {
+                    "requirement": "8.2.3",
+                    "coverage": "PARTIALLY_AUTOMATED"
+                }
+            ]
+        },
+        {
+            "id": "MB-R101",
+            "evidence_type": "automated",
+            "mappings": [
+                {
+                    "requirement": "8.2.3",
+                    "coverage": "PARTIALLY_AUTOMATED"
+                }
+            ]
+        },
+        {
+            "id": "MB-R025",
+            "evidence_type": "automated",
+            "mappings": [
+                {
+                    "requirement": "11.2.1",
+                    "coverage": "PARTIALLY_AUTOMATED"
+                },
+                {
+                    "requirement": "11.4.2",
+                    "coverage": "PARTIALLY_AUTOMATED"
+                }
+            ]
+        },
+        {
+            "id": "MB-R132",
+            "evidence_type": "automated",
+            "mappings": [
+                {
+                    "requirement": "11.2.3",
+                    "coverage": "PARTIALLY_AUTOMATED"
+                },
+                {
+                    "requirement": "11.3.3",
+                    "coverage": "PARTIALLY_AUTOMATED"
+                },
+                {
+                    "requirement": "11.6.1",
+                    "coverage": "PARTIALLY_AUTOMATED"
+                }
+            ]
+        },
+        {
+            "id": "MB-R023",
+            "evidence_type": "automated",
+            "mappings": [
+                {
+                    "requirement": "11.5.1",
+                    "coverage": "PARTIALLY_AUTOMATED"
+                }
+            ]
+        },
+        {
+            "id": "MB-R028",
+            "evidence_type": "automated",
+            "mappings": [
+                {
+                    "requirement": "12.1.2",
+                    "coverage": "PARTIALLY_AUTOMATED"
+                }
+            ]
+        },
+        {
+            "id": "MB-R078",
+            "evidence_type": "automated",
+            "mappings": [
+                {
+                    "requirement": "12.1.2",
+                    "coverage": "PARTIALLY_AUTOMATED"
+                },
+                {
+                    "requirement": "12.3.1",
+                    "coverage": "PARTIALLY_AUTOMATED"
+                }
+            ]
+        },
+        {
+            "id": "MB-R073",
+            "evidence_type": "automated",
+            "mappings": [
+                {
+                    "requirement": "12.3.1",
+                    "coverage": "PARTIALLY_AUTOMATED"
+                },
+                {
+                    "requirement": "12.3.3",
+                    "coverage": "PARTIALLY_AUTOMATED"
+                }
+            ]
+        },
+        {
+            "id": "MB-R076",
+            "evidence_type": "automated",
+            "mappings": [
+                {
+                    "requirement": "12.3.1",
+                    "coverage": "PARTIALLY_AUTOMATED"
+                },
+                {
+                    "requirement": "13.2.4",
+                    "coverage": "PARTIALLY_AUTOMATED"
+                },
+                {
+                    "requirement": "13.2.5",
+                    "coverage": "PARTIALLY_AUTOMATED"
+                }
+            ]
+        },
+        {
+            "id": "MB-R135",
+            "evidence_type": "automated",
+            "mappings": [
+                {
+                    "requirement": "12.3.2",
+                    "coverage": "PARTIALLY_AUTOMATED"
+                }
+            ]
+        },
+        {
+            "id": "MB-R081",
+            "evidence_type": "automated",
+            "mappings": [
+                {
+                    "requirement": "13.2.2",
+                    "coverage": "PARTIALLY_AUTOMATED"
+                },
+                {
+                    "requirement": "13.3.2",
+                    "coverage": "PARTIALLY_AUTOMATED"
+                }
+            ]
+        },
+        {
+            "id": "MB-R097",
+            "evidence_type": "automated",
+            "mappings": [
+                {
+                    "requirement": "13.2.3",
+                    "coverage": "PARTIALLY_AUTOMATED"
+                },
+                {
+                    "requirement": "13.3.1",
+                    "coverage": "PARTIALLY_AUTOMATED"
+                }
+            ]
+        },
+        {
+            "id": "MB-R072",
+            "evidence_type": "automated",
+            "mappings": [
+                {
+                    "requirement": "13.3.1",
+                    "coverage": "PARTIALLY_AUTOMATED"
+                }
+            ]
+        },
+        {
+            "id": "MB-R079",
+            "evidence_type": "automated",
+            "mappings": [
+                {
+                    "requirement": "13.3.1",
+                    "coverage": "PARTIALLY_AUTOMATED"
+                }
+            ]
+        },
+        {
+            "id": "MB-R031",
+            "evidence_type": "automated",
+            "mappings": [
+                {
+                    "requirement": "13.4.2",
+                    "coverage": "PARTIALLY_AUTOMATED"
+                },
+                {
+                    "requirement": "15.2.3",
+                    "coverage": "PARTIALLY_AUTOMATED"
+                }
+            ]
+        },
+        {
+            "id": "MB-R032",
+            "evidence_type": "automated",
+            "mappings": [
+                {
+                    "requirement": "13.4.2",
+                    "coverage": "PARTIALLY_AUTOMATED"
+                },
+                {
+                    "requirement": "15.2.3",
+                    "coverage": "PARTIALLY_AUTOMATED"
+                }
+            ]
+        },
+        {
+            "id": "MB-R036",
+            "evidence_type": "automated",
+            "mappings": [
+                {
+                    "requirement": "13.4.2",
+                    "coverage": "PARTIALLY_AUTOMATED"
+                },
+                {
+                    "requirement": "15.2.3",
+                    "coverage": "PARTIALLY_AUTOMATED"
+                }
+            ]
+        },
+        {
+            "id": "MB-R044",
+            "evidence_type": "automated",
+            "mappings": [
+                {
+                    "requirement": "13.4.2",
+                    "coverage": "PARTIALLY_AUTOMATED"
+                },
+                {
+                    "requirement": "15.2.3",
+                    "coverage": "PARTIALLY_AUTOMATED"
+                }
+            ]
+        },
+        {
+            "id": "MB-R074",
+            "evidence_type": "automated",
+            "mappings": [
+                {
+                    "requirement": "13.4.2",
+                    "coverage": "PARTIALLY_AUTOMATED"
+                }
+            ]
+        },
+        {
+            "id": "MB-R005",
+            "evidence_type": "automated",
+            "mappings": [
+                {
+                    "requirement": "13.4.3",
+                    "coverage": "AUTOMATED"
+                }
+            ]
+        },
+        {
+            "id": "MB-R042",
+            "evidence_type": "automated",
+            "mappings": [
+                {
+                    "requirement": "13.4.5",
+                    "coverage": "PARTIALLY_AUTOMATED"
+                }
+            ]
+        },
+        {
+            "id": "MB-R077",
+            "evidence_type": "automated",
+            "mappings": [
+                {
+                    "requirement": "14.2.3",
+                    "coverage": "PARTIALLY_AUTOMATED"
+                },
+                {
+                    "requirement": "14.2.4",
+                    "coverage": "PARTIALLY_AUTOMATED"
+                }
+            ]
+        },
+        {
+            "id": "MB-R024",
+            "evidence_type": "automated",
+            "mappings": [
+                {
+                    "requirement": "14.2.4",
+                    "coverage": "PARTIALLY_AUTOMATED"
+                },
+                {
+                    "requirement": "16.2.5",
+                    "coverage": "PARTIALLY_AUTOMATED"
+                }
+            ]
+        },
+        {
+            "id": "MB-R045",
+            "evidence_type": "automated",
+            "mappings": [
+                {
+                    "requirement": "14.2.4",
+                    "coverage": "PARTIALLY_AUTOMATED"
+                },
+                {
+                    "requirement": "16.2.5",
+                    "coverage": "PARTIALLY_AUTOMATED"
+                }
+            ]
+        },
+        {
+            "id": "MB-R083",
+            "evidence_type": "automated",
+            "mappings": [
+                {
+                    "requirement": "14.2.4",
+                    "coverage": "PARTIALLY_AUTOMATED"
+                }
+            ]
+        },
+        {
+            "id": "MB-R055",
+            "evidence_type": "automated",
+            "mappings": [
+                {
+                    "requirement": "15.1.2",
+                    "coverage": "PARTIALLY_AUTOMATED"
+                }
+            ]
+        },
+        {
+            "id": "MB-R060",
+            "evidence_type": "automated",
+            "mappings": [
+                {
+                    "requirement": "15.1.2",
+                    "coverage": "PARTIALLY_AUTOMATED"
+                }
+            ]
+        },
+        {
+            "id": "MB-R063",
+            "evidence_type": "automated",
+            "mappings": [
+                {
+                    "requirement": "15.1.2",
+                    "coverage": "PARTIALLY_AUTOMATED"
+                }
+            ]
+        },
+        {
+            "id": "MB-R068",
+            "evidence_type": "automated",
+            "mappings": [
+                {
+                    "requirement": "15.1.2",
+                    "coverage": "PARTIALLY_AUTOMATED"
+                }
+            ]
+        },
+        {
+            "id": "MB-R070",
+            "evidence_type": "automated",
+            "mappings": [
+                {
+                    "requirement": "15.1.2",
+                    "coverage": "PARTIALLY_AUTOMATED"
+                }
+            ]
+        },
+        {
+            "id": "MB-R043",
+            "evidence_type": "automated",
+            "mappings": [
+                {
+                    "requirement": "16.4.2",
+                    "coverage": "PARTIALLY_AUTOMATED"
+                }
+            ]
+        },
+        {
+            "id": "MB-R080",
+            "evidence_type": "automated",
+            "mappings": [
+                {
+                    "requirement": "16.2.5",
+                    "coverage": "PARTIALLY_AUTOMATED"
+                }
+            ]
+        },
+        {
+            "id": "MB-R084",
+            "evidence_type": "automated",
+            "mappings": [
+                {
+                    "requirement": "16.2.5",
+                    "coverage": "PARTIALLY_AUTOMATED"
+                }
+            ]
+        },
+        {
+            "id": "MB-R001",
+            "evidence_type": "automated",
+            "mappings": [
+                {
+                    "requirement": "16.4.2",
+                    "coverage": "PARTIALLY_AUTOMATED"
+                }
+            ]
+        },
+        {
+            "id": "MB-R002",
+            "evidence_type": "automated",
+            "mappings": [
+                {
+                    "requirement": "16.4.2",
+                    "coverage": "PARTIALLY_AUTOMATED"
+                }
+            ]
+        },
+        {
+            "id": "MB-R004",
+            "evidence_type": "automated",
+            "mappings": [
+                {
+                    "requirement": "16.4.2",
+                    "coverage": "PARTIALLY_AUTOMATED"
+                }
+            ]
+        },
+        {
+            "id": "MB-R033",
+            "evidence_type": "automated",
+            "mappings": [
+                {
+                    "requirement": "16.5.1",
+                    "coverage": "PARTIALLY_AUTOMATED"
+                }
+            ]
+        },
+        {
+            "id": "MB-R136",
+            "evidence_type": "manual",
+            "mappings": [
+                {
+                    "requirement": "1.1.1",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ]
+        },
+        {
+            "id": "MB-R137",
+            "evidence_type": "manual",
+            "mappings": [
+                {
+                    "requirement": "1.1.2",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ]
+        },
+        {
+            "id": "MB-R138",
+            "evidence_type": "manual",
+            "mappings": [
+                {
+                    "requirement": "1.2.9",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ]
+        },
+        {
+            "id": "MB-R139",
+            "evidence_type": "manual",
+            "mappings": [
+                {
+                    "requirement": "1.3.3",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ]
+        },
+        {
+            "id": "MB-R140",
+            "evidence_type": "manual",
+            "mappings": [
+                {
+                    "requirement": "1.3.7",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ]
+        },
+        {
+            "id": "MB-R141",
+            "evidence_type": "manual",
+            "mappings": [
+                {
+                    "requirement": "1.3.10",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ]
+        },
+        {
+            "id": "MB-R142",
+            "evidence_type": "manual",
+            "mappings": [
+                {
+                    "requirement": "1.3.11",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ]
+        },
+        {
+            "id": "MB-R143",
+            "evidence_type": "manual",
+            "mappings": [
+                {
+                    "requirement": "2.1.2",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ]
+        },
+        {
+            "id": "MB-R144",
+            "evidence_type": "manual",
+            "mappings": [
+                {
+                    "requirement": "2.1.3",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ]
+        },
+        {
+            "id": "MB-R145",
+            "evidence_type": "manual",
+            "mappings": [
+                {
+                    "requirement": "2.2.3",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ]
+        },
+        {
+            "id": "MB-R146",
+            "evidence_type": "manual",
+            "mappings": [
+                {
+                    "requirement": "2.3.2",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ]
+        },
+        {
+            "id": "MB-R147",
+            "evidence_type": "manual",
+            "mappings": [
+                {
+                    "requirement": "2.3.3",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ]
+        },
+        {
+            "id": "MB-R148",
+            "evidence_type": "manual",
+            "mappings": [
+                {
+                    "requirement": "2.3.4",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ]
+        },
+        {
+            "id": "MB-R149",
+            "evidence_type": "manual",
+            "mappings": [
+                {
+                    "requirement": "3.3.3",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ]
+        },
+        {
+            "id": "MB-R150",
+            "evidence_type": "manual",
+            "mappings": [
+                {
+                    "requirement": "3.4.5",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ]
+        },
+        {
+            "id": "MB-R151",
+            "evidence_type": "manual",
+            "mappings": [
+                {
+                    "requirement": "3.5.4",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ]
+        },
+        {
+            "id": "MB-R152",
+            "evidence_type": "manual",
+            "mappings": [
+                {
+                    "requirement": "3.5.5",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ]
+        },
+        {
+            "id": "MB-R153",
+            "evidence_type": "manual",
+            "mappings": [
+                {
+                    "requirement": "3.7.2",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ]
+        },
+        {
+            "id": "MB-R154",
+            "evidence_type": "manual",
+            "mappings": [
+                {
+                    "requirement": "4.1.3",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ]
+        },
+        {
+            "id": "MB-R155",
+            "evidence_type": "manual",
+            "mappings": [
+                {
+                    "requirement": "4.2.1",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ]
+        },
+        {
+            "id": "MB-R156",
+            "evidence_type": "manual",
+            "mappings": [
+                {
+                    "requirement": "6.1.2",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ]
+        },
+        {
+            "id": "MB-R157",
+            "evidence_type": "manual",
+            "mappings": [
+                {
+                    "requirement": "6.1.3",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ]
+        },
+        {
+            "id": "MB-R158",
+            "evidence_type": "manual",
+            "mappings": [
+                {
+                    "requirement": "6.2.9",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ]
+        },
+        {
+            "id": "MB-R159",
+            "evidence_type": "manual",
+            "mappings": [
+                {
+                    "requirement": "6.2.10",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ]
+        },
+        {
+            "id": "MB-R160",
+            "evidence_type": "manual",
+            "mappings": [
+                {
+                    "requirement": "6.2.11",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ]
+        },
+        {
+            "id": "MB-R161",
+            "evidence_type": "manual",
+            "mappings": [
+                {
+                    "requirement": "6.2.12",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ]
+        },
+        {
+            "id": "MB-R162",
+            "evidence_type": "manual",
+            "mappings": [
+                {
+                    "requirement": "6.3.4",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ]
+        },
+        {
+            "id": "MB-R163",
+            "evidence_type": "manual",
+            "mappings": [
+                {
+                    "requirement": "6.4.3",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ]
+        },
+        {
+            "id": "MB-R164",
+            "evidence_type": "manual",
+            "mappings": [
+                {
+                    "requirement": "6.4.4",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ]
+        },
+        {
+            "id": "MB-R165",
+            "evidence_type": "manual",
+            "mappings": [
+                {
+                    "requirement": "6.5.1",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ]
+        },
+        {
+            "id": "MB-R166",
+            "evidence_type": "manual",
+            "mappings": [
+                {
+                    "requirement": "6.5.2",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ]
+        },
+        {
+            "id": "MB-R167",
+            "evidence_type": "manual",
+            "mappings": [
+                {
+                    "requirement": "6.5.3",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ]
+        },
+        {
+            "id": "MB-R168",
+            "evidence_type": "manual",
+            "mappings": [
+                {
+                    "requirement": "6.5.4",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ]
+        },
+        {
+            "id": "MB-R169",
+            "evidence_type": "manual",
+            "mappings": [
+                {
+                    "requirement": "6.5.5",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ]
+        },
+        {
+            "id": "MB-R170",
+            "evidence_type": "manual",
+            "mappings": [
+                {
+                    "requirement": "6.6.1",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ]
+        },
+        {
+            "id": "MB-R171",
+            "evidence_type": "manual",
+            "mappings": [
+                {
+                    "requirement": "6.6.2",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ]
+        },
+        {
+            "id": "MB-R172",
+            "evidence_type": "manual",
+            "mappings": [
+                {
+                    "requirement": "7.1.1",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ]
+        },
+        {
+            "id": "MB-R173",
+            "evidence_type": "manual",
+            "mappings": [
+                {
+                    "requirement": "7.1.2",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ]
+        },
+        {
+            "id": "MB-R174",
+            "evidence_type": "manual",
+            "mappings": [
+                {
+                    "requirement": "7.3.2",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ]
+        },
+        {
+            "id": "MB-R175",
+            "evidence_type": "manual",
+            "mappings": [
+                {
+                    "requirement": "7.4.3",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ]
+        },
+        {
+            "id": "MB-R176",
+            "evidence_type": "manual",
+            "mappings": [
+                {
+                    "requirement": "7.4.4",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ]
+        },
+        {
+            "id": "MB-R177",
+            "evidence_type": "manual",
+            "mappings": [
+                {
+                    "requirement": "7.4.5",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ]
+        },
+        {
+            "id": "MB-R178",
+            "evidence_type": "manual",
+            "mappings": [
+                {
+                    "requirement": "7.5.1",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ]
+        },
+        {
+            "id": "MB-R179",
+            "evidence_type": "manual",
+            "mappings": [
+                {
+                    "requirement": "7.5.2",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ]
+        },
+        {
+            "id": "MB-R180",
+            "evidence_type": "manual",
+            "mappings": [
+                {
+                    "requirement": "7.6.2",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ]
+        },
+        {
+            "id": "MB-R181",
+            "evidence_type": "manual",
+            "mappings": [
+                {
+                    "requirement": "8.1.2",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ]
+        },
+        {
+            "id": "MB-R182",
+            "evidence_type": "manual",
+            "mappings": [
+                {
+                    "requirement": "11.1.1",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ]
+        },
+        {
+            "id": "MB-R183",
+            "evidence_type": "manual",
+            "mappings": [
+                {
+                    "requirement": "11.1.2",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ]
+        },
+        {
+            "id": "MB-R184",
+            "evidence_type": "manual",
+            "mappings": [
+                {
+                    "requirement": "11.2.2",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ]
+        },
+        {
+            "id": "MB-R185",
+            "evidence_type": "manual",
+            "mappings": [
+                {
+                    "requirement": "11.4.3",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ]
+        },
+        {
+            "id": "MB-R186",
+            "evidence_type": "manual",
+            "mappings": [
+                {
+                    "requirement": "11.4.4",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ]
+        },
+        {
+            "id": "MB-R187",
+            "evidence_type": "manual",
+            "mappings": [
+                {
+                    "requirement": "12.1.3",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ]
+        },
+        {
+            "id": "MB-R188",
+            "evidence_type": "manual",
+            "mappings": [
+                {
+                    "requirement": "12.3.4",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ]
+        },
+        {
+            "id": "MB-R189",
+            "evidence_type": "manual",
+            "mappings": [
+                {
+                    "requirement": "13.1.1",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ]
+        },
+        {
+            "id": "MB-R190",
+            "evidence_type": "manual",
+            "mappings": [
+                {
+                    "requirement": "13.2.1",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ]
+        },
+        {
+            "id": "MB-R191",
+            "evidence_type": "manual",
+            "mappings": [
+                {
+                    "requirement": "13.4.4",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ]
+        },
+        {
+            "id": "MB-R192",
+            "evidence_type": "manual",
+            "mappings": [
+                {
+                    "requirement": "14.1.1",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ]
+        },
+        {
+            "id": "MB-R193",
+            "evidence_type": "manual",
+            "mappings": [
+                {
+                    "requirement": "14.1.2",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ]
+        },
+        {
+            "id": "MB-R194",
+            "evidence_type": "manual",
+            "mappings": [
+                {
+                    "requirement": "14.2.2",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ]
+        },
+        {
+            "id": "MB-R195",
+            "evidence_type": "manual",
+            "mappings": [
+                {
+                    "requirement": "14.3.2",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ]
+        },
+        {
+            "id": "MB-R196",
+            "evidence_type": "manual",
+            "mappings": [
+                {
+                    "requirement": "14.3.3",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ]
+        },
+        {
+            "id": "MB-R197",
+            "evidence_type": "manual",
+            "mappings": [
+                {
+                    "requirement": "15.1.3",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ]
+        },
+        {
+            "id": "MB-R198",
+            "evidence_type": "manual",
+            "mappings": [
+                {
+                    "requirement": "15.2.2",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ]
+        },
+        {
+            "id": "MB-R199",
+            "evidence_type": "manual",
+            "mappings": [
+                {
+                    "requirement": "15.3.2",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ]
+        },
+        {
+            "id": "MB-R200",
+            "evidence_type": "manual",
+            "mappings": [
+                {
+                    "requirement": "15.3.3",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ]
+        },
+        {
+            "id": "MB-R201",
+            "evidence_type": "manual",
+            "mappings": [
+                {
+                    "requirement": "15.3.4",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ]
+        },
+        {
+            "id": "MB-R202",
+            "evidence_type": "manual",
+            "mappings": [
+                {
+                    "requirement": "15.3.5",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ]
+        },
+        {
+            "id": "MB-R203",
+            "evidence_type": "manual",
+            "mappings": [
+                {
+                    "requirement": "15.3.6",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ]
+        },
+        {
+            "id": "MB-R204",
+            "evidence_type": "manual",
+            "mappings": [
+                {
+                    "requirement": "15.3.7",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ]
+        },
+        {
+            "id": "MB-R205",
+            "evidence_type": "manual",
+            "mappings": [
+                {
+                    "requirement": "16.1.1",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ]
+        },
+        {
+            "id": "MB-R206",
+            "evidence_type": "manual",
+            "mappings": [
+                {
+                    "requirement": "16.2.1",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ]
+        },
+        {
+            "id": "MB-R207",
+            "evidence_type": "manual",
+            "mappings": [
+                {
+                    "requirement": "16.2.2",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ]
+        },
+        {
+            "id": "MB-R208",
+            "evidence_type": "manual",
+            "mappings": [
+                {
+                    "requirement": "16.2.3",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ]
+        },
+        {
+            "id": "MB-R209",
+            "evidence_type": "manual",
+            "mappings": [
+                {
+                    "requirement": "16.2.4",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ]
+        },
+        {
+            "id": "MB-R210",
+            "evidence_type": "manual",
+            "mappings": [
+                {
+                    "requirement": "16.3.1",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ]
+        },
+        {
+            "id": "MB-R211",
+            "evidence_type": "manual",
+            "mappings": [
+                {
+                    "requirement": "16.3.2",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ]
+        },
+        {
+            "id": "MB-R212",
+            "evidence_type": "manual",
+            "mappings": [
+                {
+                    "requirement": "16.3.3",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ]
+        },
+        {
+            "id": "MB-R213",
+            "evidence_type": "manual",
+            "mappings": [
+                {
+                    "requirement": "16.3.4",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ]
+        },
+        {
+            "id": "MB-R214",
+            "evidence_type": "manual",
+            "mappings": [
+                {
+                    "requirement": "16.4.1",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ]
+        },
+        {
+            "id": "MB-R215",
+            "evidence_type": "manual",
+            "mappings": [
+                {
+                    "requirement": "16.4.3",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ]
+        },
+        {
+            "id": "MB-R216",
+            "evidence_type": "manual",
+            "mappings": [
+                {
+                    "requirement": "16.5.2",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ]
+        },
+        {
+            "id": "MB-R217",
+            "evidence_type": "manual",
+            "mappings": [
+                {
+                    "requirement": "16.5.3",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ]
+        },
+        {
+            "id": "MB-R218",
+            "evidence_type": "manual",
+            "applicability": {
+                "capability": "ldap"
+            },
+            "mappings": [
+                {
+                    "requirement": "1.2.6",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ]
+        },
+        {
+            "id": "MB-R219",
+            "evidence_type": "manual",
+            "applicability": {
+                "capability": "xpath"
+            },
+            "mappings": [
+                {
+                    "requirement": "1.2.7",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ]
+        },
+        {
+            "id": "MB-R220",
+            "evidence_type": "manual",
+            "applicability": {
+                "capability": "latex_processing"
+            },
+            "mappings": [
+                {
+                    "requirement": "1.2.8",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ]
+        },
+        {
+            "id": "MB-R221",
+            "evidence_type": "manual",
+            "applicability": {
+                "capability": "user_supplied_svg"
+            },
+            "mappings": [
+                {
+                    "requirement": "1.3.4",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ]
+        },
+        {
+            "id": "MB-R222",
+            "evidence_type": "manual",
+            "applicability": {
+                "capability": "scriptable_user_content"
+            },
+            "mappings": [
+                {
+                    "requirement": "1.3.5",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ]
+        },
+        {
+            "id": "MB-R223",
+            "evidence_type": "manual",
+            "applicability": {
+                "capability": "jndi"
+            },
+            "mappings": [
+                {
+                    "requirement": "1.3.8",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ]
+        },
+        {
+            "id": "MB-R224",
+            "evidence_type": "manual",
+            "applicability": {
+                "capability": "memcache"
+            },
+            "mappings": [
+                {
+                    "requirement": "1.3.9",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ]
+        },
+        {
+            "id": "MB-R225",
+            "evidence_type": "manual",
+            "applicability": {
+                "capability": "native_code"
+            },
+            "mappings": [
+                {
+                    "requirement": "1.4.1",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ]
+        },
+        {
+            "id": "MB-R226",
+            "evidence_type": "manual",
+            "applicability": {
+                "capability": "native_code"
+            },
+            "mappings": [
+                {
+                    "requirement": "1.4.2",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ]
+        },
+        {
+            "id": "MB-R227",
+            "evidence_type": "manual",
+            "applicability": {
+                "capability": "native_code"
+            },
+            "mappings": [
+                {
+                    "requirement": "1.4.3",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ]
+        },
+        {
+            "id": "MB-R228",
+            "evidence_type": "manual",
+            "applicability": {
+                "capability": "websocket"
+            },
+            "mappings": [
+                {
+                    "requirement": "4.4.3",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ]
+        },
+        {
+            "id": "MB-R229",
+            "evidence_type": "manual",
+            "applicability": {
+                "capability": "websocket"
+            },
+            "mappings": [
+                {
+                    "requirement": "4.4.4",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ]
+        },
+        {
+            "id": "MB-R230",
+            "evidence_type": "manual",
+            "applicability": {
+                "capability": "file_handling"
+            },
+            "mappings": [
+                {
+                    "requirement": "5.1.1",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ]
+        },
+        {
+            "id": "MB-R231",
+            "evidence_type": "manual",
+            "applicability": {
+                "capability": "file_handling"
+            },
+            "mappings": [
+                {
+                    "requirement": "5.4.3",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ]
+        },
+        {
+            "id": "MB-R232",
+            "evidence_type": "manual",
+            "applicability": {
+                "capability": "federated_identity"
+            },
+            "mappings": [
+                {
+                    "requirement": "6.8.1",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ]
+        },
+        {
+            "id": "MB-R233",
+            "evidence_type": "manual",
+            "applicability": {
+                "capability": "federated_identity"
+            },
+            "mappings": [
+                {
+                    "requirement": "6.8.2",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ]
+        },
+        {
+            "id": "MB-R234",
+            "evidence_type": "manual",
+            "applicability": {
+                "capability": "federated_identity"
+            },
+            "mappings": [
+                {
+                    "requirement": "6.8.3",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ]
+        },
+        {
+            "id": "MB-R235",
+            "evidence_type": "manual",
+            "applicability": {
+                "capability": "federated_identity"
+            },
+            "mappings": [
+                {
+                    "requirement": "6.8.4",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ]
+        },
+        {
+            "id": "MB-R236",
+            "evidence_type": "manual",
+            "applicability": {
+                "capability": "federated_identity"
+            },
+            "mappings": [
+                {
+                    "requirement": "7.1.3",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ]
+        },
+        {
+            "id": "MB-R237",
+            "evidence_type": "manual",
+            "applicability": {
+                "capability": "federated_identity"
+            },
+            "mappings": [
+                {
+                    "requirement": "7.6.1",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ]
+        },
+        {
+            "id": "MB-R238",
+            "evidence_type": "manual",
+            "applicability": {
+                "capability": "multi_tenant"
+            },
+            "mappings": [
+                {
+                    "requirement": "8.4.1",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ]
+        },
+        {
+            "id": "MB-R239",
+            "evidence_type": "manual",
+            "applicability": {
+                "capability": "self_contained_tokens"
+            },
+            "mappings": [
+                {
+                    "requirement": "9.2.2",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ]
+        },
+        {
+            "id": "MB-R240",
+            "evidence_type": "manual",
+            "applicability": {
+                "capability": "self_contained_tokens"
+            },
+            "mappings": [
+                {
+                    "requirement": "9.2.3",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ]
+        },
+        {
+            "id": "MB-R241",
+            "evidence_type": "manual",
+            "applicability": {
+                "capability": "self_contained_tokens"
+            },
+            "mappings": [
+                {
+                    "requirement": "9.2.4",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ]
+        },
+        {
+            "id": "MB-R242",
+            "evidence_type": "manual",
+            "applicability": {
+                "capability": "oauth_oidc"
+            },
+            "mappings": [
+                {
+                    "requirement": "10.1.1",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ]
+        },
+        {
+            "id": "MB-R243",
+            "evidence_type": "manual",
+            "applicability": {
+                "capability": "oauth_oidc"
+            },
+            "mappings": [
+                {
+                    "requirement": "10.1.2",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ]
+        },
+        {
+            "id": "MB-R244",
+            "evidence_type": "manual",
+            "applicability": {
+                "capability": "oauth_oidc"
+            },
+            "mappings": [
+                {
+                    "requirement": "10.2.1",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ]
+        },
+        {
+            "id": "MB-R245",
+            "evidence_type": "manual",
+            "applicability": {
+                "capability": "oauth_oidc"
+            },
+            "mappings": [
+                {
+                    "requirement": "10.2.2",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ]
+        },
+        {
+            "id": "MB-R246",
+            "evidence_type": "manual",
+            "applicability": {
+                "capability": "oauth_oidc"
+            },
+            "mappings": [
+                {
+                    "requirement": "10.3.1",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ]
+        },
+        {
+            "id": "MB-R247",
+            "evidence_type": "manual",
+            "applicability": {
+                "capability": "oauth_oidc"
+            },
+            "mappings": [
+                {
+                    "requirement": "10.3.2",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ]
+        },
+        {
+            "id": "MB-R248",
+            "evidence_type": "manual",
+            "applicability": {
+                "capability": "oauth_oidc"
+            },
+            "mappings": [
+                {
+                    "requirement": "10.3.3",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ]
+        },
+        {
+            "id": "MB-R249",
+            "evidence_type": "manual",
+            "applicability": {
+                "capability": "oauth_oidc"
+            },
+            "mappings": [
+                {
+                    "requirement": "10.3.4",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ]
+        },
+        {
+            "id": "MB-R250",
+            "evidence_type": "manual",
+            "applicability": {
+                "capability": "oauth_oidc"
+            },
+            "mappings": [
+                {
+                    "requirement": "10.4.6",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ]
+        },
+        {
+            "id": "MB-R251",
+            "evidence_type": "manual",
+            "applicability": {
+                "capability": "oauth_oidc"
+            },
+            "mappings": [
+                {
+                    "requirement": "10.4.7",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ]
+        },
+        {
+            "id": "MB-R252",
+            "evidence_type": "manual",
+            "applicability": {
+                "capability": "oauth_oidc"
+            },
+            "mappings": [
+                {
+                    "requirement": "10.4.8",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ]
+        },
+        {
+            "id": "MB-R253",
+            "evidence_type": "manual",
+            "applicability": {
+                "capability": "oauth_oidc"
+            },
+            "mappings": [
+                {
+                    "requirement": "10.4.9",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ]
+        },
+        {
+            "id": "MB-R254",
+            "evidence_type": "manual",
+            "applicability": {
+                "capability": "oauth_oidc"
+            },
+            "mappings": [
+                {
+                    "requirement": "10.4.10",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ]
+        },
+        {
+            "id": "MB-R255",
+            "evidence_type": "manual",
+            "applicability": {
+                "capability": "oauth_oidc"
+            },
+            "mappings": [
+                {
+                    "requirement": "10.4.11",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ]
+        },
+        {
+            "id": "MB-R256",
+            "evidence_type": "manual",
+            "applicability": {
+                "capability": "oauth_oidc"
+            },
+            "mappings": [
+                {
+                    "requirement": "10.5.1",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ]
+        },
+        {
+            "id": "MB-R257",
+            "evidence_type": "manual",
+            "applicability": {
+                "capability": "oauth_oidc"
+            },
+            "mappings": [
+                {
+                    "requirement": "10.5.2",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ]
+        },
+        {
+            "id": "MB-R258",
+            "evidence_type": "manual",
+            "applicability": {
+                "capability": "oauth_oidc"
+            },
+            "mappings": [
+                {
+                    "requirement": "10.5.3",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ]
+        },
+        {
+            "id": "MB-R259",
+            "evidence_type": "manual",
+            "applicability": {
+                "capability": "oauth_oidc"
+            },
+            "mappings": [
+                {
+                    "requirement": "10.5.4",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ]
+        },
+        {
+            "id": "MB-R260",
+            "evidence_type": "manual",
+            "applicability": {
+                "capability": "oauth_oidc"
+            },
+            "mappings": [
+                {
+                    "requirement": "10.5.5",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ]
+        },
+        {
+            "id": "MB-R261",
+            "evidence_type": "manual",
+            "applicability": {
+                "capability": "oauth_oidc"
+            },
+            "mappings": [
+                {
+                    "requirement": "10.6.1",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ]
+        },
+        {
+            "id": "MB-R262",
+            "evidence_type": "manual",
+            "applicability": {
+                "capability": "oauth_oidc"
+            },
+            "mappings": [
+                {
+                    "requirement": "10.6.2",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ]
+        },
+        {
+            "id": "MB-R263",
+            "evidence_type": "manual",
+            "applicability": {
+                "capability": "oauth_oidc"
+            },
+            "mappings": [
+                {
+                    "requirement": "10.7.1",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ]
+        },
+        {
+            "id": "MB-R264",
+            "evidence_type": "manual",
+            "applicability": {
+                "capability": "oauth_oidc"
+            },
+            "mappings": [
+                {
+                    "requirement": "10.7.2",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ]
+        },
+        {
+            "id": "MB-R265",
+            "evidence_type": "manual",
+            "applicability": {
+                "capability": "oauth_oidc"
+            },
+            "mappings": [
+                {
+                    "requirement": "10.7.3",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ]
+        },
+        {
+            "id": "MB-R266",
+            "evidence_type": "manual",
+            "applicability": {
+                "capability": "webrtc"
+            },
+            "mappings": [
+                {
+                    "requirement": "17.1.1",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ]
+        },
+        {
+            "id": "MB-R267",
+            "evidence_type": "manual",
+            "applicability": {
+                "capability": "webrtc"
+            },
+            "mappings": [
+                {
+                    "requirement": "17.2.1",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ]
+        },
+        {
+            "id": "MB-R268",
+            "evidence_type": "manual",
+            "applicability": {
+                "capability": "webrtc"
+            },
+            "mappings": [
+                {
+                    "requirement": "17.2.2",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ]
+        },
+        {
+            "id": "MB-R269",
+            "evidence_type": "manual",
+            "applicability": {
+                "capability": "webrtc"
+            },
+            "mappings": [
+                {
+                    "requirement": "17.2.3",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ]
+        },
+        {
+            "id": "MB-R270",
+            "evidence_type": "manual",
+            "applicability": {
+                "capability": "webrtc"
+            },
+            "mappings": [
+                {
+                    "requirement": "17.2.4",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ]
+        },
+        {
+            "id": "MB-R271",
+            "evidence_type": "manual",
+            "applicability": {
+                "capability": "webrtc"
+            },
+            "mappings": [
+                {
+                    "requirement": "17.3.1",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ]
+        },
+        {
+            "id": "MB-R272",
+            "evidence_type": "manual",
+            "applicability": {
+                "capability": "webrtc"
+            },
+            "mappings": [
+                {
+                    "requirement": "17.3.2",
+                    "coverage": "MANUAL_REVIEW"
+                }
+            ]
+        },
+        {
+            "id": "MB-R273",
+            "evidence_type": "automated",
+            "mappings": [
+                {
+                    "requirement": "3.4.5",
+                    "coverage": "PARTIALLY_AUTOMATED"
+                }
+            ]
+        },
+        {
+            "id": "MB-R274",
+            "evidence_type": "automated",
+            "mappings": [
+                {
+                    "requirement": "13.4.4",
+                    "coverage": "PARTIALLY_AUTOMATED"
+                }
+            ]
+        },
+        {
+            "id": "MB-R275",
+            "evidence_type": "automated",
+            "mappings": [
+                {
+                    "requirement": "4.3.2",
+                    "coverage": "PARTIALLY_AUTOMATED"
+                }
+            ],
+            "applicability": {
+                "capability": "graphql"
+            }
+        }
+    ],
+    "requirement_coverage": [
+        {
+            "id": "1.1.1",
+            "title": "Canonical decoding",
+            "status": "MANUAL_REVIEW",
+            "rules": [
+                "MB-R136"
+            ],
+            "note": "A dedicated human-review rule requests implementation evidence and a reviewer conclusion."
+        },
+        {
+            "id": "1.1.2",
+            "title": "Late output encoding",
+            "status": "MANUAL_REVIEW",
+            "rules": [
+                "MB-R137"
+            ],
+            "note": "A dedicated human-review rule requests implementation evidence and a reviewer conclusion."
+        },
+        {
+            "id": "1.2.6",
+            "title": "LDAP injection",
+            "status": "CONTEXT_REQUIRED",
+            "rules": [
+                "MB-R218"
+            ],
+            "note": "A conditional human-review rule is activated only when capability \"ldap\" is enabled.",
+            "applicability": {
+                "capability": "ldap",
+                "default": "CONTEXT_REQUIRED"
+            }
+        },
+        {
+            "id": "1.2.7",
+            "title": "XPath injection",
+            "status": "CONTEXT_REQUIRED",
+            "rules": [
+                "MB-R219"
+            ],
+            "note": "A conditional human-review rule is activated only when capability \"xpath\" is enabled.",
+            "applicability": {
+                "capability": "xpath",
+                "default": "CONTEXT_REQUIRED"
+            }
+        },
+        {
+            "id": "1.2.8",
+            "title": "LaTeX injection",
+            "status": "CONTEXT_REQUIRED",
+            "rules": [
+                "MB-R220"
+            ],
+            "note": "A conditional human-review rule is activated only when capability \"latex_processing\" is enabled.",
+            "applicability": {
+                "capability": "latex_processing",
+                "default": "CONTEXT_REQUIRED"
+            }
+        },
+        {
+            "id": "1.2.9",
+            "title": "Regular-expression injection",
+            "status": "MANUAL_REVIEW",
+            "rules": [
+                "MB-R138"
+            ],
+            "note": "A dedicated human-review rule requests implementation evidence and a reviewer conclusion."
+        },
+        {
+            "id": "1.3.3",
+            "title": "Dangerous-context sanitization",
+            "status": "MANUAL_REVIEW",
+            "rules": [
+                "MB-R139"
+            ],
+            "note": "A dedicated human-review rule requests implementation evidence and a reviewer conclusion."
+        },
+        {
+            "id": "1.3.4",
+            "title": "SVG sanitization",
+            "status": "CONTEXT_REQUIRED",
+            "rules": [
+                "MB-R221"
+            ],
+            "note": "A conditional human-review rule is activated only when capability \"user_supplied_svg\" is enabled.",
+            "applicability": {
+                "capability": "user_supplied_svg",
+                "default": "CONTEXT_REQUIRED"
+            }
+        },
+        {
+            "id": "1.3.5",
+            "title": "Scriptable content",
+            "status": "CONTEXT_REQUIRED",
+            "rules": [
+                "MB-R222"
+            ],
+            "note": "A conditional human-review rule is activated only when capability \"scriptable_user_content\" is enabled.",
+            "applicability": {
+                "capability": "scriptable_user_content",
+                "default": "CONTEXT_REQUIRED"
+            }
+        },
+        {
+            "id": "1.3.6",
+            "title": "SSRF prevention",
+            "status": "PARTIALLY_AUTOMATED",
+            "rules": [
+                "MB-R016"
+            ],
+            "note": "Existing Magebean rules provide useful evidence but do not prove the full ASVS requirement."
+        },
+        {
+            "id": "1.3.7",
+            "title": "Template injection",
+            "status": "MANUAL_REVIEW",
+            "rules": [
+                "MB-R140"
+            ],
+            "note": "A dedicated human-review rule requests implementation evidence and a reviewer conclusion."
+        },
+        {
+            "id": "1.3.8",
+            "title": "JNDI injection",
+            "status": "CONTEXT_REQUIRED",
+            "rules": [
+                "MB-R223"
+            ],
+            "note": "A conditional human-review rule is activated only when capability \"jndi\" is enabled.",
+            "applicability": {
+                "capability": "jndi",
+                "default": "CONTEXT_REQUIRED"
+            }
+        },
+        {
+            "id": "1.3.9",
+            "title": "Memcache injection",
+            "status": "CONTEXT_REQUIRED",
+            "rules": [
+                "MB-R224"
+            ],
+            "note": "A conditional human-review rule is activated only when capability \"memcache\" is enabled.",
+            "applicability": {
+                "capability": "memcache",
+                "default": "CONTEXT_REQUIRED"
+            }
+        },
+        {
+            "id": "1.3.10",
+            "title": "Format-string injection",
+            "status": "MANUAL_REVIEW",
+            "rules": [
+                "MB-R141"
+            ],
+            "note": "A dedicated human-review rule requests implementation evidence and a reviewer conclusion."
+        },
+        {
+            "id": "1.3.11",
+            "title": "Mail injection",
+            "status": "MANUAL_REVIEW",
+            "rules": [
+                "MB-R142"
+            ],
+            "note": "A dedicated human-review rule requests implementation evidence and a reviewer conclusion."
+        },
+        {
+            "id": "1.4.1",
+            "title": "Memory-safe operations",
+            "status": "CONTEXT_REQUIRED",
+            "rules": [
+                "MB-R225"
+            ],
+            "note": "A conditional human-review rule is activated only when capability \"native_code\" is enabled.",
+            "applicability": {
+                "capability": "native_code",
+                "default": "CONTEXT_REQUIRED"
+            }
+        },
+        {
+            "id": "1.4.2",
+            "title": "Integer overflow",
+            "status": "CONTEXT_REQUIRED",
+            "rules": [
+                "MB-R226"
+            ],
+            "note": "A conditional human-review rule is activated only when capability \"native_code\" is enabled.",
+            "applicability": {
+                "capability": "native_code",
+                "default": "CONTEXT_REQUIRED"
+            }
+        },
+        {
+            "id": "1.4.3",
+            "title": "Resource lifecycle",
+            "status": "CONTEXT_REQUIRED",
+            "rules": [
+                "MB-R227"
+            ],
+            "note": "A conditional human-review rule is activated only when capability \"native_code\" is enabled.",
+            "applicability": {
+                "capability": "native_code",
+                "default": "CONTEXT_REQUIRED"
+            }
+        },
+        {
+            "id": "1.5.2",
+            "title": "Safe deserialization",
+            "status": "PARTIALLY_AUTOMATED",
+            "rules": [
+                "MB-R017"
+            ],
+            "note": "Existing Magebean rules provide useful evidence but do not prove the full ASVS requirement."
+        },
+        {
+            "id": "2.1.2",
+            "title": "Contextual data consistency",
+            "status": "MANUAL_REVIEW",
+            "rules": [
+                "MB-R143"
+            ],
+            "note": "A dedicated human-review rule requests implementation evidence and a reviewer conclusion."
+        },
+        {
+            "id": "2.1.3",
+            "title": "Business limits documentation",
+            "status": "MANUAL_REVIEW",
+            "rules": [
+                "MB-R144"
+            ],
+            "note": "A dedicated human-review rule requests implementation evidence and a reviewer conclusion."
+        },
+        {
+            "id": "2.2.3",
+            "title": "Related-data validation",
+            "status": "MANUAL_REVIEW",
+            "rules": [
+                "MB-R145"
+            ],
+            "note": "A dedicated human-review rule requests implementation evidence and a reviewer conclusion."
+        },
+        {
+            "id": "2.3.2",
+            "title": "Enforce business limits",
+            "status": "MANUAL_REVIEW",
+            "rules": [
+                "MB-R146"
+            ],
+            "note": "A dedicated human-review rule requests implementation evidence and a reviewer conclusion."
+        },
+        {
+            "id": "2.3.3",
+            "title": "Transactional integrity",
+            "status": "MANUAL_REVIEW",
+            "rules": [
+                "MB-R147"
+            ],
+            "note": "A dedicated human-review rule requests implementation evidence and a reviewer conclusion."
+        },
+        {
+            "id": "2.3.4",
+            "title": "Business locking",
+            "status": "MANUAL_REVIEW",
+            "rules": [
+                "MB-R148"
+            ],
+            "note": "A dedicated human-review rule requests implementation evidence and a reviewer conclusion."
+        },
+        {
+            "id": "2.4.1",
+            "title": "Anti-automation",
+            "status": "PARTIALLY_AUTOMATED",
+            "rules": [
+                "MB-R011"
+            ],
+            "note": "Existing Magebean rules provide useful evidence but do not prove the full ASVS requirement."
+        },
+        {
+            "id": "3.3.2",
+            "title": "SameSite policy",
+            "status": "PARTIALLY_AUTOMATED",
+            "rules": [
+                "MB-R030"
+            ],
+            "note": "Existing Magebean rules provide useful evidence but do not prove the full ASVS requirement."
+        },
+        {
+            "id": "3.3.3",
+            "title": "Host-bound cookies",
+            "status": "MANUAL_REVIEW",
+            "rules": [
+                "MB-R149"
+            ],
+            "note": "A dedicated human-review rule requests implementation evidence and a reviewer conclusion."
+        },
+        {
+            "id": "3.3.4",
+            "title": "HttpOnly",
+            "status": "PARTIALLY_AUTOMATED",
+            "rules": [
+                "MB-R030"
+            ],
+            "note": "Existing Magebean rules provide useful evidence but do not prove the full ASVS requirement."
+        },
+        {
+            "id": "3.4.3",
+            "title": "Content Security Policy",
+            "status": "PARTIALLY_AUTOMATED",
+            "rules": [
+                "MB-R089"
+            ],
+            "note": "Existing Magebean rules provide useful evidence but do not prove the full ASVS requirement."
+        },
+        {
+            "id": "3.4.4",
+            "title": "No content sniffing",
+            "status": "PARTIALLY_AUTOMATED",
+            "rules": [
+                "MB-R096"
+            ],
+            "note": "Existing Magebean rules provide useful evidence but do not prove the full ASVS requirement."
+        },
+        {
+            "id": "3.4.5",
+            "title": "Referrer policy",
+            "status": "PARTIALLY_AUTOMATED",
+            "rules": [
+                "MB-R150",
+                "MB-R273"
+            ],
+            "note": "Automated endpoint evidence is combined with existing code/configuration evidence or human review; complete deployment coverage still requires review."
+        },
+        {
+            "id": "3.4.6",
+            "title": "Anti-framing",
+            "status": "PARTIALLY_AUTOMATED",
+            "rules": [
+                "MB-R096"
+            ],
+            "note": "Existing Magebean rules provide useful evidence but do not prove the full ASVS requirement."
+        },
+        {
+            "id": "3.5.4",
+            "title": "Separate application origins",
+            "status": "MANUAL_REVIEW",
+            "rules": [
+                "MB-R151"
+            ],
+            "note": "A dedicated human-review rule requests implementation evidence and a reviewer conclusion."
+        },
+        {
+            "id": "3.5.5",
+            "title": "postMessage validation",
+            "status": "MANUAL_REVIEW",
+            "rules": [
+                "MB-R152"
+            ],
+            "note": "A dedicated human-review rule requests implementation evidence and a reviewer conclusion."
+        },
+        {
+            "id": "3.7.1",
+            "title": "Supported browser technologies",
+            "status": "PARTIALLY_AUTOMATED",
+            "rules": [
+                "MB-R049",
+                "MB-R058",
+                "MB-R062"
+            ],
+            "note": "Existing Magebean rules provide useful evidence but do not prove the full ASVS requirement."
+        },
+        {
+            "id": "3.7.2",
+            "title": "External redirect allowlist",
+            "status": "MANUAL_REVIEW",
+            "rules": [
+                "MB-R153"
+            ],
+            "note": "A dedicated human-review rule requests implementation evidence and a reviewer conclusion."
+        },
+        {
+            "id": "4.1.2",
+            "title": "HTTP-to-HTTPS redirect scope",
+            "status": "PARTIALLY_AUTOMATED",
+            "rules": [
+                "MB-R026"
+            ],
+            "note": "Existing Magebean rules provide useful evidence but do not prove the full ASVS requirement."
+        },
+        {
+            "id": "4.1.3",
+            "title": "Trusted intermediary headers",
+            "status": "MANUAL_REVIEW",
+            "rules": [
+                "MB-R154"
+            ],
+            "note": "A dedicated human-review rule requests implementation evidence and a reviewer conclusion."
+        },
+        {
+            "id": "4.2.1",
+            "title": "HTTP request-smuggling defense",
+            "status": "MANUAL_REVIEW",
+            "rules": [
+                "MB-R155"
+            ],
+            "note": "A dedicated human-review rule requests implementation evidence and a reviewer conclusion."
+        },
+        {
+            "id": "4.3.1",
+            "title": "GraphQL resource limits",
+            "status": "PARTIALLY_AUTOMATED",
+            "rules": [
+                "MB-R095"
+            ],
+            "note": "Existing Magebean rules provide useful evidence but do not prove the full ASVS requirement.",
+            "applicability": {
+                "capability": "graphql",
+                "default": "CONTEXT_REQUIRED"
+            }
+        },
+        {
+            "id": "4.3.2",
+            "title": "GraphQL introspection",
+            "status": "PARTIALLY_AUTOMATED",
+            "rules": [
+                "MB-R095",
+                "MB-R275"
+            ],
+            "note": "Automated endpoint evidence is combined with existing code/configuration evidence or human review; complete deployment coverage still requires review.",
+            "applicability": {
+                "capability": "graphql",
+                "default": "CONTEXT_REQUIRED"
+            }
+        },
+        {
+            "id": "4.4.2",
+            "title": "WebSocket Origin validation",
+            "status": "PARTIALLY_AUTOMATED",
+            "rules": [
+                "MB-R130"
+            ],
+            "note": "Existing Magebean rules provide useful evidence but do not prove the full ASVS requirement.",
+            "applicability": {
+                "capability": "websocket",
+                "default": "CONTEXT_REQUIRED"
+            }
+        },
+        {
+            "id": "4.4.3",
+            "title": "WebSocket session tokens",
+            "status": "CONTEXT_REQUIRED",
+            "rules": [
+                "MB-R228"
+            ],
+            "note": "A conditional human-review rule is activated only when capability \"websocket\" is enabled.",
+            "applicability": {
+                "capability": "websocket",
+                "default": "CONTEXT_REQUIRED"
+            }
+        },
+        {
+            "id": "4.4.4",
+            "title": "Authenticated WebSocket upgrade",
+            "status": "CONTEXT_REQUIRED",
+            "rules": [
+                "MB-R229"
+            ],
+            "note": "A conditional human-review rule is activated only when capability \"websocket\" is enabled.",
+            "applicability": {
+                "capability": "websocket",
+                "default": "CONTEXT_REQUIRED"
+            }
+        },
+        {
+            "id": "5.1.1",
+            "title": "Upload policy documentation",
+            "status": "CONTEXT_REQUIRED",
+            "rules": [
+                "MB-R230"
+            ],
+            "note": "A conditional human-review rule is activated only when capability \"file_handling\" is enabled.",
+            "applicability": {
+                "capability": "file_handling",
+                "default": "CONTEXT_REQUIRED"
+            }
+        },
+        {
+            "id": "5.2.3",
+            "title": "Archive limits",
+            "status": "PARTIALLY_AUTOMATED",
+            "rules": [
+                "MB-R021"
+            ],
+            "note": "Existing Magebean rules provide useful evidence but do not prove the full ASVS requirement.",
+            "applicability": {
+                "capability": "file_handling",
+                "default": "CONTEXT_REQUIRED"
+            }
+        },
+        {
+            "id": "5.4.1",
+            "title": "Safe download filename selection",
+            "status": "PARTIALLY_AUTOMATED",
+            "rules": [
+                "MB-R099"
+            ],
+            "note": "Existing Magebean rules provide useful evidence but do not prove the full ASVS requirement.",
+            "applicability": {
+                "capability": "file_handling",
+                "default": "CONTEXT_REQUIRED"
+            }
+        },
+        {
+            "id": "5.4.2",
+            "title": "Safe filename encoding",
+            "status": "PARTIALLY_AUTOMATED",
+            "rules": [
+                "MB-R021",
+                "MB-R099"
+            ],
+            "note": "Existing Magebean rules provide useful evidence but do not prove the full ASVS requirement.",
+            "applicability": {
+                "capability": "file_handling",
+                "default": "CONTEXT_REQUIRED"
+            }
+        },
+        {
+            "id": "5.4.3",
+            "title": "Malware scanning",
+            "status": "CONTEXT_REQUIRED",
+            "rules": [
+                "MB-R231"
+            ],
+            "note": "A conditional human-review rule is activated only when capability \"file_handling\" is enabled.",
+            "applicability": {
+                "capability": "file_handling",
+                "default": "CONTEXT_REQUIRED"
+            }
+        },
+        {
+            "id": "6.1.2",
+            "title": "Context-specific password denylist",
+            "status": "MANUAL_REVIEW",
+            "rules": [
+                "MB-R156"
+            ],
+            "note": "A dedicated human-review rule requests implementation evidence and a reviewer conclusion."
+        },
+        {
+            "id": "6.1.3",
+            "title": "Authentication-path inventory",
+            "status": "MANUAL_REVIEW",
+            "rules": [
+                "MB-R157"
+            ],
+            "note": "A dedicated human-review rule requests implementation evidence and a reviewer conclusion."
+        },
+        {
+            "id": "6.2.9",
+            "title": "Long passwords",
+            "status": "MANUAL_REVIEW",
+            "rules": [
+                "MB-R158"
+            ],
+            "note": "A dedicated human-review rule requests implementation evidence and a reviewer conclusion."
+        },
+        {
+            "id": "6.2.10",
+            "title": "No forced periodic rotation",
+            "status": "MANUAL_REVIEW",
+            "rules": [
+                "MB-R159"
+            ],
+            "note": "A dedicated human-review rule requests implementation evidence and a reviewer conclusion."
+        },
+        {
+            "id": "6.2.11",
+            "title": "Context-specific word checks",
+            "status": "MANUAL_REVIEW",
+            "rules": [
+                "MB-R160"
+            ],
+            "note": "A dedicated human-review rule requests implementation evidence and a reviewer conclusion."
+        },
+        {
+            "id": "6.2.12",
+            "title": "Breached-password checks",
+            "status": "MANUAL_REVIEW",
+            "rules": [
+                "MB-R161"
+            ],
+            "note": "A dedicated human-review rule requests implementation evidence and a reviewer conclusion."
+        },
+        {
+            "id": "6.3.3",
+            "title": "Multiple authentication factors",
+            "status": "PARTIALLY_AUTOMATED",
+            "rules": [
+                "MB-R007"
+            ],
+            "note": "Existing Magebean rules provide useful evidence but do not prove the full ASVS requirement."
+        },
+        {
+            "id": "6.3.4",
+            "title": "Consistent authentication pathways",
+            "status": "MANUAL_REVIEW",
+            "rules": [
+                "MB-R162"
+            ],
+            "note": "A dedicated human-review rule requests implementation evidence and a reviewer conclusion."
+        },
+        {
+            "id": "6.4.3",
+            "title": "Secure password reset",
+            "status": "MANUAL_REVIEW",
+            "rules": [
+                "MB-R163"
+            ],
+            "note": "A dedicated human-review rule requests implementation evidence and a reviewer conclusion."
+        },
+        {
+            "id": "6.4.4",
+            "title": "MFA-factor recovery",
+            "status": "MANUAL_REVIEW",
+            "rules": [
+                "MB-R164"
+            ],
+            "note": "A dedicated human-review rule requests implementation evidence and a reviewer conclusion."
+        },
+        {
+            "id": "6.5.1",
+            "title": "One-time use",
+            "status": "MANUAL_REVIEW",
+            "rules": [
+                "MB-R165"
+            ],
+            "note": "A dedicated human-review rule requests implementation evidence and a reviewer conclusion."
+        },
+        {
+            "id": "6.5.2",
+            "title": "Stored lookup secrets",
+            "status": "MANUAL_REVIEW",
+            "rules": [
+                "MB-R166"
+            ],
+            "note": "A dedicated human-review rule requests implementation evidence and a reviewer conclusion."
+        },
+        {
+            "id": "6.5.3",
+            "title": "Secure generation",
+            "status": "MANUAL_REVIEW",
+            "rules": [
+                "MB-R167"
+            ],
+            "note": "A dedicated human-review rule requests implementation evidence and a reviewer conclusion."
+        },
+        {
+            "id": "6.5.4",
+            "title": "Minimum entropy",
+            "status": "MANUAL_REVIEW",
+            "rules": [
+                "MB-R168"
+            ],
+            "note": "A dedicated human-review rule requests implementation evidence and a reviewer conclusion."
+        },
+        {
+            "id": "6.5.5",
+            "title": "Short lifetime",
+            "status": "MANUAL_REVIEW",
+            "rules": [
+                "MB-R169"
+            ],
+            "note": "A dedicated human-review rule requests implementation evidence and a reviewer conclusion."
+        },
+        {
+            "id": "6.6.1",
+            "title": "Phone/SMS OTP limitations",
+            "status": "MANUAL_REVIEW",
+            "rules": [
+                "MB-R170"
+            ],
+            "note": "A dedicated human-review rule requests implementation evidence and a reviewer conclusion."
+        },
+        {
+            "id": "6.6.2",
+            "title": "Bind OOB challenge",
+            "status": "MANUAL_REVIEW",
+            "rules": [
+                "MB-R171"
+            ],
+            "note": "A dedicated human-review rule requests implementation evidence and a reviewer conclusion."
+        },
+        {
+            "id": "6.6.3",
+            "title": "OOB brute-force defense",
+            "status": "PARTIALLY_AUTOMATED",
+            "rules": [
+                "MB-R011"
+            ],
+            "note": "Existing Magebean rules provide useful evidence but do not prove the full ASVS requirement."
+        },
+        {
+            "id": "6.8.1",
+            "title": "IdP namespace isolation",
+            "status": "CONTEXT_REQUIRED",
+            "rules": [
+                "MB-R232"
+            ],
+            "note": "A conditional human-review rule is activated only when capability \"federated_identity\" is enabled.",
+            "applicability": {
+                "capability": "federated_identity",
+                "default": "CONTEXT_REQUIRED"
+            }
+        },
+        {
+            "id": "6.8.2",
+            "title": "Signed assertions",
+            "status": "CONTEXT_REQUIRED",
+            "rules": [
+                "MB-R233"
+            ],
+            "note": "A conditional human-review rule is activated only when capability \"federated_identity\" is enabled.",
+            "applicability": {
+                "capability": "federated_identity",
+                "default": "CONTEXT_REQUIRED"
+            }
+        },
+        {
+            "id": "6.8.3",
+            "title": "SAML replay prevention",
+            "status": "CONTEXT_REQUIRED",
+            "rules": [
+                "MB-R234"
+            ],
+            "note": "A conditional human-review rule is activated only when capability \"federated_identity\" is enabled.",
+            "applicability": {
+                "capability": "federated_identity",
+                "default": "CONTEXT_REQUIRED"
+            }
+        },
+        {
+            "id": "6.8.4",
+            "title": "Authentication-context validation",
+            "status": "CONTEXT_REQUIRED",
+            "rules": [
+                "MB-R235"
+            ],
+            "note": "A conditional human-review rule is activated only when capability \"federated_identity\" is enabled.",
+            "applicability": {
+                "capability": "federated_identity",
+                "default": "CONTEXT_REQUIRED"
+            }
+        },
+        {
+            "id": "7.1.1",
+            "title": "Session-lifetime policy",
+            "status": "MANUAL_REVIEW",
+            "rules": [
+                "MB-R172"
+            ],
+            "note": "A dedicated human-review rule requests implementation evidence and a reviewer conclusion."
+        },
+        {
+            "id": "7.1.2",
+            "title": "Concurrent-session policy",
+            "status": "MANUAL_REVIEW",
+            "rules": [
+                "MB-R173"
+            ],
+            "note": "A dedicated human-review rule requests implementation evidence and a reviewer conclusion."
+        },
+        {
+            "id": "7.1.3",
+            "title": "Federated-session inventory",
+            "status": "CONTEXT_REQUIRED",
+            "rules": [
+                "MB-R236"
+            ],
+            "note": "A conditional human-review rule is activated only when capability \"federated_identity\" is enabled.",
+            "applicability": {
+                "capability": "federated_identity",
+                "default": "CONTEXT_REQUIRED"
+            }
+        },
+        {
+            "id": "7.3.1",
+            "title": "Inactivity timeout",
+            "status": "PARTIALLY_AUTOMATED",
+            "rules": [
+                "MB-R009"
+            ],
+            "note": "Existing Magebean rules provide useful evidence but do not prove the full ASVS requirement."
+        },
+        {
+            "id": "7.3.2",
+            "title": "Absolute lifetime",
+            "status": "MANUAL_REVIEW",
+            "rules": [
+                "MB-R174"
+            ],
+            "note": "A dedicated human-review rule requests implementation evidence and a reviewer conclusion."
+        },
+        {
+            "id": "7.4.3",
+            "title": "Terminate other sessions after factor changes",
+            "status": "MANUAL_REVIEW",
+            "rules": [
+                "MB-R175"
+            ],
+            "note": "A dedicated human-review rule requests implementation evidence and a reviewer conclusion."
+        },
+        {
+            "id": "7.4.4",
+            "title": "Visible logout",
+            "status": "MANUAL_REVIEW",
+            "rules": [
+                "MB-R176"
+            ],
+            "note": "A dedicated human-review rule requests implementation evidence and a reviewer conclusion."
+        },
+        {
+            "id": "7.4.5",
+            "title": "Administrative session termination",
+            "status": "MANUAL_REVIEW",
+            "rules": [
+                "MB-R177"
+            ],
+            "note": "A dedicated human-review rule requests implementation evidence and a reviewer conclusion."
+        },
+        {
+            "id": "7.5.1",
+            "title": "Re-authenticate sensitive account changes",
+            "status": "MANUAL_REVIEW",
+            "rules": [
+                "MB-R178"
+            ],
+            "note": "A dedicated human-review rule requests implementation evidence and a reviewer conclusion."
+        },
+        {
+            "id": "7.5.2",
+            "title": "User session management",
+            "status": "MANUAL_REVIEW",
+            "rules": [
+                "MB-R179"
+            ],
+            "note": "A dedicated human-review rule requests implementation evidence and a reviewer conclusion."
+        },
+        {
+            "id": "7.6.1",
+            "title": "Federated lifetime enforcement",
+            "status": "CONTEXT_REQUIRED",
+            "rules": [
+                "MB-R237"
+            ],
+            "note": "A conditional human-review rule is activated only when capability \"federated_identity\" is enabled.",
+            "applicability": {
+                "capability": "federated_identity",
+                "default": "CONTEXT_REQUIRED"
+            }
+        },
+        {
+            "id": "7.6.2",
+            "title": "User-initiated sessions",
+            "status": "MANUAL_REVIEW",
+            "rules": [
+                "MB-R180"
+            ],
+            "note": "A dedicated human-review rule requests implementation evidence and a reviewer conclusion."
+        },
+        {
+            "id": "8.1.2",
+            "title": "Field-level authorization rules",
+            "status": "MANUAL_REVIEW",
+            "rules": [
+                "MB-R181"
+            ],
+            "note": "A dedicated human-review rule requests implementation evidence and a reviewer conclusion."
+        },
+        {
+            "id": "8.2.3",
+            "title": "Field-level enforcement",
+            "status": "PARTIALLY_AUTOMATED",
+            "rules": [
+                "MB-R094",
+                "MB-R099",
+                "MB-R100",
+                "MB-R101"
+            ],
+            "note": "Existing Magebean rules provide useful evidence but do not prove the full ASVS requirement."
+        },
+        {
+            "id": "8.4.1",
+            "title": "Tenant isolation",
+            "status": "CONTEXT_REQUIRED",
+            "rules": [
+                "MB-R238"
+            ],
+            "note": "A conditional human-review rule is activated only when capability \"multi_tenant\" is enabled.",
+            "applicability": {
+                "capability": "multi_tenant",
+                "default": "CONTEXT_REQUIRED"
+            }
+        },
+        {
+            "id": "9.2.2",
+            "title": "Token type and purpose",
+            "status": "CONTEXT_REQUIRED",
+            "rules": [
+                "MB-R239"
+            ],
+            "note": "A conditional human-review rule is activated only when capability \"self_contained_tokens\" is enabled.",
+            "applicability": {
+                "capability": "self_contained_tokens",
+                "default": "CONTEXT_REQUIRED"
+            }
+        },
+        {
+            "id": "9.2.3",
+            "title": "Audience validation",
+            "status": "CONTEXT_REQUIRED",
+            "rules": [
+                "MB-R240"
+            ],
+            "note": "A conditional human-review rule is activated only when capability \"self_contained_tokens\" is enabled.",
+            "applicability": {
+                "capability": "self_contained_tokens",
+                "default": "CONTEXT_REQUIRED"
+            }
+        },
+        {
+            "id": "9.2.4",
+            "title": "Audience restriction across services",
+            "status": "CONTEXT_REQUIRED",
+            "rules": [
+                "MB-R241"
+            ],
+            "note": "A conditional human-review rule is activated only when capability \"self_contained_tokens\" is enabled.",
+            "applicability": {
+                "capability": "self_contained_tokens",
+                "default": "CONTEXT_REQUIRED"
+            }
+        },
+        {
+            "id": "10.1.1",
+            "title": "Token minimization",
+            "status": "CONTEXT_REQUIRED",
+            "rules": [
+                "MB-R242"
+            ],
+            "note": "A conditional human-review rule is activated only when capability \"oauth_oidc\" is enabled.",
+            "applicability": {
+                "capability": "oauth_oidc",
+                "default": "CONTEXT_REQUIRED"
+            }
+        },
+        {
+            "id": "10.1.2",
+            "title": "Bind authorization transaction",
+            "status": "CONTEXT_REQUIRED",
+            "rules": [
+                "MB-R243"
+            ],
+            "note": "A conditional human-review rule is activated only when capability \"oauth_oidc\" is enabled.",
+            "applicability": {
+                "capability": "oauth_oidc",
+                "default": "CONTEXT_REQUIRED"
+            }
+        },
+        {
+            "id": "10.2.1",
+            "title": "Code-flow CSRF defense",
+            "status": "CONTEXT_REQUIRED",
+            "rules": [
+                "MB-R244"
+            ],
+            "note": "A conditional human-review rule is activated only when capability \"oauth_oidc\" is enabled.",
+            "applicability": {
+                "capability": "oauth_oidc",
+                "default": "CONTEXT_REQUIRED"
+            }
+        },
+        {
+            "id": "10.2.2",
+            "title": "Mix-up attack defense",
+            "status": "CONTEXT_REQUIRED",
+            "rules": [
+                "MB-R245"
+            ],
+            "note": "A conditional human-review rule is activated only when capability \"oauth_oidc\" is enabled.",
+            "applicability": {
+                "capability": "oauth_oidc",
+                "default": "CONTEXT_REQUIRED"
+            }
+        },
+        {
+            "id": "10.3.1",
+            "title": "Access-token audience",
+            "status": "CONTEXT_REQUIRED",
+            "rules": [
+                "MB-R246"
+            ],
+            "note": "A conditional human-review rule is activated only when capability \"oauth_oidc\" is enabled.",
+            "applicability": {
+                "capability": "oauth_oidc",
+                "default": "CONTEXT_REQUIRED"
+            }
+        },
+        {
+            "id": "10.3.2",
+            "title": "Delegated authorization claims",
+            "status": "CONTEXT_REQUIRED",
+            "rules": [
+                "MB-R247"
+            ],
+            "note": "A conditional human-review rule is activated only when capability \"oauth_oidc\" is enabled.",
+            "applicability": {
+                "capability": "oauth_oidc",
+                "default": "CONTEXT_REQUIRED"
+            }
+        },
+        {
+            "id": "10.3.3",
+            "title": "Stable user identity",
+            "status": "CONTEXT_REQUIRED",
+            "rules": [
+                "MB-R248"
+            ],
+            "note": "A conditional human-review rule is activated only when capability \"oauth_oidc\" is enabled.",
+            "applicability": {
+                "capability": "oauth_oidc",
+                "default": "CONTEXT_REQUIRED"
+            }
+        },
+        {
+            "id": "10.3.4",
+            "title": "Authentication strength and freshness",
+            "status": "CONTEXT_REQUIRED",
+            "rules": [
+                "MB-R249"
+            ],
+            "note": "A conditional human-review rule is activated only when capability \"oauth_oidc\" is enabled.",
+            "applicability": {
+                "capability": "oauth_oidc",
+                "default": "CONTEXT_REQUIRED"
+            }
+        },
+        {
+            "id": "10.4.6",
+            "title": "PKCE enforcement",
+            "status": "CONTEXT_REQUIRED",
+            "rules": [
+                "MB-R250"
+            ],
+            "note": "A conditional human-review rule is activated only when capability \"oauth_oidc\" is enabled.",
+            "applicability": {
+                "capability": "oauth_oidc",
+                "default": "CONTEXT_REQUIRED"
+            }
+        },
+        {
+            "id": "10.4.7",
+            "title": "Dynamic-client registration safety",
+            "status": "CONTEXT_REQUIRED",
+            "rules": [
+                "MB-R251"
+            ],
+            "note": "A conditional human-review rule is activated only when capability \"oauth_oidc\" is enabled.",
+            "applicability": {
+                "capability": "oauth_oidc",
+                "default": "CONTEXT_REQUIRED"
+            }
+        },
+        {
+            "id": "10.4.8",
+            "title": "Refresh-token expiration",
+            "status": "CONTEXT_REQUIRED",
+            "rules": [
+                "MB-R252"
+            ],
+            "note": "A conditional human-review rule is activated only when capability \"oauth_oidc\" is enabled.",
+            "applicability": {
+                "capability": "oauth_oidc",
+                "default": "CONTEXT_REQUIRED"
+            }
+        },
+        {
+            "id": "10.4.9",
+            "title": "Token revocation",
+            "status": "CONTEXT_REQUIRED",
+            "rules": [
+                "MB-R253"
+            ],
+            "note": "A conditional human-review rule is activated only when capability \"oauth_oidc\" is enabled.",
+            "applicability": {
+                "capability": "oauth_oidc",
+                "default": "CONTEXT_REQUIRED"
+            }
+        },
+        {
+            "id": "10.4.10",
+            "title": "Confidential-client authentication",
+            "status": "CONTEXT_REQUIRED",
+            "rules": [
+                "MB-R254"
+            ],
+            "note": "A conditional human-review rule is activated only when capability \"oauth_oidc\" is enabled.",
+            "applicability": {
+                "capability": "oauth_oidc",
+                "default": "CONTEXT_REQUIRED"
+            }
+        },
+        {
+            "id": "10.4.11",
+            "title": "Least OAuth scopes",
+            "status": "CONTEXT_REQUIRED",
+            "rules": [
+                "MB-R255"
+            ],
+            "note": "A conditional human-review rule is activated only when capability \"oauth_oidc\" is enabled.",
+            "applicability": {
+                "capability": "oauth_oidc",
+                "default": "CONTEXT_REQUIRED"
+            }
+        },
+        {
+            "id": "10.5.1",
+            "title": "ID Token replay defense",
+            "status": "CONTEXT_REQUIRED",
+            "rules": [
+                "MB-R256"
+            ],
+            "note": "A conditional human-review rule is activated only when capability \"oauth_oidc\" is enabled.",
+            "applicability": {
+                "capability": "oauth_oidc",
+                "default": "CONTEXT_REQUIRED"
+            }
+        },
+        {
+            "id": "10.5.2",
+            "title": "Stable OIDC identity",
+            "status": "CONTEXT_REQUIRED",
+            "rules": [
+                "MB-R257"
+            ],
+            "note": "A conditional human-review rule is activated only when capability \"oauth_oidc\" is enabled.",
+            "applicability": {
+                "capability": "oauth_oidc",
+                "default": "CONTEXT_REQUIRED"
+            }
+        },
+        {
+            "id": "10.5.3",
+            "title": "Issuer metadata validation",
+            "status": "CONTEXT_REQUIRED",
+            "rules": [
+                "MB-R258"
+            ],
+            "note": "A conditional human-review rule is activated only when capability \"oauth_oidc\" is enabled.",
+            "applicability": {
+                "capability": "oauth_oidc",
+                "default": "CONTEXT_REQUIRED"
+            }
+        },
+        {
+            "id": "10.5.4",
+            "title": "ID Token audience",
+            "status": "CONTEXT_REQUIRED",
+            "rules": [
+                "MB-R259"
+            ],
+            "note": "A conditional human-review rule is activated only when capability \"oauth_oidc\" is enabled.",
+            "applicability": {
+                "capability": "oauth_oidc",
+                "default": "CONTEXT_REQUIRED"
+            }
+        },
+        {
+            "id": "10.5.5",
+            "title": "Back-channel logout validation",
+            "status": "CONTEXT_REQUIRED",
+            "rules": [
+                "MB-R260"
+            ],
+            "note": "A conditional human-review rule is activated only when capability \"oauth_oidc\" is enabled.",
+            "applicability": {
+                "capability": "oauth_oidc",
+                "default": "CONTEXT_REQUIRED"
+            }
+        },
+        {
+            "id": "10.6.1",
+            "title": "Safe response types",
+            "status": "CONTEXT_REQUIRED",
+            "rules": [
+                "MB-R261"
+            ],
+            "note": "A conditional human-review rule is activated only when capability \"oauth_oidc\" is enabled.",
+            "applicability": {
+                "capability": "oauth_oidc",
+                "default": "CONTEXT_REQUIRED"
+            }
+        },
+        {
+            "id": "10.6.2",
+            "title": "Logout DoS protection",
+            "status": "CONTEXT_REQUIRED",
+            "rules": [
+                "MB-R262"
+            ],
+            "note": "A conditional human-review rule is activated only when capability \"oauth_oidc\" is enabled.",
+            "applicability": {
+                "capability": "oauth_oidc",
+                "default": "CONTEXT_REQUIRED"
+            }
+        },
+        {
+            "id": "10.7.1",
+            "title": "Consent per authorization",
+            "status": "CONTEXT_REQUIRED",
+            "rules": [
+                "MB-R263"
+            ],
+            "note": "A conditional human-review rule is activated only when capability \"oauth_oidc\" is enabled.",
+            "applicability": {
+                "capability": "oauth_oidc",
+                "default": "CONTEXT_REQUIRED"
+            }
+        },
+        {
+            "id": "10.7.2",
+            "title": "Informed consent",
+            "status": "CONTEXT_REQUIRED",
+            "rules": [
+                "MB-R264"
+            ],
+            "note": "A conditional human-review rule is activated only when capability \"oauth_oidc\" is enabled.",
+            "applicability": {
+                "capability": "oauth_oidc",
+                "default": "CONTEXT_REQUIRED"
+            }
+        },
+        {
+            "id": "10.7.3",
+            "title": "Consent management",
+            "status": "CONTEXT_REQUIRED",
+            "rules": [
+                "MB-R265"
+            ],
+            "note": "A conditional human-review rule is activated only when capability \"oauth_oidc\" is enabled.",
+            "applicability": {
+                "capability": "oauth_oidc",
+                "default": "CONTEXT_REQUIRED"
+            }
+        },
+        {
+            "id": "11.1.1",
+            "title": "Key-management policy",
+            "status": "MANUAL_REVIEW",
+            "rules": [
+                "MB-R182"
+            ],
+            "note": "A dedicated human-review rule requests implementation evidence and a reviewer conclusion."
+        },
+        {
+            "id": "11.1.2",
+            "title": "Cryptographic inventory",
+            "status": "MANUAL_REVIEW",
+            "rules": [
+                "MB-R183"
+            ],
+            "note": "A dedicated human-review rule requests implementation evidence and a reviewer conclusion."
+        },
+        {
+            "id": "11.2.1",
+            "title": "Validated implementations",
+            "status": "PARTIALLY_AUTOMATED",
+            "rules": [
+                "MB-R025"
+            ],
+            "note": "Existing Magebean rules provide useful evidence but do not prove the full ASVS requirement."
+        },
+        {
+            "id": "11.2.2",
+            "title": "Crypto agility",
+            "status": "MANUAL_REVIEW",
+            "rules": [
+                "MB-R184"
+            ],
+            "note": "A dedicated human-review rule requests implementation evidence and a reviewer conclusion."
+        },
+        {
+            "id": "11.2.3",
+            "title": "Minimum security strength",
+            "status": "PARTIALLY_AUTOMATED",
+            "rules": [
+                "MB-R132"
+            ],
+            "note": "Existing Magebean rules provide useful evidence but do not prove the full ASVS requirement."
+        },
+        {
+            "id": "11.3.3",
+            "title": "Authenticated encryption",
+            "status": "PARTIALLY_AUTOMATED",
+            "rules": [
+                "MB-R132"
+            ],
+            "note": "Existing Magebean rules provide useful evidence but do not prove the full ASVS requirement."
+        },
+        {
+            "id": "11.4.2",
+            "title": "Password hashing",
+            "status": "PARTIALLY_AUTOMATED",
+            "rules": [
+                "MB-R025"
+            ],
+            "note": "Existing Magebean rules provide useful evidence but do not prove the full ASVS requirement."
+        },
+        {
+            "id": "11.4.3",
+            "title": "Hash strength",
+            "status": "MANUAL_REVIEW",
+            "rules": [
+                "MB-R185"
+            ],
+            "note": "A dedicated human-review rule requests implementation evidence and a reviewer conclusion."
+        },
+        {
+            "id": "11.4.4",
+            "title": "Password-derived keys",
+            "status": "MANUAL_REVIEW",
+            "rules": [
+                "MB-R186"
+            ],
+            "note": "A dedicated human-review rule requests implementation evidence and a reviewer conclusion."
+        },
+        {
+            "id": "11.5.1",
+            "title": "Secure random values",
+            "status": "PARTIALLY_AUTOMATED",
+            "rules": [
+                "MB-R023"
+            ],
+            "note": "Existing Magebean rules provide useful evidence but do not prove the full ASVS requirement."
+        },
+        {
+            "id": "11.6.1",
+            "title": "Approved public-key operations",
+            "status": "PARTIALLY_AUTOMATED",
+            "rules": [
+                "MB-R132"
+            ],
+            "note": "Existing Magebean rules provide useful evidence but do not prove the full ASVS requirement."
+        },
+        {
+            "id": "12.1.2",
+            "title": "Recommended cipher suites",
+            "status": "PARTIALLY_AUTOMATED",
+            "rules": [
+                "MB-R028",
+                "MB-R078"
+            ],
+            "note": "Existing Magebean rules provide useful evidence but do not prove the full ASVS requirement."
+        },
+        {
+            "id": "12.1.3",
+            "title": "mTLS certificate trust",
+            "status": "MANUAL_REVIEW",
+            "rules": [
+                "MB-R187"
+            ],
+            "note": "A dedicated human-review rule requests implementation evidence and a reviewer conclusion."
+        },
+        {
+            "id": "12.3.1",
+            "title": "Encrypt all service connections",
+            "status": "PARTIALLY_AUTOMATED",
+            "rules": [
+                "MB-R073",
+                "MB-R076",
+                "MB-R078"
+            ],
+            "note": "Existing Magebean rules provide useful evidence but do not prove the full ASVS requirement."
+        },
+        {
+            "id": "12.3.2",
+            "title": "Server-certificate validation",
+            "status": "PARTIALLY_AUTOMATED",
+            "rules": [
+                "MB-R135"
+            ],
+            "note": "Existing Magebean rules provide useful evidence but do not prove the full ASVS requirement."
+        },
+        {
+            "id": "12.3.3",
+            "title": "Internal HTTPS",
+            "status": "PARTIALLY_AUTOMATED",
+            "rules": [
+                "MB-R073"
+            ],
+            "note": "Existing Magebean rules provide useful evidence but do not prove the full ASVS requirement."
+        },
+        {
+            "id": "12.3.4",
+            "title": "Internal certificate trust",
+            "status": "MANUAL_REVIEW",
+            "rules": [
+                "MB-R188"
+            ],
+            "note": "A dedicated human-review rule requests implementation evidence and a reviewer conclusion."
+        },
+        {
+            "id": "13.1.1",
+            "title": "Communication inventory",
+            "status": "MANUAL_REVIEW",
+            "rules": [
+                "MB-R189"
+            ],
+            "note": "A dedicated human-review rule requests implementation evidence and a reviewer conclusion."
+        },
+        {
+            "id": "13.2.1",
+            "title": "Backend authentication",
+            "status": "MANUAL_REVIEW",
+            "rules": [
+                "MB-R190"
+            ],
+            "note": "A dedicated human-review rule requests implementation evidence and a reviewer conclusion."
+        },
+        {
+            "id": "13.2.2",
+            "title": "Least-privilege backend accounts",
+            "status": "PARTIALLY_AUTOMATED",
+            "rules": [
+                "MB-R081"
+            ],
+            "note": "Existing Magebean rules provide useful evidence but do not prove the full ASVS requirement."
+        },
+        {
+            "id": "13.2.3",
+            "title": "No default service credentials",
+            "status": "PARTIALLY_AUTOMATED",
+            "rules": [
+                "MB-R097"
+            ],
+            "note": "Existing Magebean rules provide useful evidence but do not prove the full ASVS requirement."
+        },
+        {
+            "id": "13.2.4",
+            "title": "Outbound communication allowlist",
+            "status": "PARTIALLY_AUTOMATED",
+            "rules": [
+                "MB-R076"
+            ],
+            "note": "Existing Magebean rules provide useful evidence but do not prove the full ASVS requirement."
+        },
+        {
+            "id": "13.2.5",
+            "title": "Server-side resource allowlist",
+            "status": "PARTIALLY_AUTOMATED",
+            "rules": [
+                "MB-R076"
+            ],
+            "note": "Existing Magebean rules provide useful evidence but do not prove the full ASVS requirement."
+        },
+        {
+            "id": "13.3.1",
+            "title": "Secrets management",
+            "status": "PARTIALLY_AUTOMATED",
+            "rules": [
+                "MB-R072",
+                "MB-R079",
+                "MB-R097"
+            ],
+            "note": "Existing Magebean rules provide useful evidence but do not prove the full ASVS requirement."
+        },
+        {
+            "id": "13.3.2",
+            "title": "Least-privilege secret access",
+            "status": "PARTIALLY_AUTOMATED",
+            "rules": [
+                "MB-R081"
+            ],
+            "note": "Existing Magebean rules provide useful evidence but do not prove the full ASVS requirement."
+        },
+        {
+            "id": "13.4.2",
+            "title": "Disable debug mode",
+            "status": "PARTIALLY_AUTOMATED",
+            "rules": [
+                "MB-R031",
+                "MB-R032",
+                "MB-R036",
+                "MB-R044",
+                "MB-R074"
+            ],
+            "note": "Existing Magebean rules provide useful evidence but do not prove the full ASVS requirement."
+        },
+        {
+            "id": "13.4.3",
+            "title": "Disable directory listing",
+            "status": "AUTOMATED",
+            "rules": [
+                "MB-R005"
+            ],
+            "note": "Existing Magebean rule directly checks this production configuration."
+        },
+        {
+            "id": "13.4.4",
+            "title": "Disable HTTP TRACE",
+            "status": "PARTIALLY_AUTOMATED",
+            "rules": [
+                "MB-R191",
+                "MB-R274"
+            ],
+            "note": "Automated endpoint evidence is combined with existing code/configuration evidence or human review; complete deployment coverage still requires review."
+        },
+        {
+            "id": "13.4.5",
+            "title": "Protect docs and monitoring endpoints",
+            "status": "PARTIALLY_AUTOMATED",
+            "rules": [
+                "MB-R042",
+                "MB-R095"
+            ],
+            "note": "Existing Magebean rules provide useful evidence but do not prove the full ASVS requirement."
+        },
+        {
+            "id": "14.1.1",
+            "title": "Sensitive-data inventory",
+            "status": "MANUAL_REVIEW",
+            "rules": [
+                "MB-R192"
+            ],
+            "note": "A dedicated human-review rule requests implementation evidence and a reviewer conclusion."
+        },
+        {
+            "id": "14.1.2",
+            "title": "Protection requirements",
+            "status": "MANUAL_REVIEW",
+            "rules": [
+                "MB-R193"
+            ],
+            "note": "A dedicated human-review rule requests implementation evidence and a reviewer conclusion."
+        },
+        {
+            "id": "14.2.2",
+            "title": "Server-side cache protection",
+            "status": "MANUAL_REVIEW",
+            "rules": [
+                "MB-R194"
+            ],
+            "note": "A dedicated human-review rule requests implementation evidence and a reviewer conclusion."
+        },
+        {
+            "id": "14.2.3",
+            "title": "No disclosure to untrusted parties",
+            "status": "PARTIALLY_AUTOMATED",
+            "rules": [
+                "MB-R077"
+            ],
+            "note": "Existing Magebean rules provide useful evidence but do not prove the full ASVS requirement."
+        },
+        {
+            "id": "14.2.4",
+            "title": "Enforce data controls",
+            "status": "PARTIALLY_AUTOMATED",
+            "rules": [
+                "MB-R024",
+                "MB-R045",
+                "MB-R077",
+                "MB-R083"
+            ],
+            "note": "Existing Magebean rules provide useful evidence but do not prove the full ASVS requirement."
+        },
+        {
+            "id": "14.3.2",
+            "title": "Browser anti-caching",
+            "status": "MANUAL_REVIEW",
+            "rules": [
+                "MB-R195"
+            ],
+            "note": "A dedicated human-review rule requests implementation evidence and a reviewer conclusion."
+        },
+        {
+            "id": "14.3.3",
+            "title": "Browser-storage minimization",
+            "status": "MANUAL_REVIEW",
+            "rules": [
+                "MB-R196"
+            ],
+            "note": "A dedicated human-review rule requests implementation evidence and a reviewer conclusion."
+        },
+        {
+            "id": "15.1.2",
+            "title": "SBOM and trusted repositories",
+            "status": "PARTIALLY_AUTOMATED",
+            "rules": [
+                "MB-R049",
+                "MB-R055",
+                "MB-R058",
+                "MB-R060",
+                "MB-R063",
+                "MB-R068",
+                "MB-R070"
+            ],
+            "note": "Existing Magebean rules provide useful evidence but do not prove the full ASVS requirement."
+        },
+        {
+            "id": "15.1.3",
+            "title": "Resource-intensive functionality",
+            "status": "MANUAL_REVIEW",
+            "rules": [
+                "MB-R197"
+            ],
+            "note": "A dedicated human-review rule requests implementation evidence and a reviewer conclusion."
+        },
+        {
+            "id": "15.2.2",
+            "title": "Availability defenses",
+            "status": "MANUAL_REVIEW",
+            "rules": [
+                "MB-R198"
+            ],
+            "note": "A dedicated human-review rule requests implementation evidence and a reviewer conclusion."
+        },
+        {
+            "id": "15.2.3",
+            "title": "Production feature minimization",
+            "status": "PARTIALLY_AUTOMATED",
+            "rules": [
+                "MB-R031",
+                "MB-R032",
+                "MB-R036",
+                "MB-R044"
+            ],
+            "note": "Existing Magebean rules provide useful evidence but do not prove the full ASVS requirement."
+        },
+        {
+            "id": "15.3.2",
+            "title": "External redirect handling",
+            "status": "MANUAL_REVIEW",
+            "rules": [
+                "MB-R199"
+            ],
+            "note": "A dedicated human-review rule requests implementation evidence and a reviewer conclusion."
+        },
+        {
+            "id": "15.3.3",
+            "title": "Mass-assignment protection",
+            "status": "MANUAL_REVIEW",
+            "rules": [
+                "MB-R200"
+            ],
+            "note": "A dedicated human-review rule requests implementation evidence and a reviewer conclusion."
+        },
+        {
+            "id": "15.3.4",
+            "title": "Trusted client IP propagation",
+            "status": "MANUAL_REVIEW",
+            "rules": [
+                "MB-R201"
+            ],
+            "note": "A dedicated human-review rule requests implementation evidence and a reviewer conclusion."
+        },
+        {
+            "id": "15.3.5",
+            "title": "Strict typing and comparison",
+            "status": "MANUAL_REVIEW",
+            "rules": [
+                "MB-R202"
+            ],
+            "note": "A dedicated human-review rule requests implementation evidence and a reviewer conclusion."
+        },
+        {
+            "id": "15.3.6",
+            "title": "Prototype-pollution defense",
+            "status": "MANUAL_REVIEW",
+            "rules": [
+                "MB-R203"
+            ],
+            "note": "A dedicated human-review rule requests implementation evidence and a reviewer conclusion."
+        },
+        {
+            "id": "15.3.7",
+            "title": "HTTP parameter pollution",
+            "status": "MANUAL_REVIEW",
+            "rules": [
+                "MB-R204"
+            ],
+            "note": "A dedicated human-review rule requests implementation evidence and a reviewer conclusion."
+        },
+        {
+            "id": "16.1.1",
+            "title": "Logging inventory",
+            "status": "MANUAL_REVIEW",
+            "rules": [
+                "MB-R205"
+            ],
+            "note": "A dedicated human-review rule requests implementation evidence and a reviewer conclusion."
+        },
+        {
+            "id": "16.2.1",
+            "title": "Investigation metadata",
+            "status": "MANUAL_REVIEW",
+            "rules": [
+                "MB-R206"
+            ],
+            "note": "A dedicated human-review rule requests implementation evidence and a reviewer conclusion."
+        },
+        {
+            "id": "16.2.2",
+            "title": "Time synchronization",
+            "status": "MANUAL_REVIEW",
+            "rules": [
+                "MB-R207"
+            ],
+            "note": "A dedicated human-review rule requests implementation evidence and a reviewer conclusion."
+        },
+        {
+            "id": "16.2.3",
+            "title": "Approved log destinations",
+            "status": "MANUAL_REVIEW",
+            "rules": [
+                "MB-R208"
+            ],
+            "note": "A dedicated human-review rule requests implementation evidence and a reviewer conclusion."
+        },
+        {
+            "id": "16.2.4",
+            "title": "Correlatable format",
+            "status": "MANUAL_REVIEW",
+            "rules": [
+                "MB-R209"
+            ],
+            "note": "A dedicated human-review rule requests implementation evidence and a reviewer conclusion."
+        },
+        {
+            "id": "16.2.5",
+            "title": "Sensitive-data logging",
+            "status": "PARTIALLY_AUTOMATED",
+            "rules": [
+                "MB-R024",
+                "MB-R045",
+                "MB-R080",
+                "MB-R084"
+            ],
+            "note": "Existing Magebean rules provide useful evidence but do not prove the full ASVS requirement."
+        },
+        {
+            "id": "16.3.1",
+            "title": "Authentication logging",
+            "status": "MANUAL_REVIEW",
+            "rules": [
+                "MB-R210"
+            ],
+            "note": "A dedicated human-review rule requests implementation evidence and a reviewer conclusion."
+        },
+        {
+            "id": "16.3.2",
+            "title": "Authorization logging",
+            "status": "MANUAL_REVIEW",
+            "rules": [
+                "MB-R211"
+            ],
+            "note": "A dedicated human-review rule requests implementation evidence and a reviewer conclusion."
+        },
+        {
+            "id": "16.3.3",
+            "title": "Security-control events",
+            "status": "MANUAL_REVIEW",
+            "rules": [
+                "MB-R212"
+            ],
+            "note": "A dedicated human-review rule requests implementation evidence and a reviewer conclusion."
+        },
+        {
+            "id": "16.3.4",
+            "title": "Error and control-failure logging",
+            "status": "MANUAL_REVIEW",
+            "rules": [
+                "MB-R213"
+            ],
+            "note": "A dedicated human-review rule requests implementation evidence and a reviewer conclusion."
+        },
+        {
+            "id": "16.4.1",
+            "title": "Log-injection prevention",
+            "status": "MANUAL_REVIEW",
+            "rules": [
+                "MB-R214"
+            ],
+            "note": "A dedicated human-review rule requests implementation evidence and a reviewer conclusion."
+        },
+        {
+            "id": "16.4.2",
+            "title": "Log integrity and access",
+            "status": "PARTIALLY_AUTOMATED",
+            "rules": [
+                "MB-R001",
+                "MB-R002",
+                "MB-R004",
+                "MB-R043"
+            ],
+            "note": "Existing Magebean rules provide useful evidence but do not prove the full ASVS requirement."
+        },
+        {
+            "id": "16.4.3",
+            "title": "Separate log system",
+            "status": "MANUAL_REVIEW",
+            "rules": [
+                "MB-R215"
+            ],
+            "note": "A dedicated human-review rule requests implementation evidence and a reviewer conclusion."
+        },
+        {
+            "id": "16.5.1",
+            "title": "Generic error responses",
+            "status": "PARTIALLY_AUTOMATED",
+            "rules": [
+                "MB-R033"
+            ],
+            "note": "Existing Magebean rules provide useful evidence but do not prove the full ASVS requirement."
+        },
+        {
+            "id": "16.5.2",
+            "title": "Secure external-service failure",
+            "status": "MANUAL_REVIEW",
+            "rules": [
+                "MB-R216"
+            ],
+            "note": "A dedicated human-review rule requests implementation evidence and a reviewer conclusion."
+        },
+        {
+            "id": "16.5.3",
+            "title": "Fail securely",
+            "status": "MANUAL_REVIEW",
+            "rules": [
+                "MB-R217"
+            ],
+            "note": "A dedicated human-review rule requests implementation evidence and a reviewer conclusion."
+        },
+        {
+            "id": "17.1.1",
+            "title": "TURN destination restrictions",
+            "status": "CONTEXT_REQUIRED",
+            "rules": [
+                "MB-R266"
+            ],
+            "note": "A conditional human-review rule is activated only when capability \"webrtc\" is enabled.",
+            "applicability": {
+                "capability": "webrtc",
+                "default": "CONTEXT_REQUIRED"
+            }
+        },
+        {
+            "id": "17.2.1",
+            "title": "DTLS key management",
+            "status": "CONTEXT_REQUIRED",
+            "rules": [
+                "MB-R267"
+            ],
+            "note": "A conditional human-review rule is activated only when capability \"webrtc\" is enabled.",
+            "applicability": {
+                "capability": "webrtc",
+                "default": "CONTEXT_REQUIRED"
+            }
+        },
+        {
+            "id": "17.2.2",
+            "title": "Secure DTLS-SRTP configuration",
+            "status": "CONTEXT_REQUIRED",
+            "rules": [
+                "MB-R268"
+            ],
+            "note": "A conditional human-review rule is activated only when capability \"webrtc\" is enabled.",
+            "applicability": {
+                "capability": "webrtc",
+                "default": "CONTEXT_REQUIRED"
+            }
+        },
+        {
+            "id": "17.2.3",
+            "title": "SRTP authentication",
+            "status": "CONTEXT_REQUIRED",
+            "rules": [
+                "MB-R269"
+            ],
+            "note": "A conditional human-review rule is activated only when capability \"webrtc\" is enabled.",
+            "applicability": {
+                "capability": "webrtc",
+                "default": "CONTEXT_REQUIRED"
+            }
+        },
+        {
+            "id": "17.2.4",
+            "title": "Malformed media resilience",
+            "status": "CONTEXT_REQUIRED",
+            "rules": [
+                "MB-R270"
+            ],
+            "note": "A conditional human-review rule is activated only when capability \"webrtc\" is enabled.",
+            "applicability": {
+                "capability": "webrtc",
+                "default": "CONTEXT_REQUIRED"
+            }
+        },
+        {
+            "id": "17.3.1",
+            "title": "Signaling flood protection",
+            "status": "CONTEXT_REQUIRED",
+            "rules": [
+                "MB-R271"
+            ],
+            "note": "A conditional human-review rule is activated only when capability \"webrtc\" is enabled.",
+            "applicability": {
+                "capability": "webrtc",
+                "default": "CONTEXT_REQUIRED"
+            }
+        },
+        {
+            "id": "17.3.2",
+            "title": "Malformed signaling resilience",
+            "status": "CONTEXT_REQUIRED",
+            "rules": [
+                "MB-R272"
+            ],
+            "note": "A conditional human-review rule is activated only when capability \"webrtc\" is enabled.",
+            "applicability": {
+                "capability": "webrtc",
+                "default": "CONTEXT_REQUIRED"
+            }
+        }
+    ]
+}

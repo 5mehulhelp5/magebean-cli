@@ -95,7 +95,7 @@ final class HttpCheck
         if ($ok) $this->transportOk++;
     }
 
-    private function fetch(string $url, string $method = 'GET', array $headers = [], int $timeoutMs = 8000, bool $follow = true): array
+    private function fetch(string $url, string $method = 'GET', array $headers = [], int $timeoutMs = 8000, bool $follow = true, ?string $requestBody = null): array
     {
         $ctxHeaders = [];
         foreach ($headers as $k => $v) $ctxHeaders[] = is_int($k) ? $v : ($k . ': ' . $v);
@@ -112,6 +112,7 @@ final class HttpCheck
             curl_setopt($ch, CURLOPT_MAXREDIRS, 5);
             curl_setopt($ch, CURLOPT_USERAGENT, 'Magebean-CLI/1.0');
             if ($ctxHeaders) curl_setopt($ch, CURLOPT_HTTPHEADER, $ctxHeaders);
+            if ($requestBody !== null) curl_setopt($ch, CURLOPT_POSTFIELDS, $requestBody);
             $resp = curl_exec($ch);
             if ($resp === false) {
                 $err = curl_error($ch);
@@ -137,6 +138,7 @@ final class HttpCheck
                 'header'        => implode("\r\n", $ctxHeaders),
                 'ignore_errors' => true,
                 'timeout'       => max(1, (int)ceil($timeoutMs / 1000)),
+                'content'       => $requestBody ?? '',
             ]
         ];
         $context = stream_context_create($opts);
@@ -900,7 +902,7 @@ final class HttpCheck
     private function headerIn(array $args): array
     {
         $base = $this->baseUrl();
-        if ($base === '') return [false, 'Missing URL in context'];
+        if ($base === '') return [null, '[UNKNOWN] Missing URL in context', []];
         $header = strtolower((string)($args['header'] ?? ''));
         $allowed = (array)($args['allowed'] ?? []);
         if ($header === '' || !$allowed) return [null, '[UNKNOWN] Missing header/allowed', []];
@@ -1183,11 +1185,12 @@ final class HttpCheck
         $url = rtrim($base, '/') . $path;
         $query = '{"query":"query IntrospectionQuery { __schema { types { name } } }"}';
         $headers = ['Content-Type: application/json'];
-        [$ok, $msg, $ev] = $this->fetch($url, 'POST', $headers, (int)($args['timeout_ms'] ?? 8000), false);
+        [$ok, $msg, $ev] = $this->fetch($url, 'POST', $headers, (int)($args['timeout_ms'] ?? 8000), false, $query);
         if ($ok === null) return [null, $msg, $ev];
         if (!$ok) return [null, '[UNKNOWN] GraphQL endpoint not responding', $ev];
         $body = (string)($ev['body'] ?? '');
-        $hasSchema = str_contains($body, '__schema');
+        $decoded = json_decode($body, true);
+        $hasSchema = is_array($decoded) && isset($decoded['data']['__schema']);
         return [!$hasSchema, !$hasSchema ? 'Introspection disabled' : 'Introspection enabled', $ev];
     }
 

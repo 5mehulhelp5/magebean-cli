@@ -67,6 +67,7 @@ final class HtmlReporter
                 'UNKNOWN' => 'status-unknown',
                 default => 'status-fail'
             };
+            $statusLabel = $status === 'MANUAL_REVIEW' ? 'HUMAN VERIFICATION REQUIRED' : $status;
             $userMsgRaw = (string)($f['message'] ?? '');
             if ($status === 'UNKNOWN' && trim($userMsgRaw) === '') {
                 $userMsgRaw = 'CVE file not found (requires --cve-data package)';
@@ -88,7 +89,7 @@ final class HtmlReporter
             $rows .= '<tr>'
                 . '<td><a href="https://magebean.com/baseline/' . $id . '" target="_blank">' . $id . '</a></td>'
                 . '<td>' . $severity . '</td>'
-                . '<td class="' . $statusClass . '">' . $status . '</td>'
+                . '<td class="' . $statusClass . '">' . $statusLabel . '</td>'
                 . '<td>' . implode('', $messageParts)
                 . '</td>'  /* Quan trọng: đóng ô Message trước khi thêm ô Details */
                 . ($this->showDetails ? '<td>' 

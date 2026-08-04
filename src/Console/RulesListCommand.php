@@ -19,15 +19,18 @@ List Magebean rules after applying a profile and optional control/severity filte
 
 PROFILES
   basic      Default; 21 basic production-readiness rules.
-  asvs-l1    60 OWASP ASVS 5.0 Level 1 mapped rules; partial automated coverage.
+  asvs-l1    32 rules by default; 60 with --include-manual-review.
+  asvs-l2    73 rules by default; manual and contextual rules are opt-in.
   owasp      77 application-security rules mapped to OWASP Top 10 2025.
   pci        69 PCI DSS v4.0.1 payment-readiness rules.
   hardening  89 deep production-hardening rules.
-  baseline   All 135 local catalog rules. Aliases: all, magebean.
+  baseline   110 automated rules by default; 275 including manual review. Aliases: all, magebean.
   FILE       Custom profile JSON path or a profile under .magebean/profiles.
 
 OPTIONS
   --profile=PROFILE|FILE       Select the profile. Default: basic.
+  --include-manual-review    Include human-review rules; excluded by default.
+  --capabilities=NAME,NAME    Include contextual rules for enabled application capabilities.
   --control=MB-Cxx,MB-Cxx     Keep only the listed controls.
   --severity=LEVEL             Keep low, medium, high, or critical rules.
   -h, --help                   Show this help.
@@ -41,6 +44,7 @@ OPTIONS
 EXAMPLES
   php magebean.phar rules:list
   php magebean.phar rules:list --profile=asvs-l1
+  php magebean.phar rules:list --profile=asvs-l2 --include-manual-review --capabilities=oauth_oidc
   php magebean.phar rules:list --profile=hardening
   php magebean.phar rules:list --profile=baseline --control=MB-C03
   php magebean.phar rules:list --profile=owasp --severity=critical
@@ -57,13 +61,18 @@ HELP;
             ->addUsage('--profile=baseline --control=MB-C03')
             ->addUsage('--profile=owasp --severity=critical')
             ->setHelp(self::HELP)
+            ->addOption('include-manual-review', null, InputOption::VALUE_NONE, 'Include human manual-review rules (excluded by default)')
+            ->addOption('capabilities', null, InputOption::VALUE_OPTIONAL, 'Comma list of application capabilities for contextual rules')
             ->addOption('control', null, InputOption::VALUE_OPTIONAL, 'Comma list of controls (e.g. MB-C01,MB-C02)')
-            ->addOption('profile', null, InputOption::VALUE_OPTIONAL, 'Profile: basic (default) | asvs-l1 | owasp | pci | hardening | baseline | custom JSON')
+            ->addOption('profile', null, InputOption::VALUE_OPTIONAL, 'Profile: basic (default) | asvs-l1 | asvs-l2 | owasp | pci | hardening | baseline | custom JSON')
             ->addOption('severity', null, InputOption::VALUE_OPTIONAL, 'low|medium|high|critical');
     }
     protected function execute(InputInterface $in, OutputInterface $out): int
     {
         $controlsOpt = (string)($in->getOption('control') ?? '');
+        $capabilitiesOpt = trim((string)($in->getOption('capabilities') ?? ''));
+        $includeManualReview = (bool)$in->getOption('include-manual-review');
+        $capabilities = $capabilitiesOpt === '' ? [] : array_fill_keys(array_filter(array_map('trim', explode(',', strtolower($capabilitiesOpt)))), true);
         $profileOpt = trim((string)($in->getOption('profile') ?? ''));
         if ($profileOpt === '') {
             $profileOpt = 'basic';
@@ -72,11 +81,17 @@ HELP;
         $pack = RulePackLoader::loadAll($controls);
         if ($profileOpt !== '' && !in_array(strtolower($profileOpt), ['baseline', 'all', 'magebean'], true)) {
             $profile = ProfileLoader::load($profileOpt, getcwd() ?: '');
-            $pack = ProfileLoader::apply($pack, $profile, $controls !== []);
+            $pack = ProfileLoader::apply($pack, $profile, $controls !== [], $capabilities);
             $out->writeln(sprintf(
                 '<info>Profile:</info> %s (%s)',
                 (string)($profile['id'] ?? $profileOpt),
                 (string)($profile['title'] ?? '')
+            ));
+        }
+        if (!$includeManualReview) {
+            $pack['rules'] = array_values(array_filter(
+                $pack['rules'] ?? [],
+                static fn(array $rule): bool => strtolower((string)($rule['verification'] ?? 'automated')) !== 'manual'
             ));
         }
         $sev = $in->getOption('severity');

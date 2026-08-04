@@ -66,14 +66,29 @@ When neither `--path` nor `--url` is supplied, Magebean searches for a Magento r
 | Profile | Rules | Purpose |
 |---|---:|---|
 | `basic` | 21 | Default fast, low-noise production security and operations check. |
-| `asvs-l1` | 60 | OWASP ASVS 5.0 Level 1 mapping with automated and manual-review rules. |
+| `asvs-l1` | 32 default / 60 with manual | Level 1 mapping; manual-review rules require `--include-manual-review`. |
+| `asvs-l2` | 73 default / 183 with manual | Cumulative Level 2 mapping; manual and contextual reviews are opt-in. |
 | `owasp` | 77 | Application-security checks mapped to OWASP Top 10 2025. |
 | `pci` | 69 | PCI DSS v4.0.1 payment-readiness checks; not a certification. |
 | `hardening` | 89 | Deep production, code, dependency, integration, and operations checks. |
-| `baseline` | 135 | Full local catalog. Aliases: `all`, `magebean`. |
+| `baseline` | 110 default / 275 with manual | Full local catalog. Aliases: `all`, `magebean`. |
 | `FILE` | Custom | JSON profile path or a profile in `.magebean/profiles`. |
 
 The `asvs-l1` mapping covers all 70 Level 1 requirements: 15 automated, 15 partially automated, 28 manual-review, and 12 currently without a mapped rule. This is an evidence-oriented scan profile, not an ASVS certification.
+
+The cumulative `asvs-l2` mapping covers 253 requirements. By default it selects 73 automated or partially automated rules. Add `--include-manual-review` to select 183 non-contextual rules. Set capabilities explicitly to activate relevant conditional reviews:
+
+```json
+{
+  "capabilities": {
+    "graphql": true,
+    "oauth_oidc": false,
+    "webrtc": false
+  }
+}
+```
+
+Manual reviews can be enabled with `--include-manual-review`. The same capabilities can be supplied for one scan with `--capabilities=graphql,oauth_oidc`. Unspecified or false capabilities do not activate contextual rules.
 
 If `--profile` is omitted, Magebean uses `basic`.
 
@@ -90,6 +105,8 @@ php magebean.phar scan --profile=basic
 | `--path=PATH` | Magento root. Omit to auto-detect it from the current directory. |
 | `--url=URL` | Absolute storefront URL. Selects Remote or Hybrid mode. |
 | `--profile=PROFILE\|FILE` | Built-in or custom profile. Default: `basic`. |
+| `--include-manual-review` | Include human manual-review rules; excluded by default. |
+| `--capabilities=NAME,...` | Enable capability-dependent profile rules for this scan. |
 | `--controls=MB-Cxx,...` | Restrict the loaded rule pack to control IDs. |
 | `--rules=MB-Rxxx,...` | Run listed rule IDs directly from the available catalog and bypass profile selection. |
 | `--exclude-rules=MB-Rxxx,...` | Remove listed rules after profile and project configuration. |

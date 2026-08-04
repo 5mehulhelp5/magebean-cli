@@ -35,7 +35,7 @@ final class CheckRegistry
 
         $registry->register('human_manual_review_required', static function (array $args): array {
             $requirement = trim((string)($args['requirement'] ?? ''));
-            $review = trim((string)($args['review'] ?? 'Human review and supporting evidence are required.'));
+            $review = trim((string)($args['review'] ?? 'MANDATORY HUMAN ASSESSMENT: Magebean CLI cannot determine or attest compliance for this requirement.'));
             $message = '[MANUAL_REVIEW] ' . $review;
             return [null, $message, [
                 'manual_review' => true,

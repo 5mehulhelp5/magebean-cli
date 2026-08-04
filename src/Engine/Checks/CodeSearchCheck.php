@@ -123,6 +123,10 @@ final class CodeSearchCheck
         $roots = $args['paths'] ?? ['app/code'];
         $inc = $args['include_ext'] ?? ['php'];
         $max = max(1, (int)($args['max_results'] ?? 100));
+        $excludeDirs = array_values(array_filter(array_map(
+            static fn(mixed $path): string => trim(str_replace('\\', '/', (string)$path), '/'),
+            (array)($args['exclude_dirs'] ?? ['setup', 'dev/tests', 'dev/tools', 'vendor', 'var', 'generated', 'pub/static', 'pub/media'])
+        ), static fn(string $path): bool => $path !== ''));
         $rootsAbs = array_map(fn($p) => $this->ctx->abs($p), $roots);
 
         $findings = [];
@@ -1331,9 +1335,9 @@ final class CodeSearchCheck
     {
         $roots = $args['paths'] ?? ['app/code', 'app/etc', 'app/design', 'pub/.htaccess', '.htaccess', 'nginx.conf'];
         $inc = $args['include_ext'] ?? ['xml', 'php', 'phtml', 'html', 'conf', 'htaccess'];
-        $required = $args['required_directives'] ?? ['script-src', 'connect-src', 'frame-src', 'form-action'];
+        $required = $args['required_directives'] ?? ['script-src', 'connect-src', 'frame-src', 'form-action', 'object-src', 'base-uri'];
         if (!is_array($required)) {
-            $required = ['script-src', 'connect-src', 'frame-src', 'form-action'];
+            $required = ['script-src', 'connect-src', 'frame-src', 'form-action', 'object-src', 'base-uri'];
         }
         $required = array_values(array_unique(array_map(static fn(mixed $value): string => strtolower((string)$value), $required)));
         $requireReporting = (bool)($args['require_reporting'] ?? true);
@@ -2033,10 +2037,6 @@ final class CodeSearchCheck
             ];
         }
 
-        if ($hasApplicationSignatureValidation) {
-            $failures = array_values(array_filter($failures, static fn(array $failure): bool => !str_starts_with((string)$failure['kind'], 'xml_')));
-        }
-
         $evidence = [
             'paths' => array_values($roots),
             'files_scanned' => $filesRead,
@@ -2257,7 +2257,7 @@ final class CodeSearchCheck
 
         foreach ($matches as $match) {
             $field = (string)$match['field'][0];
-            $class = ltrim(str_replace('\\\\', '\\', (string)$match['class'][0]), '\\');
+            $class = ltrim(str_replace('\\', '\\', (string)$match['class'][0]), '\\');
             $offset = (int)$match[0][1];
             $window = substr($scanContent, max(0, $offset - 500), 1100);
             if (!$this->hasSensitiveAuthorizationWorkflow($field . "\n" . $class . "\n" . $window)) {
@@ -2311,7 +2311,7 @@ final class CodeSearchCheck
                     continue;
                 }
                 $needle = preg_quote(ltrim($class, '\\'), '~');
-                if (preg_match('~(?:namespace\s+' . str_replace('\\\\', '\\\\', $needle) . '\b|class\s+' . preg_quote($this->shortClassName($class), '~') . '\b)~', $content) === 1) {
+                if (preg_match('~(?:namespace\s+' . str_replace('\\', '\\\\', $needle) . '\b|class\s+' . preg_quote($this->shortClassName($class), '~') . '\b)~', $content) === 1) {
                     $files[] = $file;
                 }
             }
@@ -2811,7 +2811,7 @@ final class CodeSearchCheck
         $locations = [];
         $permissive = [];
         $reporting = preg_match('~\b(?:report-uri|report-to|SecurityPolicyViolationEvent|csp[_/-]?report(?:[_/-]?uri)?|report_uri|report_only)\b~i', $scanContent) === 1;
-        $directiveRegex = '~\b(?P<directive>script-src|connect-src|frame-src|form-action)\b~i';
+        $directiveRegex = '~\b(?P<directive>script-src|connect-src|frame-src|form-action|object-src|base-uri)\b~i';
         if (preg_match_all($directiveRegex, $scanContent, $matches, PREG_OFFSET_CAPTURE | PREG_SET_ORDER) > 0) {
             foreach ($matches as $match) {
                 $directive = strtolower((string)$match['directive'][0]);
@@ -2820,7 +2820,7 @@ final class CodeSearchCheck
             }
         }
 
-        if (preg_match_all('~<policy\b[^>]*\bid\s*=\s*([\'\"])(?P<directive>script-src|connect-src|frame-src|form-action)\1~i', $scanContent, $policyMatches, PREG_OFFSET_CAPTURE | PREG_SET_ORDER) > 0) {
+        if (preg_match_all('~<policy\b[^>]*\bid\s*=\s*([\'\"])(?P<directive>script-src|connect-src|frame-src|form-action|object-src|base-uri)\1~i', $scanContent, $policyMatches, PREG_OFFSET_CAPTURE | PREG_SET_ORDER) > 0) {
             foreach ($policyMatches as $match) {
                 $directive = strtolower((string)$match['directive'][0]);
                 $directives[$directive] = true;
@@ -2829,7 +2829,7 @@ final class CodeSearchCheck
         }
 
         $badPatterns = [
-            'wildcard_source' => '~(?:\b(?:script-src|connect-src|frame-src|form-action)\b|<policy\b[^>]*\bid\s*=\s*([\'\"])(?:script-src|connect-src|frame-src|form-action)\1)[\s\S]{0,500}(?:\s\*\s|<value\b[^>]*>\s*\*\s*</value>)~i',
+            'wildcard_source' => '~(?:\b(?:script-src|connect-src|frame-src|form-action|object-src|base-uri)\b|<policy\b[^>]*\bid\s*=\s*([\'\"])(?:script-src|connect-src|frame-src|form-action|object-src|base-uri)\1)[\s\S]{0,500}(?:\s\*\s|<value\b[^>]*>\s*\*\s*</value>)~i',
             'unsafe_eval' => '~\bunsafe-eval\b~i',
             'unsafe_inline_without_nonce' => '~\bunsafe-inline\b(?![\s\S]{0,300}(?:nonce-|sha256-|sha384-|sha512-))~i',
         ];
@@ -2906,7 +2906,7 @@ final class CodeSearchCheck
             'manifest' => false,
             'sri_or_hash' => preg_match('~\b(?:integrity\s*=|sha(?:256|384|512)-|sri|script_hash)\b~i', $text) === 1,
             'nonce' => preg_match('~\b(?:nonce\s*=|csp_nonce|script_nonce|nonceProvider|getNonce)\b~i', $text) === 1,
-            'csp_allowlist' => preg_match('~\b(?:csp_whitelist|script-src|connect-src|frame-src|form-action)\b~i', $text) === 1,
+            'csp_allowlist' => preg_match('~\b(?:csp_whitelist|script-src|connect-src|frame-src|form-action|object-src|base-uri)\b~i', $text) === 1,
             'monitoring' => preg_match('~\b(?:report-uri|report-to|SecurityPolicyViolationEvent|tamper|integrity[_-]?monitor|checkout[_-]?monitor)\b~i', $text) === 1,
             'files' => [],
         ];

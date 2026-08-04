@@ -47,17 +47,20 @@ Docs: <href=https://magebean.com/documentation>magebean.com/documentation</>
 
 <options=bold>PROFILES</>
   <fg=yellow>basic</>      Default; 21 basic production security and operations checks.
-  <fg=yellow>asvs-l1</>    OWASP ASVS 5.0 Level 1 mapping; includes automated and manual-review checks.
+  <fg=yellow>asvs-l1</>    32 default automated rules; 28 manual-review rules require --include-manual-review.
+  <fg=yellow>asvs-l2</>    73 default automated rules; manual/contextual rules are opt-in.
   <fg=yellow>owasp</>      Application-security checks mapped to OWASP Top 10 2025.
   <fg=yellow>pci</>        PCI DSS v4.0.1 payment readiness; not a certification.
   <fg=yellow>hardening</>  89 deep production, code, dependency, integration, and operations checks.
-  <fg=yellow>baseline</>   All 135 local rules. Aliases: all, magebean.
+  <fg=yellow>baseline</>   110 automated rules by default; 275 including manual review. Aliases: all, magebean.
   <fg=yellow>FILE</>       Custom JSON path or a profile under .magebean/profiles.
 
 <options=bold>COMMAND OPTIONS</>
   <fg=yellow>--path=PATH</>                     Magento root. Omit to search from the current directory.
   <fg=yellow>--url=URL</>                       Absolute storefront URL; selects REMOTE or HYBRID mode.
   <fg=yellow>--profile=PROFILE|FILE</>          Built-in or custom profile. Default: basic.
+  <fg=yellow>--include-manual-review</>           Include human-review rules; excluded by default.
+  <fg=yellow>--capabilities=NAME,NAME</>         Enable contextual profile rules (for example graphql,oauth_oidc).
   <fg=yellow>--controls=MB-Cxx,MB-Cxx</>       Restrict the loaded pack to control IDs.
   <fg=yellow>--rules=MB-Rxxx,MB-Rxxx</>         Run listed rule IDs directly from the available catalog; bypasses profile selection.
   <fg=yellow>--exclude-rules=MB-Rxxx,...</>     Remove rules after profile and project configuration.
@@ -85,6 +88,7 @@ Docs: <href=https://magebean.com/documentation>magebean.com/documentation</>
 
   # ASVS Level 1, application security, payment readiness, deep hardening, or full catalog
   <fg=green>php magebean.phar scan --path=/var/www/magento --profile=asvs-l1</>
+  <fg=green>php magebean.phar scan --path=/var/www/magento --url=https://store.example.com --profile=asvs-l2 --include-manual-review --capabilities=graphql</>
   <fg=green>php magebean.phar scan --path=/var/www/magento --profile=owasp</>
   <fg=green>php magebean.phar scan --path=/var/www/magento --profile=pci</>
   <fg=green>php magebean.phar scan --path=/var/www/magento --profile=hardening</>
@@ -129,7 +133,9 @@ HELP;
             // HTML report output is disabled, so the HTML-only detail option is hidden for now.
             // ->addOption('detail', null, InputOption::VALUE_NONE, 'Include Details column in HTML report')
             ->addOption('standard', null, InputOption::VALUE_OPTIONAL, 'Legacy report selector: magebean (default) | owasp | pci | cwe; prefer --profile', 'magebean')
-            ->addOption('profile', null, InputOption::VALUE_OPTIONAL, 'Profile: basic (default) | asvs-l1 | owasp | pci | hardening | baseline | custom JSON')
+            ->addOption('profile', null, InputOption::VALUE_OPTIONAL, 'Profile: basic (default) | asvs-l1 | asvs-l2 | owasp | pci | hardening | baseline | custom JSON')
+            ->addOption('include-manual-review', null, InputOption::VALUE_NONE, 'Include human manual-review rules (excluded by default)')
+            ->addOption('capabilities', null, InputOption::VALUE_OPTIONAL, 'Comma-separated application capabilities used to activate contextual profile rules')
             ->addOption('controls', null, InputOption::VALUE_OPTIONAL, 'Comma-separated control IDs to load (e.g., MB-C01,MB-C05 or MB-01,MB-05)')
             ->addOption('rules', null, InputOption::VALUE_OPTIONAL, 'Comma-separated rule IDs to run (e.g., MB-R036,MB-R020)')
             ->addOption('exclude-rules', null, InputOption::VALUE_OPTIONAL, 'Comma-separated rule IDs to exclude after loading')
@@ -206,6 +212,8 @@ HELP;
             $excludeRulesOpt = (string)($in->getOption('exclude-rules') ?? '');
             $controlsOpt = (string)($in->getOption('controls') ?? '');
             $configOpt = trim((string)($in->getOption('config') ?? ''));
+            $capabilitiesOpt = trim((string)($in->getOption('capabilities') ?? ''));
+            $includeManualReview = (bool)$in->getOption('include-manual-review');
 
             $allowed = ['magebean', 'owasp', 'pci', 'cwe'];
             if (!in_array($standard, $allowed, true)) {
@@ -268,6 +276,12 @@ HELP;
             if ($configFile !== null) {
                 $out->writeln(sprintf('<info>Loaded Magebean project config:</info> %s', $configFile));
             }
+            $capabilities = is_array($projectConfig['capabilities'] ?? null) ? $projectConfig['capabilities'] : [];
+            if ($capabilitiesOpt !== '') {
+                foreach (array_filter(array_map('trim', explode(',', $capabilitiesOpt))) as $capability) {
+                    $capabilities[strtolower($capability)] = true;
+                }
+            }
 
             // normalize controls filter
             $controlsFilter = $this->normalizeControlList($projectConfig['include_controls'] ?? []);
@@ -325,13 +339,27 @@ HELP;
                     $profile = ProfileLoader::load($profileOpt, $profileBasePath);
                     $profileCanBePartial = $targetMode === self::MODE_REMOTE
                         || $controlsFilter !== [] || $projectConfig !== [];
-                    $pack = ProfileLoader::apply($pack, $profile, $profileCanBePartial);
+                    $pack = ProfileLoader::apply($pack, $profile, $profileCanBePartial, $capabilities);
                     $activeProfile = ProfileLoader::publicMetadata($profile);
                     $standard = (string)($activeProfile['id'] ?? $standard);
                     $out->writeln(sprintf(
-                        '<info>Loaded profile:</info> %s (%d rules)',
-                        (string)($activeProfile['id'] ?? $profileOpt),
-                        count($pack['rules'] ?? [])
+                        '<info>Loaded profile:</info> %s',
+                        (string)($activeProfile['id'] ?? $profileOpt)
+                    ));
+                }
+            }
+
+            if (!$hasExplicitRuleSelection && !$includeManualReview) {
+                $beforeManualFilter = count($pack['rules'] ?? []);
+                $pack['rules'] = array_values(array_filter(
+                    $pack['rules'] ?? [],
+                    static fn(array $rule): bool => strtolower((string)($rule['verification'] ?? 'automated')) !== 'manual'
+                ));
+                $manualRulesExcluded = $beforeManualFilter - count($pack['rules']);
+                if ($manualRulesExcluded > 0) {
+                    $out->writeln(sprintf(
+                        '<comment>Manual-review rules excluded:</comment> %d (use --include-manual-review to include them)',
+                        $manualRulesExcluded
                     ));
                 }
             }
@@ -622,7 +650,7 @@ HELP;
                 : '<info>AUDIT COMPLETE</info>'));
         $out->writeln($auditStatus);
         $out->writeln(sprintf(
-            '<info>%d</info> / <info>%d</info> checks passed · <fg=yellow;options=bold>%d findings</> · <fg=cyan;options=bold>%d manual review</> · <fg=magenta;options=bold>%d inconclusive</>',
+            '<info>%d</info> / <info>%d</info> checks passed · <fg=yellow;options=bold>%d findings</> · <fg=cyan;options=bold>%d human verification required</> · <fg=magenta;options=bold>%d inconclusive</>',
             $passed,
             $total,
             count($confirmedFindings),
@@ -645,7 +673,7 @@ HELP;
         $out->writeln('');
         $out->writeln('<options=bold>Status guide</>');
         $out->writeln('  <fg=green;options=bold>PASS</>          Check completed and no issue was detected.');
-        $out->writeln('  <fg=cyan;options=bold>MANUAL REVIEW</> Human judgment or supporting evidence is required; this is not an automated failure.');
+        $out->writeln('  <fg=cyan;options=bold>HUMAN VERIFICATION REQUIRED</> Magebean CLI did not verify this requirement. Independent assessment and documented evidence are mandatory before treating it as satisfied.');
         $out->writeln('  <fg=red;options=bold>FAIL</>          Check completed and found an issue requiring attention.');
         $out->writeln('  <fg=magenta;options=bold>INCONCLUSIVE</>  Required evidence or access was unavailable; this does not mean the check passed.');
         $out->writeln('');
@@ -669,12 +697,12 @@ HELP;
             $statusTag = $showRuleDetails
                 ? match ($status) {
                     'PASS' => '<fg=green;options=bold>[PASS]</> ',
-                    'MANUAL_REVIEW' => '<fg=cyan;options=bold>[MANUAL REVIEW]</> ',
+                    'MANUAL_REVIEW' => '<fg=cyan;options=bold>[HUMAN VERIFICATION REQUIRED]</> ',
                     'UNKNOWN' => '<fg=magenta;options=bold>[INCONCLUSIVE]</> ',
                     default => '<fg=red;options=bold>[FAIL]</> ',
                 }
                 : ($status === 'MANUAL_REVIEW'
-                    ? '<fg=cyan;options=bold>[MANUAL REVIEW]</> '
+                    ? '<fg=cyan;options=bold>[HUMAN VERIFICATION REQUIRED]</> '
                     : '');
             $line = $id !== ''
                 ? sprintf('%s%s <href=https://magebean.com/baseline/%3$s>%3$s</> %4$s', $statusTag, $sevBadge($sev), $id, $text)

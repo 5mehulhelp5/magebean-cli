@@ -1,0 +1,2713 @@
+{
+    "control": "MB-C15",
+    "title": "ASVS Level 2 Human Assurance",
+    "description": "Human verification rules for OWASP ASVS 5.0 Level 2 requirements that cannot yet be concluded reliably from unattended Magebean evidence.",
+    "rules": [
+        {
+            "id": "MB-R136",
+            "title": "ASVS 1.1.1 Canonical decoding",
+            "control": "MB-C15",
+            "severity": "medium",
+            "op": "all",
+            "verification": "manual",
+            "requirements": [
+                {
+                    "standard": "OWASP-ASVS",
+                    "version": "5.0.0",
+                    "id": "1.1.1",
+                    "level": 2
+                }
+            ],
+            "checks": [
+                {
+                    "name": "human_manual_review_required",
+                    "args": {
+                        "requirement": "ASVS 5.0.0 1.1.1",
+                        "review": "MANDATORY HUMAN ASSESSMENT: Provide documented evidence that ASVS 5.0.0 1.1.1 (Canonical decoding) is satisfied. Magebean CLI cannot determine or attest compliance for this requirement.",
+                        "evidence_needed": [
+                            "Relevant design or policy documentation",
+                            "Implementation, configuration, or test evidence",
+                            "Reviewer conclusion and rationale"
+                        ]
+                    }
+                }
+            ],
+            "messages": {
+                "manual_review": "NOT VERIFIED BY MAGEBEAN CLI. Independent human assessment and documented supporting evidence are mandatory before this requirement can be considered satisfied."
+            }
+        },
+        {
+            "id": "MB-R137",
+            "title": "ASVS 1.1.2 Late output encoding",
+            "control": "MB-C15",
+            "severity": "medium",
+            "op": "all",
+            "verification": "manual",
+            "requirements": [
+                {
+                    "standard": "OWASP-ASVS",
+                    "version": "5.0.0",
+                    "id": "1.1.2",
+                    "level": 2
+                }
+            ],
+            "checks": [
+                {
+                    "name": "human_manual_review_required",
+                    "args": {
+                        "requirement": "ASVS 5.0.0 1.1.2",
+                        "review": "MANDATORY HUMAN ASSESSMENT: Provide documented evidence that ASVS 5.0.0 1.1.2 (Late output encoding) is satisfied. Magebean CLI cannot determine or attest compliance for this requirement.",
+                        "evidence_needed": [
+                            "Relevant design or policy documentation",
+                            "Implementation, configuration, or test evidence",
+                            "Reviewer conclusion and rationale"
+                        ]
+                    }
+                }
+            ],
+            "messages": {
+                "manual_review": "NOT VERIFIED BY MAGEBEAN CLI. Independent human assessment and documented supporting evidence are mandatory before this requirement can be considered satisfied."
+            }
+        },
+        {
+            "id": "MB-R138",
+            "title": "ASVS 1.2.9 Regular-expression injection",
+            "control": "MB-C15",
+            "severity": "medium",
+            "op": "all",
+            "verification": "manual",
+            "requirements": [
+                {
+                    "standard": "OWASP-ASVS",
+                    "version": "5.0.0",
+                    "id": "1.2.9",
+                    "level": 2
+                }
+            ],
+            "checks": [
+                {
+                    "name": "human_manual_review_required",
+                    "args": {
+                        "requirement": "ASVS 5.0.0 1.2.9",
+                        "review": "MANDATORY HUMAN ASSESSMENT: Provide documented evidence that ASVS 5.0.0 1.2.9 (Regular-expression injection) is satisfied. Magebean CLI cannot determine or attest compliance for this requirement.",
+                        "evidence_needed": [
+                            "Relevant design or policy documentation",
+                            "Implementation, configuration, or test evidence",
+                            "Reviewer conclusion and rationale"
+                        ]
+                    }
+                }
+            ],
+            "messages": {
+                "manual_review": "NOT VERIFIED BY MAGEBEAN CLI. Independent human assessment and documented supporting evidence are mandatory before this requirement can be considered satisfied."
+            }
+        },
+        {
+            "id": "MB-R139",
+            "title": "ASVS 1.3.3 Dangerous-context sanitization",
+            "control": "MB-C15",
+            "severity": "medium",
+            "op": "all",
+            "verification": "manual",
+            "requirements": [
+                {
+                    "standard": "OWASP-ASVS",
+                    "version": "5.0.0",
+                    "id": "1.3.3",
+                    "level": 2
+                }
+            ],
+            "checks": [
+                {
+                    "name": "human_manual_review_required",
+                    "args": {
+                        "requirement": "ASVS 5.0.0 1.3.3",
+                        "review": "MANDATORY HUMAN ASSESSMENT: Provide documented evidence that ASVS 5.0.0 1.3.3 (Dangerous-context sanitization) is satisfied. Magebean CLI cannot determine or attest compliance for this requirement.",
+                        "evidence_needed": [
+                            "Relevant design or policy documentation",
+                            "Implementation, configuration, or test evidence",
+                            "Reviewer conclusion and rationale"
+                        ]
+                    }
+                }
+            ],
+            "messages": {
+                "manual_review": "NOT VERIFIED BY MAGEBEAN CLI. Independent human assessment and documented supporting evidence are mandatory before this requirement can be considered satisfied."
+            }
+        },
+        {
+            "id": "MB-R140",
+            "title": "ASVS 1.3.7 Template injection",
+            "control": "MB-C15",
+            "severity": "medium",
+            "op": "all",
+            "verification": "manual",
+            "requirements": [
+                {
+                    "standard": "OWASP-ASVS",
+                    "version": "5.0.0",
+                    "id": "1.3.7",
+                    "level": 2
+                }
+            ],
+            "checks": [
+                {
+                    "name": "human_manual_review_required",
+                    "args": {
+                        "requirement": "ASVS 5.0.0 1.3.7",
+                        "review": "MANDATORY HUMAN ASSESSMENT: Provide documented evidence that ASVS 5.0.0 1.3.7 (Template injection) is satisfied. Magebean CLI cannot determine or attest compliance for this requirement.",
+                        "evidence_needed": [
+                            "Relevant design or policy documentation",
+                            "Implementation, configuration, or test evidence",
+                            "Reviewer conclusion and rationale"
+                        ]
+                    }
+                }
+            ],
+            "messages": {
+                "manual_review": "NOT VERIFIED BY MAGEBEAN CLI. Independent human assessment and documented supporting evidence are mandatory before this requirement can be considered satisfied."
+            }
+        },
+        {
+            "id": "MB-R141",
+            "title": "ASVS 1.3.10 Format-string injection",
+            "control": "MB-C15",
+            "severity": "medium",
+            "op": "all",
+            "verification": "manual",
+            "requirements": [
+                {
+                    "standard": "OWASP-ASVS",
+                    "version": "5.0.0",
+                    "id": "1.3.10",
+                    "level": 2
+                }
+            ],
+            "checks": [
+                {
+                    "name": "human_manual_review_required",
+                    "args": {
+                        "requirement": "ASVS 5.0.0 1.3.10",
+                        "review": "MANDATORY HUMAN ASSESSMENT: Provide documented evidence that ASVS 5.0.0 1.3.10 (Format-string injection) is satisfied. Magebean CLI cannot determine or attest compliance for this requirement.",
+                        "evidence_needed": [
+                            "Relevant design or policy documentation",
+                            "Implementation, configuration, or test evidence",
+                            "Reviewer conclusion and rationale"
+                        ]
+                    }
+                }
+            ],
+            "messages": {
+                "manual_review": "NOT VERIFIED BY MAGEBEAN CLI. Independent human assessment and documented supporting evidence are mandatory before this requirement can be considered satisfied."
+            }
+        },
+        {
+            "id": "MB-R142",
+            "title": "ASVS 1.3.11 Mail injection",
+            "control": "MB-C15",
+            "severity": "medium",
+            "op": "all",
+            "verification": "manual",
+            "requirements": [
+                {
+                    "standard": "OWASP-ASVS",
+                    "version": "5.0.0",
+                    "id": "1.3.11",
+                    "level": 2
+                }
+            ],
+            "checks": [
+                {
+                    "name": "human_manual_review_required",
+                    "args": {
+                        "requirement": "ASVS 5.0.0 1.3.11",
+                        "review": "MANDATORY HUMAN ASSESSMENT: Provide documented evidence that ASVS 5.0.0 1.3.11 (Mail injection) is satisfied. Magebean CLI cannot determine or attest compliance for this requirement.",
+                        "evidence_needed": [
+                            "Relevant design or policy documentation",
+                            "Implementation, configuration, or test evidence",
+                            "Reviewer conclusion and rationale"
+                        ]
+                    }
+                }
+            ],
+            "messages": {
+                "manual_review": "NOT VERIFIED BY MAGEBEAN CLI. Independent human assessment and documented supporting evidence are mandatory before this requirement can be considered satisfied."
+            }
+        },
+        {
+            "id": "MB-R143",
+            "title": "ASVS 2.1.2 Contextual data consistency",
+            "control": "MB-C15",
+            "severity": "medium",
+            "op": "all",
+            "verification": "manual",
+            "requirements": [
+                {
+                    "standard": "OWASP-ASVS",
+                    "version": "5.0.0",
+                    "id": "2.1.2",
+                    "level": 2
+                }
+            ],
+            "checks": [
+                {
+                    "name": "human_manual_review_required",
+                    "args": {
+                        "requirement": "ASVS 5.0.0 2.1.2",
+                        "review": "MANDATORY HUMAN ASSESSMENT: Provide documented evidence that ASVS 5.0.0 2.1.2 (Contextual data consistency) is satisfied. Magebean CLI cannot determine or attest compliance for this requirement.",
+                        "evidence_needed": [
+                            "Relevant design or policy documentation",
+                            "Implementation, configuration, or test evidence",
+                            "Reviewer conclusion and rationale"
+                        ]
+                    }
+                }
+            ],
+            "messages": {
+                "manual_review": "NOT VERIFIED BY MAGEBEAN CLI. Independent human assessment and documented supporting evidence are mandatory before this requirement can be considered satisfied."
+            }
+        },
+        {
+            "id": "MB-R144",
+            "title": "ASVS 2.1.3 Business limits documentation",
+            "control": "MB-C15",
+            "severity": "medium",
+            "op": "all",
+            "verification": "manual",
+            "requirements": [
+                {
+                    "standard": "OWASP-ASVS",
+                    "version": "5.0.0",
+                    "id": "2.1.3",
+                    "level": 2
+                }
+            ],
+            "checks": [
+                {
+                    "name": "human_manual_review_required",
+                    "args": {
+                        "requirement": "ASVS 5.0.0 2.1.3",
+                        "review": "MANDATORY HUMAN ASSESSMENT: Provide documented evidence that ASVS 5.0.0 2.1.3 (Business limits documentation) is satisfied. Magebean CLI cannot determine or attest compliance for this requirement.",
+                        "evidence_needed": [
+                            "Relevant design or policy documentation",
+                            "Implementation, configuration, or test evidence",
+                            "Reviewer conclusion and rationale"
+                        ]
+                    }
+                }
+            ],
+            "messages": {
+                "manual_review": "NOT VERIFIED BY MAGEBEAN CLI. Independent human assessment and documented supporting evidence are mandatory before this requirement can be considered satisfied."
+            }
+        },
+        {
+            "id": "MB-R145",
+            "title": "ASVS 2.2.3 Related-data validation",
+            "control": "MB-C15",
+            "severity": "medium",
+            "op": "all",
+            "verification": "manual",
+            "requirements": [
+                {
+                    "standard": "OWASP-ASVS",
+                    "version": "5.0.0",
+                    "id": "2.2.3",
+                    "level": 2
+                }
+            ],
+            "checks": [
+                {
+                    "name": "human_manual_review_required",
+                    "args": {
+                        "requirement": "ASVS 5.0.0 2.2.3",
+                        "review": "MANDATORY HUMAN ASSESSMENT: Provide documented evidence that ASVS 5.0.0 2.2.3 (Related-data validation) is satisfied. Magebean CLI cannot determine or attest compliance for this requirement.",
+                        "evidence_needed": [
+                            "Relevant design or policy documentation",
+                            "Implementation, configuration, or test evidence",
+                            "Reviewer conclusion and rationale"
+                        ]
+                    }
+                }
+            ],
+            "messages": {
+                "manual_review": "NOT VERIFIED BY MAGEBEAN CLI. Independent human assessment and documented supporting evidence are mandatory before this requirement can be considered satisfied."
+            }
+        },
+        {
+            "id": "MB-R146",
+            "title": "ASVS 2.3.2 Enforce business limits",
+            "control": "MB-C15",
+            "severity": "medium",
+            "op": "all",
+            "verification": "manual",
+            "requirements": [
+                {
+                    "standard": "OWASP-ASVS",
+                    "version": "5.0.0",
+                    "id": "2.3.2",
+                    "level": 2
+                }
+            ],
+            "checks": [
+                {
+                    "name": "human_manual_review_required",
+                    "args": {
+                        "requirement": "ASVS 5.0.0 2.3.2",
+                        "review": "MANDATORY HUMAN ASSESSMENT: Provide documented evidence that ASVS 5.0.0 2.3.2 (Enforce business limits) is satisfied. Magebean CLI cannot determine or attest compliance for this requirement.",
+                        "evidence_needed": [
+                            "Relevant design or policy documentation",
+                            "Implementation, configuration, or test evidence",
+                            "Reviewer conclusion and rationale"
+                        ]
+                    }
+                }
+            ],
+            "messages": {
+                "manual_review": "NOT VERIFIED BY MAGEBEAN CLI. Independent human assessment and documented supporting evidence are mandatory before this requirement can be considered satisfied."
+            }
+        },
+        {
+            "id": "MB-R147",
+            "title": "ASVS 2.3.3 Transactional integrity",
+            "control": "MB-C15",
+            "severity": "medium",
+            "op": "all",
+            "verification": "manual",
+            "requirements": [
+                {
+                    "standard": "OWASP-ASVS",
+                    "version": "5.0.0",
+                    "id": "2.3.3",
+                    "level": 2
+                }
+            ],
+            "checks": [
+                {
+                    "name": "human_manual_review_required",
+                    "args": {
+                        "requirement": "ASVS 5.0.0 2.3.3",
+                        "review": "MANDATORY HUMAN ASSESSMENT: Provide documented evidence that ASVS 5.0.0 2.3.3 (Transactional integrity) is satisfied. Magebean CLI cannot determine or attest compliance for this requirement.",
+                        "evidence_needed": [
+                            "Relevant design or policy documentation",
+                            "Implementation, configuration, or test evidence",
+                            "Reviewer conclusion and rationale"
+                        ]
+                    }
+                }
+            ],
+            "messages": {
+                "manual_review": "NOT VERIFIED BY MAGEBEAN CLI. Independent human assessment and documented supporting evidence are mandatory before this requirement can be considered satisfied."
+            }
+        },
+        {
+            "id": "MB-R148",
+            "title": "ASVS 2.3.4 Business locking",
+            "control": "MB-C15",
+            "severity": "medium",
+            "op": "all",
+            "verification": "manual",
+            "requirements": [
+                {
+                    "standard": "OWASP-ASVS",
+                    "version": "5.0.0",
+                    "id": "2.3.4",
+                    "level": 2
+                }
+            ],
+            "checks": [
+                {
+                    "name": "human_manual_review_required",
+                    "args": {
+                        "requirement": "ASVS 5.0.0 2.3.4",
+                        "review": "MANDATORY HUMAN ASSESSMENT: Provide documented evidence that ASVS 5.0.0 2.3.4 (Business locking) is satisfied. Magebean CLI cannot determine or attest compliance for this requirement.",
+                        "evidence_needed": [
+                            "Relevant design or policy documentation",
+                            "Implementation, configuration, or test evidence",
+                            "Reviewer conclusion and rationale"
+                        ]
+                    }
+                }
+            ],
+            "messages": {
+                "manual_review": "NOT VERIFIED BY MAGEBEAN CLI. Independent human assessment and documented supporting evidence are mandatory before this requirement can be considered satisfied."
+            }
+        },
+        {
+            "id": "MB-R149",
+            "title": "ASVS 3.3.3 Host-bound cookies",
+            "control": "MB-C15",
+            "severity": "medium",
+            "op": "all",
+            "verification": "manual",
+            "requirements": [
+                {
+                    "standard": "OWASP-ASVS",
+                    "version": "5.0.0",
+                    "id": "3.3.3",
+                    "level": 2
+                }
+            ],
+            "checks": [
+                {
+                    "name": "human_manual_review_required",
+                    "args": {
+                        "requirement": "ASVS 5.0.0 3.3.3",
+                        "review": "MANDATORY HUMAN ASSESSMENT: Provide documented evidence that ASVS 5.0.0 3.3.3 (Host-bound cookies) is satisfied. Magebean CLI cannot determine or attest compliance for this requirement.",
+                        "evidence_needed": [
+                            "Relevant design or policy documentation",
+                            "Implementation, configuration, or test evidence",
+                            "Reviewer conclusion and rationale"
+                        ]
+                    }
+                }
+            ],
+            "messages": {
+                "manual_review": "NOT VERIFIED BY MAGEBEAN CLI. Independent human assessment and documented supporting evidence are mandatory before this requirement can be considered satisfied."
+            }
+        },
+        {
+            "id": "MB-R150",
+            "title": "ASVS 3.4.5 Referrer policy",
+            "control": "MB-C15",
+            "severity": "medium",
+            "op": "all",
+            "verification": "manual",
+            "requirements": [
+                {
+                    "standard": "OWASP-ASVS",
+                    "version": "5.0.0",
+                    "id": "3.4.5",
+                    "level": 2
+                }
+            ],
+            "checks": [
+                {
+                    "name": "human_manual_review_required",
+                    "args": {
+                        "requirement": "ASVS 5.0.0 3.4.5",
+                        "review": "MANDATORY HUMAN ASSESSMENT: Provide documented evidence that ASVS 5.0.0 3.4.5 (Referrer policy) is satisfied. Magebean CLI cannot determine or attest compliance for this requirement.",
+                        "evidence_needed": [
+                            "Relevant design or policy documentation",
+                            "Implementation, configuration, or test evidence",
+                            "Reviewer conclusion and rationale"
+                        ]
+                    }
+                }
+            ],
+            "messages": {
+                "manual_review": "NOT VERIFIED BY MAGEBEAN CLI. Independent human assessment and documented supporting evidence are mandatory before this requirement can be considered satisfied."
+            }
+        },
+        {
+            "id": "MB-R151",
+            "title": "ASVS 3.5.4 Separate application origins",
+            "control": "MB-C15",
+            "severity": "medium",
+            "op": "all",
+            "verification": "manual",
+            "requirements": [
+                {
+                    "standard": "OWASP-ASVS",
+                    "version": "5.0.0",
+                    "id": "3.5.4",
+                    "level": 2
+                }
+            ],
+            "checks": [
+                {
+                    "name": "human_manual_review_required",
+                    "args": {
+                        "requirement": "ASVS 5.0.0 3.5.4",
+                        "review": "MANDATORY HUMAN ASSESSMENT: Provide documented evidence that ASVS 5.0.0 3.5.4 (Separate application origins) is satisfied. Magebean CLI cannot determine or attest compliance for this requirement.",
+                        "evidence_needed": [
+                            "Relevant design or policy documentation",
+                            "Implementation, configuration, or test evidence",
+                            "Reviewer conclusion and rationale"
+                        ]
+                    }
+                }
+            ],
+            "messages": {
+                "manual_review": "NOT VERIFIED BY MAGEBEAN CLI. Independent human assessment and documented supporting evidence are mandatory before this requirement can be considered satisfied."
+            }
+        },
+        {
+            "id": "MB-R152",
+            "title": "ASVS 3.5.5 postMessage validation",
+            "control": "MB-C15",
+            "severity": "medium",
+            "op": "all",
+            "verification": "manual",
+            "requirements": [
+                {
+                    "standard": "OWASP-ASVS",
+                    "version": "5.0.0",
+                    "id": "3.5.5",
+                    "level": 2
+                }
+            ],
+            "checks": [
+                {
+                    "name": "human_manual_review_required",
+                    "args": {
+                        "requirement": "ASVS 5.0.0 3.5.5",
+                        "review": "MANDATORY HUMAN ASSESSMENT: Provide documented evidence that ASVS 5.0.0 3.5.5 (postMessage validation) is satisfied. Magebean CLI cannot determine or attest compliance for this requirement.",
+                        "evidence_needed": [
+                            "Relevant design or policy documentation",
+                            "Implementation, configuration, or test evidence",
+                            "Reviewer conclusion and rationale"
+                        ]
+                    }
+                }
+            ],
+            "messages": {
+                "manual_review": "NOT VERIFIED BY MAGEBEAN CLI. Independent human assessment and documented supporting evidence are mandatory before this requirement can be considered satisfied."
+            }
+        },
+        {
+            "id": "MB-R153",
+            "title": "ASVS 3.7.2 External redirect allowlist",
+            "control": "MB-C15",
+            "severity": "medium",
+            "op": "all",
+            "verification": "manual",
+            "requirements": [
+                {
+                    "standard": "OWASP-ASVS",
+                    "version": "5.0.0",
+                    "id": "3.7.2",
+                    "level": 2
+                }
+            ],
+            "checks": [
+                {
+                    "name": "human_manual_review_required",
+                    "args": {
+                        "requirement": "ASVS 5.0.0 3.7.2",
+                        "review": "MANDATORY HUMAN ASSESSMENT: Provide documented evidence that ASVS 5.0.0 3.7.2 (External redirect allowlist) is satisfied. Magebean CLI cannot determine or attest compliance for this requirement.",
+                        "evidence_needed": [
+                            "Relevant design or policy documentation",
+                            "Implementation, configuration, or test evidence",
+                            "Reviewer conclusion and rationale"
+                        ]
+                    }
+                }
+            ],
+            "messages": {
+                "manual_review": "NOT VERIFIED BY MAGEBEAN CLI. Independent human assessment and documented supporting evidence are mandatory before this requirement can be considered satisfied."
+            }
+        },
+        {
+            "id": "MB-R154",
+            "title": "ASVS 4.1.3 Trusted intermediary headers",
+            "control": "MB-C15",
+            "severity": "medium",
+            "op": "all",
+            "verification": "manual",
+            "requirements": [
+                {
+                    "standard": "OWASP-ASVS",
+                    "version": "5.0.0",
+                    "id": "4.1.3",
+                    "level": 2
+                }
+            ],
+            "checks": [
+                {
+                    "name": "human_manual_review_required",
+                    "args": {
+                        "requirement": "ASVS 5.0.0 4.1.3",
+                        "review": "MANDATORY HUMAN ASSESSMENT: Provide documented evidence that ASVS 5.0.0 4.1.3 (Trusted intermediary headers) is satisfied. Magebean CLI cannot determine or attest compliance for this requirement.",
+                        "evidence_needed": [
+                            "Relevant design or policy documentation",
+                            "Implementation, configuration, or test evidence",
+                            "Reviewer conclusion and rationale"
+                        ]
+                    }
+                }
+            ],
+            "messages": {
+                "manual_review": "NOT VERIFIED BY MAGEBEAN CLI. Independent human assessment and documented supporting evidence are mandatory before this requirement can be considered satisfied."
+            }
+        },
+        {
+            "id": "MB-R155",
+            "title": "ASVS 4.2.1 HTTP request-smuggling defense",
+            "control": "MB-C15",
+            "severity": "medium",
+            "op": "all",
+            "verification": "manual",
+            "requirements": [
+                {
+                    "standard": "OWASP-ASVS",
+                    "version": "5.0.0",
+                    "id": "4.2.1",
+                    "level": 2
+                }
+            ],
+            "checks": [
+                {
+                    "name": "human_manual_review_required",
+                    "args": {
+                        "requirement": "ASVS 5.0.0 4.2.1",
+                        "review": "MANDATORY HUMAN ASSESSMENT: Provide documented evidence that ASVS 5.0.0 4.2.1 (HTTP request-smuggling defense) is satisfied. Magebean CLI cannot determine or attest compliance for this requirement.",
+                        "evidence_needed": [
+                            "Relevant design or policy documentation",
+                            "Implementation, configuration, or test evidence",
+                            "Reviewer conclusion and rationale"
+                        ]
+                    }
+                }
+            ],
+            "messages": {
+                "manual_review": "NOT VERIFIED BY MAGEBEAN CLI. Independent human assessment and documented supporting evidence are mandatory before this requirement can be considered satisfied."
+            }
+        },
+        {
+            "id": "MB-R156",
+            "title": "ASVS 6.1.2 Context-specific password denylist",
+            "control": "MB-C15",
+            "severity": "high",
+            "op": "all",
+            "verification": "manual",
+            "requirements": [
+                {
+                    "standard": "OWASP-ASVS",
+                    "version": "5.0.0",
+                    "id": "6.1.2",
+                    "level": 2
+                }
+            ],
+            "checks": [
+                {
+                    "name": "human_manual_review_required",
+                    "args": {
+                        "requirement": "ASVS 5.0.0 6.1.2",
+                        "review": "MANDATORY HUMAN ASSESSMENT: Provide documented evidence that ASVS 5.0.0 6.1.2 (Context-specific password denylist) is satisfied. Magebean CLI cannot determine or attest compliance for this requirement.",
+                        "evidence_needed": [
+                            "Relevant design or policy documentation",
+                            "Implementation, configuration, or test evidence",
+                            "Reviewer conclusion and rationale"
+                        ]
+                    }
+                }
+            ],
+            "messages": {
+                "manual_review": "NOT VERIFIED BY MAGEBEAN CLI. Independent human assessment and documented supporting evidence are mandatory before this requirement can be considered satisfied."
+            }
+        },
+        {
+            "id": "MB-R157",
+            "title": "ASVS 6.1.3 Authentication-path inventory",
+            "control": "MB-C15",
+            "severity": "high",
+            "op": "all",
+            "verification": "manual",
+            "requirements": [
+                {
+                    "standard": "OWASP-ASVS",
+                    "version": "5.0.0",
+                    "id": "6.1.3",
+                    "level": 2
+                }
+            ],
+            "checks": [
+                {
+                    "name": "human_manual_review_required",
+                    "args": {
+                        "requirement": "ASVS 5.0.0 6.1.3",
+                        "review": "MANDATORY HUMAN ASSESSMENT: Provide documented evidence that ASVS 5.0.0 6.1.3 (Authentication-path inventory) is satisfied. Magebean CLI cannot determine or attest compliance for this requirement.",
+                        "evidence_needed": [
+                            "Relevant design or policy documentation",
+                            "Implementation, configuration, or test evidence",
+                            "Reviewer conclusion and rationale"
+                        ]
+                    }
+                }
+            ],
+            "messages": {
+                "manual_review": "NOT VERIFIED BY MAGEBEAN CLI. Independent human assessment and documented supporting evidence are mandatory before this requirement can be considered satisfied."
+            }
+        },
+        {
+            "id": "MB-R158",
+            "title": "ASVS 6.2.9 Long passwords",
+            "control": "MB-C15",
+            "severity": "high",
+            "op": "all",
+            "verification": "manual",
+            "requirements": [
+                {
+                    "standard": "OWASP-ASVS",
+                    "version": "5.0.0",
+                    "id": "6.2.9",
+                    "level": 2
+                }
+            ],
+            "checks": [
+                {
+                    "name": "human_manual_review_required",
+                    "args": {
+                        "requirement": "ASVS 5.0.0 6.2.9",
+                        "review": "MANDATORY HUMAN ASSESSMENT: Provide documented evidence that ASVS 5.0.0 6.2.9 (Long passwords) is satisfied. Magebean CLI cannot determine or attest compliance for this requirement.",
+                        "evidence_needed": [
+                            "Relevant design or policy documentation",
+                            "Implementation, configuration, or test evidence",
+                            "Reviewer conclusion and rationale"
+                        ]
+                    }
+                }
+            ],
+            "messages": {
+                "manual_review": "NOT VERIFIED BY MAGEBEAN CLI. Independent human assessment and documented supporting evidence are mandatory before this requirement can be considered satisfied."
+            }
+        },
+        {
+            "id": "MB-R159",
+            "title": "ASVS 6.2.10 No forced periodic rotation",
+            "control": "MB-C15",
+            "severity": "high",
+            "op": "all",
+            "verification": "manual",
+            "requirements": [
+                {
+                    "standard": "OWASP-ASVS",
+                    "version": "5.0.0",
+                    "id": "6.2.10",
+                    "level": 2
+                }
+            ],
+            "checks": [
+                {
+                    "name": "human_manual_review_required",
+                    "args": {
+                        "requirement": "ASVS 5.0.0 6.2.10",
+                        "review": "MANDATORY HUMAN ASSESSMENT: Provide documented evidence that ASVS 5.0.0 6.2.10 (No forced periodic rotation) is satisfied. Magebean CLI cannot determine or attest compliance for this requirement.",
+                        "evidence_needed": [
+                            "Relevant design or policy documentation",
+                            "Implementation, configuration, or test evidence",
+                            "Reviewer conclusion and rationale"
+                        ]
+                    }
+                }
+            ],
+            "messages": {
+                "manual_review": "NOT VERIFIED BY MAGEBEAN CLI. Independent human assessment and documented supporting evidence are mandatory before this requirement can be considered satisfied."
+            }
+        },
+        {
+            "id": "MB-R160",
+            "title": "ASVS 6.2.11 Context-specific word checks",
+            "control": "MB-C15",
+            "severity": "high",
+            "op": "all",
+            "verification": "manual",
+            "requirements": [
+                {
+                    "standard": "OWASP-ASVS",
+                    "version": "5.0.0",
+                    "id": "6.2.11",
+                    "level": 2
+                }
+            ],
+            "checks": [
+                {
+                    "name": "human_manual_review_required",
+                    "args": {
+                        "requirement": "ASVS 5.0.0 6.2.11",
+                        "review": "MANDATORY HUMAN ASSESSMENT: Provide documented evidence that ASVS 5.0.0 6.2.11 (Context-specific word checks) is satisfied. Magebean CLI cannot determine or attest compliance for this requirement.",
+                        "evidence_needed": [
+                            "Relevant design or policy documentation",
+                            "Implementation, configuration, or test evidence",
+                            "Reviewer conclusion and rationale"
+                        ]
+                    }
+                }
+            ],
+            "messages": {
+                "manual_review": "NOT VERIFIED BY MAGEBEAN CLI. Independent human assessment and documented supporting evidence are mandatory before this requirement can be considered satisfied."
+            }
+        },
+        {
+            "id": "MB-R161",
+            "title": "ASVS 6.2.12 Breached-password checks",
+            "control": "MB-C15",
+            "severity": "high",
+            "op": "all",
+            "verification": "manual",
+            "requirements": [
+                {
+                    "standard": "OWASP-ASVS",
+                    "version": "5.0.0",
+                    "id": "6.2.12",
+                    "level": 2
+                }
+            ],
+            "checks": [
+                {
+                    "name": "human_manual_review_required",
+                    "args": {
+                        "requirement": "ASVS 5.0.0 6.2.12",
+                        "review": "MANDATORY HUMAN ASSESSMENT: Provide documented evidence that ASVS 5.0.0 6.2.12 (Breached-password checks) is satisfied. Magebean CLI cannot determine or attest compliance for this requirement.",
+                        "evidence_needed": [
+                            "Relevant design or policy documentation",
+                            "Implementation, configuration, or test evidence",
+                            "Reviewer conclusion and rationale"
+                        ]
+                    }
+                }
+            ],
+            "messages": {
+                "manual_review": "NOT VERIFIED BY MAGEBEAN CLI. Independent human assessment and documented supporting evidence are mandatory before this requirement can be considered satisfied."
+            }
+        },
+        {
+            "id": "MB-R162",
+            "title": "ASVS 6.3.4 Consistent authentication pathways",
+            "control": "MB-C15",
+            "severity": "high",
+            "op": "all",
+            "verification": "manual",
+            "requirements": [
+                {
+                    "standard": "OWASP-ASVS",
+                    "version": "5.0.0",
+                    "id": "6.3.4",
+                    "level": 2
+                }
+            ],
+            "checks": [
+                {
+                    "name": "human_manual_review_required",
+                    "args": {
+                        "requirement": "ASVS 5.0.0 6.3.4",
+                        "review": "MANDATORY HUMAN ASSESSMENT: Provide documented evidence that ASVS 5.0.0 6.3.4 (Consistent authentication pathways) is satisfied. Magebean CLI cannot determine or attest compliance for this requirement.",
+                        "evidence_needed": [
+                            "Relevant design or policy documentation",
+                            "Implementation, configuration, or test evidence",
+                            "Reviewer conclusion and rationale"
+                        ]
+                    }
+                }
+            ],
+            "messages": {
+                "manual_review": "NOT VERIFIED BY MAGEBEAN CLI. Independent human assessment and documented supporting evidence are mandatory before this requirement can be considered satisfied."
+            }
+        },
+        {
+            "id": "MB-R163",
+            "title": "ASVS 6.4.3 Secure password reset",
+            "control": "MB-C15",
+            "severity": "high",
+            "op": "all",
+            "verification": "manual",
+            "requirements": [
+                {
+                    "standard": "OWASP-ASVS",
+                    "version": "5.0.0",
+                    "id": "6.4.3",
+                    "level": 2
+                }
+            ],
+            "checks": [
+                {
+                    "name": "human_manual_review_required",
+                    "args": {
+                        "requirement": "ASVS 5.0.0 6.4.3",
+                        "review": "MANDATORY HUMAN ASSESSMENT: Provide documented evidence that ASVS 5.0.0 6.4.3 (Secure password reset) is satisfied. Magebean CLI cannot determine or attest compliance for this requirement.",
+                        "evidence_needed": [
+                            "Relevant design or policy documentation",
+                            "Implementation, configuration, or test evidence",
+                            "Reviewer conclusion and rationale"
+                        ]
+                    }
+                }
+            ],
+            "messages": {
+                "manual_review": "NOT VERIFIED BY MAGEBEAN CLI. Independent human assessment and documented supporting evidence are mandatory before this requirement can be considered satisfied."
+            }
+        },
+        {
+            "id": "MB-R164",
+            "title": "ASVS 6.4.4 MFA-factor recovery",
+            "control": "MB-C15",
+            "severity": "high",
+            "op": "all",
+            "verification": "manual",
+            "requirements": [
+                {
+                    "standard": "OWASP-ASVS",
+                    "version": "5.0.0",
+                    "id": "6.4.4",
+                    "level": 2
+                }
+            ],
+            "checks": [
+                {
+                    "name": "human_manual_review_required",
+                    "args": {
+                        "requirement": "ASVS 5.0.0 6.4.4",
+                        "review": "MANDATORY HUMAN ASSESSMENT: Provide documented evidence that ASVS 5.0.0 6.4.4 (MFA-factor recovery) is satisfied. Magebean CLI cannot determine or attest compliance for this requirement.",
+                        "evidence_needed": [
+                            "Relevant design or policy documentation",
+                            "Implementation, configuration, or test evidence",
+                            "Reviewer conclusion and rationale"
+                        ]
+                    }
+                }
+            ],
+            "messages": {
+                "manual_review": "NOT VERIFIED BY MAGEBEAN CLI. Independent human assessment and documented supporting evidence are mandatory before this requirement can be considered satisfied."
+            }
+        },
+        {
+            "id": "MB-R165",
+            "title": "ASVS 6.5.1 One-time use",
+            "control": "MB-C15",
+            "severity": "high",
+            "op": "all",
+            "verification": "manual",
+            "requirements": [
+                {
+                    "standard": "OWASP-ASVS",
+                    "version": "5.0.0",
+                    "id": "6.5.1",
+                    "level": 2
+                }
+            ],
+            "checks": [
+                {
+                    "name": "human_manual_review_required",
+                    "args": {
+                        "requirement": "ASVS 5.0.0 6.5.1",
+                        "review": "MANDATORY HUMAN ASSESSMENT: Provide documented evidence that ASVS 5.0.0 6.5.1 (One-time use) is satisfied. Magebean CLI cannot determine or attest compliance for this requirement.",
+                        "evidence_needed": [
+                            "Relevant design or policy documentation",
+                            "Implementation, configuration, or test evidence",
+                            "Reviewer conclusion and rationale"
+                        ]
+                    }
+                }
+            ],
+            "messages": {
+                "manual_review": "NOT VERIFIED BY MAGEBEAN CLI. Independent human assessment and documented supporting evidence are mandatory before this requirement can be considered satisfied."
+            }
+        },
+        {
+            "id": "MB-R166",
+            "title": "ASVS 6.5.2 Stored lookup secrets",
+            "control": "MB-C15",
+            "severity": "high",
+            "op": "all",
+            "verification": "manual",
+            "requirements": [
+                {
+                    "standard": "OWASP-ASVS",
+                    "version": "5.0.0",
+                    "id": "6.5.2",
+                    "level": 2
+                }
+            ],
+            "checks": [
+                {
+                    "name": "human_manual_review_required",
+                    "args": {
+                        "requirement": "ASVS 5.0.0 6.5.2",
+                        "review": "MANDATORY HUMAN ASSESSMENT: Provide documented evidence that ASVS 5.0.0 6.5.2 (Stored lookup secrets) is satisfied. Magebean CLI cannot determine or attest compliance for this requirement.",
+                        "evidence_needed": [
+                            "Relevant design or policy documentation",
+                            "Implementation, configuration, or test evidence",
+                            "Reviewer conclusion and rationale"
+                        ]
+                    }
+                }
+            ],
+            "messages": {
+                "manual_review": "NOT VERIFIED BY MAGEBEAN CLI. Independent human assessment and documented supporting evidence are mandatory before this requirement can be considered satisfied."
+            }
+        },
+        {
+            "id": "MB-R167",
+            "title": "ASVS 6.5.3 Secure generation",
+            "control": "MB-C15",
+            "severity": "high",
+            "op": "all",
+            "verification": "manual",
+            "requirements": [
+                {
+                    "standard": "OWASP-ASVS",
+                    "version": "5.0.0",
+                    "id": "6.5.3",
+                    "level": 2
+                }
+            ],
+            "checks": [
+                {
+                    "name": "human_manual_review_required",
+                    "args": {
+                        "requirement": "ASVS 5.0.0 6.5.3",
+                        "review": "MANDATORY HUMAN ASSESSMENT: Provide documented evidence that ASVS 5.0.0 6.5.3 (Secure generation) is satisfied. Magebean CLI cannot determine or attest compliance for this requirement.",
+                        "evidence_needed": [
+                            "Relevant design or policy documentation",
+                            "Implementation, configuration, or test evidence",
+                            "Reviewer conclusion and rationale"
+                        ]
+                    }
+                }
+            ],
+            "messages": {
+                "manual_review": "NOT VERIFIED BY MAGEBEAN CLI. Independent human assessment and documented supporting evidence are mandatory before this requirement can be considered satisfied."
+            }
+        },
+        {
+            "id": "MB-R168",
+            "title": "ASVS 6.5.4 Minimum entropy",
+            "control": "MB-C15",
+            "severity": "high",
+            "op": "all",
+            "verification": "manual",
+            "requirements": [
+                {
+                    "standard": "OWASP-ASVS",
+                    "version": "5.0.0",
+                    "id": "6.5.4",
+                    "level": 2
+                }
+            ],
+            "checks": [
+                {
+                    "name": "human_manual_review_required",
+                    "args": {
+                        "requirement": "ASVS 5.0.0 6.5.4",
+                        "review": "MANDATORY HUMAN ASSESSMENT: Provide documented evidence that ASVS 5.0.0 6.5.4 (Minimum entropy) is satisfied. Magebean CLI cannot determine or attest compliance for this requirement.",
+                        "evidence_needed": [
+                            "Relevant design or policy documentation",
+                            "Implementation, configuration, or test evidence",
+                            "Reviewer conclusion and rationale"
+                        ]
+                    }
+                }
+            ],
+            "messages": {
+                "manual_review": "NOT VERIFIED BY MAGEBEAN CLI. Independent human assessment and documented supporting evidence are mandatory before this requirement can be considered satisfied."
+            }
+        },
+        {
+            "id": "MB-R169",
+            "title": "ASVS 6.5.5 Short lifetime",
+            "control": "MB-C15",
+            "severity": "high",
+            "op": "all",
+            "verification": "manual",
+            "requirements": [
+                {
+                    "standard": "OWASP-ASVS",
+                    "version": "5.0.0",
+                    "id": "6.5.5",
+                    "level": 2
+                }
+            ],
+            "checks": [
+                {
+                    "name": "human_manual_review_required",
+                    "args": {
+                        "requirement": "ASVS 5.0.0 6.5.5",
+                        "review": "MANDATORY HUMAN ASSESSMENT: Provide documented evidence that ASVS 5.0.0 6.5.5 (Short lifetime) is satisfied. Magebean CLI cannot determine or attest compliance for this requirement.",
+                        "evidence_needed": [
+                            "Relevant design or policy documentation",
+                            "Implementation, configuration, or test evidence",
+                            "Reviewer conclusion and rationale"
+                        ]
+                    }
+                }
+            ],
+            "messages": {
+                "manual_review": "NOT VERIFIED BY MAGEBEAN CLI. Independent human assessment and documented supporting evidence are mandatory before this requirement can be considered satisfied."
+            }
+        },
+        {
+            "id": "MB-R170",
+            "title": "ASVS 6.6.1 Phone/SMS OTP limitations",
+            "control": "MB-C15",
+            "severity": "high",
+            "op": "all",
+            "verification": "manual",
+            "requirements": [
+                {
+                    "standard": "OWASP-ASVS",
+                    "version": "5.0.0",
+                    "id": "6.6.1",
+                    "level": 2
+                }
+            ],
+            "checks": [
+                {
+                    "name": "human_manual_review_required",
+                    "args": {
+                        "requirement": "ASVS 5.0.0 6.6.1",
+                        "review": "MANDATORY HUMAN ASSESSMENT: Provide documented evidence that ASVS 5.0.0 6.6.1 (Phone/SMS OTP limitations) is satisfied. Magebean CLI cannot determine or attest compliance for this requirement.",
+                        "evidence_needed": [
+                            "Relevant design or policy documentation",
+                            "Implementation, configuration, or test evidence",
+                            "Reviewer conclusion and rationale"
+                        ]
+                    }
+                }
+            ],
+            "messages": {
+                "manual_review": "NOT VERIFIED BY MAGEBEAN CLI. Independent human assessment and documented supporting evidence are mandatory before this requirement can be considered satisfied."
+            }
+        },
+        {
+            "id": "MB-R171",
+            "title": "ASVS 6.6.2 Bind OOB challenge",
+            "control": "MB-C15",
+            "severity": "high",
+            "op": "all",
+            "verification": "manual",
+            "requirements": [
+                {
+                    "standard": "OWASP-ASVS",
+                    "version": "5.0.0",
+                    "id": "6.6.2",
+                    "level": 2
+                }
+            ],
+            "checks": [
+                {
+                    "name": "human_manual_review_required",
+                    "args": {
+                        "requirement": "ASVS 5.0.0 6.6.2",
+                        "review": "MANDATORY HUMAN ASSESSMENT: Provide documented evidence that ASVS 5.0.0 6.6.2 (Bind OOB challenge) is satisfied. Magebean CLI cannot determine or attest compliance for this requirement.",
+                        "evidence_needed": [
+                            "Relevant design or policy documentation",
+                            "Implementation, configuration, or test evidence",
+                            "Reviewer conclusion and rationale"
+                        ]
+                    }
+                }
+            ],
+            "messages": {
+                "manual_review": "NOT VERIFIED BY MAGEBEAN CLI. Independent human assessment and documented supporting evidence are mandatory before this requirement can be considered satisfied."
+            }
+        },
+        {
+            "id": "MB-R172",
+            "title": "ASVS 7.1.1 Session-lifetime policy",
+            "control": "MB-C15",
+            "severity": "high",
+            "op": "all",
+            "verification": "manual",
+            "requirements": [
+                {
+                    "standard": "OWASP-ASVS",
+                    "version": "5.0.0",
+                    "id": "7.1.1",
+                    "level": 2
+                }
+            ],
+            "checks": [
+                {
+                    "name": "human_manual_review_required",
+                    "args": {
+                        "requirement": "ASVS 5.0.0 7.1.1",
+                        "review": "MANDATORY HUMAN ASSESSMENT: Provide documented evidence that ASVS 5.0.0 7.1.1 (Session-lifetime policy) is satisfied. Magebean CLI cannot determine or attest compliance for this requirement.",
+                        "evidence_needed": [
+                            "Relevant design or policy documentation",
+                            "Implementation, configuration, or test evidence",
+                            "Reviewer conclusion and rationale"
+                        ]
+                    }
+                }
+            ],
+            "messages": {
+                "manual_review": "NOT VERIFIED BY MAGEBEAN CLI. Independent human assessment and documented supporting evidence are mandatory before this requirement can be considered satisfied."
+            }
+        },
+        {
+            "id": "MB-R173",
+            "title": "ASVS 7.1.2 Concurrent-session policy",
+            "control": "MB-C15",
+            "severity": "high",
+            "op": "all",
+            "verification": "manual",
+            "requirements": [
+                {
+                    "standard": "OWASP-ASVS",
+                    "version": "5.0.0",
+                    "id": "7.1.2",
+                    "level": 2
+                }
+            ],
+            "checks": [
+                {
+                    "name": "human_manual_review_required",
+                    "args": {
+                        "requirement": "ASVS 5.0.0 7.1.2",
+                        "review": "MANDATORY HUMAN ASSESSMENT: Provide documented evidence that ASVS 5.0.0 7.1.2 (Concurrent-session policy) is satisfied. Magebean CLI cannot determine or attest compliance for this requirement.",
+                        "evidence_needed": [
+                            "Relevant design or policy documentation",
+                            "Implementation, configuration, or test evidence",
+                            "Reviewer conclusion and rationale"
+                        ]
+                    }
+                }
+            ],
+            "messages": {
+                "manual_review": "NOT VERIFIED BY MAGEBEAN CLI. Independent human assessment and documented supporting evidence are mandatory before this requirement can be considered satisfied."
+            }
+        },
+        {
+            "id": "MB-R174",
+            "title": "ASVS 7.3.2 Absolute lifetime",
+            "control": "MB-C15",
+            "severity": "high",
+            "op": "all",
+            "verification": "manual",
+            "requirements": [
+                {
+                    "standard": "OWASP-ASVS",
+                    "version": "5.0.0",
+                    "id": "7.3.2",
+                    "level": 2
+                }
+            ],
+            "checks": [
+                {
+                    "name": "human_manual_review_required",
+                    "args": {
+                        "requirement": "ASVS 5.0.0 7.3.2",
+                        "review": "MANDATORY HUMAN ASSESSMENT: Provide documented evidence that ASVS 5.0.0 7.3.2 (Absolute lifetime) is satisfied. Magebean CLI cannot determine or attest compliance for this requirement.",
+                        "evidence_needed": [
+                            "Relevant design or policy documentation",
+                            "Implementation, configuration, or test evidence",
+                            "Reviewer conclusion and rationale"
+                        ]
+                    }
+                }
+            ],
+            "messages": {
+                "manual_review": "NOT VERIFIED BY MAGEBEAN CLI. Independent human assessment and documented supporting evidence are mandatory before this requirement can be considered satisfied."
+            }
+        },
+        {
+            "id": "MB-R175",
+            "title": "ASVS 7.4.3 Terminate other sessions after factor changes",
+            "control": "MB-C15",
+            "severity": "high",
+            "op": "all",
+            "verification": "manual",
+            "requirements": [
+                {
+                    "standard": "OWASP-ASVS",
+                    "version": "5.0.0",
+                    "id": "7.4.3",
+                    "level": 2
+                }
+            ],
+            "checks": [
+                {
+                    "name": "human_manual_review_required",
+                    "args": {
+                        "requirement": "ASVS 5.0.0 7.4.3",
+                        "review": "MANDATORY HUMAN ASSESSMENT: Provide documented evidence that ASVS 5.0.0 7.4.3 (Terminate other sessions after factor changes) is satisfied. Magebean CLI cannot determine or attest compliance for this requirement.",
+                        "evidence_needed": [
+                            "Relevant design or policy documentation",
+                            "Implementation, configuration, or test evidence",
+                            "Reviewer conclusion and rationale"
+                        ]
+                    }
+                }
+            ],
+            "messages": {
+                "manual_review": "NOT VERIFIED BY MAGEBEAN CLI. Independent human assessment and documented supporting evidence are mandatory before this requirement can be considered satisfied."
+            }
+        },
+        {
+            "id": "MB-R176",
+            "title": "ASVS 7.4.4 Visible logout",
+            "control": "MB-C15",
+            "severity": "high",
+            "op": "all",
+            "verification": "manual",
+            "requirements": [
+                {
+                    "standard": "OWASP-ASVS",
+                    "version": "5.0.0",
+                    "id": "7.4.4",
+                    "level": 2
+                }
+            ],
+            "checks": [
+                {
+                    "name": "human_manual_review_required",
+                    "args": {
+                        "requirement": "ASVS 5.0.0 7.4.4",
+                        "review": "MANDATORY HUMAN ASSESSMENT: Provide documented evidence that ASVS 5.0.0 7.4.4 (Visible logout) is satisfied. Magebean CLI cannot determine or attest compliance for this requirement.",
+                        "evidence_needed": [
+                            "Relevant design or policy documentation",
+                            "Implementation, configuration, or test evidence",
+                            "Reviewer conclusion and rationale"
+                        ]
+                    }
+                }
+            ],
+            "messages": {
+                "manual_review": "NOT VERIFIED BY MAGEBEAN CLI. Independent human assessment and documented supporting evidence are mandatory before this requirement can be considered satisfied."
+            }
+        },
+        {
+            "id": "MB-R177",
+            "title": "ASVS 7.4.5 Administrative session termination",
+            "control": "MB-C15",
+            "severity": "high",
+            "op": "all",
+            "verification": "manual",
+            "requirements": [
+                {
+                    "standard": "OWASP-ASVS",
+                    "version": "5.0.0",
+                    "id": "7.4.5",
+                    "level": 2
+                }
+            ],
+            "checks": [
+                {
+                    "name": "human_manual_review_required",
+                    "args": {
+                        "requirement": "ASVS 5.0.0 7.4.5",
+                        "review": "MANDATORY HUMAN ASSESSMENT: Provide documented evidence that ASVS 5.0.0 7.4.5 (Administrative session termination) is satisfied. Magebean CLI cannot determine or attest compliance for this requirement.",
+                        "evidence_needed": [
+                            "Relevant design or policy documentation",
+                            "Implementation, configuration, or test evidence",
+                            "Reviewer conclusion and rationale"
+                        ]
+                    }
+                }
+            ],
+            "messages": {
+                "manual_review": "NOT VERIFIED BY MAGEBEAN CLI. Independent human assessment and documented supporting evidence are mandatory before this requirement can be considered satisfied."
+            }
+        },
+        {
+            "id": "MB-R178",
+            "title": "ASVS 7.5.1 Re-authenticate sensitive account changes",
+            "control": "MB-C15",
+            "severity": "high",
+            "op": "all",
+            "verification": "manual",
+            "requirements": [
+                {
+                    "standard": "OWASP-ASVS",
+                    "version": "5.0.0",
+                    "id": "7.5.1",
+                    "level": 2
+                }
+            ],
+            "checks": [
+                {
+                    "name": "human_manual_review_required",
+                    "args": {
+                        "requirement": "ASVS 5.0.0 7.5.1",
+                        "review": "MANDATORY HUMAN ASSESSMENT: Provide documented evidence that ASVS 5.0.0 7.5.1 (Re-authenticate sensitive account changes) is satisfied. Magebean CLI cannot determine or attest compliance for this requirement.",
+                        "evidence_needed": [
+                            "Relevant design or policy documentation",
+                            "Implementation, configuration, or test evidence",
+                            "Reviewer conclusion and rationale"
+                        ]
+                    }
+                }
+            ],
+            "messages": {
+                "manual_review": "NOT VERIFIED BY MAGEBEAN CLI. Independent human assessment and documented supporting evidence are mandatory before this requirement can be considered satisfied."
+            }
+        },
+        {
+            "id": "MB-R179",
+            "title": "ASVS 7.5.2 User session management",
+            "control": "MB-C15",
+            "severity": "high",
+            "op": "all",
+            "verification": "manual",
+            "requirements": [
+                {
+                    "standard": "OWASP-ASVS",
+                    "version": "5.0.0",
+                    "id": "7.5.2",
+                    "level": 2
+                }
+            ],
+            "checks": [
+                {
+                    "name": "human_manual_review_required",
+                    "args": {
+                        "requirement": "ASVS 5.0.0 7.5.2",
+                        "review": "MANDATORY HUMAN ASSESSMENT: Provide documented evidence that ASVS 5.0.0 7.5.2 (User session management) is satisfied. Magebean CLI cannot determine or attest compliance for this requirement.",
+                        "evidence_needed": [
+                            "Relevant design or policy documentation",
+                            "Implementation, configuration, or test evidence",
+                            "Reviewer conclusion and rationale"
+                        ]
+                    }
+                }
+            ],
+            "messages": {
+                "manual_review": "NOT VERIFIED BY MAGEBEAN CLI. Independent human assessment and documented supporting evidence are mandatory before this requirement can be considered satisfied."
+            }
+        },
+        {
+            "id": "MB-R180",
+            "title": "ASVS 7.6.2 User-initiated sessions",
+            "control": "MB-C15",
+            "severity": "high",
+            "op": "all",
+            "verification": "manual",
+            "requirements": [
+                {
+                    "standard": "OWASP-ASVS",
+                    "version": "5.0.0",
+                    "id": "7.6.2",
+                    "level": 2
+                }
+            ],
+            "checks": [
+                {
+                    "name": "human_manual_review_required",
+                    "args": {
+                        "requirement": "ASVS 5.0.0 7.6.2",
+                        "review": "MANDATORY HUMAN ASSESSMENT: Provide documented evidence that ASVS 5.0.0 7.6.2 (User-initiated sessions) is satisfied. Magebean CLI cannot determine or attest compliance for this requirement.",
+                        "evidence_needed": [
+                            "Relevant design or policy documentation",
+                            "Implementation, configuration, or test evidence",
+                            "Reviewer conclusion and rationale"
+                        ]
+                    }
+                }
+            ],
+            "messages": {
+                "manual_review": "NOT VERIFIED BY MAGEBEAN CLI. Independent human assessment and documented supporting evidence are mandatory before this requirement can be considered satisfied."
+            }
+        },
+        {
+            "id": "MB-R181",
+            "title": "ASVS 8.1.2 Field-level authorization rules",
+            "control": "MB-C15",
+            "severity": "high",
+            "op": "all",
+            "verification": "manual",
+            "requirements": [
+                {
+                    "standard": "OWASP-ASVS",
+                    "version": "5.0.0",
+                    "id": "8.1.2",
+                    "level": 2
+                }
+            ],
+            "checks": [
+                {
+                    "name": "human_manual_review_required",
+                    "args": {
+                        "requirement": "ASVS 5.0.0 8.1.2",
+                        "review": "MANDATORY HUMAN ASSESSMENT: Provide documented evidence that ASVS 5.0.0 8.1.2 (Field-level authorization rules) is satisfied. Magebean CLI cannot determine or attest compliance for this requirement.",
+                        "evidence_needed": [
+                            "Relevant design or policy documentation",
+                            "Implementation, configuration, or test evidence",
+                            "Reviewer conclusion and rationale"
+                        ]
+                    }
+                }
+            ],
+            "messages": {
+                "manual_review": "NOT VERIFIED BY MAGEBEAN CLI. Independent human assessment and documented supporting evidence are mandatory before this requirement can be considered satisfied."
+            }
+        },
+        {
+            "id": "MB-R182",
+            "title": "ASVS 11.1.1 Key-management policy",
+            "control": "MB-C15",
+            "severity": "high",
+            "op": "all",
+            "verification": "manual",
+            "requirements": [
+                {
+                    "standard": "OWASP-ASVS",
+                    "version": "5.0.0",
+                    "id": "11.1.1",
+                    "level": 2
+                }
+            ],
+            "checks": [
+                {
+                    "name": "human_manual_review_required",
+                    "args": {
+                        "requirement": "ASVS 5.0.0 11.1.1",
+                        "review": "MANDATORY HUMAN ASSESSMENT: Provide documented evidence that ASVS 5.0.0 11.1.1 (Key-management policy) is satisfied. Magebean CLI cannot determine or attest compliance for this requirement.",
+                        "evidence_needed": [
+                            "Relevant design or policy documentation",
+                            "Implementation, configuration, or test evidence",
+                            "Reviewer conclusion and rationale"
+                        ]
+                    }
+                }
+            ],
+            "messages": {
+                "manual_review": "NOT VERIFIED BY MAGEBEAN CLI. Independent human assessment and documented supporting evidence are mandatory before this requirement can be considered satisfied."
+            }
+        },
+        {
+            "id": "MB-R183",
+            "title": "ASVS 11.1.2 Cryptographic inventory",
+            "control": "MB-C15",
+            "severity": "high",
+            "op": "all",
+            "verification": "manual",
+            "requirements": [
+                {
+                    "standard": "OWASP-ASVS",
+                    "version": "5.0.0",
+                    "id": "11.1.2",
+                    "level": 2
+                }
+            ],
+            "checks": [
+                {
+                    "name": "human_manual_review_required",
+                    "args": {
+                        "requirement": "ASVS 5.0.0 11.1.2",
+                        "review": "MANDATORY HUMAN ASSESSMENT: Provide documented evidence that ASVS 5.0.0 11.1.2 (Cryptographic inventory) is satisfied. Magebean CLI cannot determine or attest compliance for this requirement.",
+                        "evidence_needed": [
+                            "Relevant design or policy documentation",
+                            "Implementation, configuration, or test evidence",
+                            "Reviewer conclusion and rationale"
+                        ]
+                    }
+                }
+            ],
+            "messages": {
+                "manual_review": "NOT VERIFIED BY MAGEBEAN CLI. Independent human assessment and documented supporting evidence are mandatory before this requirement can be considered satisfied."
+            }
+        },
+        {
+            "id": "MB-R184",
+            "title": "ASVS 11.2.2 Crypto agility",
+            "control": "MB-C15",
+            "severity": "high",
+            "op": "all",
+            "verification": "manual",
+            "requirements": [
+                {
+                    "standard": "OWASP-ASVS",
+                    "version": "5.0.0",
+                    "id": "11.2.2",
+                    "level": 2
+                }
+            ],
+            "checks": [
+                {
+                    "name": "human_manual_review_required",
+                    "args": {
+                        "requirement": "ASVS 5.0.0 11.2.2",
+                        "review": "MANDATORY HUMAN ASSESSMENT: Provide documented evidence that ASVS 5.0.0 11.2.2 (Crypto agility) is satisfied. Magebean CLI cannot determine or attest compliance for this requirement.",
+                        "evidence_needed": [
+                            "Relevant design or policy documentation",
+                            "Implementation, configuration, or test evidence",
+                            "Reviewer conclusion and rationale"
+                        ]
+                    }
+                }
+            ],
+            "messages": {
+                "manual_review": "NOT VERIFIED BY MAGEBEAN CLI. Independent human assessment and documented supporting evidence are mandatory before this requirement can be considered satisfied."
+            }
+        },
+        {
+            "id": "MB-R185",
+            "title": "ASVS 11.4.3 Hash strength",
+            "control": "MB-C15",
+            "severity": "high",
+            "op": "all",
+            "verification": "manual",
+            "requirements": [
+                {
+                    "standard": "OWASP-ASVS",
+                    "version": "5.0.0",
+                    "id": "11.4.3",
+                    "level": 2
+                }
+            ],
+            "checks": [
+                {
+                    "name": "human_manual_review_required",
+                    "args": {
+                        "requirement": "ASVS 5.0.0 11.4.3",
+                        "review": "MANDATORY HUMAN ASSESSMENT: Provide documented evidence that ASVS 5.0.0 11.4.3 (Hash strength) is satisfied. Magebean CLI cannot determine or attest compliance for this requirement.",
+                        "evidence_needed": [
+                            "Relevant design or policy documentation",
+                            "Implementation, configuration, or test evidence",
+                            "Reviewer conclusion and rationale"
+                        ]
+                    }
+                }
+            ],
+            "messages": {
+                "manual_review": "NOT VERIFIED BY MAGEBEAN CLI. Independent human assessment and documented supporting evidence are mandatory before this requirement can be considered satisfied."
+            }
+        },
+        {
+            "id": "MB-R186",
+            "title": "ASVS 11.4.4 Password-derived keys",
+            "control": "MB-C15",
+            "severity": "high",
+            "op": "all",
+            "verification": "manual",
+            "requirements": [
+                {
+                    "standard": "OWASP-ASVS",
+                    "version": "5.0.0",
+                    "id": "11.4.4",
+                    "level": 2
+                }
+            ],
+            "checks": [
+                {
+                    "name": "human_manual_review_required",
+                    "args": {
+                        "requirement": "ASVS 5.0.0 11.4.4",
+                        "review": "MANDATORY HUMAN ASSESSMENT: Provide documented evidence that ASVS 5.0.0 11.4.4 (Password-derived keys) is satisfied. Magebean CLI cannot determine or attest compliance for this requirement.",
+                        "evidence_needed": [
+                            "Relevant design or policy documentation",
+                            "Implementation, configuration, or test evidence",
+                            "Reviewer conclusion and rationale"
+                        ]
+                    }
+                }
+            ],
+            "messages": {
+                "manual_review": "NOT VERIFIED BY MAGEBEAN CLI. Independent human assessment and documented supporting evidence are mandatory before this requirement can be considered satisfied."
+            }
+        },
+        {
+            "id": "MB-R187",
+            "title": "ASVS 12.1.3 mTLS certificate trust",
+            "control": "MB-C15",
+            "severity": "high",
+            "op": "all",
+            "verification": "manual",
+            "requirements": [
+                {
+                    "standard": "OWASP-ASVS",
+                    "version": "5.0.0",
+                    "id": "12.1.3",
+                    "level": 2
+                }
+            ],
+            "checks": [
+                {
+                    "name": "human_manual_review_required",
+                    "args": {
+                        "requirement": "ASVS 5.0.0 12.1.3",
+                        "review": "MANDATORY HUMAN ASSESSMENT: Provide documented evidence that ASVS 5.0.0 12.1.3 (mTLS certificate trust) is satisfied. Magebean CLI cannot determine or attest compliance for this requirement.",
+                        "evidence_needed": [
+                            "Relevant design or policy documentation",
+                            "Implementation, configuration, or test evidence",
+                            "Reviewer conclusion and rationale"
+                        ]
+                    }
+                }
+            ],
+            "messages": {
+                "manual_review": "NOT VERIFIED BY MAGEBEAN CLI. Independent human assessment and documented supporting evidence are mandatory before this requirement can be considered satisfied."
+            }
+        },
+        {
+            "id": "MB-R188",
+            "title": "ASVS 12.3.4 Internal certificate trust",
+            "control": "MB-C15",
+            "severity": "high",
+            "op": "all",
+            "verification": "manual",
+            "requirements": [
+                {
+                    "standard": "OWASP-ASVS",
+                    "version": "5.0.0",
+                    "id": "12.3.4",
+                    "level": 2
+                }
+            ],
+            "checks": [
+                {
+                    "name": "human_manual_review_required",
+                    "args": {
+                        "requirement": "ASVS 5.0.0 12.3.4",
+                        "review": "MANDATORY HUMAN ASSESSMENT: Provide documented evidence that ASVS 5.0.0 12.3.4 (Internal certificate trust) is satisfied. Magebean CLI cannot determine or attest compliance for this requirement.",
+                        "evidence_needed": [
+                            "Relevant design or policy documentation",
+                            "Implementation, configuration, or test evidence",
+                            "Reviewer conclusion and rationale"
+                        ]
+                    }
+                }
+            ],
+            "messages": {
+                "manual_review": "NOT VERIFIED BY MAGEBEAN CLI. Independent human assessment and documented supporting evidence are mandatory before this requirement can be considered satisfied."
+            }
+        },
+        {
+            "id": "MB-R189",
+            "title": "ASVS 13.1.1 Communication inventory",
+            "control": "MB-C15",
+            "severity": "medium",
+            "op": "all",
+            "verification": "manual",
+            "requirements": [
+                {
+                    "standard": "OWASP-ASVS",
+                    "version": "5.0.0",
+                    "id": "13.1.1",
+                    "level": 2
+                }
+            ],
+            "checks": [
+                {
+                    "name": "human_manual_review_required",
+                    "args": {
+                        "requirement": "ASVS 5.0.0 13.1.1",
+                        "review": "MANDATORY HUMAN ASSESSMENT: Provide documented evidence that ASVS 5.0.0 13.1.1 (Communication inventory) is satisfied. Magebean CLI cannot determine or attest compliance for this requirement.",
+                        "evidence_needed": [
+                            "Relevant design or policy documentation",
+                            "Implementation, configuration, or test evidence",
+                            "Reviewer conclusion and rationale"
+                        ]
+                    }
+                }
+            ],
+            "messages": {
+                "manual_review": "NOT VERIFIED BY MAGEBEAN CLI. Independent human assessment and documented supporting evidence are mandatory before this requirement can be considered satisfied."
+            }
+        },
+        {
+            "id": "MB-R190",
+            "title": "ASVS 13.2.1 Backend authentication",
+            "control": "MB-C15",
+            "severity": "medium",
+            "op": "all",
+            "verification": "manual",
+            "requirements": [
+                {
+                    "standard": "OWASP-ASVS",
+                    "version": "5.0.0",
+                    "id": "13.2.1",
+                    "level": 2
+                }
+            ],
+            "checks": [
+                {
+                    "name": "human_manual_review_required",
+                    "args": {
+                        "requirement": "ASVS 5.0.0 13.2.1",
+                        "review": "MANDATORY HUMAN ASSESSMENT: Provide documented evidence that ASVS 5.0.0 13.2.1 (Backend authentication) is satisfied. Magebean CLI cannot determine or attest compliance for this requirement.",
+                        "evidence_needed": [
+                            "Relevant design or policy documentation",
+                            "Implementation, configuration, or test evidence",
+                            "Reviewer conclusion and rationale"
+                        ]
+                    }
+                }
+            ],
+            "messages": {
+                "manual_review": "NOT VERIFIED BY MAGEBEAN CLI. Independent human assessment and documented supporting evidence are mandatory before this requirement can be considered satisfied."
+            }
+        },
+        {
+            "id": "MB-R191",
+            "title": "ASVS 13.4.4 Disable HTTP TRACE",
+            "control": "MB-C15",
+            "severity": "medium",
+            "op": "all",
+            "verification": "manual",
+            "requirements": [
+                {
+                    "standard": "OWASP-ASVS",
+                    "version": "5.0.0",
+                    "id": "13.4.4",
+                    "level": 2
+                }
+            ],
+            "checks": [
+                {
+                    "name": "human_manual_review_required",
+                    "args": {
+                        "requirement": "ASVS 5.0.0 13.4.4",
+                        "review": "MANDATORY HUMAN ASSESSMENT: Provide documented evidence that ASVS 5.0.0 13.4.4 (Disable HTTP TRACE) is satisfied. Magebean CLI cannot determine or attest compliance for this requirement.",
+                        "evidence_needed": [
+                            "Relevant design or policy documentation",
+                            "Implementation, configuration, or test evidence",
+                            "Reviewer conclusion and rationale"
+                        ]
+                    }
+                }
+            ],
+            "messages": {
+                "manual_review": "NOT VERIFIED BY MAGEBEAN CLI. Independent human assessment and documented supporting evidence are mandatory before this requirement can be considered satisfied."
+            }
+        },
+        {
+            "id": "MB-R192",
+            "title": "ASVS 14.1.1 Sensitive-data inventory",
+            "control": "MB-C15",
+            "severity": "medium",
+            "op": "all",
+            "verification": "manual",
+            "requirements": [
+                {
+                    "standard": "OWASP-ASVS",
+                    "version": "5.0.0",
+                    "id": "14.1.1",
+                    "level": 2
+                }
+            ],
+            "checks": [
+                {
+                    "name": "human_manual_review_required",
+                    "args": {
+                        "requirement": "ASVS 5.0.0 14.1.1",
+                        "review": "MANDATORY HUMAN ASSESSMENT: Provide documented evidence that ASVS 5.0.0 14.1.1 (Sensitive-data inventory) is satisfied. Magebean CLI cannot determine or attest compliance for this requirement.",
+                        "evidence_needed": [
+                            "Relevant design or policy documentation",
+                            "Implementation, configuration, or test evidence",
+                            "Reviewer conclusion and rationale"
+                        ]
+                    }
+                }
+            ],
+            "messages": {
+                "manual_review": "NOT VERIFIED BY MAGEBEAN CLI. Independent human assessment and documented supporting evidence are mandatory before this requirement can be considered satisfied."
+            }
+        },
+        {
+            "id": "MB-R193",
+            "title": "ASVS 14.1.2 Protection requirements",
+            "control": "MB-C15",
+            "severity": "medium",
+            "op": "all",
+            "verification": "manual",
+            "requirements": [
+                {
+                    "standard": "OWASP-ASVS",
+                    "version": "5.0.0",
+                    "id": "14.1.2",
+                    "level": 2
+                }
+            ],
+            "checks": [
+                {
+                    "name": "human_manual_review_required",
+                    "args": {
+                        "requirement": "ASVS 5.0.0 14.1.2",
+                        "review": "MANDATORY HUMAN ASSESSMENT: Provide documented evidence that ASVS 5.0.0 14.1.2 (Protection requirements) is satisfied. Magebean CLI cannot determine or attest compliance for this requirement.",
+                        "evidence_needed": [
+                            "Relevant design or policy documentation",
+                            "Implementation, configuration, or test evidence",
+                            "Reviewer conclusion and rationale"
+                        ]
+                    }
+                }
+            ],
+            "messages": {
+                "manual_review": "NOT VERIFIED BY MAGEBEAN CLI. Independent human assessment and documented supporting evidence are mandatory before this requirement can be considered satisfied."
+            }
+        },
+        {
+            "id": "MB-R194",
+            "title": "ASVS 14.2.2 Server-side cache protection",
+            "control": "MB-C15",
+            "severity": "medium",
+            "op": "all",
+            "verification": "manual",
+            "requirements": [
+                {
+                    "standard": "OWASP-ASVS",
+                    "version": "5.0.0",
+                    "id": "14.2.2",
+                    "level": 2
+                }
+            ],
+            "checks": [
+                {
+                    "name": "human_manual_review_required",
+                    "args": {
+                        "requirement": "ASVS 5.0.0 14.2.2",
+                        "review": "MANDATORY HUMAN ASSESSMENT: Provide documented evidence that ASVS 5.0.0 14.2.2 (Server-side cache protection) is satisfied. Magebean CLI cannot determine or attest compliance for this requirement.",
+                        "evidence_needed": [
+                            "Relevant design or policy documentation",
+                            "Implementation, configuration, or test evidence",
+                            "Reviewer conclusion and rationale"
+                        ]
+                    }
+                }
+            ],
+            "messages": {
+                "manual_review": "NOT VERIFIED BY MAGEBEAN CLI. Independent human assessment and documented supporting evidence are mandatory before this requirement can be considered satisfied."
+            }
+        },
+        {
+            "id": "MB-R195",
+            "title": "ASVS 14.3.2 Browser anti-caching",
+            "control": "MB-C15",
+            "severity": "medium",
+            "op": "all",
+            "verification": "manual",
+            "requirements": [
+                {
+                    "standard": "OWASP-ASVS",
+                    "version": "5.0.0",
+                    "id": "14.3.2",
+                    "level": 2
+                }
+            ],
+            "checks": [
+                {
+                    "name": "human_manual_review_required",
+                    "args": {
+                        "requirement": "ASVS 5.0.0 14.3.2",
+                        "review": "MANDATORY HUMAN ASSESSMENT: Provide documented evidence that ASVS 5.0.0 14.3.2 (Browser anti-caching) is satisfied. Magebean CLI cannot determine or attest compliance for this requirement.",
+                        "evidence_needed": [
+                            "Relevant design or policy documentation",
+                            "Implementation, configuration, or test evidence",
+                            "Reviewer conclusion and rationale"
+                        ]
+                    }
+                }
+            ],
+            "messages": {
+                "manual_review": "NOT VERIFIED BY MAGEBEAN CLI. Independent human assessment and documented supporting evidence are mandatory before this requirement can be considered satisfied."
+            }
+        },
+        {
+            "id": "MB-R196",
+            "title": "ASVS 14.3.3 Browser-storage minimization",
+            "control": "MB-C15",
+            "severity": "medium",
+            "op": "all",
+            "verification": "manual",
+            "requirements": [
+                {
+                    "standard": "OWASP-ASVS",
+                    "version": "5.0.0",
+                    "id": "14.3.3",
+                    "level": 2
+                }
+            ],
+            "checks": [
+                {
+                    "name": "human_manual_review_required",
+                    "args": {
+                        "requirement": "ASVS 5.0.0 14.3.3",
+                        "review": "MANDATORY HUMAN ASSESSMENT: Provide documented evidence that ASVS 5.0.0 14.3.3 (Browser-storage minimization) is satisfied. Magebean CLI cannot determine or attest compliance for this requirement.",
+                        "evidence_needed": [
+                            "Relevant design or policy documentation",
+                            "Implementation, configuration, or test evidence",
+                            "Reviewer conclusion and rationale"
+                        ]
+                    }
+                }
+            ],
+            "messages": {
+                "manual_review": "NOT VERIFIED BY MAGEBEAN CLI. Independent human assessment and documented supporting evidence are mandatory before this requirement can be considered satisfied."
+            }
+        },
+        {
+            "id": "MB-R197",
+            "title": "ASVS 15.1.3 Resource-intensive functionality",
+            "control": "MB-C15",
+            "severity": "medium",
+            "op": "all",
+            "verification": "manual",
+            "requirements": [
+                {
+                    "standard": "OWASP-ASVS",
+                    "version": "5.0.0",
+                    "id": "15.1.3",
+                    "level": 2
+                }
+            ],
+            "checks": [
+                {
+                    "name": "human_manual_review_required",
+                    "args": {
+                        "requirement": "ASVS 5.0.0 15.1.3",
+                        "review": "MANDATORY HUMAN ASSESSMENT: Provide documented evidence that ASVS 5.0.0 15.1.3 (Resource-intensive functionality) is satisfied. Magebean CLI cannot determine or attest compliance for this requirement.",
+                        "evidence_needed": [
+                            "Relevant design or policy documentation",
+                            "Implementation, configuration, or test evidence",
+                            "Reviewer conclusion and rationale"
+                        ]
+                    }
+                }
+            ],
+            "messages": {
+                "manual_review": "NOT VERIFIED BY MAGEBEAN CLI. Independent human assessment and documented supporting evidence are mandatory before this requirement can be considered satisfied."
+            }
+        },
+        {
+            "id": "MB-R198",
+            "title": "ASVS 15.2.2 Availability defenses",
+            "control": "MB-C15",
+            "severity": "medium",
+            "op": "all",
+            "verification": "manual",
+            "requirements": [
+                {
+                    "standard": "OWASP-ASVS",
+                    "version": "5.0.0",
+                    "id": "15.2.2",
+                    "level": 2
+                }
+            ],
+            "checks": [
+                {
+                    "name": "human_manual_review_required",
+                    "args": {
+                        "requirement": "ASVS 5.0.0 15.2.2",
+                        "review": "MANDATORY HUMAN ASSESSMENT: Provide documented evidence that ASVS 5.0.0 15.2.2 (Availability defenses) is satisfied. Magebean CLI cannot determine or attest compliance for this requirement.",
+                        "evidence_needed": [
+                            "Relevant design or policy documentation",
+                            "Implementation, configuration, or test evidence",
+                            "Reviewer conclusion and rationale"
+                        ]
+                    }
+                }
+            ],
+            "messages": {
+                "manual_review": "NOT VERIFIED BY MAGEBEAN CLI. Independent human assessment and documented supporting evidence are mandatory before this requirement can be considered satisfied."
+            }
+        },
+        {
+            "id": "MB-R199",
+            "title": "ASVS 15.3.2 External redirect handling",
+            "control": "MB-C15",
+            "severity": "medium",
+            "op": "all",
+            "verification": "manual",
+            "requirements": [
+                {
+                    "standard": "OWASP-ASVS",
+                    "version": "5.0.0",
+                    "id": "15.3.2",
+                    "level": 2
+                }
+            ],
+            "checks": [
+                {
+                    "name": "human_manual_review_required",
+                    "args": {
+                        "requirement": "ASVS 5.0.0 15.3.2",
+                        "review": "MANDATORY HUMAN ASSESSMENT: Provide documented evidence that ASVS 5.0.0 15.3.2 (External redirect handling) is satisfied. Magebean CLI cannot determine or attest compliance for this requirement.",
+                        "evidence_needed": [
+                            "Relevant design or policy documentation",
+                            "Implementation, configuration, or test evidence",
+                            "Reviewer conclusion and rationale"
+                        ]
+                    }
+                }
+            ],
+            "messages": {
+                "manual_review": "NOT VERIFIED BY MAGEBEAN CLI. Independent human assessment and documented supporting evidence are mandatory before this requirement can be considered satisfied."
+            }
+        },
+        {
+            "id": "MB-R200",
+            "title": "ASVS 15.3.3 Mass-assignment protection",
+            "control": "MB-C15",
+            "severity": "medium",
+            "op": "all",
+            "verification": "manual",
+            "requirements": [
+                {
+                    "standard": "OWASP-ASVS",
+                    "version": "5.0.0",
+                    "id": "15.3.3",
+                    "level": 2
+                }
+            ],
+            "checks": [
+                {
+                    "name": "human_manual_review_required",
+                    "args": {
+                        "requirement": "ASVS 5.0.0 15.3.3",
+                        "review": "MANDATORY HUMAN ASSESSMENT: Provide documented evidence that ASVS 5.0.0 15.3.3 (Mass-assignment protection) is satisfied. Magebean CLI cannot determine or attest compliance for this requirement.",
+                        "evidence_needed": [
+                            "Relevant design or policy documentation",
+                            "Implementation, configuration, or test evidence",
+                            "Reviewer conclusion and rationale"
+                        ]
+                    }
+                }
+            ],
+            "messages": {
+                "manual_review": "NOT VERIFIED BY MAGEBEAN CLI. Independent human assessment and documented supporting evidence are mandatory before this requirement can be considered satisfied."
+            }
+        },
+        {
+            "id": "MB-R201",
+            "title": "ASVS 15.3.4 Trusted client IP propagation",
+            "control": "MB-C15",
+            "severity": "medium",
+            "op": "all",
+            "verification": "manual",
+            "requirements": [
+                {
+                    "standard": "OWASP-ASVS",
+                    "version": "5.0.0",
+                    "id": "15.3.4",
+                    "level": 2
+                }
+            ],
+            "checks": [
+                {
+                    "name": "human_manual_review_required",
+                    "args": {
+                        "requirement": "ASVS 5.0.0 15.3.4",
+                        "review": "MANDATORY HUMAN ASSESSMENT: Provide documented evidence that ASVS 5.0.0 15.3.4 (Trusted client IP propagation) is satisfied. Magebean CLI cannot determine or attest compliance for this requirement.",
+                        "evidence_needed": [
+                            "Relevant design or policy documentation",
+                            "Implementation, configuration, or test evidence",
+                            "Reviewer conclusion and rationale"
+                        ]
+                    }
+                }
+            ],
+            "messages": {
+                "manual_review": "NOT VERIFIED BY MAGEBEAN CLI. Independent human assessment and documented supporting evidence are mandatory before this requirement can be considered satisfied."
+            }
+        },
+        {
+            "id": "MB-R202",
+            "title": "ASVS 15.3.5 Strict typing and comparison",
+            "control": "MB-C15",
+            "severity": "medium",
+            "op": "all",
+            "verification": "manual",
+            "requirements": [
+                {
+                    "standard": "OWASP-ASVS",
+                    "version": "5.0.0",
+                    "id": "15.3.5",
+                    "level": 2
+                }
+            ],
+            "checks": [
+                {
+                    "name": "human_manual_review_required",
+                    "args": {
+                        "requirement": "ASVS 5.0.0 15.3.5",
+                        "review": "MANDATORY HUMAN ASSESSMENT: Provide documented evidence that ASVS 5.0.0 15.3.5 (Strict typing and comparison) is satisfied. Magebean CLI cannot determine or attest compliance for this requirement.",
+                        "evidence_needed": [
+                            "Relevant design or policy documentation",
+                            "Implementation, configuration, or test evidence",
+                            "Reviewer conclusion and rationale"
+                        ]
+                    }
+                }
+            ],
+            "messages": {
+                "manual_review": "NOT VERIFIED BY MAGEBEAN CLI. Independent human assessment and documented supporting evidence are mandatory before this requirement can be considered satisfied."
+            }
+        },
+        {
+            "id": "MB-R203",
+            "title": "ASVS 15.3.6 Prototype-pollution defense",
+            "control": "MB-C15",
+            "severity": "medium",
+            "op": "all",
+            "verification": "manual",
+            "requirements": [
+                {
+                    "standard": "OWASP-ASVS",
+                    "version": "5.0.0",
+                    "id": "15.3.6",
+                    "level": 2
+                }
+            ],
+            "checks": [
+                {
+                    "name": "human_manual_review_required",
+                    "args": {
+                        "requirement": "ASVS 5.0.0 15.3.6",
+                        "review": "MANDATORY HUMAN ASSESSMENT: Provide documented evidence that ASVS 5.0.0 15.3.6 (Prototype-pollution defense) is satisfied. Magebean CLI cannot determine or attest compliance for this requirement.",
+                        "evidence_needed": [
+                            "Relevant design or policy documentation",
+                            "Implementation, configuration, or test evidence",
+                            "Reviewer conclusion and rationale"
+                        ]
+                    }
+                }
+            ],
+            "messages": {
+                "manual_review": "NOT VERIFIED BY MAGEBEAN CLI. Independent human assessment and documented supporting evidence are mandatory before this requirement can be considered satisfied."
+            }
+        },
+        {
+            "id": "MB-R204",
+            "title": "ASVS 15.3.7 HTTP parameter pollution",
+            "control": "MB-C15",
+            "severity": "medium",
+            "op": "all",
+            "verification": "manual",
+            "requirements": [
+                {
+                    "standard": "OWASP-ASVS",
+                    "version": "5.0.0",
+                    "id": "15.3.7",
+                    "level": 2
+                }
+            ],
+            "checks": [
+                {
+                    "name": "human_manual_review_required",
+                    "args": {
+                        "requirement": "ASVS 5.0.0 15.3.7",
+                        "review": "MANDATORY HUMAN ASSESSMENT: Provide documented evidence that ASVS 5.0.0 15.3.7 (HTTP parameter pollution) is satisfied. Magebean CLI cannot determine or attest compliance for this requirement.",
+                        "evidence_needed": [
+                            "Relevant design or policy documentation",
+                            "Implementation, configuration, or test evidence",
+                            "Reviewer conclusion and rationale"
+                        ]
+                    }
+                }
+            ],
+            "messages": {
+                "manual_review": "NOT VERIFIED BY MAGEBEAN CLI. Independent human assessment and documented supporting evidence are mandatory before this requirement can be considered satisfied."
+            }
+        },
+        {
+            "id": "MB-R205",
+            "title": "ASVS 16.1.1 Logging inventory",
+            "control": "MB-C15",
+            "severity": "medium",
+            "op": "all",
+            "verification": "manual",
+            "requirements": [
+                {
+                    "standard": "OWASP-ASVS",
+                    "version": "5.0.0",
+                    "id": "16.1.1",
+                    "level": 2
+                }
+            ],
+            "checks": [
+                {
+                    "name": "human_manual_review_required",
+                    "args": {
+                        "requirement": "ASVS 5.0.0 16.1.1",
+                        "review": "MANDATORY HUMAN ASSESSMENT: Provide documented evidence that ASVS 5.0.0 16.1.1 (Logging inventory) is satisfied. Magebean CLI cannot determine or attest compliance for this requirement.",
+                        "evidence_needed": [
+                            "Relevant design or policy documentation",
+                            "Implementation, configuration, or test evidence",
+                            "Reviewer conclusion and rationale"
+                        ]
+                    }
+                }
+            ],
+            "messages": {
+                "manual_review": "NOT VERIFIED BY MAGEBEAN CLI. Independent human assessment and documented supporting evidence are mandatory before this requirement can be considered satisfied."
+            }
+        },
+        {
+            "id": "MB-R206",
+            "title": "ASVS 16.2.1 Investigation metadata",
+            "control": "MB-C15",
+            "severity": "medium",
+            "op": "all",
+            "verification": "manual",
+            "requirements": [
+                {
+                    "standard": "OWASP-ASVS",
+                    "version": "5.0.0",
+                    "id": "16.2.1",
+                    "level": 2
+                }
+            ],
+            "checks": [
+                {
+                    "name": "human_manual_review_required",
+                    "args": {
+                        "requirement": "ASVS 5.0.0 16.2.1",
+                        "review": "MANDATORY HUMAN ASSESSMENT: Provide documented evidence that ASVS 5.0.0 16.2.1 (Investigation metadata) is satisfied. Magebean CLI cannot determine or attest compliance for this requirement.",
+                        "evidence_needed": [
+                            "Relevant design or policy documentation",
+                            "Implementation, configuration, or test evidence",
+                            "Reviewer conclusion and rationale"
+                        ]
+                    }
+                }
+            ],
+            "messages": {
+                "manual_review": "NOT VERIFIED BY MAGEBEAN CLI. Independent human assessment and documented supporting evidence are mandatory before this requirement can be considered satisfied."
+            }
+        },
+        {
+            "id": "MB-R207",
+            "title": "ASVS 16.2.2 Time synchronization",
+            "control": "MB-C15",
+            "severity": "medium",
+            "op": "all",
+            "verification": "manual",
+            "requirements": [
+                {
+                    "standard": "OWASP-ASVS",
+                    "version": "5.0.0",
+                    "id": "16.2.2",
+                    "level": 2
+                }
+            ],
+            "checks": [
+                {
+                    "name": "human_manual_review_required",
+                    "args": {
+                        "requirement": "ASVS 5.0.0 16.2.2",
+                        "review": "MANDATORY HUMAN ASSESSMENT: Provide documented evidence that ASVS 5.0.0 16.2.2 (Time synchronization) is satisfied. Magebean CLI cannot determine or attest compliance for this requirement.",
+                        "evidence_needed": [
+                            "Relevant design or policy documentation",
+                            "Implementation, configuration, or test evidence",
+                            "Reviewer conclusion and rationale"
+                        ]
+                    }
+                }
+            ],
+            "messages": {
+                "manual_review": "NOT VERIFIED BY MAGEBEAN CLI. Independent human assessment and documented supporting evidence are mandatory before this requirement can be considered satisfied."
+            }
+        },
+        {
+            "id": "MB-R208",
+            "title": "ASVS 16.2.3 Approved log destinations",
+            "control": "MB-C15",
+            "severity": "medium",
+            "op": "all",
+            "verification": "manual",
+            "requirements": [
+                {
+                    "standard": "OWASP-ASVS",
+                    "version": "5.0.0",
+                    "id": "16.2.3",
+                    "level": 2
+                }
+            ],
+            "checks": [
+                {
+                    "name": "human_manual_review_required",
+                    "args": {
+                        "requirement": "ASVS 5.0.0 16.2.3",
+                        "review": "MANDATORY HUMAN ASSESSMENT: Provide documented evidence that ASVS 5.0.0 16.2.3 (Approved log destinations) is satisfied. Magebean CLI cannot determine or attest compliance for this requirement.",
+                        "evidence_needed": [
+                            "Relevant design or policy documentation",
+                            "Implementation, configuration, or test evidence",
+                            "Reviewer conclusion and rationale"
+                        ]
+                    }
+                }
+            ],
+            "messages": {
+                "manual_review": "NOT VERIFIED BY MAGEBEAN CLI. Independent human assessment and documented supporting evidence are mandatory before this requirement can be considered satisfied."
+            }
+        },
+        {
+            "id": "MB-R209",
+            "title": "ASVS 16.2.4 Correlatable format",
+            "control": "MB-C15",
+            "severity": "medium",
+            "op": "all",
+            "verification": "manual",
+            "requirements": [
+                {
+                    "standard": "OWASP-ASVS",
+                    "version": "5.0.0",
+                    "id": "16.2.4",
+                    "level": 2
+                }
+            ],
+            "checks": [
+                {
+                    "name": "human_manual_review_required",
+                    "args": {
+                        "requirement": "ASVS 5.0.0 16.2.4",
+                        "review": "MANDATORY HUMAN ASSESSMENT: Provide documented evidence that ASVS 5.0.0 16.2.4 (Correlatable format) is satisfied. Magebean CLI cannot determine or attest compliance for this requirement.",
+                        "evidence_needed": [
+                            "Relevant design or policy documentation",
+                            "Implementation, configuration, or test evidence",
+                            "Reviewer conclusion and rationale"
+                        ]
+                    }
+                }
+            ],
+            "messages": {
+                "manual_review": "NOT VERIFIED BY MAGEBEAN CLI. Independent human assessment and documented supporting evidence are mandatory before this requirement can be considered satisfied."
+            }
+        },
+        {
+            "id": "MB-R210",
+            "title": "ASVS 16.3.1 Authentication logging",
+            "control": "MB-C15",
+            "severity": "medium",
+            "op": "all",
+            "verification": "manual",
+            "requirements": [
+                {
+                    "standard": "OWASP-ASVS",
+                    "version": "5.0.0",
+                    "id": "16.3.1",
+                    "level": 2
+                }
+            ],
+            "checks": [
+                {
+                    "name": "human_manual_review_required",
+                    "args": {
+                        "requirement": "ASVS 5.0.0 16.3.1",
+                        "review": "MANDATORY HUMAN ASSESSMENT: Provide documented evidence that ASVS 5.0.0 16.3.1 (Authentication logging) is satisfied. Magebean CLI cannot determine or attest compliance for this requirement.",
+                        "evidence_needed": [
+                            "Relevant design or policy documentation",
+                            "Implementation, configuration, or test evidence",
+                            "Reviewer conclusion and rationale"
+                        ]
+                    }
+                }
+            ],
+            "messages": {
+                "manual_review": "NOT VERIFIED BY MAGEBEAN CLI. Independent human assessment and documented supporting evidence are mandatory before this requirement can be considered satisfied."
+            }
+        },
+        {
+            "id": "MB-R211",
+            "title": "ASVS 16.3.2 Authorization logging",
+            "control": "MB-C15",
+            "severity": "medium",
+            "op": "all",
+            "verification": "manual",
+            "requirements": [
+                {
+                    "standard": "OWASP-ASVS",
+                    "version": "5.0.0",
+                    "id": "16.3.2",
+                    "level": 2
+                }
+            ],
+            "checks": [
+                {
+                    "name": "human_manual_review_required",
+                    "args": {
+                        "requirement": "ASVS 5.0.0 16.3.2",
+                        "review": "MANDATORY HUMAN ASSESSMENT: Provide documented evidence that ASVS 5.0.0 16.3.2 (Authorization logging) is satisfied. Magebean CLI cannot determine or attest compliance for this requirement.",
+                        "evidence_needed": [
+                            "Relevant design or policy documentation",
+                            "Implementation, configuration, or test evidence",
+                            "Reviewer conclusion and rationale"
+                        ]
+                    }
+                }
+            ],
+            "messages": {
+                "manual_review": "NOT VERIFIED BY MAGEBEAN CLI. Independent human assessment and documented supporting evidence are mandatory before this requirement can be considered satisfied."
+            }
+        },
+        {
+            "id": "MB-R212",
+            "title": "ASVS 16.3.3 Security-control events",
+            "control": "MB-C15",
+            "severity": "medium",
+            "op": "all",
+            "verification": "manual",
+            "requirements": [
+                {
+                    "standard": "OWASP-ASVS",
+                    "version": "5.0.0",
+                    "id": "16.3.3",
+                    "level": 2
+                }
+            ],
+            "checks": [
+                {
+                    "name": "human_manual_review_required",
+                    "args": {
+                        "requirement": "ASVS 5.0.0 16.3.3",
+                        "review": "MANDATORY HUMAN ASSESSMENT: Provide documented evidence that ASVS 5.0.0 16.3.3 (Security-control events) is satisfied. Magebean CLI cannot determine or attest compliance for this requirement.",
+                        "evidence_needed": [
+                            "Relevant design or policy documentation",
+                            "Implementation, configuration, or test evidence",
+                            "Reviewer conclusion and rationale"
+                        ]
+                    }
+                }
+            ],
+            "messages": {
+                "manual_review": "NOT VERIFIED BY MAGEBEAN CLI. Independent human assessment and documented supporting evidence are mandatory before this requirement can be considered satisfied."
+            }
+        },
+        {
+            "id": "MB-R213",
+            "title": "ASVS 16.3.4 Error and control-failure logging",
+            "control": "MB-C15",
+            "severity": "medium",
+            "op": "all",
+            "verification": "manual",
+            "requirements": [
+                {
+                    "standard": "OWASP-ASVS",
+                    "version": "5.0.0",
+                    "id": "16.3.4",
+                    "level": 2
+                }
+            ],
+            "checks": [
+                {
+                    "name": "human_manual_review_required",
+                    "args": {
+                        "requirement": "ASVS 5.0.0 16.3.4",
+                        "review": "MANDATORY HUMAN ASSESSMENT: Provide documented evidence that ASVS 5.0.0 16.3.4 (Error and control-failure logging) is satisfied. Magebean CLI cannot determine or attest compliance for this requirement.",
+                        "evidence_needed": [
+                            "Relevant design or policy documentation",
+                            "Implementation, configuration, or test evidence",
+                            "Reviewer conclusion and rationale"
+                        ]
+                    }
+                }
+            ],
+            "messages": {
+                "manual_review": "NOT VERIFIED BY MAGEBEAN CLI. Independent human assessment and documented supporting evidence are mandatory before this requirement can be considered satisfied."
+            }
+        },
+        {
+            "id": "MB-R214",
+            "title": "ASVS 16.4.1 Log-injection prevention",
+            "control": "MB-C15",
+            "severity": "medium",
+            "op": "all",
+            "verification": "manual",
+            "requirements": [
+                {
+                    "standard": "OWASP-ASVS",
+                    "version": "5.0.0",
+                    "id": "16.4.1",
+                    "level": 2
+                }
+            ],
+            "checks": [
+                {
+                    "name": "human_manual_review_required",
+                    "args": {
+                        "requirement": "ASVS 5.0.0 16.4.1",
+                        "review": "MANDATORY HUMAN ASSESSMENT: Provide documented evidence that ASVS 5.0.0 16.4.1 (Log-injection prevention) is satisfied. Magebean CLI cannot determine or attest compliance for this requirement.",
+                        "evidence_needed": [
+                            "Relevant design or policy documentation",
+                            "Implementation, configuration, or test evidence",
+                            "Reviewer conclusion and rationale"
+                        ]
+                    }
+                }
+            ],
+            "messages": {
+                "manual_review": "NOT VERIFIED BY MAGEBEAN CLI. Independent human assessment and documented supporting evidence are mandatory before this requirement can be considered satisfied."
+            }
+        },
+        {
+            "id": "MB-R215",
+            "title": "ASVS 16.4.3 Separate log system",
+            "control": "MB-C15",
+            "severity": "medium",
+            "op": "all",
+            "verification": "manual",
+            "requirements": [
+                {
+                    "standard": "OWASP-ASVS",
+                    "version": "5.0.0",
+                    "id": "16.4.3",
+                    "level": 2
+                }
+            ],
+            "checks": [
+                {
+                    "name": "human_manual_review_required",
+                    "args": {
+                        "requirement": "ASVS 5.0.0 16.4.3",
+                        "review": "MANDATORY HUMAN ASSESSMENT: Provide documented evidence that ASVS 5.0.0 16.4.3 (Separate log system) is satisfied. Magebean CLI cannot determine or attest compliance for this requirement.",
+                        "evidence_needed": [
+                            "Relevant design or policy documentation",
+                            "Implementation, configuration, or test evidence",
+                            "Reviewer conclusion and rationale"
+                        ]
+                    }
+                }
+            ],
+            "messages": {
+                "manual_review": "NOT VERIFIED BY MAGEBEAN CLI. Independent human assessment and documented supporting evidence are mandatory before this requirement can be considered satisfied."
+            }
+        },
+        {
+            "id": "MB-R216",
+            "title": "ASVS 16.5.2 Secure external-service failure",
+            "control": "MB-C15",
+            "severity": "medium",
+            "op": "all",
+            "verification": "manual",
+            "requirements": [
+                {
+                    "standard": "OWASP-ASVS",
+                    "version": "5.0.0",
+                    "id": "16.5.2",
+                    "level": 2
+                }
+            ],
+            "checks": [
+                {
+                    "name": "human_manual_review_required",
+                    "args": {
+                        "requirement": "ASVS 5.0.0 16.5.2",
+                        "review": "MANDATORY HUMAN ASSESSMENT: Provide documented evidence that ASVS 5.0.0 16.5.2 (Secure external-service failure) is satisfied. Magebean CLI cannot determine or attest compliance for this requirement.",
+                        "evidence_needed": [
+                            "Relevant design or policy documentation",
+                            "Implementation, configuration, or test evidence",
+                            "Reviewer conclusion and rationale"
+                        ]
+                    }
+                }
+            ],
+            "messages": {
+                "manual_review": "NOT VERIFIED BY MAGEBEAN CLI. Independent human assessment and documented supporting evidence are mandatory before this requirement can be considered satisfied."
+            }
+        },
+        {
+            "id": "MB-R217",
+            "title": "ASVS 16.5.3 Fail securely",
+            "control": "MB-C15",
+            "severity": "medium",
+            "op": "all",
+            "verification": "manual",
+            "requirements": [
+                {
+                    "standard": "OWASP-ASVS",
+                    "version": "5.0.0",
+                    "id": "16.5.3",
+                    "level": 2
+                }
+            ],
+            "checks": [
+                {
+                    "name": "human_manual_review_required",
+                    "args": {
+                        "requirement": "ASVS 5.0.0 16.5.3",
+                        "review": "MANDATORY HUMAN ASSESSMENT: Provide documented evidence that ASVS 5.0.0 16.5.3 (Fail securely) is satisfied. Magebean CLI cannot determine or attest compliance for this requirement.",
+                        "evidence_needed": [
+                            "Relevant design or policy documentation",
+                            "Implementation, configuration, or test evidence",
+                            "Reviewer conclusion and rationale"
+                        ]
+                    }
+                }
+            ],
+            "messages": {
+                "manual_review": "NOT VERIFIED BY MAGEBEAN CLI. Independent human assessment and documented supporting evidence are mandatory before this requirement can be considered satisfied."
+            }
+        }
+    ]
+}

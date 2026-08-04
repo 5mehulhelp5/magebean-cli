@@ -1,912 +1,912 @@
 {
-  "control": "MB-C13",
-  "title": "Application Behavior & Human Assurance",
-  "description": "Human verification rules for ASVS requirements that cannot be concluded reliably from unattended CLI evidence.",
-  "rules": [
-    {
-      "id": "MB-R102",
-      "title": "ASVS 2.1.1 Input validation rules are documented",
-      "control": "MB-C13",
-      "severity": "medium",
-      "op": "all",
-      "verification": "manual",
-      "requirements": [
+    "control": "MB-C13",
+    "title": "Application Behavior & Human Assurance",
+    "description": "Human verification rules for ASVS requirements that cannot be concluded reliably from unattended CLI evidence.",
+    "rules": [
         {
-          "standard": "OWASP-ASVS",
-          "version": "5.0.0",
-          "id": "2.1.1",
-          "level": 1
-        }
-      ],
-      "checks": [
+            "id": "MB-R102",
+            "title": "ASVS 2.1.1 Input validation rules are documented",
+            "control": "MB-C13",
+            "severity": "medium",
+            "op": "all",
+            "verification": "manual",
+            "requirements": [
+                {
+                    "standard": "OWASP-ASVS",
+                    "version": "5.0.0",
+                    "id": "2.1.1",
+                    "level": 1
+                }
+            ],
+            "checks": [
+                {
+                    "name": "human_manual_review_required",
+                    "args": {
+                        "requirement": "ASVS 5.0.0 2.1.1",
+                        "review": "MANDATORY HUMAN ASSESSMENT: Review the documented formats, limits, allowlists, and validation rules for security-sensitive and business-critical inputs. Magebean CLI cannot determine or attest compliance for this requirement.",
+                        "evidence_needed": [
+                            "Input validation specification",
+                            "Data classification or API schema",
+                            "Reviewer conclusion"
+                        ]
+                    }
+                }
+            ],
+            "messages": {
+                "manual_review": "NOT VERIFIED BY MAGEBEAN CLI. Independent human assessment and documented supporting evidence are mandatory before this requirement can be considered satisfied."
+            }
+        },
         {
-          "name": "human_manual_review_required",
-          "args": {
-            "requirement": "ASVS 5.0.0 2.1.1",
-            "review": "Review the documented formats, limits, allowlists, and validation rules for security-sensitive and business-critical inputs.",
-            "evidence_needed": [
-              "Input validation specification",
-              "Data classification or API schema",
-              "Reviewer conclusion"
-            ]
-          }
-        }
-      ],
-      "messages": {
-        "manual_review": "Human manual review and supporting evidence are required."
-      }
-    },
-    {
-      "id": "MB-R103",
-      "title": "ASVS 2.3.1 Business workflows enforce the required sequence",
-      "control": "MB-C13",
-      "severity": "medium",
-      "op": "all",
-      "verification": "manual",
-      "requirements": [
+            "id": "MB-R103",
+            "title": "ASVS 2.3.1 Business workflows enforce the required sequence",
+            "control": "MB-C13",
+            "severity": "medium",
+            "op": "all",
+            "verification": "manual",
+            "requirements": [
+                {
+                    "standard": "OWASP-ASVS",
+                    "version": "5.0.0",
+                    "id": "2.3.1",
+                    "level": 1
+                }
+            ],
+            "checks": [
+                {
+                    "name": "human_manual_review_required",
+                    "args": {
+                        "requirement": "ASVS 5.0.0 2.3.1",
+                        "review": "MANDATORY HUMAN ASSESSMENT: Review critical business workflows to confirm required steps cannot be skipped, reordered, replayed, or completed for another user. Magebean CLI cannot determine or attest compliance for this requirement.",
+                        "evidence_needed": [
+                            "Workflow diagrams or test cases",
+                            "Authenticated workflow test evidence",
+                            "Reviewer conclusion"
+                        ]
+                    }
+                }
+            ],
+            "messages": {
+                "manual_review": "NOT VERIFIED BY MAGEBEAN CLI. Independent human assessment and documented supporting evidence are mandatory before this requirement can be considered satisfied."
+            }
+        },
         {
-          "standard": "OWASP-ASVS",
-          "version": "5.0.0",
-          "id": "2.3.1",
-          "level": 1
-        }
-      ],
-      "checks": [
+            "id": "MB-R104",
+            "title": "ASVS 6.1.1 Anti-automation policy is documented",
+            "control": "MB-C13",
+            "severity": "medium",
+            "op": "all",
+            "verification": "manual",
+            "requirements": [
+                {
+                    "standard": "OWASP-ASVS",
+                    "version": "5.0.0",
+                    "id": "6.1.1",
+                    "level": 1
+                }
+            ],
+            "checks": [
+                {
+                    "name": "human_manual_review_required",
+                    "args": {
+                        "requirement": "ASVS 5.0.0 6.1.1",
+                        "review": "MANDATORY HUMAN ASSESSMENT: Review the credential-stuffing and brute-force defense policy, including throttling, adaptive responses, monitoring, and lockout-abuse prevention. Magebean CLI cannot determine or attest compliance for this requirement.",
+                        "evidence_needed": [
+                            "Anti-automation policy",
+                            "Rate-limit configuration references",
+                            "Monitoring and response procedure"
+                        ]
+                    }
+                }
+            ],
+            "messages": {
+                "manual_review": "NOT VERIFIED BY MAGEBEAN CLI. Independent human assessment and documented supporting evidence are mandatory before this requirement can be considered satisfied."
+            }
+        },
         {
-          "name": "human_manual_review_required",
-          "args": {
-            "requirement": "ASVS 5.0.0 2.3.1",
-            "review": "Review critical business workflows to confirm required steps cannot be skipped, reordered, replayed, or completed for another user.",
-            "evidence_needed": [
-              "Workflow diagrams or test cases",
-              "Authenticated workflow test evidence",
-              "Reviewer conclusion"
-            ]
-          }
-        }
-      ],
-      "messages": {
-        "manual_review": "Human manual review and supporting evidence are required."
-      }
-    },
-    {
-      "id": "MB-R104",
-      "title": "ASVS 6.1.1 Anti-automation policy is documented",
-      "control": "MB-C13",
-      "severity": "medium",
-      "op": "all",
-      "verification": "manual",
-      "requirements": [
+            "id": "MB-R105",
+            "title": "ASVS 6.2.2 Users can change their password",
+            "control": "MB-C13",
+            "severity": "medium",
+            "op": "all",
+            "verification": "manual",
+            "requirements": [
+                {
+                    "standard": "OWASP-ASVS",
+                    "version": "5.0.0",
+                    "id": "6.2.2",
+                    "level": 1
+                }
+            ],
+            "checks": [
+                {
+                    "name": "human_manual_review_required",
+                    "args": {
+                        "requirement": "ASVS 5.0.0 6.2.2",
+                        "review": "MANDATORY HUMAN ASSESSMENT: Verify authenticated users can change their password through an approved workflow. Magebean CLI cannot determine or attest compliance for this requirement.",
+                        "evidence_needed": [
+                            "Authenticated functional test",
+                            "Applicable Magento customization review"
+                        ]
+                    }
+                }
+            ],
+            "messages": {
+                "manual_review": "NOT VERIFIED BY MAGEBEAN CLI. Independent human assessment and documented supporting evidence are mandatory before this requirement can be considered satisfied."
+            }
+        },
         {
-          "standard": "OWASP-ASVS",
-          "version": "5.0.0",
-          "id": "6.1.1",
-          "level": 1
-        }
-      ],
-      "checks": [
+            "id": "MB-R106",
+            "title": "ASVS 6.2.3 Password changes require the current password",
+            "control": "MB-C13",
+            "severity": "medium",
+            "op": "all",
+            "verification": "manual",
+            "requirements": [
+                {
+                    "standard": "OWASP-ASVS",
+                    "version": "5.0.0",
+                    "id": "6.2.3",
+                    "level": 1
+                }
+            ],
+            "checks": [
+                {
+                    "name": "human_manual_review_required",
+                    "args": {
+                        "requirement": "ASVS 5.0.0 6.2.3",
+                        "review": "MANDATORY HUMAN ASSESSMENT: Verify the password-change workflow requires successful verification of the current password before accepting a new one. Magebean CLI cannot determine or attest compliance for this requirement.",
+                        "evidence_needed": [
+                            "Authenticated functional test",
+                            "Password-change implementation review"
+                        ]
+                    }
+                }
+            ],
+            "messages": {
+                "manual_review": "NOT VERIFIED BY MAGEBEAN CLI. Independent human assessment and documented supporting evidence are mandatory before this requirement can be considered satisfied."
+            }
+        },
         {
-          "name": "human_manual_review_required",
-          "args": {
-            "requirement": "ASVS 5.0.0 6.1.1",
-            "review": "Review the credential-stuffing and brute-force defense policy, including throttling, adaptive responses, monitoring, and lockout-abuse prevention.",
-            "evidence_needed": [
-              "Anti-automation policy",
-              "Rate-limit configuration references",
-              "Monitoring and response procedure"
-            ]
-          }
-        }
-      ],
-      "messages": {
-        "manual_review": "Human manual review and supporting evidence are required."
-      }
-    },
-    {
-      "id": "MB-R105",
-      "title": "ASVS 6.2.2 Users can change their password",
-      "control": "MB-C13",
-      "severity": "medium",
-      "op": "all",
-      "verification": "manual",
-      "requirements": [
+            "id": "MB-R107",
+            "title": "ASVS 6.2.5 Password policy does not impose composition rules",
+            "control": "MB-C13",
+            "severity": "medium",
+            "op": "all",
+            "verification": "manual",
+            "requirements": [
+                {
+                    "standard": "OWASP-ASVS",
+                    "version": "5.0.0",
+                    "id": "6.2.5",
+                    "level": 1
+                }
+            ],
+            "checks": [
+                {
+                    "name": "human_manual_review_required",
+                    "args": {
+                        "requirement": "ASVS 5.0.0 6.2.5",
+                        "review": "MANDATORY HUMAN ASSESSMENT: Review password policy and UI behavior to confirm fixed upper/lowercase, number, or special-character composition rules are not imposed. Magebean CLI cannot determine or attest compliance for this requirement.",
+                        "evidence_needed": [
+                            "Password policy configuration",
+                            "Password creation functional test"
+                        ]
+                    }
+                }
+            ],
+            "messages": {
+                "manual_review": "NOT VERIFIED BY MAGEBEAN CLI. Independent human assessment and documented supporting evidence are mandatory before this requirement can be considered satisfied."
+            }
+        },
         {
-          "standard": "OWASP-ASVS",
-          "version": "5.0.0",
-          "id": "6.2.2",
-          "level": 1
-        }
-      ],
-      "checks": [
+            "id": "MB-R108",
+            "title": "ASVS 6.2.6 Password entry is masked",
+            "control": "MB-C13",
+            "severity": "medium",
+            "op": "all",
+            "verification": "manual",
+            "requirements": [
+                {
+                    "standard": "OWASP-ASVS",
+                    "version": "5.0.0",
+                    "id": "6.2.6",
+                    "level": 1
+                }
+            ],
+            "checks": [
+                {
+                    "name": "human_manual_review_required",
+                    "args": {
+                        "requirement": "ASVS 5.0.0 6.2.6",
+                        "review": "MANDATORY HUMAN ASSESSMENT: Verify password inputs are masked by default and any temporary reveal behavior is safe. Magebean CLI cannot determine or attest compliance for this requirement.",
+                        "evidence_needed": [
+                            "UI inspection",
+                            "Browser test evidence"
+                        ]
+                    }
+                }
+            ],
+            "messages": {
+                "manual_review": "NOT VERIFIED BY MAGEBEAN CLI. Independent human assessment and documented supporting evidence are mandatory before this requirement can be considered satisfied."
+            }
+        },
         {
-          "name": "human_manual_review_required",
-          "args": {
-            "requirement": "ASVS 5.0.0 6.2.2",
-            "review": "Verify authenticated users can change their password through an approved workflow.",
-            "evidence_needed": [
-              "Authenticated functional test",
-              "Applicable Magento customization review"
-            ]
-          }
-        }
-      ],
-      "messages": {
-        "manual_review": "Human manual review and supporting evidence are required."
-      }
-    },
-    {
-      "id": "MB-R106",
-      "title": "ASVS 6.2.3 Password changes require the current password",
-      "control": "MB-C13",
-      "severity": "medium",
-      "op": "all",
-      "verification": "manual",
-      "requirements": [
+            "id": "MB-R109",
+            "title": "ASVS 6.2.7 Password managers and paste are allowed",
+            "control": "MB-C13",
+            "severity": "medium",
+            "op": "all",
+            "verification": "manual",
+            "requirements": [
+                {
+                    "standard": "OWASP-ASVS",
+                    "version": "5.0.0",
+                    "id": "6.2.7",
+                    "level": 1
+                }
+            ],
+            "checks": [
+                {
+                    "name": "human_manual_review_required",
+                    "args": {
+                        "requirement": "ASVS 5.0.0 6.2.7",
+                        "review": "MANDATORY HUMAN ASSESSMENT: Verify password fields do not block paste, browser helpers, or password-manager autofill. Magebean CLI cannot determine or attest compliance for this requirement.",
+                        "evidence_needed": [
+                            "Browser test evidence",
+                            "Frontend customization review"
+                        ]
+                    }
+                }
+            ],
+            "messages": {
+                "manual_review": "NOT VERIFIED BY MAGEBEAN CLI. Independent human assessment and documented supporting evidence are mandatory before this requirement can be considered satisfied."
+            }
+        },
         {
-          "standard": "OWASP-ASVS",
-          "version": "5.0.0",
-          "id": "6.2.3",
-          "level": 1
-        }
-      ],
-      "checks": [
+            "id": "MB-R110",
+            "title": "ASVS 6.2.8 Password verification preserves the exact input",
+            "control": "MB-C13",
+            "severity": "medium",
+            "op": "all",
+            "verification": "manual",
+            "requirements": [
+                {
+                    "standard": "OWASP-ASVS",
+                    "version": "5.0.0",
+                    "id": "6.2.8",
+                    "level": 1
+                }
+            ],
+            "checks": [
+                {
+                    "name": "human_manual_review_required",
+                    "args": {
+                        "requirement": "ASVS 5.0.0 6.2.8",
+                        "review": "MANDATORY HUMAN ASSESSMENT: Verify password processing does not truncate, case-fold, trim, or otherwise transform the submitted password before verification. Magebean CLI cannot determine or attest compliance for this requirement.",
+                        "evidence_needed": [
+                            "Authentication implementation review",
+                            "Boundary-value authentication tests"
+                        ]
+                    }
+                }
+            ],
+            "messages": {
+                "manual_review": "NOT VERIFIED BY MAGEBEAN CLI. Independent human assessment and documented supporting evidence are mandatory before this requirement can be considered satisfied."
+            }
+        },
         {
-          "name": "human_manual_review_required",
-          "args": {
-            "requirement": "ASVS 5.0.0 6.2.3",
-            "review": "Verify the password-change workflow requires successful verification of the current password before accepting a new one.",
-            "evidence_needed": [
-              "Authenticated functional test",
-              "Password-change implementation review"
-            ]
-          }
-        }
-      ],
-      "messages": {
-        "manual_review": "Human manual review and supporting evidence are required."
-      }
-    },
-    {
-      "id": "MB-R107",
-      "title": "ASVS 6.2.5 Password policy does not impose composition rules",
-      "control": "MB-C13",
-      "severity": "medium",
-      "op": "all",
-      "verification": "manual",
-      "requirements": [
+            "id": "MB-R111",
+            "title": "ASVS 6.4.1 Initial credentials are random, short-lived, and replaced",
+            "control": "MB-C13",
+            "severity": "medium",
+            "op": "all",
+            "verification": "manual",
+            "requirements": [
+                {
+                    "standard": "OWASP-ASVS",
+                    "version": "5.0.0",
+                    "id": "6.4.1",
+                    "level": 1
+                }
+            ],
+            "checks": [
+                {
+                    "name": "human_manual_review_required",
+                    "args": {
+                        "requirement": "ASVS 5.0.0 6.4.1",
+                        "review": "MANDATORY HUMAN ASSESSMENT: Review account activation and initial credential workflows for secure randomness, short expiry, and mandatory replacement. Magebean CLI cannot determine or attest compliance for this requirement.",
+                        "evidence_needed": [
+                            "Activation workflow review",
+                            "Token lifetime configuration",
+                            "Functional test evidence"
+                        ]
+                    }
+                }
+            ],
+            "messages": {
+                "manual_review": "NOT VERIFIED BY MAGEBEAN CLI. Independent human assessment and documented supporting evidence are mandatory before this requirement can be considered satisfied."
+            }
+        },
         {
-          "standard": "OWASP-ASVS",
-          "version": "5.0.0",
-          "id": "6.2.5",
-          "level": 1
-        }
-      ],
-      "checks": [
+            "id": "MB-R112",
+            "title": "ASVS 6.4.2 Password hints and secret questions are not used",
+            "control": "MB-C13",
+            "severity": "medium",
+            "op": "all",
+            "verification": "manual",
+            "requirements": [
+                {
+                    "standard": "OWASP-ASVS",
+                    "version": "5.0.0",
+                    "id": "6.4.2",
+                    "level": 1
+                }
+            ],
+            "checks": [
+                {
+                    "name": "human_manual_review_required",
+                    "args": {
+                        "requirement": "ASVS 5.0.0 6.4.2",
+                        "review": "MANDATORY HUMAN ASSESSMENT: Verify authentication and recovery workflows do not use password hints or knowledge-based secret questions. Magebean CLI cannot determine or attest compliance for this requirement.",
+                        "evidence_needed": [
+                            "Account recovery workflow review",
+                            "UI and configuration evidence"
+                        ]
+                    }
+                }
+            ],
+            "messages": {
+                "manual_review": "NOT VERIFIED BY MAGEBEAN CLI. Independent human assessment and documented supporting evidence are mandatory before this requirement can be considered satisfied."
+            }
+        },
         {
-          "name": "human_manual_review_required",
-          "args": {
-            "requirement": "ASVS 5.0.0 6.2.5",
-            "review": "Review password policy and UI behavior to confirm fixed upper/lowercase, number, or special-character composition rules are not imposed.",
-            "evidence_needed": [
-              "Password policy configuration",
-              "Password creation functional test"
-            ]
-          }
-        }
-      ],
-      "messages": {
-        "manual_review": "Human manual review and supporting evidence are required."
-      }
-    },
-    {
-      "id": "MB-R108",
-      "title": "ASVS 6.2.6 Password entry is masked",
-      "control": "MB-C13",
-      "severity": "medium",
-      "op": "all",
-      "verification": "manual",
-      "requirements": [
+            "id": "MB-R113",
+            "title": "ASVS 7.2.1 Sessions are validated by a trusted backend",
+            "control": "MB-C13",
+            "severity": "medium",
+            "op": "all",
+            "verification": "manual",
+            "requirements": [
+                {
+                    "standard": "OWASP-ASVS",
+                    "version": "5.0.0",
+                    "id": "7.2.1",
+                    "level": 1
+                }
+            ],
+            "checks": [
+                {
+                    "name": "human_manual_review_required",
+                    "args": {
+                        "requirement": "ASVS 5.0.0 7.2.1",
+                        "review": "MANDATORY HUMAN ASSESSMENT: Review session validation to confirm trust decisions are made by the backend rather than client-controlled state. Magebean CLI cannot determine or attest compliance for this requirement.",
+                        "evidence_needed": [
+                            "Session architecture review",
+                            "Authentication middleware evidence"
+                        ]
+                    }
+                }
+            ],
+            "messages": {
+                "manual_review": "NOT VERIFIED BY MAGEBEAN CLI. Independent human assessment and documented supporting evidence are mandatory before this requirement can be considered satisfied."
+            }
+        },
         {
-          "standard": "OWASP-ASVS",
-          "version": "5.0.0",
-          "id": "6.2.6",
-          "level": 1
-        }
-      ],
-      "checks": [
+            "id": "MB-R114",
+            "title": "ASVS 7.2.2 Session tokens are dynamically generated",
+            "control": "MB-C13",
+            "severity": "medium",
+            "op": "all",
+            "verification": "manual",
+            "requirements": [
+                {
+                    "standard": "OWASP-ASVS",
+                    "version": "5.0.0",
+                    "id": "7.2.2",
+                    "level": 1
+                }
+            ],
+            "checks": [
+                {
+                    "name": "human_manual_review_required",
+                    "args": {
+                        "requirement": "ASVS 5.0.0 7.2.2",
+                        "review": "MANDATORY HUMAN ASSESSMENT: Verify interactive sessions use dynamically generated tokens and not static API keys or shared secrets. Magebean CLI cannot determine or attest compliance for this requirement.",
+                        "evidence_needed": [
+                            "Session configuration",
+                            "Runtime session evidence"
+                        ]
+                    }
+                }
+            ],
+            "messages": {
+                "manual_review": "NOT VERIFIED BY MAGEBEAN CLI. Independent human assessment and documented supporting evidence are mandatory before this requirement can be considered satisfied."
+            }
+        },
         {
-          "name": "human_manual_review_required",
-          "args": {
-            "requirement": "ASVS 5.0.0 6.2.6",
-            "review": "Verify password inputs are masked by default and any temporary reveal behavior is safe.",
-            "evidence_needed": [
-              "UI inspection",
-              "Browser test evidence"
-            ]
-          }
-        }
-      ],
-      "messages": {
-        "manual_review": "Human manual review and supporting evidence are required."
-      }
-    },
-    {
-      "id": "MB-R109",
-      "title": "ASVS 6.2.7 Password managers and paste are allowed",
-      "control": "MB-C13",
-      "severity": "medium",
-      "op": "all",
-      "verification": "manual",
-      "requirements": [
+            "id": "MB-R115",
+            "title": "ASVS 7.2.3 Reference session tokens have at least 128 bits of entropy",
+            "control": "MB-C13",
+            "severity": "medium",
+            "op": "all",
+            "verification": "manual",
+            "requirements": [
+                {
+                    "standard": "OWASP-ASVS",
+                    "version": "5.0.0",
+                    "id": "7.2.3",
+                    "level": 1
+                }
+            ],
+            "checks": [
+                {
+                    "name": "human_manual_review_required",
+                    "args": {
+                        "requirement": "ASVS 5.0.0 7.2.3",
+                        "review": "MANDATORY HUMAN ASSESSMENT: Verify the session-token generator uses a CSPRNG and provides at least 128 bits of entropy. Magebean CLI cannot determine or attest compliance for this requirement.",
+                        "evidence_needed": [
+                            "Framework/session configuration",
+                            "Token-generation implementation evidence"
+                        ]
+                    }
+                }
+            ],
+            "messages": {
+                "manual_review": "NOT VERIFIED BY MAGEBEAN CLI. Independent human assessment and documented supporting evidence are mandatory before this requirement can be considered satisfied."
+            }
+        },
         {
-          "standard": "OWASP-ASVS",
-          "version": "5.0.0",
-          "id": "6.2.7",
-          "level": 1
-        }
-      ],
-      "checks": [
+            "id": "MB-R116",
+            "title": "ASVS 7.2.4 Session tokens rotate after authentication",
+            "control": "MB-C13",
+            "severity": "medium",
+            "op": "all",
+            "verification": "manual",
+            "requirements": [
+                {
+                    "standard": "OWASP-ASVS",
+                    "version": "5.0.0",
+                    "id": "7.2.4",
+                    "level": 1
+                }
+            ],
+            "checks": [
+                {
+                    "name": "human_manual_review_required",
+                    "args": {
+                        "requirement": "ASVS 5.0.0 7.2.4",
+                        "review": "MANDATORY HUMAN ASSESSMENT: Verify successful authentication and re-authentication rotate the session token and invalidate the previous token. Magebean CLI cannot determine or attest compliance for this requirement.",
+                        "evidence_needed": [
+                            "Authenticated session test",
+                            "Session lifecycle implementation review"
+                        ]
+                    }
+                }
+            ],
+            "messages": {
+                "manual_review": "NOT VERIFIED BY MAGEBEAN CLI. Independent human assessment and documented supporting evidence are mandatory before this requirement can be considered satisfied."
+            }
+        },
         {
-          "name": "human_manual_review_required",
-          "args": {
-            "requirement": "ASVS 5.0.0 6.2.7",
-            "review": "Verify password fields do not block paste, browser helpers, or password-manager autofill.",
-            "evidence_needed": [
-              "Browser test evidence",
-              "Frontend customization review"
-            ]
-          }
-        }
-      ],
-      "messages": {
-        "manual_review": "Human manual review and supporting evidence are required."
-      }
-    },
-    {
-      "id": "MB-R110",
-      "title": "ASVS 6.2.8 Password verification preserves the exact input",
-      "control": "MB-C13",
-      "severity": "medium",
-      "op": "all",
-      "verification": "manual",
-      "requirements": [
+            "id": "MB-R117",
+            "title": "ASVS 7.4.1 Logout and expiry terminate sessions",
+            "control": "MB-C13",
+            "severity": "medium",
+            "op": "all",
+            "verification": "manual",
+            "requirements": [
+                {
+                    "standard": "OWASP-ASVS",
+                    "version": "5.0.0",
+                    "id": "7.4.1",
+                    "level": 1
+                }
+            ],
+            "checks": [
+                {
+                    "name": "human_manual_review_required",
+                    "args": {
+                        "requirement": "ASVS 5.0.0 7.4.1",
+                        "review": "MANDATORY HUMAN ASSESSMENT: Verify logged-out or expired sessions cannot be reused. Magebean CLI cannot determine or attest compliance for this requirement.",
+                        "evidence_needed": [
+                            "Logout and expiry test evidence",
+                            "Server-side session invalidation evidence"
+                        ]
+                    }
+                }
+            ],
+            "messages": {
+                "manual_review": "NOT VERIFIED BY MAGEBEAN CLI. Independent human assessment and documented supporting evidence are mandatory before this requirement can be considered satisfied."
+            }
+        },
         {
-          "standard": "OWASP-ASVS",
-          "version": "5.0.0",
-          "id": "6.2.8",
-          "level": 1
-        }
-      ],
-      "checks": [
+            "id": "MB-R118",
+            "title": "ASVS 7.4.2 Disabled accounts lose all active sessions",
+            "control": "MB-C13",
+            "severity": "medium",
+            "op": "all",
+            "verification": "manual",
+            "requirements": [
+                {
+                    "standard": "OWASP-ASVS",
+                    "version": "5.0.0",
+                    "id": "7.4.2",
+                    "level": 1
+                }
+            ],
+            "checks": [
+                {
+                    "name": "human_manual_review_required",
+                    "args": {
+                        "requirement": "ASVS 5.0.0 7.4.2",
+                        "review": "MANDATORY HUMAN ASSESSMENT: Verify disabling or deleting an account terminates every active session belonging to that account. Magebean CLI cannot determine or attest compliance for this requirement.",
+                        "evidence_needed": [
+                            "Multi-session functional test",
+                            "Account lifecycle implementation review"
+                        ]
+                    }
+                }
+            ],
+            "messages": {
+                "manual_review": "NOT VERIFIED BY MAGEBEAN CLI. Independent human assessment and documented supporting evidence are mandatory before this requirement can be considered satisfied."
+            }
+        },
         {
-          "name": "human_manual_review_required",
-          "args": {
-            "requirement": "ASVS 5.0.0 6.2.8",
-            "review": "Verify password processing does not truncate, case-fold, trim, or otherwise transform the submitted password before verification.",
-            "evidence_needed": [
-              "Authentication implementation review",
-              "Boundary-value authentication tests"
-            ]
-          }
-        }
-      ],
-      "messages": {
-        "manual_review": "Human manual review and supporting evidence are required."
-      }
-    },
-    {
-      "id": "MB-R111",
-      "title": "ASVS 6.4.1 Initial credentials are random, short-lived, and replaced",
-      "control": "MB-C13",
-      "severity": "medium",
-      "op": "all",
-      "verification": "manual",
-      "requirements": [
+            "id": "MB-R119",
+            "title": "ASVS 8.1.1 Authorization rules are documented",
+            "control": "MB-C13",
+            "severity": "medium",
+            "op": "all",
+            "verification": "manual",
+            "requirements": [
+                {
+                    "standard": "OWASP-ASVS",
+                    "version": "5.0.0",
+                    "id": "8.1.1",
+                    "level": 1
+                }
+            ],
+            "checks": [
+                {
+                    "name": "human_manual_review_required",
+                    "args": {
+                        "requirement": "ASVS 5.0.0 8.1.1",
+                        "review": "MANDATORY HUMAN ASSESSMENT: Review the authorization model for functions, data, consumer permissions, ownership, tenancy, and resource attributes. Magebean CLI cannot determine or attest compliance for this requirement.",
+                        "evidence_needed": [
+                            "Authorization matrix or model",
+                            "Role and resource definitions",
+                            "Reviewer conclusion"
+                        ]
+                    }
+                }
+            ],
+            "messages": {
+                "manual_review": "NOT VERIFIED BY MAGEBEAN CLI. Independent human assessment and documented supporting evidence are mandatory before this requirement can be considered satisfied."
+            }
+        },
         {
-          "standard": "OWASP-ASVS",
-          "version": "5.0.0",
-          "id": "6.4.1",
-          "level": 1
-        }
-      ],
-      "checks": [
+            "id": "MB-R120",
+            "title": "ASVS 8.2.2 Object-level authorization prevents IDOR and BOLA",
+            "control": "MB-C13",
+            "severity": "medium",
+            "op": "all",
+            "verification": "manual",
+            "requirements": [
+                {
+                    "standard": "OWASP-ASVS",
+                    "version": "5.0.0",
+                    "id": "8.2.2",
+                    "level": 1
+                }
+            ],
+            "checks": [
+                {
+                    "name": "human_manual_review_required",
+                    "args": {
+                        "requirement": "ASVS 5.0.0 8.2.2",
+                        "review": "MANDATORY HUMAN ASSESSMENT: Test object and data access across users, roles, stores, websites, and tenants to confirm identifiers cannot bypass authorization. Magebean CLI cannot determine or attest compliance for this requirement.",
+                        "evidence_needed": [
+                            "Authenticated cross-user tests",
+                            "API and GraphQL authorization evidence"
+                        ]
+                    }
+                }
+            ],
+            "messages": {
+                "manual_review": "NOT VERIFIED BY MAGEBEAN CLI. Independent human assessment and documented supporting evidence are mandatory before this requirement can be considered satisfied."
+            }
+        },
         {
-          "name": "human_manual_review_required",
-          "args": {
-            "requirement": "ASVS 5.0.0 6.4.1",
-            "review": "Review account activation and initial credential workflows for secure randomness, short expiry, and mandatory replacement.",
-            "evidence_needed": [
-              "Activation workflow review",
-              "Token lifetime configuration",
-              "Functional test evidence"
-            ]
-          }
-        }
-      ],
-      "messages": {
-        "manual_review": "Human manual review and supporting evidence are required."
-      }
-    },
-    {
-      "id": "MB-R112",
-      "title": "ASVS 6.4.2 Password hints and secret questions are not used",
-      "control": "MB-C13",
-      "severity": "medium",
-      "op": "all",
-      "verification": "manual",
-      "requirements": [
+            "id": "MB-R121",
+            "title": "ASVS 8.3.1 Authorization is enforced by a trusted service layer",
+            "control": "MB-C13",
+            "severity": "medium",
+            "op": "all",
+            "verification": "manual",
+            "requirements": [
+                {
+                    "standard": "OWASP-ASVS",
+                    "version": "5.0.0",
+                    "id": "8.3.1",
+                    "level": 1
+                }
+            ],
+            "checks": [
+                {
+                    "name": "human_manual_review_required",
+                    "args": {
+                        "requirement": "ASVS 5.0.0 8.3.1",
+                        "review": "MANDATORY HUMAN ASSESSMENT: Verify authorization is enforced server-side and does not rely on JavaScript, hidden fields, route visibility, or other client-controlled mechanisms. Magebean CLI cannot determine or attest compliance for this requirement.",
+                        "evidence_needed": [
+                            "Architecture or code review",
+                            "Authorization bypass tests"
+                        ]
+                    }
+                }
+            ],
+            "messages": {
+                "manual_review": "NOT VERIFIED BY MAGEBEAN CLI. Independent human assessment and documented supporting evidence are mandatory before this requirement can be considered satisfied."
+            }
+        },
         {
-          "standard": "OWASP-ASVS",
-          "version": "5.0.0",
-          "id": "6.4.2",
-          "level": 1
-        }
-      ],
-      "checks": [
+            "id": "MB-R122",
+            "title": "ASVS 10.4.1 OAuth redirect URIs are exactly matched",
+            "control": "MB-C13",
+            "severity": "medium",
+            "op": "all",
+            "verification": "manual",
+            "requirements": [
+                {
+                    "standard": "OWASP-ASVS",
+                    "version": "5.0.0",
+                    "id": "10.4.1",
+                    "level": 1
+                }
+            ],
+            "checks": [
+                {
+                    "name": "human_manual_review_required",
+                    "args": {
+                        "requirement": "ASVS 5.0.0 10.4.1",
+                        "review": "MANDATORY HUMAN ASSESSMENT: Determine whether the Magento application acts as an OAuth authorization server; if applicable, verify exact per-client redirect URI matching. Magebean CLI cannot determine or attest compliance for this requirement.",
+                        "evidence_needed": [
+                            "Applicability rationale",
+                            "OAuth client configuration",
+                            "Redirect URI negative tests"
+                        ]
+                    }
+                }
+            ],
+            "messages": {
+                "manual_review": "NOT VERIFIED BY MAGEBEAN CLI. Independent human assessment and documented supporting evidence are mandatory before this requirement can be considered satisfied."
+            }
+        },
         {
-          "name": "human_manual_review_required",
-          "args": {
-            "requirement": "ASVS 5.0.0 6.4.2",
-            "review": "Verify authentication and recovery workflows do not use password hints or knowledge-based secret questions.",
-            "evidence_needed": [
-              "Account recovery workflow review",
-              "UI and configuration evidence"
-            ]
-          }
-        }
-      ],
-      "messages": {
-        "manual_review": "Human manual review and supporting evidence are required."
-      }
-    },
-    {
-      "id": "MB-R113",
-      "title": "ASVS 7.2.1 Sessions are validated by a trusted backend",
-      "control": "MB-C13",
-      "severity": "medium",
-      "op": "all",
-      "verification": "manual",
-      "requirements": [
+            "id": "MB-R123",
+            "title": "ASVS 10.4.2 OAuth authorization codes are single-use",
+            "control": "MB-C13",
+            "severity": "medium",
+            "op": "all",
+            "verification": "manual",
+            "requirements": [
+                {
+                    "standard": "OWASP-ASVS",
+                    "version": "5.0.0",
+                    "id": "10.4.2",
+                    "level": 1
+                }
+            ],
+            "checks": [
+                {
+                    "name": "human_manual_review_required",
+                    "args": {
+                        "requirement": "ASVS 5.0.0 10.4.2",
+                        "review": "MANDATORY HUMAN ASSESSMENT: If the application is an OAuth authorization server, verify authorization code reuse is rejected and related tokens are revoked as required. Magebean CLI cannot determine or attest compliance for this requirement.",
+                        "evidence_needed": [
+                            "Applicability rationale",
+                            "Authorization code replay test"
+                        ]
+                    }
+                }
+            ],
+            "messages": {
+                "manual_review": "NOT VERIFIED BY MAGEBEAN CLI. Independent human assessment and documented supporting evidence are mandatory before this requirement can be considered satisfied."
+            }
+        },
         {
-          "standard": "OWASP-ASVS",
-          "version": "5.0.0",
-          "id": "7.2.1",
-          "level": 1
-        }
-      ],
-      "checks": [
+            "id": "MB-R124",
+            "title": "ASVS 10.4.3 OAuth authorization codes expire within ten minutes",
+            "control": "MB-C13",
+            "severity": "medium",
+            "op": "all",
+            "verification": "manual",
+            "requirements": [
+                {
+                    "standard": "OWASP-ASVS",
+                    "version": "5.0.0",
+                    "id": "10.4.3",
+                    "level": 1
+                }
+            ],
+            "checks": [
+                {
+                    "name": "human_manual_review_required",
+                    "args": {
+                        "requirement": "ASVS 5.0.0 10.4.3",
+                        "review": "MANDATORY HUMAN ASSESSMENT: If applicable, verify authorization codes expire in no more than ten minutes. Magebean CLI cannot determine or attest compliance for this requirement.",
+                        "evidence_needed": [
+                            "Applicability rationale",
+                            "Authorization code lifetime configuration"
+                        ]
+                    }
+                }
+            ],
+            "messages": {
+                "manual_review": "NOT VERIFIED BY MAGEBEAN CLI. Independent human assessment and documented supporting evidence are mandatory before this requirement can be considered satisfied."
+            }
+        },
         {
-          "name": "human_manual_review_required",
-          "args": {
-            "requirement": "ASVS 5.0.0 7.2.1",
-            "review": "Review session validation to confirm trust decisions are made by the backend rather than client-controlled state.",
-            "evidence_needed": [
-              "Session architecture review",
-              "Authentication middleware evidence"
-            ]
-          }
-        }
-      ],
-      "messages": {
-        "manual_review": "Human manual review and supporting evidence are required."
-      }
-    },
-    {
-      "id": "MB-R114",
-      "title": "ASVS 7.2.2 Session tokens are dynamically generated",
-      "control": "MB-C13",
-      "severity": "medium",
-      "op": "all",
-      "verification": "manual",
-      "requirements": [
+            "id": "MB-R125",
+            "title": "ASVS 10.4.4 OAuth grants are restricted per client",
+            "control": "MB-C13",
+            "severity": "medium",
+            "op": "all",
+            "verification": "manual",
+            "requirements": [
+                {
+                    "standard": "OWASP-ASVS",
+                    "version": "5.0.0",
+                    "id": "10.4.4",
+                    "level": 1
+                }
+            ],
+            "checks": [
+                {
+                    "name": "human_manual_review_required",
+                    "args": {
+                        "requirement": "ASVS 5.0.0 10.4.4",
+                        "review": "MANDATORY HUMAN ASSESSMENT: If applicable, verify each client is limited to necessary grants and that Implicit and Resource Owner Password Credentials flows are unavailable. Magebean CLI cannot determine or attest compliance for this requirement.",
+                        "evidence_needed": [
+                            "Applicability rationale",
+                            "OAuth client grant configuration"
+                        ]
+                    }
+                }
+            ],
+            "messages": {
+                "manual_review": "NOT VERIFIED BY MAGEBEAN CLI. Independent human assessment and documented supporting evidence are mandatory before this requirement can be considered satisfied."
+            }
+        },
         {
-          "standard": "OWASP-ASVS",
-          "version": "5.0.0",
-          "id": "7.2.2",
-          "level": 1
-        }
-      ],
-      "checks": [
+            "id": "MB-R126",
+            "title": "ASVS 10.4.5 Public clients have refresh-token replay protection",
+            "control": "MB-C13",
+            "severity": "medium",
+            "op": "all",
+            "verification": "manual",
+            "requirements": [
+                {
+                    "standard": "OWASP-ASVS",
+                    "version": "5.0.0",
+                    "id": "10.4.5",
+                    "level": 1
+                }
+            ],
+            "checks": [
+                {
+                    "name": "human_manual_review_required",
+                    "args": {
+                        "requirement": "ASVS 5.0.0 10.4.5",
+                        "review": "MANDATORY HUMAN ASSESSMENT: If applicable, verify public clients use refresh-token rotation or sender-constrained tokens with reuse detection. Magebean CLI cannot determine or attest compliance for this requirement.",
+                        "evidence_needed": [
+                            "Applicability rationale",
+                            "Refresh-token configuration",
+                            "Replay test evidence"
+                        ]
+                    }
+                }
+            ],
+            "messages": {
+                "manual_review": "NOT VERIFIED BY MAGEBEAN CLI. Independent human assessment and documented supporting evidence are mandatory before this requirement can be considered satisfied."
+            }
+        },
         {
-          "name": "human_manual_review_required",
-          "args": {
-            "requirement": "ASVS 5.0.0 7.2.2",
-            "review": "Verify interactive sessions use dynamically generated tokens and not static API keys or shared secrets.",
-            "evidence_needed": [
-              "Session configuration",
-              "Runtime session evidence"
-            ]
-          }
-        }
-      ],
-      "messages": {
-        "manual_review": "Human manual review and supporting evidence are required."
-      }
-    },
-    {
-      "id": "MB-R115",
-      "title": "ASVS 7.2.3 Reference session tokens have at least 128 bits of entropy",
-      "control": "MB-C13",
-      "severity": "medium",
-      "op": "all",
-      "verification": "manual",
-      "requirements": [
+            "id": "MB-R127",
+            "title": "ASVS 14.3.1 Authenticated client-side data is cleared on session end",
+            "control": "MB-C13",
+            "severity": "medium",
+            "op": "all",
+            "verification": "manual",
+            "requirements": [
+                {
+                    "standard": "OWASP-ASVS",
+                    "version": "5.0.0",
+                    "id": "14.3.1",
+                    "level": 1
+                }
+            ],
+            "checks": [
+                {
+                    "name": "human_manual_review_required",
+                    "args": {
+                        "requirement": "ASVS 5.0.0 14.3.1",
+                        "review": "MANDATORY HUMAN ASSESSMENT: Verify logout and session expiry remove authenticated data from the DOM, browser storage, caches, and client-side application state. Magebean CLI cannot determine or attest compliance for this requirement.",
+                        "evidence_needed": [
+                            "Browser storage inspection",
+                            "Logout and expiry test evidence"
+                        ]
+                    }
+                }
+            ],
+            "messages": {
+                "manual_review": "NOT VERIFIED BY MAGEBEAN CLI. Independent human assessment and documented supporting evidence are mandatory before this requirement can be considered satisfied."
+            }
+        },
         {
-          "standard": "OWASP-ASVS",
-          "version": "5.0.0",
-          "id": "7.2.3",
-          "level": 1
-        }
-      ],
-      "checks": [
+            "id": "MB-R128",
+            "title": "ASVS 15.1.1 Dependency remediation deadlines are documented",
+            "control": "MB-C13",
+            "severity": "medium",
+            "op": "all",
+            "verification": "manual",
+            "requirements": [
+                {
+                    "standard": "OWASP-ASVS",
+                    "version": "5.0.0",
+                    "id": "15.1.1",
+                    "level": 1
+                }
+            ],
+            "checks": [
+                {
+                    "name": "human_manual_review_required",
+                    "args": {
+                        "requirement": "ASVS 5.0.0 15.1.1",
+                        "review": "MANDATORY HUMAN ASSESSMENT: Review the risk-based policy that defines remediation deadlines for vulnerable third-party components. Magebean CLI cannot determine or attest compliance for this requirement.",
+                        "evidence_needed": [
+                            "Dependency remediation policy",
+                            "Risk and SLA definitions",
+                            "Approval evidence"
+                        ]
+                    }
+                }
+            ],
+            "messages": {
+                "manual_review": "NOT VERIFIED BY MAGEBEAN CLI. Independent human assessment and documented supporting evidence are mandatory before this requirement can be considered satisfied."
+            }
+        },
         {
-          "name": "human_manual_review_required",
-          "args": {
-            "requirement": "ASVS 5.0.0 7.2.3",
-            "review": "Verify the session-token generator uses a CSPRNG and provides at least 128 bits of entropy.",
-            "evidence_needed": [
-              "Framework/session configuration",
-              "Token-generation implementation evidence"
-            ]
-          }
+            "id": "MB-R129",
+            "title": "ASVS 15.3.1 Responses return only required fields",
+            "control": "MB-C13",
+            "severity": "medium",
+            "op": "all",
+            "verification": "manual",
+            "requirements": [
+                {
+                    "standard": "OWASP-ASVS",
+                    "version": "5.0.0",
+                    "id": "15.3.1",
+                    "level": 1
+                }
+            ],
+            "checks": [
+                {
+                    "name": "human_manual_review_required",
+                    "args": {
+                        "requirement": "ASVS 5.0.0 15.3.1",
+                        "review": "MANDATORY HUMAN ASSESSMENT: Review application and API responses to confirm they do not expose unused sensitive fields or complete internal data objects. Magebean CLI cannot determine or attest compliance for this requirement.",
+                        "evidence_needed": [
+                            "API response review",
+                            "GraphQL schema/query review",
+                            "Data minimization test evidence"
+                        ]
+                    }
+                }
+            ],
+            "messages": {
+                "manual_review": "NOT VERIFIED BY MAGEBEAN CLI. Independent human assessment and documented supporting evidence are mandatory before this requirement can be considered satisfied."
+            }
         }
-      ],
-      "messages": {
-        "manual_review": "Human manual review and supporting evidence are required."
-      }
-    },
-    {
-      "id": "MB-R116",
-      "title": "ASVS 7.2.4 Session tokens rotate after authentication",
-      "control": "MB-C13",
-      "severity": "medium",
-      "op": "all",
-      "verification": "manual",
-      "requirements": [
-        {
-          "standard": "OWASP-ASVS",
-          "version": "5.0.0",
-          "id": "7.2.4",
-          "level": 1
-        }
-      ],
-      "checks": [
-        {
-          "name": "human_manual_review_required",
-          "args": {
-            "requirement": "ASVS 5.0.0 7.2.4",
-            "review": "Verify successful authentication and re-authentication rotate the session token and invalidate the previous token.",
-            "evidence_needed": [
-              "Authenticated session test",
-              "Session lifecycle implementation review"
-            ]
-          }
-        }
-      ],
-      "messages": {
-        "manual_review": "Human manual review and supporting evidence are required."
-      }
-    },
-    {
-      "id": "MB-R117",
-      "title": "ASVS 7.4.1 Logout and expiry terminate sessions",
-      "control": "MB-C13",
-      "severity": "medium",
-      "op": "all",
-      "verification": "manual",
-      "requirements": [
-        {
-          "standard": "OWASP-ASVS",
-          "version": "5.0.0",
-          "id": "7.4.1",
-          "level": 1
-        }
-      ],
-      "checks": [
-        {
-          "name": "human_manual_review_required",
-          "args": {
-            "requirement": "ASVS 5.0.0 7.4.1",
-            "review": "Verify logged-out or expired sessions cannot be reused.",
-            "evidence_needed": [
-              "Logout and expiry test evidence",
-              "Server-side session invalidation evidence"
-            ]
-          }
-        }
-      ],
-      "messages": {
-        "manual_review": "Human manual review and supporting evidence are required."
-      }
-    },
-    {
-      "id": "MB-R118",
-      "title": "ASVS 7.4.2 Disabled accounts lose all active sessions",
-      "control": "MB-C13",
-      "severity": "medium",
-      "op": "all",
-      "verification": "manual",
-      "requirements": [
-        {
-          "standard": "OWASP-ASVS",
-          "version": "5.0.0",
-          "id": "7.4.2",
-          "level": 1
-        }
-      ],
-      "checks": [
-        {
-          "name": "human_manual_review_required",
-          "args": {
-            "requirement": "ASVS 5.0.0 7.4.2",
-            "review": "Verify disabling or deleting an account terminates every active session belonging to that account.",
-            "evidence_needed": [
-              "Multi-session functional test",
-              "Account lifecycle implementation review"
-            ]
-          }
-        }
-      ],
-      "messages": {
-        "manual_review": "Human manual review and supporting evidence are required."
-      }
-    },
-    {
-      "id": "MB-R119",
-      "title": "ASVS 8.1.1 Authorization rules are documented",
-      "control": "MB-C13",
-      "severity": "medium",
-      "op": "all",
-      "verification": "manual",
-      "requirements": [
-        {
-          "standard": "OWASP-ASVS",
-          "version": "5.0.0",
-          "id": "8.1.1",
-          "level": 1
-        }
-      ],
-      "checks": [
-        {
-          "name": "human_manual_review_required",
-          "args": {
-            "requirement": "ASVS 5.0.0 8.1.1",
-            "review": "Review the authorization model for functions, data, consumer permissions, ownership, tenancy, and resource attributes.",
-            "evidence_needed": [
-              "Authorization matrix or model",
-              "Role and resource definitions",
-              "Reviewer conclusion"
-            ]
-          }
-        }
-      ],
-      "messages": {
-        "manual_review": "Human manual review and supporting evidence are required."
-      }
-    },
-    {
-      "id": "MB-R120",
-      "title": "ASVS 8.2.2 Object-level authorization prevents IDOR and BOLA",
-      "control": "MB-C13",
-      "severity": "medium",
-      "op": "all",
-      "verification": "manual",
-      "requirements": [
-        {
-          "standard": "OWASP-ASVS",
-          "version": "5.0.0",
-          "id": "8.2.2",
-          "level": 1
-        }
-      ],
-      "checks": [
-        {
-          "name": "human_manual_review_required",
-          "args": {
-            "requirement": "ASVS 5.0.0 8.2.2",
-            "review": "Test object and data access across users, roles, stores, websites, and tenants to confirm identifiers cannot bypass authorization.",
-            "evidence_needed": [
-              "Authenticated cross-user tests",
-              "API and GraphQL authorization evidence"
-            ]
-          }
-        }
-      ],
-      "messages": {
-        "manual_review": "Human manual review and supporting evidence are required."
-      }
-    },
-    {
-      "id": "MB-R121",
-      "title": "ASVS 8.3.1 Authorization is enforced by a trusted service layer",
-      "control": "MB-C13",
-      "severity": "medium",
-      "op": "all",
-      "verification": "manual",
-      "requirements": [
-        {
-          "standard": "OWASP-ASVS",
-          "version": "5.0.0",
-          "id": "8.3.1",
-          "level": 1
-        }
-      ],
-      "checks": [
-        {
-          "name": "human_manual_review_required",
-          "args": {
-            "requirement": "ASVS 5.0.0 8.3.1",
-            "review": "Verify authorization is enforced server-side and does not rely on JavaScript, hidden fields, route visibility, or other client-controlled mechanisms.",
-            "evidence_needed": [
-              "Architecture or code review",
-              "Authorization bypass tests"
-            ]
-          }
-        }
-      ],
-      "messages": {
-        "manual_review": "Human manual review and supporting evidence are required."
-      }
-    },
-    {
-      "id": "MB-R122",
-      "title": "ASVS 10.4.1 OAuth redirect URIs are exactly matched",
-      "control": "MB-C13",
-      "severity": "medium",
-      "op": "all",
-      "verification": "manual",
-      "requirements": [
-        {
-          "standard": "OWASP-ASVS",
-          "version": "5.0.0",
-          "id": "10.4.1",
-          "level": 1
-        }
-      ],
-      "checks": [
-        {
-          "name": "human_manual_review_required",
-          "args": {
-            "requirement": "ASVS 5.0.0 10.4.1",
-            "review": "Determine whether the Magento application acts as an OAuth authorization server; if applicable, verify exact per-client redirect URI matching.",
-            "evidence_needed": [
-              "Applicability rationale",
-              "OAuth client configuration",
-              "Redirect URI negative tests"
-            ]
-          }
-        }
-      ],
-      "messages": {
-        "manual_review": "Human manual review and supporting evidence are required."
-      }
-    },
-    {
-      "id": "MB-R123",
-      "title": "ASVS 10.4.2 OAuth authorization codes are single-use",
-      "control": "MB-C13",
-      "severity": "medium",
-      "op": "all",
-      "verification": "manual",
-      "requirements": [
-        {
-          "standard": "OWASP-ASVS",
-          "version": "5.0.0",
-          "id": "10.4.2",
-          "level": 1
-        }
-      ],
-      "checks": [
-        {
-          "name": "human_manual_review_required",
-          "args": {
-            "requirement": "ASVS 5.0.0 10.4.2",
-            "review": "If the application is an OAuth authorization server, verify authorization code reuse is rejected and related tokens are revoked as required.",
-            "evidence_needed": [
-              "Applicability rationale",
-              "Authorization code replay test"
-            ]
-          }
-        }
-      ],
-      "messages": {
-        "manual_review": "Human manual review and supporting evidence are required."
-      }
-    },
-    {
-      "id": "MB-R124",
-      "title": "ASVS 10.4.3 OAuth authorization codes expire within ten minutes",
-      "control": "MB-C13",
-      "severity": "medium",
-      "op": "all",
-      "verification": "manual",
-      "requirements": [
-        {
-          "standard": "OWASP-ASVS",
-          "version": "5.0.0",
-          "id": "10.4.3",
-          "level": 1
-        }
-      ],
-      "checks": [
-        {
-          "name": "human_manual_review_required",
-          "args": {
-            "requirement": "ASVS 5.0.0 10.4.3",
-            "review": "If applicable, verify authorization codes expire in no more than ten minutes.",
-            "evidence_needed": [
-              "Applicability rationale",
-              "Authorization code lifetime configuration"
-            ]
-          }
-        }
-      ],
-      "messages": {
-        "manual_review": "Human manual review and supporting evidence are required."
-      }
-    },
-    {
-      "id": "MB-R125",
-      "title": "ASVS 10.4.4 OAuth grants are restricted per client",
-      "control": "MB-C13",
-      "severity": "medium",
-      "op": "all",
-      "verification": "manual",
-      "requirements": [
-        {
-          "standard": "OWASP-ASVS",
-          "version": "5.0.0",
-          "id": "10.4.4",
-          "level": 1
-        }
-      ],
-      "checks": [
-        {
-          "name": "human_manual_review_required",
-          "args": {
-            "requirement": "ASVS 5.0.0 10.4.4",
-            "review": "If applicable, verify each client is limited to necessary grants and that Implicit and Resource Owner Password Credentials flows are unavailable.",
-            "evidence_needed": [
-              "Applicability rationale",
-              "OAuth client grant configuration"
-            ]
-          }
-        }
-      ],
-      "messages": {
-        "manual_review": "Human manual review and supporting evidence are required."
-      }
-    },
-    {
-      "id": "MB-R126",
-      "title": "ASVS 10.4.5 Public clients have refresh-token replay protection",
-      "control": "MB-C13",
-      "severity": "medium",
-      "op": "all",
-      "verification": "manual",
-      "requirements": [
-        {
-          "standard": "OWASP-ASVS",
-          "version": "5.0.0",
-          "id": "10.4.5",
-          "level": 1
-        }
-      ],
-      "checks": [
-        {
-          "name": "human_manual_review_required",
-          "args": {
-            "requirement": "ASVS 5.0.0 10.4.5",
-            "review": "If applicable, verify public clients use refresh-token rotation or sender-constrained tokens with reuse detection.",
-            "evidence_needed": [
-              "Applicability rationale",
-              "Refresh-token configuration",
-              "Replay test evidence"
-            ]
-          }
-        }
-      ],
-      "messages": {
-        "manual_review": "Human manual review and supporting evidence are required."
-      }
-    },
-    {
-      "id": "MB-R127",
-      "title": "ASVS 14.3.1 Authenticated client-side data is cleared on session end",
-      "control": "MB-C13",
-      "severity": "medium",
-      "op": "all",
-      "verification": "manual",
-      "requirements": [
-        {
-          "standard": "OWASP-ASVS",
-          "version": "5.0.0",
-          "id": "14.3.1",
-          "level": 1
-        }
-      ],
-      "checks": [
-        {
-          "name": "human_manual_review_required",
-          "args": {
-            "requirement": "ASVS 5.0.0 14.3.1",
-            "review": "Verify logout and session expiry remove authenticated data from the DOM, browser storage, caches, and client-side application state.",
-            "evidence_needed": [
-              "Browser storage inspection",
-              "Logout and expiry test evidence"
-            ]
-          }
-        }
-      ],
-      "messages": {
-        "manual_review": "Human manual review and supporting evidence are required."
-      }
-    },
-    {
-      "id": "MB-R128",
-      "title": "ASVS 15.1.1 Dependency remediation deadlines are documented",
-      "control": "MB-C13",
-      "severity": "medium",
-      "op": "all",
-      "verification": "manual",
-      "requirements": [
-        {
-          "standard": "OWASP-ASVS",
-          "version": "5.0.0",
-          "id": "15.1.1",
-          "level": 1
-        }
-      ],
-      "checks": [
-        {
-          "name": "human_manual_review_required",
-          "args": {
-            "requirement": "ASVS 5.0.0 15.1.1",
-            "review": "Review the risk-based policy that defines remediation deadlines for vulnerable third-party components.",
-            "evidence_needed": [
-              "Dependency remediation policy",
-              "Risk and SLA definitions",
-              "Approval evidence"
-            ]
-          }
-        }
-      ],
-      "messages": {
-        "manual_review": "Human manual review and supporting evidence are required."
-      }
-    },
-    {
-      "id": "MB-R129",
-      "title": "ASVS 15.3.1 Responses return only required fields",
-      "control": "MB-C13",
-      "severity": "medium",
-      "op": "all",
-      "verification": "manual",
-      "requirements": [
-        {
-          "standard": "OWASP-ASVS",
-          "version": "5.0.0",
-          "id": "15.3.1",
-          "level": 1
-        }
-      ],
-      "checks": [
-        {
-          "name": "human_manual_review_required",
-          "args": {
-            "requirement": "ASVS 5.0.0 15.3.1",
-            "review": "Review application and API responses to confirm they do not expose unused sensitive fields or complete internal data objects.",
-            "evidence_needed": [
-              "API response review",
-              "GraphQL schema/query review",
-              "Data minimization test evidence"
-            ]
-          }
-        }
-      ],
-      "messages": {
-        "manual_review": "Human manual review and supporting evidence are required."
-      }
-    }
-  ]
+    ]
 }

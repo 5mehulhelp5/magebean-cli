@@ -19,13 +19,107 @@ final class ProfileLoader
         }
 
         $file = self::resolveProfileFile($profile, $projectPath);
-        $data = self::loadFile($file);
+        $data = self::loadWithInheritance($file, $projectPath);
         $data['_source'] = $file;
 
         return self::normalize($data);
     }
 
-    public static function apply(array $pack, array $profile, bool $ignoreUnknownRules = false): array
+
+    private static function loadWithInheritance(string $file, string $projectPath, array $stack = []): array
+    {
+        $realFile = realpath($file) ?: $file;
+        if (in_array($realFile, $stack, true)) {
+            throw new \RuntimeException(sprintf(
+                'Circular profile inheritance detected: %s',
+                implode(' -> ', array_merge($stack, [$realFile]))
+            ));
+        }
+
+        $profile = self::loadFile($file);
+        $inherits = $profile['inherits'] ?? [];
+        if (is_string($inherits)) {
+            $inherits = [$inherits];
+        }
+        if (!is_array($inherits)) {
+            throw new \RuntimeException('Profile field "inherits" must be a string or array.');
+        }
+
+        $merged = [];
+        $nextStack = array_merge($stack, [$realFile]);
+        foreach ($inherits as $parent) {
+            if (!is_scalar($parent) || trim((string)$parent) === '') {
+                throw new \RuntimeException('Profile inheritance contains an invalid parent.');
+            }
+            $parentBasePath = self::looksLikePath((string)$parent) ? dirname($file) : $projectPath;
+            $parentFile = self::resolveProfileFile((string)$parent, $parentBasePath);
+            $merged = self::mergeProfiles(
+                $merged,
+                self::loadWithInheritance($parentFile, $projectPath, $nextStack)
+            );
+        }
+
+        return self::mergeProfiles($merged, $profile);
+    }
+
+    private static function mergeProfiles(array $parent, array $child): array
+    {
+        $merged = array_replace($parent, $child);
+        $merged['rules'] = self::mergeRuleMappings(
+            is_array($parent['rules'] ?? null) ? $parent['rules'] : [],
+            is_array($child['rules'] ?? null) ? $child['rules'] : []
+        );
+        $merged['requirement_coverage'] = self::mergeRequirementCoverage(
+            is_array($parent['requirement_coverage'] ?? null) ? $parent['requirement_coverage'] : [],
+            is_array($child['requirement_coverage'] ?? null) ? $child['requirement_coverage'] : []
+        );
+
+        return $merged;
+    }
+
+    private static function mergeRuleMappings(array $parent, array $child): array
+    {
+        $byId = [];
+        foreach (array_merge($parent, $child) as $entry) {
+            $id = is_array($entry)
+                ? strtoupper(trim((string)($entry['id'] ?? '')))
+                : strtoupper(trim((string)$entry));
+            if ($id === '') {
+                continue;
+            }
+            if (!isset($byId[$id]) || !is_array($entry)) {
+                $byId[$id] = $entry;
+                continue;
+            }
+            $existing = is_array($byId[$id]) ? $byId[$id] : ['id' => $id];
+            $combined = array_replace($existing, $entry);
+            $combined['mappings'] = array_values(array_merge(
+                is_array($existing['mappings'] ?? null) ? $existing['mappings'] : [],
+                is_array($entry['mappings'] ?? null) ? $entry['mappings'] : []
+            ));
+            $byId[$id] = $combined;
+        }
+
+        return array_values($byId);
+    }
+
+    private static function mergeRequirementCoverage(array $parent, array $child): array
+    {
+        $byId = [];
+        foreach (array_merge($parent, $child) as $entry) {
+            if (!is_array($entry)) {
+                continue;
+            }
+            $id = trim((string)($entry['id'] ?? ''));
+            if ($id !== '') {
+                $byId[$id] = $entry;
+            }
+        }
+
+        return array_values($byId);
+    }
+
+    public static function apply(array $pack, array $profile, bool $ignoreUnknownRules = false, array $capabilities = []): array
     {
         $rules = $pack['rules'] ?? [];
         if (!is_array($rules)) {
@@ -44,7 +138,7 @@ final class ProfileLoader
         }
 
         $includeControls = self::strings($profile['include']['controls'] ?? $profile['controls'] ?? []);
-        $includeRules = self::profileRuleIds($profile);
+        $includeRules = self::profileRuleIds($profile, $capabilities);
         $excludeRules = self::strings($profile['exclude']['rules'] ?? $profile['exclude_rules'] ?? []);
 
         $selected = [];
@@ -221,7 +315,7 @@ final class ProfileLoader
         return [];
     }
 
-    private static function profileRuleIds(array $profile): array
+    private static function profileRuleIds(array $profile, array $capabilities = []): array
     {
         $rules = $profile['rules'] ?? $profile['include']['rules'] ?? [];
         if (!is_array($rules)) {
@@ -229,7 +323,22 @@ final class ProfileLoader
         }
 
         $ids = [];
+        $enabledCapabilities = [];
+        foreach ($capabilities as $name => $enabled) {
+            if (is_int($name) && is_scalar($enabled)) {
+                $enabledCapabilities[strtolower(trim((string)$enabled))] = true;
+            } elseif (is_scalar($name)) {
+                $enabledCapabilities[strtolower(trim((string)$name))] = filter_var($enabled, FILTER_VALIDATE_BOOL);
+            }
+        }
+
         foreach ($rules as $entry) {
+            if (is_array($entry)) {
+                $capability = strtolower(trim((string)($entry['applicability']['capability'] ?? '')));
+                if ($capability !== '' && empty($enabledCapabilities[$capability])) {
+                    continue;
+                }
+            }
             if (is_scalar($entry)) {
                 $id = strtoupper(trim((string)$entry));
             } elseif (is_array($entry)) {

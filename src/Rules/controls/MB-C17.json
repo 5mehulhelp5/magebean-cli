@@ -1,0 +1,100 @@
+{
+    "control": "MB-C17",
+    "title": "ASVS Level 2 Automated Verification",
+    "description": "Focused automated checks that provide direct or partial evidence for OWASP ASVS 5.0 Level 2 requirements.",
+    "rules": [
+        {
+            "id": "MB-R273",
+            "title": "Referrer-Policy limits cross-origin information leakage",
+            "control": "MB-C17",
+            "severity": "medium",
+            "op": "all",
+            "requirements": [
+                {
+                    "standard": "OWASP-ASVS",
+                    "version": "5.0.0",
+                    "id": "3.4.5",
+                    "level": 2
+                }
+            ],
+            "checks": [
+                {
+                    "name": "http_header_in",
+                    "args": {
+                        "header": "Referrer-Policy",
+                        "allowed": [
+                            "no-referrer",
+                            "same-origin",
+                            "strict-origin",
+                            "strict-origin-when-cross-origin"
+                        ],
+                        "timeout_ms": 8000
+                    }
+                }
+            ],
+            "messages": {
+                "pass": "Referrer-Policy uses an approved restrictive value.",
+                "fail": "Referrer-Policy is missing or does not use an approved restrictive value."
+            }
+        },
+        {
+            "id": "MB-R274",
+            "title": "Production endpoint rejects HTTP TRACE",
+            "control": "MB-C17",
+            "severity": "medium",
+            "op": "all",
+            "requirements": [
+                {
+                    "standard": "OWASP-ASVS",
+                    "version": "5.0.0",
+                    "id": "13.4.4",
+                    "level": 2
+                }
+            ],
+            "checks": [
+                {
+                    "name": "http_method_disallowed",
+                    "args": {
+                        "method": "TRACE",
+                        "timeout_ms": 8000
+                    }
+                }
+            ],
+            "messages": {
+                "pass": "HTTP TRACE is rejected by the production endpoint.",
+                "fail": "HTTP TRACE is accepted by the production endpoint."
+            }
+        },
+        {
+            "id": "MB-R275",
+            "title": "GraphQL introspection is disabled when GraphQL is private",
+            "control": "MB-C17",
+            "severity": "medium",
+            "op": "all",
+            "applicability": {
+                "capability": "graphql"
+            },
+            "requirements": [
+                {
+                    "standard": "OWASP-ASVS",
+                    "version": "5.0.0",
+                    "id": "4.3.2",
+                    "level": 2
+                }
+            ],
+            "checks": [
+                {
+                    "name": "http_graphql_introspection_disabled",
+                    "args": {
+                        "path": "/graphql",
+                        "timeout_ms": 8000
+                    }
+                }
+            ],
+            "messages": {
+                "pass": "GraphQL schema introspection is not exposed.",
+                "fail": "GraphQL schema introspection is exposed in production."
+            }
+        }
+    ]
+}
