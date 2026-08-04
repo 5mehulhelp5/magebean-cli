@@ -4,16 +4,16 @@
 **Original date:** 2025-08-20
 **Catalog revision:** 2026-08-03
 **Baseline version:** 1.0
-**Catalog size:** 19 controls, 370 rules
+**Catalog size:** 19 controls, 371 rules
 
 ---
 
 ## Introduction
 
-The **Magebean Security Baseline v1** is the canonical security rule catalog used by Magebean CLI for Magento 2 assessment. The current catalog contains **19 controls and 370 rules**:
+The **Magebean Security Baseline v1** is the canonical security rule catalog used by Magebean CLI for Magento 2 assessment. The current catalog contains **19 controls and 371 rules**:
 
 - **113 `AUTOMATED` rules** execute technical checks and produce machine-generated evidence.
-- **257 `HUMAN VERIFICATION REQUIRED` rules** identify requirements that Magebean CLI cannot conclusively attest without independent human assessment and supporting evidence.
+- **258 `HUMAN VERIFICATION REQUIRED` rules** identify requirements that Magebean CLI cannot conclusively attest without independent human assessment and supporting evidence.
 
 Profiles select subsets of this catalog for a particular assessment objective. A profile result is evidence for review; it is not, by itself, an OWASP ASVS or PCI DSS certification.
 
@@ -38,7 +38,7 @@ A **Rule** is the canonical unit of assessment identified by an `MB-Rxxx` ID. Ev
 
 ### 1.4 Baseline
 
-The **Baseline** is the complete current catalog of **19 controls and 370 rules**. The `baseline` profile selects all **113 automated rules** by default and all **370 rules** when `--include-manual-review` is supplied, subject to target applicability and capability filters.
+The **Baseline** is the complete current catalog of **19 controls and 371 rules**. The `baseline` profile selects all **113 automated rules** by default and all **371 rules** when `--include-manual-review` is supplied, subject to target applicability and capability filters.
 
 ### 1.5 Profile
 
@@ -95,7 +95,7 @@ The baseline is intended for developers, agencies, merchants, security reviewers
 | MB-C18 | ASVS Level 3 Human Assurance | 92 | 0 | 92 |
 | MB-C19 | ASVS Level 3 Automated Verification | 3 | 3 | 0 |
 
-## Complete Rule Catalog (370 Rules)
+## Complete Rule Catalog (371 Rules)
 
 ### MB-C01 - File & Folder Permissions (7 rules)
 
@@ -697,11 +697,11 @@ The baseline is intended for developers, agencies, merchants, security reviewers
 - **Severity:** `LOW`
 - **Description:** SaaS integration entry points use least-privilege ACL resources or IP allowlists.
 
-#### MB-R082 - No PAN, CVV, or track data stored in database
+#### MB-R082 - No PAN or sensitive authentication data stored in database
 
 - **Verification:** `AUTOMATED`
 - **Severity:** `CRITICAL`
-- **Description:** No database schema or code patterns indicating stored raw cardholder data were detected.
+- **Description:** No database schema or code patterns indicating stored raw PAN or sensitive authentication data were detected.
 
 #### MB-R085 - Payment method scope detection
 
@@ -2717,6 +2717,13 @@ Focused HTTP checks that provide partial evidence for OWASP ASVS 5.0 Level 3 req
 - **Mapped requirements:** OWASP-ASVS 5.0.0 section 13.4.6 (L3)
 - **Description:** Backend server banner does not expose a detailed version.
 
+#### MB-R371 - PCI vendor default account evidence assessment
+
+- **Verification:** `HUMAN VERIFICATION REQUIRED` (`HYBRID` evidence)
+- **Severity:** `HIGH`
+- **Mapped requirements:** PCI DSS 4.0.1 requirement 2.2.2 (`PARTIAL`)
+- **Description:** Validates a credential-free inventory and attestation showing how vendor default accounts are disabled, removed, or protected by changed authentication factors. Explicitly unsafe account states fail; complete structured evidence still requires independent human verification against the scoped system components.
+
 ---
 
 ## Chapter 4. Implementation Guidance
@@ -2758,7 +2765,7 @@ Profiles select a curated subset of baseline rules for a specific assessment len
 - **OWASP profile:** Selects application security rules mapped to OWASP Top 10 categories.
 - **PCI profile:** Selects PCI DSS readiness rules focused on payment scope, cardholder data leakage, payment-page script integrity, admin hardening, transport security, logging, and dependency risk.
 - **Hardening profile:** Runs deep production checks while excluding payment-specific compliance evidence.
-- **Baseline profile:** Runs all 113 automated rules by default, or all 370 rules with `--include-manual-review`.
+- **Baseline profile:** Runs all 113 automated rules by default, or all 371 rules with `--include-manual-review`.
 - **Custom profile:** Allows projects, agencies, or open-source contributors to define their own rule selection and mappings without changing the core rule catalog.
 
 ### 4.4 Command-Line Output
@@ -2834,7 +2841,7 @@ This chapter explains the rating system to help prioritize remediation.
 A structured review process to evaluate a Magento system against Controls and Rules. In Magebean CLI, an audit is executed via automated scans.
 
 **Baseline**
-The complete current Magebean rule catalog consisting of 19 controls and 370 rules. It provides a reference point for measuring Magento 2 security posture and readiness signals.
+The complete current Magebean rule catalog consisting of 19 controls and 371 rules. It provides a reference point for measuring Magento 2 security posture and readiness signals.
 
 **Control**
 A high-level category of checks that represents a key security or compliance area (e.g., Admin Hardening, HTTPS Enforcement).

@@ -1,0 +1,91 @@
+{
+  "schema_version": 1,
+  "requirement": "2.2.2",
+  "assessment": {
+    "id": "pci-review-2026-q3",
+    "generated_at": "2026-08-04T17:00:00Z",
+    "prepared_by": {
+      "name": "Security Operations",
+      "role": "PCI evidence owner"
+    }
+  },
+  "scope": {
+    "entity_role": "MERCHANT",
+    "environment": "PRODUCTION",
+    "components": [
+      {
+        "id": "magento-production",
+        "name": "Magento production application",
+        "type": "MAGENTO_APPLICATION",
+        "vendor": "Adobe",
+        "product": "Adobe Commerce",
+        "in_scope": true,
+        "inventory_source": "Approved CDE component inventory",
+        "evidence_refs": ["ev-component-inventory"]
+      }
+    ]
+  },
+  "accounts": [
+    {
+      "id": "vendor-support-account",
+      "component_id": "magento-production",
+      "vendor": "Example Vendor",
+      "product": "Example Integration",
+      "account_name": "vendor_support",
+      "classification": "CONFIRMED_VENDOR_DEFAULT",
+      "intended_use": "NOT_USED",
+      "observed_state": "DISABLED",
+      "credential_state": "NOT_APPLICABLE",
+      "verification_methods": [
+        "CONFIGURATION_EXPORT",
+        "VENDOR_DOCUMENTATION",
+        "SYSTEM_OBSERVATION"
+      ],
+      "evidence_refs": [
+        "ev-vendor-documentation",
+        "ev-account-export",
+        "ev-observation"
+      ],
+      "human_verified": true,
+      "notes": "The unused vendor account is disabled; no credential material is included."
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-component-inventory",
+      "type": "CONFIGURATION_EXPORT",
+      "reference": "evidence/cde-component-inventory.json",
+      "collected_at": "2026-08-04T16:30:00Z",
+      "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    },
+    {
+      "id": "ev-vendor-documentation",
+      "type": "VENDOR_DOCUMENTATION",
+      "reference": "evidence/example-vendor-default-accounts.pdf",
+      "collected_at": "2026-08-04T16:35:00Z",
+      "sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+    },
+    {
+      "id": "ev-account-export",
+      "type": "CONFIGURATION_EXPORT",
+      "reference": "evidence/example-integration-accounts.json",
+      "collected_at": "2026-08-04T16:40:00Z",
+      "sha256": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+    },
+    {
+      "id": "ev-observation",
+      "type": "OBSERVATION_RECORD",
+      "reference": "evidence/vendor-support-account-observation.md",
+      "collected_at": "2026-08-04T16:45:00Z",
+      "sha256": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+    }
+  ],
+  "attestation": {
+    "scope_confirmed": true,
+    "inventory_complete": true,
+    "manual_verification_complete": true,
+    "reviewed_by": "Qualified reviewer",
+    "reviewed_at": "2026-08-04T17:00:00Z",
+    "notes": "All in-scope components were reviewed against vendor documentation."
+  }
+}

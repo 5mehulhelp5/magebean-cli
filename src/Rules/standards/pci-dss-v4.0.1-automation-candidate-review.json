@@ -1,0 +1,1083 @@
+{
+    "id": "pci-dss-v4.0.1-automation-candidate-review",
+    "standard": "PCI DSS",
+    "version": "4.0.1",
+    "source_document": "PCI-DSS-v4_0_1.pdf",
+    "scope": "Criterion-level review of all 71 automation candidates remaining after implementation of requirement 2.2.2. No entry establishes PCI DSS compliance.",
+    "summary": {
+        "requirements_reviewed": 71,
+        "decisions": {
+            "REUSE_EXISTING_RULES": 7,
+            "EXTERNAL_SYSTEM_EVIDENCE": 34,
+            "CONTEXTUAL_APPLICABILITY": 3,
+            "HUMAN_ONLY": 27
+        },
+        "requirements_mapped": 7,
+        "new_rules_added": 0
+    },
+    "requirements": [
+        {
+            "requirement": "3.3.1.1",
+            "principal_requirement": "3",
+            "source_pdf_page": 84,
+            "testing_methods": [
+                "examine"
+            ],
+            "criterion_summary": "Assess all in-scope data sources and confirm full track data is not retained after authorization.",
+            "decision": "REUSE_EXISTING_RULES",
+            "existing_rules": [
+                "MB-R082",
+                "MB-R083",
+                "MB-R084"
+            ],
+            "maximum_coverage": "PARTIAL",
+            "human_verification_required": true,
+            "human_assessment_scope": "Assess all in-scope data sources and confirm full track data is not retained after authorization."
+        },
+        {
+            "requirement": "3.3.1.2",
+            "principal_requirement": "3",
+            "source_pdf_page": 85,
+            "testing_methods": [
+                "examine"
+            ],
+            "criterion_summary": "Assess all in-scope data sources and confirm card verification codes are not retained after authorization.",
+            "decision": "REUSE_EXISTING_RULES",
+            "existing_rules": [
+                "MB-R082",
+                "MB-R083",
+                "MB-R084"
+            ],
+            "maximum_coverage": "PARTIAL",
+            "human_verification_required": true,
+            "human_assessment_scope": "Assess all in-scope data sources and confirm card verification codes are not retained after authorization."
+        },
+        {
+            "requirement": "3.3.1.3",
+            "principal_requirement": "3",
+            "source_pdf_page": 86,
+            "testing_methods": [
+                "examine"
+            ],
+            "criterion_summary": "Assess all in-scope data sources and confirm PINs and PIN blocks are not retained after authorization.",
+            "decision": "REUSE_EXISTING_RULES",
+            "existing_rules": [
+                "MB-R082"
+            ],
+            "maximum_coverage": "SUPPORTING",
+            "human_verification_required": true,
+            "human_assessment_scope": "Assess all in-scope data sources and confirm PINs and PIN blocks are not retained after authorization."
+        },
+        {
+            "requirement": "3.3.2",
+            "principal_requirement": "3",
+            "source_pdf_page": 87,
+            "testing_methods": [
+                "examine"
+            ],
+            "criterion_summary": "Assess any pre-authorization SAD storage and confirm strong cryptography protects it.",
+            "decision": "EXTERNAL_SYSTEM_EVIDENCE",
+            "existing_rules": [],
+            "maximum_coverage": null,
+            "human_verification_required": true,
+            "human_assessment_scope": "Assess any pre-authorization SAD storage and confirm strong cryptography protects it."
+        },
+        {
+            "requirement": "3.3.3",
+            "principal_requirement": "3",
+            "source_pdf_page": 89,
+            "testing_methods": [
+                "examine",
+                "interview"
+            ],
+            "criterion_summary": "For issuer or issuing-service scope, assess the documented business need and protection of retained SAD.",
+            "decision": "CONTEXTUAL_APPLICABILITY",
+            "existing_rules": [],
+            "maximum_coverage": null,
+            "human_verification_required": true,
+            "human_assessment_scope": "For issuer or issuing-service scope, assess the documented business need and protection of retained SAD."
+        },
+        {
+            "requirement": "3.4.1",
+            "principal_requirement": "3",
+            "source_pdf_page": 91,
+            "testing_methods": [
+                "examine"
+            ],
+            "criterion_summary": "Assess PAN displays, role authorization, and masking so unauthorized roles cannot see more than permitted digits.",
+            "decision": "EXTERNAL_SYSTEM_EVIDENCE",
+            "existing_rules": [],
+            "maximum_coverage": null,
+            "human_verification_required": true,
+            "human_assessment_scope": "Assess PAN displays, role authorization, and masking so unauthorized roles cannot see more than permitted digits."
+        },
+        {
+            "requirement": "3.4.2",
+            "principal_requirement": "3",
+            "source_pdf_page": 93,
+            "testing_methods": [
+                "examine",
+                "interview",
+                "observe"
+            ],
+            "criterion_summary": "Assess remote-access controls and authorization records that prevent unauthorized copying or relocation of PAN.",
+            "decision": "EXTERNAL_SYSTEM_EVIDENCE",
+            "existing_rules": [],
+            "maximum_coverage": null,
+            "human_verification_required": true,
+            "human_assessment_scope": "Assess remote-access controls and authorization records that prevent unauthorized copying or relocation of PAN."
+        },
+        {
+            "requirement": "4.2.1.1",
+            "principal_requirement": "4",
+            "source_pdf_page": 120,
+            "testing_methods": [
+                "examine"
+            ],
+            "criterion_summary": "Assess certificate and key inventories and confirm trusted, valid cryptography protects PAN over open public networks.",
+            "decision": "EXTERNAL_SYSTEM_EVIDENCE",
+            "existing_rules": [],
+            "maximum_coverage": null,
+            "human_verification_required": true,
+            "human_assessment_scope": "Assess certificate and key inventories and confirm trusted, valid cryptography protects PAN over open public networks."
+        },
+        {
+            "requirement": "4.2.1.2",
+            "principal_requirement": "4",
+            "source_pdf_page": 121,
+            "testing_methods": [
+                "examine"
+            ],
+            "criterion_summary": "Assess wireless technologies transmitting PAN and confirm strong cryptography secures authentication and transmission.",
+            "decision": "EXTERNAL_SYSTEM_EVIDENCE",
+            "existing_rules": [],
+            "maximum_coverage": null,
+            "human_verification_required": true,
+            "human_assessment_scope": "Assess wireless technologies transmitting PAN and confirm strong cryptography secures authentication and transmission."
+        },
+        {
+            "requirement": "4.2.2",
+            "principal_requirement": "4",
+            "source_pdf_page": 122,
+            "testing_methods": [
+                "examine"
+            ],
+            "criterion_summary": "Assess end-user messaging channels and confirm unprotected PAN is never sent through them.",
+            "decision": "EXTERNAL_SYSTEM_EVIDENCE",
+            "existing_rules": [],
+            "maximum_coverage": null,
+            "human_verification_required": true,
+            "human_assessment_scope": "Assess end-user messaging channels and confirm unprotected PAN is never sent through them."
+        },
+        {
+            "requirement": "6.2.1",
+            "principal_requirement": "6",
+            "source_pdf_page": 141,
+            "testing_methods": [
+                "examine"
+            ],
+            "criterion_summary": "Assess the software-development lifecycle and confirm bespoke and custom software is developed securely.",
+            "decision": "HUMAN_ONLY",
+            "existing_rules": [],
+            "maximum_coverage": null,
+            "human_verification_required": true,
+            "human_assessment_scope": "Assess the software-development lifecycle and confirm bespoke and custom software is developed securely."
+        },
+        {
+            "requirement": "6.2.2",
+            "principal_requirement": "6",
+            "source_pdf_page": 142,
+            "testing_methods": [
+                "examine",
+                "interview"
+            ],
+            "criterion_summary": "Assess annual role-relevant secure-software training records for personnel working on bespoke and custom software.",
+            "decision": "HUMAN_ONLY",
+            "existing_rules": [],
+            "maximum_coverage": null,
+            "human_verification_required": true,
+            "human_assessment_scope": "Assess annual role-relevant secure-software training records for personnel working on bespoke and custom software."
+        },
+        {
+            "requirement": "6.2.3",
+            "principal_requirement": "6",
+            "source_pdf_page": 143,
+            "testing_methods": [
+                "examine",
+                "interview"
+            ],
+            "criterion_summary": "Assess pre-production code-review procedures and evidence for bespoke and custom software changes.",
+            "decision": "HUMAN_ONLY",
+            "existing_rules": [],
+            "maximum_coverage": null,
+            "human_verification_required": true,
+            "human_assessment_scope": "Assess pre-production code-review procedures and evidence for bespoke and custom software changes."
+        },
+        {
+            "requirement": "6.2.3.1",
+            "principal_requirement": "6",
+            "source_pdf_page": 144,
+            "testing_methods": [
+                "examine",
+                "interview"
+            ],
+            "criterion_summary": "Assess manual code-review independence and reviewer knowledge for changes entering production.",
+            "decision": "HUMAN_ONLY",
+            "existing_rules": [],
+            "maximum_coverage": null,
+            "human_verification_required": true,
+            "human_assessment_scope": "Assess manual code-review independence and reviewer knowledge for changes entering production."
+        },
+        {
+            "requirement": "6.3.2",
+            "principal_requirement": "6",
+            "source_pdf_page": 151,
+            "testing_methods": [
+                "examine",
+                "interview"
+            ],
+            "criterion_summary": "Assess the inventory of bespoke, custom, and third-party software components and their ownership.",
+            "decision": "EXTERNAL_SYSTEM_EVIDENCE",
+            "existing_rules": [],
+            "maximum_coverage": null,
+            "human_verification_required": true,
+            "human_assessment_scope": "Assess the inventory of bespoke, custom, and third-party software components and their ownership."
+        },
+        {
+            "requirement": "6.4.1",
+            "principal_requirement": "6",
+            "source_pdf_page": 154,
+            "testing_methods": [
+                "examine",
+                "interview"
+            ],
+            "criterion_summary": "Assess recurring application-security reviews or automated protection for public-facing web applications.",
+            "decision": "EXTERNAL_SYSTEM_EVIDENCE",
+            "existing_rules": [],
+            "maximum_coverage": null,
+            "human_verification_required": true,
+            "human_assessment_scope": "Assess recurring application-security reviews or automated protection for public-facing web applications."
+        },
+        {
+            "requirement": "6.4.2",
+            "principal_requirement": "6",
+            "source_pdf_page": 156,
+            "testing_methods": [
+                "examine",
+                "interview"
+            ],
+            "criterion_summary": "Assess the automated technical solution in front of public-facing web applications, including detection, prevention, currency, and logging.",
+            "decision": "EXTERNAL_SYSTEM_EVIDENCE",
+            "existing_rules": [],
+            "maximum_coverage": null,
+            "human_verification_required": true,
+            "human_assessment_scope": "Assess the automated technical solution in front of public-facing web applications, including detection, prevention, currency, and logging."
+        },
+        {
+            "requirement": "6.5.1",
+            "principal_requirement": "6",
+            "source_pdf_page": 159,
+            "testing_methods": [
+                "examine"
+            ],
+            "criterion_summary": "Assess change-control procedures and records for all in-scope system components.",
+            "decision": "HUMAN_ONLY",
+            "existing_rules": [],
+            "maximum_coverage": null,
+            "human_verification_required": true,
+            "human_assessment_scope": "Assess change-control procedures and records for all in-scope system components."
+        },
+        {
+            "requirement": "6.5.3",
+            "principal_requirement": "6",
+            "source_pdf_page": 161,
+            "testing_methods": [
+                "examine"
+            ],
+            "criterion_summary": "Assess separation between pre-production and production environments and access controls.",
+            "decision": "HUMAN_ONLY",
+            "existing_rules": [],
+            "maximum_coverage": null,
+            "human_verification_required": true,
+            "human_assessment_scope": "Assess separation between pre-production and production environments and access controls."
+        },
+        {
+            "requirement": "6.5.4",
+            "principal_requirement": "6",
+            "source_pdf_page": 162,
+            "testing_methods": [
+                "examine",
+                "interview",
+                "observe"
+            ],
+            "criterion_summary": "Assess separation of duties between development/test and production roles.",
+            "decision": "HUMAN_ONLY",
+            "existing_rules": [],
+            "maximum_coverage": null,
+            "human_verification_required": true,
+            "human_assessment_scope": "Assess separation of duties between development/test and production roles."
+        },
+        {
+            "requirement": "6.5.5",
+            "principal_requirement": "6",
+            "source_pdf_page": 163,
+            "testing_methods": [
+                "examine",
+                "interview",
+                "observe"
+            ],
+            "criterion_summary": "Assess controls preventing live PAN from entering pre-production unless protected under all applicable requirements.",
+            "decision": "HUMAN_ONLY",
+            "existing_rules": [],
+            "maximum_coverage": null,
+            "human_verification_required": true,
+            "human_assessment_scope": "Assess controls preventing live PAN from entering pre-production unless protected under all applicable requirements."
+        },
+        {
+            "requirement": "6.5.6",
+            "principal_requirement": "6",
+            "source_pdf_page": 164,
+            "testing_methods": [
+                "examine",
+                "interview",
+                "observe"
+            ],
+            "criterion_summary": "Assess production launch evidence confirming test data and test accounts were removed.",
+            "decision": "HUMAN_ONLY",
+            "existing_rules": [],
+            "maximum_coverage": null,
+            "human_verification_required": true,
+            "human_assessment_scope": "Assess production launch evidence confirming test data and test accounts were removed."
+        },
+        {
+            "requirement": "7.2.2",
+            "principal_requirement": "7",
+            "source_pdf_page": 170,
+            "testing_methods": [
+                "examine",
+                "interview"
+            ],
+            "criterion_summary": "Assess assigned privileges against job function, least privilege, and documented approval.",
+            "decision": "REUSE_EXISTING_RULES",
+            "existing_rules": [
+                "MB-R100",
+                "MB-R101"
+            ],
+            "maximum_coverage": "PARTIAL",
+            "human_verification_required": true,
+            "human_assessment_scope": "Assess assigned privileges against job function, least privilege, and documented approval."
+        },
+        {
+            "requirement": "7.2.3",
+            "principal_requirement": "7",
+            "source_pdf_page": 171,
+            "testing_methods": [
+                "examine"
+            ],
+            "criterion_summary": "Assess required-privilege approval records from authorized personnel.",
+            "decision": "HUMAN_ONLY",
+            "existing_rules": [],
+            "maximum_coverage": null,
+            "human_verification_required": true,
+            "human_assessment_scope": "Assess required-privilege approval records from authorized personnel."
+        },
+        {
+            "requirement": "7.2.4",
+            "principal_requirement": "7",
+            "source_pdf_page": 172,
+            "testing_methods": [
+                "examine",
+                "interview"
+            ],
+            "criterion_summary": "Assess all user and system-account access assignments and confirm they match documented job functions.",
+            "decision": "HUMAN_ONLY",
+            "existing_rules": [],
+            "maximum_coverage": null,
+            "human_verification_required": true,
+            "human_assessment_scope": "Assess all user and system-account access assignments and confirm they match documented job functions."
+        },
+        {
+            "requirement": "7.2.5",
+            "principal_requirement": "7",
+            "source_pdf_page": 173,
+            "testing_methods": [
+                "examine",
+                "interview"
+            ],
+            "criterion_summary": "Assess periodic access reviews, reviewer evidence, and remediation of inappropriate access.",
+            "decision": "HUMAN_ONLY",
+            "existing_rules": [],
+            "maximum_coverage": null,
+            "human_verification_required": true,
+            "human_assessment_scope": "Assess periodic access reviews, reviewer evidence, and remediation of inappropriate access."
+        },
+        {
+            "requirement": "7.2.5.1",
+            "principal_requirement": "7",
+            "source_pdf_page": 174,
+            "testing_methods": [
+                "examine",
+                "interview"
+            ],
+            "criterion_summary": "For service-provider scope, assess six-monthly access reviews and customer-environment access controls.",
+            "decision": "CONTEXTUAL_APPLICABILITY",
+            "existing_rules": [],
+            "maximum_coverage": null,
+            "human_verification_required": true,
+            "human_assessment_scope": "For service-provider scope, assess six-monthly access reviews and customer-environment access controls."
+        },
+        {
+            "requirement": "7.2.6",
+            "principal_requirement": "7",
+            "source_pdf_page": 175,
+            "testing_methods": [
+                "examine",
+                "interview"
+            ],
+            "criterion_summary": "Assess application and system account access, least privilege, and management controls.",
+            "decision": "HUMAN_ONLY",
+            "existing_rules": [],
+            "maximum_coverage": null,
+            "human_verification_required": true,
+            "human_assessment_scope": "Assess application and system account access, least privilege, and management controls."
+        },
+        {
+            "requirement": "7.3.1",
+            "principal_requirement": "7",
+            "source_pdf_page": 176,
+            "testing_methods": [
+                "examine"
+            ],
+            "criterion_summary": "Assess access-control system configuration and confirm access is restricted by need to know.",
+            "decision": "REUSE_EXISTING_RULES",
+            "existing_rules": [
+                "MB-R101"
+            ],
+            "maximum_coverage": "SUPPORTING",
+            "human_verification_required": true,
+            "human_assessment_scope": "Assess access-control system configuration and confirm access is restricted by need to know."
+        },
+        {
+            "requirement": "7.3.2",
+            "principal_requirement": "7",
+            "source_pdf_page": 176,
+            "testing_methods": [
+                "examine"
+            ],
+            "criterion_summary": "Assess default-deny configuration for access-control systems.",
+            "decision": "EXTERNAL_SYSTEM_EVIDENCE",
+            "existing_rules": [],
+            "maximum_coverage": null,
+            "human_verification_required": true,
+            "human_assessment_scope": "Assess default-deny configuration for access-control systems."
+        },
+        {
+            "requirement": "7.3.3",
+            "principal_requirement": "7",
+            "source_pdf_page": 177,
+            "testing_methods": [
+                "examine"
+            ],
+            "criterion_summary": "Assess access-control enforcement on all system components and data resources.",
+            "decision": "EXTERNAL_SYSTEM_EVIDENCE",
+            "existing_rules": [],
+            "maximum_coverage": null,
+            "human_verification_required": true,
+            "human_assessment_scope": "Assess access-control enforcement on all system components and data resources."
+        },
+        {
+            "requirement": "8.2.1",
+            "principal_requirement": "8",
+            "source_pdf_page": 182,
+            "testing_methods": [
+                "examine",
+                "interview"
+            ],
+            "criterion_summary": "Assess account inventories and confirm every user has a unique identity before access is granted.",
+            "decision": "HUMAN_ONLY",
+            "existing_rules": [],
+            "maximum_coverage": null,
+            "human_verification_required": true,
+            "human_assessment_scope": "Assess account inventories and confirm every user has a unique identity before access is granted."
+        },
+        {
+            "requirement": "8.2.2",
+            "principal_requirement": "8",
+            "source_pdf_page": 183,
+            "testing_methods": [
+                "examine",
+                "interview"
+            ],
+            "criterion_summary": "Assess shared or generic account exceptions, approvals, identity attribution, and time-bounded use.",
+            "decision": "HUMAN_ONLY",
+            "existing_rules": [],
+            "maximum_coverage": null,
+            "human_verification_required": true,
+            "human_assessment_scope": "Assess shared or generic account exceptions, approvals, identity attribution, and time-bounded use."
+        },
+        {
+            "requirement": "8.2.4",
+            "principal_requirement": "8",
+            "source_pdf_page": 186,
+            "testing_methods": [
+                "examine"
+            ],
+            "criterion_summary": "Assess account lifecycle records and confirm terminated-user access is revoked immediately.",
+            "decision": "HUMAN_ONLY",
+            "existing_rules": [],
+            "maximum_coverage": null,
+            "human_verification_required": true,
+            "human_assessment_scope": "Assess account lifecycle records and confirm terminated-user access is revoked immediately."
+        },
+        {
+            "requirement": "8.2.5",
+            "principal_requirement": "8",
+            "source_pdf_page": 186,
+            "testing_methods": [
+                "examine",
+                "interview"
+            ],
+            "criterion_summary": "Assess inactive-account reports and confirm accounts are removed or disabled within 90 days.",
+            "decision": "EXTERNAL_SYSTEM_EVIDENCE",
+            "existing_rules": [],
+            "maximum_coverage": null,
+            "human_verification_required": true,
+            "human_assessment_scope": "Assess inactive-account reports and confirm accounts are removed or disabled within 90 days."
+        },
+        {
+            "requirement": "8.2.6",
+            "principal_requirement": "8",
+            "source_pdf_page": 187,
+            "testing_methods": [
+                "examine",
+                "interview"
+            ],
+            "criterion_summary": "Assess controls for inactive accounts that must remain enabled, including authorization and monitoring.",
+            "decision": "EXTERNAL_SYSTEM_EVIDENCE",
+            "existing_rules": [],
+            "maximum_coverage": null,
+            "human_verification_required": true,
+            "human_assessment_scope": "Assess controls for inactive accounts that must remain enabled, including authorization and monitoring."
+        },
+        {
+            "requirement": "8.2.7",
+            "principal_requirement": "8",
+            "source_pdf_page": 187,
+            "testing_methods": [
+                "examine",
+                "interview"
+            ],
+            "criterion_summary": "Assess third-party remote-access account activation, monitoring, and disabling when not in use.",
+            "decision": "EXTERNAL_SYSTEM_EVIDENCE",
+            "existing_rules": [],
+            "maximum_coverage": null,
+            "human_verification_required": true,
+            "human_assessment_scope": "Assess third-party remote-access account activation, monitoring, and disabling when not in use."
+        },
+        {
+            "requirement": "8.3.1",
+            "principal_requirement": "8",
+            "source_pdf_page": 190,
+            "testing_methods": [
+                "examine",
+                "observe"
+            ],
+            "criterion_summary": "Assess authentication coverage and confirm all user and administrator access uses required factors.",
+            "decision": "EXTERNAL_SYSTEM_EVIDENCE",
+            "existing_rules": [],
+            "maximum_coverage": null,
+            "human_verification_required": true,
+            "human_assessment_scope": "Assess authentication coverage and confirm all user and administrator access uses required factors."
+        },
+        {
+            "requirement": "8.3.2",
+            "principal_requirement": "8",
+            "source_pdf_page": 191,
+            "testing_methods": [
+                "examine"
+            ],
+            "criterion_summary": "Assess cryptographic protection of authentication factors during transmission and storage.",
+            "decision": "EXTERNAL_SYSTEM_EVIDENCE",
+            "existing_rules": [],
+            "maximum_coverage": null,
+            "human_verification_required": true,
+            "human_assessment_scope": "Assess cryptographic protection of authentication factors during transmission and storage."
+        },
+        {
+            "requirement": "8.3.3",
+            "principal_requirement": "8",
+            "source_pdf_page": 192,
+            "testing_methods": [
+                "examine",
+                "observe"
+            ],
+            "criterion_summary": "Assess identity confirmation before authentication factors are modified or replaced.",
+            "decision": "HUMAN_ONLY",
+            "existing_rules": [],
+            "maximum_coverage": null,
+            "human_verification_required": true,
+            "human_assessment_scope": "Assess identity confirmation before authentication factors are modified or replaced."
+        },
+        {
+            "requirement": "8.3.5",
+            "principal_requirement": "8",
+            "source_pdf_page": 193,
+            "testing_methods": [
+                "examine",
+                "observe"
+            ],
+            "criterion_summary": "Assess initial and reset passwords and confirm unique values are changed immediately after first use.",
+            "decision": "HUMAN_ONLY",
+            "existing_rules": [],
+            "maximum_coverage": null,
+            "human_verification_required": true,
+            "human_assessment_scope": "Assess initial and reset passwords and confirm unique values are changed immediately after first use."
+        },
+        {
+            "requirement": "8.3.7",
+            "principal_requirement": "8",
+            "source_pdf_page": 195,
+            "testing_methods": [
+                "examine"
+            ],
+            "criterion_summary": "Assess password history settings and confirm the last four passwords cannot be reused.",
+            "decision": "EXTERNAL_SYSTEM_EVIDENCE",
+            "existing_rules": [],
+            "maximum_coverage": null,
+            "human_verification_required": true,
+            "human_assessment_scope": "Assess password history settings and confirm the last four passwords cannot be reused."
+        },
+        {
+            "requirement": "8.3.8",
+            "principal_requirement": "8",
+            "source_pdf_page": 196,
+            "testing_methods": [
+                "examine",
+                "interview"
+            ],
+            "criterion_summary": "Assess documented authentication guidance and evidence that it is communicated to users.",
+            "decision": "HUMAN_ONLY",
+            "existing_rules": [],
+            "maximum_coverage": null,
+            "human_verification_required": true,
+            "human_assessment_scope": "Assess documented authentication guidance and evidence that it is communicated to users."
+        },
+        {
+            "requirement": "8.3.9",
+            "principal_requirement": "8",
+            "source_pdf_page": 197,
+            "testing_methods": [
+                "examine"
+            ],
+            "criterion_summary": "Assess password change or dynamic-account-analysis controls for non-consumer user accounts.",
+            "decision": "EXTERNAL_SYSTEM_EVIDENCE",
+            "existing_rules": [],
+            "maximum_coverage": null,
+            "human_verification_required": true,
+            "human_assessment_scope": "Assess password change or dynamic-account-analysis controls for non-consumer user accounts."
+        },
+        {
+            "requirement": "8.3.11",
+            "principal_requirement": "8",
+            "source_pdf_page": 201,
+            "testing_methods": [
+                "examine",
+                "interview",
+                "observe"
+            ],
+            "criterion_summary": "Assess token, smart-card, and certificate assignment so each factor is individual and non-shareable.",
+            "decision": "HUMAN_ONLY",
+            "existing_rules": [],
+            "maximum_coverage": null,
+            "human_verification_required": true,
+            "human_assessment_scope": "Assess token, smart-card, and certificate assignment so each factor is individual and non-shareable."
+        },
+        {
+            "requirement": "8.4.1",
+            "principal_requirement": "8",
+            "source_pdf_page": 202,
+            "testing_methods": [
+                "examine",
+                "observe"
+            ],
+            "criterion_summary": "Assess MFA enforcement for all non-console administrative access into the CDE.",
+            "decision": "REUSE_EXISTING_RULES",
+            "existing_rules": [
+                "MB-R007"
+            ],
+            "maximum_coverage": "PARTIAL",
+            "human_verification_required": true,
+            "human_assessment_scope": "Assess MFA enforcement for all non-console administrative access into the CDE."
+        },
+        {
+            "requirement": "8.5.1",
+            "principal_requirement": "8",
+            "source_pdf_page": 208,
+            "testing_methods": [
+                "examine",
+                "interview",
+                "observe"
+            ],
+            "criterion_summary": "Assess MFA implementation and confirm factors are independent and resistant to replay and bypass.",
+            "decision": "EXTERNAL_SYSTEM_EVIDENCE",
+            "existing_rules": [],
+            "maximum_coverage": null,
+            "human_verification_required": true,
+            "human_assessment_scope": "Assess MFA implementation and confirm factors are independent and resistant to replay and bypass."
+        },
+        {
+            "requirement": "8.6.1",
+            "principal_requirement": "8",
+            "source_pdf_page": 210,
+            "testing_methods": [
+                "examine",
+                "interview"
+            ],
+            "criterion_summary": "Assess application and system account use, ownership, interactive-use restrictions, and exception controls.",
+            "decision": "EXTERNAL_SYSTEM_EVIDENCE",
+            "existing_rules": [],
+            "maximum_coverage": null,
+            "human_verification_required": true,
+            "human_assessment_scope": "Assess application and system account use, ownership, interactive-use restrictions, and exception controls."
+        },
+        {
+            "requirement": "8.6.3",
+            "principal_requirement": "8",
+            "source_pdf_page": 212,
+            "testing_methods": [
+                "examine",
+                "interview"
+            ],
+            "criterion_summary": "Assess protection and rotation of passwords for application and system accounts.",
+            "decision": "EXTERNAL_SYSTEM_EVIDENCE",
+            "existing_rules": [],
+            "maximum_coverage": null,
+            "human_verification_required": true,
+            "human_assessment_scope": "Assess protection and rotation of passwords for application and system accounts."
+        },
+        {
+            "requirement": "10.2.1",
+            "principal_requirement": "10",
+            "source_pdf_page": 243,
+            "testing_methods": [
+                "examine",
+                "interview"
+            ],
+            "criterion_summary": "Assess audit-log coverage for anomaly detection, suspicious activity, and forensic analysis.",
+            "decision": "HUMAN_ONLY",
+            "existing_rules": [],
+            "maximum_coverage": null,
+            "human_verification_required": true,
+            "human_assessment_scope": "Assess audit-log coverage for anomaly detection, suspicious activity, and forensic analysis."
+        },
+        {
+            "requirement": "10.2.1.1",
+            "principal_requirement": "10",
+            "source_pdf_page": 243,
+            "testing_methods": [
+                "examine"
+            ],
+            "criterion_summary": "Assess logging of all individual user access to cardholder data.",
+            "decision": "EXTERNAL_SYSTEM_EVIDENCE",
+            "existing_rules": [],
+            "maximum_coverage": null,
+            "human_verification_required": true,
+            "human_assessment_scope": "Assess logging of all individual user access to cardholder data."
+        },
+        {
+            "requirement": "10.2.1.2",
+            "principal_requirement": "10",
+            "source_pdf_page": 244,
+            "testing_methods": [
+                "examine"
+            ],
+            "criterion_summary": "Assess logging of all actions performed by administrative users.",
+            "decision": "EXTERNAL_SYSTEM_EVIDENCE",
+            "existing_rules": [],
+            "maximum_coverage": null,
+            "human_verification_required": true,
+            "human_assessment_scope": "Assess logging of all actions performed by administrative users."
+        },
+        {
+            "requirement": "10.2.1.3",
+            "principal_requirement": "10",
+            "source_pdf_page": 244,
+            "testing_methods": [
+                "examine"
+            ],
+            "criterion_summary": "Assess logging of all access to audit logs.",
+            "decision": "EXTERNAL_SYSTEM_EVIDENCE",
+            "existing_rules": [],
+            "maximum_coverage": null,
+            "human_verification_required": true,
+            "human_assessment_scope": "Assess logging of all access to audit logs."
+        },
+        {
+            "requirement": "10.2.1.4",
+            "principal_requirement": "10",
+            "source_pdf_page": 244,
+            "testing_methods": [
+                "examine"
+            ],
+            "criterion_summary": "Assess logging of invalid logical-access attempts.",
+            "decision": "EXTERNAL_SYSTEM_EVIDENCE",
+            "existing_rules": [],
+            "maximum_coverage": null,
+            "human_verification_required": true,
+            "human_assessment_scope": "Assess logging of invalid logical-access attempts."
+        },
+        {
+            "requirement": "10.2.1.5",
+            "principal_requirement": "10",
+            "source_pdf_page": 246,
+            "testing_methods": [
+                "examine"
+            ],
+            "criterion_summary": "Assess logging of identity and authentication changes, including privileged-account changes.",
+            "decision": "EXTERNAL_SYSTEM_EVIDENCE",
+            "existing_rules": [],
+            "maximum_coverage": null,
+            "human_verification_required": true,
+            "human_assessment_scope": "Assess logging of identity and authentication changes, including privileged-account changes."
+        },
+        {
+            "requirement": "10.2.1.6",
+            "principal_requirement": "10",
+            "source_pdf_page": 246,
+            "testing_methods": [
+                "examine"
+            ],
+            "criterion_summary": "Assess logging of audit-log initialization, stopping, and pausing.",
+            "decision": "EXTERNAL_SYSTEM_EVIDENCE",
+            "existing_rules": [],
+            "maximum_coverage": null,
+            "human_verification_required": true,
+            "human_assessment_scope": "Assess logging of audit-log initialization, stopping, and pausing."
+        },
+        {
+            "requirement": "10.2.1.7",
+            "principal_requirement": "10",
+            "source_pdf_page": 247,
+            "testing_methods": [
+                "examine"
+            ],
+            "criterion_summary": "Assess logging of creation and deletion of system-level objects.",
+            "decision": "EXTERNAL_SYSTEM_EVIDENCE",
+            "existing_rules": [],
+            "maximum_coverage": null,
+            "human_verification_required": true,
+            "human_assessment_scope": "Assess logging of creation and deletion of system-level objects."
+        },
+        {
+            "requirement": "10.2.2",
+            "principal_requirement": "10",
+            "source_pdf_page": 247,
+            "testing_methods": [
+                "examine",
+                "interview"
+            ],
+            "criterion_summary": "Assess audit records for user, event, time, outcome, origin, and affected resource details.",
+            "decision": "HUMAN_ONLY",
+            "existing_rules": [],
+            "maximum_coverage": null,
+            "human_verification_required": true,
+            "human_assessment_scope": "Assess audit records for user, event, time, outcome, origin, and affected resource details."
+        },
+        {
+            "requirement": "10.3.2",
+            "principal_requirement": "10",
+            "source_pdf_page": 249,
+            "testing_methods": [
+                "examine",
+                "interview"
+            ],
+            "criterion_summary": "Assess controls preventing unauthorized reading, modification, and deletion of audit logs.",
+            "decision": "REUSE_EXISTING_RULES",
+            "existing_rules": [
+                "MB-R042"
+            ],
+            "maximum_coverage": "SUPPORTING",
+            "human_verification_required": true,
+            "human_assessment_scope": "Assess controls preventing unauthorized reading, modification, and deletion of audit logs."
+        },
+        {
+            "requirement": "10.3.3",
+            "principal_requirement": "10",
+            "source_pdf_page": 249,
+            "testing_methods": [
+                "examine"
+            ],
+            "criterion_summary": "Assess prompt backup of audit logs to a secure central log server or protected media.",
+            "decision": "EXTERNAL_SYSTEM_EVIDENCE",
+            "existing_rules": [],
+            "maximum_coverage": null,
+            "human_verification_required": true,
+            "human_assessment_scope": "Assess prompt backup of audit logs to a secure central log server or protected media."
+        },
+        {
+            "requirement": "10.3.4",
+            "principal_requirement": "10",
+            "source_pdf_page": 250,
+            "testing_methods": [
+                "examine"
+            ],
+            "criterion_summary": "Assess file-integrity or change-detection monitoring for audit logs and alert handling.",
+            "decision": "EXTERNAL_SYSTEM_EVIDENCE",
+            "existing_rules": [],
+            "maximum_coverage": null,
+            "human_verification_required": true,
+            "human_assessment_scope": "Assess file-integrity or change-detection monitoring for audit logs and alert handling."
+        },
+        {
+            "requirement": "10.4.1",
+            "principal_requirement": "10",
+            "source_pdf_page": 251,
+            "testing_methods": [
+                "examine",
+                "interview",
+                "observe"
+            ],
+            "criterion_summary": "Assess daily review of security events and logs from critical and security-function systems.",
+            "decision": "HUMAN_ONLY",
+            "existing_rules": [],
+            "maximum_coverage": null,
+            "human_verification_required": true,
+            "human_assessment_scope": "Assess daily review of security events and logs from critical and security-function systems."
+        },
+        {
+            "requirement": "10.4.1.1",
+            "principal_requirement": "10",
+            "source_pdf_page": 252,
+            "testing_methods": [
+                "examine",
+                "interview"
+            ],
+            "criterion_summary": "Assess automated mechanisms used to perform required audit-log reviews.",
+            "decision": "HUMAN_ONLY",
+            "existing_rules": [],
+            "maximum_coverage": null,
+            "human_verification_required": true,
+            "human_assessment_scope": "Assess automated mechanisms used to perform required audit-log reviews."
+        },
+        {
+            "requirement": "10.4.2",
+            "principal_requirement": "10",
+            "source_pdf_page": 253,
+            "testing_methods": [
+                "examine",
+                "interview"
+            ],
+            "criterion_summary": "Assess risk-based review frequency for logs outside the daily-review scope.",
+            "decision": "HUMAN_ONLY",
+            "existing_rules": [],
+            "maximum_coverage": null,
+            "human_verification_required": true,
+            "human_assessment_scope": "Assess risk-based review frequency for logs outside the daily-review scope."
+        },
+        {
+            "requirement": "10.4.2.1",
+            "principal_requirement": "10",
+            "source_pdf_page": 254,
+            "testing_methods": [
+                "examine",
+                "interview"
+            ],
+            "criterion_summary": "For service-provider scope, assess daily review of logs for customer-facing security services.",
+            "decision": "CONTEXTUAL_APPLICABILITY",
+            "existing_rules": [],
+            "maximum_coverage": null,
+            "human_verification_required": true,
+            "human_assessment_scope": "For service-provider scope, assess daily review of logs for customer-facing security services."
+        },
+        {
+            "requirement": "10.4.3",
+            "principal_requirement": "10",
+            "source_pdf_page": 255,
+            "testing_methods": [
+                "examine",
+                "interview",
+                "observe"
+            ],
+            "criterion_summary": "Assess follow-up and resolution records for exceptions and anomalies found during log reviews.",
+            "decision": "HUMAN_ONLY",
+            "existing_rules": [],
+            "maximum_coverage": null,
+            "human_verification_required": true,
+            "human_assessment_scope": "Assess follow-up and resolution records for exceptions and anomalies found during log reviews."
+        },
+        {
+            "requirement": "10.6.1",
+            "principal_requirement": "10",
+            "source_pdf_page": 257,
+            "testing_methods": [
+                "examine"
+            ],
+            "criterion_summary": "Assess time-synchronization configuration against designated time servers.",
+            "decision": "EXTERNAL_SYSTEM_EVIDENCE",
+            "existing_rules": [],
+            "maximum_coverage": null,
+            "human_verification_required": true,
+            "human_assessment_scope": "Assess time-synchronization configuration against designated time servers."
+        },
+        {
+            "requirement": "10.6.2",
+            "principal_requirement": "10",
+            "source_pdf_page": 258,
+            "testing_methods": [
+                "examine"
+            ],
+            "criterion_summary": "Assess controls protecting time data and settings from unauthorized changes.",
+            "decision": "EXTERNAL_SYSTEM_EVIDENCE",
+            "existing_rules": [],
+            "maximum_coverage": null,
+            "human_verification_required": true,
+            "human_assessment_scope": "Assess controls protecting time data and settings from unauthorized changes."
+        },
+        {
+            "requirement": "10.6.3",
+            "principal_requirement": "10",
+            "source_pdf_page": 259,
+            "testing_methods": [
+                "examine",
+                "observe"
+            ],
+            "criterion_summary": "Assess receipt of time settings from accepted industry sources.",
+            "decision": "EXTERNAL_SYSTEM_EVIDENCE",
+            "existing_rules": [],
+            "maximum_coverage": null,
+            "human_verification_required": true,
+            "human_assessment_scope": "Assess receipt of time settings from accepted industry sources."
+        },
+        {
+            "requirement": "10.7.2",
+            "principal_requirement": "10",
+            "source_pdf_page": 261,
+            "testing_methods": [
+                "examine",
+                "interview",
+                "observe"
+            ],
+            "criterion_summary": "Assess detection and alerting when critical security control systems fail.",
+            "decision": "EXTERNAL_SYSTEM_EVIDENCE",
+            "existing_rules": [],
+            "maximum_coverage": null,
+            "human_verification_required": true,
+            "human_assessment_scope": "Assess detection and alerting when critical security control systems fail."
+        },
+        {
+            "requirement": "10.7.3",
+            "principal_requirement": "10",
+            "source_pdf_page": 262,
+            "testing_methods": [
+                "examine",
+                "interview"
+            ],
+            "criterion_summary": "Assess documented and tested response procedures for critical security-control failures.",
+            "decision": "HUMAN_ONLY",
+            "existing_rules": [],
+            "maximum_coverage": null,
+            "human_verification_required": true,
+            "human_assessment_scope": "Assess documented and tested response procedures for critical security-control failures."
+        }
+    ]
+}

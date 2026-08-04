@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://magebean.com/schemas/pci-dss-v4.0.1-context.schema.json",
+  "title": "Magebean PCI DSS 4.0.1 applicability context",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "entity_type", "scope_confirmed", "payment_architecture", "pan_handling", "overlays", "requirement_overrides"],
+  "properties": {
+    "schema_version": {"const": 1},
+    "entity_type": {"enum": ["merchant", "service_provider", "merchant_and_service_provider"]},
+    "issuer_or_issuing_services": {"type": "boolean", "default": false},
+    "scope_confirmed": {"type": "boolean"},
+    "payment_architecture": {"enum": ["redirect", "hosted_fields", "iframe", "direct_post", "card_present", "mixed", "unknown"]},
+    "pan_handling": {"enum": ["none_observed", "transmit_only", "process", "store", "unknown"]},
+    "overlays": {"type": "array", "uniqueItems": true, "items": {"enum": ["A1", "A2", "A3"]}},
+    "requirement_overrides": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["requirement", "status", "rationale"],
+        "properties": {
+          "requirement": {"type": "string", "minLength": 1},
+          "status": {"enum": ["APPLICABLE", "NOT_APPLICABLE", "NOT_DETERMINED"]},
+          "rationale": {"type": "string", "minLength": 1}
+        }
+      }
+    }
+  }
+}

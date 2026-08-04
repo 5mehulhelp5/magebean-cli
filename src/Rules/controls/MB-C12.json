@@ -293,7 +293,7 @@
     },
     {
       "id": "MB-R082",
-      "title": "No PAN, CVV, or track data stored in database",
+      "title": "No PAN or sensitive authentication data stored in database",
       "control": "MB-C12",
       "severity": "critical",
       "op": "all",
@@ -317,7 +317,7 @@
         }
       ],
       "messages": {
-        "pass": "No database schema or code patterns indicating stored raw cardholder data were detected."
+        "pass": "No database schema or code patterns indicating stored raw PAN or sensitive authentication data were detected."
       }
     },
     {

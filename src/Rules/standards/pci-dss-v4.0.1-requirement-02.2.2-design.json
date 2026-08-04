@@ -1,0 +1,114 @@
+{
+    "id": "pci-dss-v4.0.1-requirement-02.2.2-design",
+    "standard": "PCI DSS",
+    "version": "4.0.1",
+    "requirement": "2.2.2",
+    "source_pdf_page": 69,
+    "evidence_schema": "pci-dss-v4.0.1-2.2.2-evidence.schema.json",
+    "implementation_status": "IMPLEMENTED",
+    "proposed_check": "pci_vendor_default_accounts_evidence",
+    "proposed_rule_id": "MB-R371",
+    "evidence_type": "hybrid",
+    "maximum_mapping_coverage": "PARTIAL",
+    "human_verification_required": true,
+    "scope": {
+        "automated": [
+            "Validate evidence document structure and supported enum values.",
+            "Validate component, account, and evidence-reference integrity.",
+            "Detect explicit unsafe dispositions for confirmed vendor default accounts.",
+            "Detect unresolved classifications, states, credentials, inventory, and attestation.",
+            "Return structured evidence without reading or storing credentials."
+        ],
+        "human": [
+            "Confirm the inventory includes every in-scope component, including cloud and third-party components.",
+            "Confirm each account is correctly classified using vendor documentation.",
+            "Confirm retained default accounts changed their vendor default password according to the applicable password policy.",
+            "Confirm unused default accounts are removed or disabled in the actual system.",
+            "Confirm evidence provenance, freshness, and assessment applicability."
+        ],
+        "excluded": [
+            "Password collection, password comparison, credential testing, or authentication attempts.",
+            "Inference that a username is a vendor default account from its name alone.",
+            "Claims about operating systems, appliances, cloud consoles, or third-party systems absent from the submitted inventory.",
+            "Automatic PCI DSS compliance or not-applicable decisions."
+        ]
+    },
+    "outcomes": [
+        {
+            "outcome": "FAIL",
+            "conditions": [
+                "A CONFIRMED_VENDOR_DEFAULT account marked USED has credential_state DEFAULT_OR_UNCHANGED.",
+                "A CONFIRMED_VENDOR_DEFAULT account marked NOT_USED has observed_state ENABLED.",
+                "A confirmed default account has a disposition that directly contradicts the criterion."
+            ],
+            "meaning": "The submitted evidence contains an explicit unsafe condition."
+        },
+        {
+            "outcome": "HUMAN_VERIFICATION_REQUIRED",
+            "conditions": [
+                "Any account classification, intended use, observed state, or credential state is unresolved or unknown.",
+                "Any account is not human verified.",
+                "Scope, inventory, or manual verification attestation is incomplete.",
+                "No default accounts are listed but complete inventory and scope attestation is absent."
+            ],
+            "meaning": "Evidence is incomplete or requires a decision Magebean cannot make. This is not a pass."
+        },
+        {
+            "outcome": "UNKNOWN",
+            "conditions": [
+                "The evidence file is missing, unreadable, invalid JSON, or schema-invalid.",
+                "Component references or evidence references are broken or duplicated.",
+                "Evidence timestamps or assessment identifiers are invalid."
+            ],
+            "meaning": "Magebean could not evaluate the evidence contract. This is not a failure or pass."
+        },
+        {
+            "outcome": "EVIDENCE_COMPLETE",
+            "conditions": [
+                "The document is structurally valid and internally consistent.",
+                "Every confirmed used vendor default account is enabled only with credential_state CHANGED_FROM_VENDOR_DEFAULT.",
+                "Every confirmed unused vendor default account is DISABLED or REMOVED.",
+                "No suspected, unresolved, unknown, or unverified account remains.",
+                "Scope, inventory, and manual verification attestations are all complete."
+            ],
+            "meaning": "The evidence package is internally complete. Human verification remains mandatory and this outcome does not establish compliance."
+        }
+    ],
+    "outcome_precedence": [
+        "UNKNOWN",
+        "FAIL",
+        "HUMAN_VERIFICATION_REQUIRED",
+        "EVIDENCE_COMPLETE"
+    ],
+    "false_positive_boundaries": [
+        "An account name such as admin, root, administrator, or support is never sufficient to classify an account as vendor default.",
+        "Absence from one database, configuration export, or API response is never sufficient evidence that an account was removed.",
+        "A changed password timestamp or password hash is never sufficient evidence that a vendor default password was changed.",
+        "A disabled Magento admin account does not prove that related operating-system, database, cloud, or vendor service accounts are disabled.",
+        "Customer accounts and ordinary merchant-created administrator accounts are outside this check unless vendor documentation classifies them as defaults.",
+        "A zero-account inventory is acceptable only as evidence input when scope and inventory completeness are manually attested; it never creates automatic compliance.",
+        "Stale, scope-mismatched, duplicate, or internally conflicting evidence must not produce EVIDENCE_COMPLETE.",
+        "The check must not accept free-text claims as substitutes for referenced evidence and human attestation."
+    ],
+    "sensitive_data_policy": {
+        "forbidden": [
+            "password",
+            "password_hash",
+            "credential_value",
+            "secret",
+            "token",
+            "private_key",
+            "authentication_cookie"
+        ],
+        "rule": "Evidence may record only the normalized credential state. Magebean must never request, read, compare, emit, or persist credential material for this check."
+    },
+    "implementation_gates": [
+        "Schema and semantic validator tests pass for safe, unsafe, incomplete, malformed, duplicate-reference, and zero-account fixtures.",
+        "CLI output distinguishes EVIDENCE_COMPLETE from PCI DSS compliance and always retains the human-verification requirement.",
+        "Missing evidence does not create a FAIL finding when the manual-evidence flag is not selected.",
+        "No credential material appears in fixtures, logs, evidence, console output, or reports.",
+        "The future rule maps to 2.2.2 no higher than PARTIAL coverage."
+    ],
+    "implemented_check": "pci_vendor_default_accounts_evidence",
+    "implementation_gates_status": "PASS"
+}

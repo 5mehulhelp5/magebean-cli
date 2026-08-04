@@ -1,0 +1,171 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://magebean.com/schemas/pci-dss-v4.0.1-registry.schema.json",
+  "title": "Magebean PCI DSS v4.0.1 Requirement Registry",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "standard",
+    "version",
+    "publication_date",
+    "source",
+    "counts",
+    "principal_requirements",
+    "overlays",
+    "objective_groups",
+    "requirements"
+  ],
+  "properties": {
+    "$schema": { "type": "string" },
+    "standard": { "const": "PCI DSS" },
+    "version": { "const": "4.0.1" },
+    "publication_date": { "const": "2024-06" },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["publisher", "document", "official_url", "pdf_pages", "content_policy"],
+      "properties": {
+        "publisher": { "const": "PCI Security Standards Council" },
+        "document": { "type": "string", "minLength": 1 },
+        "official_url": { "type": "string", "format": "uri" },
+        "pdf_pages": { "type": "integer", "minimum": 1 },
+        "content_policy": { "type": "string", "minLength": 1 }
+      }
+    },
+    "counts": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "principal_requirements",
+        "objective_groups_core",
+        "defined_approach_requirements_core",
+        "additional_requirements",
+        "requirements_total"
+      ],
+      "properties": {
+        "principal_requirements": { "const": 12 },
+        "objective_groups_core": { "const": 63 },
+        "defined_approach_requirements_core": { "const": 250 },
+        "additional_requirements": { "const": 30 },
+        "requirements_total": { "const": 280 }
+      }
+    },
+    "principal_requirements": {
+      "type": "array",
+      "minItems": 12,
+      "maxItems": 12,
+      "items": { "$ref": "#/$defs/catalogSection" }
+    },
+    "overlays": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 3,
+      "items": {
+        "allOf": [
+          { "$ref": "#/$defs/catalogSection" },
+          {
+            "type": "object",
+            "required": ["applicability"],
+            "properties": {
+              "applicability": {
+                "enum": [
+                  "multi_tenant_service_provider",
+                  "legacy_card_present_pos_poi_tls",
+                  "designated_entity"
+                ]
+              }
+            }
+          }
+        ]
+      }
+    },
+    "objective_groups": {
+      "type": "array",
+      "minItems": 71,
+      "maxItems": 71,
+      "items": { "$ref": "#/$defs/catalogSection" }
+    },
+    "requirements": {
+      "type": "array",
+      "minItems": 280,
+      "maxItems": 280,
+      "items": { "$ref": "#/$defs/requirement" }
+    }
+  },
+  "$defs": {
+    "catalogSection": {
+      "type": "object",
+      "required": ["id", "title"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "title": { "type": "string", "minLength": 1 }
+      }
+    },
+    "requirement": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "principal_requirement",
+        "objective_group",
+        "kind",
+        "entity_restriction",
+        "effective_from",
+        "approaches",
+        "testing_methods",
+        "source"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^(?:[1-9]|1[0-2]|A[123])(?:\\.[0-9]+){2,}$"
+        },
+        "principal_requirement": {
+          "type": "string",
+          "pattern": "^(?:[1-9]|1[0-2]|A[123])$"
+        },
+        "objective_group": {
+          "type": "string",
+          "pattern": "^(?:[1-9]|1[0-2]|A[123])\\.[0-9]+$"
+        },
+        "kind": { "enum": ["core", "additional"] },
+        "overlay": { "enum": ["A1", "A2", "A3"] },
+        "entity_restriction": {
+          "enum": ["all_applicable_entities", "service_provider_only"]
+        },
+        "effective_from": {
+          "type": ["string", "null"],
+          "format": "date"
+        },
+        "approaches": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["defined", "customized"],
+          "properties": {
+            "defined": { "const": true },
+            "customized": { "type": "boolean" }
+          }
+        },
+        "testing_methods": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "enum": ["examine", "interview", "observe"] }
+        },
+        "source": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["document", "pdf_page", "content_sha256"],
+          "properties": {
+            "document": { "const": "PCI-DSS-v4_0_1.pdf" },
+            "pdf_page": { "type": "integer", "minimum": 1, "maximum": 397 },
+            "content_sha256": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            }
+          }
+        }
+      }
+    }
+  }
+}

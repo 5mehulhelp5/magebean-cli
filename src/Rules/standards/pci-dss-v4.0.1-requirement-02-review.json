@@ -1,0 +1,124 @@
+{
+    "id": "pci-dss-v4.0.1-requirement-02-review",
+    "standard": "PCI DSS",
+    "version": "4.0.1",
+    "principal_requirement": "2",
+    "objective_group": "2.2",
+    "registry": "pci-dss-v4.0.1.json",
+    "coverage_matrix": "pci-dss-v4.0.1-coverage.json",
+    "gap_triage": "pci-dss-v4.0.1-gap-triage.json",
+    "review_scope": "Criterion-level engineering review of previously unmapped PCI DSS 2.2.2 through 2.2.7.",
+    "assessment_policy": "All decisions describe Magebean evidence capability only. Human verification remains mandatory and no decision establishes PCI DSS compliance.",
+    "summary": {
+        "requirements_reviewed": 6,
+        "reuse_existing_rules": 2,
+        "new_rule_candidates": 0,
+        "external_system_evidence": 3,
+        "new_rules_added": 1
+    },
+    "requirements": [
+        {
+            "requirement": "2.2.2",
+            "source_pdf_page": 69,
+            "criterion_summary": "Vendor default accounts must be disabled or removed when unused, or have their default password changed when retained.",
+            "testing_methods": [
+                "examine",
+                "interview",
+                "observe"
+            ],
+            "decision": "IMPLEMENTED_HYBRID_RULE",
+            "automation_model": "HYBRID",
+            "existing_rules": [
+                "MB-R371"
+            ],
+            "maximum_mapping_coverage": "PARTIAL",
+            "rationale": "Magebean can inspect bounded Magento account and configuration evidence, but it cannot discover every vendor default account across operating systems, services, appliances, cloud consoles, and third-party components.",
+            "next_action": "Run the PCI profile with --include-manual-review and provide schema-valid evidence; mandatory human verification remains required for every result.",
+            "design": "pci-dss-v4.0.1-requirement-02.2.2-design.json",
+            "evidence_schema": "pci-dss-v4.0.1-2.2.2-evidence.schema.json"
+        },
+        {
+            "requirement": "2.2.3",
+            "source_pdf_page": 70,
+            "criterion_summary": "Primary functions with different security needs must be separated or all secured to the highest required level.",
+            "testing_methods": [
+                "examine"
+            ],
+            "decision": "EXTERNAL_SYSTEM_EVIDENCE",
+            "automation_model": "NONE",
+            "existing_rules": [],
+            "maximum_mapping_coverage": "SUPPORTING",
+            "rationale": "Verification requires a complete system-component inventory and architecture evidence for hosts, virtual machines, containers, and isolation controls outside a Magento repository.",
+            "next_action": "Define structured infrastructure inventory and architecture evidence rather than a local scan rule."
+        },
+        {
+            "requirement": "2.2.4",
+            "source_pdf_page": 72,
+            "criterion_summary": "Only documented necessary services, protocols, daemons, and functions may remain enabled.",
+            "testing_methods": [
+                "examine"
+            ],
+            "decision": "EXTERNAL_SYSTEM_EVIDENCE",
+            "automation_model": "NONE",
+            "existing_rules": [],
+            "maximum_mapping_coverage": "SUPPORTING",
+            "rationale": "A repository cannot establish the running service inventory or business necessity for every in-scope system component.",
+            "next_action": "Use host, container, cloud, and network configuration evidence with an approved required-function inventory."
+        },
+        {
+            "requirement": "2.2.5",
+            "source_pdf_page": 73,
+            "criterion_summary": "Any retained insecure service, protocol, or daemon requires documented business justification and implemented risk-reduction controls.",
+            "testing_methods": [
+                "examine",
+                "interview"
+            ],
+            "decision": "EXTERNAL_SYSTEM_EVIDENCE",
+            "automation_model": "NONE",
+            "existing_rules": [],
+            "maximum_mapping_coverage": "SUPPORTING",
+            "rationale": "The requirement combines external system configuration with a human business-justification decision; a Magebean finding cannot establish both elements.",
+            "next_action": "Collect service inventory, compensating security configuration, justification, owner, and approval evidence through an external evidence workflow."
+        },
+        {
+            "requirement": "2.2.6",
+            "source_pdf_page": 74,
+            "criterion_summary": "System security parameters must be configured to prevent misuse according to the configuration standard.",
+            "testing_methods": [
+                "examine",
+                "interview"
+            ],
+            "decision": "REUSE_EXISTING_RULES",
+            "automation_model": "AUTOMATED_PLUS_HUMAN",
+            "existing_rules": [
+                "MB-R031",
+                "MB-R032",
+                "MB-R033",
+                "MB-R036"
+            ],
+            "maximum_mapping_coverage": "PARTIAL",
+            "rationale": "Production mode, disabled Xdebug, disabled error display, and disabled template hints are concrete Magento and PHP security parameters, but they cover only a subset of all in-scope components and parameters.",
+            "next_action": "Add PARTIAL mappings for the four existing rules and retain mandatory review of configuration standards and remaining parameters."
+        },
+        {
+            "requirement": "2.2.7",
+            "source_pdf_page": 75,
+            "criterion_summary": "All non-console administrative access must use strong cryptography and insecure remote login methods must be unavailable.",
+            "testing_methods": [
+                "examine",
+                "interview",
+                "observe"
+            ],
+            "decision": "REUSE_EXISTING_RULES",
+            "automation_model": "AUTOMATED_PLUS_HUMAN",
+            "existing_rules": [
+                "MB-R026",
+                "MB-R027",
+                "MB-R028"
+            ],
+            "maximum_mapping_coverage": "PARTIAL",
+            "rationale": "Magento admin HTTPS, HSTS, and observed TLS protocol evidence cover browser administration only; they do not prove secure SSH, APIs, OOB management, or every in-scope component.",
+            "next_action": "Add PARTIAL or SUPPORTING mappings for existing HTTPS/TLS rules and require external evidence for all other administrative paths."
+        }
+    ]
+}

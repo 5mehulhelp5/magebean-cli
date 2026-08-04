@@ -1,0 +1,10 @@
+{
+  "schema_version": 1,
+  "entity_type": "merchant",
+  "issuer_or_issuing_services": false,
+  "scope_confirmed": false,
+  "payment_architecture": "hosted_fields",
+  "pan_handling": "unknown",
+  "overlays": [],
+  "requirement_overrides": []
+}

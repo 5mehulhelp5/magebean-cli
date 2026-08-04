@@ -30,6 +30,7 @@ final class CheckRegistry
         $git = new GitHistoryCheck($ctx);
         $cron = new CronCheck($ctx);
         $sys = new SystemCheck($ctx);
+        $pci = new PciEvidenceCheck($ctx);
 
         $registry->services['http'] = $http;
 
@@ -98,6 +99,7 @@ final class CheckRegistry
         $registry->register('fs_exists', fn(array $args): array => $fs->fsExists($args));
         $registry->register('security_mitigations_documented', fn(array $args): array => $fs->securityMitigationsDocumented($args));
         $registry->register('pci_manual_evidence_documented', fn(array $args): array => $fs->pciManualEvidenceDocumented($args));
+        $registry->register('pci_vendor_default_accounts_evidence', fn(array $args): array => $pci->vendorDefaultAccountsEvidence($args));
         $registry->register('fs_di_compiled', fn(array $args): array => $fs->diCompiled($args));
         $registry->register('fs_static_content_deployed', fn(array $args): array => $fs->staticContentDeployed($args));
         $registry->register('fs_indexers_ready', fn(array $args): array => $fs->indexersReady($args));

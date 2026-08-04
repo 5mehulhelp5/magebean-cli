@@ -1,0 +1,25 @@
+{
+  "schema_version": 1,
+  "standard": "PCI DSS",
+  "version": "4.0.1",
+  "assessment_id": "assessment-2026-q3",
+  "collected_at": "2026-08-04T12:00:00Z",
+  "evidence": [
+    {
+      "id": "ev-tls-inventory-001",
+      "requirement": "4.2.1.1",
+      "method": "examine",
+      "source_type": "configuration_export",
+      "source_ref": "evidence/tls-inventory.json",
+      "collected_at": "2026-08-04T11:30:00Z",
+      "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "description": "TLS certificate, protocol, and key inventory exported from the authoritative gateway.",
+      "owner": "platform-security",
+      "attestation": {
+        "complete": true,
+        "reviewer": "pci-evidence-reviewer",
+        "reviewed_at": "2026-08-04T11:45:00Z"
+      }
+    }
+  ]
+}

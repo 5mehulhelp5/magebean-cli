@@ -1,0 +1,24 @@
+<?php
+declare(strict_types=1);
+namespace Magebean\Engine\Pci;
+
+final class PciApplicabilityCompiler
+{
+    public function compile(array $registry,array $context):array
+    {
+        $errors=$this->validateContext($context);$registryIds=array_fill_keys(array_column($registry['requirements']??[],'id'),true);foreach($context['requirement_overrides']??[] as $override)if(!isset($registryIds[(string)($override['requirement']??'')]))$errors[]='Unknown PCI requirement override: '.(string)($override['requirement']??'').'.';if($errors!==[])return ['valid'=>false,'errors'=>array_values(array_unique($errors)),'context'=>$context,'summary'=>[],'requirements'=>[]];
+        $entity=$context['entity_type'];$scope=(bool)$context['scope_confirmed'];$issuer=(bool)($context['issuer_or_issuing_services']??false);$overlays=array_fill_keys($context['overlays']??[],true);$overrides=[];foreach($context['requirement_overrides']??[] as $o)$overrides[$o['requirement']]=$o;
+        $rows=[];$counts=['APPLICABLE'=>0,'NOT_APPLICABLE'=>0,'NOT_DETERMINED'=>0];
+        foreach($registry['requirements']??[] as $r){$id=$r['id'];$status='NOT_DETERMINED';$rationale='PCI scope has not been confirmed for this assessment context.';$overlay=$r['overlay']??null;$restriction=$r['entity_restriction']??'all_applicable_entities';
+            if(isset($overrides[$id])){$status=$overrides[$id]['status'];$rationale=$overrides[$id]['rationale'];}
+            elseif($overlay!==null){$status=isset($overlays[$overlay])?'APPLICABLE':'NOT_APPLICABLE';$rationale=isset($overlays[$overlay])?"Overlay {$overlay} is enabled by the assessment context.":"Overlay {$overlay} is not enabled by the assessment context.";}
+            elseif($restriction==='service_provider_only'&&!in_array($entity,['service_provider','merchant_and_service_provider'],true)){$status='NOT_APPLICABLE';$rationale='The assessment context does not include a service-provider role.';}
+            elseif($restriction==='issuer_or_issuing_services_only'&&!$issuer){$status='NOT_APPLICABLE';$rationale='The assessment context does not include issuer or issuing-service functions.';}
+            elseif($scope){$status='APPLICABLE';$rationale='The requirement is in the confirmed core PCI scope; requirement-specific applicability still requires assessor review.';}
+            $counts[$status]++;$rows[]=['requirement'=>$id,'principal_requirement'=>$r['principal_requirement'],'status'=>$status,'rationale'=>$rationale,'entity_restriction'=>$restriction,'overlay'=>$overlay,'human_confirmation_required'=>true];
+        }
+        return ['valid'=>true,'errors'=>[],'context'=>$context,'summary'=>$counts+['total'=>count($rows)],'requirements'=>$rows];
+    }
+    public function load(string $path):array{if(!is_file($path)||!is_readable($path))throw new \RuntimeException("PCI context is missing or unreadable: {$path}");try{$v=json_decode((string)file_get_contents($path),true,512,JSON_THROW_ON_ERROR);}catch(\JsonException){throw new \RuntimeException('PCI context contains malformed JSON.');}if(!is_array($v))throw new \RuntimeException('PCI context root must be an object.');return $v;}
+    private function validateContext(array $c):array{$e=[];$allowed=['schema_version','entity_type','issuer_or_issuing_services','scope_confirmed','payment_architecture','pan_handling','overlays','requirement_overrides'];foreach(array_diff(array_keys($c),$allowed) as $key)$e[]="Unknown PCI context field: {$key}.";foreach(['schema_version','entity_type','scope_confirmed','payment_architecture','pan_handling','overlays','requirement_overrides'] as $k)if(!array_key_exists($k,$c))$e[]="Missing PCI context field: {$k}.";if(($c['schema_version']??null)!==1)$e[]='PCI context schema_version must be 1.';if(!in_array($c['entity_type']??null,['merchant','service_provider','merchant_and_service_provider'],true))$e[]='Invalid PCI entity_type.';if(!is_bool($c['scope_confirmed']??null))$e[]='scope_confirmed must be boolean.';if(!in_array($c['payment_architecture']??null,['redirect','hosted_fields','iframe','direct_post','card_present','mixed','unknown'],true))$e[]='Invalid payment_architecture.';if(!in_array($c['pan_handling']??null,['none_observed','transmit_only','process','store','unknown'],true))$e[]='Invalid pan_handling.';$ov=$c['overlays']??null;if(!is_array($ov)||array_diff($ov,['A1','A2','A3'])||count($ov)!==count(array_unique($ov)))$e[]='overlays may contain only A1, A2, and A3.';$seen=[];foreach($c['requirement_overrides']??[] as $i=>$o){if(!is_array($o)||trim((string)($o['requirement']??''))===''||!in_array($o['status']??null,['APPLICABLE','NOT_APPLICABLE','NOT_DETERMINED'],true)||trim((string)($o['rationale']??''))==='')$e[]="Invalid requirement_overrides[{$i}].";elseif(isset($seen[$o['requirement']]))$e[]="Duplicate requirement override: {$o['requirement']}.";else$seen[$o['requirement']]=true;}return array_values(array_unique($e));}
+}

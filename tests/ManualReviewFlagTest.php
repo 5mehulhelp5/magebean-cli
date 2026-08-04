@@ -34,4 +34,18 @@ $baseline = new CommandTester($command);
 $baseline->execute(['--profile' => 'baseline', '--no-ansi' => true]);
 assertManualFlag(str_contains($baseline->getDisplay(), 'Total Rules Listed: 113'), 'Baseline must exclude manual rules by default');
 
+$baselineManual = new CommandTester($command);
+$baselineManual->execute(['--profile' => 'baseline', '--include-manual-review' => true, '--no-ansi' => true]);
+assertManualFlag(str_contains($baselineManual->getDisplay(), 'Total Rules Listed: 371'), 'Baseline manual flag must list all 371 rules');
+
+$pci = new CommandTester($command);
+$pci->execute(['--profile' => 'pci', '--no-ansi' => true]);
+assertManualFlag(str_contains($pci->getDisplay(), 'Total Rules Listed: 67'), 'PCI must hide MB-R371 by default');
+assertManualFlag(!str_contains($pci->getDisplay(), 'MB-R371'), 'PCI manual rule leaked without the flag');
+
+$pciManual = new CommandTester($command);
+$pciManual->execute(['--profile' => 'pci', '--include-manual-review' => true, '--no-ansi' => true]);
+assertManualFlag(str_contains($pciManual->getDisplay(), 'Total Rules Listed: 68'), 'PCI manual flag must list 68 rules');
+assertManualFlag(str_contains($pciManual->getDisplay(), 'MB-R371'), 'PCI manual rule is missing with the flag');
+
 echo "ManualReviewFlagTest: PASS\n";

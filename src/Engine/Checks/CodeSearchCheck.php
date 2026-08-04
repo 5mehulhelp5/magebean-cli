@@ -547,7 +547,7 @@ final class CodeSearchCheck
             return [false, 'No application schema/code files found to verify cardholder data storage', $evidence];
         }
 
-        return [true, 'No raw PAN, CVV, or track-data storage patterns detected', $evidence];
+        return [true, 'No raw PAN or sensitive-authentication-data storage patterns detected', $evidence];
     }
     public function cardholderDataFiles(array $args): array
     {
@@ -3349,8 +3349,8 @@ final class CodeSearchCheck
         }
 
         $patterns = [
-            'sql_schema_column' => '~\b(?:CREATE|ALTER)\s+TABLE\b[^;]{0,1800}(?P<field>\b[A-Za-z0-9_]*(?:cc[_-]?(?:num|number)|card[_-]?number|credit[_-]?card[_-]?number|primary[_-]?account[_-]?number|pan|cvv|cvc|cid|track[12]|magnetic[_-]?stripe)[A-Za-z0-9_]*\b)~is',
-            'sql_dml_write' => '~\b(?:INSERT\s+INTO|UPDATE)\b[^;]{0,1600}(?P<field>\b[A-Za-z0-9_]*(?:cc[_-]?(?:num|number)|card[_-]?number|credit[_-]?card[_-]?number|primary[_-]?account[_-]?number|pan|cvv|cvc|cid|track[12]|magnetic[_-]?stripe)[A-Za-z0-9_]*\b)~is',
+            'sql_schema_column' => '~\b(?:CREATE|ALTER)\s+TABLE\b[^;]{0,1800}(?P<field>\b[A-Za-z0-9_]*(?:cc[_-]?(?:num|number)|card[_-]?number|credit[_-]?card[_-]?number|primary[_-]?account[_-]?number|pan|cvv|cvc|cid|pin[_-]?block|track[12]|magnetic[_-]?stripe)[A-Za-z0-9_]*\b)~is',
+            'sql_dml_write' => '~\b(?:INSERT\s+INTO|UPDATE)\b[^;]{0,1600}(?P<field>\b[A-Za-z0-9_]*(?:cc[_-]?(?:num|number)|card[_-]?number|credit[_-]?card[_-]?number|primary[_-]?account[_-]?number|pan|cvv|cvc|cid|pin[_-]?block|track[12]|magnetic[_-]?stripe)[A-Za-z0-9_]*\b)~is',
         ];
 
         foreach ($patterns as $kind => $regex) {
@@ -3393,7 +3393,7 @@ final class CodeSearchCheck
     private function cardholderCodeStorageFindings(string $file, string $content, string $searchable, string $relative, string $extension): array
     {
         $findings = [];
-        $rawFieldRegex = '(?P<field>\b[A-Za-z0-9_./-]*(?:cc[_-]?(?:num|number)|card[_-]?number|credit[_-]?card[_-]?number|primary[_-]?account[_-]?number|pan|cvv|cvc|cid|track[12]|magnetic[_-]?stripe)[A-Za-z0-9_./-]*\b)';
+        $rawFieldRegex = '(?P<field>\b[A-Za-z0-9_./-]*(?:cc[_-]?(?:num|number)|card[_-]?number|credit[_-]?card[_-]?number|primary[_-]?account[_-]?number|pan|cvv|cvc|cid|pin[_-]?block|track[12]|magnetic[_-]?stripe)[A-Za-z0-9_./-]*\b)';
         if (preg_match_all('~' . $rawFieldRegex . '~i', $searchable, $matches, PREG_OFFSET_CAPTURE | PREG_SET_ORDER) < 1) {
             return [];
         }
@@ -3456,8 +3456,8 @@ final class CodeSearchCheck
             return false;
         }
 
-        return preg_match('~^(?:cc_(?:num|number)|card_number|credit_card_number|primary_account_number|pan|cvv|cvc|cid|track1|track2|magnetic_stripe)$~i', $normalized) === 1
-            || preg_match('~(?:^|_)(?:cc_(?:num|number)|card_number|credit_card_number|primary_account_number|pan|cvv|cvc|cid|track1|track2|magnetic_stripe)(?:_|$)~i', $normalized) === 1;
+        return preg_match('~^(?:cc_(?:num|number)|card_number|credit_card_number|primary_account_number|pan|cvv|cvc|cid|pin_block|track1|track2|magnetic_stripe)$~i', $normalized) === 1
+            || preg_match('~(?:^|_)(?:cc_(?:num|number)|card_number|credit_card_number|primary_account_number|pan|cvv|cvc|cid|pin_block|track1|track2|magnetic_stripe)(?:_|$)~i', $normalized) === 1;
     }
 
     private function xmlAttributeValue(string $attrs, string $name): ?string

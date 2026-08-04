@@ -196,6 +196,51 @@
         "pass": "Global Magento Admin ACL access is limited to approved roles and users.",
         "fail": "Unapproved roles or users inherit global Magento Admin ACL access. Remove Magento_Backend::all or document narrowly scoped break-glass exceptions."
       }
+    },
+    {
+        "id": "MB-R371",
+        "title": "PCI vendor default account evidence assessment",
+        "control": "MB-C02",
+        "severity": "high",
+        "op": "all",
+        "verification": "manual",
+        "requirements": [
+            {
+                "standard": "PCI-DSS",
+                "version": "4.0.1",
+                "id": "2.2.2"
+            }
+        ],
+        "checks": [
+            {
+                "name": "pci_vendor_default_accounts_evidence",
+                "args": {
+                    "paths": [
+                        ".magebean/pci/2.2.2-vendor-default-accounts.json",
+                        ".magebean/pci-2.2.2-evidence.json"
+                    ]
+                }
+            },
+            {
+                "name": "human_manual_review_required",
+                "args": {
+                    "requirement": "PCI DSS 4.0.1 2.2.2",
+                    "review": "Confirm every in-scope component is inventoried; verify retained vendor default accounts changed their default password and unused vendor default accounts are disabled or removed.",
+                    "evidence_needed": [
+                        "Complete in-scope component inventory",
+                        "Vendor documentation identifying default accounts",
+                        "Account configuration exports or observations",
+                        "Reviewer attestation"
+                    ]
+                }
+            }
+        ],
+        "remediation": [
+            "Inventory vendor default accounts for every in-scope system component.",
+            "Change the vendor default password for every retained account according to the applicable password policy.",
+            "Remove or disable every vendor default account that is not used.",
+            "Record evidence using the PCI DSS 2.2.2 Magebean evidence schema and complete independent human verification."
+        ]
     }
   ]
 }

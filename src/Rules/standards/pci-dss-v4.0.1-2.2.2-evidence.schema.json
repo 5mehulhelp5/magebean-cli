@@ -1,0 +1,342 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://magebean.com/schemas/pci-dss-v4.0.1-2.2.2-evidence.schema.json",
+    "title": "Magebean PCI DSS 2.2.2 Vendor Default Account Evidence",
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+        "schema_version",
+        "requirement",
+        "assessment",
+        "scope",
+        "accounts",
+        "evidence",
+        "attestation"
+    ],
+    "properties": {
+        "schema_version": {
+            "const": 1
+        },
+        "requirement": {
+            "const": "2.2.2"
+        },
+        "assessment": {
+            "$ref": "#/$defs/assessment"
+        },
+        "scope": {
+            "$ref": "#/$defs/scope"
+        },
+        "accounts": {
+            "type": "array",
+            "items": {
+                "$ref": "#/$defs/account"
+            }
+        },
+        "evidence": {
+            "type": "array",
+            "items": {
+                "$ref": "#/$defs/evidence"
+            }
+        },
+        "attestation": {
+            "$ref": "#/$defs/attestation"
+        }
+    },
+    "$defs": {
+        "nonEmptyString": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 500
+        },
+        "identifier": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$"
+        },
+        "timestamp": {
+            "type": "string",
+            "format": "date-time"
+        },
+        "assessment": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+                "id",
+                "generated_at",
+                "prepared_by"
+            ],
+            "properties": {
+                "id": {
+                    "$ref": "#/$defs/identifier"
+                },
+                "generated_at": {
+                    "$ref": "#/$defs/timestamp"
+                },
+                "prepared_by": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [
+                        "name",
+                        "role"
+                    ],
+                    "properties": {
+                        "name": {
+                            "$ref": "#/$defs/nonEmptyString"
+                        },
+                        "role": {
+                            "$ref": "#/$defs/nonEmptyString"
+                        }
+                    }
+                }
+            }
+        },
+        "scope": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+                "entity_role",
+                "environment",
+                "components"
+            ],
+            "properties": {
+                "entity_role": {
+                    "enum": [
+                        "MERCHANT",
+                        "SERVICE_PROVIDER",
+                        "MERCHANT_AND_SERVICE_PROVIDER"
+                    ]
+                },
+                "environment": {
+                    "enum": [
+                        "PRODUCTION",
+                        "STAGING",
+                        "DISASTER_RECOVERY",
+                        "OTHER"
+                    ]
+                },
+                "components": {
+                    "type": "array",
+                    "minItems": 1,
+                    "items": {
+                        "$ref": "#/$defs/component"
+                    }
+                }
+            }
+        },
+        "component": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+                "id",
+                "name",
+                "type",
+                "vendor",
+                "product",
+                "in_scope",
+                "inventory_source",
+                "evidence_refs"
+            ],
+            "properties": {
+                "id": {
+                    "$ref": "#/$defs/identifier"
+                },
+                "name": {
+                    "$ref": "#/$defs/nonEmptyString"
+                },
+                "type": {
+                    "enum": [
+                        "MAGENTO_APPLICATION",
+                        "OPERATING_SYSTEM",
+                        "DATABASE",
+                        "WEB_SERVER",
+                        "SECURITY_SERVICE",
+                        "NETWORK_DEVICE",
+                        "CLOUD_SERVICE",
+                        "PAYMENT_APPLICATION",
+                        "POS_TERMINAL",
+                        "OTHER"
+                    ]
+                },
+                "vendor": {
+                    "$ref": "#/$defs/nonEmptyString"
+                },
+                "product": {
+                    "$ref": "#/$defs/nonEmptyString"
+                },
+                "in_scope": {
+                    "type": "boolean"
+                },
+                "inventory_source": {
+                    "$ref": "#/$defs/nonEmptyString"
+                },
+                "evidence_refs": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/$defs/identifier"
+                    },
+                    "uniqueItems": true,
+                    "minItems": 1
+                }
+            }
+        },
+        "account": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+                "id",
+                "component_id",
+                "vendor",
+                "product",
+                "account_name",
+                "classification",
+                "intended_use",
+                "observed_state",
+                "credential_state",
+                "verification_methods",
+                "evidence_refs",
+                "human_verified"
+            ],
+            "properties": {
+                "id": {
+                    "$ref": "#/$defs/identifier"
+                },
+                "component_id": {
+                    "$ref": "#/$defs/identifier"
+                },
+                "vendor": {
+                    "$ref": "#/$defs/nonEmptyString"
+                },
+                "product": {
+                    "$ref": "#/$defs/nonEmptyString"
+                },
+                "account_name": {
+                    "$ref": "#/$defs/nonEmptyString"
+                },
+                "classification": {
+                    "enum": [
+                        "CONFIRMED_VENDOR_DEFAULT",
+                        "SUSPECTED_VENDOR_DEFAULT",
+                        "CONFIRMED_NOT_VENDOR_DEFAULT"
+                    ]
+                },
+                "intended_use": {
+                    "enum": [
+                        "USED",
+                        "NOT_USED",
+                        "UNRESOLVED"
+                    ]
+                },
+                "observed_state": {
+                    "enum": [
+                        "ENABLED",
+                        "DISABLED",
+                        "REMOVED",
+                        "UNKNOWN"
+                    ]
+                },
+                "credential_state": {
+                    "enum": [
+                        "CHANGED_FROM_VENDOR_DEFAULT",
+                        "DEFAULT_OR_UNCHANGED",
+                        "NOT_APPLICABLE",
+                        "UNKNOWN"
+                    ]
+                },
+                "verification_methods": {
+                    "type": "array",
+                    "minItems": 1,
+                    "items": {
+                        "enum": [
+                            "CONFIGURATION_EXPORT",
+                            "DATABASE_QUERY",
+                            "VENDOR_DOCUMENTATION",
+                            "SYSTEM_OBSERVATION",
+                            "PERSONNEL_INTERVIEW"
+                        ]
+                    },
+                    "uniqueItems": true
+                },
+                "evidence_refs": {
+                    "type": "array",
+                    "minItems": 1,
+                    "items": {
+                        "$ref": "#/$defs/identifier"
+                    },
+                    "uniqueItems": true
+                },
+                "human_verified": {
+                    "type": "boolean"
+                },
+                "notes": {
+                    "$ref": "#/$defs/nonEmptyString"
+                }
+            }
+        },
+        "evidence": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+                "id",
+                "type",
+                "reference",
+                "collected_at",
+                "sha256"
+            ],
+            "properties": {
+                "id": {
+                    "$ref": "#/$defs/identifier"
+                },
+                "type": {
+                    "enum": [
+                        "CONFIGURATION_EXPORT",
+                        "DATABASE_QUERY_RESULT",
+                        "VENDOR_DOCUMENTATION",
+                        "SCREENSHOT",
+                        "OBSERVATION_RECORD",
+                        "INTERVIEW_RECORD"
+                    ]
+                },
+                "reference": {
+                    "$ref": "#/$defs/nonEmptyString"
+                },
+                "collected_at": {
+                    "$ref": "#/$defs/timestamp"
+                },
+                "sha256": {
+                    "type": "string",
+                    "pattern": "^[a-f0-9]{64}$"
+                }
+            }
+        },
+        "attestation": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+                "scope_confirmed",
+                "inventory_complete",
+                "manual_verification_complete",
+                "reviewed_by",
+                "reviewed_at"
+            ],
+            "properties": {
+                "scope_confirmed": {
+                    "type": "boolean"
+                },
+                "inventory_complete": {
+                    "type": "boolean"
+                },
+                "manual_verification_complete": {
+                    "type": "boolean"
+                },
+                "reviewed_by": {
+                    "$ref": "#/$defs/nonEmptyString"
+                },
+                "reviewed_at": {
+                    "$ref": "#/$defs/timestamp"
+                },
+                "notes": {
+                    "$ref": "#/$defs/nonEmptyString"
+                }
+            }
+        }
+    }
+}

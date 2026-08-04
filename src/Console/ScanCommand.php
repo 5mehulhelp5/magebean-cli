@@ -13,6 +13,9 @@ use Magebean\Engine\ProjectConfigLoader;
 use Magebean\Engine\RulePackMerger;
 use Magebean\Engine\RuleValidator;
 use Magebean\Engine\Checks\CheckRegistry;
+use Magebean\Engine\Pci\PciApplicabilityCompiler;
+use Magebean\Engine\Pci\PciExternalEvidenceImporter;
+use Magebean\Engine\Pci\PciAssessmentReportBuilder;
 
 use Symfony\Component\Console\Helper\ProgressBar;
 use Symfony\Component\Console\Command\Command;
@@ -47,13 +50,13 @@ Docs: <href=https://magebean.com/documentation>magebean.com/documentation</>
 
 <options=bold>PROFILES</>
   <fg=yellow>basic</>      Default; 21 basic production security and operations checks.
-  <fg=yellow>asvs-l1</>    32 default automated rules; 28 manual-review rules require --include-manual-review.
-  <fg=yellow>asvs-l2</>    73 default automated rules; manual/contextual rules are opt-in.
-  <fg=yellow>asvs-l3</>    80 default rules; 259 with non-contextual mandatory human assessment.
-  <fg=yellow>owasp</>      Application-security checks mapped to OWASP Top 10 2025.
-  <fg=yellow>pci</>        PCI DSS v4.0.1 payment readiness; not a certification.
-  <fg=yellow>hardening</>  89 deep production, code, dependency, integration, and operations checks.
-  <fg=yellow>baseline</>   113 automated rules by default; 370 including manual review. Aliases: all, magebean.
+  <fg=yellow>asvs-l1</>    32 rules by default; 60 including 28 human-verification rules.
+  <fg=yellow>asvs-l2</>    73 rules by default; 183 including 110 human-verification rules.
+  <fg=yellow>asvs-l3</>    80 rules by default; 259 including 179 human-verification rules.
+  <fg=yellow>owasp</>      77 application-security rules mapped to OWASP Top 10 2025.
+  <fg=yellow>pci</>        67 rules by default; 68 including 1 human-verification rule.
+  <fg=yellow>hardening</>  91 rules by default; 92 with human verification enabled.
+  <fg=yellow>baseline</>   113 automated rules by default; 371 including manual review. Aliases: all, magebean.
   <fg=yellow>FILE</>       Custom JSON path or a profile under .magebean/profiles.
 
 <options=bold>COMMAND OPTIONS</>
@@ -66,6 +69,9 @@ Docs: <href=https://magebean.com/documentation>magebean.com/documentation</>
   <fg=yellow>--rules=MB-Rxxx,MB-Rxxx</>         Run listed rule IDs directly from the available catalog; bypasses profile selection.
   <fg=yellow>--exclude-rules=MB-Rxxx,...</>     Remove rules after profile and project configuration.
   <fg=yellow>--config=FILE</>                   Project policy file; auto-detected in LOCAL/HYBRID.
+  <fg=yellow>--pci-context=FILE</>               PCI applicability context JSON (PCI profile only).
+  <fg=yellow>--pci-evidence=FILE</>              Structured external evidence JSON (PCI profile only).
+  <fg=yellow>--pci-report=FILE</>                Write the PCI evidence-readiness report as JSON.
   <fg=yellow>--standard=NAME</>                 Legacy selector: magebean, owasp, pci, or cwe.
                                           Prefer --profile; explicit --profile takes precedence.
 
@@ -142,6 +148,9 @@ HELP;
             ->addOption('rules', null, InputOption::VALUE_OPTIONAL, 'Comma-separated rule IDs to run (e.g., MB-R036,MB-R020)')
             ->addOption('exclude-rules', null, InputOption::VALUE_OPTIONAL, 'Comma-separated rule IDs to exclude after loading')
             ->addOption('config', null, InputOption::VALUE_OPTIONAL, 'Project policy file (.magebean.json or .magebean.yml)')
+            ->addOption('pci-context', null, InputOption::VALUE_OPTIONAL, 'PCI DSS applicability context JSON')
+            ->addOption('pci-evidence', null, InputOption::VALUE_OPTIONAL, 'PCI DSS structured external evidence JSON')
+            ->addOption('pci-report', null, InputOption::VALUE_OPTIONAL, 'Write PCI DSS evidence-readiness report JSON')
             ->addOption('url', null, InputOption::VALUE_OPTIONAL, 'Absolute store base URL (REMOTE without --path; HYBRID with --path)')
             ->addOption('path', null, InputOption::VALUE_OPTIONAL, 'Magento root path (omit to auto-detect from current working directory)', '');
     }
@@ -216,6 +225,9 @@ HELP;
             $configOpt = trim((string)($in->getOption('config') ?? ''));
             $capabilitiesOpt = trim((string)($in->getOption('capabilities') ?? ''));
             $includeManualReview = (bool)$in->getOption('include-manual-review');
+            $pciContextOpt = trim((string)($in->getOption('pci-context') ?? ''));
+            $pciEvidenceOpt = trim((string)($in->getOption('pci-evidence') ?? ''));
+            $pciReportOpt = trim((string)($in->getOption('pci-report') ?? ''));
 
             $allowed = ['magebean', 'owasp', 'pci', 'cwe'];
             if (!in_array($standard, $allowed, true)) {
@@ -351,6 +363,14 @@ HELP;
                 }
             }
 
+            $activeProfileId = strtolower((string)($activeProfile['id'] ?? ''));
+            $isPciProfile = $standard === 'pci' || str_starts_with($activeProfileId, 'pci-dss');
+            if (!$isPciProfile && ($pciContextOpt !== '' || $pciEvidenceOpt !== '' || $pciReportOpt !== '')) {
+                throw new \RuntimeException('--pci-context, --pci-evidence, and --pci-report require the PCI profile.');
+            }
+            $profileRulesTotal = count($pack['rules'] ?? []);
+            $profileManualRulesTotal = count(array_filter($pack['rules'] ?? [], static fn(array $rule): bool => strtolower((string)($rule['verification'] ?? 'automated')) === 'manual'));
+            $manualRulesExcluded = 0;
             if (!$hasExplicitRuleSelection && !$includeManualReview) {
                 $beforeManualFilter = count($pack['rules'] ?? []);
                 $pack['rules'] = array_values(array_filter(
@@ -358,12 +378,7 @@ HELP;
                     static fn(array $rule): bool => strtolower((string)($rule['verification'] ?? 'automated')) !== 'manual'
                 ));
                 $manualRulesExcluded = $beforeManualFilter - count($pack['rules']);
-                if ($manualRulesExcluded > 0) {
-                    $out->writeln(sprintf(
-                        '<comment>Manual-review rules excluded:</comment> %d (use --include-manual-review to include them)',
-                        $manualRulesExcluded
-                    ));
-                }
+
             }
 
             // filter by --rules (comma-separated IDs)
@@ -411,6 +426,14 @@ HELP;
                 }
             }
 
+            if ($hasExplicitRuleSelection) {
+                $profileRulesTotal = count($pack['rules'] ?? []);
+                $profileManualRulesTotal = count(array_filter(
+                    $pack['rules'] ?? [],
+                    static fn(array $rule): bool => strtolower((string)($rule['verification'] ?? 'automated')) === 'manual'
+                ));
+                $manualRulesExcluded = 0;
+            }
             $validationErrors = RuleValidator::validatePack($pack, $registry);
             if ($validationErrors) {
                 $out->writeln('<error>Invalid rule pack:</error>');
@@ -453,9 +476,45 @@ HELP;
             $result['meta']['rules_filter'] = $requestedIds;
             $result['meta']['controls_filter'] = $controlsFilter;
             $result['meta']['project_config'] = $configFile;
+            $result['meta']['profile_rules_total'] = $profileRulesTotal;
+            $result['meta']['profile_manual_rules_total'] = $profileManualRulesTotal;
+            $result['meta']['manual_rules_hidden'] = $manualRulesExcluded;
+            $result['meta']['manual_rules_included'] = $includeManualReview || $hasExplicitRuleSelection;
             $result['summary']['path'] = $projectPath;
             $result['summary']['url'] = $projectUrl;
 
+            if ($isPciProfile) {
+                $registryData = $this->loadJsonDocument(__DIR__ . '/../Rules/standards/pci-dss-v4.0.1.json', 'PCI DSS registry');
+                $coverageData = $this->loadJsonDocument(__DIR__ . '/../Rules/standards/pci-dss-v4.0.1-coverage.json', 'PCI DSS coverage matrix');
+                $triageData = $this->loadJsonDocument(__DIR__ . '/../Rules/standards/pci-dss-v4.0.1-gap-triage.json', 'PCI DSS gap triage');
+                $criterionReviewData = $this->loadJsonDocument(__DIR__ . '/../Rules/standards/pci-dss-v4.0.1-automation-candidate-review.json', 'PCI DSS criterion review');
+                $requirement02ReviewData = $this->loadJsonDocument(__DIR__ . '/../Rules/standards/pci-dss-v4.0.1-requirement-02-review.json', 'PCI DSS Requirement 2 review');
+                $criterionReviewData['requirements'] = array_merge($requirement02ReviewData['requirements'] ?? [], $criterionReviewData['requirements'] ?? []);
+                $compiler = new PciApplicabilityCompiler();
+                $pciContext = $pciContextOpt !== '' ? $compiler->load($this->resolveProjectConfigPath($pciContextOpt, $configBasePath)) : [
+                    'schema_version' => 1, 'entity_type' => 'merchant', 'issuer_or_issuing_services' => false,
+                    'scope_confirmed' => false, 'payment_architecture' => 'unknown', 'pan_handling' => 'unknown',
+                    'overlays' => [], 'requirement_overrides' => [],
+                ];
+                $applicability = $compiler->compile($registryData, $pciContext);
+                if (($applicability['valid'] ?? false) !== true) throw new \RuntimeException("Invalid PCI applicability context:\n- " . implode("\n- ", $applicability['errors'] ?? []));
+                $externalEvidence = ['valid' => true, 'errors' => [], 'evidence_by_requirement' => [], 'summary' => ['items' => 0, 'requirements' => 0, 'credential_material_processed' => false]];
+                if ($pciEvidenceOpt !== '') {
+                    $externalEvidence = (new PciExternalEvidenceImporter(array_column($registryData['requirements'] ?? [], 'id')))->import($this->resolveProjectConfigPath($pciEvidenceOpt, $configBasePath));
+                    if (($externalEvidence['valid'] ?? false) !== true) throw new \RuntimeException("Invalid PCI external evidence package:\n- " . implode("\n- ", $externalEvidence['errors'] ?? []));
+                }
+                $pciReport = (new PciAssessmentReportBuilder())->build($result, $coverageData, $triageData, $applicability, $externalEvidence, $includeManualReview, $criterionReviewData);
+                $pciReport['context_source'] = $pciContextOpt !== '' ? $pciContextOpt : 'default:unconfirmed';
+                $pciReport['evidence_source'] = $pciEvidenceOpt !== '' ? $pciEvidenceOpt : null;
+                $result['pci'] = $pciReport;
+                if ($pciReportOpt !== '') {
+                    $pciReportFile = $this->resolveProjectConfigPath($pciReportOpt, $configBasePath);
+                    $pciReportDir = dirname($pciReportFile);
+                    if (!is_dir($pciReportDir) && !mkdir($pciReportDir, 0777, true) && !is_dir($pciReportDir)) throw new \RuntimeException('Cannot create PCI report directory: ' . $pciReportDir);
+                    if (file_put_contents($pciReportFile, json_encode($pciReport, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) . "\n") === false) throw new \RuntimeException('Cannot write PCI report: ' . $pciReportFile);
+                    $out->writeln(sprintf('<info>PCI report written:</info> %s', $pciReportFile));
+                }
+            }
             if ($targetMode === self::MODE_REMOTE) {
                 $planned = (int)($result['meta']['planned_rules'] ?? 0);
                 $executed = (int)($result['meta']['executed_rules'] ?? 0);
@@ -497,6 +556,12 @@ HELP;
             // ---------- Pretty console output (mimic sample) ----------
             $this->writePhase($out, 4, 4, 'Rendering command-line summary');
             $this->renderPrettySummary($out, $result, $projectPath);
+            if (isset($result['pci']) && is_array($result['pci'])) {
+                $this->renderPciAssessmentSummary($out, $result['pci']);
+            }
+            $out->writeln('');
+            $out->writeln('Contact: <href=mailto:support@magebean.com>support@magebean.com</>');
+            $out->writeln('');
 
             return $this->determineExitCode($result);
 
@@ -516,6 +581,35 @@ HELP;
         }
     }
 
+    private function loadJsonDocument(string $path, string $label): array
+    {
+        try { $data = json_decode((string)file_get_contents($path), true, 512, JSON_THROW_ON_ERROR); }
+        catch (\JsonException) { throw new \RuntimeException($label . ' contains malformed JSON.'); }
+        if (!is_array($data)) throw new \RuntimeException($label . ' root must be an object.');
+        return $data;
+    }
+
+    private function renderPciAssessmentSummary(OutputInterface $out, array $pci): void
+    {
+        $summary = $pci['summary'] ?? [];
+        $statuses = $summary['statuses'] ?? [];
+        $requirements = (int)($summary['human_verification_required'] ?? $summary['requirements'] ?? 0);
+        $out->writeln('');
+        $out->writeln('<options=bold>PCI DSS 4.0.1 EVIDENCE READINESS</>');
+        $out->writeln(sprintf('  Registry requirements requiring human confirmation: <fg=cyan;options=bold>%d</>', $requirements));
+        $out->writeln(sprintf('  Technical findings: %d · Evidence collected, human confirmation pending: %d', (int)($statuses['TECHNICAL_FINDING'] ?? 0), (int)($statuses['EVIDENCE_COLLECTED_HUMAN_VERIFICATION_REQUIRED'] ?? 0)));
+        $out->writeln(sprintf('  Applicability undetermined: %d · Not applicable, confirmation pending: %d', (int)($statuses['NOT_DETERMINED'] ?? 0), (int)($statuses['NOT_APPLICABLE'] ?? 0)));
+        $actions = $pci['human_actions'] ?? [];
+        if ($actions === []) {
+            $out->writeln('  <comment>Detailed human actions are hidden; use --include-manual-review to list them.</comment>');
+        } else {
+            $out->writeln(sprintf('  <fg=cyan;options=bold>Human actions (%d)</>', count($actions)));
+            foreach ($actions as $action) {
+                $out->writeln(sprintf('    <fg=cyan>[%s]</> %s', (string)($action['requirement'] ?? ''), (string)($action['scope'] ?? '')));
+            }
+        }
+        $out->writeln('<comment>This is evidence-readiness output, not PCI DSS certification or an attestation of compliance.</comment>');
+    }
     private function renderRemoteMagentoInconclusive(
         OutputInterface $out,
         string $url,
@@ -569,18 +663,27 @@ HELP;
 
         // Header
         $out->writeln('');
-        $out->writeln(sprintf(
-            '<fg=cyan;options=bold>Magebean CLI v%s — Security Audit (Baseline v%s)</>        Target: <fg=green>%s</>',
-            Application::VERSION,
-            Application::BASELINE_VERSION,
-            $path
-        ));
+        $out->writeln(sprintf('<fg=cyan;options=bold>Magebean CLI %s</>', Application::VERSION));
+        $out->writeln(sprintf('Audit         Security Audit · Baseline %s', Application::BASELINE_VERSION));
+        $out->writeln(sprintf('Target        <fg=green>%s</>', $path));
         $standard = (string)($result['meta']['standard'] ?? 'magebean');
         $profile = (array)($result['meta']['profile'] ?? []);
         $profileTitle = (string)($profile['title'] ?? $profile['id'] ?? 'Magebean Baseline');
-        $out->writeln(sprintf('Profile ID: <info>%s</info>', strtoupper($standard)));
-        $out->writeln(sprintf('Profile: <info>%s</info>', $profileTitle));
-        $out->writeln(sprintf('Time: <comment>%s</comment>   PHP: <info>%s</info>   Env: %s', date('Y-m-d H:i'), $phpShort, $envTag($env)));
+        $out->writeln(sprintf('Profile ID    <info>%s</info>', strtoupper($standard)));
+        $out->writeln(sprintf('Profile       <info>%s</info>', $profileTitle));
+        $profileRulesTotal = (int)($result['meta']['profile_rules_total'] ?? $total);
+        $profileManualRulesTotal = (int)($result['meta']['profile_manual_rules_total'] ?? 0);
+        $manualRulesHidden = (int)($result['meta']['manual_rules_hidden'] ?? 0);
+        $manualRulesIncluded = (bool)($result['meta']['manual_rules_included'] ?? false);
+        $out->writeln(sprintf('Rules         <info>%d</info> / <info>%d</info> selected', $total, $profileRulesTotal));
+        if ($manualRulesHidden > 0) {
+            $out->writeln(sprintf('Manual rules  <fg=cyan;options=bold>%d not evaluated</> (use <info>--include-manual-review</info> to include)', $manualRulesHidden));
+        } elseif ($manualRulesIncluded && $profileManualRulesTotal > 0) {
+            $out->writeln(sprintf('Manual rules  <fg=cyan;options=bold>%d included</>', $profileManualRulesTotal));
+        } else {
+            $out->writeln('Manual rules  <comment>None in the current profile selection</comment>');
+        }
+        $out->writeln(sprintf('Environment   PHP <info>%s</info> · %s · <comment>%s</comment>', $phpShort, $envTag($env), date('Y-m-d H:i')));
         if ($isExternal) {
             $det = $result['meta']['detected'] ?? [];
             $detConf = (int)($det['confidence'] ?? 0);
@@ -651,17 +754,14 @@ HELP;
                 ? '<fg=magenta;options=bold>AUDIT COMPLETE · INCONCLUSIVE</>'
                 : '<info>AUDIT COMPLETE</info>'));
         $out->writeln($auditStatus);
-        $out->writeln(sprintf(
-            '<info>%d</info> / <info>%d</info> checks passed · <fg=yellow;options=bold>%d findings</> · <fg=cyan;options=bold>%d human verification required</> · <fg=magenta;options=bold>%d inconclusive</>',
-            $passed,
-            $total,
-            count($confirmedFindings),
-            count($manualReviewFindings),
-            count($inconclusiveFindings)
-        ));
+        $out->writeln('');
+        $out->writeln(sprintf('  Passed                    <info>%d / %d</info>', $passed, $total));
+        $out->writeln(sprintf('  Confirmed findings        <fg=yellow;options=bold>%d</>', count($confirmedFindings)));
+        $out->writeln(sprintf('  Technical manual review   <fg=cyan;options=bold>%d</>', count($manualReviewFindings)));
+        $out->writeln(sprintf('  Inconclusive              <fg=magenta;options=bold>%d</>', count($inconclusiveFindings)));
         if ($confirmedFindings !== []) {
             $out->writeln(sprintf(
-                '%s %d Critical</> | %s %d High</> | %s %d Medium</> | %s %d Low</>',
+                '  %sCritical %d</> · %sHigh %d</> · %sMedium %d</> · %sLow %d</>',
                 '<fg=white;bg=red;options=bold>',
                 $sevCounts['critical'],
                 '<fg=red;options=bold>',
@@ -673,22 +773,17 @@ HELP;
             ));
         }
         $out->writeln('');
-        $out->writeln('<options=bold>Status guide</>');
-        $out->writeln('  <fg=green;options=bold>PASS</>          Check completed and no issue was detected.');
-        $out->writeln('  <fg=cyan;options=bold>HUMAN VERIFICATION REQUIRED</> Magebean CLI did not verify this requirement. Independent assessment and documented evidence are mandatory before treating it as satisfied.');
-        $out->writeln('  <fg=red;options=bold>FAIL</>          Check completed and found an issue requiring attention.');
-        $out->writeln('  <fg=magenta;options=bold>INCONCLUSIVE</>  Required evidence or access was unavailable; this does not mean the check passed.');
-        $out->writeln('');
 
         $rulesFilter = array_values(array_filter((array)($result['meta']['rules_filter'] ?? [])));
         $showRuleDetails = $rulesFilter !== [];
         if ($showRuleDetails) {
             $out->writeln(sprintf('<options=bold>Rule details</> (<fg=yellow>%d</>)', count($allFindings)));
         } elseif ($confirmedFindings !== [] || $manualReviewFindings !== []) {
-            $out->writeln(sprintf('<options=bold>Results requiring attention</> (<fg=yellow>%d</>)', count($confirmedFindings) + count($manualReviewFindings)));
+            $out->writeln(sprintf('<options=bold>FINDINGS REQUIRING ATTENTION (%d)</>', count($confirmedFindings) + count($manualReviewFindings)));
         }
 
         $findingsToRender = $showRuleDetails ? $allFindings : array_merge($confirmedFindings, $manualReviewFindings);
+        $currentSeverity = null;
         foreach ($findingsToRender as $f) {
             $sev = strtoupper((string)($f['severity'] ?? 'LOW'));
             $id = trim((string)($f['id'] ?? ''));
@@ -706,10 +801,15 @@ HELP;
                 : ($status === 'MANUAL_REVIEW'
                     ? '<fg=cyan;options=bold>[HUMAN VERIFICATION REQUIRED]</> '
                     : '');
+            if (!$showRuleDetails && $status !== 'MANUAL_REVIEW' && $sev !== $currentSeverity) {
+                $currentSeverity = $sev;
+                $out->writeln('');
+                $out->writeln(sprintf('  %s (%d)', $sevBadge($sev), $sevCounts[strtolower($sev)] ?? 0));
+            }
             $line = $id !== ''
-                ? sprintf('%s%s <href=https://magebean.com/baseline/%3$s>%3$s</> %4$s', $statusTag, $sevBadge($sev), $id, $text)
-                : sprintf('%s%s %s', $statusTag, $sevBadge($sev), $text);
-            $out->writeln('  ' . $line);
+                ? sprintf('%s<href=https://magebean.com/baseline/%2$s>%2$s</>  %3$s', $statusTag, $id, $text)
+                : sprintf('%s%s', $statusTag, $text);
+            $out->writeln(($showRuleDetails ? '  ' . $sevBadge($sev) . ' ' : '    ') . $line);
 
             if ($id === 'MB-R072' && $status === 'UNKNOWN') {
                 $out->writeln('    Git history was not verified; INCONCLUSIVE does not mean the history is clean.');
@@ -717,13 +817,6 @@ HELP;
                 $out->writeln("      <fg=green>php magebean.phar scan --path='/path/to/magento-source' --rules=MB-R072</>");
             }
 
-            if (!$showRuleDetails && $id === 'MB-R049' && $status === 'FAIL') {
-                $out->writeln('    Run this command to list affected packages and advisories:');
-                $out->writeln(sprintf(
-                    '      <fg=green>php magebean.phar scan %s--rules=MB-R049</>',
-                    $targetOption
-                ));
-            }
 
             if ($showRuleDetails) {
                 $this->renderCheckDetails($out, $f);
@@ -750,7 +843,7 @@ HELP;
         if (!$showRuleDetails && $inconclusiveFindings !== []) {
             $out->writeln('');
             $out->writeln(sprintf(
-                '<options=bold>Inconclusive checks</> (<fg=magenta>%d</>)',
+                '<options=bold>INCONCLUSIVE CHECKS (%d)</>',
                 count($inconclusiveFindings)
             ));
             foreach ($inconclusiveFindings as $f) {
@@ -758,9 +851,10 @@ HELP;
                 $id = trim((string)($f['id'] ?? ''));
                 $text = $this->compactFindingDescription($f);
                 $line = $id !== ''
-                    ? sprintf('<fg=magenta;options=bold>[INCONCLUSIVE]</> %1$s <href=https://magebean.com/baseline/%2$s>%2$s</> %3$s', $sevBadge($sev), $id, $text)
-                    : sprintf('<fg=magenta;options=bold>[INCONCLUSIVE]</> %s %s', $sevBadge($sev), $text);
+                    ? sprintf('<href=https://magebean.com/baseline/%1$s>%1$s</>  %2$s', $id, $text)
+                    : $text;
                 $out->writeln('  ' . $line);
+                $out->writeln(sprintf('    Potential severity: %s', ucfirst(strtolower($sev))));
                 if ($id === 'MB-R072') {
                     $out->writeln('    Git history was not verified; INCONCLUSIVE does not mean the history is clean.');
                     $out->writeln('    Run this rule against the original source checkout containing .git:');
@@ -773,16 +867,13 @@ HELP;
         if (!$showRuleDetails && ($confirmedFindings !== [] || $inconclusiveFindings !== [])) {
             $exampleRules = array_values(array_filter(array_map(
                 static fn(array $finding): string => trim((string)($finding['id'] ?? '')),
-                array_slice($confirmedFindings, 0, 2)
+                array_slice($confirmedFindings, 0, 1)
             )));
-            $out->writeln('<options=bold>Next steps</>');
+            $out->writeln('<options=bold>NEXT STEPS</>');
             if ($exampleRules !== []) {
-                $out->writeln('  Inspect a finding with its evidence and remediation:');
+                $out->writeln('  Review the highest-priority finding:');
                 $out->writeln(sprintf('    <fg=green>php magebean.phar scan %s--rules=%s</>', $targetOption, $exampleRules[0]));
-                if (count($exampleRules) > 1) {
-                    $out->writeln('  Inspect multiple findings:');
-                    $out->writeln(sprintf('    <fg=green>php magebean.phar scan %s--rules=%s</>', $targetOption, implode(',', $exampleRules)));
-                }
+
             }
             if ($inconclusiveFindings !== []) {
                 $inconclusiveId = trim((string)($inconclusiveFindings[0]['id'] ?? ''));
@@ -807,10 +898,7 @@ HELP;
             }
         }
 
-        // Footer
-        $out->writeln('');
-        $out->writeln('Contact: <href=mailto:support@magebean.com>support@magebean.com</>');
-        $out->writeln('');
+
     }
 
     private function normalizeControlId(string $raw): string

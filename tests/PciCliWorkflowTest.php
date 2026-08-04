@@ -1,0 +1,33 @@
+<?php
+declare(strict_types=1);
+require_once __DIR__.'/../vendor/autoload.php';
+use Magebean\Application;
+use Symfony\Component\Console\Tester\CommandTester;
+function assertPciWorkflow(bool $c,string $m):void{if(!$c)throw new RuntimeException($m);}
+$root=dirname(__DIR__);$tmp=sys_get_temp_dir().'/magebean-pci-cli-'.bin2hex(random_bytes(5));
+mkdir($tmp.'/app/etc',0777,true);mkdir($tmp.'/bin',0777,true);mkdir($tmp.'/.magebean',0777,true);
+file_put_contents($tmp.'/composer.json','{"name":"fixture/magento","require":{"magento/framework":"103.0.7"}}');
+file_put_contents($tmp.'/bin/magento',"#!/usr/bin/env php\n<?php\n");
+file_put_contents($tmp.'/app/etc/config.php',"<?php return ['modules'=>['Magento_TwoFactorAuth'=>1,'Magento_GoogleAuthenticator'=>1],'system'=>['default'=>['admin'=>['security'=>['min_password_length'=>12,'session_lifetime'=>900]]]]];\n");
+file_put_contents($tmp.'/app/etc/env.php',"<?php return ['backend'=>['frontName'=>'secureadminpath'],'MAGE_MODE'=>'production'];\n");
+copy($root.'/docs/examples/pci-dss-context.example.json',$tmp.'/.magebean/pci-context.json');
+copy($root.'/docs/examples/pci-dss-external-evidence.example.json',$tmp.'/.magebean/pci-evidence.json');
+$tester=new CommandTester((new Application())->find('scan'));
+$exit=$tester->execute(['--path'=>$tmp,'--profile'=>'pci','--controls'=>'MB-C02','--include-manual-review'=>true,'--pci-context'=>'.magebean/pci-context.json','--pci-evidence'=>'.magebean/pci-evidence.json','--pci-report'=>'var/report/pci.json','--no-ansi'=>true]);
+$reportFile=$tmp.'/var/report/pci.json';assertPciWorkflow(is_file($reportFile),'PCI report file was not written');$report=json_decode((string)file_get_contents($reportFile),true,512,JSON_THROW_ON_ERROR);
+assertPciWorkflow(($report['report_type']??null)==='PCI DSS 4.0.1 evidence-readiness','Unexpected report type');
+assertPciWorkflow(($report['summary']['external_evidence_items']??null)===1,'External evidence did not reach the report');
+assertPciWorkflow(($report['summary']['human_actions_listed']??0)>0,'Manual flag must list human actions');
+assertPciWorkflow(!in_array('PASS',array_column($report['requirements'],'assessment_status'),true),'PCI report must never emit a compliance PASS');
+assertPciWorkflow(str_contains($tester->getDisplay(),'PCI DSS 4.0.1 EVIDENCE READINESS'),'PCI console summary is missing');
+assertPciWorkflow(str_contains($tester->getDisplay(),'Registry requirements requiring human confirmation: 280'),'Mandatory human-verification declaration is missing');
+assertPciWorkflow(str_contains($tester->getDisplay(),'Rules         8 / 8 selected'),'Included-manual scan count is missing');
+assertPciWorkflow(str_contains($tester->getDisplay(),'Manual rules  1 included'),'Included human-rule count is missing');
+$hiddenTester=new CommandTester((new Application())->find('scan'));
+$hiddenTester->execute(['--path'=>$tmp,'--profile'=>'pci','--controls'=>'MB-C02','--no-ansi'=>true]);
+assertPciWorkflow(str_contains($hiddenTester->getDisplay(),'Rules         7 / 8 selected'),'Default scan must show selected and complete profile counts');
+assertPciWorkflow(str_contains($hiddenTester->getDisplay(),'Manual rules  1 not evaluated'),'Default scan manual-rule guidance is missing');
+assertPciWorkflow(!str_contains($tester->getDisplay(),'Human-required: 0'),'Misleading zero human-required count must never be rendered');
+assertPciWorkflow(in_array($exit,[0,1],true),'Unexpected CLI exit code');
+$it=new RecursiveIteratorIterator(new RecursiveDirectoryIterator($tmp,FilesystemIterator::SKIP_DOTS),RecursiveIteratorIterator::CHILD_FIRST);foreach($it as $node){$node->isDir()?rmdir($node->getPathname()):unlink($node->getPathname());}rmdir($tmp);
+echo "PciCliWorkflowTest: PASS\n";

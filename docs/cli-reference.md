@@ -1,6 +1,6 @@
 # Magebean CLI Reference
 
-Magebean CLI audits Magento 2 production readiness using a catalog of 19 controls and 370 rules: 113 automated and 257 requiring human verification.
+Magebean CLI audits Magento 2 production readiness using a catalog of 19 controls and 371 rules: 113 automated and 258 requiring human verification.
 
 Current CLI version:
 
@@ -70,9 +70,9 @@ When neither `--path` nor `--url` is supplied, Magebean searches for a Magento r
 | `asvs-l2` | 73 default / 183 with manual | Cumulative Level 2 mapping; manual and contextual reviews are opt-in. |
 | `asvs-l3` | 80 default / 259 with manual | Cumulative Level 3 mapping; substantial independent human assurance is mandatory. |
 | `owasp` | 77 | Application-security checks mapped to OWASP Top 10 2025. |
-| `pci` | 69 | PCI DSS v4.0.1 payment-readiness checks; not a certification. |
-| `hardening` | 89 | Deep production, code, dependency, integration, and operations checks. |
-| `baseline` | 113 default / 370 with manual | Full local catalog. Aliases: `all`, `magebean`. |
+| `pci` | 67 default / 68 with manual | PCI DSS v4.0.1 payment-readiness checks with audited coverage classifications; not a certification. |
+| `hardening` | 91 default / 92 with manual | Deep production, code, dependency, integration, and operations checks. |
+| `baseline` | 113 default / 371 with manual | Full local catalog. Aliases: `all`, `magebean`. |
 | `FILE` | Custom | JSON profile path or a profile in `.magebean/profiles`. |
 
 The `asvs-l1` mapping covers all 70 Level 1 requirements: 15 automated, 15 partially automated, 28 manual-review, and 12 currently without a mapped rule. This is an evidence-oriented scan profile, not an ASVS certification.
@@ -92,6 +92,8 @@ The cumulative `asvs-l2` mapping covers 253 requirements. By default it selects 
 ```
 
 Manual reviews can be enabled with `--include-manual-review`. The same capabilities can be supplied for one scan with `--capabilities=graphql,oauth_oidc`. Unspecified or false capabilities do not activate contextual rules.
+
+Every scan summary shows both the number of rules selected to run and the complete rule count for the current profile selection. When human-verification rules are hidden, the summary reports how many are hidden and instructs the user to add `--include-manual-review`. The same count and guidance are shown by `rules:list`.
 
 If `--profile` is omitted, Magebean uses `basic`.
 
@@ -114,6 +116,9 @@ php magebean.phar scan --profile=basic
 | `--rules=MB-Rxxx,...` | Run listed rule IDs directly from the available catalog and bypass profile selection. |
 | `--exclude-rules=MB-Rxxx,...` | Remove listed rules after profile and project configuration. |
 | `--config=FILE` | Project policy file. Local scans auto-detect `.magebean.json` or `.magebean.yml`. |
+| `--pci-context=FILE` | PCI DSS entity, scope, payment architecture, overlays, and requirement overrides. |
+| `--pci-evidence=FILE` | Credential-free structured external evidence package. |
+| `--pci-report=FILE` | Write a PCI DSS evidence-readiness JSON report; never a compliance attestation. |
 | `--standard=NAME` | Legacy report selector: `magebean`, `owasp`, `pci`, or `cwe`. Prefer `--profile`. |
 
 An explicit `--profile` takes precedence over the legacy `--standard` selector.
@@ -181,6 +186,7 @@ Select a profile:
 php magebean.phar scan --path=/var/www/magento --profile=basic
 php magebean.phar scan --path=/var/www/magento --profile=owasp
 php magebean.phar scan --path=/var/www/magento --profile=pci
+php magebean.phar scan --path=/var/www/magento --profile=pci --pci-context=.magebean/pci-context.json --pci-evidence=.magebean/pci-evidence.json --include-manual-review --pci-report=var/report/magebean-pci.json
 php magebean.phar scan --path=/var/www/magento --profile=hardening
 php magebean.phar scan --path=/var/www/magento --profile=baseline
 ```

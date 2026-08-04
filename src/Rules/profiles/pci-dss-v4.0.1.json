@@ -1,78 +1,1155 @@
 {
-  "id": "pci-dss-v4.0.1",
-  "aliases": ["pci", "pci-dss", "pci-dss-v4"],
-  "title": "PCI DSS v4.0.1 Readiness",
-  "description": "Automated Magento readiness checks mapped to PCI DSS v4.0.1 technical requirements. This profile does not certify PCI DSS compliance.",
-  "report_template": "pci",
-  "rules": [
-    { "id": "MB-R001", "requirements": ["2.2.1", "6.5.2"], "evidence_type": "automated" },
-    { "id": "MB-R002", "requirements": ["3.5.1", "7.2.1"], "evidence_type": "automated" },
-    { "id": "MB-R003", "requirements": ["2.2.1", "6.5.2"], "evidence_type": "automated" },
-    { "id": "MB-R004", "requirements": ["6.5.2", "11.5.2"], "evidence_type": "automated" },
-    { "id": "MB-R005", "requirements": ["2.2.1"], "evidence_type": "automated" },
-    { "id": "MB-R006", "requirements": ["8.3.1"], "evidence_type": "automated" },
-    { "id": "MB-R007", "requirements": ["8.4.2", "8.4.3"], "evidence_type": "automated" },
-    { "id": "MB-R008", "requirements": ["8.3.6", "8.3.9"], "evidence_type": "automated" },
-    { "id": "MB-R009", "requirements": ["8.2.8"], "evidence_type": "automated" },
-    { "id": "MB-R010", "requirements": ["7.2.1", "8.3.1"], "evidence_type": "automated" },
-    { "id": "MB-R011", "requirements": ["8.3.4", "8.3.5"], "evidence_type": "automated" },
-    { "id": "MB-R023", "requirements": ["3.7.1"], "evidence_type": "automated" },
-    { "id": "MB-R024", "requirements": ["3.3.1", "10.2.1"], "evidence_type": "automated" },
-    { "id": "MB-R026", "requirements": ["4.2.1"], "evidence_type": "automated" },
-    { "id": "MB-R027", "requirements": ["4.2.1"], "evidence_type": "automated" },
-    { "id": "MB-R028", "requirements": ["4.2.1"], "evidence_type": "automated" },
-    { "id": "MB-R029", "requirements": ["4.2.1", "6.4.3"], "evidence_type": "automated" },
-    { "id": "MB-R030", "requirements": ["4.2.1", "8.2.8"], "evidence_type": "automated" },
-    { "id": "MB-R031", "requirements": ["2.2.1", "6.5.2"], "evidence_type": "automated" },
-    { "id": "MB-R032", "requirements": ["2.2.1"], "evidence_type": "automated" },
-    { "id": "MB-R033", "requirements": ["2.2.1"], "evidence_type": "automated" },
-    { "id": "MB-R034", "requirements": ["2.2.1"], "evidence_type": "automated" },
-    { "id": "MB-R035", "requirements": ["2.2.1"], "evidence_type": "automated" },
-    { "id": "MB-R036", "requirements": ["2.2.1", "6.5.2"], "evidence_type": "automated" },
-    { "id": "MB-R042", "requirements": ["10.2.1", "10.4.1"], "evidence_type": "automated" },
-    { "id": "MB-R043", "requirements": ["10.2.1", "10.4.1"], "evidence_type": "automated" },
-    { "id": "MB-R044", "requirements": ["10.2.1", "10.4.1"], "evidence_type": "automated" },
-    { "id": "MB-R045", "requirements": ["10.4.1", "10.5.1"], "evidence_type": "automated" },
-    { "id": "MB-R049", "requirements": ["6.3.1", "6.3.3"], "evidence_type": "automated" },
-    { "id": "MB-R050", "requirements": ["6.3.1", "6.3.3"], "evidence_type": "automated" },
-    { "id": "MB-R051", "requirements": ["6.3.1", "6.3.3"], "evidence_type": "automated" },
-    { "id": "MB-R052", "requirements": ["6.3.1", "6.3.3"], "evidence_type": "automated" },
-    { "id": "MB-R053", "requirements": ["6.3.1", "6.3.3"], "evidence_type": "automated" },
-    { "id": "MB-R054", "requirements": ["6.3.1", "6.3.3"], "evidence_type": "automated" },
-    { "id": "MB-R055", "requirements": ["6.3.1", "6.3.3"], "evidence_type": "automated" },
-    { "id": "MB-R056", "requirements": ["6.3.1", "6.3.3"], "evidence_type": "automated" },
-    { "id": "MB-R057", "requirements": ["6.3.1", "6.3.3"], "evidence_type": "automated" },
-    { "id": "MB-R058", "requirements": ["6.3.1", "6.3.3"], "evidence_type": "automated" },
-    { "id": "MB-R059", "requirements": ["6.3.1", "6.3.3"], "evidence_type": "automated" },
-    { "id": "MB-R060", "requirements": ["6.3.1", "6.3.3"], "evidence_type": "automated" },
-    { "id": "MB-R065", "requirements": ["6.3.1", "6.3.3"], "evidence_type": "automated" },
-    { "id": "MB-R066", "requirements": ["6.3.1", "6.3.3"], "evidence_type": "automated" },
-    { "id": "MB-R067", "requirements": ["6.3.1", "6.3.3"], "evidence_type": "automated" },
-    { "id": "MB-R068", "requirements": ["6.3.1", "6.3.3"], "evidence_type": "automated" },
-    { "id": "MB-R069", "requirements": ["6.3.1", "6.3.3"], "evidence_type": "automated" },
-    { "id": "MB-R070", "requirements": ["6.3.1", "6.3.3"], "evidence_type": "automated" },
-    { "id": "MB-R071", "requirements": ["6.3.1", "6.3.3"], "evidence_type": "automated" },
-    { "id": "MB-R072", "requirements": ["3.5.1", "4.2.1"], "evidence_type": "automated" },
-    { "id": "MB-R073", "requirements": ["3.5.1", "4.2.1"], "evidence_type": "automated" },
-    { "id": "MB-R074", "requirements": ["3.5.1", "4.2.1"], "evidence_type": "automated" },
-    { "id": "MB-R075", "requirements": ["3.5.1", "4.2.1"], "evidence_type": "automated" },
-    { "id": "MB-R076", "requirements": ["3.5.1", "4.2.1"], "evidence_type": "automated" },
-    { "id": "MB-R077", "requirements": ["3.5.1", "4.2.1"], "evidence_type": "automated" },
-    { "id": "MB-R078", "requirements": ["3.5.1", "4.2.1"], "evidence_type": "automated" },
-    { "id": "MB-R079", "requirements": ["3.5.1", "4.2.1"], "evidence_type": "automated" },
-    { "id": "MB-R080", "requirements": ["3.5.1", "4.2.1"], "evidence_type": "automated" },
-    { "id": "MB-R081", "requirements": ["3.5.1", "4.2.1"], "evidence_type": "automated" },
-    { "id": "MB-R082", "requirements": ["3.2.1", "3.3.1"], "evidence_type": "automated" },
-    { "id": "MB-R083", "requirements": ["3.2.1", "3.3.1"], "evidence_type": "automated" },
-    { "id": "MB-R084", "requirements": ["3.2.1", "3.3.1", "10.2.1"], "evidence_type": "automated" },
-    { "id": "MB-R085", "requirements": ["12.5.2"], "evidence_type": "automated" },
-    { "id": "MB-R086", "requirements": ["3.2.1", "6.2.4"], "evidence_type": "automated" },
-    { "id": "MB-R087", "requirements": ["6.4.3"], "evidence_type": "hybrid" },
-    { "id": "MB-R088", "requirements": ["6.4.3", "11.6.1"], "evidence_type": "hybrid" },
-    { "id": "MB-R089", "requirements": ["6.4.3"], "evidence_type": "automated" },
-    { "id": "MB-R090", "requirements": ["11.6.1"], "evidence_type": "hybrid" },
-    { "id": "MB-R091", "requirements": ["6.5.2", "11.5.2"], "evidence_type": "automated" },
-    { "id": "MB-R092", "requirements": ["6.2.4", "10.2.1"], "evidence_type": "automated" },
-    { "id": "MB-R093", "requirements": ["12.8.5", "12.10.1"], "evidence_type": "manual" }
-  ]
+    "id": "pci-dss-v4.0.1",
+    "aliases": [
+        "pci",
+        "pci-dss",
+        "pci-dss-v4"
+    ],
+    "title": "PCI DSS v4.0.1 Readiness",
+    "description": "Magento readiness checks mapped to PCI DSS v4.0.1 requirements. Results provide scoped evidence and do not certify PCI DSS compliance.",
+    "report_template": "pci",
+    "standard": {
+        "id": "pci-dss",
+        "version": "4.0.1",
+        "alignment": "readiness-evidence"
+    },
+    "registry": "../standards/pci-dss-v4.0.1.json",
+    "coverage_matrix": "../standards/pci-dss-v4.0.1-coverage.json",
+    "gap_triage": "../standards/pci-dss-v4.0.1-gap-triage.json",
+    "criterion_reviews": {
+        "2": "../standards/pci-dss-v4.0.1-requirement-02-review.json"
+    },
+    "rule_designs": {
+        "2.2.2": "../standards/pci-dss-v4.0.1-requirement-02.2.2-design.json"
+    },
+    "mapping_policy": {
+        "DIRECT": "The rule tests the complete technical criterion represented by this mapping.",
+        "PARTIAL": "The rule tests a material subset; additional technical or human evidence is required.",
+        "SUPPORTING": "The rule supplies useful evidence but cannot establish the requirement by itself.",
+        "HUMAN": "The requirement depends on mandatory human assessment and documentary evidence."
+    },
+    "coverage_summary": {
+        "rules": 68,
+        "evidence_types": {
+            "automated": 64,
+            "hybrid": 4,
+            "manual": 0
+        },
+        "mappings": {
+            "DIRECT": 1,
+            "PARTIAL": 58,
+            "SUPPORTING": 35,
+            "HUMAN": 0
+        }
+    },
+    "rules": [
+        {
+            "id": "MB-R001",
+            "evidence_type": "automated",
+            "requirements": [
+                "2.2.1"
+            ],
+            "mappings": [
+                {
+                    "requirement": "2.2.1",
+                    "coverage": "PARTIAL",
+                    "rationale": "No world-writable files or directories: this rule tests a material part of the criterion but not its full operational scope for PCI DSS 2.2.1."
+                }
+            ]
+        },
+        {
+            "id": "MB-R002",
+            "evidence_type": "automated",
+            "requirements": [
+                "7.2.1"
+            ],
+            "mappings": [
+                {
+                    "requirement": "7.2.1",
+                    "coverage": "SUPPORTING",
+                    "rationale": "env.php restricted to owner/group access: this rule supplies supporting implementation evidence without establishing compliance for PCI DSS 7.2.1."
+                }
+            ]
+        },
+        {
+            "id": "MB-R003",
+            "evidence_type": "automated",
+            "requirements": [
+                "2.2.1"
+            ],
+            "mappings": [
+                {
+                    "requirement": "2.2.1",
+                    "coverage": "PARTIAL",
+                    "rationale": "Webroot hygiene (no .git/.env/backups in pub/): this rule tests a material part of the criterion but not its full operational scope for PCI DSS 2.2.1."
+                }
+            ]
+        },
+        {
+            "id": "MB-R004",
+            "evidence_type": "automated",
+            "requirements": [
+                "6.5.2",
+                "11.5.2"
+            ],
+            "mappings": [
+                {
+                    "requirement": "6.5.2",
+                    "coverage": "SUPPORTING",
+                    "rationale": "Code directories are read-only: this rule supplies supporting implementation evidence without establishing compliance for PCI DSS 6.5.2."
+                },
+                {
+                    "requirement": "11.5.2",
+                    "coverage": "SUPPORTING",
+                    "rationale": "Code directories are read-only: this rule supplies supporting implementation evidence without establishing compliance for PCI DSS 11.5.2."
+                }
+            ]
+        },
+        {
+            "id": "MB-R005",
+            "evidence_type": "automated",
+            "requirements": [
+                "2.2.1"
+            ],
+            "mappings": [
+                {
+                    "requirement": "2.2.1",
+                    "coverage": "PARTIAL",
+                    "rationale": "Directory listing disabled: this rule tests a material part of the criterion but not its full operational scope for PCI DSS 2.2.1."
+                }
+            ]
+        },
+        {
+            "id": "MB-R007",
+            "evidence_type": "automated",
+            "requirements": [
+                "8.4.2",
+                "8.4.3",
+                "8.4.1"
+            ],
+            "mappings": [
+                {
+                    "requirement": "8.4.2",
+                    "coverage": "PARTIAL",
+                    "rationale": "Admin 2FA module enabled: this rule tests a material part of the criterion but not its full operational scope for PCI DSS 8.4.2."
+                },
+                {
+                    "requirement": "8.4.3",
+                    "coverage": "PARTIAL",
+                    "rationale": "Admin 2FA module enabled: this rule tests a material part of the criterion but not its full operational scope for PCI DSS 8.4.3."
+                },
+                {
+                    "requirement": "8.4.1",
+                    "coverage": "PARTIAL",
+                    "rationale": "Assess MFA enforcement for all non-console administrative access into the CDE. Magebean supplies partial local technical evidence; the remaining PCI testing procedures require human assessment and, where applicable, external-system evidence."
+                }
+            ]
+        },
+        {
+            "id": "MB-R008",
+            "evidence_type": "automated",
+            "requirements": [
+                "8.3.6"
+            ],
+            "mappings": [
+                {
+                    "requirement": "8.3.6",
+                    "coverage": "PARTIAL",
+                    "rationale": "Admin passwords require at least 8 characters: this rule tests a material part of the criterion but not its full operational scope for PCI DSS 8.3.6."
+                }
+            ]
+        },
+        {
+            "id": "MB-R009",
+            "evidence_type": "automated",
+            "requirements": [
+                "8.2.8"
+            ],
+            "mappings": [
+                {
+                    "requirement": "8.2.8",
+                    "coverage": "DIRECT",
+                    "rationale": "Admin session timeout <= 900s: this rule directly tests the stated technical criterion for PCI DSS 8.2.8."
+                }
+            ]
+        },
+        {
+            "id": "MB-R010",
+            "evidence_type": "automated",
+            "requirements": [
+                "7.2.1"
+            ],
+            "mappings": [
+                {
+                    "requirement": "7.2.1",
+                    "coverage": "SUPPORTING",
+                    "rationale": "Admin URL exposure restricted: this rule supplies supporting implementation evidence without establishing compliance for PCI DSS 7.2.1."
+                }
+            ]
+        },
+        {
+            "id": "MB-R011",
+            "evidence_type": "automated",
+            "requirements": [
+                "8.3.4"
+            ],
+            "mappings": [
+                {
+                    "requirement": "8.3.4",
+                    "coverage": "PARTIAL",
+                    "rationale": "Login rate-limiting / CAPTCHA enabled: this rule tests a material part of the criterion but not its full operational scope for PCI DSS 8.3.4."
+                }
+            ]
+        },
+        {
+            "id": "MB-R023",
+            "evidence_type": "automated",
+            "requirements": [
+                "6.2.4"
+            ],
+            "mappings": [
+                {
+                    "requirement": "6.2.4",
+                    "coverage": "PARTIAL",
+                    "rationale": "Use CSPRNG; avoid weak PRNG: this rule tests a material part of the criterion but not its full operational scope for PCI DSS 6.2.4."
+                }
+            ]
+        },
+        {
+            "id": "MB-R024",
+            "evidence_type": "automated",
+            "requirements": [
+                "3.3.1"
+            ],
+            "mappings": [
+                {
+                    "requirement": "3.3.1",
+                    "coverage": "SUPPORTING",
+                    "rationale": "Sensitive data not logged: this rule supplies supporting implementation evidence without establishing compliance for PCI DSS 3.3.1."
+                }
+            ]
+        },
+        {
+            "id": "MB-R026",
+            "evidence_type": "automated",
+            "requirements": [
+                "4.2.1",
+                "2.2.7"
+            ],
+            "mappings": [
+                {
+                    "requirement": "4.2.1",
+                    "coverage": "PARTIAL",
+                    "rationale": "Force HTTPS in admin and storefront: this rule tests a material part of the criterion but not its full operational scope for PCI DSS 4.2.1."
+                },
+                {
+                    "requirement": "2.2.7",
+                    "coverage": "PARTIAL",
+                    "rationale": "Force HTTPS in admin and storefront tests browser-based Magento administration, providing partial evidence for PCI DSS 2.2.7; other administrative paths remain outside this rule."
+                }
+            ]
+        },
+        {
+            "id": "MB-R027",
+            "evidence_type": "automated",
+            "requirements": [
+                "4.2.1",
+                "2.2.7"
+            ],
+            "mappings": [
+                {
+                    "requirement": "4.2.1",
+                    "coverage": "SUPPORTING",
+                    "rationale": "HSTS max-age is at least one year: this rule supplies supporting implementation evidence without establishing compliance for PCI DSS 4.2.1."
+                },
+                {
+                    "requirement": "2.2.7",
+                    "coverage": "SUPPORTING",
+                    "rationale": "HSTS helps prevent browser downgrade to cleartext access and supplies supporting evidence for PCI DSS 2.2.7, but it does not establish strong cryptography for every administrative path."
+                }
+            ]
+        },
+        {
+            "id": "MB-R028",
+            "evidence_type": "automated",
+            "requirements": [
+                "4.2.1",
+                "2.2.7"
+            ],
+            "mappings": [
+                {
+                    "requirement": "4.2.1",
+                    "coverage": "PARTIAL",
+                    "rationale": "TLS protocols >= 1.2: this rule tests a material part of the criterion but not its full operational scope for PCI DSS 4.2.1."
+                },
+                {
+                    "requirement": "2.2.7",
+                    "coverage": "PARTIAL",
+                    "rationale": "Observed TLS 1.2 or later provides partial protocol evidence for PCI DSS 2.2.7 on the scanned web endpoint, not for every in-scope component or remote administration method."
+                }
+            ]
+        },
+        {
+            "id": "MB-R029",
+            "evidence_type": "automated",
+            "requirements": [
+                "4.2.1"
+            ],
+            "mappings": [
+                {
+                    "requirement": "4.2.1",
+                    "coverage": "SUPPORTING",
+                    "rationale": "No mixed content (http://) in templates/assets: this rule supplies supporting implementation evidence without establishing compliance for PCI DSS 4.2.1."
+                }
+            ]
+        },
+        {
+            "id": "MB-R031",
+            "evidence_type": "automated",
+            "requirements": [
+                "2.2.1",
+                "6.5.2",
+                "2.2.6"
+            ],
+            "mappings": [
+                {
+                    "requirement": "2.2.1",
+                    "coverage": "PARTIAL",
+                    "rationale": "Magento runs in PRODUCTION mode: this rule tests a material part of the criterion but not its full operational scope for PCI DSS 2.2.1."
+                },
+                {
+                    "requirement": "6.5.2",
+                    "coverage": "SUPPORTING",
+                    "rationale": "Magento runs in PRODUCTION mode: this rule supplies supporting implementation evidence without establishing compliance for PCI DSS 6.5.2."
+                },
+                {
+                    "requirement": "2.2.6",
+                    "coverage": "PARTIAL",
+                    "rationale": "Magento production mode is a concrete application security parameter and provides partial evidence for PCI DSS 2.2.6."
+                }
+            ]
+        },
+        {
+            "id": "MB-R032",
+            "evidence_type": "automated",
+            "requirements": [
+                "2.2.1",
+                "2.2.6"
+            ],
+            "mappings": [
+                {
+                    "requirement": "2.2.1",
+                    "coverage": "PARTIAL",
+                    "rationale": "Xdebug disabled in production: this rule tests a material part of the criterion but not its full operational scope for PCI DSS 2.2.1."
+                },
+                {
+                    "requirement": "2.2.6",
+                    "coverage": "PARTIAL",
+                    "rationale": "Disabled Xdebug is a concrete PHP security parameter and provides partial evidence for PCI DSS 2.2.6."
+                }
+            ]
+        },
+        {
+            "id": "MB-R033",
+            "evidence_type": "automated",
+            "requirements": [
+                "2.2.1",
+                "2.2.6"
+            ],
+            "mappings": [
+                {
+                    "requirement": "2.2.1",
+                    "coverage": "PARTIAL",
+                    "rationale": "display_errors is Off: this rule tests a material part of the criterion but not its full operational scope for PCI DSS 2.2.1."
+                },
+                {
+                    "requirement": "2.2.6",
+                    "coverage": "PARTIAL",
+                    "rationale": "Disabled error display is a concrete PHP security parameter and provides partial evidence for PCI DSS 2.2.6."
+                }
+            ]
+        },
+        {
+            "id": "MB-R034",
+            "evidence_type": "automated",
+            "requirements": [
+                "2.2.1"
+            ],
+            "mappings": [
+                {
+                    "requirement": "2.2.1",
+                    "coverage": "SUPPORTING",
+                    "rationale": "Compiled DI generated (metadata & code): this rule supplies supporting implementation evidence without establishing compliance for PCI DSS 2.2.1."
+                }
+            ]
+        },
+        {
+            "id": "MB-R036",
+            "evidence_type": "automated",
+            "requirements": [
+                "2.2.1",
+                "2.2.6"
+            ],
+            "mappings": [
+                {
+                    "requirement": "2.2.1",
+                    "coverage": "PARTIAL",
+                    "rationale": "No dev debug configs on production (template hints off): this rule tests a material part of the criterion but not its full operational scope for PCI DSS 2.2.1."
+                },
+                {
+                    "requirement": "2.2.6",
+                    "coverage": "PARTIAL",
+                    "rationale": "Disabled production template hints are a concrete Magento security parameter and provide partial evidence for PCI DSS 2.2.6."
+                }
+            ]
+        },
+        {
+            "id": "MB-R042",
+            "evidence_type": "automated",
+            "requirements": [
+                "10.3.1",
+                "10.3.2"
+            ],
+            "mappings": [
+                {
+                    "requirement": "10.3.1",
+                    "coverage": "PARTIAL",
+                    "rationale": "Logs and reports not exposed under pub/: this rule tests a material part of the criterion but not its full operational scope for PCI DSS 10.3.1."
+                },
+                {
+                    "requirement": "10.3.2",
+                    "coverage": "SUPPORTING",
+                    "rationale": "Assess controls preventing unauthorized reading, modification, and deletion of audit logs. Magebean supplies supporting local technical evidence; the remaining PCI testing procedures require human assessment and, where applicable, external-system evidence."
+                }
+            ]
+        },
+        {
+            "id": "MB-R043",
+            "evidence_type": "automated",
+            "requirements": [
+                "10.5.1"
+            ],
+            "mappings": [
+                {
+                    "requirement": "10.5.1",
+                    "coverage": "PARTIAL",
+                    "rationale": "Log rotation configured: this rule tests a material part of the criterion but not its full operational scope for PCI DSS 10.5.1."
+                }
+            ]
+        },
+        {
+            "id": "MB-R044",
+            "evidence_type": "automated",
+            "requirements": [
+                "2.2.1"
+            ],
+            "mappings": [
+                {
+                    "requirement": "2.2.1",
+                    "coverage": "PARTIAL",
+                    "rationale": "Debug template hints disabled in production: this rule tests a material part of the criterion but not its full operational scope for PCI DSS 2.2.1."
+                }
+            ]
+        },
+        {
+            "id": "MB-R049",
+            "evidence_type": "automated",
+            "requirements": [
+                "6.3.1"
+            ],
+            "mappings": [
+                {
+                    "requirement": "6.3.1",
+                    "coverage": "PARTIAL",
+                    "rationale": "No vulnerable packages (CVE via OSV): this rule tests a material part of the criterion but not its full operational scope for PCI DSS 6.3.1."
+                }
+            ]
+        },
+        {
+            "id": "MB-R050",
+            "evidence_type": "automated",
+            "requirements": [
+                "6.3.3"
+            ],
+            "mappings": [
+                {
+                    "requirement": "6.3.3",
+                    "coverage": "PARTIAL",
+                    "rationale": "Adobe security patches applied: this rule tests a material part of the criterion but not its full operational scope for PCI DSS 6.3.3."
+                }
+            ]
+        },
+        {
+            "id": "MB-R051",
+            "evidence_type": "automated",
+            "requirements": [
+                "6.3.3"
+            ],
+            "mappings": [
+                {
+                    "requirement": "6.3.3",
+                    "coverage": "SUPPORTING",
+                    "rationale": "Suggest fixed versions for vulnerable packages: this rule supplies supporting implementation evidence without establishing compliance for PCI DSS 6.3.3."
+                }
+            ]
+        },
+        {
+            "id": "MB-R052",
+            "evidence_type": "automated",
+            "requirements": [
+                "6.3.1"
+            ],
+            "mappings": [
+                {
+                    "requirement": "6.3.1",
+                    "coverage": "SUPPORTING",
+                    "rationale": "Enabled high-risk modules are maintained: this rule supplies supporting implementation evidence without establishing compliance for PCI DSS 6.3.1."
+                }
+            ]
+        },
+        {
+            "id": "MB-R053",
+            "evidence_type": "automated",
+            "requirements": [
+                "6.3.3"
+            ],
+            "mappings": [
+                {
+                    "requirement": "6.3.3",
+                    "coverage": "SUPPORTING",
+                    "rationale": "Temporary mitigations documented: this rule supplies supporting implementation evidence without establishing compliance for PCI DSS 6.3.3."
+                }
+            ]
+        },
+        {
+            "id": "MB-R054",
+            "evidence_type": "automated",
+            "requirements": [
+                "6.3.1"
+            ],
+            "mappings": [
+                {
+                    "requirement": "6.3.1",
+                    "coverage": "PARTIAL",
+                    "rationale": "Known-exploited packages prioritized (CISA KEV): this rule tests a material part of the criterion but not its full operational scope for PCI DSS 6.3.1."
+                }
+            ]
+        },
+        {
+            "id": "MB-R055",
+            "evidence_type": "automated",
+            "requirements": [
+                "6.3.1"
+            ],
+            "mappings": [
+                {
+                    "requirement": "6.3.1",
+                    "coverage": "PARTIAL",
+                    "rationale": "Transitive dependencies checked for CVEs: this rule tests a material part of the criterion but not its full operational scope for PCI DSS 6.3.1."
+                }
+            ]
+        },
+        {
+            "id": "MB-R056",
+            "evidence_type": "automated",
+            "requirements": [
+                "6.3.3"
+            ],
+            "mappings": [
+                {
+                    "requirement": "6.3.3",
+                    "coverage": "SUPPORTING",
+                    "rationale": "No constraints blocking security updates: this rule supplies supporting implementation evidence without establishing compliance for PCI DSS 6.3.3."
+                }
+            ]
+        },
+        {
+            "id": "MB-R057",
+            "evidence_type": "automated",
+            "requirements": [
+                "6.3.1"
+            ],
+            "mappings": [
+                {
+                    "requirement": "6.3.1",
+                    "coverage": "SUPPORTING",
+                    "rationale": "No yanked/withdrawn packages: this rule supplies supporting implementation evidence without establishing compliance for PCI DSS 6.3.1."
+                }
+            ]
+        },
+        {
+            "id": "MB-R058",
+            "evidence_type": "automated",
+            "requirements": [
+                "6.3.3"
+            ],
+            "mappings": [
+                {
+                    "requirement": "6.3.3",
+                    "coverage": "SUPPORTING",
+                    "rationale": "Marketplace extensions are current and maintained: this rule supplies supporting implementation evidence without establishing compliance for PCI DSS 6.3.3."
+                }
+            ]
+        },
+        {
+            "id": "MB-R059",
+            "evidence_type": "automated",
+            "requirements": [
+                "6.3.3"
+            ],
+            "mappings": [
+                {
+                    "requirement": "6.3.3",
+                    "coverage": "PARTIAL",
+                    "rationale": "Unresolved advisories are within remediation SLA: this rule tests a material part of the criterion but not its full operational scope for PCI DSS 6.3.3."
+                }
+            ]
+        },
+        {
+            "id": "MB-R060",
+            "evidence_type": "automated",
+            "requirements": [
+                "6.3.1"
+            ],
+            "mappings": [
+                {
+                    "requirement": "6.3.1",
+                    "coverage": "SUPPORTING",
+                    "rationale": "Marketplace extensions have vendor support evidence: this rule supplies supporting implementation evidence without establishing compliance for PCI DSS 6.3.1."
+                }
+            ]
+        },
+        {
+            "id": "MB-R065",
+            "evidence_type": "automated",
+            "requirements": [
+                "6.3.1"
+            ],
+            "mappings": [
+                {
+                    "requirement": "6.3.1",
+                    "coverage": "SUPPORTING",
+                    "rationale": "No wildcard constraints in composer.json: this rule supplies supporting implementation evidence without establishing compliance for PCI DSS 6.3.1."
+                }
+            ]
+        },
+        {
+            "id": "MB-R066",
+            "evidence_type": "automated",
+            "requirements": [
+                "6.3.1"
+            ],
+            "mappings": [
+                {
+                    "requirement": "6.3.1",
+                    "coverage": "SUPPORTING",
+                    "rationale": "No dev branches in composer.json: this rule supplies supporting implementation evidence without establishing compliance for PCI DSS 6.3.1."
+                }
+            ]
+        },
+        {
+            "id": "MB-R067",
+            "evidence_type": "automated",
+            "requirements": [
+                "6.3.1"
+            ],
+            "mappings": [
+                {
+                    "requirement": "6.3.1",
+                    "coverage": "SUPPORTING",
+                    "rationale": "prefer-stable=true in composer.json: this rule supplies supporting implementation evidence without establishing compliance for PCI DSS 6.3.1."
+                }
+            ]
+        },
+        {
+            "id": "MB-R068",
+            "evidence_type": "automated",
+            "requirements": [
+                "6.3.1"
+            ],
+            "mappings": [
+                {
+                    "requirement": "6.3.1",
+                    "coverage": "PARTIAL",
+                    "rationale": "Composer audit clean (no known vulns): this rule tests a material part of the criterion but not its full operational scope for PCI DSS 6.3.1."
+                }
+            ]
+        },
+        {
+            "id": "MB-R069",
+            "evidence_type": "automated",
+            "requirements": [
+                "6.3.3"
+            ],
+            "mappings": [
+                {
+                    "requirement": "6.3.3",
+                    "coverage": "PARTIAL",
+                    "rationale": "Direct dependencies up-to-date: this rule tests a material part of the criterion but not its full operational scope for PCI DSS 6.3.3."
+                }
+            ]
+        },
+        {
+            "id": "MB-R070",
+            "evidence_type": "automated",
+            "requirements": [
+                "6.5.2"
+            ],
+            "mappings": [
+                {
+                    "requirement": "6.5.2",
+                    "coverage": "SUPPORTING",
+                    "rationale": "composer.lock integrity with composer.json: this rule supplies supporting implementation evidence without establishing compliance for PCI DSS 6.5.2."
+                }
+            ]
+        },
+        {
+            "id": "MB-R071",
+            "evidence_type": "automated",
+            "requirements": [
+                "6.3.1"
+            ],
+            "mappings": [
+                {
+                    "requirement": "6.3.1",
+                    "coverage": "SUPPORTING",
+                    "rationale": "No abandoned libraries allowed: this rule supplies supporting implementation evidence without establishing compliance for PCI DSS 6.3.1."
+                }
+            ]
+        },
+        {
+            "id": "MB-R072",
+            "evidence_type": "automated",
+            "requirements": [
+                "3.6.1"
+            ],
+            "mappings": [
+                {
+                    "requirement": "3.6.1",
+                    "coverage": "SUPPORTING",
+                    "rationale": "No secrets in VCS (working tree or git history): this rule supplies supporting implementation evidence without establishing compliance for PCI DSS 3.6.1."
+                }
+            ]
+        },
+        {
+            "id": "MB-R073",
+            "evidence_type": "automated",
+            "requirements": [
+                "4.2.1"
+            ],
+            "mappings": [
+                {
+                    "requirement": "4.2.1",
+                    "coverage": "PARTIAL",
+                    "rationale": "HTTPS-only endpoints configured: this rule tests a material part of the criterion but not its full operational scope for PCI DSS 4.2.1."
+                }
+            ]
+        },
+        {
+            "id": "MB-R074",
+            "evidence_type": "automated",
+            "requirements": [
+                "2.2.1"
+            ],
+            "mappings": [
+                {
+                    "requirement": "2.2.1",
+                    "coverage": "SUPPORTING",
+                    "rationale": "Debug/verbose off for third-party integrations: this rule supplies supporting implementation evidence without establishing compliance for PCI DSS 2.2.1."
+                }
+            ]
+        },
+        {
+            "id": "MB-R075",
+            "evidence_type": "automated",
+            "requirements": [
+                "6.2.4"
+            ],
+            "mappings": [
+                {
+                    "requirement": "6.2.4",
+                    "coverage": "PARTIAL",
+                    "rationale": "Webhook signature validation present: this rule tests a material part of the criterion but not its full operational scope for PCI DSS 6.2.4."
+                }
+            ]
+        },
+        {
+            "id": "MB-R076",
+            "evidence_type": "automated",
+            "requirements": [
+                "1.3.2"
+            ],
+            "mappings": [
+                {
+                    "requirement": "1.3.2",
+                    "coverage": "PARTIAL",
+                    "rationale": "Outbound connections restricted by allow-list: this rule tests a material part of the criterion but not its full operational scope for PCI DSS 1.3.2."
+                }
+            ]
+        },
+        {
+            "id": "MB-R077",
+            "evidence_type": "automated",
+            "requirements": [
+                "3.2.1"
+            ],
+            "mappings": [
+                {
+                    "requirement": "3.2.1",
+                    "coverage": "SUPPORTING",
+                    "rationale": "PII minimization for third-party flows: this rule supplies supporting implementation evidence without establishing compliance for PCI DSS 3.2.1."
+                }
+            ]
+        },
+        {
+            "id": "MB-R078",
+            "evidence_type": "automated",
+            "requirements": [
+                "4.2.1"
+            ],
+            "mappings": [
+                {
+                    "requirement": "4.2.1",
+                    "coverage": "PARTIAL",
+                    "rationale": "Strong TLS ciphers on upstream gateways: this rule tests a material part of the criterion but not its full operational scope for PCI DSS 4.2.1."
+                }
+            ]
+        },
+        {
+            "id": "MB-R079",
+            "evidence_type": "automated",
+            "requirements": [
+                "8.6.2"
+            ],
+            "mappings": [
+                {
+                    "requirement": "8.6.2",
+                    "coverage": "PARTIAL",
+                    "rationale": "API keys stored in env.php (not in DB/plain code): this rule tests a material part of the criterion but not its full operational scope for PCI DSS 8.6.2."
+                }
+            ]
+        },
+        {
+            "id": "MB-R080",
+            "evidence_type": "automated",
+            "requirements": [
+                "3.3.1"
+            ],
+            "mappings": [
+                {
+                    "requirement": "3.3.1",
+                    "coverage": "SUPPORTING",
+                    "rationale": "Third-party logging sanitized (mask/redact): this rule supplies supporting implementation evidence without establishing compliance for PCI DSS 3.3.1."
+                }
+            ]
+        },
+        {
+            "id": "MB-R081",
+            "evidence_type": "automated",
+            "requirements": [
+                "7.2.1"
+            ],
+            "mappings": [
+                {
+                    "requirement": "7.2.1",
+                    "coverage": "PARTIAL",
+                    "rationale": "SaaS integrations scoped by ACL (least privilege/IP allowlist): this rule tests a material part of the criterion but not its full operational scope for PCI DSS 7.2.1."
+                }
+            ]
+        },
+        {
+            "id": "MB-R082",
+            "evidence_type": "automated",
+            "requirements": [
+                "3.2.1",
+                "3.3.1",
+                "3.3.1.1",
+                "3.3.1.2",
+                "3.3.1.3"
+            ],
+            "mappings": [
+                {
+                    "requirement": "3.2.1",
+                    "coverage": "PARTIAL",
+                    "rationale": "No PAN, CVV, or track data stored in database: this rule tests a material part of the criterion but not its full operational scope for PCI DSS 3.2.1."
+                },
+                {
+                    "requirement": "3.3.1",
+                    "coverage": "PARTIAL",
+                    "rationale": "No PAN, CVV, or track data stored in database: this rule tests a material part of the criterion but not its full operational scope for PCI DSS 3.3.1."
+                },
+                {
+                    "requirement": "3.3.1.1",
+                    "coverage": "PARTIAL",
+                    "rationale": "Assess all in-scope data sources and confirm full track data is not retained after authorization. Magebean supplies partial local technical evidence; the remaining PCI testing procedures require human assessment and, where applicable, external-system evidence."
+                },
+                {
+                    "requirement": "3.3.1.2",
+                    "coverage": "PARTIAL",
+                    "rationale": "Assess all in-scope data sources and confirm card verification codes are not retained after authorization. Magebean supplies partial local technical evidence; the remaining PCI testing procedures require human assessment and, where applicable, external-system evidence."
+                },
+                {
+                    "requirement": "3.3.1.3",
+                    "coverage": "SUPPORTING",
+                    "rationale": "Assess all in-scope data sources and confirm PINs and PIN blocks are not retained after authorization. Magebean supplies supporting local technical evidence; the remaining PCI testing procedures require human assessment and, where applicable, external-system evidence."
+                }
+            ]
+        },
+        {
+            "id": "MB-R083",
+            "evidence_type": "automated",
+            "requirements": [
+                "3.2.1",
+                "3.3.1",
+                "3.3.1.1",
+                "3.3.1.2"
+            ],
+            "mappings": [
+                {
+                    "requirement": "3.2.1",
+                    "coverage": "PARTIAL",
+                    "rationale": "No cardholder data in files, exports, or backups: this rule tests a material part of the criterion but not its full operational scope for PCI DSS 3.2.1."
+                },
+                {
+                    "requirement": "3.3.1",
+                    "coverage": "PARTIAL",
+                    "rationale": "No cardholder data in files, exports, or backups: this rule tests a material part of the criterion but not its full operational scope for PCI DSS 3.3.1."
+                },
+                {
+                    "requirement": "3.3.1.1",
+                    "coverage": "PARTIAL",
+                    "rationale": "Assess all in-scope data sources and confirm full track data is not retained after authorization. Magebean supplies partial local technical evidence; the remaining PCI testing procedures require human assessment and, where applicable, external-system evidence."
+                },
+                {
+                    "requirement": "3.3.1.2",
+                    "coverage": "PARTIAL",
+                    "rationale": "Assess all in-scope data sources and confirm card verification codes are not retained after authorization. Magebean supplies partial local technical evidence; the remaining PCI testing procedures require human assessment and, where applicable, external-system evidence."
+                }
+            ]
+        },
+        {
+            "id": "MB-R084",
+            "evidence_type": "automated",
+            "requirements": [
+                "3.2.1",
+                "3.3.1",
+                "3.3.1.1",
+                "3.3.1.2"
+            ],
+            "mappings": [
+                {
+                    "requirement": "3.2.1",
+                    "coverage": "PARTIAL",
+                    "rationale": "No cardholder data in application logs: this rule tests a material part of the criterion but not its full operational scope for PCI DSS 3.2.1."
+                },
+                {
+                    "requirement": "3.3.1",
+                    "coverage": "PARTIAL",
+                    "rationale": "No cardholder data in application logs: this rule tests a material part of the criterion but not its full operational scope for PCI DSS 3.3.1."
+                },
+                {
+                    "requirement": "3.3.1.1",
+                    "coverage": "PARTIAL",
+                    "rationale": "Assess all in-scope data sources and confirm full track data is not retained after authorization. Magebean supplies partial local technical evidence; the remaining PCI testing procedures require human assessment and, where applicable, external-system evidence."
+                },
+                {
+                    "requirement": "3.3.1.2",
+                    "coverage": "PARTIAL",
+                    "rationale": "Assess all in-scope data sources and confirm card verification codes are not retained after authorization. Magebean supplies partial local technical evidence; the remaining PCI testing procedures require human assessment and, where applicable, external-system evidence."
+                }
+            ]
+        },
+        {
+            "id": "MB-R085",
+            "evidence_type": "automated",
+            "requirements": [
+                "12.5.2"
+            ],
+            "mappings": [
+                {
+                    "requirement": "12.5.2",
+                    "coverage": "SUPPORTING",
+                    "rationale": "Payment method scope detection: this rule supplies supporting implementation evidence without establishing compliance for PCI DSS 12.5.2."
+                }
+            ]
+        },
+        {
+            "id": "MB-R086",
+            "evidence_type": "automated",
+            "requirements": [
+                "3.2.1",
+                "6.2.4"
+            ],
+            "mappings": [
+                {
+                    "requirement": "3.2.1",
+                    "coverage": "PARTIAL",
+                    "rationale": "No raw card collection in Magento checkout: this rule tests a material part of the criterion but not its full operational scope for PCI DSS 3.2.1."
+                },
+                {
+                    "requirement": "6.2.4",
+                    "coverage": "SUPPORTING",
+                    "rationale": "No raw card collection in Magento checkout: this rule supplies supporting implementation evidence without establishing compliance for PCI DSS 6.2.4."
+                }
+            ]
+        },
+        {
+            "id": "MB-R087",
+            "evidence_type": "hybrid",
+            "requirements": [
+                "6.4.3"
+            ],
+            "mappings": [
+                {
+                    "requirement": "6.4.3",
+                    "coverage": "PARTIAL",
+                    "rationale": "Payment page script inventory maintained: this rule tests a material part of the criterion but not its full operational scope for PCI DSS 6.4.3."
+                }
+            ]
+        },
+        {
+            "id": "MB-R088",
+            "evidence_type": "hybrid",
+            "requirements": [
+                "6.4.3",
+                "11.6.1"
+            ],
+            "mappings": [
+                {
+                    "requirement": "6.4.3",
+                    "coverage": "PARTIAL",
+                    "rationale": "Payment page script allowlist and integrity controls: this rule tests a material part of the criterion but not its full operational scope for PCI DSS 6.4.3."
+                },
+                {
+                    "requirement": "11.6.1",
+                    "coverage": "PARTIAL",
+                    "rationale": "Payment page script allowlist and integrity controls: this rule tests a material part of the criterion but not its full operational scope for PCI DSS 11.6.1."
+                }
+            ]
+        },
+        {
+            "id": "MB-R089",
+            "evidence_type": "automated",
+            "requirements": [
+                "6.4.3"
+            ],
+            "mappings": [
+                {
+                    "requirement": "6.4.3",
+                    "coverage": "SUPPORTING",
+                    "rationale": "Checkout Content Security Policy enforced: this rule supplies supporting implementation evidence without establishing compliance for PCI DSS 6.4.3."
+                }
+            ]
+        },
+        {
+            "id": "MB-R090",
+            "evidence_type": "hybrid",
+            "requirements": [
+                "11.6.1"
+            ],
+            "mappings": [
+                {
+                    "requirement": "11.6.1",
+                    "coverage": "PARTIAL",
+                    "rationale": "Payment page tamper monitoring readiness: this rule tests a material part of the criterion but not its full operational scope for PCI DSS 11.6.1."
+                }
+            ]
+        },
+        {
+            "id": "MB-R091",
+            "evidence_type": "automated",
+            "requirements": [
+                "6.2.4"
+            ],
+            "mappings": [
+                {
+                    "requirement": "6.2.4",
+                    "coverage": "SUPPORTING",
+                    "rationale": "No executable code in media or upload paths: this rule supplies supporting implementation evidence without establishing compliance for PCI DSS 6.2.4."
+                }
+            ]
+        },
+        {
+            "id": "MB-R092",
+            "evidence_type": "automated",
+            "requirements": [
+                "6.2.4"
+            ],
+            "mappings": [
+                {
+                    "requirement": "6.2.4",
+                    "coverage": "PARTIAL",
+                    "rationale": "Payment webhook endpoint authentication hardening: this rule tests a material part of the criterion but not its full operational scope for PCI DSS 6.2.4."
+                }
+            ]
+        },
+        {
+            "id": "MB-R093",
+            "evidence_type": "automated",
+            "requirements": [
+                "12.8.5",
+                "12.10.1"
+            ],
+            "mappings": [
+                {
+                    "requirement": "12.8.5",
+                    "coverage": "SUPPORTING",
+                    "rationale": "PCI manual evidence checklist present: this rule supplies supporting implementation evidence without establishing compliance for PCI DSS 12.8.5."
+                },
+                {
+                    "requirement": "12.10.1",
+                    "coverage": "SUPPORTING",
+                    "rationale": "PCI manual evidence checklist present: this rule supplies supporting implementation evidence without establishing compliance for PCI DSS 12.10.1."
+                }
+            ]
+        },
+        {
+            "id": "MB-R371",
+            "evidence_type": "hybrid",
+            "requirements": [
+                "2.2.2"
+            ],
+            "mappings": [
+                {
+                    "requirement": "2.2.2",
+                    "coverage": "PARTIAL",
+                    "rationale": "Structured vendor-default-account evidence can detect explicit unsafe dispositions, while complete inventory, classification, and observation still require mandatory human verification."
+                }
+            ]
+        },
+        {
+            "id": "MB-R100",
+            "evidence_type": "automated",
+            "requirements": [
+                "7.2.2"
+            ],
+            "mappings": [
+                {
+                    "requirement": "7.2.2",
+                    "coverage": "PARTIAL",
+                    "rationale": "Assess assigned privileges against job function, least privilege, and documented approval. Magebean supplies partial local technical evidence; the remaining PCI testing procedures require human assessment and, where applicable, external-system evidence."
+                }
+            ]
+        },
+        {
+            "id": "MB-R101",
+            "evidence_type": "automated",
+            "requirements": [
+                "7.2.2",
+                "7.3.1"
+            ],
+            "mappings": [
+                {
+                    "requirement": "7.2.2",
+                    "coverage": "PARTIAL",
+                    "rationale": "Assess assigned privileges against job function, least privilege, and documented approval. Magebean supplies partial local technical evidence; the remaining PCI testing procedures require human assessment and, where applicable, external-system evidence."
+                },
+                {
+                    "requirement": "7.3.1",
+                    "coverage": "SUPPORTING",
+                    "rationale": "Assess access-control system configuration and confirm access is restricted by need to know. Magebean supplies supporting local technical evidence; the remaining PCI testing procedures require human assessment and, where applicable, external-system evidence."
+                }
+            ]
+        }
+    ]
 }

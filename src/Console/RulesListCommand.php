@@ -19,13 +19,13 @@ List Magebean rules after applying a profile and optional control/severity filte
 
 PROFILES
   basic      Default; 21 basic production-readiness rules.
-  asvs-l1    32 rules by default; 60 with --include-manual-review.
-  asvs-l2    73 rules by default; manual and contextual rules are opt-in.
-  asvs-l3    80 rules by default; 259 with non-contextual mandatory human assessment.
+  asvs-l1    32 rules by default; 60 including 28 human-verification rules.
+  asvs-l2    73 rules by default; 183 including 110 human-verification rules.
+  asvs-l3    80 rules by default; 259 including 179 human-verification rules.
   owasp      77 application-security rules mapped to OWASP Top 10 2025.
-  pci        69 PCI DSS v4.0.1 payment-readiness rules.
-  hardening  89 deep production-hardening rules.
-  baseline   113 automated rules by default; 370 including manual review. Aliases: all, magebean.
+  pci        67 rules by default; 68 including 1 human-verification rule.
+  hardening  91 rules by default; 92 with human verification enabled.
+  baseline   113 automated rules by default; 371 including manual review. Aliases: all, magebean.
   FILE       Custom profile JSON path or a profile under .magebean/profiles.
 
 OPTIONS
@@ -90,6 +90,8 @@ HELP;
                 (string)($profile['title'] ?? '')
             ));
         }
+        $profileRulesTotal = count($pack['rules'] ?? []);
+        $profileManualRulesTotal = count(array_filter($pack['rules'] ?? [], static fn(array $rule): bool => strtolower((string)($rule['verification'] ?? 'automated')) === 'manual'));
         if (!$includeManualReview) {
             $pack['rules'] = array_values(array_filter(
                 $pack['rules'] ?? [],
@@ -112,6 +114,13 @@ HELP;
             $count++;
         }
         $out->writeln("<info>Total Rules Listed: {$count}</info>");
-        return Command::SUCCESS;
+        $out->writeln(sprintf('<info>Total Profile Rules: %d</info> (including %d human verification %s)', $profileRulesTotal, $profileManualRulesTotal, $profileManualRulesTotal === 1 ? 'rule' : 'rules'));
+        if (!$includeManualReview && $profileManualRulesTotal > 0) {
+            $out->writeln(sprintf('<comment>Human verification rules hidden: %d. Use --include-manual-review to show them.</comment>', $profileManualRulesTotal));
+        } elseif ($includeManualReview && $profileManualRulesTotal > 0) {
+            $out->writeln(sprintf('<info>Human verification rules included: %d.</info>', $profileManualRulesTotal));
+        } else {
+            $out->writeln('<comment>Human verification rules: none in this profile. Use --include-manual-review when the selected profile provides them.</comment>');
+        }        return Command::SUCCESS;
     }
 }
