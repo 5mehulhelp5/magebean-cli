@@ -1,6 +1,6 @@
 {
     "id": "asvs-l2",
-    "title": "Magebean ASVS-Aligned Level 2",
+    "title": "OWASP ASVS Level 2",
     "description": "OWASP ASVS 5.0 Level 2 cumulative mapping. Inherits Level 1 and provides conservative partial coverage; this is not an OWASP certification or compliance claim.",
     "inherits": [
         "asvs-l1"

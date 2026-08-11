@@ -1,6 +1,6 @@
 {
   "id": "asvs-l1",
-  "title": "Magebean ASVS-Aligned Level 1",
+  "title": "OWASP ASVS Level 1",
   "description": "OWASP ASVS 5.0 Level 1 mapping with partial automated coverage. This profile does not claim OWASP certification or full ASVS compliance.",
   "standard": {
     "id": "owasp-asvs",

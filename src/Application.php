@@ -7,7 +7,13 @@ namespace Magebean;
 use Symfony\Component\Console\Application as ConsoleApp;
 use Magebean\Console\{
     ScanCommand,
-    RulesListCommand
+    RulesListCommand,
+    AgentConnectCommand,
+    AgentStatusCommand,
+    AgentDoctorCommand,
+    AgentDisconnectCommand,
+    AgentTickCommand,
+    AgentCronCommand
 };
 
 final class Application extends ConsoleApp
@@ -21,6 +27,12 @@ final class Application extends ConsoleApp
         parent::__construct($name, self::VERSION);
         $this->add(new ScanCommand());
         $this->add(new RulesListCommand());
+        $this->add(new AgentConnectCommand());
+        $this->add(new AgentStatusCommand());
+        $this->add(new AgentCronCommand());
+        $this->add(new AgentDoctorCommand());
+        $this->add(new AgentDisconnectCommand());
+        $this->add(new AgentTickCommand());
     }
 
     public function getLongVersion(): string

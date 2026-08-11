@@ -1,6 +1,6 @@
 {
     "id": "asvs-l3",
-    "title": "Magebean ASVS-Aligned Level 3",
+    "title": "OWASP ASVS Level 3",
     "description": "OWASP ASVS 5.0 Level 3 cumulative mapping. Inherits Level 2 and requires substantial independent human assurance; Magebean CLI does not certify or attest compliance.",
     "inherits": [
         "asvs-l2"
