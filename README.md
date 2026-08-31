@@ -1,6 +1,8 @@
-# Magebean CLI — Magento 2 Security Audit
+# Magebean CLI — Magento 2 Security & Compliance Auditing
 
-Audit Magento 2 security, configuration, performance, and extensions from the command line. Generate actionable command-line results and integrate with CI.
+Magebean CLI audits Magento 2 installations and public storefronts against versioned security profiles. Run it locally, remotely, or in hybrid mode to turn filesystem, configuration, dependency, and HTTP evidence into actionable findings.
+
+Use the fast production-readiness profile for routine checks, map an assessment to OWASP ASVS, OWASP Top 10, or PCI DSS, or run the complete Magebean baseline. The CLI supports both automated checks and structured human verification, works in CI, and can connect a Magento host to Magebean Security Dashboard for managed assessments.
 
 > **Goal**: “Audit in minutes. Know exactly what to fix and why.”
 
@@ -8,22 +10,26 @@ Audit Magento 2 security, configuration, performance, and extensions from the co
 
 ## ✨ Features
 
-- **Security Audit**: file permissions, PHP hardening, admin exposure, SQLi/XSS/SSRF surfaces.
-- **Config Audit**: production mode, cache, Elasticsearch/OpenSearch, cron, logging/monitoring.
-- **Performance Signals**: cache effectiveness, DB indexes, static assets, storefront anti‑patterns.
-- **Extension Audit**: parse `composer.lock` to flag vulnerable/abandoned modules (CVE bundle optional).
-- **Local-first**: most checks run locally. API-backed checks send endpoint-specific package or Magento version metadata documented in [API data disclosure](docs/api-reference.md#data-disclosure).
-- **CI‑friendly**: non‑zero exit codes on findings for pipelines.
-- **Security Dashboard agent**: pair a host, validate prerequisites, and poll for assessment work with the `agent:*` commands.
+- **Target-aware scanning**: audit a Magento filesystem in LOCAL mode, a public storefront in REMOTE mode, or combine both evidence sources in HYBRID mode.
+- **Security profiles**: choose `basic`, ASVS Level 1–3, OWASP Top 10 2025, PCI DSS v4.0.1, `hardening`, the full `baseline`, or a custom profile.
+- **Automated and human checks**: run 113 automated rules by default in the full baseline and opt into 258 structured `HUMAN VERIFICATION REQUIRED` rules when an assessment needs human evidence.
+- **Actionable results**: distinguish PASS, confirmed findings, and INCONCLUSIVE checks; inspect evidence, remediation guidance, and re-run commands for individual rules.
+- **PCI DSS workflow**: compile applicability context, import structured external evidence, and generate an evidence-readiness JSON report.
+- **Project policy**: customize capabilities, controls, exclusions, rule overrides, project-specific rules, and additional rule packs with `.magebean.json` or YAML.
+- **CI-friendly behavior**: use deterministic exit codes based on confirmed finding severity while keeping inconclusive checks separate.
+- **Security Dashboard agent**: pair a Magento host, validate prerequisites, install bounded polling, and run managed assessment work with the `agent:*` commands.
+- **Local-first data handling**: filesystem checks stay on the host; API-backed checks disclose only endpoint-specific data described in [API data disclosure](docs/api-reference.md#data-disclosure).
 
 ---
 
 ## 📦 Requirements
 
 - PHP **8.1+**
-- Magento **2.4+** codebase to scan
-- (Optional) CVE Bundle for vulnerability lookups
-- (Agent only) PHP cURL extension and cron with `flock` for scheduled polling
+- For LOCAL or HYBRID scans: a readable Magento **2.4+** installation
+- For REMOTE scans: an accessible HTTP/HTTPS Magento storefront; source access is not required
+- For Security Dashboard agent commands: PHP cURL extension
+- Optional: PHP YAML extension when using `.magebean.yml` or `.yaml` policy files
+- Optional for scheduled agent polling: cron and `flock`
 
 ---
 
