@@ -9,7 +9,7 @@ final class TickRunner
     {
         if(!$this->repo->isConnected()) throw new \RuntimeException('Agent is not connected.');
         $lock=new AgentLock();if(!$lock->acquire($this->repo->paths->lock()))return 'skipped: another tick is running';
-        try{$c=$this->repo->config();$client=new ConsoleClient((string)$c['console_url'],(string)$this->repo->credentials()['token']);$this->retryPending($client);
+        try{$c=$this->repo->config();$client=new ConsoleClient((string)$c['console_url'], (string)$this->repo->credentials()['token'], verifyTls: empty($c['dev_mode']));$this->retryPending($client);
             $state=$this->repo->state();$heartbeat=['schema_version'=>'1.0','cli_version'=>\Magebean\Application::VERSION,'php_version'=>PHP_VERSION,'installation_fingerprint'=>hash('sha256',(string)$c['magento_path'].'|'.(gethostname()?:'unknown'))];
             if(time()-strtotime((string)($state['last_health_at']??'1970-01-01'))>=300){$heartbeat['runtime_health']=$this->health((string)$c['magento_path']);$state['last_health_at']=gmdate(DATE_ATOM);}
             $client->post('heartbeat',$heartbeat);$claim=$client->post('jobs/claim',['schema_version'=>'1.0']);$job=$claim['job']??null;
@@ -26,6 +26,22 @@ final class TickRunner
         }finally{$lock->release();}
     }
     private function retryPending(ConsoleClient $client):void{foreach(glob($this->repo->paths->pending().'/*.json')?:[] as $file){$p=(new AtomicJsonStore())->read($file);$client->postApi('assessments/'.$p['assessment_id'].'/scans',$p['payload'],['Idempotency-Key'=>(string)$p['payload']['scan_uuid'],'X-Magebean-Lease'=>(string)$p['lease_token']]);$client->post('jobs/'.$p['job_id'].'/complete',['schema_version'=>'1.0','scan_uuid'=>$p['payload']['scan_uuid']],['X-Magebean-Lease'=>(string)$p['lease_token']]);unlink($file);}}
-    private function health(string $p):array{return['magento_path_readable'=>is_readable($p),'bootstrap_present'=>is_file($p.'/app/bootstrap.php'),'cli_present'=>is_file($p.'/bin/magento'),'disk_free_bytes'=>(int)(@disk_free_space($p)?:0),'php_version'=>PHP_VERSION];}
+    private function health(string $path): array
+    {
+        $health = [
+            'magento_path_readable' => is_readable($path),
+            'bootstrap_present' => is_file($path.'/app/bootstrap.php'),
+            'cli_present' => is_file($path.'/bin/magento'),
+            'disk_free_bytes' => (int) (@disk_free_space($path) ?: 0),
+            'php_version' => PHP_VERSION,
+        ];
+        $health['status'] = $health['magento_path_readable']
+            && $health['bootstrap_present']
+            && $health['cli_present']
+            ? 'healthy'
+            : 'warning';
+
+        return $health;
+    }
     private function uuid():string{$b=random_bytes(16);$b[6]=chr((ord($b[6])&15)|64);$b[8]=chr((ord($b[8])&63)|128);return vsprintf('%s%s-%s-%s-%s-%s%s%s',str_split(bin2hex($b),4));}
 }

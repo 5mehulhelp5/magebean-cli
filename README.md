@@ -14,6 +14,7 @@ Audit Magento 2 security, configuration, performance, and extensions from the co
 - **Extension Audit**: parse `composer.lock` to flag vulnerable/abandoned modules (CVE bundle optional).
 - **Local-first**: most checks run locally. API-backed checks send endpoint-specific package or Magento version metadata documented in [API data disclosure](docs/api-reference.md#data-disclosure).
 - **CI‑friendly**: non‑zero exit codes on findings for pipelines.
+- **Security Dashboard agent**: pair a host, validate prerequisites, and poll for assessment work with the `agent:*` commands.
 
 ---
 
@@ -22,6 +23,7 @@ Audit Magento 2 security, configuration, performance, and extensions from the co
 - PHP **8.1+**
 - Magento **2.4+** codebase to scan
 - (Optional) CVE Bundle for vulnerability lookups
+- (Agent only) PHP cURL extension and cron with `flock` for scheduled polling
 
 ---
 
@@ -54,6 +56,32 @@ The current rule library contains **19 controls and 371 rules**: **113 automated
 `scan` and `rules:list` use the 21-rule `basic` profile by default. Select `asvs-l1`, `asvs-l2`, `asvs-l3`, `owasp`, `pci`, or `hardening` with `--profile`, or use `--profile=baseline` for the full catalog. The `asvs-l1`, `asvs-l2`, and `asvs-l3` profiles exclude manual-review rules by default; add `--include-manual-review` when human evidence collection is desired. The PCI profile runs 67 rules by default and 68 with human verification enabled; use `--pci-context`, `--pci-evidence`, and `--pci-report` for applicability compilation and evidence-readiness reporting.
 
 See [CLI Reference](docs/cli-reference.md) for all commands, options, profiles, target modes, and examples.
+
+---
+
+## Commands
+
+| Command | Purpose |
+|---|---|
+| `scan` | Audit a local Magento installation, a public storefront, or both. |
+| `rules:list` | List rules after applying profile, control, severity, capability, and manual-review filters. |
+| `agent:connect` | Pair this host with Magebean Security Dashboard. |
+| `agent:status` | Show local and remote agent status. |
+| `agent:doctor` | Validate PHP, Magento, agent storage, credentials, and disk prerequisites. |
+| `agent:tick` | Run one bounded Dashboard polling cycle. |
+| `agent:cron` | Print or install the current-user polling cron entry. |
+| `agent:disconnect` | Disconnect the host and remove its local token. |
+| `completion` | Generate shell completion. |
+| `list` / `help` | Discover commands and command-specific help. |
+
+Use command help as the authoritative option summary for the installed build:
+
+```bash
+php magebean.phar list
+php magebean.phar scan --help
+php magebean.phar rules:list --help
+php magebean.phar agent:connect --help
+```
 
 ---
 
@@ -113,7 +141,7 @@ Inconclusive checks do not change the exit code because they are not confirmed f
 
 ---
 
-## ⚙️ Command Options
+## ⚙️ Scan Options
 
 Target mode is selected from the explicitly provided options:
 
@@ -124,14 +152,47 @@ Target mode is selected from the explicitly provided options:
 
 | Option | Description | Default |
 |---|---|---|
+| `--profile` | Built-in profile or custom JSON profile path | `basic` |
+| `--standard` | Legacy report selector: `magebean`, `owasp`, `pci`, or `cwe`; prefer `--profile` | `magebean` |
 | `--path` | Magento root to audit | auto-detect in LOCAL mode |
 | `--url` | Absolute HTTP/HTTPS store base URL | none |
-| `--cve-data` | Path to CVE bundle (optional) | none |
 | `--rules` | Run only selected rule IDs | all |
+| `--controls` | Restrict the loaded pack to selected control IDs | none |
 | `--exclude-rules` | Exclude selected rule IDs | none |
 | `--config` | Project policy file (`.magebean.json` auto-detected in Magento root) | auto |
 | `--include-manual-review` | Include human-review rules | off |
 | `--capabilities` | Enable contextual profile rules, such as `graphql` or `oauth_oidc` | none |
+| `--pci-context` | PCI DSS applicability context JSON | none |
+| `--pci-evidence` | PCI DSS structured external evidence JSON | none |
+| `--pci-report` | Write a PCI evidence-readiness report as JSON | none |
+
+Selection order is: target pack → project policy → (`--rules` or profile) → `--exclude-rules`. An explicit `--rules` list bypasses profile selection and chooses IDs from the available catalog.
+
+### Profiles
+
+| Profile | Rules selected by default |
+|---|---:|
+| `basic` | 21 |
+| `asvs-l1` | 32 (60 with manual review) |
+| `asvs-l2` | 73 (183 with manual review) |
+| `asvs-l3` | 80 (259 with manual review) |
+| `owasp` | 77 |
+| `pci` | 67 (68 with manual review) |
+| `hardening` | 91 (92 with manual review) |
+| `baseline` | 113 automated (371 with manual review) |
+
+`all` and `magebean` are aliases for `baseline`. Custom profile files can be passed to `--profile`, including profiles stored under `.magebean/profiles`.
+
+### List and filter rules
+
+```bash
+php magebean.phar rules:list
+php magebean.phar rules:list --profile=asvs-l2 --include-manual-review
+php magebean.phar rules:list --profile=baseline --control=MB-C03
+php magebean.phar rules:list --profile=owasp --severity=critical
+```
+
+`rules:list` supports `--profile`, `--include-manual-review`, `--capabilities`, `--control`, and `--severity`. Its filters are intersected.
 
 ### Project-specific policy
 
@@ -226,6 +287,36 @@ YAML configs are accepted when the PHP `yaml` extension is installed; JSON is th
 
 ---
 
+## Security Dashboard Agent
+
+Pair the host using a one-time code from Magebean Security Dashboard, check it, and install the polling schedule:
+
+```bash
+php magebean.phar agent:connect \
+  --code=MB-N77V-XKNF \
+  --magento-path=/var/www/magento
+
+php magebean.phar agent:doctor
+php magebean.phar agent:status
+php magebean.phar agent:cron --install
+```
+
+The agent stores its configuration, private token, state, queue, cache, and logs in `$MAGEBEAN_HOME`, or `~/.magebean` when the variable is unset. The token is stored locally and is never printed.
+
+Run one polling cycle manually with `agent:tick`. To print the recommended cron line without modifying the crontab, run `agent:cron` without `--install`. Cron installation requires interactive confirmation and avoids duplicate agent entries.
+
+```bash
+php magebean.phar agent:tick
+php magebean.phar agent:cron
+php magebean.phar agent:disconnect
+```
+
+`agent:status`, `agent:doctor`, `agent:tick`, `agent:cron`, and `agent:disconnect` accept `--config-dir`. For the initial connection, use `MAGEBEAN_HOME` to select a non-default data directory. `agent:connect --dev` targets the local development Dashboard API and disables TLS verification; do not use it in production.
+
+See [Security Dashboard agent](docs/cli-reference.md#security-dashboard-agent) for storage layout, command behavior, and troubleshooting.
+
+---
+
 ## 🧩 Development
 
 ```bash
@@ -237,6 +328,9 @@ php bin/magebean scan --url=https://magento-store.com
 
 # inspect available rules
 php bin/magebean rules:list
+
+# inspect every registered command
+php bin/magebean list
 ```
 
 - Findings Overview counts **failures only**
