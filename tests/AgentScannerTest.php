@@ -13,4 +13,40 @@ scannerAssert($result['manifest_hash']==='sha256:test','manifest hash missing');
 $rejected=false;
 try{$scanner->run(__DIR__,['schema_version'=>'2.0','rules'=>[['assessment_item_id'=>'item-1','rule_key'=>'MB-R001']]]);}catch(RuntimeException){$rejected=true;}
 scannerAssert($rejected,'future manifest schema must be rejected');
+$root = sys_get_temp_dir() . '/magebean-agent-title-' . bin2hex(random_bytes(8));
+mkdir($root . '/pub/media', 0700, true);
+try {
+    // Harmless fixture: inspected as text, never executed.
+    file_put_contents($root . '/pub/media/unexpected.php', '<?php echo 1;');
+    $mediaManifest = ['schema_version' => '1.0', 'manifest_hash' => 'sha256:media', 'rules' => [
+        ['assessment_item_id' => 'media-item', 'rule_key' => 'MB-R091'],
+    ]];
+    $failed = $scanner->run($root, $mediaManifest)['results'][0];
+    scannerAssert($failed['status'] === 'fail', 'executable media fixture must fail');
+    scannerAssert($failed['title'] === 'Executable code or script-enabling handlers detected in media/upload paths', 'upload must use issue summary, not rule title: ' . $failed['title']);
+    scannerAssert($failed['assessment_item_id'] === 'media-item', 'title must preserve item mapping');
+    scannerAssert(str_contains($failed['message'], "\n"), 'full message must retain evidence lines');
+    scannerAssert($failed['detail'][0]['status'] === 'FAIL', 'failed-check detail must remain intact');
+    scannerAssert(!str_contains(json_encode($failed), $root), 'payload must not expose installation root');
+    unlink($root . '/pub/media/unexpected.php');
+    $passed = $scanner->run($root, $mediaManifest)['results'][0];
+    scannerAssert($passed['status'] === 'pass', 'empty media directory must pass');
+    scannerAssert($passed['title'] === 'No executable code or script-enabling handlers detected in media or upload paths.', 'passing result must retain its actual outcome');
+} finally {
+    if (is_file($root . '/pub/media/unexpected.php')) unlink($root . '/pub/media/unexpected.php');
+    rmdir($root . '/pub/media');
+    rmdir($root . '/pub');
+    rmdir($root);
+}
+
+$titleMethod = new ReflectionMethod(AgentScanner::class, 'resultTitle');
+$titleMethod->setAccessible(true);
+$titleFor = fn(array $result): string => $titleMethod->invoke($scanner, $result);
+scannerAssert($titleFor(['status' => 'fail', 'message' => '', 'detail' => [
+    ['status' => 'PASS', 'message' => 'Safe'], ['status' => 'FAIL', 'message' => "Actual failure:\r\nEvidence"],
+]]) === 'Actual failure', 'empty summary must use failed check, not passing check');
+scannerAssert($titleFor(['status' => 'fail', 'message' => ' ', 'title' => 'No executable code']) === 'Security check failed', 'missing outcome must not fall back to rule title');
+scannerAssert($titleFor(['status' => 'error', 'message' => '']) === 'Security check could not be completed', 'unknown result must not claim a failure');
+scannerAssert($titleFor(['status' => 'fail', 'message' => str_repeat('a', 255)]) === str_repeat('a', 255), '255-character title should remain intact');
+scannerAssert($titleFor(['status' => 'fail', 'message' => str_repeat('é', 256)]) === str_repeat('é', 252) . '...', 'long title must truncate safely without corrupting UTF-8');
 echo "AgentScannerTest: PASS\n";
