@@ -36,6 +36,11 @@ final class AgentScanner
             }
         }
         $title = rtrim(trim((string)(preg_split('/\R/u', $message, 2)[0] ?? '')), ': ');
+        // Rule messages can put remediation on the same line as the issue.
+        // Keep the first sentence; dots within paths and versions are not boundaries.
+        if (preg_match('/^(.+?[.!?])\s+(?=\p{Lu})/u', $title, $sentence) === 1) {
+            $title = $sentence[1];
+        }
         if ($title === '') {
             $title = match ($result['status']) {
                 'fail' => 'Security check failed',

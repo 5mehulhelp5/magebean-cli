@@ -28,6 +28,15 @@ try {
     scannerAssert(str_contains($failed['message'], "\n"), 'full message must retain evidence lines');
     scannerAssert($failed['detail'][0]['status'] === 'FAIL', 'failed-check detail must remain intact');
     scannerAssert(!str_contains(json_encode($failed), $root), 'payload must not expose installation root');
+    chmod($root . '/pub/media/unexpected.php', 0777);
+    $permissions = $scanner->run($root, [
+        'schema_version' => '1.0', 'manifest_hash' => 'sha256:permissions',
+        'rules' => [['assessment_item_id' => 'permissions-item', 'rule_key' => 'MB-R001']],
+    ])['results'][0];
+    scannerAssert($permissions['status'] === 'fail', 'world-writable fixture must fail');
+    scannerAssert($permissions['title'] === 'World-writable files or directories detected.', 'title must exclude remediation on the same line');
+    scannerAssert($permissions['message'] === 'World-writable files or directories detected. Tighten permissions and remove public write access.', 'full result message must retain remediation');
+    scannerAssert($permissions['detail'] !== [] && $permissions['evidence'] !== [], 'detailed evidence must remain available');
     unlink($root . '/pub/media/unexpected.php');
     $passed = $scanner->run($root, $mediaManifest)['results'][0];
     scannerAssert($passed['status'] === 'pass', 'empty media directory must pass');
@@ -42,6 +51,16 @@ try {
 $titleMethod = new ReflectionMethod(AgentScanner::class, 'resultTitle');
 $titleMethod->setAccessible(true);
 $titleFor = fn(array $result): string => $titleMethod->invoke($scanner, $result);
+foreach ([
+    'app/etc/env.php is too permissive. Restrict it to 0640 or tighter.' => 'app/etc/env.php is too permissive.',
+    'TLS 1.0 and 1.1 are enabled. Restrict to TLS 1.2+.' => 'TLS 1.0 and 1.1 are enabled.',
+    'Sensitive artifacts found under pub/. Remove them.' => 'Sensitive artifacts found under pub/.',
+    'Unsafe settings detected! Disable them.' => 'Unsafe settings detected!',
+    'Certificate for example.com is invalid. Replace it.' => 'Certificate for example.com is invalid.',
+    'app/etc/env.php is writable' => 'app/etc/env.php is writable',
+] as $message => $expected) {
+    scannerAssert($titleFor(['status' => 'fail', 'message' => $message]) === $expected, 'title must keep only the issue sentence: ' . $message);
+}
 scannerAssert($titleFor(['status' => 'fail', 'message' => '', 'detail' => [
     ['status' => 'PASS', 'message' => 'Safe'], ['status' => 'FAIL', 'message' => "Actual failure:\r\nEvidence"],
 ]]) === 'Actual failure', 'empty summary must use failed check, not passing check');
