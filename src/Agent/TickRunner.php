@@ -2,6 +2,7 @@
 declare(strict_types=1);
 namespace Magebean\Agent;
 use Magebean\Agent\Http\ConsoleClient;
+use Magebean\Update\SelfUpdater;
 final class TickRunner
 {
     public function __construct(private readonly AgentRepository $repo, private readonly AgentScanner $scanner=new AgentScanner()){}
@@ -10,9 +11,11 @@ final class TickRunner
         if(!$this->repo->isConnected()) throw new \RuntimeException('Agent is not connected.');
         $lock=new AgentLock();if(!$lock->acquire($this->repo->paths->lock()))return 'skipped: another tick is running';
         try{$c=$this->repo->config();$client=new ConsoleClient((string)$c['console_url'], (string)$this->repo->credentials()['token'], verifyTls: empty($c['dev_mode']));$this->retryPending($client);
-            $state=$this->repo->state();$heartbeat=['schema_version'=>'1.0','cli_version'=>\Magebean\Application::VERSION,'php_version'=>PHP_VERSION,'installation_fingerprint'=>hash('sha256',(string)$c['magento_path'].'|'.(gethostname()?:'unknown'))];
+            $state=$this->repo->state();$heartbeat=['schema_version'=>'1.0','cli_version'=>\Magebean\Application::VERSION,'current_version'=>\Magebean\Application::VERSION,'php_version'=>PHP_VERSION,'installation_fingerprint'=>hash('sha256',(string)$c['magento_path'].'|'.(gethostname()?:'unknown'))];
             if(time()-strtotime((string)($state['last_health_at']??'1970-01-01'))>=300){$heartbeat['runtime_health']=$this->health((string)$c['magento_path']);$state['last_health_at']=gmdate(DATE_ATOM);}
-            $client->post('heartbeat',$heartbeat);$claim=$client->post('jobs/claim',['schema_version'=>'1.0']);$job=$claim['job']??null;
+            $heartbeatResponse=$client->post('heartbeat',$heartbeat);
+            if(is_array($heartbeatResponse['update']??null))return $this->update($client,$heartbeatResponse['update']);
+            $claim=$client->post('jobs/claim',['schema_version'=>'1.0']);$job=$claim['job']??null;
             if(!is_array($job)||!isset($job['id'])){$state['last_tick_at']=gmdate(DATE_ATOM);$this->repo->saveState($state);return 'idle';}
             $id=(string)$job['id'];$lease=(string)($job['lease_token']??$claim['lease_token']??'');$headers=['X-Magebean-Lease'=>$lease];
             try{$client->post("jobs/{$id}/start",['schema_version'=>'1.0'],$headers);$manifest=$client->get("jobs/{$id}/manifest",$headers);$lastLease=time();$startedAt=gmdate(DATE_ATOM);
@@ -24,6 +27,13 @@ final class TickRunner
                 $state['last_job_id']=$id;$state['last_scan_uuid']=$scanUuid;$state['last_tick_at']=gmdate(DATE_ATOM);$this->repo->saveState($state);return 'completed job '.$id;
             }catch(\Throwable $e){try{$client->post("jobs/{$id}/fail",['schema_version'=>1,'message'=>substr($e->getMessage(),0,500)],$headers);}catch(\Throwable){}throw $e;}
         }finally{$lock->release();}
+    }
+    /** @param array<string,mixed> $release */
+    private function update(ConsoleClient $client,array $release):string
+    {
+        $current=\Phar::running(false)?:realpath((string)($_SERVER['argv'][0]??''));
+        try{if(!$current||!str_ends_with($current,'.phar'))throw new \RuntimeException('Self-update is only available when running magebean.phar.');(new SelfUpdater())->update($release,$current);$client->post('update-status',['schema_version'=>'1.0','current_version'=>(string)$release['version'],'status'=>'updated','error'=>null]);return 'updated to '.(string)$release['version'].'; restart required';}
+        catch(\Throwable $exception){try{$client->post('update-status',['schema_version'=>'1.0','current_version'=>\Magebean\Application::VERSION,'status'=>'failed','error'=>substr($exception->getMessage(),0,2000)]);}catch(\Throwable){}throw $exception;}
     }
     private function retryPending(ConsoleClient $client):void{foreach(glob($this->repo->paths->pending().'/*.json')?:[] as $file){$p=(new AtomicJsonStore())->read($file);$client->postApi('assessments/'.$p['assessment_id'].'/scans',$p['payload'],['Idempotency-Key'=>(string)$p['payload']['scan_uuid'],'X-Magebean-Lease'=>(string)$p['lease_token']]);$client->post('jobs/'.$p['job_id'].'/complete',['schema_version'=>'1.0','scan_uuid'=>$p['payload']['scan_uuid']],['X-Magebean-Lease'=>(string)$p['lease_token']]);unlink($file);}}
     private function health(string $path): array
