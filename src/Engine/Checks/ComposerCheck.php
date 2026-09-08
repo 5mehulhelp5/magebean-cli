@@ -335,16 +335,7 @@ final class ComposerCheck
 
         if (($decoded['status'] ?? null) === 'unsupported_branch') {
             $evidence['supported_branches'] = $decoded['supported_branches'] ?? [];
-            $reason = (string)($decoded['reason'] ?? 'lifecycle_not_covered');
-            $supportEnd = (string)($decoded['lifecycle']['security_support_end'] ?? '');
-            $recommended = (string)($decoded['recommended_latest_branch'] ?? '');
-            $message = 'Magento branch ' . ($decoded['branch'] ?? $version)
-                . ($reason === 'security_support_ended'
-                    ? ' no longer receives Adobe security fixes'
-                    : ' is not covered by the current Adobe lifecycle dataset');
-            if ($supportEnd !== '') $message .= ' (security support ended ' . $supportEnd . ')';
-            if ($recommended !== '') $message .= '; upgrade to a supported release line such as ' . $recommended;
-            return [false, $message, $evidence];
+            return [false, $this->unsupportedBranchMessage($decoded, $version), $evidence];
         }
         if (($decoded['status'] ?? null) === 'current') {
             $latest = (string)($decoded['latest_security_version'] ?? $version);
@@ -398,6 +389,36 @@ final class ComposerCheck
         }
 
         return [false, $message, $evidence];
+    }
+
+    private function unsupportedBranchMessage(array $response, string $installedVersion): string
+    {
+        $branch = trim((string)($response['branch'] ?? $installedVersion));
+        $reason = (string)($response['reason'] ?? 'lifecycle_not_covered');
+        $supportEnd = trim((string)($response['lifecycle']['security_support_end'] ?? ''));
+        $recommended = trim((string)($response['recommended_latest_branch'] ?? ''));
+        $supportedBranches = array_values(array_filter(array_map(
+            static function (mixed $candidate): string {
+                if (is_scalar($candidate)) return trim((string)$candidate);
+                if (!is_array($candidate)) return '';
+                return trim((string)($candidate['branch'] ?? $candidate['name'] ?? $candidate['version'] ?? ''));
+            },
+            is_array($response['supported_branches'] ?? null) ? $response['supported_branches'] : []
+        )));
+        $recommendationIsDifferent = $recommended !== '' && strcasecmp($recommended, $branch) !== 0;
+        $recommendationIsSupported = $supportedBranches === []
+            || in_array(strtolower($recommended), array_map('strtolower', $supportedBranches), true);
+
+        $message = 'Magento branch ' . $branch
+            . ($reason === 'security_support_ended'
+                ? ' no longer receives Adobe security fixes'
+                : ' is not covered by the current Adobe lifecycle dataset');
+        if ($supportEnd !== '') $message .= ' (security support ended ' . $supportEnd . ')';
+        if ($recommendationIsDifferent && $recommendationIsSupported) {
+            return $message . '; upgrade to a supported release line such as ' . $recommended;
+        }
+
+        return $message . '. No supported upgrade recommendation is currently available.';
     }
 
     /** @deprecated Use adobeSecurityPatchesApi(); retained for custom rule compatibility. */
@@ -563,6 +584,8 @@ final class ComposerCheck
         $auditor = new \Magebean\Engine\Cve\CveAuditor($this->ctx);
         $sus = [];
         $unassessed = [];
+        $remediated = [];
+        $hotfixVerifier = new \Magebean\Engine\Cve\HotfixVerifier();
         $usableAdvisories = 0;
 
         foreach ($vulns as $vuln) {
@@ -636,6 +659,24 @@ final class ComposerCheck
                 }
 
                 $findingKey = strtolower((string)$pkg) . '@' . $current . '|' . $id;
+                $hotfix = null;
+                $hotfixRules = $aff['database_specific']['magebean_hotfixes'] ?? [];
+                if (is_array($hotfixRules) && $hotfixRules !== []) {
+                    // Only rules explicitly bound to this advisory may suppress this package finding.
+                    $ids = array_map('strtoupper', array_merge([$id],
+                        array_filter((array)($vuln['aliases'] ?? []), 'is_string')));
+                    $hotfixRules = array_values(array_filter($hotfixRules, static fn($rule): bool =>
+                        is_array($rule) && array_intersect($ids, array_map('strtoupper',
+                            array_filter((array)($rule['advisories'] ?? []), 'is_string'))) !== []));
+                    $hotfix = $hotfixVerifier->verify($this->ctx->path, (string)$pkg, $current, $hotfixRules);
+                    if ($hotfix['status'] === 'verified_fixed') {
+                        $remediated[$findingKey] = [
+                            'package' => (string)$pkg, 'version' => $current,
+                            'advisory' => $id, 'hotfix_verification' => $hotfix,
+                        ];
+                        continue;
+                    }
+                }
                 $sus[$findingKey] = [
                     'package' => (string)$pkg,
                     'version' => $current,
@@ -648,6 +689,7 @@ final class ComposerCheck
                     'cvss_vector' => $cvssVector,
                     'fixed' => $fixed,
                     'known_exploited' => $knownExploited,
+                    'hotfix_verification' => $hotfix,
                 ];
             }
         }
@@ -655,6 +697,7 @@ final class ComposerCheck
         $evidence = $sourceEvidence + [
             'advisories' => count($vulns),
             'usable_advisories' => $usableAdvisories,
+            'remediated_findings' => array_values($remediated),
             'unassessed_affected_packages' => array_values($unassessed),
         ];
         if ($vulns !== [] && $usableAdvisories === 0) {
@@ -688,6 +731,9 @@ final class ComposerCheck
                     $message .= ')';
                     if (is_string($item['fixed'] ?? null) && $item['fixed'] !== '') {
                         $message .= ', fix >= ' . $item['fixed'];
+                    }
+                    if (is_array($item['hotfix_verification'] ?? null)) {
+                        $message .= '; hotfix not verified (version match remains)';
                     }
                     return $message;
                 },
@@ -726,7 +772,7 @@ final class ComposerCheck
 
         return [
             true,
-            'No vulnerable packages according to OSV advisories (' . count($installedVers) . ' pkgs, ' . count($vulns) . ' advisories)',
+            'No unresolved vulnerable packages according to OSV advisories (' . count($installedVers) . ' pkgs, ' . count($vulns) . ' advisories; ' . count($remediated) . ' package/advisory matches verified fixed by hotfix)',
             $evidence,
         ];
     }
