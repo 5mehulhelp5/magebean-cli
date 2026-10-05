@@ -23,7 +23,22 @@ final class AtomicJsonStore
         $temp = tempnam($dir, '.magebean-');
         if ($temp === false) throw new \RuntimeException("Cannot create temporary file in {$dir}");
         try {
-            if (file_put_contents($temp, $json, LOCK_EX) === false) throw new \RuntimeException("Cannot write {$temp}");
+            $handle = fopen($temp, 'wb');
+            if ($handle === false) throw new \RuntimeException("Cannot write {$temp}");
+            try {
+                if (!flock($handle, LOCK_EX)) throw new \RuntimeException("Cannot lock {$temp}");
+                $offset = 0;
+                $length = strlen($json);
+                while ($offset < $length) {
+                    $written = fwrite($handle, substr($json, $offset));
+                    if ($written === false || $written === 0) throw new \RuntimeException("Cannot write {$temp}");
+                    $offset += $written;
+                }
+                if (!fflush($handle)) throw new \RuntimeException("Cannot flush {$temp}");
+                if (function_exists('fsync') && !fsync($handle)) throw new \RuntimeException("Cannot sync {$temp}");
+            } finally {
+                fclose($handle);
+            }
             @chmod($temp, 0600);
             if (!rename($temp, $path)) throw new \RuntimeException("Cannot replace {$path}");
             @chmod($path, 0600);

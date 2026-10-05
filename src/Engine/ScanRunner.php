@@ -10,39 +10,56 @@ final class ScanRunner
 {
     private Context $ctx;
     private array $pack;
+    private $checkpoint;
     private CheckRegistry $registry;
     /** @var null|callable(array): void */
     private $progressCallback;
 
-    public function __construct(Context $ctx, array $pack, ?callable $progressCallback = null, ?CheckRegistry $registry = null)
+    public function __construct(Context|ScanContext $ctx, array $pack, ?callable $progressCallback = null, ?CheckRegistry $registry = null, private readonly ?ScanDeadline $deadline = null, ?callable $checkpoint = null)
     {
-        $this->ctx = $ctx;
+        $this->ctx = $ctx instanceof ScanContext ? $ctx->toLegacy() : $ctx;
         $this->pack = $pack;
-        $this->registry = $registry ?? CheckRegistry::fromContext($ctx);
+        $this->checkpoint = $checkpoint;
+        $this->registry = $registry ?? CheckRegistry::fromContext($this->ctx);
         $this->progressCallback = $progressCallback;
     }
 
     private function evalCheckWithEvidence(
         string $name,
         array $args
-    ): array {
-        $res = $this->registry->run($name, $args);
-        if (!is_array($res)) {
-            $res = [false, 'Unknown check: ' . $name];
+    ): CheckResult {
+        if ($this->deadline?->expired()) {
+            return CheckResult::of(CheckOutcome::Unknown, '[UNKNOWN] Scan deadline exceeded; check was not executed.', [], 'SCAN_DEADLINE_EXCEEDED', $name);
         }
-        $ok  = $res[0] ?? null;
-        $msg = (string)($res[1] ?? '');
-        $ev  = $res[2] ?? [];
-        if (!is_array($ev)) {
-            $ev = $ev !== null ? [$ev] : [];
+        try {
+            if ($this->checkpoint !== null) ($this->checkpoint)();
+            if ($this->deadline?->expired()) throw new ScanDeadlineExceeded();
+            return $this->registry->runResult($name, $args);
+        } catch (ScanDeadlineExceeded) {
+            return CheckResult::of(CheckOutcome::Unknown, '[UNKNOWN] Scan deadline exceeded; check could not be completed.', [], 'SCAN_DEADLINE_EXCEEDED', $name);
         }
-        return [$ok, $msg, $ev];
     }
 
 
     public function run(): array
     {
+        return $this->runReport()->toLegacy();
+    }
+
+    public function runReport(): ScanReport
+    {
+        $this->registry->beginCollection($this->deadline, $this->checkpoint);
+        try {
+            return $this->executeReport();
+        } finally {
+            $this->registry->endCollection();
+        }
+    }
+
+    private function executeReport(): ScanReport
+    {
         $findings = [];
+        $checkResults = [];
         $passed = 0;
         $failed = 0;
         $plannedRules = is_array($this->pack['rules'] ?? null) ? count($this->pack['rules']) : 0;
@@ -62,21 +79,23 @@ final class ScanRunner
             // Với 'any' khởi tạo FAIL cho tới khi có check PASS
             $ok = ($op === 'any') ? false : true;
 
+            $ruleResults = [];
             $details  = [];
             $evidence = [];
             $hasTrue = false;
             $hasFalse = false;
             $hasUnknown = false;
             $hasManualReview = false;
+            $hasDeadlineExceeded = false;
 
             foreach ($rule['checks'] as $chk) {
                 $name = $chk['name'];
                 $args = $chk['args'] ?? [];
 
-                [$cok, $msg, $ev] = $this->evalCheckWithEvidence(
-                    $name,
-                    $args
-                );
+                $checkResult = $this->evalCheckWithEvidence($name, $args);
+                $hasDeadlineExceeded = $hasDeadlineExceeded || $checkResult->reasonCode === 'SCAN_DEADLINE_EXCEEDED';
+                $ruleResults[] = $checkResult;
+                [$cok, $msg, $ev] = $checkResult->toLegacy();
 
                 $details[] = [$name, $msg, $cok];
                 if (!empty($ev)) {
@@ -96,7 +115,7 @@ final class ScanRunner
                     $hasFalse = true;
                 } else {
                     $hasUnknown = true;
-                    if (str_starts_with($msg, '[MANUAL_REVIEW]')) {
+                    if ($checkResult->outcome === CheckOutcome::ManualReview) {
                         $hasManualReview = true;
                     }
                 }
@@ -105,6 +124,9 @@ final class ScanRunner
             if ($op === 'any') {
                 if ($ok) {
                     $status = 'PASS';
+                } elseif ($hasDeadlineExceeded) {
+                    $ok = null;
+                    $status = 'UNKNOWN';
                 } elseif ($hasManualReview) {
                     $status = 'MANUAL_REVIEW';
                 } elseif ($hasUnknown && !$hasFalse) {
@@ -203,6 +225,7 @@ final class ScanRunner
             }
 
             $findings[] = $finding;
+            $checkResults[] = $ruleResults;
 
             // Đếm theo status để UNKNOWN không bị tính là failed
             if ($status === 'PASS') {
@@ -233,7 +256,7 @@ final class ScanRunner
         $transportOk    = (int)($tc['ok'] ?? 0);
         $transportTotal = (int)($tc['total'] ?? 0);
 
-        return [
+        return ScanReport::fromLegacy([
             'summary'  => ['passed' => $passed, 'failed' => $failed, 'unknown' => $unknown, 'manual_review' => $manualReview, 'total' => count($findings)],
             'findings' => $findings,
             'meta'     => [
@@ -243,7 +266,7 @@ final class ScanRunner
                 'transport_total' => $transportTotal,
                 'suppress_confidence' => $suppressConfidence ?? false
             ]
-        ];
+        ], $checkResults);
     }
 
     private function notifyProgress(array $event): void

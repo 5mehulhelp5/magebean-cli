@@ -5,27 +5,36 @@ declare(strict_types=1);
 namespace Magebean\Engine\Checks;
 
 use Magebean\Engine\Context;
+use Magebean\Engine\CheckResult;
+use Magebean\Engine\Collectors\CollectorSet;
 
 final class CheckRegistry
 {
-    /** @var array<string, callable(array): array> */
+    /** @var array<string, callable(array): array|CheckResult> */
     private array $checks = [];
-    /** @var array<string, callable(string,array): array> */
+    /** @var array<string, callable(string,array): array|CheckResult> */
     private array $prefixChecks = [];
     /** @var array<string, object> */
     private array $services = [];
 
-    public static function fromContext(Context $ctx): self
+    private ?CollectorSet $collectors = null;
+
+    public function beginCollection(?\Magebean\Engine\ScanDeadline $deadline = null, ?callable $checkpoint = null): void { $this->collectors?->session->begin($deadline, $checkpoint); }
+    public function endCollection(): void { $this->collectors?->session->end(); }
+
+    public static function fromContext(Context $ctx, ?CollectorSet $collectors = null): self
     {
         $registry = new self();
+        $collectors ??= new CollectorSet();
+        $registry->collectors = $collectors;
 
         $fs = new FilesystemCheck($ctx);
-        $phpc = new PhpConfigCheck($ctx);
-        $comp = new ComposerCheck($ctx);
-        $mage = new MagentoCheck($ctx);
+        $phpc = new PhpConfigCheck($ctx, $collectors);
+        $comp = new ComposerCheck($ctx, $collectors);
+        $mage = new MagentoCheck($ctx, $collectors);
         $adminAcl = new AdminAclCheck($ctx);
-        $http = new HttpCheck($ctx);
-        $code = new CodeSearchCheck($ctx);
+        $http = new HttpCheck($ctx, $collectors);
+        $code = new CodeSearchCheck($ctx, $collectors);
         $web = new WebServerConfigCheck($ctx);
         $git = new GitHistoryCheck($ctx);
         $cron = new CronCheck($ctx);
@@ -207,6 +216,18 @@ final class CheckRegistry
     }
 
     public function run(string $name, array $args): array
+    {
+        $result = $this->execute($name, $args);
+        return $result instanceof CheckResult ? $result->toLegacy() : $result;
+    }
+
+    public function runResult(string $name, array $args): CheckResult
+    {
+        $result = $this->execute($name, $args);
+        return $result instanceof CheckResult ? $result->forCheck($name) : CheckResult::fromLegacy($result, $name);
+    }
+
+    private function execute(string $name, array $args): array|CheckResult
     {
         if (isset($this->checks[$name])) {
             return ($this->checks[$name])($args);

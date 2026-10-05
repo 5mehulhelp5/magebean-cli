@@ -32,6 +32,12 @@ final class Context
         return new self($path, $url, $cveData, $extra);
     }
 
+    /** Explicit migration: canonical target fields win over legacy extra keys. */
+    public function toScanContext(): ScanContext
+    {
+        return new ScanContext($this->path, $this->url, $this->cveData, $this->extra);
+    }
+
     /** Resolve to absolute path in project root (giữ nguyên nếu đã absolute) */
     public function abs(string $p): string
     {

@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace Magebean\Agent\Http;
 
-final class ConsoleClient
+final class ConsoleClient implements ConsoleTransport
 {
     public const DEFAULT_BASE_URL = 'https://console.magebean.com/api';
     public const DEV_BASE_URL = 'https://console.magebean.local/api';
@@ -26,13 +26,13 @@ final class ConsoleClient
         if (! $this->verifyTls) curl_setopt_array($ch, [CURLOPT_SSL_VERIFYPEER => false, CURLOPT_SSL_VERIFYHOST => 0]);
         if ($body !== null) curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($body, JSON_THROW_ON_ERROR));
         $raw = curl_exec($ch);
-        if ($raw === false) { $message = curl_error($ch); curl_close($ch); throw new \RuntimeException('Security Dashboard request failed: ' . $message); }
+        if ($raw === false) { $message = curl_error($ch); curl_close($ch); throw new ConsoleRequestException('Security Dashboard request failed: ' . $message); }
         $status = (int)curl_getinfo($ch, CURLINFO_RESPONSE_CODE);
         curl_close($ch);
         $decoded = $raw === '' ? [] : json_decode($raw, true);
-        if (!is_array($decoded)) throw new \RuntimeException("Console returned invalid JSON (HTTP {$status}).");
+        if (!is_array($decoded)) throw new ConsoleRequestException("Console returned invalid JSON (HTTP {$status}).", $status, $status >= 200 && $status < 300 || $status >= 500 || in_array($status, [408, 425, 429], true));
         if ($status < 200 || $status >= 300) {
-            throw new \RuntimeException($this->errorMessage($decoded, $status));
+            throw new ConsoleRequestException($this->errorMessage($decoded, $status), $status, $status >= 500 || in_array($status, [408, 425, 429], true));
         }
         return $decoded;
     }

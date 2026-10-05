@@ -5,13 +5,16 @@ declare(strict_types=1);
 namespace Magebean\Engine\Checks;
 
 use Magebean\Engine\Context;
+use Magebean\Engine\Collectors\CollectorSet;
 
 final class MagentoCheck
 {
     private Context $ctx;
-    public function __construct(Context $ctx)
+    private CollectorSet $collectors;
+    public function __construct(Context $ctx, ?CollectorSet $collectors = null)
     {
         $this->ctx = $ctx;
+        $this->collectors = $collectors ?? new CollectorSet();
     }
     public function stub(array $args): array
     {
@@ -581,16 +584,10 @@ final class MagentoCheck
     private function loadArray(string $relativeFile): array
     {
         $file = $this->ctx->abs($relativeFile);
-        if (!is_file($file)) {
-            return ['__ERROR__' => "$relativeFile not found"];
-        }
-
-        $data = @include $file;
-        if (!is_array($data)) {
-            return ['__ERROR__' => "$relativeFile did not return array"];
-        }
-
-        return $data;
+        // Keep the legacy include scope and evaluation frequency for executable configs.
+        return $this->collectors->php->load($file, $relativeFile, function () use ($file, $relativeFile): mixed {
+            return @include $file;
+        });
     }
 
     private function getByDotPath(array $arr, string $path, mixed $default = null): mixed
