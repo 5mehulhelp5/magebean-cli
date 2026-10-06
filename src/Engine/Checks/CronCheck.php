@@ -100,6 +100,12 @@ final class CronCheck
         }
 
         if ($found !== []) {
+            if ($this->ctx !== null) {
+                $project = rtrim($this->ctx->path, '/');
+                $scoped = array_filter($found, static fn(array $entry): bool => str_contains($entry['line'], $project . '/bin/magento') || str_contains($entry['line'], $project . '/update/cron.php') || preg_match('~\bcd\s+[\"\']?' . preg_quote($project, '~') . '[\"\']?\s*(?:&&|;)~', $entry['line']) === 1);
+                if ($scoped === []) return [null, '[UNKNOWN] Magento cron found, but installation scope is unverified', ['checked' => $checked, 'found' => $found]];
+                $found = array_values($scoped);
+            }
             return [true, 'Found Magento cron entry', ['checked' => $checked, 'found' => array_slice($found, 0, 10)]];
         }
 
@@ -107,12 +113,8 @@ final class CronCheck
         $readableCronSources = array_values(array_filter($checked, static fn(array $entry): bool => !empty($entry['readable'])));
         $evidence = ['checked' => $checked, 'repo_evidence' => $repoEvidence];
 
-        if ($repoEvidence !== [] && $readableCronSources === []) {
-            return [null, '[UNKNOWN] Magento cron command found in deployment files, but no readable crontab source confirmed it', $evidence];
-        }
-
         if ($repoEvidence !== []) {
-            return [true, 'Found Magento cron command in deployment configuration', $evidence];
+            return [null, '[UNKNOWN] Magento cron command found in deployment files, but no readable crontab source confirmed it', $evidence];
         }
 
         if ($readableCronSources === []) {
@@ -398,6 +400,7 @@ final class CronCheck
                 if (!is_string($content)) {
                     continue;
                 }
+                $content = implode("\n", array_map(static fn(string $line): string => str_starts_with(ltrim($line), '#') ? '' : $line, preg_split('~\r?\n~', $content) ?: []));
                 foreach ($patterns as $rx) {
                     if (preg_match('/' . str_replace('/', '\/', (string)$rx) . '/im', $content, $match, PREG_OFFSET_CAPTURE) !== 1) {
                         continue;

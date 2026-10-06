@@ -55,6 +55,8 @@ final class HttpCollector
                 'method'        => $method,
                 'header'        => implode("\r\n", $ctxHeaders),
                 'ignore_errors' => true,
+                'follow_location' => $follow ? 1 : 0,
+                'max_redirects' => 5,
                 'timeout'       => max(1, (int)ceil($timeoutMs / 1000)),
                 'content'       => $requestBody ?? '',
             ]
@@ -65,7 +67,7 @@ final class HttpCollector
         $status = 0;
         if (isset($http_response_header) && is_array($http_response_header)) {
             $hdrs = $this->parseHeaders(implode("\r\n", $http_response_header));
-            if (preg_match('~HTTP/\S+\s+(\d{3})~', $http_response_header[0] ?? '', $m)) $status = (int)$m[1];
+            foreach ($http_response_header as $line) if (preg_match('~^HTTP/\S+\s+(\d{3})~', $line, $m)) $status = (int)$m[1];
         }
         if ($body === false) {
             $observe(false);
@@ -79,6 +81,10 @@ final class HttpCollector
         // Combine duplicate headers; keep 'set-cookie' as array of all values.
         $out = [];
         foreach (preg_split("~\r?\n~", $raw) as $line) {
+            if (preg_match('~^HTTP/\S+\s+\d{3}\b~i', $line)) {
+                $out = [];
+                continue;
+            }
             if (strpos($line, ':') !== false) {
                 [$k, $v] = array_map('trim', explode(':', $line, 2));
                 $lk = strtolower($k);

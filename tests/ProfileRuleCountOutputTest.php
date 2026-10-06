@@ -7,9 +7,9 @@ function assertProfileCount(bool $condition,string $message):void{if(!$condition
 $command=(new Application())->find('rules:list');
 $profiles=[
     'basic'=>[21,21,0],
-    'asvs-l1'=>[32,60,28],
-    'asvs-l2'=>[73,183,110],
-    'asvs-l3'=>[80,259,179],
+    'asvs-l1'=>[42,70,28],
+    'asvs-l2'=>[90,198,108],
+    'asvs-l3'=>[98,268,170],
     'owasp'=>[77,77,0],
     'pci'=>[67,68,1],
     'hardening'=>[91,92,1],

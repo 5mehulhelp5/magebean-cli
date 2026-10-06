@@ -19,9 +19,9 @@ List Magebean rules after applying a profile and optional control/severity filte
 
 PROFILES
   basic      Default; 21 basic production-readiness rules.
-  asvs-l1    32 rules by default; 60 including 28 human-verification rules.
-  asvs-l2    73 rules by default; 183 including 110 human-verification rules.
-  asvs-l3    80 rules by default; 259 including 179 human-verification rules.
+  asvs-l1    42 requirements by default (including partial evidence checks); 70 including human review.
+  asvs-l2    90 requirements by default (including partial evidence checks); 198 including human review.
+  asvs-l3    98 requirements by default (including partial evidence checks); 268 including human review.
   owasp      77 application-security rules mapped to OWASP Top 10 2025.
   pci        67 rules by default; 68 including 1 human-verification rule.
   hardening  91 rules by default; 92 with human verification enabled.
@@ -84,6 +84,7 @@ HELP;
         if ($profileOpt !== '' && !in_array(strtolower($profileOpt), ['baseline', 'all', 'magebean'], true)) {
             $profile = ProfileLoader::load($profileOpt, getcwd() ?: '');
             $pack = ProfileLoader::apply($pack, $profile, $controls !== [], $capabilities);
+            $pack = \Magebean\Engine\RequirementCatalog::compile($pack, $profile, $capabilities, $controls !== []);
             $out->writeln(sprintf(
                 '<info>Profile:</info> %s (%s)',
                 (string)($profile['id'] ?? $profileOpt),

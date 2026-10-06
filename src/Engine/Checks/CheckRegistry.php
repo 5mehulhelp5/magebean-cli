@@ -42,6 +42,13 @@ final class CheckRegistry
         $pci = new PciEvidenceCheck($ctx);
 
         $registry->services['http'] = $http;
+        $asvsSource = new AsvsSourceEvidenceCheck($ctx, $collectors);
+        $asvsRuntime = new AsvsRuntimeEvidenceCheck($ctx, $collectors);
+        $registry->register('asvs_source_evidence', fn(array $args): CheckResult => $asvsSource->run($args));
+        $registry->register('asvs_response_content_type', fn(array $args): CheckResult => $asvsRuntime->contentType($args));
+        $registry->register('asvs_default_accounts', fn(array $args): CheckResult => $asvsRuntime->defaultAccounts($args));
+
+        $registry->register('requirement_assessment', fn(array $args): \Magebean\Engine\CheckResult => \Magebean\Engine\RequirementEvaluator::evaluate($args, fn(string $name, array $options): \Magebean\Engine\CheckResult => $registry->runResult($name, $options)));
 
         $registry->register('human_manual_review_required', static function (array $args): array {
             $requirement = trim((string)($args['requirement'] ?? ''));

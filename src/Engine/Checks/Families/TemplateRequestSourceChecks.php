@@ -276,7 +276,7 @@ final class TemplateRequestSourceChecks extends CodeSearchSupport
     private function csrfFormFindings(string $file, string $content): array
     {
         $findings = [];
-        if (preg_match_all('~<form\b(?P<attrs>[^>]*)>(?P<body>.*?)</form>~is', $content, $matches, PREG_OFFSET_CAPTURE | PREG_SET_ORDER) !== 1) {
+        if (preg_match_all('~<form\b(?P<attrs>[^>]*)>(?P<body>.*?)</form>~is', $content, $matches, PREG_OFFSET_CAPTURE | PREG_SET_ORDER) < 1) {
             return [];
         }
 
@@ -333,7 +333,7 @@ final class TemplateRequestSourceChecks extends CodeSearchSupport
     {
         $findings = [];
 
-        if (preg_match_all('~<script\b(?P<attrs>[^>]*)>(?P<body>.*?)</script>~is', $content, $matches, PREG_OFFSET_CAPTURE | PREG_SET_ORDER) === 1) {
+        if (preg_match_all('~<script\b(?P<attrs>[^>]*)>(?P<body>.*?)</script>~is', $content, $matches, PREG_OFFSET_CAPTURE | PREG_SET_ORDER) > 0) {
             foreach ($matches as $match) {
                 $attrs = (string)$match['attrs'][0];
                 $body = (string)$match['body'][0];
@@ -353,7 +353,7 @@ final class TemplateRequestSourceChecks extends CodeSearchSupport
             }
         }
 
-        if (preg_match_all('~\b(?:on[a-z]+|data-mage-init|x-magento-init)\s*=\s*([\'"])(?P<value>.*?)\1~is', $content, $matches, PREG_OFFSET_CAPTURE | PREG_SET_ORDER) === 1) {
+        if (preg_match_all('~\b(?:on[a-z]+|data-mage-init|x-magento-init)\s*=\s*([\'"])(?P<value>.*?)\1~is', $content, $matches, PREG_OFFSET_CAPTURE | PREG_SET_ORDER) > 0) {
             foreach ($matches as $match) {
                 $value = (string)$match['value'][0];
                 foreach ($this->phpOutputExpressions($value, (int)$match['value'][1]) as $expr) {
@@ -501,7 +501,7 @@ final class TemplateRequestSourceChecks extends CodeSearchSupport
         ];
 
         foreach ($patterns as $regex) {
-            if (preg_match_all($regex, $content, $matches, PREG_OFFSET_CAPTURE | PREG_SET_ORDER) !== 1) {
+            if (preg_match_all($regex, $content, $matches, PREG_OFFSET_CAPTURE | PREG_SET_ORDER) < 1) {
                 continue;
             }
             foreach ($matches as $match) {

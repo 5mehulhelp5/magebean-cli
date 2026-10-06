@@ -24,11 +24,11 @@ final class SystemCheck
     {
         // 1) UFW trước, nếu có
         if ($this->isCmdAvailable('ufw')) {
-            $out = $this->safeShell('ufw status');
+            $out = $this->safeShell('ufw status verbose');
             if ($out['ok']) {
                 $t = strtolower($out['stdout']);
                 $active = (strpos($t, 'status: active') !== false);
-                $deny1  = (strpos($t, 'default: deny (outgoing)') !== false);
+                $deny1 = preg_match('~default:[^\r\n]*\b(?:deny|reject)\s*\(outgoing\)~', $t) === 1;
                 // một số distro in khác: "Outgoing: DENY"
                 $deny2  = (strpos($t, 'outgoing: deny') !== false);
                 if ($active && ($deny1 || $deny2)) {
@@ -37,13 +37,14 @@ final class SystemCheck
                         'output' => $out['stdout'],
                     ]];
                 }
-                if ($active) {
+                if ($active && preg_match('~default:[^\r\n]*\ballow\s*\(outgoing\)|outgoing:\s*allow~', $t) === 1) {
                     // active nhưng cho phép outbound
                     return [false, 'UFW is active but does not deny outgoing traffic', [
                         'tool' => 'ufw',
                         'output' => $out['stdout'],
                     ]];
                 }
+                if ($active) return [null, '[UNKNOWN] UFW outgoing default policy was not observable', ['tool' => 'ufw', 'output' => $out['stdout']]];
                 // not active → tiếp tục thử iptables
             } else {
                 // không chạy được ufw → tiếp tục iptables
@@ -56,6 +57,7 @@ final class SystemCheck
             $out = $this->safeShell('iptables -S OUTPUT');
             if ($out['ok'] && trim($out['stdout']) !== '') {
                 $policy = $this->parseIptablesPolicy($out['stdout']);
+                if (($policy === 'DROP' || $policy === 'REJECT') && preg_match('~^-A\s+OUTPUT\s+-j\s+ACCEPT\s*$~m', $out['stdout']) === 1) return [false, 'Unconditional OUTPUT ACCEPT bypasses the default deny policy', ['output' => $out['stdout']]];
                 if ($policy === 'DROP' || $policy === 'REJECT') {
                     return [true, 'iptables OUTPUT policy denies by default', [
                         'tool' => 'iptables -S',
@@ -63,6 +65,7 @@ final class SystemCheck
                         'output' => $out['stdout'],
                     ]];
                 }
+                if ($policy === 'ACCEPT' && preg_match('~^-A\s+OUTPUT\b~m', $out['stdout']) === 1) return [null, '[UNKNOWN] OUTPUT rules require effective firewall evaluation', ['output' => $out['stdout']]];
                 if ($policy === 'ACCEPT') {
                     return [false, 'iptables OUTPUT policy is ACCEPT (unrestricted)', [
                         'tool' => 'iptables -S',

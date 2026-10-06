@@ -55,7 +55,7 @@
                     "optional": true,
                     "array": false,
                     "default": null,
-                    "description": "Comma-separated rule IDs to run (e.g., MB-R036,MB-R020)"
+                    "description": "Legacy MB-R or canonical ASVS requirement IDs; canonical selection requires an ASVS profile"
                 },
                 "exclude-rules": {
                     "shortcut": null,
@@ -63,7 +63,7 @@
                     "optional": true,
                     "array": false,
                     "default": null,
-                    "description": "Comma-separated rule IDs to exclude after loading"
+                    "description": "Legacy aliases or canonical requirement IDs to exclude after loading"
                 },
                 "config": {
                     "shortcut": null,
@@ -114,7 +114,7 @@
                     "description": "Magento root path (omit to auto-detect from current working directory)"
                 }
             },
-            "help": "<fg=cyan;options=bold>Audit Magento 2 production readiness</> using selectable Magebean security profiles.\nThe default <fg=green;options=bold>basic</> profile runs 21 fast, low-noise checks.\nDocs: <href=https://magebean.com/documentation>magebean.com/documentation</>\n\n<options=bold>USAGE</>\n  <fg=green>php magebean.phar scan [--path=PATH] [--url=URL] [options]</>\n\n<options=bold>TARGET MODES</>\n  \u2022 <fg=green;options=bold>LOCAL</> \u2014 --path only, or omit both target options to auto-detect the Magento root\n  \u2022 <fg=blue;options=bold>REMOTE</> \u2014 --url only; verifies Magento and runs externally observable rules\n  \u2022 <fg=magenta;options=bold>HYBRID</> \u2014 --path plus --url; combines local and HTTP evidence\n  \u2022 Basic contains 21 local rules and 9 applicable remote rules.\n  \u2022 Use --profile=baseline remotely to run all 10 external rules.\n\n<options=bold>PROFILES</>\n  <fg=yellow>basic</>      Default; 21 basic production security and operations checks.\n  <fg=yellow>asvs-l1</>    32 rules by default; 60 including 28 human-verification rules.\n  <fg=yellow>asvs-l2</>    73 rules by default; 183 including 110 human-verification rules.\n  <fg=yellow>asvs-l3</>    80 rules by default; 259 including 179 human-verification rules.\n  <fg=yellow>owasp</>      77 application-security rules mapped to OWASP Top 10 2025.\n  <fg=yellow>pci</>        67 rules by default; 68 including 1 human-verification rule.\n  <fg=yellow>hardening</>  91 rules by default; 92 with human verification enabled.\n  <fg=yellow>baseline</>   113 automated rules by default; 371 including manual review. Aliases: all, magebean.\n  <fg=yellow>FILE</>       Custom JSON path or a profile under .magebean/profiles.\n\n<options=bold>COMMAND OPTIONS</>\n  <fg=yellow>--path=PATH</>                     Magento root. Omit to search from the current directory.\n  <fg=yellow>--url=URL</>                       Absolute storefront URL; selects REMOTE or HYBRID mode.\n  <fg=yellow>--profile=PROFILE|FILE</>          Built-in or custom profile. Default: basic.\n  <fg=yellow>--include-manual-review</>           Include human-review rules; excluded by default.\n  <fg=yellow>--capabilities=NAME,NAME</>         Enable contextual profile rules (for example graphql,oauth_oidc).\n  <fg=yellow>--controls=MB-Cxx,MB-Cxx</>       Restrict the loaded pack to control IDs.\n  <fg=yellow>--rules=MB-Rxxx,MB-Rxxx</>         Run listed rule IDs directly from the available catalog; bypasses profile selection.\n  <fg=yellow>--exclude-rules=MB-Rxxx,...</>     Remove rules after profile and project configuration.\n  <fg=yellow>--config=FILE</>                   Project policy file; auto-detected in LOCAL/HYBRID.\n  <fg=yellow>--pci-context=FILE</>               PCI applicability context JSON (PCI profile only).\n  <fg=yellow>--pci-evidence=FILE</>              Structured external evidence JSON (PCI profile only).\n  <fg=yellow>--pci-report=FILE</>                Write the PCI evidence-readiness report as JSON.\n  <fg=yellow>--standard=NAME</>                 Legacy selector: magebean, owasp, pci, or cwe.\n                                          Prefer --profile; explicit --profile takes precedence.\n\n<options=bold>GLOBAL OPTIONS</>\n  <fg=yellow>-h, --help</>           Show help.\n  <fg=yellow>-V, --version</>        Show version.\n  <fg=yellow>-q, --quiet</>          Show errors only.\n  <fg=yellow>--silent</>             Suppress all output.\n  <fg=yellow>--ansi|--no-ansi</>     Force or disable ANSI formatting.\n  <fg=yellow>-n, --no-interaction</> Disable interactive questions.\n  <fg=yellow>-v|vv|vvv</>            Increase verbosity.\n\n<options=bold>EXAMPLES</>\n  # Default basic scan with Magento root auto-detection\n  <fg=green>php magebean.phar scan</>\n\n  # LOCAL, REMOTE, and HYBRID scans\n  <fg=green>php magebean.phar scan --path=/var/www/magento</>\n  <fg=green>php magebean.phar scan --url=https://store.example.com</>\n  <fg=green>php magebean.phar scan --path=/var/www/magento --url=https://store.example.com</>\n\n  # ASVS Level 1, application security, payment readiness, deep hardening, or full catalog\n  <fg=green>php magebean.phar scan --path=/var/www/magento --profile=asvs-l1</>\n  <fg=green>php magebean.phar scan --path=/var/www/magento --url=https://store.example.com --profile=asvs-l2 --include-manual-review --capabilities=graphql</>\n  <fg=green>php magebean.phar scan --path=/var/www/magento --url=https://store.example.com --profile=asvs-l3 --include-manual-review</>\n  <fg=green>php magebean.phar scan --path=/var/www/magento --profile=owasp</>\n  <fg=green>php magebean.phar scan --path=/var/www/magento --profile=pci</>\n  <fg=green>php magebean.phar scan --path=/var/www/magento --profile=hardening</>\n  <fg=green>php magebean.phar scan --path=/var/www/magento --profile=baseline</>\n\n  # Rule and control filters\n  <fg=green>php magebean.phar scan --path=/var/www/magento --rules=MB-R031,MB-R037</>\n  <fg=green>php magebean.phar scan --path=/var/www/magento --rules=MB-R020</>\n  <fg=green>php magebean.phar scan --path=/var/www/magento --profile=hardening --controls=MB-C01,MB-C05</>\n  <fg=green>php magebean.phar scan --path=/var/www/magento --config=.magebean.yml --exclude-rules=MB-R032</>\n\n<options=bold>SELECTION ORDER</>\n  Target pack \u2192 project policy \u2192 (--rules OR profile) \u2192 --exclude-rules.\n  --rules bypasses profile selection and selects IDs directly from the available catalog.\n\n<options=bold>NOTES</>\n  \u2022 REMOTE results cover only publicly observable behavior; local-only checks are omitted.\n  \u2022 --path must point to, or be below, a Magento root containing app/etc and vendor.\n  \u2022 Unknown rule IDs in a custom profile fail validation against a full local pack.\n  \u2022 Confirmed findings determine the process exit code.\n\n<options=bold>SEE ALSO</>\n  <fg=cyan>rules:list --help</>  List and filter rules by profile, control, and severity.\n\nCONTACT: <href=mailto:support@magebean.com>support@magebean.com</>\n"
+            "help": "<fg=cyan;options=bold>Audit Magento 2 production readiness</> using selectable Magebean security profiles.\nThe default <fg=green;options=bold>basic</> profile runs 21 fast, low-noise checks.\nDocs: <href=https://magebean.com/documentation>magebean.com/documentation</>\n\n<options=bold>USAGE</>\n  <fg=green>php magebean.phar scan [--path=PATH] [--url=URL] [options]</>\n\n<options=bold>TARGET MODES</>\n  \u2022 <fg=green;options=bold>LOCAL</> \u2014 --path only, or omit both target options to auto-detect the Magento root\n  \u2022 <fg=blue;options=bold>REMOTE</> \u2014 --url only; verifies Magento and runs externally observable rules\n  \u2022 <fg=magenta;options=bold>HYBRID</> \u2014 --path plus --url; combines local and HTTP evidence\n  \u2022 Basic contains 21 local rules and 9 applicable remote rules.\n  \u2022 Use --profile=baseline remotely to run all 10 external rules.\n\n<options=bold>PROFILES</>\n  <fg=yellow>basic</>      Default; 21 basic production security and operations checks.\n  <fg=yellow>asvs-l1</>    42 requirements by default (including partial evidence checks); 70 including human review.\n  <fg=yellow>asvs-l2</>    90 requirements by default (including partial evidence checks); 198 including human review.\n  <fg=yellow>asvs-l3</>    98 requirements by default (including partial evidence checks); 268 including human review.\n  <fg=yellow>owasp</>      77 application-security rules mapped to OWASP Top 10 2025.\n  <fg=yellow>pci</>        67 rules by default; 68 including 1 human-verification rule.\n  <fg=yellow>hardening</>  91 rules by default; 92 with human verification enabled.\n  <fg=yellow>baseline</>   113 automated rules by default; 371 including manual review. Aliases: all, magebean.\n  <fg=yellow>FILE</>       Custom JSON path or a profile under .magebean/profiles.\n\n<options=bold>COMMAND OPTIONS</>\n  <fg=yellow>--path=PATH</>                     Magento root. Omit to search from the current directory.\n  <fg=yellow>--url=URL</>                       Absolute storefront URL; selects REMOTE or HYBRID mode.\n  <fg=yellow>--profile=PROFILE|FILE</>          Built-in or custom profile. Default: basic.\n  <fg=yellow>--include-manual-review</>           Include human-review rules; excluded by default.\n  <fg=yellow>--capabilities=NAME,NAME</>         Enable contextual profile rules (for example graphql,oauth_oidc).\n  <fg=yellow>--controls=MB-Cxx,MB-Cxx</>       Restrict the loaded pack to control IDs.\n  <fg=yellow>--rules=MB-Rxxx,MB-Rxxx</>         Run listed rule IDs directly from the available catalog; bypasses profile selection.\n  <fg=yellow>--exclude-rules=MB-Rxxx,...</>     Remove rules after profile and project configuration.\n  <fg=yellow>--config=FILE</>                   Project policy file; auto-detected in LOCAL/HYBRID.\n  <fg=yellow>--pci-context=FILE</>               PCI applicability context JSON (PCI profile only).\n  <fg=yellow>--pci-evidence=FILE</>              Structured external evidence JSON (PCI profile only).\n  <fg=yellow>--pci-report=FILE</>                Write the PCI evidence-readiness report as JSON.\n  <fg=yellow>--standard=NAME</>                 Legacy selector: magebean, owasp, pci, or cwe.\n                                          Prefer --profile; explicit --profile takes precedence.\n\n<options=bold>GLOBAL OPTIONS</>\n  <fg=yellow>-h, --help</>           Show help.\n  <fg=yellow>-V, --version</>        Show version.\n  <fg=yellow>-q, --quiet</>          Show errors only.\n  <fg=yellow>--silent</>             Suppress all output.\n  <fg=yellow>--ansi|--no-ansi</>     Force or disable ANSI formatting.\n  <fg=yellow>-n, --no-interaction</> Disable interactive questions.\n  <fg=yellow>-v|vv|vvv</>            Increase verbosity.\n\n<options=bold>EXAMPLES</>\n  # Default basic scan with Magento root auto-detection\n  <fg=green>php magebean.phar scan</>\n\n  # LOCAL, REMOTE, and HYBRID scans\n  <fg=green>php magebean.phar scan --path=/var/www/magento</>\n  <fg=green>php magebean.phar scan --url=https://store.example.com</>\n  <fg=green>php magebean.phar scan --path=/var/www/magento --url=https://store.example.com</>\n\n  # ASVS Level 1, application security, payment readiness, deep hardening, or full catalog\n  <fg=green>php magebean.phar scan --path=/var/www/magento --profile=asvs-l1</>\n  <fg=green>php magebean.phar scan --path=/var/www/magento --url=https://store.example.com --profile=asvs-l2 --include-manual-review --capabilities=graphql</>\n  <fg=green>php magebean.phar scan --path=/var/www/magento --url=https://store.example.com --profile=asvs-l3 --include-manual-review</>\n  <fg=green>php magebean.phar scan --path=/var/www/magento --profile=owasp</>\n  <fg=green>php magebean.phar scan --path=/var/www/magento --profile=pci</>\n  <fg=green>php magebean.phar scan --path=/var/www/magento --profile=hardening</>\n  <fg=green>php magebean.phar scan --path=/var/www/magento --profile=baseline</>\n\n  # Rule and control filters\n  <fg=green>php magebean.phar scan --path=/var/www/magento --rules=MB-R031,MB-R037</>\n  <fg=green>php magebean.phar scan --path=/var/www/magento --rules=MB-R020</>\n  <fg=green>php magebean.phar scan --path=/var/www/magento --profile=hardening --controls=MB-C01,MB-C05</>\n  <fg=green>php magebean.phar scan --path=/var/www/magento --config=.magebean.yml --exclude-rules=MB-R032</>\n\n<options=bold>SELECTION ORDER</>\n  Target pack \u2192 project policy \u2192 (--rules OR profile) \u2192 --exclude-rules.\n  MB-R --rules bypasses profile selection. Canonical OWASP-ASVS IDs require an ASVS --profile for level context.\n\n<options=bold>NOTES</>\n  \u2022 REMOTE results cover only publicly observable behavior; local-only checks are omitted.\n  \u2022 --path must point to, or be below, a Magento root containing app/etc and vendor.\n  \u2022 Unknown rule IDs in a custom profile fail validation against a full local pack.\n  \u2022 Confirmed findings determine the process exit code.\n\n<options=bold>SEE ALSO</>\n  <fg=cyan>rules:list --help</>  List and filter rules by profile, control, and severity.\n\nCONTACT: <href=mailto:support@magebean.com>support@magebean.com</>\n"
         },
         "rules:list": {
             "aliases": [],
@@ -161,7 +161,7 @@
                     "description": "low|medium|high|critical"
                 }
             },
-            "help": "List Magebean rules after applying a profile and optional control/severity filters.\n\nPROFILES\n  basic      Default; 21 basic production-readiness rules.\n  asvs-l1    32 rules by default; 60 including 28 human-verification rules.\n  asvs-l2    73 rules by default; 183 including 110 human-verification rules.\n  asvs-l3    80 rules by default; 259 including 179 human-verification rules.\n  owasp      77 application-security rules mapped to OWASP Top 10 2025.\n  pci        67 rules by default; 68 including 1 human-verification rule.\n  hardening  91 rules by default; 92 with human verification enabled.\n  baseline   113 automated rules by default; 371 including manual review. Aliases: all, magebean.\n  FILE       Custom profile JSON path or a profile under .magebean/profiles.\n\nOPTIONS\n  --profile=PROFILE|FILE       Select the profile. Default: basic.\n  --include-manual-review    Include human-review rules; excluded by default.\n  --capabilities=NAME,NAME    Include contextual rules for enabled application capabilities.\n  --control=MB-Cxx,MB-Cxx     Keep only the listed controls.\n  --severity=LEVEL             Keep low, medium, high, or critical rules.\n  -h, --help                   Show this help.\n  -V, --version                Show the Magebean version.\n  -q, --quiet                  Show errors only.\n  --silent                     Suppress all output.\n  --ansi|--no-ansi             Force or disable ANSI formatting.\n  -n, --no-interaction         Disable interactive questions.\n  -v|vv|vvv                    Increase verbosity.\n\nEXAMPLES\n  php magebean.phar rules:list\n  php magebean.phar rules:list --profile=asvs-l1\n  php magebean.phar rules:list --profile=asvs-l2 --include-manual-review --capabilities=oauth_oidc\n  php magebean.phar rules:list --profile=asvs-l3 --include-manual-review\n  php magebean.phar rules:list --profile=hardening\n  php magebean.phar rules:list --profile=baseline --control=MB-C03\n  php magebean.phar rules:list --profile=owasp --severity=critical\n  php magebean.phar rules:list --profile=.magebean/profiles/acme.json\n\nFilters are intersected: --control and --severity only reduce the selected profile."
+            "help": "List Magebean rules after applying a profile and optional control/severity filters.\n\nPROFILES\n  basic      Default; 21 basic production-readiness rules.\n  asvs-l1    42 requirements by default (including partial evidence checks); 70 including human review.\n  asvs-l2    90 requirements by default (including partial evidence checks); 198 including human review.\n  asvs-l3    98 requirements by default (including partial evidence checks); 268 including human review.\n  owasp      77 application-security rules mapped to OWASP Top 10 2025.\n  pci        67 rules by default; 68 including 1 human-verification rule.\n  hardening  91 rules by default; 92 with human verification enabled.\n  baseline   113 automated rules by default; 371 including manual review. Aliases: all, magebean.\n  FILE       Custom profile JSON path or a profile under .magebean/profiles.\n\nOPTIONS\n  --profile=PROFILE|FILE       Select the profile. Default: basic.\n  --include-manual-review    Include human-review rules; excluded by default.\n  --capabilities=NAME,NAME    Include contextual rules for enabled application capabilities.\n  --control=MB-Cxx,MB-Cxx     Keep only the listed controls.\n  --severity=LEVEL             Keep low, medium, high, or critical rules.\n  -h, --help                   Show this help.\n  -V, --version                Show the Magebean version.\n  -q, --quiet                  Show errors only.\n  --silent                     Suppress all output.\n  --ansi|--no-ansi             Force or disable ANSI formatting.\n  -n, --no-interaction         Disable interactive questions.\n  -v|vv|vvv                    Increase verbosity.\n\nEXAMPLES\n  php magebean.phar rules:list\n  php magebean.phar rules:list --profile=asvs-l1\n  php magebean.phar rules:list --profile=asvs-l2 --include-manual-review --capabilities=oauth_oidc\n  php magebean.phar rules:list --profile=asvs-l3 --include-manual-review\n  php magebean.phar rules:list --profile=hardening\n  php magebean.phar rules:list --profile=baseline --control=MB-C03\n  php magebean.phar rules:list --profile=owasp --severity=critical\n  php magebean.phar rules:list --profile=.magebean/profiles/acme.json\n\nFilters are intersected: --control and --severity only reduce the selected profile."
         },
         "agent:connect": {
             "aliases": [],
@@ -391,7 +391,7 @@
             "control": "MB-C03",
             "severity": "high",
             "verification": "automated",
-            "definition_sha256": "2355fbb919c895f96944cb941103fcc155ca024dcbd875727a14c26d62f96b48"
+            "definition_sha256": "6a4fbc22d25b9dfcb387934ab1deecf9aabd19d20717cda1b9def4b5a7384b72"
         },
         "MB-R015": {
             "control": "MB-C03",
@@ -409,7 +409,7 @@
             "control": "MB-C03",
             "severity": "high",
             "verification": "automated",
-            "definition_sha256": "7c193ab1c5dacb6691a763edf5ed2978b4425a6d56c96064a9fc6b6e09de1e34"
+            "definition_sha256": "fbec2a3e157dae54d02ed1f237ec5c59863bd9f571805a0a89d94dc73803ca87"
         },
         "MB-R018": {
             "control": "MB-C03",
@@ -5232,11 +5232,11 @@
         },
         {
             "exit": 0,
-            "output": "Profile: asvs-l1 (OWASP ASVS Level 1)\nMB-R008 [MB-C02] high \u2014 Admin passwords require at least 8 characters\nMB-R011 [MB-C02] medium \u2014 Login rate-limiting / CAPTCHA enabled\nTotal Rules Listed: 2\nTotal Profile Rules: 2 (including 0 human verification rules)\nHuman verification rules: none in this profile. Use --include-manual-review when the selected profile provides them.\n"
+            "output": "Profile: asvs-l1 (OWASP ASVS Level 1)\nOWASP-ASVS:5.0.0:6.2.1 [MB-C02] high \u2014 ASVS 5.0.0 requirement 6.2.1\nOWASP-ASVS:5.0.0:6.2.4 [MB-C02] high \u2014 Common password denylist enforcement\nOWASP-ASVS:5.0.0:6.3.1 [MB-C02] medium \u2014 ASVS 5.0.0 requirement 6.3.1\nOWASP-ASVS:5.0.0:6.3.2 [MB-C02] high \u2014 Default account absence or disabling\nTotal Rules Listed: 4\nTotal Profile Rules: 4 (including 0 human verification rules)\nHuman verification rules: none in this profile. Use --include-manual-review when the selected profile provides them.\n"
         },
         {
             "exit": 0,
-            "output": "Profile: asvs-l3 (OWASP ASVS Level 3)\nMB-R012 [MB-C03] high \u2014 No raw SQL without abstraction\nMB-R013 [MB-C03] high \u2014 Template output is escaped\nMB-R014 [MB-C03] high \u2014 Avoid PHP superglobals directly\nMB-R015 [MB-C03] high \u2014 Forms include CSRF tokens (form_key)\nMB-R016 [MB-C03] high \u2014 SSRF protections present\nMB-R018 [MB-C03] critical \u2014 Command execution is guarded\nMB-R019 [MB-C03] critical \u2014 No eval/assert/dynamic execution\nMB-R020 [MB-C03] high \u2014 Path traversal protections\nMB-R021 [MB-C03] high \u2014 Secure file upload handling\nMB-R022 [MB-C03] high \u2014 Escaping for JS context\nMB-R025 [MB-C03] medium \u2014 No unsafe raw crypto or session APIs in custom code\nMB-R094 [MB-C03] high \u2014 Custom controllers and APIs include function-level authorization\nMB-R098 [MB-C03] high \u2014 Unsafe XML parsing disabled\nMB-R099 [MB-C03] high \u2014 File download and export endpoints require authorization\nMB-R017 [MB-C03] high \u2014 No unsafe deserialization\nMB-R095 [MB-C03] medium \u2014 GraphQL and API exposure minimized\nMB-R023 [MB-C03] high \u2014 Use CSPRNG; avoid weak PRNG\nMB-R097 [MB-C03] high \u2014 Secrets are not hardcoded in custom code\nMB-R024 [MB-C03] high \u2014 Sensitive data not logged\nTotal Rules Listed: 19\nTotal Profile Rules: 19 (including 0 human verification rules)\nHuman verification rules: none in this profile. Use --include-manual-review when the selected profile provides them.\n"
+            "output": "Profile: asvs-l3 (OWASP ASVS Level 3)\nOWASP-ASVS:5.0.0:1.2.1 [MB-C03] high \u2014 ASVS 5.0.0 requirement 1.2.1\nOWASP-ASVS:5.0.0:1.2.2 [MB-C03] high \u2014 ASVS 5.0.0 requirement 1.2.2\nOWASP-ASVS:5.0.0:1.2.3 [MB-C03] high \u2014 ASVS 5.0.0 requirement 1.2.3\nOWASP-ASVS:5.0.0:1.2.4 [MB-C03] high \u2014 ASVS 5.0.0 requirement 1.2.4\nOWASP-ASVS:5.0.0:1.2.5 [MB-C03] critical \u2014 ASVS 5.0.0 requirement 1.2.5\nOWASP-ASVS:5.0.0:1.3.1 [MB-C03] high \u2014 Untrusted HTML sanitization\nOWASP-ASVS:5.0.0:1.3.2 [MB-C03] critical \u2014 ASVS 5.0.0 requirement 1.3.2\nOWASP-ASVS:5.0.0:1.5.1 [MB-C03] high \u2014 ASVS 5.0.0 requirement 1.5.1\nOWASP-ASVS:5.0.0:2.2.1 [MB-C03] high \u2014 Business and functional input validation\nOWASP-ASVS:5.0.0:2.2.2 [MB-C03] high \u2014 ASVS 5.0.0 requirement 2.2.2\nOWASP-ASVS:5.0.0:3.2.2 [MB-C03] high \u2014 Safe text DOM rendering\nOWASP-ASVS:5.0.0:3.5.1 [MB-C03] high \u2014 ASVS 5.0.0 requirement 3.5.1\nOWASP-ASVS:5.0.0:3.5.3 [MB-C03] high \u2014 Sensitive operations use appropriate methods\nOWASP-ASVS:5.0.0:5.2.1 [MB-C03] high \u2014 ASVS 5.0.0 requirement 5.2.1\nOWASP-ASVS:5.0.0:5.2.2 [MB-C03] high \u2014 ASVS 5.0.0 requirement 5.2.2\nOWASP-ASVS:5.0.0:5.3.1 [MB-C03] critical \u2014 ASVS 5.0.0 requirement 5.3.1\nOWASP-ASVS:5.0.0:5.3.2 [MB-C03] high \u2014 ASVS 5.0.0 requirement 5.3.2\nOWASP-ASVS:5.0.0:8.2.1 [MB-C03] high \u2014 ASVS 5.0.0 requirement 8.2.1\nOWASP-ASVS:5.0.0:9.1.1 [MB-C03] high \u2014 Self-contained token signature validation\nOWASP-ASVS:5.0.0:9.1.2 [MB-C03] high \u2014 Self-contained token algorithm policy\nOWASP-ASVS:5.0.0:9.1.3 [MB-C03] high \u2014 Trusted token verification key sources\nOWASP-ASVS:5.0.0:9.2.1 [MB-C03] high \u2014 Token validity time enforcement\nOWASP-ASVS:5.0.0:11.3.2 [MB-C03] high \u2014 ASVS 5.0.0 requirement 11.3.2\nOWASP-ASVS:5.0.0:11.4.1 [MB-C03] high \u2014 Approved cryptographic hash purpose\nOWASP-ASVS:5.0.0:1.3.6 [MB-C03] high \u2014 ASVS 5.0.0 requirement 1.3.6\nOWASP-ASVS:5.0.0:1.5.2 [MB-C03] high \u2014 ASVS 5.0.0 requirement 1.5.2\nOWASP-ASVS:5.0.0:4.3.1 [MB-C03] medium \u2014 ASVS 5.0.0 requirement 4.3.1\nOWASP-ASVS:5.0.0:4.3.2 [MB-C03] medium \u2014 ASVS 5.0.0 requirement 4.3.2\nOWASP-ASVS:5.0.0:5.2.3 [MB-C03] high \u2014 ASVS 5.0.0 requirement 5.2.3\nOWASP-ASVS:5.0.0:5.4.1 [MB-C03] high \u2014 ASVS 5.0.0 requirement 5.4.1\nOWASP-ASVS:5.0.0:5.4.2 [MB-C03] high \u2014 ASVS 5.0.0 requirement 5.4.2\nOWASP-ASVS:5.0.0:8.2.3 [MB-C03] high \u2014 ASVS 5.0.0 requirement 8.2.3\nOWASP-ASVS:5.0.0:11.2.1 [MB-C03] medium \u2014 ASVS 5.0.0 requirement 11.2.1\nOWASP-ASVS:5.0.0:11.4.2 [MB-C03] medium \u2014 ASVS 5.0.0 requirement 11.4.2\nOWASP-ASVS:5.0.0:11.5.1 [MB-C03] high \u2014 ASVS 5.0.0 requirement 11.5.1\nOWASP-ASVS:5.0.0:13.2.3 [MB-C03] high \u2014 ASVS 5.0.0 requirement 13.2.3\nOWASP-ASVS:5.0.0:13.3.1 [MB-C03] critical \u2014 ASVS 5.0.0 requirement 13.3.1\nOWASP-ASVS:5.0.0:13.4.5 [MB-C03] high \u2014 ASVS 5.0.0 requirement 13.4.5\nOWASP-ASVS:5.0.0:14.2.4 [MB-C03] critical \u2014 ASVS 5.0.0 requirement 14.2.4\nOWASP-ASVS:5.0.0:16.2.5 [MB-C03] critical \u2014 ASVS 5.0.0 requirement 16.2.5\nOWASP-ASVS:5.0.0:11.1.3 [MB-C03] high \u2014 ASVS 5.0.0 requirement 11.1.3\nTotal Rules Listed: 41\nTotal Profile Rules: 41 (including 0 human verification rules)\nHuman verification rules: none in this profile. Use --include-manual-review when the selected profile provides them.\n"
         }
     ],
     "local_scans": {
@@ -5298,8 +5298,8 @@
     "engine_truth_table": {
         "summary": {
             "passed": 8,
-            "failed": 10,
-            "unknown": 4,
+            "failed": 8,
+            "unknown": 6,
             "manual_review": 10,
             "total": 32
         },
@@ -6067,9 +6067,9 @@
                 "title": "Compatibility QA-any-fail-unknown",
                 "control": "QA",
                 "severity": "low",
-                "passed": false,
-                "status": "FAIL",
-                "message": "fail fixture",
+                "passed": null,
+                "status": "UNKNOWN",
+                "message": "unknown fixture",
                 "detail": [
                     {
                         "check": "fail",
@@ -6103,7 +6103,7 @@
                 "title": "Compatibility QA-any-fail-manual",
                 "control": "QA",
                 "severity": "low",
-                "passed": false,
+                "passed": null,
                 "status": "MANUAL_REVIEW",
                 "message": "Fixture review",
                 "detail": [
@@ -6176,9 +6176,9 @@
                 "title": "Compatibility QA-any-unknown-fail",
                 "control": "QA",
                 "severity": "low",
-                "passed": false,
-                "status": "FAIL",
-                "message": "fail fixture",
+                "passed": null,
+                "status": "UNKNOWN",
+                "message": "unknown fixture",
                 "detail": [
                     {
                         "check": "unknown",
@@ -6212,7 +6212,7 @@
                 "title": "Compatibility QA-any-unknown-unknown",
                 "control": "QA",
                 "severity": "low",
-                "passed": false,
+                "passed": null,
                 "status": "UNKNOWN",
                 "message": "unknown fixture",
                 "detail": [
@@ -6248,7 +6248,7 @@
                 "title": "Compatibility QA-any-unknown-manual",
                 "control": "QA",
                 "severity": "low",
-                "passed": false,
+                "passed": null,
                 "status": "MANUAL_REVIEW",
                 "message": "Fixture review",
                 "detail": [
@@ -6322,7 +6322,7 @@
                 "title": "Compatibility QA-any-manual-fail",
                 "control": "QA",
                 "severity": "low",
-                "passed": false,
+                "passed": null,
                 "status": "MANUAL_REVIEW",
                 "message": "Fixture review",
                 "detail": [
@@ -6359,7 +6359,7 @@
                 "title": "Compatibility QA-any-manual-unknown",
                 "control": "QA",
                 "severity": "low",
-                "passed": false,
+                "passed": null,
                 "status": "MANUAL_REVIEW",
                 "message": "Fixture review",
                 "detail": [
@@ -6396,7 +6396,7 @@
                 "title": "Compatibility QA-any-manual-manual",
                 "control": "QA",
                 "severity": "low",
-                "passed": false,
+                "passed": null,
                 "status": "MANUAL_REVIEW",
                 "message": "Fixture review",
                 "detail": [

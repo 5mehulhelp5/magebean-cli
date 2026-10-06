@@ -477,11 +477,11 @@ final class ComposerPolicyChecks extends ComposerSupport
                     foreach ($aff['ranges'] as $rng) {
                         $events = $rng['events'] ?? [];
                         $intervals = $this->eventsToIntervalsSafe($auditor, $events, $minFixedCandidate);
-                        foreach ($intervals as [$a, $b]) {
-                            if ($this->inRangeSafe($auditor, $curVer, $a, $b)) {
+                        foreach ($intervals as [$a, $b, $inclusive, $kind]) {
+                            if ($this->inRangeSafe($auditor, $curVer, $a, $b, $inclusive)) {
                                 $affected = true;
                             }
-                            if ($b !== null) $minFixed = $this->minVersionLocal($minFixed, $b);
+                            if ($b !== null && $kind === 'fixed') $minFixed = $this->minVersionLocal($minFixed, $b);
                         }
                         if (isset($minFixedCandidate)) $minFixed = $this->minVersionLocal($minFixed, $minFixedCandidate);
                     }
@@ -642,10 +642,10 @@ final class ComposerPolicyChecks extends ComposerSupport
                     foreach ($aff['ranges'] as $rng) {
                         $events = is_array($rng['events'] ?? null) ? $rng['events'] : [];
                         $intervals = $this->eventsToIntervalsSafe($auditor, $events, $minFixedCandidate);
-                        foreach ($intervals as [$a, $b]) {
-                            if ($this->inRangeSafe($auditor, $cur, $a, $b)) {
+                        foreach ($intervals as [$a, $b, $inclusive, $kind]) {
+                            if ($this->inRangeSafe($auditor, $cur, $a, $b, $inclusive)) {
                                 $hit = true;
-                                if ($b !== null) $minFixed = $this->minVersionLocal($minFixed, $b);
+                                if ($b !== null && $kind === 'fixed') $minFixed = $this->minVersionLocal($minFixed, $b);
                             }
                         }
                         if (isset($minFixedCandidate)) $minFixed = $this->minVersionLocal($minFixed, $minFixedCandidate);

@@ -8,11 +8,18 @@ Use the fast production-readiness profile for routine checks, map an assessment 
 
 ---
 
+## Assessment terminology
+
+We use **requirement** for the unit assessed and reported. The accepted model is **one requirement = one assessment definition (legacy name: rule)**, containing one or more reusable checks. ASVS profiles compile one definition per versioned requirement. The underlying MB-R catalog remains a compatibility/evidence catalog; other profiles continue using it. Exact command names such as `rules:list`, options such as `--rules`, and JSON `rules` keys remain supported as implemented today.
+
+Read the [requirement model](docs/requirement-model.md) and [ASVS L1/L2 migration inventory](docs/asvs-requirement-migration.md) for the mapping and implementation boundary. A technical check PASS does not resolve an unverified human obligation.
+
+
 ## ✨ Features
 
 - **Target-aware scanning**: audit a Magento filesystem in LOCAL mode, a public storefront in REMOTE mode, or combine both evidence sources in HYBRID mode.
 - **Security profiles**: choose `basic`, ASVS Level 1–3, OWASP Top 10 2025, PCI DSS v4.0.1, `hardening`, the full `baseline`, or a custom profile.
-- **Automated and human checks**: run 113 automated rules by default in the full baseline and opt into 258 structured `HUMAN VERIFICATION REQUIRED` rules when an assessment needs human evidence.
+- **Automated and human checks**: run 113 automated legacy assessment definitions by default in the full baseline and opt into 258 structured `HUMAN VERIFICATION REQUIRED` definitions when an assessment needs human evidence.
 - **Actionable results**: distinguish PASS, confirmed findings, and INCONCLUSIVE checks; inspect evidence, remediation guidance, and re-run commands for individual rules.
 - **PCI DSS workflow**: compile applicability context, import structured external evidence, and generate an evidence-readiness JSON report.
 - **Project policy**: customize capabilities, controls, exclusions, rule overrides, project-specific rules, and additional rule packs with `.magebean.json` or YAML.
@@ -179,9 +186,9 @@ Selection order is: target pack → project policy → (`--rules` or profile) �
 | Profile | Rules selected by default |
 |---|---:|
 | `basic` | 21 |
-| `asvs-l1` | 32 (60 with manual review) |
-| `asvs-l2` | 73 (183 with manual review) |
-| `asvs-l3` | 80 (259 with manual review) |
+| `asvs-l1` | 42 (70 with manual review) |
+| `asvs-l2` | 90 (198 with manual review) |
+| `asvs-l3` | 98 (268 with manual review) |
 | `owasp` | 77 |
 | `pci` | 67 (68 with manual review) |
 | `hardening` | 91 (92 with manual review) |
@@ -374,3 +381,7 @@ MageBean CLI is open-sourced software licensed under the [MIT license](./LICENSE
 - **Audit-as-a-Service** → Commercial offering.
 
 This dual model ensures that the community benefits from a free baseline audit tool, while advanced vulnerability data and professional audit services remain sustainable.
+
+ASVS counts above are requirement findings, including 12 native partial evidence implementations (missing evidence still returns UNKNOWN). Canonical selectors require a profile, for example `scan --profile=asvs-l2 --rules=OWASP-ASVS:5.0.0:6.2.1`. Explicit MB-R selections retain legacy execution. See [runtime migration and dashboard compatibility](docs/requirement-migration.md).
+
+The former ASVS L1 implementation gaps now have native checks; see [ASVS native evidence](docs/asvs-native-evidence.md) for scope, required account artifacts and human confirmation.

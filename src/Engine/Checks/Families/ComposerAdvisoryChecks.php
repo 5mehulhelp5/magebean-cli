@@ -1413,25 +1413,7 @@ final class ComposerAdvisoryChecks extends ComposerSupport
         }
 
         // ---- 5) Iterate vulnerabilities & compute latency
-        $eventsToIntervals = function (array $events): array {
-            $intervals = [];
-            $curStart = null;
-            foreach ($events as $e) {
-                if (isset($e['introduced'])) {
-                    $curStart = ltrim((string)$e['introduced'], 'vV');
-                } elseif (isset($e['fixed'])) {
-                    $fixed = ltrim((string)$e['fixed'], 'vV');
-                    $intervals[] = [$curStart, $fixed];
-                    $curStart = null;
-                } elseif (isset($e['last_affected'])) {
-                    $la = ltrim((string)$e['last_affected'], 'vV');
-                    $intervals[] = [$curStart, $la];
-                    $curStart = null;
-                }
-            }
-            if ($curStart !== null) $intervals[] = [$curStart, null];
-            return $intervals;
-        };
+        $eventsToIntervals = static fn(array $events): array => \Magebean\Engine\Cve\OsvRange::intervals($events);
 
         $parseDate = static function (?string $s): ?\DateTimeImmutable {
             if (!is_string($s) || $s === '') return null;
@@ -1493,7 +1475,8 @@ final class ComposerAdvisoryChecks extends ComposerSupport
                     foreach ($ranges as $rng) {
                         $events = is_array($rng['events'] ?? null) ? $rng['events'] : [];
                         $intervals = $eventsToIntervals($events);
-                        foreach ($intervals as [, $to]) {
+                        foreach ($intervals as [, $to, , $kind]) {
+                            if ($kind !== 'fixed') continue;
                             if ($to !== null && $to !== '') $fixedVers[] = ltrim((string)$to, 'vV');
                         }
                     }

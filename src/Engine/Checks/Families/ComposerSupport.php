@@ -123,10 +123,10 @@ abstract class ComposerSupport
                         }
                         $fixedCandidate = null;
                         $intervals = $this->eventsToIntervalsSafe($auditor, $events, $fixedCandidate);
-                        foreach ($intervals as [$start, $end]) {
-                            if ($this->inRangeSafe($auditor, $current, $start, $end)) {
+                        foreach ($intervals as [$start, $end, $inclusive, $kind]) {
+                            if ($this->inRangeSafe($auditor, $current, $start, $end, $inclusive)) {
                                 $hit = true;
-                                if ($end !== null) {
+                                if ($end !== null && $kind === 'fixed') {
                                     $fixed = $this->minVersionLocal($fixed, $end);
                                 }
                             }
@@ -424,31 +424,12 @@ abstract class ComposerSupport
 
     protected function eventsToIntervals(array $events): array
     {
-        $res = [];
-        $curStart = null;
-        foreach ($events as $ev) {
-            if (isset($ev['introduced'])) {
-                $curStart = ltrim((string)$ev['introduced'], 'v');
-            } elseif (isset($ev['fixed'])) {
-                $end = ltrim((string)$ev['fixed'], 'v');
-                if ($curStart !== null) {
-                    $res[] = [$curStart, $end];
-                    $curStart = null;
-                } else {
-                    $res[] = [null, $end];
-                }
-            }
-        }
-        if ($curStart !== null) $res[] = [$curStart, null];
-        return $res;
+        return \Magebean\Engine\Cve\OsvRange::intervals($events);
     }
 
-    protected function inRange(string $cur, ?string $a, ?string $b): bool
+    protected function inRange(string $cur, ?string $a, ?string $b, bool $inclusive = false): bool
     {
-        $cur = ltrim($cur, 'v');
-        if ($a !== null && version_compare($cur, $a, '<')) return false;
-        if ($b !== null && version_compare($cur, $b, '>=')) return false;
-        return true;
+        return \Magebean\Engine\Cve\OsvRange::contains($cur, $a, $b, $inclusive);
     }
 
     protected function extractSeverity(array $vuln): ?string
@@ -751,75 +732,14 @@ abstract class ComposerSupport
         return [$severity['label'], $severity['score'], $severity['vector']];
     }
 
-        protected function eventsToIntervalsSafe($auditor, array $events, ?string &$minFixedCandidate = null): array
-        {
-            // Try to use CveAuditor implementation if it exists
-            if (is_object($auditor)) {
-                try {
-                    $ref = new \ReflectionClass($auditor);
-                    if ($ref->hasMethod('eventsToIntervals')) {
-                        $m = $ref->getMethod('eventsToIntervals');
-                        $m->setAccessible(true);
-
-                        $params = $m->getParameters();
-                        if (count($params) >= 2) {
-                            // Method expects (array $events, ?string &$minFixedCandidate)
-                            $args = [$events, &$minFixedCandidate];
-                        } else {
-                            // Older signature: eventsToIntervals(array $events)
-                            $args = [$events];
-                        }
-
-                        $result = $m->invokeArgs($auditor, $args);
-                        if (is_array($result)) {
-                            return $result;
-                        }
-                    }
-                } catch (\Throwable $e) {
-                    // If reflection / invocation fails, fall back to local implementation
-                }
-            }
-
-            // Local fallback implementation
-            $res = [];
-            $curStart = null;
-            $minFixedCandidate = null;
-
-            foreach ($events as $ev) {
-                if (isset($ev['introduced'])) {
-                    $curStart = ltrim((string) $ev['introduced'], 'v');
-                } elseif (isset($ev['fixed'])) {
-                    $fx = ltrim((string) $ev['fixed'], 'v');
-                    $minFixedCandidate = $this->minVersionLocal($minFixedCandidate, $fx);
-
-                    if ($curStart !== null) {
-                        $res[] = [$curStart, $fx];
-                        $curStart = null;
-                    } else {
-                        $res[] = [null, $fx];
-                    }
-                }
-            }
-
-            if ($curStart !== null) {
-                $res[] = [$curStart, null];
-            }
-
-            return $res;
-        }
-
-    protected function inRangeSafe($auditor, string $cur, ?string $a, ?string $b): bool
+    protected function eventsToIntervalsSafe($auditor, array $events, ?string &$minFixedCandidate = null): array
     {
-        $ref = new \ReflectionClass($auditor);
-        if ($ref->hasMethod('inRange')) {
-            $m = $ref->getMethod('inRange');
-            $m->setAccessible(true);
-            return $m->invoke($auditor, $cur, $a, $b);
-        }
-        $cur = ltrim($cur, 'v');
-        if ($a !== null && version_compare($cur, $a, '<')) return false;
-        if ($b !== null && version_compare($cur, $b, '>=')) return false;
-        return true;
+        return \Magebean\Engine\Cve\OsvRange::intervals($events, $minFixedCandidate);
+    }
+
+    protected function inRangeSafe($auditor, string $cur, ?string $a, ?string $b, bool $inclusive = false): bool
+    {
+        return \Magebean\Engine\Cve\OsvRange::contains($cur, $a, $b, $inclusive);
     }
 
     protected function minVersionLocal(?string $cur, string $cand): string

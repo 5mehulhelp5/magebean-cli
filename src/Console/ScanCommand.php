@@ -39,9 +39,9 @@ Docs: <href=https://magebean.com/documentation>magebean.com/documentation</>
 
 <options=bold>PROFILES</>
   <fg=yellow>basic</>      Default; 21 basic production security and operations checks.
-  <fg=yellow>asvs-l1</>    32 rules by default; 60 including 28 human-verification rules.
-  <fg=yellow>asvs-l2</>    73 rules by default; 183 including 110 human-verification rules.
-  <fg=yellow>asvs-l3</>    80 rules by default; 259 including 179 human-verification rules.
+  <fg=yellow>asvs-l1</>    42 requirements by default (including partial evidence checks); 70 including human review.
+  <fg=yellow>asvs-l2</>    90 requirements by default (including partial evidence checks); 198 including human review.
+  <fg=yellow>asvs-l3</>    98 requirements by default (including partial evidence checks); 268 including human review.
   <fg=yellow>owasp</>      77 application-security rules mapped to OWASP Top 10 2025.
   <fg=yellow>pci</>        67 rules by default; 68 including 1 human-verification rule.
   <fg=yellow>hardening</>  91 rules by default; 92 with human verification enabled.
@@ -99,7 +99,7 @@ Docs: <href=https://magebean.com/documentation>magebean.com/documentation</>
 
 <options=bold>SELECTION ORDER</>
   Target pack → project policy → (--rules OR profile) → --exclude-rules.
-  --rules bypasses profile selection and selects IDs directly from the available catalog.
+  MB-R --rules bypasses profile selection. Canonical OWASP-ASVS IDs require an ASVS --profile for level context.
 
 <options=bold>NOTES</>
   • REMOTE results cover only publicly observable behavior; local-only checks are omitted.
@@ -134,8 +134,8 @@ HELP;
             ->addOption('include-manual-review', null, InputOption::VALUE_NONE, 'Include human manual-review rules (excluded by default)')
             ->addOption('capabilities', null, InputOption::VALUE_OPTIONAL, 'Comma-separated application capabilities used to activate contextual profile rules')
             ->addOption('controls', null, InputOption::VALUE_OPTIONAL, 'Comma-separated control IDs to load (e.g., MB-C01,MB-C05 or MB-01,MB-05)')
-            ->addOption('rules', null, InputOption::VALUE_OPTIONAL, 'Comma-separated rule IDs to run (e.g., MB-R036,MB-R020)')
-            ->addOption('exclude-rules', null, InputOption::VALUE_OPTIONAL, 'Comma-separated rule IDs to exclude after loading')
+            ->addOption('rules', null, InputOption::VALUE_OPTIONAL, 'Legacy MB-R or canonical ASVS requirement IDs; canonical selection requires an ASVS profile')
+            ->addOption('exclude-rules', null, InputOption::VALUE_OPTIONAL, 'Legacy aliases or canonical requirement IDs to exclude after loading')
             ->addOption('config', null, InputOption::VALUE_OPTIONAL, 'Project policy file (.magebean.json or .magebean.yml)')
             ->addOption('pci-context', null, InputOption::VALUE_OPTIONAL, 'PCI DSS applicability context JSON')
             ->addOption('pci-evidence', null, InputOption::VALUE_OPTIONAL, 'PCI DSS structured external evidence JSON')

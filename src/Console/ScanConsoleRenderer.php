@@ -261,7 +261,7 @@ final class ScanConsoleRenderer
                     $out->writeln($status === 'UNKNOWN'
                         ? '    - Re-run after resolving the missing evidence:'
                         : '    - Re-run after applying the remediation:');
-                    $out->writeln(sprintf('      <fg=green>php magebean.phar scan %s--rules=%s</>', $targetOption, $id));
+                    $out->writeln(sprintf('      <fg=green>php magebean.phar scan %s--rules=%s</>', $targetOption . (str_starts_with($id, 'OWASP-ASVS:') ? '--profile=' . escapeshellarg((string)$result['meta']['profile']['id']) . ' ' : ''), $id));
                 }
             }
         }
@@ -298,14 +298,14 @@ final class ScanConsoleRenderer
             $out->writeln('<options=bold>NEXT STEPS</>');
             if ($exampleRules !== []) {
                 $out->writeln('  Review the highest-priority finding:');
-                $out->writeln(sprintf('    <fg=green>php magebean.phar scan %s--rules=%s</>', $targetOption, $exampleRules[0]));
+                $out->writeln(sprintf('    <fg=green>php magebean.phar scan %s--rules=%s</>', $targetOption . (str_starts_with($exampleRules[0], 'OWASP-ASVS:') ? '--profile=' . escapeshellarg((string)$result['meta']['profile']['id']) . ' ' : ''), $exampleRules[0]));
 
             }
             if ($inconclusiveFindings !== []) {
                 $inconclusiveId = trim((string)($inconclusiveFindings[0]['id'] ?? ''));
                 if ($inconclusiveId !== '') {
                     $out->writeln('  Resolve an inconclusive check:');
-                    $out->writeln(sprintf('    <fg=green>php magebean.phar scan %s--rules=%s</>', $targetOption, $inconclusiveId));
+                    $out->writeln(sprintf('    <fg=green>php magebean.phar scan %s--rules=%s</>', $targetOption . (str_starts_with($inconclusiveId, 'OWASP-ASVS:') ? '--profile=' . escapeshellarg((string)$result['meta']['profile']['id']) . ' ' : ''), $inconclusiveId));
                 }
             }
             $out->writeln('');

@@ -48,9 +48,9 @@ final class CveAuditor
             $pkgMap[$name] = [
                 'name' => $name,
                 'installed' => $ver,
-                'status' => 'PASS',
+                'status' => $datasetTotal > 0 ? 'PASS' : 'UNKNOWN',
                 'advisories_count' => 0,
-                'highest_severity' => 'None',
+                'highest_severity' => $datasetTotal > 0 ? 'None' : 'Unknown',
                 'upgrade_hint' => null,
                 'advisories' => [],
             ];
@@ -98,11 +98,11 @@ final class CveAuditor
                     foreach ($aff['ranges'] as $rng) {
                         $events = $rng['events'] ?? [];
                         $intervals = $this->eventsToIntervals($events, $minFixedCandidate);
-                        foreach ($intervals as [$a, $b]) {
-                            if ($this->inRange($curVer, $a, $b)) {
+                        foreach ($intervals as [$a, $b, $inclusive, $kind]) {
+                            if ($this->inRange($curVer, $a, $b, $inclusive)) {
                                 $hit = true;
                             }
-                            if ($b !== null) {
+                            if ($b !== null && $kind === 'fixed') {
                                 $minFixed = $this->minVersion($minFixed, $b);
                             }
                         }
@@ -131,20 +131,33 @@ final class CveAuditor
                         $pkgMap[$pkg]['highest_severity'],
                         $sevLabel
                     );
-                    if ($minFixed) {
-                        $pkgMap[$pkg]['upgrade_hint'] = $this->minVersion(
-                            $pkgMap[$pkg]['upgrade_hint'],
-                            $minFixed
-                        );
-                    }
                     $advisoriesTotal++;
                 }
             }
         }
 
+        foreach ($pkgMap as $name => &$package) {
+            if ($package['status'] !== 'FAIL') continue;
+            $related = []; $candidates = [];
+            foreach ($vulns as $vuln) foreach ($vuln['affected'] ?? [] as $affected) {
+                if (($affected['package']['name'] ?? '') !== $name || !in_array(strtolower((string)($affected['package']['ecosystem'] ?? '')), ['composer', 'packagist'], true)) continue;
+                $related[] = $affected;
+                foreach ($affected['ranges'] ?? [] as $range) foreach ($range['events'] ?? [] as $event) {
+                    if (isset($event['fixed']) && version_compare(ltrim((string)$event['fixed'], 'vV'), $package['installed'], '>')) $candidates[] = ltrim((string)$event['fixed'], 'vV');
+                }
+            }
+            $candidates = array_values(array_unique($candidates));
+            usort($candidates, 'version_compare');
+            foreach ($candidates as $candidate) {
+                $safe = true;
+                foreach ($related as $affected) if (OsvRange::affects($affected, $candidate)) { $safe = false; break; }
+                if ($safe) { $package['upgrade_hint'] = $candidate; break; }
+            }
+        }
+        unset($package);
         $packagesTotal = count($pkgMap);
         $packagesAffected = count(array_filter($pkgMap, fn($p) => $p['status'] === 'FAIL'));
-        $highestOverall = 'None';
+        $highestOverall = $datasetTotal > 0 ? 'None' : 'Unknown';
         foreach ($pkgMap as $p) $highestOverall = $this->maxSeverity($highestOverall, $p['highest_severity']);
 
         usort($pkgMap, function ($a, $b) {
@@ -302,33 +315,12 @@ final class CveAuditor
 
     private function eventsToIntervals(array $events, ?string &$minFixedCandidate = null): array
     {
-        $res = [];
-        $curStart = null;
-        $minFixedCandidate = null;
-        foreach ($events as $ev) {
-            if (isset($ev['introduced'])) {
-                $curStart = ltrim((string)$ev['introduced'], 'v');
-            } elseif (isset($ev['fixed'])) {
-                $fx = ltrim((string)$ev['fixed'], 'v');
-                $minFixedCandidate = $this->minVersion($minFixedCandidate, $fx);
-                if ($curStart !== null) {
-                    $res[] = [$curStart, $fx];
-                    $curStart = null;
-                } else {
-                    $res[] = [null, $fx];
-                }
-            }
-        }
-        if ($curStart !== null) $res[] = [$curStart, null];
-        return $res;
+        return OsvRange::intervals($events, $minFixedCandidate);
     }
 
-    private function inRange(string $cur, ?string $a, ?string $b): bool
+    private function inRange(string $cur, ?string $a, ?string $b, bool $inclusive = false): bool
     {
-        $cur = ltrim($cur, 'v');
-        if ($a !== null && version_compare($cur, $a, '<')) return false;
-        if ($b !== null && version_compare($cur, $b, '>=')) return false;
-        return true;
+        return OsvRange::contains($cur, $a, $b, $inclusive);
     }
 
     private function minVersion(?string $cur, string $cand): string
@@ -362,6 +354,10 @@ final class CveAuditor
 
     private function maxSeverity(string $a, string $b): string
     {
+        if (!in_array(strtolower($a), ['critical', 'high', 'medium', 'low', 'none'], true)) $a = 'Unknown';
+        if (!in_array(strtolower($b), ['critical', 'high', 'medium', 'low', 'none'], true)) $b = 'Unknown';
+        if (strtolower($a) === 'none' && strtolower($b) === 'unknown') return $b;
+        if (strtolower($b) === 'none' && strtolower($a) === 'unknown') return $a;
         return $this->sevOrder($a) <= $this->sevOrder($b) ? $a : $b;
     }
 
@@ -384,8 +380,8 @@ final class CveAuditor
             foreach ($aff['ranges'] as $rng) {
                 $evs = $rng['events'] ?? [];
                 $intervals = $this->eventsToIntervals($evs, $minFx);
-                foreach ($intervals as [$a, $b]) {
-                    $out['ranges'][] = array_filter(['introduced' => $a, 'fixed' => $b], fn($x) => $x !== null);
+                foreach ($intervals as [$a, $b, $inclusive, $kind]) {
+                    $out['ranges'][] = array_filter(['introduced' => $a, ($kind ?? 'fixed') => $b], fn($x) => $x !== null);
                 }
             }
         }

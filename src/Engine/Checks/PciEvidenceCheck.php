@@ -60,8 +60,13 @@ final class PciEvidenceCheck
 
         $failures = [];
         $manualReasons = [];
+        $components = array_column($document['scope']['components'], null, 'id');
         foreach ($document['accounts'] as $account) {
             $accountId = (string) $account['id'];
+            if ($components[$account['component_id']]['in_scope'] === false) {
+                $manualReasons[] = "Account {$accountId} belongs to a declared out-of-scope component; scope exclusion requires human confirmation.";
+                continue;
+            }
             $classification = (string) $account['classification'];
             $intendedUse = (string) $account['intended_use'];
             $observedState = (string) $account['observed_state'];

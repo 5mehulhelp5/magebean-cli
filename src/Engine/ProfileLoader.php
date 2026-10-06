@@ -25,8 +25,23 @@ final class ProfileLoader
         return self::normalize($data);
     }
 
+    /** Dashboard canonical requests use bundled profiles, never project shadow files. */
+    public static function loadBundled(string $profile): array
+    {
+        if (!preg_match('/^[a-z0-9-]+$/D', $profile)) throw new \RuntimeException('Invalid bundled profile name.');
+        $file = self::dir() . '/' . $profile . '.json';
+        $data = self::loadWithInheritance($file, '', [], true);
+        $data['_source'] = $file;
+        return self::normalize($data);
+    }
 
-    private static function loadWithInheritance(string $file, string $projectPath, array $stack = []): array
+    public static function applyRequirements(array $pack, array $profile, bool $ignoreUnknownRules = false, array $capabilities = [], bool $restrictToAvailable = false): array
+    {
+        return RequirementCatalog::compile(self::apply($pack, $profile, $ignoreUnknownRules, $capabilities), $profile, $capabilities, $restrictToAvailable);
+    }
+
+
+    private static function loadWithInheritance(string $file, string $projectPath, array $stack = [], bool $bundledOnly = false): array
     {
         $realFile = realpath($file) ?: $file;
         if (in_array($realFile, $stack, true)) {
@@ -52,10 +67,11 @@ final class ProfileLoader
                 throw new \RuntimeException('Profile inheritance contains an invalid parent.');
             }
             $parentBasePath = self::looksLikePath((string)$parent) ? dirname($file) : $projectPath;
-            $parentFile = self::resolveProfileFile((string)$parent, $parentBasePath);
+            if ($bundledOnly && !preg_match('/^[a-z0-9-]+$/D', (string)$parent)) throw new \RuntimeException('Invalid bundled profile parent.');
+            $parentFile = $bundledOnly ? self::dir() . '/' . $parent . '.json' : self::resolveProfileFile((string)$parent, $parentBasePath);
             $merged = self::mergeProfiles(
                 $merged,
-                self::loadWithInheritance($parentFile, $projectPath, $nextStack)
+                self::loadWithInheritance($parentFile, $projectPath, $nextStack, $bundledOnly)
             );
         }
 

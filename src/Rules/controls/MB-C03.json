@@ -63,7 +63,7 @@
       "op": "all",
       "checks": [
         {
-          "name": "code_unserialize_safety",
+          "name": "code_grep",
           "args": {
             "paths": [
               "app"
@@ -135,7 +135,7 @@
       "op": "all",
       "checks": [
         {
-          "name": "code_grep",
+          "name": "code_unserialize_safety",
           "args": {
             "paths": [
               "app"

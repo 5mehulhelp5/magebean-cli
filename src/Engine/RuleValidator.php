@@ -68,6 +68,21 @@ final class RuleValidator
                 if (!$registry->has($name)) {
                     $errors[] = self::label($id, $index) . " references unknown check '{$name}'.";
                 }
+                if ($name === 'requirement_assessment' && is_array($check['args'] ?? null)) {
+                    $groups = $check['args']['groups'] ?? null;
+                    if (!is_array($groups)) $errors[] = self::label($id, $index) . ' requirement groups must be an array.';
+                    else foreach ($groups as $group) {
+                        if (!is_array($group) || !is_bool($group['missing'] ?? null) || !in_array($group['op'] ?? '', ['all', 'any'], true) || !is_array($group['checks'] ?? null)) {
+                            $errors[] = self::label($id, $index) . ' has invalid requirement evidence group.'; continue;
+                        }
+                        if ($group['missing']) continue;
+                        if (array_filter($group['checks'], static fn($child): bool => is_array($child) && ($child['name'] ?? '') === 'requirement_assessment')) {
+                            $errors[] = self::label($id, $index) . ' recursively embeds a requirement assessment.'; continue;
+                        }
+                        $child = ['id' => $group['id'] ?? '', 'title' => 'Evidence group', 'control' => $rule['control'] ?? '', 'severity' => $rule['severity'] ?? '', 'op' => $group['op'], 'checks' => $group['checks']];
+                        foreach (self::validatePack(['rules' => [$child]], $registry) as $error) $errors[] = self::label($id, $index) . ': ' . $error;
+                    }
+                }
                 if (isset($check['args']) && !is_array($check['args'])) {
                     $errors[] = self::label($id, $index) . " check '{$name}' args must be an object.";
                 }

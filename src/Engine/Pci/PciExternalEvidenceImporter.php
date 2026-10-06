@@ -29,7 +29,16 @@ final class PciExternalEvidenceImporter
     }
     private function result(bool $valid,array $errors,array $by,int $count):array{return ['valid'=>$valid,'errors'=>$errors,'evidence_by_requirement'=>$by,'summary'=>['items'=>$count,'requirements'=>count($by),'credential_material_processed'=>false]];}
     private function validId(string $v):bool{return $v!==''&&strlen($v)<=200&&preg_match('/^[A-Za-z0-9][A-Za-z0-9._:\/-]*$/',$v)===1;}
-    private function validTimestamp(mixed $v):bool{if(!is_string($v)||trim($v)==='')return false;try{new \DateTimeImmutable($v);return true;}catch(\Throwable){return false;}}
+    private function validTimestamp(mixed $v): bool
+    {
+        if (!is_string($v) || !preg_match('/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,6})?(?:Z|[+-]\d{2}:\d{2})$/D', $v)) return false;
+        $format = str_contains($v, '.') ? '!Y-m-d\TH:i:s.uP' : '!Y-m-d\TH:i:sP';
+        $date = \DateTimeImmutable::createFromFormat($format, $v);
+        $errors = \DateTimeImmutable::getLastErrors();
+        if ($date === false || ($errors !== false && ($errors['warning_count'] || $errors['error_count']))) return false;
+        if (preg_match('/([+-])(\d{2}):(\d{2})$/', $v, $offset) && ((int)$offset[2] > 23 || (int)$offset[3] > 59)) return false;
+        return true;
+    }
     private function rejectUnknownKeys(array $value,array $allowed,string $path,array &$errors):void{foreach(array_diff(array_keys($value),$allowed) as $key)$errors[]="Unknown field at {$path}.{$key}.";}
     private function rejectForbiddenKeys(mixed $v,string $path,array &$errors):void{if(!is_array($v))return;foreach($v as $k=>$child){$key=strtolower((string)$k);if(in_array($key,self::FORBIDDEN,true))$errors[]="Forbidden sensitive field at {$path}.{$k}; use references and fingerprints only.";$this->rejectForbiddenKeys($child,$path.'.'.$k,$errors);}}
 }

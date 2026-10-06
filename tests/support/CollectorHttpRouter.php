@@ -1,5 +1,7 @@
 <?php
 declare(strict_types=1);
+if (isset($_GET['redirect'])) { header('Strict-Transport-Security: max-age=31536000'); header('Location: /?final=1', true, 302); return; }
+if (isset($_GET['final'])) { header('X-Final: yes'); echo 'final'; return; }
 if (isset($_GET['delay'])) usleep(750000);
 if (isset($_GET['status'])) {
     http_response_code((int)$_GET['status']);

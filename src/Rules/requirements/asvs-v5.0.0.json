@@ -1,0 +1,210 @@
+{
+  "standard": "OWASP-ASVS",
+  "version": "5.0.0",
+  "implementations": {
+    "1.3.1": {
+      "id": "ASVS-NATIVE:1.3.1",
+      "title": "Untrusted HTML sanitization",
+      "control": "MB-C03",
+      "severity": "high",
+      "coverage": "PARTIALLY_AUTOMATED",
+      "checks": [
+        {
+          "name": "asvs_source_evidence",
+          "args": {
+            "requirement": "1.3.1",
+            "review": "Verify untrusted rich-HTML entry points, the actual sanitizer call path/library policy, and bypass payload tests."
+          }
+        }
+      ],
+      "review": "Verify untrusted rich-HTML entry points, the actual sanitizer call path/library policy, and bypass payload tests."
+    },
+    "2.2.1": {
+      "id": "ASVS-NATIVE:2.2.1",
+      "title": "Business and functional input validation",
+      "control": "MB-C03",
+      "severity": "high",
+      "coverage": "PARTIALLY_AUTOMATED",
+      "checks": [
+        {
+          "name": "asvs_source_evidence",
+          "args": {
+            "requirement": "2.2.1",
+            "review": "Verify positive validation against business constraints before decisions; L2/L3 scope includes all input, not only critical input."
+          }
+        }
+      ],
+      "review": "Verify positive validation against business constraints before decisions; L2/L3 scope includes all input, not only critical input."
+    },
+    "3.2.2": {
+      "id": "ASVS-NATIVE:3.2.2",
+      "title": "Safe text DOM rendering",
+      "control": "MB-C03",
+      "severity": "high",
+      "coverage": "PARTIALLY_AUTOMATED",
+      "checks": [
+        {
+          "name": "asvs_source_evidence",
+          "args": {
+            "requirement": "3.2.2",
+            "review": "Classify text versus HTML output and verify every relevant DOM sink and dynamic browser flow."
+          }
+        }
+      ],
+      "review": "Classify text versus HTML output and verify every relevant DOM sink and dynamic browser flow."
+    },
+    "3.5.3": {
+      "id": "ASVS-NATIVE:3.5.3",
+      "title": "Sensitive operations use appropriate methods",
+      "control": "MB-C03",
+      "severity": "high",
+      "coverage": "PARTIALLY_AUTOMATED",
+      "checks": [
+        {
+          "name": "asvs_source_evidence",
+          "args": {
+            "requirement": "3.5.3",
+            "review": "Verify sensitive route method enforcement or strict Sec-Fetch site/mode/destination validation; do not invoke state-changing routes during discovery."
+          }
+        }
+      ],
+      "review": "Verify sensitive route method enforcement or strict Sec-Fetch site/mode/destination validation; do not invoke state-changing routes during discovery."
+    },
+    "4.1.1": {
+      "id": "ASVS-NATIVE:4.1.1",
+      "title": "Response media type and safe character encoding",
+      "control": "MB-C04",
+      "severity": "high",
+      "coverage": "PARTIALLY_AUTOMATED",
+      "checks": [
+        {
+          "name": "asvs_response_content_type",
+          "args": {
+            "requirement": "4.1.1",
+            "review": "Verify body/media/charset consistency across authenticated and unauthenticated HTML, JSON, XML and error responses; one sample is not complete coverage."
+          }
+        }
+      ],
+      "review": "Verify body/media/charset consistency across authenticated and unauthenticated HTML, JSON, XML and error responses; one sample is not complete coverage."
+    },
+    "6.2.4": {
+      "id": "ASVS-NATIVE:6.2.4",
+      "title": "Common password denylist enforcement",
+      "control": "MB-C02",
+      "severity": "high",
+      "coverage": "PARTIALLY_AUTOMATED",
+      "checks": [
+        {
+          "name": "asvs_source_evidence",
+          "args": {
+            "requirement": "6.2.4",
+            "review": "Verify registration and password-change enforcement against at least the top 3000 passwords matching the actual password policy; library references do not prove list size or enforcement."
+          }
+        }
+      ],
+      "review": "Verify registration and password-change enforcement against at least the top 3000 passwords matching the actual password policy; library references do not prove list size or enforcement."
+    },
+    "6.3.2": {
+      "id": "ASVS-NATIVE:6.3.2",
+      "title": "Default account absence or disabling",
+      "control": "MB-C02",
+      "severity": "high",
+      "coverage": "PARTIALLY_AUTOMATED",
+      "checks": [
+        {
+          "name": "asvs_default_accounts",
+          "args": {
+            "requirement": "6.3.2",
+            "review": "Verify live default-account provenance and enabled state across the application and identity providers; supplied inventory must be complete and independently confirmed."
+          }
+        }
+      ],
+      "review": "Verify live default-account provenance and enabled state across the application and identity providers; supplied inventory must be complete and independently confirmed."
+    },
+    "9.1.1": {
+      "id": "ASVS-NATIVE:9.1.1",
+      "title": "Self-contained token signature validation",
+      "control": "MB-C03",
+      "severity": "high",
+      "coverage": "PARTIALLY_AUTOMATED",
+      "checks": [
+        {
+          "name": "asvs_source_evidence",
+          "args": {
+            "requirement": "9.1.1",
+            "review": "Verify signature/MAC validation before token claims are trusted, including invalid-signature rejection tests."
+          }
+        }
+      ],
+      "review": "Verify signature/MAC validation before token claims are trusted, including invalid-signature rejection tests."
+    },
+    "9.1.2": {
+      "id": "ASVS-NATIVE:9.1.2",
+      "title": "Self-contained token algorithm policy",
+      "control": "MB-C03",
+      "severity": "high",
+      "coverage": "PARTIALLY_AUTOMATED",
+      "checks": [
+        {
+          "name": "asvs_source_evidence",
+          "args": {
+            "requirement": "9.1.2",
+            "review": "Verify context-specific permitted algorithms, rejection of None, and symmetric/asymmetric key-confusion protections."
+          }
+        }
+      ],
+      "review": "Verify context-specific permitted algorithms, rejection of None, and symmetric/asymmetric key-confusion protections."
+    },
+    "9.1.3": {
+      "id": "ASVS-NATIVE:9.1.3",
+      "title": "Trusted token verification key sources",
+      "control": "MB-C03",
+      "severity": "high",
+      "coverage": "PARTIALLY_AUTOMATED",
+      "checks": [
+        {
+          "name": "asvs_source_evidence",
+          "args": {
+            "requirement": "9.1.3",
+            "review": "Verify issuer-specific preconfigured key sources and trusted allowlists for jku/x5u/jwk; a key reference is not proof of trust."
+          }
+        }
+      ],
+      "review": "Verify issuer-specific preconfigured key sources and trusted allowlists for jku/x5u/jwk; a key reference is not proof of trust."
+    },
+    "9.2.1": {
+      "id": "ASVS-NATIVE:9.2.1",
+      "title": "Token validity time enforcement",
+      "control": "MB-C03",
+      "severity": "high",
+      "coverage": "PARTIALLY_AUTOMATED",
+      "checks": [
+        {
+          "name": "asvs_source_evidence",
+          "args": {
+            "requirement": "9.2.1",
+            "review": "Verify acceptance/rejection at nbf/exp boundaries and configured clock skew whenever a validity span is present."
+          }
+        }
+      ],
+      "review": "Verify acceptance/rejection at nbf/exp boundaries and configured clock skew whenever a validity span is present."
+    },
+    "11.4.1": {
+      "id": "ASVS-NATIVE:11.4.1",
+      "title": "Approved cryptographic hash purpose",
+      "control": "MB-C03",
+      "severity": "high",
+      "coverage": "PARTIALLY_AUTOMATED",
+      "checks": [
+        {
+          "name": "asvs_source_evidence",
+          "args": {
+            "requirement": "11.4.1",
+            "review": "Classify actual cryptographic purposes and verify approved hash algorithms; an MD5 checksum for a non-cryptographic purpose is not a confirmed violation."
+          }
+        }
+      ],
+      "review": "Classify actual cryptographic purposes and verify approved hash algorithms; an MD5 checksum for a non-cryptographic purpose is not a confirmed violation."
+    }
+  }
+}

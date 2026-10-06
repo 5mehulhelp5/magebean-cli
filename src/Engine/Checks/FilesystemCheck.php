@@ -268,52 +268,40 @@ final class FilesystemCheck
     public function logRotationConfigured(array $args): array
     {
         $fileRel = (string)($args['file'] ?? 'devops/logrotate.conf');
-        $file = $this->ctx->abs($fileRel);
-        if (!is_file($file)) {
-            return [false, 'Log rotation configuration file not found', ['file' => $fileRel]];
-        }
-
-        $content = @file_get_contents($file);
-        if ($content === false) {
-            return [null, '[UNKNOWN] Unable to read log rotation configuration', ['file' => $fileRel]];
-        }
-
-        $activeLines = [];
-        foreach (preg_split("~\r?\n~", $content) as $line) {
-            $line = trim(preg_replace('~\s+#.*$~', '', (string)$line) ?? '');
-            if ($line === '' || str_starts_with($line, '#')) {
+        $content = @file_get_contents($this->ctx->abs($fileRel));
+        if ($content === false) return [null, '[UNKNOWN] Log rotation configuration unavailable', ['file' => $fileRel]];
+        $defaults = ['rotate' => null, 'compress' => false]; $blocks = []; $state = $defaults;
+        $target = ''; $inside = false; $script = false; $pending = ''; $unsupported = false;
+        foreach (preg_split('~\r?\n~', $content) ?: [] as $raw) {
+            $line = trim(preg_replace('~\s+#.*$~', '', $raw) ?? '');
+            if ($line === '' || str_starts_with($line, '#')) continue;
+            if ($script) { if ($line === 'endscript') $script = false; continue; }
+            if (preg_match('~^(?:pre|post|first|last)action\b|^(?:pre|post)rotate\b~', $line)) { $script = true; continue; }
+            if (!$inside && str_contains($line, '{')) {
+                [$head, $tail] = explode('{', $line, 2);
+                $target = trim($pending . ' ' . $head); $pending = ''; $state = $defaults; $inside = true;
+                if (trim($tail) !== '') $unsupported = true;
                 continue;
             }
-            $activeLines[] = $line;
+            if ($line === '}' && $inside) {
+                $blocks[] = ['target' => $target] + $state; $inside = false; continue;
+            }
+            if (preg_match('~^rotate\s+(-?\d+)\s*$~', $line, $match)) {
+                if ($inside) $state['rotate'] = (int)$match[1]; else $defaults['rotate'] = (int)$match[1];
+            } elseif ($line === 'compress' || $line === 'nocompress') {
+                if ($inside) $state['compress'] = $line === 'compress'; else $defaults['compress'] = $line === 'compress';
+            } elseif (preg_match('~^include\b~', $line)) {
+                $unsupported = true;
+            } elseif (!$inside && (str_contains($line, '/') || str_contains($line, '.log') || $line === '{')) {
+                $pending .= ' ' . $line;
+            }
         }
-        $active = implode("\n", $activeLines);
-
-        $hasRotate = preg_match('~^\s*rotate\s+\d+\b~mi', $active) === 1;
-        $hasCompress = preg_match('~^\s*(?:delaycompress|compress)\b~mi', $active) === 1;
-        $hasLogTarget = preg_match('~(?:^|\s)(?:/[^{}\s]*var/log/[^{}\s]*|var/log/[^{}\s]*|[^{}\s]*\.log)(?:\s|\{|$)~mi', $active) === 1;
-
-        $evidence = [
-            'file' => $fileRel,
-            'has_rotate' => $hasRotate,
-            'has_compress' => $hasCompress,
-            'has_log_target' => $hasLogTarget,
-        ];
-
-        $missing = [];
-        if (!$hasLogTarget) {
-            $missing[] = 'log target';
-        }
-        if (!$hasRotate) {
-            $missing[] = 'rotate directive';
-        }
-        if (!$hasCompress) {
-            $missing[] = 'compress directive';
-        }
-        if ($missing !== []) {
-            return [false, 'Log rotation configuration is incomplete: missing ' . implode(', ', $missing), $evidence];
-        }
-
-        return [true, 'Log rotation is configured with rotate and compression', $evidence];
+        $evidence = ['file' => $fileRel, 'blocks' => $blocks];
+        if ($inside || $script || $unsupported) return [null, '[UNKNOWN] Logrotate syntax or includes require effective configuration review', $evidence];
+        $relevant = array_filter($blocks, static fn(array $block): bool => preg_match('~(?:var/log/|\.log(?:["\s*]|$))~', $block['target']) === 1);
+        if ($relevant === []) return [false, 'No log target block found', $evidence];
+        foreach ($relevant as $block) if ($block['rotate'] === null || ($block['rotate'] === 0 || $block['rotate'] < -1) || !$block['compress']) return [false, 'Log target lacks positive retention or enabled compression: ' . $block['target'], $evidence];
+        return [true, 'Log rotation has positive retention and compression for each detected log target', $evidence];
     }
 
     public function codeDirsReadonly(array $args): array

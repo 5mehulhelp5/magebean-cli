@@ -9,13 +9,17 @@ final class SarifReporter implements Reporter
     public function write(array $result, string $outFile): void
     {
         $runs = [];
-        foreach ($result['findings'] as $f) {
-            $runs[] = ['ruleId' => $f['id'], 'level' => $f['passed'] ? 'note' : 'error', 'message' => ['text' => $f['title']]];
-            if (strtoupper((string)($f['status'] ?? '')) !== 'FAIL') {
-                continue;
-            }
+        foreach ($result['findings'] ?? [] as $f) {
+            $status = strtoupper((string)($f['status'] ?? 'UNKNOWN'));
+            if ($status === 'PASS') continue;
+            $runs[] = [
+                'ruleId' => (string)$f['id'],
+                'level' => $status === 'FAIL' ? 'error' : 'note',
+                'message' => ['text' => (string)($f['message'] ?? $f['title'] ?? '')],
+                'properties' => ['magebean_status' => $status],
+            ];
         }
-        $sarif = ['version' => '2.1.0', 'runs' => [['results' => $runs]]];
+        $sarif = ['version' => '2.1.0', 'runs' => [['tool' => ['driver' => ['name' => 'magebean-cli']], 'results' => $runs]]];
         file_put_contents($outFile, json_encode($sarif, JSON_PRETTY_PRINT));
     }
 }

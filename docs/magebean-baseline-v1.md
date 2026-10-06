@@ -1,4 +1,4 @@
-# Magebean Security Baseline v1.0 - Current Rule Catalog
+# Magebean Security Baseline v1.0 - Current Legacy Assessment Catalog
 
 **Author:** Son Cao
 **Original date:** 2025-08-20
@@ -25,9 +25,13 @@ Profiles select subsets of this catalog for a particular assessment objective. A
 
 A **Control** is a high-level security category that groups related rules, such as file permissions, authentication hardening, secure coding, transport security, dependency governance, or human assurance.
 
-### 1.2 Rule
+### 1.2 Requirement and legacy rule
 
-A **Rule** is the canonical unit of assessment identified by an `MB-Rxxx` ID. Every rule has a severity, a verification type, and a concrete assessment criterion.
+A **requirement** is the product unit of assessment. The accepted target convention is **one rule = one requirement**, with one assessment definition per versioned requirement identity. Every definition has its own criterion, applicability, verification obligations and outcome.
+
+Current `MB-Rxxx` entries are **legacy assessment definitions**. Their existing standards mapping can associate one entry with several requirements or several entries with one requirement. The 371-entry count below describes that current catalog, not the number of unique ASVS/PCI requirements. Mapping reclassification is pending; see [Requirement model](requirement-model.md) and [ASVS migration inventory](asvs-requirement-migration.md).
+
+A **check** collects or validates evidence for a requirement. A requirement may need several checks; implementations may be reused by different requirements, but conclusions are evaluated independently. Partial automated evidence does not satisfy an outstanding human obligation.
 
 ### 1.3 Verification tags
 
@@ -42,7 +46,7 @@ The **Baseline** is the complete current catalog of **19 controls and 371 rules*
 
 ### 1.5 Profile
 
-A **Profile** is a curated selection and standards mapping over canonical rules. Profiles select the evidence appropriate to a specific assessment objective without duplicating rule definitions.
+A **Profile** selects assessment requirements for an objective. In the target model, inherited profiles refer to the same versioned requirement identity rather than duplicate it. Current profile JSON still selects legacy `rules` and attaches standards coverage metadata; its loader and examples have not changed.
 
 ### 1.6 Scan and audit
 
@@ -2916,3 +2920,7 @@ Magento background processes that pre-compute data (e.g., search, catalog, prici
 
 **Note:** Magebean Security Baseline is an original framework authored by Son Cao.
 It is aligned with OWASP standards but tailored specifically for Magento 2.
+
+## ASVS requirement runtime migration
+
+`RequirementCatalog` compiles ASVS coverage metadata and legacy evidence definitions into one versioned requirement definition. `RequirementPolicy` applies canonical selection/presentation policy after compilation. `RequirementEvaluator` evaluates grouped evidence through the existing registry and scan deadline/lease callback. Necessary groups use AND; source alternatives preserve their operator, while mandatory human evidence is a separate obligation. Gap definitions produce UNKNOWN. Legacy `ProfileLoader::apply`, MB-R catalog loading and non-ASVS profiles remain adapters. See [runtime migration](requirement-migration.md) for scope and compatibility.

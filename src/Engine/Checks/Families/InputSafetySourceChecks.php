@@ -523,7 +523,7 @@ final class InputSafetySourceChecks extends CodeSearchSupport
     private function unserializeFindings(string $file, string $content): array
     {
         $findings = [];
-        if (preg_match_all('~(?<!->)(?<!::)(?<!function\s)\b\\\\?unserialize\s*\((?P<args>.{0,500})~is', $content, $matches, PREG_OFFSET_CAPTURE | PREG_SET_ORDER) !== 1) {
+        if (preg_match_all('~(?<!->)(?<!::)(?<!function\s)\b\\\\?unserialize\s*\((?P<args>.{0,500})~is', $content, $matches, PREG_OFFSET_CAPTURE | PREG_SET_ORDER) < 1) {
             return [];
         }
 
@@ -553,7 +553,7 @@ final class InputSafetySourceChecks extends CodeSearchSupport
         ];
 
         foreach ($patterns as $kind => $regex) {
-            if (preg_match_all($regex, $searchable, $matches, PREG_OFFSET_CAPTURE | PREG_SET_ORDER) !== 1) {
+            if (preg_match_all($regex, $searchable, $matches, PREG_OFFSET_CAPTURE | PREG_SET_ORDER) < 1) {
                 continue;
             }
 
@@ -587,7 +587,7 @@ final class InputSafetySourceChecks extends CodeSearchSupport
         ];
 
         foreach ($patterns as $kind => $regex) {
-            if (preg_match_all($regex, $searchable, $matches, PREG_OFFSET_CAPTURE | PREG_SET_ORDER) !== 1) {
+            if (preg_match_all($regex, $searchable, $matches, PREG_OFFSET_CAPTURE | PREG_SET_ORDER) < 1) {
                 continue;
             }
 
@@ -620,7 +620,7 @@ final class InputSafetySourceChecks extends CodeSearchSupport
         ];
 
         foreach ($patterns as $kind => $regex) {
-            if (preg_match_all($regex, $searchable, $matches, PREG_OFFSET_CAPTURE | PREG_SET_ORDER) !== 1) {
+            if (preg_match_all($regex, $searchable, $matches, PREG_OFFSET_CAPTURE | PREG_SET_ORDER) < 1) {
                 continue;
             }
 
@@ -654,7 +654,7 @@ final class InputSafetySourceChecks extends CodeSearchSupport
         ];
 
         foreach ($patterns as $kind => $regex) {
-            if (preg_match_all($regex, $searchable, $matches, PREG_OFFSET_CAPTURE | PREG_SET_ORDER) !== 1) {
+            if (preg_match_all($regex, $searchable, $matches, PREG_OFFSET_CAPTURE | PREG_SET_ORDER) < 1) {
                 continue;
             }
 
@@ -685,7 +685,7 @@ final class InputSafetySourceChecks extends CodeSearchSupport
         $searchable = $this->maskPhpStringsAndComments($content);
         $regex = '~\b(?P<fn>rand|mt_rand|array_rand|shuffle|str_shuffle|uniqid)\s*\(~i';
 
-        if (preg_match_all($regex, $searchable, $matches, PREG_OFFSET_CAPTURE | PREG_SET_ORDER) !== 1) {
+        if (preg_match_all($regex, $searchable, $matches, PREG_OFFSET_CAPTURE | PREG_SET_ORDER) < 1) {
             return [];
         }
 
@@ -958,12 +958,12 @@ final class InputSafetySourceChecks extends CodeSearchSupport
 
     private function hasSsrfSafeguards(string $window): bool
     {
-        $hasHostValidation = preg_match('~\b(?:parse_url|UriInterface|getHost|filter_var|FILTER_VALIDATE_URL|allowedHosts?|allowlist|whitelist|isAllowedHost|validateHost|validateUrl)\b~i', $window) === 1;
+        $hasHostValidation = preg_match('~\b(?:allowedHosts?|allowlist|whitelist|isAllowedHost)\b~i', $window) === 1;
         $hasPrivateIpGuard = preg_match('~\b(?:FILTER_FLAG_NO_PRIV_RANGE|FILTER_FLAG_NO_RES_RANGE|private|localhost|127\.0\.0\.1|0\.0\.0\.0|169\.254|10\.|172\.(?:1[6-9]|2\d|3[01])\.|192\.168|::1|fc00|fe80|metadata)\b~i', $window) === 1;
         $hasProtocolGuard = preg_match('~\b(?:https?|scheme|getScheme)\b[\s\S]{0,160}(?:===|==|in_array|allowed|https)~i', $window) === 1;
         $hasTimeout = preg_match('~\b(?:CURLOPT_TIMEOUT|CURLOPT_CONNECTTIMEOUT|timeout|setTimeout|connect_timeout|read_timeout)\b~i', $window) === 1;
 
-        return $hasTimeout && ($hasHostValidation || $hasPrivateIpGuard || $hasProtocolGuard);
+        return $hasTimeout && ($hasHostValidation || ($hasPrivateIpGuard && $hasProtocolGuard));
     }
 
     private function looksLikeUnsafeSqlArgument(string $arg): bool

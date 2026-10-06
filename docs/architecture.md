@@ -1,8 +1,14 @@
 # Magebean CLI architecture after phases 1–6
 
 This is an incremental refactor, preserving command options, bundled rules,
-ordinary output/exit behavior and agent transport schema. The phase 1 frozen
-baseline is still authoritative for behavior; it was not regenerated.
+ordinary output/exit behavior and agent transport schema. The original phase 1 snapshot preserved behavior during architecture work.
+The subsequent [QA remediation](qa-remediation.md) accepted only reviewed
+routing and OR truth-table changes; current compatibility tests use that reviewed snapshot.
+
+## Requirement assessment direction
+
+The [accepted requirement model](requirement-model.md) defines one requirement per assessment definition, with multiple reusable checks and one scope-aware conclusion. [ASVS L1/L2 migration inventory](asvs-requirement-migration.md) records the legacy mappings to split or compose. ASVS profiles now use this model through RequirementCatalog and RequirementEvaluator. The legacy catalog remains an evidence adapter; see the runtime migration section below for selectors, reporting and agent compatibility.
+
 
 ## Application flow
 
@@ -111,3 +117,7 @@ not an atomic deployment snapshot. Pending corruption/permanent rejection retain
 data and can block subsequent claims; exactly-once delivery depends on the server.
 These boundaries are intentional to preserve existing behavior and are detailed
 in `scan-collectors.md` and `scan-reliability.md`.
+
+## ASVS requirement runtime migration
+
+`RequirementCatalog` compiles ASVS coverage metadata and legacy evidence definitions into one versioned requirement definition. `RequirementPolicy` applies canonical selection/presentation policy after compilation. `RequirementEvaluator` evaluates grouped evidence through the existing registry and scan deadline/lease callback. Necessary groups use AND; source alternatives preserve their operator, while mandatory human evidence is a separate obligation. Gap definitions produce UNKNOWN. Legacy `ProfileLoader::apply`, MB-R catalog loading and non-ASVS profiles remain adapters. See [runtime migration](requirement-migration.md) for scope and compatibility.

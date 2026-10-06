@@ -249,8 +249,9 @@ final class HttpCheck
     private function mixedContentInMarkup(string $body): array
     {
         $offenders = [];
+        $body = preg_replace('~<!--[\s\S]*?-->~', '', $body) ?? $body;
         $patterns = [
-            'html_attr' => '~\b(?:href|src|action|data-src|formaction|poster|srcset|data-srcset)\s*=\s*([\'"])(?P<url>[^\'"]*http://[^\'"]+)\1~i',
+            'html_attr' => '~<(?:script|img|iframe|frame|link|audio|video|source|track|embed|object|input|form)\b[^>]*?\b(?:href|src|action|data|data-src|formaction|poster|srcset|data-srcset)\s*=\s*([\'"])(?P<url>[^\'"]*http://[^\'"]+)\1~i',
             'css_url' => '~url\(\s*([\'"]?)(?P<url>http://[^\'")\s]+)\1\s*\)~i',
         ];
         foreach ($patterns as $kind => $regex) {
@@ -260,9 +261,6 @@ final class HttpCheck
             }
             foreach ($matches as $match) {
                 $url = isset($match['url']) && is_array($match['url']) ? (string)$match['url'][0] : '';
-                if (preg_match('~^http://(?:www\.)?(?:w3\.org|schema\.org)/~i', $url) === 1) {
-                    continue;
-                }
                 $offenders[] = [
                     'kind' => $kind,
                     'url' => $url,

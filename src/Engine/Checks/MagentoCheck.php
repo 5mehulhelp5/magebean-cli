@@ -411,6 +411,11 @@ final class MagentoCheck
         }
 
         if ($base !== '') {
+            $probes = $evidence['http_probes'];
+            $unobserved = array_filter($probes, static fn(array $probe): bool => ($probe['status'] ?? null) === null || (int)$probe['status'] < 100 || (int)$probe['status'] >= 500);
+            if ($probes === [] || $unobserved !== []) {
+                return [null, '[UNKNOWN] Admin exposure could not be verified for all probed paths', $evidence];
+            }
             return [true, 'No public admin login exposure detected on probed paths', $evidence];
         }
 

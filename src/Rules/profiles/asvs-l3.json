@@ -17,11 +17,11 @@
         "level_2_inherited": 183,
         "level_3_additions": 92,
         "automated": 16,
-        "partially_automated": 70,
+        "partially_automated": 82,
         "manual_review": 170,
         "context_required": 77,
         "not_applicable": 0,
-        "not_yet_covered": 12
+        "not_yet_covered": 0
     },
     "report_template": "owasp",
     "rules": [

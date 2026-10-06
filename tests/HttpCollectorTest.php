@@ -25,6 +25,8 @@ function exerciseHttpCollector(string $url): array {
     httpCollectorAssert($one['probe'] === 'one' && $two['probe'] === 'two', 'Request headers are preserved.');
     httpCollectorAssert($three['method'] === 'POST' && $three['body'] === 'fixture-body', 'Request method and body are preserved.');
     httpCollectorAssert(count($first[2]['headers']['set-cookie']) === 2 && $observations === [true, true, true], 'Duplicate cookies and transport observations retain semantics.');
+    $redirect = $collector->fetch($url . '/?redirect=1');
+    httpCollectorAssert($redirect[2]['status'] === 200 && !isset($redirect[2]['headers']['strict-transport-security']) && $redirect[2]['headers']['x-final'] === 'yes', 'Redirect final response must not inherit HSTS from an earlier hop.');
     $check = new HttpCheck(new Context('.', $url, '', ['url' => $url]));
     $result = $check->dispatch('http_cache_signals', ['timeout_ms' => 1000]);
     httpCollectorAssert($result[0] === true && $check->getTransportCounts() === ['ok' => 2, 'total' => 2], 'Cache-signal check makes two real requests and counts both.');

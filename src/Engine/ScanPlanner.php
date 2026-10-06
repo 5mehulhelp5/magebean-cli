@@ -64,7 +64,7 @@ final class ScanPlanner
             }
         }
 
-        $pack = RulePackMerger::applyProjectConfig($pack, $projectConfig);
+        $pack = RulePackMerger::applyProjectConfig($pack, RequirementPolicy::evidenceConfig($projectConfig));
 
         $activeProfile = $targetMode === 'REMOTE'
             ? [
@@ -99,11 +99,25 @@ final class ScanPlanner
                 $profileCanBePartial = $targetMode === 'REMOTE'
                     || $controlsFilter !== [] || $projectConfig !== [];
                 $pack = ProfileLoader::apply($pack, $profile, $profileCanBePartial, $capabilities);
+                $pack = RequirementCatalog::compile($pack, $profile, $capabilities, $targetMode === 'REMOTE' || $controlsFilter !== [] || !empty(RequirementPolicy::evidenceConfig($projectConfig)['include_rules']) || !empty(RequirementPolicy::evidenceConfig($projectConfig)['select_rules']) || !empty(RequirementPolicy::evidenceConfig($projectConfig)['exclude_rules']) || !empty($projectConfig['exclude_controls']));
                 $activeProfile = ProfileLoader::publicMetadata($profile);
                 $standard = (string)($activeProfile['id'] ?? $standard);
                 $diagnostic(new ScanDiagnostic('info', 'Loaded profile:', ' ' . (string)($activeProfile['id'] ?? $profileOpt)));
             }
         }
+
+        if ($hasExplicitRuleSelection && stripos($rulesOpt, 'OWASP-ASVS:') !== false) {
+            if ($profileOpt === '') throw new \RuntimeException('Canonical ASVS IDs require --profile=asvs-l1/l2/l3 for assessment-level context.');
+            $requirementProfile = ProfileLoader::load($profileOpt, $configBasePath);
+            if (!RequirementCatalog::supports($requirementProfile)) throw new \RuntimeException('Canonical ASVS IDs require an ASVS --profile for assessment-level context.');
+            $activeProfile = ProfileLoader::publicMetadata($requirementProfile);
+            $standard = (string)$activeProfile['id'];
+            $canonical = RequirementCatalog::compile(ProfileLoader::apply($pack, $requirementProfile, $targetMode === 'REMOTE' || $controlsFilter !== [] || $projectConfig !== [], $capabilities), $requirementProfile, $capabilities, $targetMode === 'REMOTE' || $controlsFilter !== []);
+            if (RequirementPolicy::hasCanonical($projectConfig)) $canonical = RequirementPolicy::apply($canonical, $projectConfig);
+            $pack['rules'] = array_merge($pack['rules'], $canonical['rules']);
+        }
+
+        if (!$hasExplicitRuleSelection) $pack = RequirementPolicy::apply($pack, $projectConfig);
 
         $activeProfileId = strtolower((string)($activeProfile['id'] ?? ''));
         $isPciProfile = $standard === 'pci' || str_starts_with($activeProfileId, 'pci-dss');
@@ -133,10 +147,17 @@ final class ScanPlanner
                     $byId[strtoupper((string)($r['id'] ?? ''))] = $r;
                 }
                 $selected = [];
+                $selectedRequirements = [];
                 $unknown  = [];
                 foreach ($requestedIds as $id) {
                     $key = strtoupper($id);
-                    if (isset($byId[$key])) $selected[] = $byId[$key];
+                    if (isset($byId[$key])) {
+                        if (str_starts_with($key, 'OWASP-ASVS:')) {
+                            if (isset($selectedRequirements[$key])) continue;
+                            $selectedRequirements[$key] = true;
+                        }
+                        $selected[] = $byId[$key];
+                    }
                     else $unknown[] = $id;
                 }
                 foreach ($unknown as $id) {
@@ -163,7 +184,7 @@ final class ScanPlanner
             if ($excludedIds) {
                 $pack['rules'] = array_values(array_filter(
                     $pack['rules'],
-                    static fn(array $rule): bool => !in_array(strtoupper((string)($rule['id'] ?? '')), $excludedIds, true)
+                    static fn(array $rule): bool => !in_array(strtoupper((string)($rule['id'] ?? '')), $excludedIds, true) && array_intersect($rule['legacy_rule_ids'] ?? [], $excludedIds) === []
                 ));
             }
         }
@@ -219,6 +240,7 @@ final class ScanPlanner
         $manifestIndex = [];
         foreach ($entries as $entry) {
             $key = strtoupper((string)($entry['rule_key'] ?? ''));
+            if (str_starts_with($key, 'OWASP-ASVS:') && isset($manifestIndex[$key])) throw new \RuntimeException('Duplicate canonical requirement in manifest.');
             if ($key !== '') $manifestIndex[$key] = $entry;
         }
         $requested = array_keys($manifestIndex);
@@ -226,12 +248,23 @@ final class ScanPlanner
         $all = RulePackLoader::loadAll();
         $index = [];
         foreach ($all['rules'] as $rule) $index[strtoupper((string)($rule['id'] ?? ''))] = $rule;
+        $canonicalError = null;
+        if (array_filter($requested, static fn(string $id): bool => str_starts_with($id, 'OWASP-ASVS:'))) {
+            try {
+                $profileName = (string)($manifest['profile'] ?? '');
+                if (!in_array(strtolower($profileName), ['asvs-l1', 'asvs-l2', 'asvs-l3'], true)) throw new \RuntimeException('Canonical ASVS manifest requires a bundled ASVS profile context.');
+                $profile = ProfileLoader::loadBundled(strtolower($profileName));
+                if (!RequirementCatalog::supports($profile)) throw new \RuntimeException('Canonical ASVS manifest requires an ASVS profile.');
+                $capabilities = is_array($manifest['capabilities'] ?? null) ? $manifest['capabilities'] : [];
+                foreach (RequirementCatalog::compile(ProfileLoader::apply($all, $profile, false, $capabilities), $profile, $capabilities)['rules'] as $definition) $index[$definition['id']] = $definition;
+            } catch (\RuntimeException $error) { $canonicalError = $error->getMessage(); }
+        }
         $selected = []; $unsupported = [];
         foreach ($requested as $id) {
             $entry = $manifestIndex[$id];
             $base = ['assessment_item_id' => (string)$entry['assessment_item_id'], 'rule_key' => $id];
             if (!isset($index[$id])) {
-                $unsupported[] = $base + ['status' => 'unsupported', 'message' => 'Rule is not bundled in this CLI version.'];
+                $unsupported[] = $base + ['status' => 'unsupported', 'message' => str_starts_with($id, 'OWASP-ASVS:') ? ($canonicalError ?? 'Requirement is unavailable for the manifest profile/capability context.') : 'Rule is not bundled in this CLI version.'];
                 continue;
             }
             $rule = $index[$id];

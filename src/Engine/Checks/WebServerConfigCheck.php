@@ -96,6 +96,7 @@ final class WebServerConfigCheck
         }
 
         $evidence = ['checked' => $checked, 'failures' => $failures];
+        foreach ($checked as $analysis) if (array_key_exists('ok', $analysis) && $analysis['ok'] === null) return [null, '[UNKNOWN] Cipher expression needs effective OpenSSL validation', $evidence];
         if ($failures !== []) {
             $lines = ['Weak TLS protocol/cipher configuration detected:'];
             foreach ($failures as $failure) {
@@ -134,7 +135,7 @@ final class WebServerConfigCheck
             'protocols' => $protocolEvidence,
             'ciphers' => $cipherEvidence,
             'missing' => $missing,
-            'ok' => $missing === [],
+            'ok' => $requireCiphers && $cipherEvidence['ok'] === null && (!$requireProtocols || $protocolEvidence['ok']) ? null : $missing === [],
         ];
     }
 
@@ -193,36 +194,36 @@ final class WebServerConfigCheck
 
     private function cipherSuiteEvidence(?string $value): array
     {
-        if ($value === null || $value === '') {
-            return ['present' => false, 'ok' => false, 'missing' => ['cipher_directive']];
-        }
-
-        $tokens = preg_split('~[:\s]+~', trim($value)) ?: [];
-        $enabledTokens = [];
-        foreach ($tokens as $token) {
-            $token = trim((string)$token);
-            if ($token === '' || str_starts_with($token, '!') || str_starts_with($token, '-')) {
+        if ($value === null || $value === '') return ['present' => false, 'ok' => false, 'missing' => ['cipher_directive']];
+        $enabled = []; $excluded = []; $uncertain = false;
+        foreach (preg_split('~[:\s,]+~', trim($value)) ?: [] as $token) {
+            if ($token === '') continue;
+            $operator = $token[0]; $name = strtoupper(ltrim($token, '!+-'));
+            if ($operator === '!' || $operator === '-') {
+                unset($enabled[$name]);
+                if ($operator === '!') $excluded[$name] = true;
+                // Intersections, aliases and wildcard exclusions need OpenSSL expansion.
+                if (str_contains($name, '+') || !preg_match('~^(?:RC4|3DES|DES|MD5|NULL|ANULL|ENULL|EXPORT|LOW|ADH|ECDHE-(?:RSA|ECDSA)-[A-Z0-9_-]+|TLS_AES_[A-Z0-9_]+|TLS_CHACHA20_[A-Z0-9_]+)$~', $name)) $uncertain = true;
                 continue;
             }
-            $enabledTokens[] = $token;
+            if ($operator === '+') continue; // Reorders existing ciphers; never enables one.
+            if (!isset($excluded[$name])) $enabled[$name] = true;
         }
-
-        $joined = implode(':', $enabledTokens);
-        $hasStrong = preg_match('~\b(?:ECDHE|TLS_AES|CHACHA20|AESGCM|EECDH|HIGH)\b~i', $joined) === 1;
-        $weakEnabled = [];
-        foreach ($enabledTokens as $token) {
-            if (preg_match('~(?:RC4|3DES|DES|MD5|NULL|aNULL|eNULL|EXPORT|LOW|ADH)~i', $token) === 1) {
-                $weakEnabled[] = $token;
+        $weak = []; $strong = false;
+        foreach (array_keys($enabled) as $name) {
+            if (preg_match('~(?:RC4|3DES|(?:^|-)DES(?:-|$)|MD5|NULL|EXPORT|LOW|ADH)~', $name)) {
+                $removed = false;
+                foreach (array_keys($excluded) as $exclude) if ($exclude === $name || (in_array($exclude, ['RC4', '3DES', 'DES', 'MD5', 'NULL', 'ANULL', 'ENULL', 'EXPORT', 'LOW', 'ADH'], true) && ($exclude === 'DES' ? preg_match('~(?:^|-)DES(?:-|$)~', $name) === 1 : str_contains($name, $exclude)))) $removed = true;
+                if (!$removed) $weak[] = $name;
+            } elseif (preg_match('~^(?:ECDHE-(?:RSA|ECDSA)-(?:AES(?:128|256)-(?:GCM-)?SHA(?:256|384)?|CHACHA20-POLY1305)|TLS_AES_(?:128_GCM_SHA256|256_GCM_SHA384)|TLS_CHACHA20_POLY1305_SHA256)$~', $name)) {
+                $strong = true;
+            } else {
+                $uncertain = true;
             }
         }
-
-        return [
-            'present' => true,
-            'value' => $value,
-            'has_strong_cipher' => $hasStrong,
-            'weak_enabled' => $weakEnabled,
-            'ok' => $hasStrong && $weakEnabled === [],
-        ];
+        return ['present' => true, 'value' => $value, 'has_strong_cipher' => $strong,
+            'weak_enabled' => $weak, 'ok' => $weak !== [] ? false : ($uncertain ? null : $strong),
+            'reason' => $uncertain ? 'Cipher aliases require effective OpenSSL expansion' : ''];
     }
     public function hstsConfig(array $args): array
     {

@@ -34,6 +34,7 @@ final class ScanRunner
         try {
             if ($this->checkpoint !== null) ($this->checkpoint)();
             if ($this->deadline?->expired()) throw new ScanDeadlineExceeded();
+            if ($name === 'requirement_assessment') return RequirementEvaluator::evaluate($args, fn(string $check, array $options): CheckResult => $this->evalCheckWithEvidence($check, $options));
             return $this->registry->runResult($name, $args);
         } catch (ScanDeadlineExceeded) {
             return CheckResult::of(CheckOutcome::Unknown, '[UNKNOWN] Scan deadline exceeded; check could not be completed.', [], 'SCAN_DEADLINE_EXCEEDED', $name);
@@ -128,8 +129,10 @@ final class ScanRunner
                     $ok = null;
                     $status = 'UNKNOWN';
                 } elseif ($hasManualReview) {
+                    $ok = null;
                     $status = 'MANUAL_REVIEW';
-                } elseif ($hasUnknown && !$hasFalse) {
+                } elseif ($hasUnknown) {
+                    $ok = null;
                     $status = 'UNKNOWN';
                 } else {
                     $status = 'FAIL';

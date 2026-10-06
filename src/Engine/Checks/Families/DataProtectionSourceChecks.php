@@ -898,7 +898,7 @@ final class DataProtectionSourceChecks extends CodeSearchSupport
         $searchable = $this->maskPhpStringsAndComments($content);
         $regex = '~(?P<logger>\$this->\s*[_A-Za-z0-9]*logger|\$[A-Za-z_][A-Za-z0-9_]*logger|\$logger)\s*->\s*(?P<method>debug|info|notice|warning|error|critical|alert|emergency|log)\s*\((?P<args>.{0,900})~is';
 
-        if (preg_match_all($regex, $searchable, $matches, PREG_OFFSET_CAPTURE | PREG_SET_ORDER) !== 1) {
+        if (preg_match_all($regex, $searchable, $matches, PREG_OFFSET_CAPTURE | PREG_SET_ORDER) < 1) {
             return [];
         }
 
@@ -933,7 +933,7 @@ final class DataProtectionSourceChecks extends CodeSearchSupport
         $searchable = $this->maskPhpStringsAndComments($content);
         $regex = '~(?P<logger>\$this->\s*[_A-Za-z0-9]*logger|\$[A-Za-z_][A-Za-z0-9_]*logger|\$logger)\s*->\s*(?P<method>debug|info|notice|warning|error|critical|alert|emergency|log)\s*\((?P<args>.{0,900})~is';
 
-        if (preg_match_all($regex, $searchable, $matches, PREG_OFFSET_CAPTURE | PREG_SET_ORDER) !== 1) {
+        if (preg_match_all($regex, $searchable, $matches, PREG_OFFSET_CAPTURE | PREG_SET_ORDER) < 1) {
             return [];
         }
 
@@ -972,7 +972,7 @@ final class DataProtectionSourceChecks extends CodeSearchSupport
         ];
 
         foreach ($patterns as $kind => $regex) {
-            if (preg_match_all($regex, $searchable, $matches, PREG_OFFSET_CAPTURE | PREG_SET_ORDER) !== 1) {
+            if (preg_match_all($regex, $searchable, $matches, PREG_OFFSET_CAPTURE | PREG_SET_ORDER) < 1) {
                 continue;
             }
 

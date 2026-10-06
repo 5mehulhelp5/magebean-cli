@@ -1,5 +1,7 @@
 # Magebean API Reference
 
+New documentation uses **requirement** for the assessment unit: one requirement has one assessment definition and can contain multiple reusable checks. ASVS profiles now compile one canonical assessment definition per requirement from legacy many-to-many evidence mappings. Other profiles remain legacy adapters. See [Requirement model](requirement-model.md) and [ASVS L1/L2 migration inventory](asvs-requirement-migration.md). Exact CLI names, JSON keys and transport fields below describe the current implementation; they have not been renamed.
+
 Magebean CLI performs most checks locally. Some dependency, package-lifecycle,
 and Adobe security-patch rules call `https://api.magebean.com`.
 
@@ -99,3 +101,11 @@ is configured.
 To prevent these API disclosures, block outbound access to
 `api.magebean.com` or do not select rules that use these endpoints. Such rules
 may return `UNKNOWN` when their remote dataset is unavailable.
+
+## Canonical ASVS agent manifests
+
+The submission envelope remains schema 1.0 with `manifest_hash`, `summary` and `results`; existing result fields and status mapping are unchanged. Only manifest-selected assessment items are returned. Legacy MB-R manifests retain their execution path.
+
+For canonical `rule_key` values such as `OWASP-ASVS:5.0.0:6.2.1`, the manifest must supply top-level `profile` equal to `asvs-l1`, `asvs-l2` or `asvs-l3`; optional `capabilities` selects conditional requirements. The agent uses bundled profiles, preventing project files from redefining dashboard assessment scope. Missing profile, inactive/unavailable canonical requirements and duplicate canonical identities are rejected or reported unsupported, rather than producing a false PASS.
+
+The dashboard must register the new requirement keys and matching assessment_item_id values before issuing canonical manifests. This code change verifies serialization and mapper compatibility locally; it does not migrate or verify a deployed dashboard. UNKNOWN and human review still map to wire status `error`. See [runtime migration](requirement-migration.md).
