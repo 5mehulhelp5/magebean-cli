@@ -11,11 +11,282 @@ final class MagentoCheck
 {
     private Context $ctx;
     private CollectorSet $collectors;
+    private ?\PDO $primaryDatabase = null;
+    private bool $primaryDatabaseAttempted = false;
     public function __construct(Context $ctx, ?CollectorSet $collectors = null)
     {
         $this->ctx = $ctx;
         $this->collectors = $collectors ?? new CollectorSet();
     }
+    /** Exact declared route predicate; entropy is not claimed. */
+    public function adminFrontNameDeclared(array $args): array
+    {
+        $file = (string)($args['file'] ?? 'app/etc/env.php');
+        $config = $this->loadArray($file);
+        if (isset($config['__ERROR__'])) return [null, '[UNKNOWN] Backend route configuration cannot be read'];
+        $route = $this->getByDotPath($config, 'backend.frontName', null);
+        if (!is_string($route) || trim($route) === '' || preg_match('/^[a-z0-9][a-z0-9_-]*$/i', $route) !== 1) {
+            return [null, '[UNKNOWN] backend.frontName is missing or malformed'];
+        }
+        $ok = strtolower($route) !== 'admin';
+        return [$ok, $ok ? 'Declared backend route differs from admin' : 'Declared backend route is the default admin', ['file' => $file, 'path' => 'backend.frontName', 'observed' => $route, 'scope' => 'declared_configuration']];
+    }
+
+    /** Configuration resolver for exact primary predicates; legacy APIs are unchanged. */
+    private function primaryConfigValue(string $path): array
+    {
+        foreach (['app/etc/env.php', 'app/etc/config.php'] as $file) {
+            if (!is_file($this->ctx->abs($file))) continue;
+            $config = $this->loadArray($file);
+            if (isset($config['__ERROR__'])) return [false, null, $file, 'Configuration cannot be read'];
+            $system = $config['system'] ?? [];
+            if (!is_array($system)) return [false, null, $file, 'System configuration is malformed'];
+            $default = $system['default'] ?? [];
+            if (!is_array($default)) return [false, null, $file, 'Default configuration is malformed'];
+            // Magento supports nested sections and slash-delimited configuration keys.
+            if (array_key_exists($path, $default)) return [true, $default[$path], $file, ''];
+            $value = $this->getByDotPath($default, str_replace('/', '.', $path), '__NOT_FOUND__');
+            if ($value !== '__NOT_FOUND__') return [true, $value, $file, ''];
+        }
+        // Unlocked values normally live in core_config_data, not config.php.
+        $env = $this->loadArray('app/etc/env.php');
+        $connection = $env['db']['connection']['default'] ?? null;
+        if (is_array($connection)) {
+            try {
+                $host = $connection['host'] ?? null; $dbname = $connection['dbname'] ?? null;
+                if (!is_string($host) || !is_string($dbname) || str_contains($host, ';') || str_contains($dbname, ';')) throw new \RuntimeException('Invalid connection');
+                $dsn = 'mysql:host=' . $host . ';dbname=' . $dbname . ';charset=utf8mb4';
+                if (isset($connection['port'])) $dsn .= ';port=' . (int)$connection['port'];
+                if (!$this->primaryDatabaseAttempted) {
+                    $this->primaryDatabaseAttempted = true;
+                    $this->primaryDatabase = new \PDO($dsn, (string)($connection['username'] ?? ''), (string)($connection['password'] ?? ''), [\PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION, \PDO::ATTR_TIMEOUT => 2]);
+                }
+                if ($this->primaryDatabase === null) throw new \RuntimeException('Connection unavailable');
+                $pdo = $this->primaryDatabase;
+                $prefix = (string)($env['db']['table_prefix'] ?? '');
+                if (preg_match('/^[a-zA-Z0-9_]*$/', $prefix) !== 1) throw new \RuntimeException('Invalid prefix');
+                $statement = $pdo->prepare('SELECT value FROM `' . $prefix . 'core_config_data` WHERE scope = ? AND scope_id = ? AND path = ?');
+                $statement->execute(['default', 0, $path]);
+                $values = $statement->fetchAll(\PDO::FETCH_COLUMN);
+                if (count($values) > 1) return [false, null, 'core_config_data', 'Conflicting default configuration'];
+                if (count($values) === 1) return [true, $values[0], 'core_config_data', ''];
+            } catch (\Throwable $exception) {
+                $this->primaryDatabaseAttempted = true;
+                $this->primaryDatabase = null;
+                // Never disclose DSN, database credentials, SQL exceptions, or config contents.
+                return [false, null, 'core_config_data', 'Default configuration database is unavailable'];
+            }
+        }
+        return $this->installedModuleDefault($path);
+    }
+
+    /** Read installed Magento module defaults, not scanner-invented fallback values. */
+    private function installedModuleDefault(string $path): array
+    {
+        $moduleFiles = ['Magento_Backend' => 'backend', 'Magento_Captcha' => 'captcha', 'Magento_Developer' => 'developer', 'Magento_Translation' => 'translation', 'Magento_User' => 'user'];
+        $config = $this->loadArray('app/etc/config.php');
+        $modules = $config['modules'] ?? [];
+        if (isset($config['__ERROR__']) || !is_array($modules)) return [false, null, 'app/etc/config.php', 'Installed module states are unavailable'];
+        $found = false; $value = null; $source = null;
+        foreach ($moduleFiles as $module => $package) {
+            if (!$this->moduleEnabled($modules, $module)) continue;
+            $relative = 'vendor/magento/module-' . $package . '/etc/config.xml';
+            $absolute = $this->ctx->abs($relative);
+            if (!is_file($absolute)) continue;
+            $text = @file_get_contents($absolute);
+            if ($text === false || stripos($text, '<!DOCTYPE') !== false || stripos($text, '<!ENTITY') !== false) return [false, null, $relative, 'Installed module defaults cannot be read safely'];
+            $previous = libxml_use_internal_errors(true);
+            $xml = simplexml_load_string($text, \SimpleXMLElement::class, LIBXML_NONET);
+            libxml_clear_errors(); libxml_use_internal_errors($previous);
+            if ($xml === false) return [false, null, $relative, 'Installed module defaults are malformed'];
+            $cursor = $xml->default;
+            foreach (explode('/', $path) as $segment) {
+                if (!preg_match('/^[a-zA-Z0-9_]+$/D', $segment) || !isset($cursor->{$segment})) { $cursor = null; break; }
+                $cursor = $cursor->{$segment};
+            }
+            if ($cursor !== null && count($cursor) > 0) { $found = true; $value = (string)$cursor; $source = $relative; }
+        }
+        return $found ? [true, $value, $source, 'Installed module default'] : [false, null, null, 'Configuration value is not available'];
+    }
+
+    /** Bounded deployment policy, not proof of every account/password workflow. */
+    public function adminPasswordMinimumConfigured(array $args): array
+    {
+        $minimum = max(1, (int)($args['min_length'] ?? 8));
+        [$found, $value, $source, $reason] = $this->primaryConfigValue('admin/security/minimum_password_length');
+        if (!$found && $source === null) [$found, $value, $source, $reason] = $this->primaryConfigValue('admin/security/password_min_length');
+        if (!$found && $source !== 'core_config_data') {
+            $relative = 'vendor/magento/module-user/Model/UserValidationRules.php';
+            if (!is_file($this->ctx->abs($relative))) $relative = 'vendor/magento/module-user/Model/User.php';
+            $text = @file_get_contents($this->ctx->abs($relative));
+            if (is_string($text)) {
+                // Only recognize the installed validator's explicit minimum declaration.
+                if (preg_match('/const\s+(?:MIN_PASSWORD_LENGTH|MIN_PASSWORD_LENGTH_ADMIN)\s*=\s*(\d+)\s*;/', $text, $match)) {
+                    $found = true; $value = $match[1]; $source = $relative;
+                } elseif (preg_match('/new\s+(?:\\\\?[A-Za-z_][A-Za-z0-9_\\\\]*\\\\)?StringLength\s*\(\s*\[\s*[\x27\x22]min[\x27\x22]\s*=>\s*(\d+)\s*\]/', $text, $match)) {
+                    $found = true; $value = $match[1]; $source = $relative;
+                }
+            }
+        }
+        $evidence = ['source' => $source, 'observed' => $value, 'minimum' => $minimum, 'scope' => 'admin_password_minimum_deployment_policy'];
+        if (!$found || !is_scalar($value) || preg_match('/^[0-9]+$/D', (string)$value) !== 1) return [null, '[UNKNOWN] Admin password minimum cannot be resolved from installed configuration or validator', $evidence];
+        $ok = (int)$value >= $minimum;
+        return [$ok, $ok ? 'Observed admin password minimum meets deployment policy' : 'Observed admin password minimum is below deployment policy', $evidence];
+    }
+
+    public function deploymentDebugFlagsDisabled(array $args): array
+    {
+        $paths = $args['paths'] ?? ['dev/debug/template_hints', 'dev/debug/template_hints_storefront', 'dev/debug/template_hints_admin', 'dev/debug/template_hints_blocks', 'dev/translate_inline/active', 'dev/translate_inline/active_admin'];
+        if (!is_array($paths) || $paths === []) return [null, '[UNKNOWN] Project debug flag paths are unavailable'];
+        $evidence = []; $unknown = false;
+        foreach ($paths as $path) {
+            [$found, $value, $source, $reason] = $this->primaryConfigValue((string)$path);
+            $evidence[$path] = ['source' => $source, 'observed' => $value, 'available' => $found, 'reason' => $reason, 'scope' => 'declared_project_configuration'];
+            if (!$found) { if ($source !== null) $unknown = true; continue; }
+            if (!in_array($value, [0, 1, '0', '1', true, false], true)) { $unknown = true; continue; }
+            if ($this->truthy($value)) return [false, 'Declared Magento debug flag is enabled: ' . $path, $evidence];
+        }
+        $result = $unknown ? [null, '[UNKNOWN] Project debug configuration cannot be resolved'] : [true, 'No enabled debug flag is declared in inspected project configuration'];
+        foreach (['.user.ini', 'pub/.user.ini', 'php.ini', 'pub/php.ini'] as $relative) {
+            $absolute = $this->ctx->abs($relative);
+            if (!is_file($absolute)) continue;
+            $ini = @parse_ini_file($absolute, false, INI_SCANNER_RAW);
+            if ($ini === false) return [null, '[UNKNOWN] Project PHP ini cannot be read', ['file' => $relative]];
+            $xdebugMode = isset($ini['xdebug.mode']) ? strtolower(trim((string)$ini['xdebug.mode'])) : null;
+            if ($xdebugMode !== null) {
+                $modes = array_map('trim', explode(',', $xdebugMode));
+                if ($modes === [] || array_diff($modes, ['off','develop','coverage','debug','gcstats','profile','trace']) !== []) return [null, '[UNKNOWN] Project Xdebug mode declaration is malformed', ['file' => $relative]];
+                if (array_diff($modes, ['off']) !== []) return [false, 'Project Xdebug mode enables debugging features', ['file' => $relative, 'modes' => $modes]];
+            }
+            if (isset($ini['zend_extension']) && stripos((string)$ini['zend_extension'], 'xdebug') !== false && $xdebugMode !== 'off') return [false, 'Project declares Xdebug without an explicit disabled mode', ['file' => $relative]];
+            foreach (['display_errors', 'display_startup_errors'] as $flag) {
+                if (!array_key_exists($flag, $ini)) continue;
+                $normalized = strtolower(trim((string)$ini[$flag]));
+                $evidence[$relative . ':' . $flag] = ['source' => $relative, 'observed' => $ini[$flag]];
+                if (in_array($normalized, ['1', 'on', 'yes', 'true', 'stdout', 'stderr'], true)) return [false, 'Project PHP error display is enabled: ' . $flag, $evidence];
+                if (!in_array($normalized, ['0', 'off', 'no', 'false', 'none', ''], true)) return [null, '[UNKNOWN] Project PHP error display flag is malformed', $evidence];
+            }
+        }
+        return [$result[0], $result[1], $evidence];
+    }
+
+    public function adminLoginProtectionConfigured(array $args): array
+    {
+        $paths = ['admin/captcha/enable', 'admin/captcha/forms', 'admin/security/lockout_failures', 'admin/security/lockout_threshold'];
+        $values = []; $evidence = [];
+        foreach ($paths as $path) {
+            [$found, $value, $source, $reason] = $this->primaryConfigValue($path);
+            $values[$path] = [$found, $value];
+            $evidence[$path] = ['source' => $source, 'observed' => $value, 'available' => $found, 'reason' => $reason];
+        }
+        [$captchaKnown, $captcha] = $values['admin/captcha/enable'];
+        [$formsKnown, $forms] = $values['admin/captcha/forms'];
+        [$failuresKnown, $failures] = $values['admin/security/lockout_failures'];
+        [$thresholdKnown, $threshold] = $values['admin/security/lockout_threshold'];
+        $boolean = static fn(mixed $value): bool => in_array($value, [0, 1, '0', '1', false, true], true);
+        $positive = static fn(mixed $value): bool => is_scalar($value) && preg_match('/^[0-9]+$/D', (string)$value) === 1;
+        $captchaValid = $captchaKnown && $boolean($captcha);
+        $formsValid = $formsKnown && (is_string($forms) || is_array($forms));
+        $formsList = is_string($forms) ? explode(',', $forms) : (is_array($forms) ? $forms : []);
+        $loginForm = in_array('backend_login', array_map(static fn($item) => is_scalar($item) ? trim((string)$item) : '', $formsList), true);
+        $rateKnown = $failuresKnown && $thresholdKnown && $positive($failures) && $positive($threshold);
+        $max = max(1, (int)($args['max_lockout_failures'] ?? 10));
+        $rateOk = $rateKnown && (int)$failures > 0 && (int)$failures <= $max && (int)$threshold > 0;
+        $captchaOk = $captchaValid && $this->truthy($captcha) && $formsValid && $loginForm;
+        if ($rateOk || $captchaOk) return [true, 'Default admin login configuration enables CAPTCHA for backend_login or bounded lockout', $evidence];
+        $modules = $this->loadArray('app/etc/config.php');
+        $moduleMap = $modules['modules'] ?? null;
+        $recaptchaDisabled = is_array($moduleMap) && !$this->moduleEnabled($moduleMap, 'Magento_ReCaptchaAdminUi');
+        if (!$recaptchaDisabled) {
+            [$found, $type, $source, $reason] = $this->primaryConfigValue('recaptcha_backend/type_for/backend_login');
+            $evidence['recaptcha_backend/type_for/backend_login'] = ['source' => $source, 'observed' => $type, 'available' => $found, 'reason' => $reason];
+            if ($found && is_string($type) && in_array($type, ['recaptcha_v2', 'recaptcha_v2_invisible', 'recaptcha_v3'], true)) {
+                return [true, 'Default admin login configuration enables reCAPTCHA for backend_login', $evidence];
+            }
+            $recaptchaDisabled = $found && ($type === '' || $type === null || $type === '0' || $type === 0);
+        }
+        $captchaRejected = $captchaValid && (!$this->truthy($captcha) || ($formsValid && !$loginForm));
+        if ($captchaRejected && $rateKnown && $recaptchaDisabled) return [false, 'Default admin login configuration enables neither backend_login CAPTCHA nor bounded lockout', $evidence];
+        return [null, '[UNKNOWN] Admin login protection configuration is missing, malformed, or inaccessible', $evidence];
+    }
+
+    /** Safe default-scope URL hint for opt-in runtime probes; never exposes DB credentials. */
+    public function configuredBaseUrl(): array
+    {
+        foreach (['web/secure/base_url', 'web/unsecure/base_url'] as $path) {
+            [$found, $value, $source, $reason] = $this->primaryConfigValue($path);
+            if (!$found || !is_string($value)) continue;
+            $parts = parse_url(trim($value));
+            if (!is_array($parts) || !in_array(strtolower((string)($parts['scheme'] ?? '')), ['http', 'https'], true) || empty($parts['host']) || isset($parts['user']) || isset($parts['pass']) || isset($parts['query']) || isset($parts['fragment'])) continue;
+            return ['url' => rtrim(trim($value), '/'), 'source' => $source, 'reason' => 'Configured default base URL'];
+        }
+        return ['url' => '', 'source' => null, 'reason' => 'No valid configured default base URL; provide --url'];
+    }
+
+    public function httpsConfigurationObserved(array $args): array
+    {
+        $evidence = []; $unknown = false;
+        foreach (['web/secure/use_in_adminhtml', 'web/secure/use_in_frontend', 'web/secure/base_url'] as $path) {
+            [$found, $value, $source, $reason] = $this->primaryConfigValue($path);
+            $evidence[$path] = ['source' => $source, 'observed' => $value, 'available' => $found, 'reason' => $reason];
+            if (!$found) { $unknown = true; continue; }
+            if ($path === 'web/secure/base_url') {
+                if (!is_string($value) || filter_var($value, FILTER_VALIDATE_URL) === false) { $unknown = true; continue; }
+                if (strtolower((string)parse_url($value, PHP_URL_SCHEME)) !== 'https') return [false, 'Declared secure base URL does not use HTTPS', $evidence];
+            } else {
+                if (!in_array($value, [0, 1, '0', '1', false, true], true)) { $unknown = true; continue; }
+                if (!$this->truthy($value)) return [false, 'Magento secure URL flag is explicitly disabled: ' . $path, $evidence];
+            }
+        }
+        if ($unknown) return [null, '[UNKNOWN] Secure URL settings are missing, malformed, or inaccessible', $evidence];
+        return [true, 'Default Magento secure URL settings enable HTTPS for admin and storefront', $evidence];
+    }
+
+    public function cookieConfigurationObserved(array $args): array
+    {
+        $evidence = []; $unknown = false;
+        foreach (['web/cookie/cookie_secure', 'web/cookie/cookie_httponly', 'web/cookie/cookie_samesite'] as $path) {
+            [$found, $value, $source, $reason] = $this->primaryConfigValue($path);
+            $evidence[$path] = ['source' => $source, 'observed' => $value, 'available' => $found, 'reason' => $reason];
+            if (!$found) { $unknown = true; continue; }
+            if ($path === 'web/cookie/cookie_samesite') {
+                if (!is_string($value)) { $unknown = true; continue; }
+                if (!in_array(strtolower(trim($value)), ['lax', 'strict'], true)) return [false, 'Declared cookie SameSite does not meet Lax/Strict policy', $evidence];
+            } else {
+                if (!in_array($value, [0, 1, '0', '1', false, true], true)) { $unknown = true; continue; }
+                if (!$this->truthy($value)) return [false, 'Declared cookie protection is explicitly disabled: ' . $path, $evidence];
+            }
+        }
+        if ($unknown) return [null, '[UNKNOWN] Cookie settings are missing, malformed, or inaccessible; runtime cookies must be probed', $evidence];
+        return [true, 'Declared default cookie settings enable Secure, HttpOnly and Lax/Strict SameSite', $evidence];
+    }
+
+    public function effectiveConfigurationValues(array $paths): array
+    {
+        $result = [];
+        foreach ($paths as $path) {
+            if (!is_string($path) || $path === '') continue;
+            [$found, $value, $source, $reason] = $this->primaryConfigValue($path);
+            $result[$path] = ['available' => $found, 'value' => $value, 'source' => $source, 'reason' => $reason];
+        }
+        return $result;
+    }
+
+    public function debugConfigurationObserved(array $args): array
+    {
+        $paths = $args['paths'] ?? ['dev/debug/template_hints', 'dev/debug/template_hints_storefront', 'dev/translate_inline/active'];
+        if (!is_array($paths) || $paths === []) return [null, '[UNKNOWN] Debug configuration paths are unavailable'];
+        $observations = $this->effectiveConfigurationValues($paths);
+        $unknown = false;
+        foreach ($observations as $path => $observation) {
+            $value = $observation['value'];
+            if (!$observation['available'] || !in_array($value, [0, 1, '0', '1', true, false], true)) { $unknown = true; continue; }
+            if ($this->truthy($value)) return [false, 'Default Magento debug or inline translation flag is enabled: ' . $path, $observations];
+        }
+        if ($unknown || count($observations) !== count($paths)) return [null, '[UNKNOWN] Debug flags are missing, malformed, or inaccessible', $observations];
+        return [true, 'Observed default Magento debug and inline translation flags are disabled', $observations];
+    }
+
     public function stub(array $args): array
     {
         return [true, 'MagentoCheck stub PASS'];
@@ -120,10 +391,20 @@ final class MagentoCheck
 
         $arr = $this->loadArray($file);
         if (isset($arr['__ERROR__'])) {
-            return [false, $arr['__ERROR__']];
+            return !empty($args['declared_scope_only']) ? [null, '[UNKNOWN] ' . $arr['__ERROR__']] : [false, $arr['__ERROR__']];
         }
 
+        if (!empty($args['declared_scope_only']) && (!array_key_exists('modules', $arr) || !is_array($arr['modules']))) {
+            return [null, '[UNKNOWN] Declared modules configuration is unavailable or malformed'];
+        }
         $modules = $this->getByDotPath($arr, 'modules', []);
+        if (!empty($args['declared_scope_only'])) {
+            foreach (array_merge([$coreModule], $providerModules) as $module) {
+                if (array_key_exists($module, $modules) && !in_array($modules[$module], [0, 1, '0', '1', false, true], true)) {
+                    return [null, '[UNKNOWN] Declared module state is malformed', ['module' => $module]];
+                }
+            }
+        }
         if (!is_array($modules)) {
             return [false, "Path 'modules' in $file is not an array"];
         }

@@ -1,0 +1,47 @@
+<?php
+declare(strict_types=1);
+require __DIR__ . '/../vendor/autoload.php';
+use Magebean\Engine\Context;
+use Magebean\Engine\Checks\MagentoCheck;
+$root = sys_get_temp_dir() . '/magebean-config-completion-' . bin2hex(random_bytes(5));
+mkdir($root . '/app/etc', 0777, true);
+$assertions = 0;
+$assert = static function ($actual, $expected, string $message) use (&$assertions): void { $assertions++; if ($actual !== $expected) throw new RuntimeException($message . ': ' . var_export($actual, true)); };
+$write = static function (array $env, array $config) use ($root): MagentoCheck { file_put_contents($root . '/app/etc/env.php', '<?php return ' . var_export($env, true) . ';'); file_put_contents($root . '/app/etc/config.php', '<?php return ' . var_export($config, true) . ';'); return new MagentoCheck(new Context($root, '')); };
+try {
+    foreach (['admin' => false, 'operations' => true, 'abc' => true, 'Admin' => false] as $route => $expected) $assert($write(['backend'=>['frontName'=>$route]], [])->adminFrontNameDeclared([])[0], $expected, 'route exact predicate');
+    foreach ([[], ['backend'=>['frontName'=>[]]], ['backend'=>['frontName'=>'bad/path']]] as $env) $assert($write($env, [])->adminFrontNameDeclared([])[0], null, 'missing/malformed route is unknown');
+    $policy = ['modules'=>[], 'system'=>['default'=>['admin'=>['captcha'=>['enable'=>0,'forms'=>'backend_login'],'security'=>['lockout_failures'=>5,'lockout_threshold'=>30]]]]];
+    $assert($write([], $policy)->adminLoginProtectionConfigured([])[0], true, 'bounded lockout passes');
+    $policy['system']['default']['admin']['security']['lockout_failures'] = 0;
+    $assert($write([], $policy)->adminLoginProtectionConfigured([])[0], false, 'explicit disabled alternatives fail');
+    $policy['system']['default']['admin']['captcha']['enable'] = 1;
+    $assert($write([], $policy)->adminLoginProtectionConfigured([])[0], true, 'backend_login CAPTCHA passes');
+    $policy['system']['default']['admin']['captcha']['forms'] = 'backend_forgotpassword';
+    $assert($write([], $policy)->adminLoginProtectionConfigured([])[0], false, 'CAPTCHA other form does not protect login');
+    $policy['system']['default']['admin']['security']['lockout_failures'] = 'bad';
+    $assert($write([], $policy)->adminLoginProtectionConfigured([])[0], null, 'malformed threshold unknown');
+    $assert($write([], [])->adminLoginProtectionConfigured([])[0], null, 'missing policy unknown');
+    $good = ['system'=>['default'=>['web'=>['secure'=>['use_in_adminhtml'=>1,'use_in_frontend'=>1,'base_url'=>'https://example.test/shop/'], 'cookie'=>['cookie_secure'=>1,'cookie_httponly'=>1,'cookie_samesite'=>'Lax']]]]];
+    $check = $write([], $good);
+    $assert($check->httpsConfigurationObserved([])[0], true, 'valid HTTPS configuration');
+    $assert($check->cookieConfigurationObserved([])[0], true, 'valid cookie config observation');
+    $assert($check->configuredBaseUrl()['url'], 'https://example.test/shop', 'discovered configured URL');
+    $env = ['system'=>['default'=>['web/secure/use_in_frontend'=>0,'web/cookie/cookie_secure'=>0,'web/secure/base_url'=>'https://override.test/']]];
+    $check = $write($env, $good);
+    $assert($check->httpsConfigurationObserved([])[0], false, 'env override wins');
+    $assert($check->cookieConfigurationObserved([])[0], false, 'env cookie override wins');
+    $assert($check->configuredBaseUrl()['url'], 'https://override.test', 'env base URL override wins');
+    $assert($write([], [])->httpsConfigurationObserved([])[0], null, 'missing HTTPS unknown');
+    $assert($write([], [])->cookieConfigurationObserved([])[0], null, 'missing cookie config unknown');
+    $assert($write(['system'=>['default'=>['web/secure/base_url'=>'https://user:secret@example.test/']]], [])->configuredBaseUrl()['url'], '', 'credentials in URL rejected');
+    $off=['system'=>['default'=>['dev'=>['debug'=>['template_hints'=>0,'template_hints_storefront'=>0],'translate_inline'=>['active'=>0]]]]];
+    $assert($write([], $off)->debugConfigurationObserved([])[0], true, 'all observeddebug off');
+    $assert($write(['system'=>['default'=>['dev/debug/template_hints'=>1]]], $off)->debugConfigurationObserved([])[0], false, 'debug effective env enabled');
+    $assert($write([], [])->debugConfigurationObserved([])[0], null, 'missing debug unknown');
+    $check = $write(['db'=>['connection'=>['default'=>['host'=>'bad;password=secret','dbname'=>'test','username'=>'sensitive','password'=>'secret']]]], []);
+    $result=$check->effectiveConfigurationValues(['admin/security/lockout_failures']);
+    $assert($result['admin/security/lockout_failures']['available'], false, 'DB invalid unknown');
+    $assert(str_contains(json_encode($result), 'secret'), false, 'database credentials never exposed');
+    echo "PASS {$assertions} configuration completion assertions\n";
+} finally { unlink($root.'/app/etc/env.php'); unlink($root.'/app/etc/config.php'); rmdir($root.'/app/etc'); rmdir($root.'/app'); rmdir($root); }

@@ -7,26 +7,27 @@ namespace Magebean\Console;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\{InputInterface, InputOption};
 use Symfony\Component\Console\Output\OutputInterface;
-use Magebean\Engine\RulePackLoader;
-use Magebean\Engine\ProfileLoader;
+use Magebean\Engine\RequirementCatalog;
 
 final class RulesListCommand extends Command
 {
     protected static $defaultName = 'rules:list';
 
     private const HELP = <<<'HELP'
-List Magebean rules after applying a profile and optional control/severity filters.
+List Magebean requirements after applying a profile and optional control/severity filters.
 
 PROFILES
-  basic      Default; 21 basic production-readiness rules.
-  asvs-l1    42 requirements by default (including partial evidence checks); 70 including human review.
-  asvs-l2    90 requirements by default (including partial evidence checks); 198 including human review.
-  asvs-l3    98 requirements by default (including partial evidence checks); 268 including human review.
-  owasp      77 application-security rules mapped to OWASP Top 10 2025.
-  pci        67 rules by default; 68 including 1 human-verification rule.
-  hardening  91 rules by default; 92 with human verification enabled.
-  baseline   113 automated rules by default; 371 including manual review. Aliases: all, magebean.
-  FILE       Custom profile JSON path or a profile under .magebean/profiles.
+  basic      Default production-readiness requirements.
+  asvs-l1    ASVS level 1 requirements.
+  asvs-l2    ASVS levels 1 and 2 requirements.
+  asvs-l3    ASVS levels 1, 2, and 3 requirements.
+  owasp      Application requirements tagged with OWASP Top 10 categories.
+  pci        PCI DSS requirement evidence and human verification obligations.
+  hardening  Production hardening requirements.
+  baseline   Complete requirement inventory. Aliases: all, magebean.
+  FILE       Custom profile JSON selecting requirement IDs.
+
+Counts are calculated from the selected catalog and capability context.
 
 OPTIONS
   --profile=PROFILE|FILE       Select the profile. Default: basic.
@@ -80,16 +81,14 @@ HELP;
             $profileOpt = 'basic';
         }
         $controls = $controlsOpt ? array_map('trim', explode(',', $controlsOpt)) : [];
-        $pack = RulePackLoader::loadAll($controls);
-        if ($profileOpt !== '' && !in_array(strtolower($profileOpt), ['baseline', 'all', 'magebean'], true)) {
-            $profile = ProfileLoader::load($profileOpt, getcwd() ?: '');
-            $pack = ProfileLoader::apply($pack, $profile, $controls !== [], $capabilities);
-            $pack = \Magebean\Engine\RequirementCatalog::compile($pack, $profile, $capabilities, $controls !== []);
-            $out->writeln(sprintf(
-                '<info>Profile:</info> %s (%s)',
-                (string)($profile['id'] ?? $profileOpt),
-                (string)($profile['title'] ?? '')
-            ));
+        $pack = RequirementCatalog::forProfile($profileOpt, $capabilities);
+        if ($controls !== []) {
+            $pack['rules'] = array_values(array_filter($pack['rules'] ?? [], static fn(array $rule): bool => RequirementCatalog::matchesControls($rule,$controls)));
+            $pack['controls'] = RequirementCatalog::controlIds($pack['rules']);
+        }
+        $profile = $pack['profile'] ?? [];
+        if ($profile !== []) {
+            $out->writeln(sprintf('<info>Profile:</info> %s (%s)', (string)($profile['id'] ?? $profileOpt), (string)($profile['title'] ?? '')));
         }
         $profileRulesTotal = count($pack['rules'] ?? []);
         $profileManualRulesTotal = count(array_filter($pack['rules'] ?? [], static fn(array $rule): bool => strtolower((string)($rule['verification'] ?? 'automated')) === 'manual'));
@@ -103,15 +102,7 @@ HELP;
         $count = 0;
         foreach ($pack['rules'] as $r) {
             if ($sev && strcasecmp($r['severity'], (string)$sev) !== 0) continue;
-            $mapping = '';
-            if (isset($r['profile']['mapping']) && is_array($r['profile']['mapping'])) {
-                $m = $r['profile']['mapping'];
-                $refs = $m['requirements'] ?? $m['categories'] ?? $m['map'] ?? [];
-                if (is_array($refs) && $refs) {
-                    $mapping = ' (' . implode(', ', array_map('strval', $refs)) . ')';
-                }
-            }
-            $out->writeln("{$r['id']} [{$r['control']}] {$r['severity']} — {$r['title']}{$mapping}");
+            $out->writeln("{$r['id']} [{$r['control']}] {$r['severity']} — {$r['title']}");
             $count++;
         }
         $out->writeln("<info>Total Rules Listed: {$count}</info>");

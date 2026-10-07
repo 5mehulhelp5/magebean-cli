@@ -7,7 +7,7 @@ use Magebean\Engine\Checks\CheckRegistry;
 function planningAssert(bool $ok, string $message): void {
     if (!$ok) throw new RuntimeException($message);
 }
-$planner = new ScanPlanner();
+$planner = new \Magebean\Engine\LegacyScanPlanner();
 $root = sys_get_temp_dir() . '/magebean-planning-' . bin2hex(random_bytes(6));
 mkdir($root);
 try {

@@ -1,8 +1,8 @@
 # Magebean CLI Reference
 
-New documentation uses **requirement** for the assessment unit: one requirement has one assessment definition and can contain multiple reusable checks. ASVS profiles compile canonical requirement definitions from the legacy many-to-many evidence mappings. See [Requirement model](requirement-model.md) and [ASVS L1/L2 migration inventory](asvs-requirement-migration.md). Exact CLI names, JSON keys and transport fields below describe the current implementation; they have not been renamed.
+Current primary runtime: one internal `MB-…` requirement identity with reusable check functions and requirement-owned obligations. Profiles select identities; standards references are alignment metadata. Historical MB-R APIs/selectors/manifests remain compatibility adapters. Older examples and legacy API sections below must be read with that boundary. See [requirement model](requirement-model.md) and [migration contract](requirement-migration.md).
 
-Magebean CLI audits Magento 2 production readiness using a current catalog of 19 controls and 371 **legacy assessment definitions**: 113 automated and 258 requiring human verification. These counts are legacy definitions, not unique standards requirements.
+The primary listing uses internal requirement identities. Legacy `RulePackLoader` still exposes 371 historical MB-R definitions for compatibility; those are not extra primary requirements. Obtain current primary and selected-profile totals through `rules:list`, with manual/capability filters labeled explicitly.
 
 Current CLI version:
 
@@ -36,7 +36,7 @@ php magebean.phar list
 | Command | Purpose |
 |---|---|
 | `scan` | Audit a Magento installation or storefront. |
-| `rules:list` | List legacy assessment definitions after applying profile and filters. |
+| `rules:list` | List internal requirements after applying profile and filters. |
 | `agent:connect` | Pair a Magento host with Magebean Security Dashboard. |
 | `agent:status` | Show local and remote agent status. |
 | `agent:doctor` | Validate agent, PHP, Magento, storage, and disk prerequisites. |
@@ -71,17 +71,19 @@ When neither `--path` nor `--url` is supplied, Magebean searches for a Magento r
 
 ### Profiles
 
-| Profile | Legacy definitions selected | Purpose |
-|---|---:|---|
-| `basic` | 21 | Default fast, low-noise production security and operations check. |
-| `asvs-l1` | 42 default / 70 with manual | Level 1 mapping; manual-review rules require `--include-manual-review`. |
-| `asvs-l2` | 90 default / 198 with manual | Cumulative Level 2 mapping; manual and contextual reviews are opt-in. |
-| `asvs-l3` | 98 default / 268 with manual | Cumulative Level 3 mapping; substantial independent human assurance is mandatory. |
-| `owasp` | 77 | Application-security checks mapped to OWASP Top 10 2025. |
-| `pci` | 67 default / 68 with manual | PCI DSS v4.0.1 payment-readiness checks with audited coverage classifications; not a certification. |
-| `hardening` | 91 default / 92 with manual | Deep production, code, dependency, integration, and operations checks. |
-| `baseline` | 113 default / 371 with manual | Full local catalog. Aliases: `all`, `magebean`. |
-| `FILE` | Custom | JSON profile path or a profile in `.magebean/profiles`. |
+| Profile | Requirement selection |
+|---|---|
+| `basic` | Default production-readiness predicates. |
+| `asvs-l1` | 70 ASVS-aligned identities at Level 1. |
+| `asvs-l2` | 253 ASVS-aligned identities cumulatively, before context filters. |
+| `asvs-l3` | 345 ASVS-aligned identities cumulatively, before context filters. |
+| `owasp` | Application predicates tagged with Top 10 categories; categories are not requirement IDs. |
+| `pci` | 280 PCI DSS 4.0.1-aligned identities with applicable human/evidence obligations. |
+| `hardening` | Production hardening predicates. |
+| `baseline` | Complete primary inventory. Aliases: `all`, `magebean`. |
+| `FILE` | Custom profile selecting internal identities. |
+
+`rules:list` reports actual selected counts. Human and capability filters reduce execution selection and do not increase the underlying unique inventory.
 
 The `asvs-l1` mapping covers all 70 Level 1 requirements: 15 automated, 27 partially automated and 28 manual-review. This is an evidence-oriented scan profile, not an ASVS certification.
 
@@ -121,8 +123,8 @@ php magebean.phar scan --profile=basic
 | `--include-manual-review` | Include human manual-review rules; excluded by default. |
 | `--capabilities=NAME,...` | Enable capability-dependent profile rules for this scan. |
 | `--controls=MB-Cxx,...` | Restrict the loaded rule pack to control IDs. |
-| `--rules=MB-Rxxx,...` | Run listed rule IDs directly from the available catalog and bypass profile selection. |
-| `--exclude-rules=MB-Rxxx,...` | Remove listed rules after profile and project configuration. |
+| `--rules=MB-xxxx,...` | Select internal requirements explicitly; historical MB-R selectors remain compatibility requests. |
+| `--exclude-rules=MB-xxxx,...` | Exclude internal requirements after profile/project policy; legacy aliases resolve at the adapter boundary. |
 | `--config=FILE` | Project policy file. Local scans auto-detect `.magebean.json` or `.magebean.yml`. |
 | `--pci-context=FILE` | PCI DSS entity, scope, payment architecture, overlays, and requirement overrides. |
 | `--pci-evidence=FILE` | Credential-free structured external evidence package. |
@@ -464,12 +466,16 @@ php magebean.phar agent:doctor
 
 For local Dashboard development, confirm that `console.magebean.local` resolves from the environment running the CLI, then connect with `--dev`.
 
-## Canonical ASVS selectors and compatibility
+## Internal requirement selectors and compatibility
 
-ASVS profiles emit IDs such as `OWASP-ASVS:5.0.0:6.2.1`, with one finding per requirement and grouped check evidence. `--rules=OWASP-ASVS:5.0.0:6.2.1 --profile=asvs-l2` retains the assessment level; canonical rerun commands include the profile. Explicit MB-R selection retains legacy behavior. Excluding an MB-R alias from an ASVS profile excludes every compiled requirement it supports.
+Normal profile findings use internal `MB-…` IDs, with singular requirement identity and standard alignment metadata. Use the ID returned by `rules:list` with `--rules=ID --profile=PROFILE`. Rerun guidance retains the selected profile, enabled capabilities and supplied hybrid target context when those are recorded in result metadata.
 
-Project `include_rules`/`select_rules`/`exclude_rules` can contain canonical IDs with an ASVS profile. Canonical `override_rules` can change title, severity, messages and remediation; identity, checks, applicability and coverage are immutable. Existing MB-R overrides remain evidence-source policy.
+Historical MB-R and former `OWASP-ASVS:5.0.0:…` selectors are compatibility requests, not additional inventory entries. Their exact expansion/result behavior belongs to the compatibility adapter. Do not infer equality from shared source checks or remove a source definition to hide it from primary inventory.
 
-Default ASVS counts are 42/90/98 for L1/L2/L3; with manual review they are 70/198/268 before capabilities. All include 12 native partial implementations; missing source, runtime or artifact evidence still produces UNKNOWN. Capability-dependent definitions are selected only when their configured capability is enabled. Partial technical PASS remains human review; partial failing signals need independent confirmation, and incomplete necessary evidence is UNKNOWN. See [runtime migration](requirement-migration.md).
+Project selection/exclusion uses primary identities. Requirement identity, criterion, obligations and proof classifications are immutable through presentation overrides. A changing title or severity does not promote heuristic evidence into complete automation.
 
-See [ASVS native evidence](asvs-native-evidence.md) for the former 12 gaps and the default-account inventory format.
+Missing source/runtime/artifact evidence remains UNKNOWN. Partial technical observations need confirmation rather than automatically proving the entire criterion. Native implementation of the former 12 ASVS gaps remains partial. See [runtime migration](requirement-migration.md) and [native evidence](asvs-native-evidence.md).
+
+### Basic automation execution contract
+
+`scan --path=/path/to/magento --profile=basic` attempts twenty automated deployment predicates. It can discover the configured runtime URL; use `--url` when the configured endpoint is inaccessible from the scanning host. Run with permission to read deployment configuration and installed scheduler sources. Missing runtime/configuration/permission evidence causes a separate execution error and process exit3. It is never counted as a confirmed vulnerability. Complete scans retain exits0=clean,1=noncritical findings,2=critical findings.

@@ -1,14 +1,14 @@
 <?php
 declare(strict_types=1);
 require_once __DIR__.'/../vendor/autoload.php';
-use Magebean\Engine\{RequirementCatalog, ProfileLoader, RulePackLoader, Context, CheckOutcome, ScanDeadline, ScanDeadlineExceeded};
+use Magebean\Engine\{RequirementCatalog, LegacyAsvsRequirementAdapter, ProfileLoader, RulePackLoader, Context, CheckOutcome, ScanDeadline, ScanDeadlineExceeded};
 use Magebean\Engine\Checks\{CheckRegistry, AsvsRuntimeEvidenceCheck};
 use Magebean\Engine\Collectors\{CollectorSet, CollectionSession};
 $n=0;
 function missingAssert(bool $ok,string $message):void {global $n;$n++;if(!$ok)throw new RuntimeException($message);}
 $ids=['1.3.1','2.2.1','3.2.2','3.5.3','4.1.1','6.2.4','6.3.2','9.1.1','9.1.2','9.1.3','9.2.1','11.4.1'];
 foreach(['asvs-l1','asvs-l2','asvs-l3'] as $profile){
- $pack=RequirementCatalog::forProfile($profile);$index=array_column($pack['rules'],null,'id');
+ $pack=LegacyAsvsRequirementAdapter::forProfile($profile);$index=array_column($pack['rules'],null,'id');
  foreach($ids as $id){
   $r=$index['OWASP-ASVS:5.0.0:'.$id];
   missingAssert($r['coverage']==='PARTIALLY_AUTOMATED','New evidence does not justify fully automated conformance: '.$id);
@@ -22,7 +22,7 @@ $server=null;
 try{
  $registry=CheckRegistry::fromContext(new Context($root,''));
  foreach($ids as $id){
-  $r=array_column(RequirementCatalog::forProfile('asvs-l1')['rules'],null,'id')['OWASP-ASVS:5.0.0:'.$id];
+  $r=array_column(LegacyAsvsRequirementAdapter::forProfile('asvs-l1')['rules'],null,'id')['OWASP-ASVS:5.0.0:'.$id];
   missingAssert($registry->runResult('requirement_assessment',$r['checks'][0]['args'])->outcome===CheckOutcome::Unknown,'Missing evidence must be UNKNOWN, never PASS: '.$id);
  }
  $cases=[

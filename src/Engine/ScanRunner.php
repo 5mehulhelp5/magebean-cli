@@ -10,6 +10,8 @@ final class ScanRunner
 {
     private Context $ctx;
     private array $pack;
+    /** Scoped observations are reused only during one primary execution. */
+    private array $primaryObservations = [];
     private $checkpoint;
     private CheckRegistry $registry;
     /** @var null|callable(array): void */
@@ -22,6 +24,34 @@ final class ScanRunner
         $this->checkpoint = $checkpoint;
         $this->registry = $registry ?? CheckRegistry::fromContext($this->ctx);
         $this->progressCallback = $progressCallback;
+    }
+
+    private function observationKey(string $name, array $args): string
+    {
+        $normalize = static function (array $value) use (&$normalize): array {
+            if (!array_is_list($value)) ksort($value, SORT_STRING);
+            foreach ($value as &$item) if (is_array($item)) $item = $normalize($item);
+            unset($item);
+            return $value;
+        };
+        return hash('sha256', serialize([$this->ctx->path, $this->ctx->url, $name, $normalize($args)]));
+    }
+
+    private function observePrimary(string $name, array $args, string $key): CheckResult
+    {
+        if (isset($this->primaryObservations[$key])) {
+            try {
+                if ($this->checkpoint !== null) ($this->checkpoint)();
+                if ($this->deadline?->expired()) throw new ScanDeadlineExceeded();
+            } catch (ScanDeadlineExceeded) {
+                return CheckResult::of(CheckOutcome::Unknown, 'Scan deadline exceeded; cached observations cannot complete this assessment.', [], 'SCAN_DEADLINE_EXCEEDED', $name);
+            }
+            return $this->primaryObservations[$key];
+        }
+        $result = $this->evalCheckWithEvidence($name, $args);
+        if ($this->deadline?->expired()) return CheckResult::of(CheckOutcome::Unknown, 'Scan deadline exceeded before the observation was completed.', [], 'SCAN_DEADLINE_EXCEEDED', $name);
+        if ($result->reasonCode !== 'SCAN_DEADLINE_EXCEEDED') $this->primaryObservations[$key] = $result;
+        return $result;
     }
 
     private function evalCheckWithEvidence(
@@ -59,6 +89,7 @@ final class ScanRunner
 
     private function executeReport(): ScanReport
     {
+        $this->primaryObservations = [];
         $findings = [];
         $checkResults = [];
         $passed = 0;
@@ -76,6 +107,43 @@ final class ScanRunner
                 'control' => (string)($rule['control'] ?? ''),
             ]);
             $executedRules++;
+            if ((preg_match('/^MB-[0-9]{4,}$/D', (string)($rule['id'] ?? '')) === 1) && isset($rule['obligations'])) {
+                $observations = [];
+                $observationKeys = [];
+                try {
+                    if ($this->deadline?->expired()) throw new ScanDeadlineExceeded();
+                    if ($this->checkpoint !== null) ($this->checkpoint)();
+                    if ($this->deadline?->expired()) throw new ScanDeadlineExceeded();
+                    $assessment = RequirementAssessmentEvaluator::evaluate($rule, function (string $name, array $args) use (&$observations, &$observationKeys): CheckResult {
+                    $key = $this->observationKey($name, $args);
+                    $result = $this->observePrimary($name, $args, $key);
+                    if (!isset($observationKeys[$key])) { $observations[] = $result; $observationKeys[$key] = true; }
+                    return $result;
+                    });
+                } catch (ScanDeadlineExceeded) {
+                    $assessment = new RequirementAssessment(RequirementOutcome::Unknown,
+                        'Scan deadline exceeded; requirement assessment could not be completed.',
+                        ['requirement_id'=>$rule['id'],'revision'=>$rule['revision'],'obligations'=>[]],
+                        'SCAN_DEADLINE_EXCEEDED', $rule['applicability'] ?? ['state'=>'APPLICABLE']);
+                }
+                $status = $assessment->outcome->value;
+                $detail = array_map(static fn(CheckResult $r): array => ['check'=>$r->checkName,'status'=>$r->outcome->value,'message'=>$r->message], $observations);
+                $finding = [
+                    'id'=>$rule['id'],'title'=>$rule['title'],'control'=>$rule['control'],'severity'=>$rule['severity'],
+                    'passed'=>match($assessment->outcome){RequirementOutcome::Pass=>true,RequirementOutcome::Fail=>false,default=>null},
+                    'status'=>$status,'message'=>$assessment->message,'detail'=>$detail,
+                    'details'=>array_map(static fn(CheckResult $r):array=>[$r->checkName,$r->toLegacy()[1],$r->toLegacy()[0]],$observations),
+                    'evidence'=>$assessment->evidence,'requirement'=>['id'=>$rule['id'],'revision'=>$rule['revision'],'criterion'=>$rule['criterion']],
+                    'alignment'=>$rule['alignments'] ?? [],'coverage'=>$rule['coverage'],'applicability'=>$assessment->applicability,
+                    'reason_code'=>$assessment->reasonCode,
+                ];
+                foreach(['profile','remediation','assessment_level'] as $field) if(isset($rule[$field]))$finding[$field]=$rule[$field];
+                $findings[]=$finding; $checkResults[]=$observations;
+                if($status==='PASS')$passed++;
+                if($status==='FAIL')$failed++;
+                $this->notifyProgress(['type'=>'rule_done','current'=>$executedRules,'total'=>$plannedRules,'rule_id'=>$rule['id'],'title'=>$rule['title'],'control'=>$rule['control'],'status'=>$status]);
+                continue;
+            }
             $op = $rule['op'] ?? 'all';
             // Với 'any' khởi tạo FAIL cho tới khi có check PASS
             $ok = ($op === 'any') ? false : true;

@@ -742,6 +742,9 @@ final class ComposerPolicyChecks extends ComposerSupport
         $jsonRel  = is_string($args['json_file'] ?? null) ? $args['json_file'] : 'composer.json';
         $jsonPath = $this->join($root, $jsonRel);
 
+        if (!is_file($jsonPath) && !empty($args['project_local_only'])) {
+            return [null, '[UNKNOWN] Project-local Composer manifest is unavailable', ['json_file' => $jsonPath]];
+        }
         if (!is_file($jsonPath)) {
             $found = $this->findUp($jsonPath, 6);
             if (is_string($found) && $found !== '') {
@@ -774,6 +777,20 @@ final class ComposerPolicyChecks extends ComposerSupport
             ];
         }
 
+        if (!empty($args['project_local_only']) && !is_object(json_decode($raw))) {
+            return [null, '[UNKNOWN] Composer manifest must be a JSON object', ['json_file' => $jsonPath]];
+        }
+        if (!empty($args['project_local_only'])) {
+            $object = json_decode($raw);
+            foreach ($args['sections'] ?? ['require', 'require-dev'] as $section) {
+                if (property_exists($object, $section)) {
+                    if (!is_object($object->$section)) return [null, '[UNKNOWN] Composer dependency section is malformed', ['section' => $section]];
+                    foreach ($object->$section as $package => $constraint) {
+                        if (!is_string($constraint)) return [null, '[UNKNOWN] Composer dependency constraint is malformed', ['package' => $package]];
+                    }
+                }
+            }
+        }
         $sections = is_array($args['sections'] ?? null)
             ? array_values(array_filter(array_map('strval', $args['sections'])))
             : ['require', 'require-dev'];
@@ -898,6 +915,9 @@ final class ComposerPolicyChecks extends ComposerSupport
         $jsonRel  = is_string($args['json_file'] ?? null) ? $args['json_file'] : 'composer.json';
         $jsonPath = $this->join($root, $jsonRel);
 
+        if (!is_file($jsonPath) && !empty($args['project_local_only'])) {
+            return [null, '[UNKNOWN] Project-local Composer manifest is unavailable', ['json_file' => $jsonPath]];
+        }
         if (!is_file($jsonPath)) {
             $found = $this->findUp($jsonPath, 6);
             if (is_string($found) && $found !== '') {
@@ -930,6 +950,9 @@ final class ComposerPolicyChecks extends ComposerSupport
             ];
         }
 
+        if (!empty($args['project_local_only']) && !is_object(json_decode($raw))) {
+            return [null, '[UNKNOWN] Composer manifest must be a JSON object', ['json_file' => $jsonPath]];
+        }
         $key = (string)($args['key'] ?? $args['path'] ?? '');
         if ($key === '') {
             return [

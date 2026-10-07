@@ -1,0 +1,31 @@
+<?php
+declare(strict_types=1);
+require __DIR__.'/../vendor/autoload.php';
+use Magebean\Engine\{RequirementCatalog,RequirementOutcome,ScanRunner,Context,CheckResult,CheckOutcome,ScanDeadline};
+use Magebean\Engine\Checks\CheckRegistry;
+$count=0;
+function mergeAssert(bool $value,string $message):void{global$count;$count++;if(!$value)throw new RuntimeException($message);}
+$pack=RequirementCatalog::loadAll();$index=array_column($pack['rules'],null,'id');$manifest=RequirementCatalog::read('semantic-consolidations');
+mergeAssert(count($index)===687,'Canonical inventory after approved merges');mergeAssert(count($manifest['groups'])===13,'Every approved group recorded');
+$allRefs=[];$retired=0;
+foreach($manifest['groups']as$g){$r=$index[$g['canonical_id']];mergeAssert($r['revision']>=2,'Criterion change increments revision');if($r['alignments']!==[])mergeAssert($r['human_evidence']['required'],'Standard consolidation retains human evidence');mergeAssert($r['review_state']==='pending_security_review'||($r['id']==='MB-0379'&&$r['revision']>2&&$r['review_state']==='security_reviewed'),'Semantic merge alone does not approve detector proof');
+ foreach($g['retired_ids']as$id){$retired++;mergeAssert(!isset($index[$id]),'Retired identity is not another inventory entry');mergeAssert(RequirementCatalog::resolveAlias($id)===[$g['canonical_id']],'Retired ID has one canonical redirect');}
+ $obligations=[];foreach($r['obligations']as$o){unset($o['id']);$obligations[]=json_encode($o);}
+ foreach($g['original_definitions']as$before){foreach($before['obligations']as$o){unset($o['id']);if($r['id']==='MB-0379'&&$r['revision']>2){foreach($o['checks']as$c)mergeAssert(in_array($c,$r['checks'],true),'Debug source observations retained after proof review');}else mergeAssert(in_array(json_encode($o),$obligations,true),'Original obligation/operator/role/proof/arguments retained');}
+  foreach($before['alignments']as$a){$matching=array_values(array_filter($r['alignments'],fn($n)=>$n['standard']===$a['standard']&&$n['version']===$a['version']&&$n['reference']===$a['reference']));mergeAssert(count($matching)===1,'Version-qualified standard reference retained once');mergeAssert($matching[0]['scoped_criterion']===$before['criterion'],'Standard view retains original scoped criterion');}
+  foreach($before['execution_variants']??[]as$mode=>$variant){$merged=$r['execution_variants'][$mode]['obligations']??[];$checks=[];foreach($merged as$o)$checks=array_merge($checks,$o['checks']);foreach($variant['obligations']as$o)foreach($o['checks']as$c)mergeAssert(in_array($c,$checks,true),'Remote evidence was not dropped by merge');}
+  foreach($before['control_tags']??[$before['control']]as$tag)mergeAssert(in_array($tag,$r['control_tags'],true),'Control membership preserved');
+ }
+}
+mergeAssert($retired===42,'Exactly approved42identities retired');
+foreach($index as$r)foreach($r['alignments']as$a)$allRefs[$a['standard'].':'.$a['version'].':'.$a['reference']]=true;
+mergeAssert(count($allRefs)===625,'345ASVS+280PCIreferences retained');
+foreach(RequirementCatalog::read('internal-profiles')['profiles']as$p){mergeAssert(count($p['requirement_ids'])===count(array_unique($p['requirement_ids'])),'Profile canonical membership unique');foreach($p['requirement_ids']as$id)mergeAssert(isset($index[$id]),'Profiles cannot select retired IDs');}
+function observedDefinition(string$id,array$args,bool$human=false):array{return['id'=>$id,'revision'=>1,'title'=>'Scoped test policy','criterion'=>'The declared property is satisfied.','control'=>'MB-C01','severity'=>'high','coverage'=>'PARTIAL','verification'=>'automated','review_state'=>'security_reviewed','human_evidence'=>['required'=>$human,'instructions'=>$human?'Independent confirmation required.':''],'alignments'=>[],'target_modes'=>['LOCAL'],'checks'=>[['name'=>'shared_property','args'=>$args]],'obligations'=>[['id'=>'O001','role'=>'mandatory','proof'=>'verified_predicate','op'=>'all','checks'=>[['name'=>'shared_property','args'=>$args]]]]];}
+$registry=new CheckRegistry();$calls=0;$registry->register('shared_property',function(array$args)use(&$calls):CheckResult{$calls++;return CheckResult::of(CheckOutcome::Pass,'Scoped observation',[],null,'shared_property');});
+$a=observedDefinition('MB-9001',['limit'=>8,'scope'=>'admin']);$b=observedDefinition('MB-9002',['scope'=>'admin','limit'=>8],true);
+$runner=new ScanRunner(new Context('/fixture',''),['rules'=>[$a,$b]],null,$registry);$report=$runner->run();mergeAssert($calls===1,'Identical scoped observations reused across criteria');mergeAssert(array_column($report['findings'],'status')===['PASS','MANUAL_REVIEW'],'Assessment conclusions are not cached/shared');$runner->run();mergeAssert($calls===2,'Observation reuse is reset for the next scan');
+$c=observedDefinition('MB-9003',['limit'=>15,'scope'=>'admin']);(new ScanRunner(new Context('/fixture',''),['rules'=>[$a,$c]],null,$registry))->run();mergeAssert($calls===4,'Different thresholds cannot reuse an observation');
+$b=$a;$b['obligations'][]=['id'=>'O002','role'=>'supporting','proof'=>'heuristic','op'=>'all','checks'=>$a['checks']];$b['checks']=array_merge($a['checks'],$a['checks']);$report=(new ScanRunner(new Context('/fixture',''),['rules'=>[$b]],null,$registry))->run();mergeAssert(count($report['findings'][0]['detail'])===1,'Same technical observation is not displayed twice inside one requirement');mergeAssert(count($report['findings'][0]['evidence']['obligations'])===2,'Distinct obligation contracts remain visible');
+$clock=0.0;$deadline=new ScanDeadline(1,static function()use(&$clock):float{return$clock;});$late=new CheckRegistry();$late->register('shared_property',function()use(&$clock):CheckResult{$clock=2.0;return CheckResult::of(CheckOutcome::Pass,'Late observation');});$report=(new ScanRunner(new Context('/fixture',''),['rules'=>[$a]],null,$late,$deadline))->run();mergeAssert($report['findings'][0]['status']==='UNKNOWN','An observation completed after deadline cannot establish PASS');
+echo "RequirementSemanticConsolidationTest: $count assertions passed\n";

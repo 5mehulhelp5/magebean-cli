@@ -1,5 +1,7 @@
 # Magebean CLI architecture after phases 1–6
 
+Current primary runtime: one internal `MB-…` requirement identity with reusable check functions and requirement-owned obligations. Profiles select identities; standards references are alignment metadata. Historical MB-R APIs/selectors/manifests remain compatibility adapters. Older examples and legacy API sections below must be read with that boundary. See [requirement model](requirement-model.md) and [migration contract](requirement-migration.md).
+
 This is an incremental refactor, preserving command options, bundled rules,
 ordinary output/exit behavior and agent transport schema. The original phase 1 snapshot preserved behavior during architecture work.
 The subsequent [QA remediation](qa-remediation.md) accepted only reviewed
@@ -118,6 +120,6 @@ data and can block subsequent claims; exactly-once delivery depends on the serve
 These boundaries are intentional to preserve existing behavior and are detailed
 in `scan-collectors.md` and `scan-reliability.md`.
 
-## ASVS requirement runtime migration
+## Independent requirement runtime
 
-`RequirementCatalog` compiles ASVS coverage metadata and legacy evidence definitions into one versioned requirement definition. `RequirementPolicy` applies canonical selection/presentation policy after compilation. `RequirementEvaluator` evaluates grouped evidence through the existing registry and scan deadline/lease callback. Necessary groups use AND; source alternatives preserve their operator, while mandatory human evidence is a separate obligation. Gap definitions produce UNKNOWN. Legacy `ProfileLoader::apply`, MB-R catalog loading and non-ASVS profiles remain adapters. See [runtime migration](requirement-migration.md) for scope and compatibility.
+`RequirementCatalog` loads persisted internal definitions and profile membership independently of legacy source objects. Each requirement owns its criterion, revision, applicability and evidence obligations; the check registry supplies reusable functions. The primary runner assesses one internal identity and attaches standard alignment as metadata. Legacy `ProfileLoader::apply`, `RulePackLoader` and historical explicit selector/manifest requests remain compatibility adapters. PCI reports use primary alignment rather than profile mappings. See [runtime migration](requirement-migration.md) for selection, report and transport acceptance gates.

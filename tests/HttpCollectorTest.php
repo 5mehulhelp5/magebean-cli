@@ -27,6 +27,11 @@ function exerciseHttpCollector(string $url): array {
     httpCollectorAssert(count($first[2]['headers']['set-cookie']) === 2 && $observations === [true, true, true], 'Duplicate cookies and transport observations retain semantics.');
     $redirect = $collector->fetch($url . '/?redirect=1');
     httpCollectorAssert($redirect[2]['status'] === 200 && !isset($redirect[2]['headers']['strict-transport-security']) && $redirect[2]['headers']['x-final'] === 'yes', 'Redirect final response must not inherit HSTS from an earlier hop.');
+    httpCollectorAssert($redirect[2]['final_url'] !== $url . '/?redirect=1', 'Both HTTP backends report the effective redirect destination.');
+    $resolve = new ReflectionMethod(HttpCollector::class, 'redirectUrl');
+    foreach (['../login?x=1'=>'https://store.test/login?x=1', '/account/'=>'https://store.test/account/', '?x=2'=>'https://store.test/path/page?x=2', '//other.test/path'=>'https://other.test/path'] as $location=>$expected) {
+        httpCollectorAssert($resolve->invoke($collector, 'https://store.test/path/page', $location) === $expected, 'Redirect resolution preserves destination: '.$location);
+    }
     $check = new HttpCheck(new Context('.', $url, '', ['url' => $url]));
     $result = $check->dispatch('http_cache_signals', ['timeout_ms' => 1000]);
     httpCollectorAssert($result[0] === true && $check->getTransportCounts() === ['ok' => 2, 'total' => 2], 'Cache-signal check makes two real requests and counts both.');

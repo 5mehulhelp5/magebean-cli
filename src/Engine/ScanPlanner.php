@@ -3,334 +3,189 @@ declare(strict_types=1);
 namespace Magebean\Engine;
 use Magebean\Engine\Checks\CheckRegistry;
 
-/** Selection policies for resolved scan targets. No console or transport dependency. */
+/** Primary selection uses internal identities; legacy execution is an explicit adapter. */
 final class ScanPlanner
 {
-    /** Diagnostics contain plain segments; presentation belongs to adapters.
-     * @param callable(ScanDiagnostic):void|null $diagnostic
-     * A null plan represents a diagnosed selection failure; loader errors still throw.
-     */
     public function planCli(ScanRequest $request, CheckRegistry $registry, ?callable $diagnostic = null): ?ScanPlan
     {
-        $diagnostic ??= static function (ScanDiagnostic $diagnostic): void {};
-        $projectPath = $request->context->path;
-        $targetMode = (string)($request->context->get('meta', [])['target_mode'] ?? 'LOCAL');
+        $diagnostic ??= static function (ScanDiagnostic $d): void {};
         $options = $request->options;
-        $standard = strtolower((string)($options['standard'] ?? 'magebean'));
-        $profileOpt = trim((string)($options['profile'] ?? ''));
-        $rulesOpt = (string)($options['rules'] ?? '');
-        $excludeRulesOpt = (string)($options['exclude-rules'] ?? '');
-        $controlsOpt = (string)($options['controls'] ?? '');
+        $requested = self::ids($options['rules'] ?? '');
+        $internal = array_filter($requested, static fn(string $id): bool => (preg_match('/^MB-[0-9]{4,}$/D', $id) === 1));
+        if ($requested !== [] && $internal === []) return (new LegacyScanPlanner())->planCli($request, $registry, $diagnostic);
+        if ($internal !== [] && count($internal) !== count($requested)) throw new \RuntimeException('Select internal requirement IDs separately from deprecated legacy execution IDs.');
+        $mode = strtoupper((string)($request->context->get('meta', [])['target_mode'] ?? 'LOCAL'));
+        if($mode==='HYBRID')$mode='LOCAL';
+        $base = $mode === 'REMOTE' ? (string)getcwd() : $request->context->path;
         $configOpt = trim((string)($options['config'] ?? ''));
-        $capabilitiesOpt = trim((string)($options['capabilities'] ?? ''));
-        $includeManualReview = (bool)($options['include-manual-review'] ?? false);
-        $pciContextOpt = trim((string)($options['pci-context'] ?? ''));
-        $pciEvidenceOpt = trim((string)($options['pci-evidence'] ?? ''));
-        $pciReportOpt = trim((string)($options['pci-report'] ?? ''));
-        $configBasePath = $targetMode === 'REMOTE' ? (string)getcwd() : $projectPath;
-        $configFile = $configOpt !== ''
-            ? ProjectPath::normalize(ProjectPath::resolve($configOpt, $configBasePath))
-            : ($targetMode === 'REMOTE' ? null : ProjectConfigLoader::discover($projectPath));
-        $projectConfig = ProjectConfigLoader::load($configFile);
-        if ($configFile !== null) {
-            $diagnostic(new ScanDiagnostic('info', 'Loaded Magebean project config:', ' ' . $configFile));
+        $configFile = $configOpt !== '' ? ProjectPath::normalize(ProjectPath::resolve($configOpt, $base)) : ($mode === 'REMOTE' ? null : ProjectConfigLoader::discover($base));
+        $config = ProjectConfigLoader::load($configFile);
+        $legacyPolicyIds = self::ids($options['exclude-rules'] ?? '');
+        foreach (['include_rules','select_rules','exclude_rules'] as $field) $legacyPolicyIds=array_merge($legacyPolicyIds,self::ids($config[$field]??[]));
+        $legacyPolicyIds=array_merge($legacyPolicyIds,array_map('strtoupper',array_keys($config['override_rules']??[])));
+        $usesLegacyPolicy=array_filter($legacyPolicyIds,static fn(string $id):bool=>preg_match('/^MB-R[0-9]+$/D',$id)===1||str_starts_with($id,'OWASP-ASVS:'))!==[];
+        if($usesLegacyPolicy){
+            if($internal!==[])throw new \RuntimeException('Use internal requirement IDs for policy when selecting internal requirements.');
+            $diagnostic(new ScanDiagnostic('comment','Using the deprecated selection-policy compatibility adapter.'));
+            return (new LegacyScanPlanner())->planCli($request,$registry,$diagnostic);
         }
-        $capabilities = is_array($projectConfig['capabilities'] ?? null) ? $projectConfig['capabilities'] : [];
-        if ($capabilitiesOpt !== '') {
-            foreach (array_filter(array_map('trim', explode(',', $capabilitiesOpt))) as $capability) {
-                $capabilities[strtolower($capability)] = true;
-            }
+        // Existing executable custom packs retain their explicit compatibility path.
+        if (!empty($config['rules']) || !empty($config['rule_files']) || !empty($config['rule_packs']) || !empty($config['rule_paths'])) {
+            if ($internal !== []) throw new \RuntimeException('Legacy project rule packs cannot redefine internal requirements.');
+            $diagnostic(new ScanDiagnostic('comment', 'Using the deprecated project-rule compatibility adapter.'));
+            return (new LegacyScanPlanner())->planCli($request, $registry, $diagnostic);
         }
-
-        // normalize controls filter
-        $controlsFilter = $this->normalizeControlList($projectConfig['include_controls'] ?? []);
-        if ($controlsOpt !== '') {
-            $controlsFilter = $this->normalizeControlList($controlsOpt);
+        $caps = is_array($config['capabilities'] ?? null) ? $config['capabilities'] : [];
+        foreach (self::ids($options['capabilities'] ?? '') as $cap) $caps[strtolower($cap)] = true;
+        $profile = trim((string)($options['profile'] ?? ''));
+        if ($profile === '') $profile = $requested !== [] ? 'baseline' : ($mode === 'REMOTE' ? 'external' : (in_array(strtolower((string)($options['standard'] ?? '')), ['owasp','pci'], true) ? strtolower($options['standard']) : 'basic'));
+        if (is_file(ProjectPath::resolve($profile, $base))) $profile = ProjectPath::resolve($profile, $base);
+        if(is_file($profile)){$custom=json_decode((string)file_get_contents($profile),true,512,JSON_THROW_ON_ERROR);if(!isset($custom['requirement_ids'])){if($internal!==[])throw new \RuntimeException('Internal selections require a primary requirement_ids profile.');$diagnostic(new ScanDiagnostic('comment','Using the deprecated custom-profile compatibility adapter.'));return (new LegacyScanPlanner())->planCli($request,$registry,$diagnostic);}}
+        if (in_array(strtolower($profile),['pci','pci-dss','pci-dss-v4.0.1'],true) && (!empty($options['controls']) || !empty($config['include_controls']))) {
+            if($internal!==[])throw new \RuntimeException('Legacy PCI control filtering cannot select internal requirement IDs.');
+            $diagnostic(new ScanDiagnostic('comment','Using the deprecated PCI control-filter compatibility adapter.'));
+            return (new LegacyScanPlanner())->planCli($request,$registry,$diagnostic);
         }
-
-        $pack = $targetMode === 'REMOTE'
-            ? RulePackLoader::loadExternalMagento($controlsFilter)
-            : RulePackLoader::loadAll($controlsFilter);
-
-        if ($controlsFilter) {
-            $loaded = $pack['controls'] ?? [];
-            $missing = array_values(array_diff($controlsFilter, $loaded));
-            if ($missing) {
-                $message = $targetMode === 'REMOTE'
-                    ? 'Control(s) not supported in REMOTE mode: '
-                    : 'Control file(s) not found: ';
-                $diagnostic(new ScanDiagnostic('error', $message . implode(', ', $missing)));
-                return null;
-            }
+        $pack = RequirementCatalog::forProfile($profile, $caps, $mode);
+        $activeProfile = $pack['profile'];
+        if($configFile!==null)$diagnostic(new ScanDiagnostic('info','Loaded Magebean project config:',' '.$configFile));
+        $diagnostic(new ScanDiagnostic('info','Loaded profile:',' '.(string)($activeProfile['id']??$profile)));
+        $profileInventoryCount=$pack['inventory_count'];$omittedRequirements=$pack['omitted_requirements']??[];
+        $controls = $this->normalizeControlList($options['controls'] ?? ($config['include_controls'] ?? []));
+        if ($controls !== []) {
+            $known = RequirementCatalog::loadAll()['controls'];
+            if ($missing = array_diff($controls, $known)) throw new \RuntimeException('Unknown control(s): ' . implode(', ', $missing));
+            $pack['rules'] = array_values(array_filter($pack['rules'], static fn(array $r): bool => RequirementCatalog::matchesControls($r,$controls)));
         }
-
-        $pack = RulePackMerger::applyProjectConfig($pack, RequirementPolicy::evidenceConfig($projectConfig));
-
-        $activeProfile = $targetMode === 'REMOTE'
-            ? [
-                'id' => 'external',
-                'title' => 'Magebean External Magento Audit',
-                'description' => 'Publicly observable checks that require only a store URL.',
-                'report_template' => 'standard',
-                '_source' => 'builtin:external',
-            ]
-            : [
-                'id' => 'baseline',
-                'title' => 'Magebean Baseline',
-                'description' => 'All enabled rules from the Magebean rule catalog.',
-                'report_template' => 'standard',
-                '_source' => 'builtin:baseline',
-            ];
-        $hasExplicitRuleSelection = trim($rulesOpt) !== '';
-        if ($hasExplicitRuleSelection) {
-            $standard = 'explicit-rules';
-            $activeProfile['id'] = 'explicit-rules';
-            $activeProfile['title'] = 'Explicit Rule Selection';
-            $activeProfile['description'] = 'Rules explicitly selected from the available catalog with --rules.';
-            $activeProfile['_source'] = 'cli:--rules';
-            $diagnostic(new ScanDiagnostic('info', 'Profile selection bypassed:', ' explicit --rules selection'));
-        } else {
-            if ($profileOpt === '') {
-                $profileOpt = in_array($standard, ['owasp', 'pci'], true) ? $standard : 'basic';
-            }
-            if ($profileOpt !== '' && !in_array(strtolower($profileOpt), ['baseline', 'all', 'magebean', 'external'], true)) {
-                $profileBasePath = $targetMode === 'REMOTE' ? (string)getcwd() : $projectPath;
-                $profile = ProfileLoader::load($profileOpt, $profileBasePath);
-                $profileCanBePartial = $targetMode === 'REMOTE'
-                    || $controlsFilter !== [] || $projectConfig !== [];
-                $pack = ProfileLoader::apply($pack, $profile, $profileCanBePartial, $capabilities);
-                $pack = RequirementCatalog::compile($pack, $profile, $capabilities, $targetMode === 'REMOTE' || $controlsFilter !== [] || !empty(RequirementPolicy::evidenceConfig($projectConfig)['include_rules']) || !empty(RequirementPolicy::evidenceConfig($projectConfig)['select_rules']) || !empty(RequirementPolicy::evidenceConfig($projectConfig)['exclude_rules']) || !empty($projectConfig['exclude_controls']));
-                $activeProfile = ProfileLoader::publicMetadata($profile);
-                $standard = (string)($activeProfile['id'] ?? $standard);
-                $diagnostic(new ScanDiagnostic('info', 'Loaded profile:', ' ' . (string)($activeProfile['id'] ?? $profileOpt)));
-            }
+        $pack = RequirementPolicy::apply($pack, $config);
+        $total = count($pack['rules']);
+        $manualTotal = count(array_filter($pack['rules'], static fn(array $r): bool => ($r['verification'] ?? 'automated') === 'manual'));
+        $includeManual = (bool)($options['include-manual-review'] ?? false);
+        $hidden = 0;
+        if ($requested === [] && !$includeManual) {
+            $pack['rules'] = array_values(array_filter($pack['rules'], static fn(array $r): bool => ($r['verification'] ?? 'automated') !== 'manual'));
+            $hidden = $total - count($pack['rules']);
         }
-
-        if ($hasExplicitRuleSelection && stripos($rulesOpt, 'OWASP-ASVS:') !== false) {
-            if ($profileOpt === '') throw new \RuntimeException('Canonical ASVS IDs require --profile=asvs-l1/l2/l3 for assessment-level context.');
-            $requirementProfile = ProfileLoader::load($profileOpt, $configBasePath);
-            if (!RequirementCatalog::supports($requirementProfile)) throw new \RuntimeException('Canonical ASVS IDs require an ASVS --profile for assessment-level context.');
-            $activeProfile = ProfileLoader::publicMetadata($requirementProfile);
-            $standard = (string)$activeProfile['id'];
-            $canonical = RequirementCatalog::compile(ProfileLoader::apply($pack, $requirementProfile, $targetMode === 'REMOTE' || $controlsFilter !== [] || $projectConfig !== [], $capabilities), $requirementProfile, $capabilities, $targetMode === 'REMOTE' || $controlsFilter !== []);
-            if (RequirementPolicy::hasCanonical($projectConfig)) $canonical = RequirementPolicy::apply($canonical, $projectConfig);
-            $pack['rules'] = array_merge($pack['rules'], $canonical['rules']);
-        }
-
-        if (!$hasExplicitRuleSelection) $pack = RequirementPolicy::apply($pack, $projectConfig);
-
-        $activeProfileId = strtolower((string)($activeProfile['id'] ?? ''));
-        $isPciProfile = $standard === 'pci' || str_starts_with($activeProfileId, 'pci-dss');
-        if (!$isPciProfile && ($pciContextOpt !== '' || $pciEvidenceOpt !== '' || $pciReportOpt !== '')) {
-            throw new \RuntimeException('--pci-context, --pci-evidence, and --pci-report require the PCI profile.');
-        }
-        $profileRulesTotal = count($pack['rules'] ?? []);
-        $profileManualRulesTotal = count(array_filter($pack['rules'] ?? [], static fn(array $rule): bool => strtolower((string)($rule['verification'] ?? 'automated')) === 'manual'));
-        $manualRulesExcluded = 0;
-        if (!$hasExplicitRuleSelection && !$includeManualReview) {
-            $beforeManualFilter = count($pack['rules'] ?? []);
-            $pack['rules'] = array_values(array_filter(
-                $pack['rules'] ?? [],
-                static fn(array $rule): bool => strtolower((string)($rule['verification'] ?? 'automated')) !== 'manual'
-            ));
-            $manualRulesExcluded = $beforeManualFilter - count($pack['rules']);
-
-        }
-
-        // filter by --rules (comma-separated IDs)
-        $requestedIds = [];
-        if ($rulesOpt !== '') {
-            $requestedIds = array_values(array_unique(array_filter(array_map('trim', explode(',', $rulesOpt)))));
-            if ($requestedIds) {
-                $byId = [];
-                foreach ($pack['rules'] as $r) {
-                    $byId[strtoupper((string)($r['id'] ?? ''))] = $r;
+        if ($requested !== []) {
+            // Explicit internal selectors use the full catalog, independent of profile membership.
+            $all = RequirementCatalog::loadAll($controls);
+            $index = array_column($all['rules'], null, 'id');
+            $selected = [];
+            $selectedIds=[];
+            foreach ($requested as $requestedId) {
+                $canonicalIds=isset($index[$requestedId])?[$requestedId]:RequirementCatalog::resolveAlias($requestedId);
+                if(count($canonicalIds)!==1){$diagnostic(new ScanDiagnostic('comment','Unknown or ambiguous requirement:',' '.$requestedId));continue;}
+                $id=$canonicalIds[0];
+                if (!isset($index[$id]) || !in_array($mode, $index[$id]['target_modes'], true)) {
+                    $diagnostic(new ScanDiagnostic('comment', 'Unknown or unavailable requirement:', ' ' . $requestedId));
+                    continue;
                 }
-                $selected = [];
-                $selectedRequirements = [];
-                $unknown  = [];
-                foreach ($requestedIds as $id) {
-                    $key = strtoupper($id);
-                    if (isset($byId[$key])) {
-                        if (str_starts_with($key, 'OWASP-ASVS:')) {
-                            if (isset($selectedRequirements[$key])) continue;
-                            $selectedRequirements[$key] = true;
-                        }
-                        $selected[] = $byId[$key];
-                    }
-                    else $unknown[] = $id;
-                }
-                foreach ($unknown as $id) {
-                    $label = $targetMode === 'REMOTE'
-                        ? 'Rule not supported in REMOTE mode:'
-                        : 'Unknown rule id:';
-                    $diagnostic(new ScanDiagnostic('comment', $label, ' ' . $id));
-                }
-                if ($selected) {
-                    // giữ nguyên controls pack để render/summary, nhưng thay tập rules đã chọn
-                    $pack['rules'] = $selected;
-                } else {
-                    $diagnostic(new ScanDiagnostic('error', 'No valid rules matched the --rules filter.'));
-                    return null;
-                }
+                if(isset($selectedIds[$id]))continue;
+                $selectedIds[$id]=true;$r = $index[$id];
+                if (isset($pack['assessment_level'])) $r['assessment_level'] = $pack['assessment_level'];
+                $selected[] = $r;
+            }
+            $all['rules'] = $selected;
+            $all['profile'] = $pack['profile'];
+            $all['assessment_level'] = $pack['assessment_level'] ?? null;
+            $pack = RequirementPolicy::apply($all, $config);
+            $selected = $pack['rules'];
+            $total = count($selected);
+            $manualTotal = count(array_filter($selected, static fn(array $r): bool => ($r['verification'] ?? '') === 'manual'));
+        }
+        $excluded = RequirementPolicy::resolveIds(self::ids($options['exclude-rules'] ?? ''), $activeProfile['id'] ?? null);
+        $pack['rules'] = array_values(array_filter($pack['rules'], static fn(array $r): bool => !in_array($r['id'], $excluded, true)));
+        foreach ($pack['rules'] as &$definition) {
+            if (isset($definition['execution_variants'][$mode]['obligations'])) {
+                $definition['obligations'] = $definition['execution_variants'][$mode]['obligations'];
+                $definition['checks'] = array_merge(...array_map(static fn(array $o): array => $o['checks'], $definition['obligations']));
+                $definition['execution_scope'] = $mode;
+            }
+            if (isset($definition['applicability']['capability'])) {
+                $cap = $definition['applicability']['capability'];
+                $enabled = array_is_list($caps) ? in_array($cap, $caps, true) : filter_var($caps[$cap] ?? false, FILTER_VALIDATE_BOOLEAN);
+                $definition['applicability']['state'] = $enabled ? 'APPLICABLE' : 'UNKNOWN';
             }
         }
-
-        if ($excludeRulesOpt !== '') {
-            $excludedIds = array_values(array_unique(array_filter(array_map(
-                static fn(string $id): string => strtoupper(trim($id)),
-                explode(',', $excludeRulesOpt)
-            ))));
-            if ($excludedIds) {
-                $pack['rules'] = array_values(array_filter(
-                    $pack['rules'],
-                    static fn(array $rule): bool => !in_array(strtoupper((string)($rule['id'] ?? '')), $excludedIds, true) && array_intersect($rule['legacy_rule_ids'] ?? [], $excludedIds) === []
-                ));
-            }
-        }
-
-        if ($hasExplicitRuleSelection) {
-            $profileRulesTotal = count($pack['rules'] ?? []);
-            $profileManualRulesTotal = count(array_filter(
-                $pack['rules'] ?? [],
-                static fn(array $rule): bool => strtolower((string)($rule['verification'] ?? 'automated')) === 'manual'
-            ));
-            $manualRulesExcluded = 0;
-        }
-        $validationErrors = RuleValidator::validatePack($pack, $registry);
-        if ($validationErrors) {
-            $diagnostic(new ScanDiagnostic('error', 'Invalid rule pack:'));
-            foreach (array_slice($validationErrors, 0, 20) as $error) {
-                $diagnostic(new ScanDiagnostic('plain', '  - ' . $error));
-            }
-            if (count($validationErrors) > 20) {
-                $diagnostic(new ScanDiagnostic('plain', sprintf('  - ... and %d more', count($validationErrors) - 20)));
-            }
+        unset($definition);
+        $pack['controls'] = RequirementCatalog::controlIds($pack['rules']);
+        $errors = RuleValidator::validatePack($pack, $registry);
+        if ($errors !== []) {
+            foreach (array_slice($errors, 0, 20) as $error) $diagnostic(new ScanDiagnostic('error', $error));
             return null;
         }
-
-        if (empty($pack['rules'])) {
-            $diagnostic(new ScanDiagnostic('error', 'No rules found. Check rules directory or control filter.'));
-            return null;
-        }
-
+        if ($pack['rules'] === []) { $diagnostic(new ScanDiagnostic('error', 'No requirements matched the selection.')); return null; }
+        $standard = (string)$activeProfile['id'];
+        $pci = $standard === 'pci' || str_starts_with($standard, 'pci-dss');
+        if (!$pci && (!empty($options['pci-context']) || !empty($options['pci-evidence']) || !empty($options['pci-report']))) throw new \RuntimeException('--pci-context, --pci-evidence, and --pci-report require the PCI profile.');
         return new ScanPlan($request, $pack, [
-            'configBasePath' => $configBasePath,
-            'configFile' => $configFile,
-            'activeProfile' => $activeProfile,
-            'standard' => $standard,
-            'isPciProfile' => $isPciProfile,
-            'profileRulesTotal' => $profileRulesTotal,
-            'profileManualRulesTotal' => $profileManualRulesTotal,
-            'manualRulesExcluded' => $manualRulesExcluded,
-            'includeManualReview' => $includeManualReview,
-            'hasExplicitRuleSelection' => $hasExplicitRuleSelection,
-            'requestedIds' => $requestedIds,
-            'controlsFilter' => $controlsFilter,
+            'configBasePath'=>$base,'configFile'=>$configFile,'activeProfile'=>$activeProfile,'standard'=>$standard,'isPciProfile'=>$pci,
+            'profileRulesTotal'=>$total,'profileManualRulesTotal'=>$manualTotal,'manualRulesExcluded'=>$hidden,
+            'includeManualReview'=>$includeManual,'hasExplicitRuleSelection'=>$requested!==[],'requestedIds'=>$requested,'controlsFilter'=>$controls,
+            'capabilities'=>$caps,'profile_selector'=>$profile,'assessment_model'=>'internal-requirement-v1','profileInventoryCount'=>$profileInventoryCount,'omittedRequirements'=>$omittedRequirements,
         ]);
     }
 
-    /** Agent policy deliberately uses only the bundled catalog and manifest order. */
+    /** Dashboard manifest cardinality and keys are preserved, including legacy requests. */
     public function planAgent(ScanRequest $request): ScanPlan
     {
         $manifest = $request->options['manifest'] ?? [];
-        $schema = (string)($manifest['schema_version'] ?? '');
-        if ($schema !== '1.0') throw new \RuntimeException("Unsupported manifest schema version {$schema}.");
+        if (isset($manifest['rules']) && (!is_array($manifest['rules']) || array_filter($manifest['rules'],static fn($e):bool=>!is_array($e))!==[])) throw new \RuntimeException('Manifest rules must be an array of entries.');
         $entries = is_array($manifest['rules'] ?? null) ? $manifest['rules'] : [];
-        $manifestIndex = [];
+        $internalEntries = array_values(array_filter($entries, static fn(array $e): bool => (preg_match('/^MB-[0-9]{4,}$/D', strtoupper((string)($e['rule_key'] ?? ''))) === 1)));
+        if ($internalEntries === []) return (new LegacyScanPlanner())->planAgent($request);
+        if (($manifest['schema_version'] ?? '') !== '1.0') throw new \RuntimeException('Unsupported manifest schema version.');
+        if (!is_array($manifest['rules'] ?? null)) throw new \RuntimeException('Manifest rules must be an array.');
+        if (isset($manifest['assessment_level']) && !in_array($manifest['assessment_level'], [1,2,3], true)) throw new \RuntimeException('Invalid manifest assessment level.');
+        $index = []; $selected = []; $unsupported = []; $bindings=[]; $executedIds=[];
+        $all = array_column(RequirementCatalog::loadAll()['rules'], null, 'id');
+        $legacyEntries = array_values(array_filter($entries, static fn(array $e): bool => !(preg_match('/^MB-[0-9]{4,}$/D', strtoupper((string)($e['rule_key'] ?? ''))) === 1)));
+        $legacyRules = [];
+        if ($legacyEntries !== []) {
+            $legacyManifest = $manifest; $legacyManifest['rules'] = $legacyEntries;
+            $legacyRequest = new ScanRequest($request->context, array_replace($request->options, ['manifest'=>$legacyManifest]));
+            $legacy = (new LegacyScanPlanner())->planAgent($legacyRequest);
+            $legacyRules = array_column($legacy->pack['rules'], null, 'id');
+            $unsupported = $legacy->metadata['unsupported'];
+        }
         foreach ($entries as $entry) {
-            $key = strtoupper((string)($entry['rule_key'] ?? ''));
-            if (str_starts_with($key, 'OWASP-ASVS:') && isset($manifestIndex[$key])) throw new \RuntimeException('Duplicate canonical requirement in manifest.');
-            if ($key !== '') $manifestIndex[$key] = $entry;
+            $id = strtoupper((string)($entry['rule_key'] ?? ''));
+            if ($id === '') continue;
+            if (isset($index[$id]) && (preg_match('/^MB-[0-9]{4,}$/D', $id) === 1)) throw new \RuntimeException('Duplicate internal requirement in manifest.');
+            $index[$id] = $entry;
         }
-        $requested = array_keys($manifestIndex);
-        if ($requested === []) throw new \RuntimeException('Manifest contains no rule IDs.');
-        $all = RulePackLoader::loadAll();
-        $index = [];
-        foreach ($all['rules'] as $rule) $index[strtoupper((string)($rule['id'] ?? ''))] = $rule;
-        $canonicalError = null;
-        if (array_filter($requested, static fn(string $id): bool => str_starts_with($id, 'OWASP-ASVS:'))) {
-            try {
-                $profileName = (string)($manifest['profile'] ?? '');
-                if (!in_array(strtolower($profileName), ['asvs-l1', 'asvs-l2', 'asvs-l3'], true)) throw new \RuntimeException('Canonical ASVS manifest requires a bundled ASVS profile context.');
-                $profile = ProfileLoader::loadBundled(strtolower($profileName));
-                if (!RequirementCatalog::supports($profile)) throw new \RuntimeException('Canonical ASVS manifest requires an ASVS profile.');
-                $capabilities = is_array($manifest['capabilities'] ?? null) ? $manifest['capabilities'] : [];
-                foreach (RequirementCatalog::compile(ProfileLoader::apply($all, $profile, false, $capabilities), $profile, $capabilities)['rules'] as $definition) $index[$definition['id']] = $definition;
-            } catch (\RuntimeException $error) { $canonicalError = $error->getMessage(); }
+        foreach ($index as $id=>$entry) {
+            if (!(preg_match('/^MB-[0-9]{4,}$/D', $id) === 1)) { if (isset($legacyRules[$id])) {$selected[]=$legacyRules[$id];$bindings[]=['requested_key'=>$id,'assessment_item_id'=>(string)($entry['assessment_item_id']??''),'canonical_id'=>$id];} continue; }
+            $canonicalIds=isset($all[$id])?[$id]:RequirementCatalog::resolveAlias($id);
+            $canonicalId=count($canonicalIds)===1?$canonicalIds[0]:null;
+            if ($canonicalId===null || !isset($all[$canonicalId])) { $unsupported[]=['assessment_item_id'=>(string)($entry['assessment_item_id']??''),'rule_key'=>$id,'status'=>'unsupported','message'=>'Requirement is not bundled in this CLI version.']; continue; }
+            $r=$all[$canonicalId];
+            $mode=strtoupper((string)($request->context->get('meta',[])['target_mode']??'LOCAL'));if($mode==='HYBRID')$mode='LOCAL';
+            if(!in_array($mode,$r['target_modes'],true)){$unsupported[]=['assessment_item_id'=>(string)($entry['assessment_item_id']??''),'rule_key'=>$id,'status'=>'unsupported','message'=>'Requirement is unavailable in this target mode.'];continue;}
+            if(isset($r['execution_variants'][$mode]['obligations'])){$r['obligations']=$r['execution_variants'][$mode]['obligations'];$r['checks']=array_merge(...array_map(static fn(array $o):array=>$o['checks'],$r['obligations']));$r['execution_scope']=$mode;}
+            if(isset($r['applicability']['capability'])){$cap=$r['applicability']['capability'];$caps=is_array($manifest['capabilities']??null)?$manifest['capabilities']:[];$enabled=array_is_list($caps)?in_array($cap,$caps,true):filter_var($caps[$cap]??false,FILTER_VALIDATE_BOOLEAN);$r['applicability']['state']=$enabled?'APPLICABLE':'UNKNOWN';}
+            if (isset($manifest['assessment_level'])) $r['assessment_level']=$manifest['assessment_level'];
+            $bindings[]=['requested_key'=>$id,'assessment_item_id'=>(string)($entry['assessment_item_id']??''),'canonical_id'=>$canonicalId];
+            if(!isset($executedIds[$canonicalId])){$selected[]=$r;$executedIds[$canonicalId]=true;}
         }
-        $selected = []; $unsupported = [];
-        foreach ($requested as $id) {
-            $entry = $manifestIndex[$id];
-            $base = ['assessment_item_id' => (string)$entry['assessment_item_id'], 'rule_key' => $id];
-            if (!isset($index[$id])) {
-                $unsupported[] = $base + ['status' => 'unsupported', 'message' => str_starts_with($id, 'OWASP-ASVS:') ? ($canonicalError ?? 'Requirement is unavailable for the manifest profile/capability context.') : 'Rule is not bundled in this CLI version.'];
-                continue;
-            }
-            $rule = $index[$id];
-            // Preserve the existing check-name predicate; changing it is a separate behavior fix.
-            $manual = false;
-            foreach ($rule['checks'] ?? [] as $check) if (($check['name'] ?? '') === 'manual_review') $manual = true;
-            if ($manual) {
-                $unsupported[] = $base + ['status' => 'unsupported', 'message' => 'Manual-review rules are not executed by agents.'];
-                continue;
-            }
-            $selected[] = $rule;
-        }
-        return new ScanPlan($request, ['rules' => $selected], ['manifestIndex' => $manifestIndex, 'unsupported' => $unsupported], true);
+        return new ScanPlan($request, ['assessment_model'=>'internal-requirement-v1','rules'=>$selected], ['manifestIndex'=>$index,'unsupported'=>$unsupported,'manifestBindings'=>$bindings], true);
     }
 
-    private function normalizeControlId(string $raw): string
+    private static function ids(mixed $raw): array
     {
-        $id = strtoupper(trim($raw));
-        if ($id === '') return '';
-        if (preg_match('/^MB-C(\d{2})$/', $id, $m)) return 'MB-C' . $m[1];
-        if (preg_match('/^MB-(\d{2})$/', $id, $m)) return 'MB-C' . $m[1];
-        if (preg_match('/^C(\d{2})$/', $id, $m)) return 'MB-C' . $m[1];
-        if (preg_match('/^(\d{2})$/', $id, $m)) return 'MB-C' . $m[1];
-        return '';
+        if (is_string($raw)) $raw=explode(',', $raw);
+        if (!is_array($raw)) return [];
+        return array_values(array_unique(array_filter(array_map(static fn($v):string=>strtoupper(trim((string)$v)), $raw))));
     }
-
     private function normalizeControlList(mixed $raw): array
     {
-        if (is_string($raw)) {
-            $parts = array_map('trim', explode(',', $raw));
-        } elseif (is_array($raw)) {
-            $parts = $raw;
-        } else {
-            return [];
+        $result=[];
+        $known=RequirementCatalog::loadAll()['controls'];
+        foreach (self::ids($raw) as $id) {
+            if(in_array($id,$known,true)){$result[]=$id;continue;}
+            if (!preg_match('/^(?:MB-C|MB-|C)?(\d{2})$/',$id,$m)) throw new \RuntimeException('Invalid control id: '.$id);
+            $result[]='MB-C'.$m[1];
         }
-
-        $normalized = [];
-        $invalid = [];
-        foreach ($parts as $control) {
-            if (!is_scalar($control)) {
-                $invalid[] = '[non-scalar]';
-                continue;
-            }
-            $control = trim((string)$control);
-            if ($control === '') {
-                continue;
-            }
-            $nc = $this->normalizeControlId($control);
-            if ($nc === '') {
-                $invalid[] = $control;
-            } else {
-                $normalized[] = $nc;
-            }
-        }
-
-        if ($invalid) {
-            throw new \RuntimeException(
-                'Invalid control id(s): ' . implode(', ', $invalid) . "\nExpected format: MB-C01 or MB-01"
-            );
-        }
-
-        return array_values(array_unique($normalized));
+        return array_values(array_unique($result));
     }
-
-
-
-
-
 }

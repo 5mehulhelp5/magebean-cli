@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 require_once __DIR__ . '/../vendor/autoload.php';
-use Magebean\Engine\{RequirementCatalog, RequirementEvaluator, ProfileLoader, RulePackLoader, CheckResult, CheckOutcome, ScanRunner, ScanPlanner, ScanRequest, ScanContext, Context, RuleValidator};
+use Magebean\Engine\{RequirementCatalog, LegacyAsvsRequirementAdapter, RequirementEvaluator, ProfileLoader, RulePackLoader, CheckResult, CheckOutcome, ScanRunner, ScanPlanner, ScanRequest, ScanContext, Context, RuleValidator};
 use Magebean\Engine\Checks\CheckRegistry;
 use Magebean\Agent\AgentScanner;
 use Magebean\Application;
@@ -52,8 +52,8 @@ requirementAssert($thrown,'Duplicate requirement definitions must be rejected');
 $bad=$fixtureProfile;$bad['requirement_coverage'][0]['id']='99.1.1';$thrown=false;
 try {RequirementCatalog::compile($legacy,$bad);} catch(RuntimeException) {$thrown=true;}
 requirementAssert($thrown,'Unknown standard identity must be rejected');
-requirementAssert(count(RequirementCatalog::forProfile('asvs-l2')['rules'])===198,'Unspecified capabilities do not activate contextual criteria');
-$graphql=RequirementCatalog::forProfile('asvs-l2',['graphql'=>false]);
+requirementAssert(count(LegacyAsvsRequirementAdapter::forProfile('asvs-l2')['rules'])===198,'Unspecified capabilities do not activate contextual criteria');
+$graphql=LegacyAsvsRequirementAdapter::forProfile('asvs-l2',['graphql'=>false]);
 requirementAssert(count($graphql['rules'])===198,'Explicitly false capability does not activate conditional evidence');
 $root=sys_get_temp_dir().'/magebean-requirements-'.bin2hex(random_bytes(6));$cwd=getcwd();
 try {

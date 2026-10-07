@@ -118,9 +118,23 @@ abstract class ComposerSupport
                 if (!empty($aff['ranges']) && is_array($aff['ranges'])) {
                     foreach ($aff['ranges'] as $range) {
                         $events = is_array($range['events'] ?? null) ? $range['events'] : [];
-                        if ($events !== []) {
-                            $hasVersionEvidence = true;
+                        $rangeType = strtoupper((string)($range['type'] ?? 'SEMVER'));
+                        $validEvents = $events !== [] && in_array($rangeType, ['SEMVER', 'ECOSYSTEM'], true);
+                        foreach ($events as $event) {
+                            if (!is_array($event) || count($event) !== 1
+                                || !in_array(array_key_first($event), ['introduced', 'fixed', 'last_affected', 'limit'], true)
+                                || !is_string(reset($event)) || trim(reset($event)) === '') {
+                                $validEvents = false;
+                            }
                         }
+                        if (!$validEvents) {
+                            $unassessed[strtolower((string)$pkg) . '@' . $current . '|' . $id . '|range'] = [
+                                'package' => (string)$pkg, 'version' => $current,
+                                'advisory' => $id, 'reason' => 'unsupported_or_malformed_range',
+                            ];
+                            continue;
+                        }
+                        $hasVersionEvidence = true;
                         $fixedCandidate = null;
                         $intervals = $this->eventsToIntervalsSafe($auditor, $events, $fixedCandidate);
                         foreach ($intervals as [$start, $end, $inclusive, $kind]) {

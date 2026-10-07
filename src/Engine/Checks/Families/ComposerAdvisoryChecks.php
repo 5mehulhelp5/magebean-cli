@@ -6,11 +6,49 @@ use Magebean\Engine\Collectors\CollectorSet;
 
 final class ComposerAdvisoryChecks extends ComposerSupport
 {
+    /** Validate before collectors normalize or omit malformed dependency records. */
+    private function validateLockScope(string $lockFile): ?string
+    {
+        $raw = $this->collectors->files->read($lockFile);
+        $lock = is_string($raw) ? json_decode($raw, true) : null;
+        if (!is_array($lock) || !array_key_exists('packages', $lock)) {
+            return 'composer.lock dependency scope is missing or invalid';
+        }
+        $names = [];
+        foreach (['packages', 'packages-dev'] as $section) {
+            if (!array_key_exists($section, $lock) && $section === 'packages-dev') continue;
+            $packages = $lock[$section] ?? null;
+            if (!is_array($packages) || !array_is_list($packages)) {
+                return 'composer.lock ' . $section . ' must be a dependency list';
+            }
+            foreach ($packages as $package) {
+                if (!is_array($package) || !is_string($package['name'] ?? null)
+                    || !preg_match('/^[a-z0-9_.-]+\/[a-z0-9_.-]+$/D', $package['name'])
+                    || !is_string($package['version'] ?? null)
+                    || trim($package['version']) === '' || trim($package['version']) !== $package['version']) {
+                    return 'composer.lock contains an invalid dependency name or version';
+                }
+                if (isset($names[$package['name']])) {
+                    return 'composer.lock contains duplicate dependency records';
+                }
+                $names[$package['name']] = true;
+            }
+        }
+        return null;
+    }
+
     public function auditApi(array $args): array
     {
         $lockFile = $this->ctx->abs($args['lock_file'] ?? 'composer.lock');
         if (!is_file($lockFile)) {
             return [null, '[UNKNOWN] composer.lock not found'];
+        }
+
+        if (!empty($args['strict_scope'])) {
+            $scopeError = $this->validateLockScope($lockFile);
+            if ($scopeError !== null) {
+                return [null, '[UNKNOWN] ' . $scopeError];
+            }
         }
 
         $installed = $this->readLockPackages($lockFile);
@@ -48,7 +86,7 @@ final class ComposerAdvisoryChecks extends ComposerSupport
             $message = $packageScope === 'adobe_core'
                 ? 'No Adobe/Magento core packages found in composer.lock'
                 : 'No packages in composer.lock (nothing to audit)';
-            return [true, $message, ['package_scope' => $packageScope, 'packages' => 0]];
+            return [null, '[UNKNOWN] ' . $message . '; advisory scope could not be established', ['package_scope' => $packageScope, 'packages' => 0]];
         }
 
         $endpoint = trim((string)($args['endpoint'] ?? $this->ctx->get(
@@ -151,7 +189,7 @@ final class ComposerAdvisoryChecks extends ComposerSupport
                     '[UNKNOWN] Unsupported OSV API response schema',
                     [
                         'endpoint' => $endpoint,
-                        'schema_version' => $decoded['schema_version'],
+                        'schema_version' => $decoded['schema_version'] ?? null,
                         'batch' => $batchIndex + 1,
                     ],
                 ];
@@ -165,8 +203,8 @@ final class ComposerAdvisoryChecks extends ComposerSupport
             }
 
             foreach ($decoded['advisories'] as $advisory) {
-                if (!is_array($advisory)) {
-                    continue;
+                if (!is_array($advisory) || !is_array($advisory['affected'] ?? null) || $advisory['affected'] === []) {
+                    return [null, '[UNKNOWN] OSV API returned a malformed advisory', ['endpoint' => $endpoint, 'batch' => $batchIndex + 1]];
                 }
                 $key = (string)($advisory['id'] ?? hash('sha256', json_encode($advisory)));
                 if (!isset($advisories[$key])) {
@@ -219,6 +257,13 @@ final class ComposerAdvisoryChecks extends ComposerSupport
         $lockFile = $this->ctx->abs($args['lock_file'] ?? 'composer.lock');
         if (!is_file($lockFile)) {
             return [null, '[UNKNOWN] composer.lock not found'];
+        }
+
+        if (!empty($args['strict_scope'])) {
+            $scopeError = $this->validateLockScope($lockFile);
+            if ($scopeError !== null) {
+                return [null, '[UNKNOWN] ' . $scopeError];
+            }
         }
 
         $installed = $this->readLockPackages($lockFile);
@@ -294,6 +339,17 @@ final class ComposerAdvisoryChecks extends ComposerSupport
                 'status' => $statusCode,
             ]];
         }
+        if (in_array($decoded['status'] ?? null, ['current', 'outdated'], true)) {
+            if (!is_array($decoded['missing_patches'] ?? null)) {
+                return [null, '[UNKNOWN] Adobe patch API missing required patch evidence', ['endpoint' => $endpoint]];
+            }
+            foreach ($decoded['missing_patches'] as $patch) {
+                if (!is_array($patch) || !is_string($patch['advisory'] ?? null)
+                    || trim($patch['advisory']) === '') {
+                    return [null, '[UNKNOWN] Adobe patch API returned malformed patch evidence', ['endpoint' => $endpoint]];
+                }
+            }
+        }
         if (($decoded['schema_version'] ?? null) === 'magebean-adobe-patch-response-v1') {
             $decoded = $this->applyAdobeFingerprintEvidence($decoded, $localPatchEvidence);
         }
@@ -327,6 +383,13 @@ final class ComposerAdvisoryChecks extends ComposerSupport
         if (($decoded['status'] ?? null) === 'unsupported_branch') {
             $evidence['supported_branches'] = $decoded['supported_branches'] ?? [];
             return [false, $this->unsupportedBranchMessage($decoded, $version), $evidence];
+        }
+        if (($decoded['status'] ?? null) === 'current'
+            && (!array_key_exists('missing_patches', $decoded)
+                || !is_array($decoded['missing_patches']) || $decoded['missing_patches'] !== []
+                || !is_string($decoded['latest_security_version'] ?? null)
+                || trim($decoded['latest_security_version']) === '')) {
+            return [null, '[UNKNOWN] Adobe patch API current status lacks complete patch evidence', $evidence];
         }
         if (($decoded['status'] ?? null) === 'current') {
             $latest = (string)($decoded['latest_security_version'] ?? $version);

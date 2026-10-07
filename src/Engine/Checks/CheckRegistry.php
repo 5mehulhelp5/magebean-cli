@@ -41,7 +41,20 @@ final class CheckRegistry
         $sys = new SystemCheck($ctx);
         $pci = new PciEvidenceCheck($ctx);
 
+        $deployment = new DeploymentStateCheck($ctx, $collectors);
+        $installedCron = new InstalledCronCheck($ctx);
+        $registry->register('fs_webroot_artifact_policy', fn(array $args): array => $deployment->webrootArtifacts($args));
+        $registry->register('cache_type_enabled', fn(array $args): array => $deployment->cacheTypeEnabled($args));
+        $registry->register('installed_magento_cron', fn(array $args): array => $installedCron->configured($args));
+        $registry->register('magento_admin_password_minimum_configured', fn(array $args): array => $mage->adminPasswordMinimumConfigured($args));
+        $registry->register('magento_deployment_debug_flags_disabled', fn(array $args): array => $mage->deploymentDebugFlagsDisabled($args));
+        $registry->register('working_tree_secret_scan', fn(array $args): array => $git->workingTreeScan($args));
         $registry->services['http'] = $http;
+        $sourceObservations = new SourceSecurityObservationsCheck($ctx, $collectors);
+        $runtimeEvidence = new RuntimeEvidenceCheck($ctx, $collectors);
+        $registry->register('source_security_observations', fn(array $args): CheckResult => $sourceObservations->run($args));
+        $registry->register('http_response_media_evidence', fn(array $args): CheckResult => $runtimeEvidence->contentType($args));
+        $registry->register('identity_inventory_evidence', fn(array $args): CheckResult => $runtimeEvidence->defaultAccounts($args));
         $asvsSource = new AsvsSourceEvidenceCheck($ctx, $collectors);
         $asvsRuntime = new AsvsRuntimeEvidenceCheck($ctx, $collectors);
         $registry->register('asvs_source_evidence', fn(array $args): CheckResult => $asvsSource->run($args));
@@ -141,6 +154,11 @@ final class CheckRegistry
 
         $registry->register('magento_config', fn(array $args): array => $mage->stub($args));
         $registry->register('magento_admin_frontname_strong', fn(array $args): array => $mage->adminFrontNameStrong($args));
+        $registry->register('magento_admin_frontname_declared', fn(array $args): array => $mage->adminFrontNameDeclared($args));
+        $registry->register('magento_admin_login_protection_configured', fn(array $args): array => $mage->adminLoginProtectionConfigured($args));
+        $registry->register('magento_https_configuration_observed', fn(array $args): array => $mage->httpsConfigurationObserved($args));
+        $registry->register('magento_cookie_configuration_observed', fn(array $args): array => $mage->cookieConfigurationObserved($args));
+        $registry->register('magento_debug_configuration_observed', fn(array $args): array => $mage->debugConfigurationObserved($args));
         $registry->register('magento_admin_2fa_enabled', fn(array $args): array => $mage->adminTwoFactorAuthEnabled($args));
         $registry->register('magento_admin_password_policy_strong', fn(array $args): array => $mage->adminPasswordPolicyStrong($args));
         $registry->register('magento_admin_session_timeout', fn(array $args): array => $mage->adminSessionTimeout($args));

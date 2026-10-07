@@ -5,6 +5,7 @@ final class ScanExitPolicy
 {
     public function code(array $result): int
     {
+        if (!empty($result['meta']['automation_only']) && !empty($result['execution_errors'])) return 3;
         $failedFindings = array_filter(
             $result['findings'] ?? [],
             static fn(array $finding): bool => strtoupper((string)($finding['status'] ?? '')) === 'FAIL'

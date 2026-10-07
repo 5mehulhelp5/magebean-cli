@@ -1,0 +1,4307 @@
+{
+  "schema_version": "1.0",
+  "before_count": 726,
+  "active_count": 684,
+  "retired_count": 42,
+  "groups": [
+    {
+      "canonical_id": "MB-0209",
+      "retired_ids": [
+        "MB-0008"
+      ],
+      "classification": "subsumed_scope",
+      "revision": 2,
+      "criterion": "Verify that user set passwords are at least 8 characters in length although a minimum of 15 characters is strongly recommended. Additional mandatory Magento deployment conditions: Admin passwords require at least 8 characters; assess only the collected Magento deployment scope.",
+      "reason": "Admin user-set passwords are a subset of user-set passwords; both require at least8. Recommendation15 remains recommendation, not a mandatory failurethreshold.",
+      "original_definitions": [
+        {
+          "id": "MB-0209",
+          "revision": 1,
+          "title": "User set passwords are at least 8 characters in length although a minimum of 15 characters is strongly recommended.",
+          "criterion": "Verify that user set passwords are at least 8 characters in length although a minimum of 15 characters is strongly recommended.",
+          "control": "MB-C02",
+          "severity": "high",
+          "alignments": [
+            {
+              "standard": "OWASP-ASVS",
+              "version": "5.0.0",
+              "reference": "6.2.1",
+              "relationship": "partial"
+            }
+          ],
+          "obligations": [
+            {
+              "id": "O001",
+              "op": "all",
+              "role": "supporting",
+              "proof": "heuristic",
+              "checks": [
+                {
+                  "name": "magento_admin_password_policy_strong",
+                  "args": {
+                    "file": "app/etc/config.php",
+                    "base_path": "system.default.admin.security",
+                    "min_password_length": 8
+                  }
+                }
+              ]
+            }
+          ],
+          "coverage": "PARTIALLY_AUTOMATED",
+          "verification": "automated",
+          "review_state": "pending_security_review",
+          "human_evidence": {
+            "required": true,
+            "instructions": "Admin password minimum length of eight is checked.",
+            "evidence_types": [
+              "review",
+              "runtime_scope"
+            ]
+          },
+          "target_modes": [
+            "LOCAL",
+            "REMOTE"
+          ],
+          "checks": [
+            {
+              "name": "magento_admin_password_policy_strong",
+              "args": {
+                "file": "app/etc/config.php",
+                "base_path": "system.default.admin.security",
+                "min_password_length": 8
+              }
+            }
+          ],
+          "op": "all",
+          "introduced_level": 1,
+          "source_metadata": {
+            "publisher": "OWASP Foundation / ASVS Project contributors",
+            "standard": "OWASP-ASVS",
+            "version": "5.0.0",
+            "reference": "6.2.1",
+            "introduced_level": 1,
+            "chapter": "Authentication",
+            "section": "Password Security",
+            "source_url": "https://raw.githubusercontent.com/OWASP/ASVS/v5.0.0/5.0/docs_en/OWASP_Application_Security_Verification_Standard_5.0.0_en.json",
+            "source_sha256": "bcdbec214d70abcfad9284a31d4f9e5134305831d628aad3aa85d7e26626cb35",
+            "license": "CC-BY-SA-4.0",
+            "license_url": "https://creativecommons.org/licenses/by-sa/4.0/",
+            "source_license_url": "https://github.com/OWASP/ASVS/blob/v5.0.0/LICENSE.md",
+            "attribution": "Application Security Verification Standard 5.0.0, OWASP Foundation / ASVS Project contributors. Licensed under CC BY-SA 4.0.",
+            "modifications": "Criterion descriptions reproduced unchanged; internal IDs and shortened display titles added.",
+            "disclaimer": "Provided without warranty; no OWASP endorsement or certification is implied."
+          }
+        },
+        {
+          "id": "MB-0008",
+          "revision": 1,
+          "title": "Admin passwords require at least 8 characters",
+          "criterion": "Admin passwords require at least 8 characters; assess only the collected Magento deployment scope.",
+          "control": "MB-C02",
+          "severity": "high",
+          "alignments": [],
+          "obligations": [
+            {
+              "id": "O001",
+              "op": "all",
+              "role": "mandatory",
+              "proof": "heuristic",
+              "checks": [
+                {
+                  "name": "magento_admin_password_policy_strong",
+                  "args": {
+                    "file": "app/etc/config.php",
+                    "base_path": "system.default.admin.security",
+                    "min_password_length": 8
+                  }
+                }
+              ]
+            }
+          ],
+          "coverage": "PARTIALLY_AUTOMATED",
+          "verification": "automated",
+          "review_state": "heuristic_supporting_only",
+          "human_evidence": {
+            "required": true,
+            "instructions": "Admin passwords require at least 8 characters; assess only the collected Magento deployment scope.",
+            "evidence_types": [
+              "review",
+              "runtime_scope"
+            ]
+          },
+          "target_modes": [
+            "LOCAL"
+          ],
+          "checks": [
+            {
+              "name": "magento_admin_password_policy_strong",
+              "args": {
+                "file": "app/etc/config.php",
+                "base_path": "system.default.admin.security",
+                "min_password_length": 8
+              }
+            }
+          ],
+          "op": "all"
+        }
+      ]
+    },
+    {
+      "canonical_id": "MB-0131",
+      "retired_ids": [
+        "MB-0017"
+      ],
+      "classification": "subsumed_scope",
+      "revision": 2,
+      "criterion": "Verify that deserialization of untrusted data enforces safe input handling, such as using an allowlist of object types or restricting client-defined object types, to prevent deserialization attacks. Deserialization mechanisms that are explicitly defined as insecure must not be used with untrusted input. Additional mandatory Magento deployment conditions: No unsafe deserialization; assess only the collected Magento deployment scope.",
+      "reason": "Same unsafe-untrusted-deserialization prevention property. The richer canonical criterion preserves type/input restrictions and prohibits explicitly insecure untrusted mechanisms.",
+      "original_definitions": [
+        {
+          "id": "MB-0131",
+          "revision": 1,
+          "title": "Deserialization of untrusted data enforces safe input handling, such as using an allowlist of object types or…",
+          "criterion": "Verify that deserialization of untrusted data enforces safe input handling, such as using an allowlist of object types or restricting client-defined object types, to prevent deserialization attacks. Deserialization mechanisms that are explicitly defined as insecure must not be used with untrusted input.",
+          "control": "MB-C03",
+          "severity": "high",
+          "alignments": [
+            {
+              "standard": "OWASP-ASVS",
+              "version": "5.0.0",
+              "reference": "1.5.2",
+              "relationship": "partial"
+            }
+          ],
+          "obligations": [
+            {
+              "id": "O001",
+              "op": "all",
+              "role": "supporting",
+              "proof": "heuristic",
+              "checks": [
+                {
+                  "name": "code_unserialize_safety",
+                  "args": {
+                    "paths": [
+                      "app"
+                    ],
+                    "include_ext": [
+                      "php"
+                    ]
+                  }
+                }
+              ]
+            }
+          ],
+          "coverage": "PARTIALLY_AUTOMATED",
+          "verification": "automated",
+          "review_state": "pending_security_review",
+          "human_evidence": {
+            "required": true,
+            "instructions": "Existing Magebean rules provide useful evidence but do not prove the full ASVS requirement.",
+            "evidence_types": [
+              "review",
+              "runtime_scope"
+            ]
+          },
+          "target_modes": [
+            "LOCAL",
+            "REMOTE"
+          ],
+          "checks": [
+            {
+              "name": "code_unserialize_safety",
+              "args": {
+                "paths": [
+                  "app"
+                ],
+                "include_ext": [
+                  "php"
+                ]
+              }
+            }
+          ],
+          "op": "all",
+          "introduced_level": 2,
+          "source_metadata": {
+            "publisher": "OWASP Foundation / ASVS Project contributors",
+            "standard": "OWASP-ASVS",
+            "version": "5.0.0",
+            "reference": "1.5.2",
+            "introduced_level": 2,
+            "chapter": "Encoding and Sanitization",
+            "section": "Safe Deserialization",
+            "source_url": "https://raw.githubusercontent.com/OWASP/ASVS/v5.0.0/5.0/docs_en/OWASP_Application_Security_Verification_Standard_5.0.0_en.json",
+            "source_sha256": "bcdbec214d70abcfad9284a31d4f9e5134305831d628aad3aa85d7e26626cb35",
+            "license": "CC-BY-SA-4.0",
+            "license_url": "https://creativecommons.org/licenses/by-sa/4.0/",
+            "source_license_url": "https://github.com/OWASP/ASVS/blob/v5.0.0/LICENSE.md",
+            "attribution": "Application Security Verification Standard 5.0.0, OWASP Foundation / ASVS Project contributors. Licensed under CC BY-SA 4.0.",
+            "modifications": "Criterion descriptions reproduced unchanged; internal IDs and shortened display titles added.",
+            "disclaimer": "Provided without warranty; no OWASP endorsement or certification is implied."
+          }
+        },
+        {
+          "id": "MB-0017",
+          "revision": 1,
+          "title": "No unsafe deserialization",
+          "criterion": "No unsafe deserialization; assess only the collected Magento deployment scope.",
+          "control": "MB-C03",
+          "severity": "high",
+          "alignments": [],
+          "obligations": [
+            {
+              "id": "O001",
+              "op": "all",
+              "role": "mandatory",
+              "proof": "heuristic",
+              "checks": [
+                {
+                  "name": "code_unserialize_safety",
+                  "args": {
+                    "paths": [
+                      "app"
+                    ],
+                    "include_ext": [
+                      "php"
+                    ]
+                  }
+                }
+              ]
+            }
+          ],
+          "coverage": "PARTIALLY_AUTOMATED",
+          "verification": "automated",
+          "review_state": "heuristic_supporting_only",
+          "human_evidence": {
+            "required": true,
+            "instructions": "No unsafe deserialization; assess only the collected Magento deployment scope.",
+            "evidence_types": [
+              "review",
+              "runtime_scope"
+            ]
+          },
+          "target_modes": [
+            "LOCAL"
+          ],
+          "checks": [
+            {
+              "name": "code_unserialize_safety",
+              "args": {
+                "paths": [
+                  "app"
+                ],
+                "include_ext": [
+                  "php"
+                ]
+              }
+            }
+          ],
+          "op": "all"
+        }
+      ]
+    },
+    {
+      "canonical_id": "MB-0379",
+      "retired_ids": [
+        "MB-0032",
+        "MB-0033",
+        "MB-0036",
+        "MB-0044",
+        "MB-0074"
+      ],
+      "classification": "coherent_policy_union_with_explicit_mandatory_subclauses",
+      "revision": 2,
+      "criterion": "Verify that debug modes are disabled for all components in production environments to prevent exposure of debugging features and information leakage. Xdebug disabled in production; assess only the collected Magento deployment scope. display_errors is Off; assess only the collected Magento deployment scope. No dev debug configs on production (template hints off); assess only the collected Magento deployment scope. Debug template hints disabled in production; assess only the collected Magento deployment scope. Debug/verbose off for third-party integrations; assess only the collected Magento deployment scope.",
+      "reason": "One productiondebug/information-exposure policy owns Xdebug, display_errorsOff, templatehints, translationinline and integrationverbosity conditions. Generic errorresponse ASVS16.5.1 remains separate; everyconfigurationrestriction retained.",
+      "original_definitions": [
+        {
+          "id": "MB-0379",
+          "revision": 1,
+          "title": "Debug modes are disabled for all components in production environments to prevent exposure of debugging features and…",
+          "criterion": "Verify that debug modes are disabled for all components in production environments to prevent exposure of debugging features and information leakage.",
+          "control": "MB-C05",
+          "severity": "high",
+          "alignments": [
+            {
+              "standard": "OWASP-ASVS",
+              "version": "5.0.0",
+              "reference": "13.4.2",
+              "relationship": "partial"
+            }
+          ],
+          "obligations": [
+            {
+              "id": "O001",
+              "op": "all",
+              "role": "supporting",
+              "proof": "heuristic",
+              "checks": [
+                {
+                  "name": "magento_production_mode",
+                  "args": {
+                    "file": "app/etc/env.php",
+                    "path": "MAGE_MODE",
+                    "equals": "production"
+                  }
+                }
+              ]
+            },
+            {
+              "id": "O002",
+              "op": "all",
+              "role": "supporting",
+              "proof": "heuristic",
+              "checks": [
+                {
+                  "name": "php_xdebug_disabled",
+                  "args": {
+                    "files": [
+                      "php.ini",
+                      ".user.ini"
+                    ]
+                  }
+                },
+                {
+                  "name": "http_no_xdebug_headers",
+                  "args": {
+                    "timeout_ms": 8000
+                  }
+                }
+              ]
+            },
+            {
+              "id": "O003",
+              "op": "any",
+              "role": "supporting",
+              "proof": "heuristic",
+              "checks": [
+                {
+                  "name": "php_template_hints_disabled",
+                  "args": {
+                    "file": "app/etc/env.php",
+                    "paths": [
+                      "system.default.dev/debug/template_hints"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "id": "O004",
+              "op": "all",
+              "role": "supporting",
+              "proof": "heuristic",
+              "checks": [
+                {
+                  "name": "php_dev_debug_config_disabled",
+                  "args": {
+                    "file": "app/etc/env.php",
+                    "paths": [
+                      "system.default.dev/translate_inline/active",
+                      "system.default.dev/debug/template_hints_storefront"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "id": "O005",
+              "op": "all",
+              "role": "supporting",
+              "proof": "heuristic",
+              "checks": [
+                {
+                  "name": "php_third_party_debug_disabled",
+                  "args": {
+                    "files": [
+                      "app/etc/env.php",
+                      "app/etc/config.php"
+                    ]
+                  }
+                }
+              ]
+            }
+          ],
+          "coverage": "PARTIALLY_AUTOMATED",
+          "verification": "automated",
+          "review_state": "pending_security_review",
+          "human_evidence": {
+            "required": true,
+            "instructions": "Existing Magebean rules provide useful evidence but do not prove the full ASVS requirement.",
+            "evidence_types": [
+              "review",
+              "runtime_scope"
+            ]
+          },
+          "target_modes": [
+            "LOCAL",
+            "REMOTE"
+          ],
+          "checks": [
+            {
+              "name": "magento_production_mode",
+              "args": {
+                "file": "app/etc/env.php",
+                "path": "MAGE_MODE",
+                "equals": "production"
+              }
+            },
+            {
+              "name": "php_xdebug_disabled",
+              "args": {
+                "files": [
+                  "php.ini",
+                  ".user.ini"
+                ]
+              }
+            },
+            {
+              "name": "http_no_xdebug_headers",
+              "args": {
+                "timeout_ms": 8000
+              }
+            },
+            {
+              "name": "php_template_hints_disabled",
+              "args": {
+                "file": "app/etc/env.php",
+                "paths": [
+                  "system.default.dev/debug/template_hints"
+                ]
+              }
+            },
+            {
+              "name": "php_dev_debug_config_disabled",
+              "args": {
+                "file": "app/etc/env.php",
+                "paths": [
+                  "system.default.dev/translate_inline/active",
+                  "system.default.dev/debug/template_hints_storefront"
+                ]
+              }
+            },
+            {
+              "name": "php_third_party_debug_disabled",
+              "args": {
+                "files": [
+                  "app/etc/env.php",
+                  "app/etc/config.php"
+                ]
+              }
+            }
+          ],
+          "op": "all",
+          "introduced_level": 2,
+          "source_metadata": {
+            "publisher": "OWASP Foundation / ASVS Project contributors",
+            "standard": "OWASP-ASVS",
+            "version": "5.0.0",
+            "reference": "13.4.2",
+            "introduced_level": 2,
+            "chapter": "Configuration",
+            "section": "Unintended Information Leakage",
+            "source_url": "https://raw.githubusercontent.com/OWASP/ASVS/v5.0.0/5.0/docs_en/OWASP_Application_Security_Verification_Standard_5.0.0_en.json",
+            "source_sha256": "bcdbec214d70abcfad9284a31d4f9e5134305831d628aad3aa85d7e26626cb35",
+            "license": "CC-BY-SA-4.0",
+            "license_url": "https://creativecommons.org/licenses/by-sa/4.0/",
+            "source_license_url": "https://github.com/OWASP/ASVS/blob/v5.0.0/LICENSE.md",
+            "attribution": "Application Security Verification Standard 5.0.0, OWASP Foundation / ASVS Project contributors. Licensed under CC BY-SA 4.0.",
+            "modifications": "Criterion descriptions reproduced unchanged; internal IDs and shortened display titles added.",
+            "disclaimer": "Provided without warranty; no OWASP endorsement or certification is implied."
+          }
+        },
+        {
+          "id": "MB-0032",
+          "revision": 1,
+          "title": "Xdebug disabled in production",
+          "criterion": "Xdebug disabled in production; assess only the collected Magento deployment scope.",
+          "control": "MB-C05",
+          "severity": "medium",
+          "alignments": [],
+          "obligations": [
+            {
+              "id": "O001",
+              "op": "all",
+              "role": "mandatory",
+              "proof": "heuristic",
+              "checks": [
+                {
+                  "name": "php_xdebug_disabled",
+                  "args": {
+                    "files": [
+                      "php.ini",
+                      ".user.ini"
+                    ]
+                  }
+                },
+                {
+                  "name": "http_no_xdebug_headers",
+                  "args": {
+                    "timeout_ms": 8000
+                  }
+                }
+              ]
+            }
+          ],
+          "coverage": "PARTIALLY_AUTOMATED",
+          "verification": "automated",
+          "review_state": "heuristic_supporting_only",
+          "human_evidence": {
+            "required": true,
+            "instructions": "Xdebug disabled in production; assess only the collected Magento deployment scope.",
+            "evidence_types": [
+              "review",
+              "runtime_scope"
+            ]
+          },
+          "target_modes": [
+            "LOCAL",
+            "REMOTE"
+          ],
+          "checks": [
+            {
+              "name": "php_xdebug_disabled",
+              "args": {
+                "files": [
+                  "php.ini",
+                  ".user.ini"
+                ]
+              }
+            },
+            {
+              "name": "http_no_xdebug_headers",
+              "args": {
+                "timeout_ms": 8000
+              }
+            }
+          ],
+          "op": "all",
+          "execution_variants": {
+            "REMOTE": {
+              "obligations": [
+                {
+                  "id": "O001",
+                  "op": "all",
+                  "role": "mandatory",
+                  "proof": "heuristic",
+                  "checks": [
+                    {
+                      "name": "http_no_xdebug_headers",
+                      "args": {
+                        "timeout_ms": 8000
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        },
+        {
+          "id": "MB-0033",
+          "revision": 1,
+          "title": "display_errors is Off",
+          "criterion": "display_errors is Off; assess only the collected Magento deployment scope.",
+          "control": "MB-C05",
+          "severity": "medium",
+          "alignments": [],
+          "obligations": [
+            {
+              "id": "O001",
+              "op": "all",
+              "role": "mandatory",
+              "proof": "heuristic",
+              "checks": [
+                {
+                  "name": "php_display_errors_disabled",
+                  "args": {
+                    "files": [
+                      "php.ini",
+                      ".user.ini"
+                    ]
+                  }
+                },
+                {
+                  "name": "http_no_stacktrace",
+                  "args": {
+                    "timeout_ms": 8000
+                  }
+                }
+              ]
+            }
+          ],
+          "coverage": "PARTIALLY_AUTOMATED",
+          "verification": "automated",
+          "review_state": "heuristic_supporting_only",
+          "human_evidence": {
+            "required": true,
+            "instructions": "display_errors is Off; assess only the collected Magento deployment scope.",
+            "evidence_types": [
+              "review",
+              "runtime_scope"
+            ]
+          },
+          "target_modes": [
+            "LOCAL",
+            "REMOTE"
+          ],
+          "checks": [
+            {
+              "name": "php_display_errors_disabled",
+              "args": {
+                "files": [
+                  "php.ini",
+                  ".user.ini"
+                ]
+              }
+            },
+            {
+              "name": "http_no_stacktrace",
+              "args": {
+                "timeout_ms": 8000
+              }
+            }
+          ],
+          "op": "all",
+          "execution_variants": {
+            "REMOTE": {
+              "obligations": [
+                {
+                  "id": "O001",
+                  "op": "all",
+                  "role": "mandatory",
+                  "proof": "heuristic",
+                  "checks": [
+                    {
+                      "name": "http_no_stacktrace",
+                      "args": {
+                        "timeout_ms": 8000
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        },
+        {
+          "id": "MB-0036",
+          "revision": 1,
+          "title": "No dev debug configs on production (template hints off)",
+          "criterion": "No dev debug configs on production (template hints off); assess only the collected Magento deployment scope.",
+          "control": "MB-C05",
+          "severity": "medium",
+          "alignments": [],
+          "obligations": [
+            {
+              "id": "O001",
+              "op": "any",
+              "role": "mandatory",
+              "proof": "heuristic",
+              "checks": [
+                {
+                  "name": "php_template_hints_disabled",
+                  "args": {
+                    "file": "app/etc/env.php",
+                    "paths": [
+                      "system.default.dev/debug/template_hints"
+                    ]
+                  }
+                }
+              ]
+            }
+          ],
+          "coverage": "PARTIALLY_AUTOMATED",
+          "verification": "automated",
+          "review_state": "heuristic_supporting_only",
+          "human_evidence": {
+            "required": true,
+            "instructions": "No dev debug configs on production (template hints off); assess only the collected Magento deployment scope.",
+            "evidence_types": [
+              "review",
+              "runtime_scope"
+            ]
+          },
+          "target_modes": [
+            "LOCAL"
+          ],
+          "checks": [
+            {
+              "name": "php_template_hints_disabled",
+              "args": {
+                "file": "app/etc/env.php",
+                "paths": [
+                  "system.default.dev/debug/template_hints"
+                ]
+              }
+            }
+          ],
+          "op": "all"
+        },
+        {
+          "id": "MB-0044",
+          "revision": 1,
+          "title": "Debug template hints disabled in production",
+          "criterion": "Debug template hints disabled in production; assess only the collected Magento deployment scope.",
+          "control": "MB-C07",
+          "severity": "medium",
+          "alignments": [],
+          "obligations": [
+            {
+              "id": "O001",
+              "op": "all",
+              "role": "mandatory",
+              "proof": "heuristic",
+              "checks": [
+                {
+                  "name": "php_dev_debug_config_disabled",
+                  "args": {
+                    "file": "app/etc/env.php",
+                    "paths": [
+                      "system.default.dev/translate_inline/active",
+                      "system.default.dev/debug/template_hints_storefront"
+                    ]
+                  }
+                }
+              ]
+            }
+          ],
+          "coverage": "PARTIALLY_AUTOMATED",
+          "verification": "automated",
+          "review_state": "heuristic_supporting_only",
+          "human_evidence": {
+            "required": true,
+            "instructions": "Debug template hints disabled in production; assess only the collected Magento deployment scope.",
+            "evidence_types": [
+              "review",
+              "runtime_scope"
+            ]
+          },
+          "target_modes": [
+            "LOCAL"
+          ],
+          "checks": [
+            {
+              "name": "php_dev_debug_config_disabled",
+              "args": {
+                "file": "app/etc/env.php",
+                "paths": [
+                  "system.default.dev/translate_inline/active",
+                  "system.default.dev/debug/template_hints_storefront"
+                ]
+              }
+            }
+          ],
+          "op": "all"
+        },
+        {
+          "id": "MB-0074",
+          "revision": 1,
+          "title": "Debug/verbose off for third-party integrations",
+          "criterion": "Debug/verbose off for third-party integrations; assess only the collected Magento deployment scope.",
+          "control": "MB-C12",
+          "severity": "medium",
+          "alignments": [],
+          "obligations": [
+            {
+              "id": "O001",
+              "op": "all",
+              "role": "mandatory",
+              "proof": "heuristic",
+              "checks": [
+                {
+                  "name": "php_third_party_debug_disabled",
+                  "args": {
+                    "files": [
+                      "app/etc/env.php",
+                      "app/etc/config.php"
+                    ]
+                  }
+                }
+              ]
+            }
+          ],
+          "coverage": "PARTIALLY_AUTOMATED",
+          "verification": "automated",
+          "review_state": "heuristic_supporting_only",
+          "human_evidence": {
+            "required": true,
+            "instructions": "Debug/verbose off for third-party integrations; assess only the collected Magento deployment scope.",
+            "evidence_types": [
+              "review",
+              "runtime_scope"
+            ]
+          },
+          "target_modes": [
+            "LOCAL"
+          ],
+          "checks": [
+            {
+              "name": "php_third_party_debug_disabled",
+              "args": {
+                "files": [
+                  "app/etc/env.php",
+                  "app/etc/config.php"
+                ]
+              }
+            }
+          ],
+          "op": "all"
+        }
+      ]
+    },
+    {
+      "canonical_id": "MB-0038",
+      "retired_ids": [
+        "MB-0041"
+      ],
+      "classification": "strict_policy_subsumption",
+      "revision": 2,
+      "criterion": "The assessed Magento cache backends use Redis or Varnish rather than a filesystem cache backend.",
+      "reason": "Avoiding file backend is already necessary under Redis/Varnish backend policy; both constrain the same effective cache backend for Magento.",
+      "original_definitions": [
+        {
+          "id": "MB-0038",
+          "revision": 1,
+          "title": "Cache backend is Redis/Varnish (not file)",
+          "criterion": "Cache backend is Redis/Varnish (not file); assess only the collected Magento deployment scope.",
+          "control": "MB-C06",
+          "severity": "medium",
+          "alignments": [],
+          "obligations": [
+            {
+              "id": "O001",
+              "op": "all",
+              "role": "mandatory",
+              "proof": "heuristic",
+              "checks": [
+                {
+                  "name": "php_cache_backend_configured",
+                  "args": {
+                    "file": "app/etc/env.php",
+                    "paths": [
+                      "cache.frontend.default.backend",
+                      "cache.frontend.page_cache.backend",
+                      "cache.backend",
+                      "system.default.system/full_page_cache/caching_application"
+                    ]
+                  }
+                }
+              ]
+            }
+          ],
+          "coverage": "PARTIALLY_AUTOMATED",
+          "verification": "automated",
+          "review_state": "heuristic_supporting_only",
+          "human_evidence": {
+            "required": true,
+            "instructions": "Cache backend is Redis/Varnish (not file); assess only the collected Magento deployment scope.",
+            "evidence_types": [
+              "review",
+              "runtime_scope"
+            ]
+          },
+          "target_modes": [
+            "LOCAL"
+          ],
+          "checks": [
+            {
+              "name": "php_cache_backend_configured",
+              "args": {
+                "file": "app/etc/env.php",
+                "paths": [
+                  "cache.frontend.default.backend",
+                  "cache.frontend.page_cache.backend",
+                  "cache.backend",
+                  "system.default.system/full_page_cache/caching_application"
+                ]
+              }
+            }
+          ],
+          "op": "all"
+        },
+        {
+          "id": "MB-0041",
+          "revision": 1,
+          "title": "No dev cache backends (avoid file backend)",
+          "criterion": "No dev cache backends (avoid file backend); assess only the collected Magento deployment scope.",
+          "control": "MB-C06",
+          "severity": "low",
+          "alignments": [],
+          "obligations": [
+            {
+              "id": "O001",
+              "op": "all",
+              "role": "mandatory",
+              "proof": "heuristic",
+              "checks": [
+                {
+                  "name": "php_no_file_cache_backend",
+                  "args": {
+                    "file": "app/etc/env.php",
+                    "paths": [
+                      "cache.frontend.default.backend",
+                      "cache.frontend.page_cache.backend",
+                      "cache.backend"
+                    ]
+                  }
+                }
+              ]
+            }
+          ],
+          "coverage": "PARTIALLY_AUTOMATED",
+          "verification": "automated",
+          "review_state": "heuristic_supporting_only",
+          "human_evidence": {
+            "required": true,
+            "instructions": "No dev cache backends (avoid file backend); assess only the collected Magento deployment scope.",
+            "evidence_types": [
+              "review",
+              "runtime_scope"
+            ]
+          },
+          "target_modes": [
+            "LOCAL"
+          ],
+          "checks": [
+            {
+              "name": "php_no_file_cache_backend",
+              "args": {
+                "file": "app/etc/env.php",
+                "paths": [
+                  "cache.frontend.default.backend",
+                  "cache.frontend.page_cache.backend",
+                  "cache.backend"
+                ]
+              }
+            }
+          ],
+          "op": "all"
+        }
+      ]
+    },
+    {
+      "canonical_id": "MB-0061",
+      "retired_ids": [
+        "MB-0071"
+      ],
+      "classification": "package_scope_subsumption",
+      "revision": 2,
+      "criterion": "No dependency package in the assessed Composer inventory is marked abandoned by the authoritative package-maintenance source.",
+      "reason": "No abandoned libraries is a subset of no packages marked abandoned: libraries are included in the dependency package inventory.",
+      "original_definitions": [
+        {
+          "id": "MB-0061",
+          "revision": 1,
+          "title": "No packages marked 'abandoned' on Packagist",
+          "criterion": "No packages marked 'abandoned' on Packagist; assess only the collected Magento deployment scope.",
+          "control": "MB-C10",
+          "severity": "high",
+          "alignments": [],
+          "obligations": [
+            {
+              "id": "O001",
+              "op": "all",
+              "role": "mandatory",
+              "proof": "heuristic",
+              "checks": [
+                {
+                  "name": "composer_abandoned_api",
+                  "args": {
+                    "lock_file": "composer.lock",
+                    "status_endpoint": "https://api.magebean.com/v1/packages/status",
+                    "timeout_ms": 10000,
+                    "allow_private_http_fallback": true
+                  }
+                }
+              ]
+            }
+          ],
+          "coverage": "PARTIALLY_AUTOMATED",
+          "verification": "automated",
+          "review_state": "heuristic_supporting_only",
+          "human_evidence": {
+            "required": true,
+            "instructions": "No packages marked 'abandoned' on Packagist; assess only the collected Magento deployment scope.",
+            "evidence_types": [
+              "review",
+              "runtime_scope"
+            ]
+          },
+          "target_modes": [
+            "LOCAL"
+          ],
+          "checks": [
+            {
+              "name": "composer_abandoned_api",
+              "args": {
+                "lock_file": "composer.lock",
+                "status_endpoint": "https://api.magebean.com/v1/packages/status",
+                "timeout_ms": 10000,
+                "allow_private_http_fallback": true
+              }
+            }
+          ],
+          "op": "all"
+        },
+        {
+          "id": "MB-0071",
+          "revision": 1,
+          "title": "No abandoned libraries allowed",
+          "criterion": "No abandoned libraries allowed; assess only the collected Magento deployment scope.",
+          "control": "MB-C11",
+          "severity": "medium",
+          "alignments": [],
+          "obligations": [
+            {
+              "id": "O001",
+              "op": "all",
+              "role": "mandatory",
+              "proof": "heuristic",
+              "checks": [
+                {
+                  "name": "composer_abandoned_api",
+                  "args": {
+                    "lock_file": "composer.lock",
+                    "status_endpoint": "https://api.magebean.com/v1/packages/status",
+                    "timeout_ms": 10000,
+                    "status_batch_size": 500,
+                    "allow_private_http_fallback": true,
+                    "package_types": [
+                      "library"
+                    ]
+                  }
+                }
+              ]
+            }
+          ],
+          "coverage": "PARTIALLY_AUTOMATED",
+          "verification": "automated",
+          "review_state": "heuristic_supporting_only",
+          "human_evidence": {
+            "required": true,
+            "instructions": "No abandoned libraries allowed; assess only the collected Magento deployment scope.",
+            "evidence_types": [
+              "review",
+              "runtime_scope"
+            ]
+          },
+          "target_modes": [
+            "LOCAL"
+          ],
+          "checks": [
+            {
+              "name": "composer_abandoned_api",
+              "args": {
+                "lock_file": "composer.lock",
+                "status_endpoint": "https://api.magebean.com/v1/packages/status",
+                "timeout_ms": 10000,
+                "status_batch_size": 500,
+                "allow_private_http_fallback": true,
+                "package_types": [
+                  "library"
+                ]
+              }
+            }
+          ],
+          "op": "all"
+        }
+      ]
+    },
+    {
+      "canonical_id": "MB-0200",
+      "retired_ids": [
+        "MB-0091"
+      ],
+      "classification": "criterion_union_preserving_stricter_local_policy",
+      "revision": 2,
+      "criterion": "Verify that files uploaded or generated by untrusted input and stored in a public folder, are not executed as server-side program code when accessed directly with an HTTP request. Additional mandatory Magento deployment conditions: No executable code in media or upload paths; assess only the collected Magento deployment scope.",
+      "reason": "Server-side nonexecution of untrusted public files and explicit local no-executable-code-in-media prohibition are retained in one file-serving security criterion; absence and nonexecution are not treated as equivalent.",
+      "original_definitions": [
+        {
+          "id": "MB-0200",
+          "revision": 1,
+          "title": "Files uploaded or generated by untrusted input and stored in a public folder, are not executed as server-side…",
+          "criterion": "Verify that files uploaded or generated by untrusted input and stored in a public folder, are not executed as server-side program code when accessed directly with an HTTP request.",
+          "control": "MB-C03",
+          "severity": "high",
+          "alignments": [
+            {
+              "standard": "OWASP-ASVS",
+              "version": "5.0.0",
+              "reference": "5.3.1",
+              "relationship": "partial"
+            }
+          ],
+          "obligations": [
+            {
+              "id": "O001",
+              "op": "all",
+              "role": "supporting",
+              "proof": "heuristic",
+              "checks": [
+                {
+                  "name": "code_upload_safety",
+                  "args": {
+                    "paths": [
+                      "app"
+                    ],
+                    "include_ext": [
+                      "php"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "id": "O002",
+              "op": "all",
+              "role": "supporting",
+              "proof": "heuristic",
+              "checks": [
+                {
+                  "name": "code_media_executable_code",
+                  "args": {
+                    "paths": [
+                      "pub/media",
+                      "pub/import",
+                      "var/import",
+                      "var/export"
+                    ],
+                    "max_results": 100,
+                    "max_file_bytes": 1048576
+                  }
+                }
+              ]
+            }
+          ],
+          "coverage": "PARTIALLY_AUTOMATED",
+          "verification": "automated",
+          "review_state": "pending_security_review",
+          "human_evidence": {
+            "required": true,
+            "instructions": "Upload storage safeguards and executable files in upload paths are checked.",
+            "evidence_types": [
+              "review",
+              "runtime_scope"
+            ]
+          },
+          "target_modes": [
+            "LOCAL",
+            "REMOTE"
+          ],
+          "checks": [
+            {
+              "name": "code_upload_safety",
+              "args": {
+                "paths": [
+                  "app"
+                ],
+                "include_ext": [
+                  "php"
+                ]
+              }
+            },
+            {
+              "name": "code_media_executable_code",
+              "args": {
+                "paths": [
+                  "pub/media",
+                  "pub/import",
+                  "var/import",
+                  "var/export"
+                ],
+                "max_results": 100,
+                "max_file_bytes": 1048576
+              }
+            }
+          ],
+          "op": "all",
+          "introduced_level": 1,
+          "source_metadata": {
+            "publisher": "OWASP Foundation / ASVS Project contributors",
+            "standard": "OWASP-ASVS",
+            "version": "5.0.0",
+            "reference": "5.3.1",
+            "introduced_level": 1,
+            "chapter": "File Handling",
+            "section": "File Storage",
+            "source_url": "https://raw.githubusercontent.com/OWASP/ASVS/v5.0.0/5.0/docs_en/OWASP_Application_Security_Verification_Standard_5.0.0_en.json",
+            "source_sha256": "bcdbec214d70abcfad9284a31d4f9e5134305831d628aad3aa85d7e26626cb35",
+            "license": "CC-BY-SA-4.0",
+            "license_url": "https://creativecommons.org/licenses/by-sa/4.0/",
+            "source_license_url": "https://github.com/OWASP/ASVS/blob/v5.0.0/LICENSE.md",
+            "attribution": "Application Security Verification Standard 5.0.0, OWASP Foundation / ASVS Project contributors. Licensed under CC BY-SA 4.0.",
+            "modifications": "Criterion descriptions reproduced unchanged; internal IDs and shortened display titles added.",
+            "disclaimer": "Provided without warranty; no OWASP endorsement or certification is implied."
+          }
+        },
+        {
+          "id": "MB-0091",
+          "revision": 1,
+          "title": "No executable code in media or upload paths",
+          "criterion": "No executable code in media or upload paths; assess only the collected Magento deployment scope.",
+          "control": "MB-C01",
+          "severity": "critical",
+          "alignments": [],
+          "obligations": [
+            {
+              "id": "O001",
+              "op": "all",
+              "role": "mandatory",
+              "proof": "heuristic",
+              "checks": [
+                {
+                  "name": "code_media_executable_code",
+                  "args": {
+                    "paths": [
+                      "pub/media",
+                      "pub/import",
+                      "var/import",
+                      "var/export"
+                    ],
+                    "max_results": 100,
+                    "max_file_bytes": 1048576
+                  }
+                }
+              ]
+            }
+          ],
+          "coverage": "PARTIALLY_AUTOMATED",
+          "verification": "automated",
+          "review_state": "heuristic_supporting_only",
+          "human_evidence": {
+            "required": true,
+            "instructions": "No executable code in media or upload paths; assess only the collected Magento deployment scope.",
+            "evidence_types": [
+              "review",
+              "runtime_scope"
+            ]
+          },
+          "target_modes": [
+            "LOCAL"
+          ],
+          "checks": [
+            {
+              "name": "code_media_executable_code",
+              "args": {
+                "paths": [
+                  "pub/media",
+                  "pub/import",
+                  "var/import",
+                  "var/export"
+                ],
+                "max_results": 100,
+                "max_file_bytes": 1048576
+              }
+            }
+          ],
+          "op": "all"
+        }
+      ]
+    },
+    {
+      "canonical_id": "MB-0424",
+      "retired_ids": [
+        "MB-0024",
+        "MB-0045",
+        "MB-0080",
+        "MB-0084"
+      ],
+      "classification": "criterion_union_preserving_stricter_local_policy",
+      "revision": 2,
+      "criterion": "Verify that when logging sensitive data, the application enforces logging based on the data's protection level. For example, it may not be allowed to log certain data, such as credentials or payment details. Other data, such as session tokens, may only be logged by being hashed or masked, either in full or partially. Additional mandatory Magento deployment conditions: Sensitive data not logged; assess only the collected Magento deployment scope. PII not logged in application logs; assess only the collected Magento deployment scope. Third-party logging sanitized (mask/redact); assess only the collected Magento deployment scope. No cardholder data in application logs; assess only the collected Magento deployment scope.",
+      "reason": "One sensitive-data logging policy owns data-classification obligations plus stricter Magento no-sensitive/PII/cardholder logging bans and third-party redaction. ASVS conditional logging permissions do not erase local prohibitions.",
+      "original_definitions": [
+        {
+          "id": "MB-0424",
+          "revision": 1,
+          "title": "When logging sensitive data, the application enforces logging based on the data's protection level. For example, it…",
+          "criterion": "Verify that when logging sensitive data, the application enforces logging based on the data's protection level. For example, it may not be allowed to log certain data, such as credentials or payment details. Other data, such as session tokens, may only be logged by being hashed or masked, either in full or partially.",
+          "control": "MB-C03",
+          "severity": "high",
+          "alignments": [
+            {
+              "standard": "OWASP-ASVS",
+              "version": "5.0.0",
+              "reference": "16.2.5",
+              "relationship": "partial"
+            }
+          ],
+          "obligations": [
+            {
+              "id": "O001",
+              "op": "all",
+              "role": "supporting",
+              "proof": "heuristic",
+              "checks": [
+                {
+                  "name": "code_sensitive_logging",
+                  "args": {
+                    "paths": [
+                      "app"
+                    ],
+                    "include_ext": [
+                      "php"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "id": "O002",
+              "op": "all",
+              "role": "supporting",
+              "proof": "heuristic",
+              "checks": [
+                {
+                  "name": "code_sensitive_logging",
+                  "args": {
+                    "paths": [
+                      "app"
+                    ],
+                    "include_ext": [
+                      "php"
+                    ],
+                    "max_results": 50
+                  }
+                }
+              ]
+            },
+            {
+              "id": "O003",
+              "op": "all",
+              "role": "supporting",
+              "proof": "heuristic",
+              "checks": [
+                {
+                  "name": "code_third_party_logging_sanitized",
+                  "args": {
+                    "paths": [
+                      "app/code"
+                    ],
+                    "include_ext": [
+                      "php"
+                    ],
+                    "max_results": 100
+                  }
+                }
+              ]
+            },
+            {
+              "id": "O004",
+              "op": "all",
+              "role": "supporting",
+              "proof": "heuristic",
+              "checks": [
+                {
+                  "name": "code_cardholder_data_logs",
+                  "args": {
+                    "paths": [
+                      "var/log",
+                      "var/report",
+                      "pub/media/log",
+                      "pub/media/report"
+                    ],
+                    "include_ext": [
+                      "log",
+                      "txt",
+                      "json",
+                      "xml"
+                    ],
+                    "max_results": 100
+                  }
+                }
+              ]
+            }
+          ],
+          "coverage": "PARTIALLY_AUTOMATED",
+          "verification": "automated",
+          "review_state": "pending_security_review",
+          "human_evidence": {
+            "required": true,
+            "instructions": "Existing Magebean rules provide useful evidence but do not prove the full ASVS requirement.",
+            "evidence_types": [
+              "review",
+              "runtime_scope"
+            ]
+          },
+          "target_modes": [
+            "LOCAL",
+            "REMOTE"
+          ],
+          "checks": [
+            {
+              "name": "code_sensitive_logging",
+              "args": {
+                "paths": [
+                  "app"
+                ],
+                "include_ext": [
+                  "php"
+                ]
+              }
+            },
+            {
+              "name": "code_sensitive_logging",
+              "args": {
+                "paths": [
+                  "app"
+                ],
+                "include_ext": [
+                  "php"
+                ],
+                "max_results": 50
+              }
+            },
+            {
+              "name": "code_third_party_logging_sanitized",
+              "args": {
+                "paths": [
+                  "app/code"
+                ],
+                "include_ext": [
+                  "php"
+                ],
+                "max_results": 100
+              }
+            },
+            {
+              "name": "code_cardholder_data_logs",
+              "args": {
+                "paths": [
+                  "var/log",
+                  "var/report",
+                  "pub/media/log",
+                  "pub/media/report"
+                ],
+                "include_ext": [
+                  "log",
+                  "txt",
+                  "json",
+                  "xml"
+                ],
+                "max_results": 100
+              }
+            }
+          ],
+          "op": "all",
+          "introduced_level": 2,
+          "source_metadata": {
+            "publisher": "OWASP Foundation / ASVS Project contributors",
+            "standard": "OWASP-ASVS",
+            "version": "5.0.0",
+            "reference": "16.2.5",
+            "introduced_level": 2,
+            "chapter": "Security Logging and Error Handling",
+            "section": "General Logging",
+            "source_url": "https://raw.githubusercontent.com/OWASP/ASVS/v5.0.0/5.0/docs_en/OWASP_Application_Security_Verification_Standard_5.0.0_en.json",
+            "source_sha256": "bcdbec214d70abcfad9284a31d4f9e5134305831d628aad3aa85d7e26626cb35",
+            "license": "CC-BY-SA-4.0",
+            "license_url": "https://creativecommons.org/licenses/by-sa/4.0/",
+            "source_license_url": "https://github.com/OWASP/ASVS/blob/v5.0.0/LICENSE.md",
+            "attribution": "Application Security Verification Standard 5.0.0, OWASP Foundation / ASVS Project contributors. Licensed under CC BY-SA 4.0.",
+            "modifications": "Criterion descriptions reproduced unchanged; internal IDs and shortened display titles added.",
+            "disclaimer": "Provided without warranty; no OWASP endorsement or certification is implied."
+          }
+        },
+        {
+          "id": "MB-0024",
+          "revision": 1,
+          "title": "Sensitive data not logged",
+          "criterion": "Sensitive data not logged; assess only the collected Magento deployment scope.",
+          "control": "MB-C03",
+          "severity": "high",
+          "alignments": [],
+          "obligations": [
+            {
+              "id": "O001",
+              "op": "all",
+              "role": "mandatory",
+              "proof": "heuristic",
+              "checks": [
+                {
+                  "name": "code_sensitive_logging",
+                  "args": {
+                    "paths": [
+                      "app"
+                    ],
+                    "include_ext": [
+                      "php"
+                    ]
+                  }
+                }
+              ]
+            }
+          ],
+          "coverage": "PARTIALLY_AUTOMATED",
+          "verification": "automated",
+          "review_state": "heuristic_supporting_only",
+          "human_evidence": {
+            "required": true,
+            "instructions": "Sensitive data not logged; assess only the collected Magento deployment scope.",
+            "evidence_types": [
+              "review",
+              "runtime_scope"
+            ]
+          },
+          "target_modes": [
+            "LOCAL"
+          ],
+          "checks": [
+            {
+              "name": "code_sensitive_logging",
+              "args": {
+                "paths": [
+                  "app"
+                ],
+                "include_ext": [
+                  "php"
+                ]
+              }
+            }
+          ],
+          "op": "all"
+        },
+        {
+          "id": "MB-0045",
+          "revision": 1,
+          "title": "PII not logged in application logs",
+          "criterion": "PII not logged in application logs; assess only the collected Magento deployment scope.",
+          "control": "MB-C07",
+          "severity": "high",
+          "alignments": [],
+          "obligations": [
+            {
+              "id": "O001",
+              "op": "all",
+              "role": "mandatory",
+              "proof": "heuristic",
+              "checks": [
+                {
+                  "name": "code_sensitive_logging",
+                  "args": {
+                    "paths": [
+                      "app"
+                    ],
+                    "include_ext": [
+                      "php"
+                    ],
+                    "max_results": 50
+                  }
+                }
+              ]
+            }
+          ],
+          "coverage": "PARTIALLY_AUTOMATED",
+          "verification": "automated",
+          "review_state": "heuristic_supporting_only",
+          "human_evidence": {
+            "required": true,
+            "instructions": "PII not logged in application logs; assess only the collected Magento deployment scope.",
+            "evidence_types": [
+              "review",
+              "runtime_scope"
+            ]
+          },
+          "target_modes": [
+            "LOCAL"
+          ],
+          "checks": [
+            {
+              "name": "code_sensitive_logging",
+              "args": {
+                "paths": [
+                  "app"
+                ],
+                "include_ext": [
+                  "php"
+                ],
+                "max_results": 50
+              }
+            }
+          ],
+          "op": "all"
+        },
+        {
+          "id": "MB-0080",
+          "revision": 1,
+          "title": "Third-party logging sanitized (mask/redact)",
+          "criterion": "Third-party logging sanitized (mask/redact); assess only the collected Magento deployment scope.",
+          "control": "MB-C12",
+          "severity": "medium",
+          "alignments": [],
+          "obligations": [
+            {
+              "id": "O001",
+              "op": "all",
+              "role": "mandatory",
+              "proof": "heuristic",
+              "checks": [
+                {
+                  "name": "code_third_party_logging_sanitized",
+                  "args": {
+                    "paths": [
+                      "app/code"
+                    ],
+                    "include_ext": [
+                      "php"
+                    ],
+                    "max_results": 100
+                  }
+                }
+              ]
+            }
+          ],
+          "coverage": "PARTIALLY_AUTOMATED",
+          "verification": "automated",
+          "review_state": "heuristic_supporting_only",
+          "human_evidence": {
+            "required": true,
+            "instructions": "Third-party logging sanitized (mask/redact); assess only the collected Magento deployment scope.",
+            "evidence_types": [
+              "review",
+              "runtime_scope"
+            ]
+          },
+          "target_modes": [
+            "LOCAL"
+          ],
+          "checks": [
+            {
+              "name": "code_third_party_logging_sanitized",
+              "args": {
+                "paths": [
+                  "app/code"
+                ],
+                "include_ext": [
+                  "php"
+                ],
+                "max_results": 100
+              }
+            }
+          ],
+          "op": "all"
+        },
+        {
+          "id": "MB-0084",
+          "revision": 1,
+          "title": "No cardholder data in application logs",
+          "criterion": "No cardholder data in application logs; assess only the collected Magento deployment scope.",
+          "control": "MB-C07",
+          "severity": "critical",
+          "alignments": [],
+          "obligations": [
+            {
+              "id": "O001",
+              "op": "all",
+              "role": "mandatory",
+              "proof": "heuristic",
+              "checks": [
+                {
+                  "name": "code_cardholder_data_logs",
+                  "args": {
+                    "paths": [
+                      "var/log",
+                      "var/report",
+                      "pub/media/log",
+                      "pub/media/report"
+                    ],
+                    "include_ext": [
+                      "log",
+                      "txt",
+                      "json",
+                      "xml"
+                    ],
+                    "max_results": 100
+                  }
+                }
+              ]
+            }
+          ],
+          "coverage": "PARTIALLY_AUTOMATED",
+          "verification": "automated",
+          "review_state": "heuristic_supporting_only",
+          "human_evidence": {
+            "required": true,
+            "instructions": "No cardholder data in application logs; assess only the collected Magento deployment scope.",
+            "evidence_types": [
+              "review",
+              "runtime_scope"
+            ]
+          },
+          "target_modes": [
+            "LOCAL"
+          ],
+          "checks": [
+            {
+              "name": "code_cardholder_data_logs",
+              "args": {
+                "paths": [
+                  "var/log",
+                  "var/report",
+                  "pub/media/log",
+                  "pub/media/report"
+                ],
+                "include_ext": [
+                  "log",
+                  "txt",
+                  "json",
+                  "xml"
+                ],
+                "max_results": 100
+              }
+            }
+          ],
+          "op": "all"
+        }
+      ]
+    },
+    {
+      "canonical_id": "MB-0105",
+      "retired_ids": [
+        "MB-0107",
+        "MB-0013",
+        "MB-0022"
+      ],
+      "classification": "coherent_policy_union_with_explicit_mandatory_subclauses",
+      "revision": 2,
+      "criterion": "Verify that output encoding for an HTTP response, HTML document, or XML document is relevant for the context required, such as encoding the relevant characters for HTML elements, HTML attributes, HTML comments, CSS, or HTTP header fields, to avoid changing the message or document structure. Verify that output encoding or escaping is used when dynamically building JavaScript content (including JSON), to avoid changing the message or document structure (to avoid JavaScript and JSON injection). Template output is escaped; assess only the collected Magento deployment scope. Escaping for JS context; assess only the collected Magento deployment scope.",
+      "reason": "Contextual outputencoding is one policy covering HTML/XML/CSS/headers, JS/JSON and eachMagento templatecontext. The union retains exact originalclauses; URLprotocolvalidation1.2.2 and databasequeries1.2.4 remain independent.",
+      "original_definitions": [
+        {
+          "id": "MB-0105",
+          "revision": 1,
+          "title": "Output encoding for an HTTP response, HTML document, or XML document is relevant for the context required, such as…",
+          "criterion": "Verify that output encoding for an HTTP response, HTML document, or XML document is relevant for the context required, such as encoding the relevant characters for HTML elements, HTML attributes, HTML comments, CSS, or HTTP header fields, to avoid changing the message or document structure.",
+          "control": "MB-C03",
+          "severity": "high",
+          "alignments": [
+            {
+              "standard": "OWASP-ASVS",
+              "version": "5.0.0",
+              "reference": "1.2.1",
+              "relationship": "partial"
+            }
+          ],
+          "obligations": [
+            {
+              "id": "O001",
+              "op": "all",
+              "role": "supporting",
+              "proof": "heuristic",
+              "checks": [
+                {
+                  "name": "code_phtml_escaped_output",
+                  "args": {
+                    "paths": [
+                      "app"
+                    ],
+                    "escape_functions": [
+                      "escapeHtml",
+                      "escapeHtmlAttr",
+                      "escapeUrl",
+                      "escapeJs",
+                      "escapeCss"
+                    ]
+                  }
+                }
+              ]
+            }
+          ],
+          "coverage": "PARTIALLY_AUTOMATED",
+          "verification": "automated",
+          "review_state": "pending_security_review",
+          "human_evidence": {
+            "required": true,
+            "instructions": "PHTML output escaping is checked; header and CSS contexts still need review.",
+            "evidence_types": [
+              "review",
+              "runtime_scope"
+            ]
+          },
+          "target_modes": [
+            "LOCAL",
+            "REMOTE"
+          ],
+          "checks": [
+            {
+              "name": "code_phtml_escaped_output",
+              "args": {
+                "paths": [
+                  "app"
+                ],
+                "escape_functions": [
+                  "escapeHtml",
+                  "escapeHtmlAttr",
+                  "escapeUrl",
+                  "escapeJs",
+                  "escapeCss"
+                ]
+              }
+            }
+          ],
+          "op": "all",
+          "introduced_level": 1,
+          "source_metadata": {
+            "publisher": "OWASP Foundation / ASVS Project contributors",
+            "standard": "OWASP-ASVS",
+            "version": "5.0.0",
+            "reference": "1.2.1",
+            "introduced_level": 1,
+            "chapter": "Encoding and Sanitization",
+            "section": "Injection Prevention",
+            "source_url": "https://raw.githubusercontent.com/OWASP/ASVS/v5.0.0/5.0/docs_en/OWASP_Application_Security_Verification_Standard_5.0.0_en.json",
+            "source_sha256": "bcdbec214d70abcfad9284a31d4f9e5134305831d628aad3aa85d7e26626cb35",
+            "license": "CC-BY-SA-4.0",
+            "license_url": "https://creativecommons.org/licenses/by-sa/4.0/",
+            "source_license_url": "https://github.com/OWASP/ASVS/blob/v5.0.0/LICENSE.md",
+            "attribution": "Application Security Verification Standard 5.0.0, OWASP Foundation / ASVS Project contributors. Licensed under CC BY-SA 4.0.",
+            "modifications": "Criterion descriptions reproduced unchanged; internal IDs and shortened display titles added.",
+            "disclaimer": "Provided without warranty; no OWASP endorsement or certification is implied."
+          }
+        },
+        {
+          "id": "MB-0107",
+          "revision": 1,
+          "title": "Output encoding or escaping is used when dynamically building JavaScript content (including JSON), to avoid changing…",
+          "criterion": "Verify that output encoding or escaping is used when dynamically building JavaScript content (including JSON), to avoid changing the message or document structure (to avoid JavaScript and JSON injection).",
+          "control": "MB-C03",
+          "severity": "high",
+          "alignments": [
+            {
+              "standard": "OWASP-ASVS",
+              "version": "5.0.0",
+              "reference": "1.2.3",
+              "relationship": "partial"
+            }
+          ],
+          "obligations": [
+            {
+              "id": "O001",
+              "op": "all",
+              "role": "supporting",
+              "proof": "heuristic",
+              "checks": [
+                {
+                  "name": "code_js_context_escaping",
+                  "args": {
+                    "paths": [
+                      "app"
+                    ],
+                    "include_ext": [
+                      "phtml",
+                      "html"
+                    ]
+                  }
+                }
+              ]
+            }
+          ],
+          "coverage": "PARTIALLY_AUTOMATED",
+          "verification": "automated",
+          "review_state": "pending_security_review",
+          "human_evidence": {
+            "required": true,
+            "instructions": "JavaScript-context escaping patterns are checked.",
+            "evidence_types": [
+              "review",
+              "runtime_scope"
+            ]
+          },
+          "target_modes": [
+            "LOCAL",
+            "REMOTE"
+          ],
+          "checks": [
+            {
+              "name": "code_js_context_escaping",
+              "args": {
+                "paths": [
+                  "app"
+                ],
+                "include_ext": [
+                  "phtml",
+                  "html"
+                ]
+              }
+            }
+          ],
+          "op": "all",
+          "introduced_level": 1,
+          "source_metadata": {
+            "publisher": "OWASP Foundation / ASVS Project contributors",
+            "standard": "OWASP-ASVS",
+            "version": "5.0.0",
+            "reference": "1.2.3",
+            "introduced_level": 1,
+            "chapter": "Encoding and Sanitization",
+            "section": "Injection Prevention",
+            "source_url": "https://raw.githubusercontent.com/OWASP/ASVS/v5.0.0/5.0/docs_en/OWASP_Application_Security_Verification_Standard_5.0.0_en.json",
+            "source_sha256": "bcdbec214d70abcfad9284a31d4f9e5134305831d628aad3aa85d7e26626cb35",
+            "license": "CC-BY-SA-4.0",
+            "license_url": "https://creativecommons.org/licenses/by-sa/4.0/",
+            "source_license_url": "https://github.com/OWASP/ASVS/blob/v5.0.0/LICENSE.md",
+            "attribution": "Application Security Verification Standard 5.0.0, OWASP Foundation / ASVS Project contributors. Licensed under CC BY-SA 4.0.",
+            "modifications": "Criterion descriptions reproduced unchanged; internal IDs and shortened display titles added.",
+            "disclaimer": "Provided without warranty; no OWASP endorsement or certification is implied."
+          }
+        },
+        {
+          "id": "MB-0013",
+          "revision": 1,
+          "title": "Template output is escaped",
+          "criterion": "Template output is escaped; assess only the collected Magento deployment scope.",
+          "control": "MB-C03",
+          "severity": "high",
+          "alignments": [],
+          "obligations": [
+            {
+              "id": "O001",
+              "op": "all",
+              "role": "mandatory",
+              "proof": "heuristic",
+              "checks": [
+                {
+                  "name": "code_phtml_escaped_output",
+                  "args": {
+                    "paths": [
+                      "app"
+                    ],
+                    "escape_functions": [
+                      "escapeHtml",
+                      "escapeHtmlAttr",
+                      "escapeUrl",
+                      "escapeJs",
+                      "escapeCss"
+                    ]
+                  }
+                }
+              ]
+            }
+          ],
+          "coverage": "PARTIALLY_AUTOMATED",
+          "verification": "automated",
+          "review_state": "heuristic_supporting_only",
+          "human_evidence": {
+            "required": true,
+            "instructions": "Template output is escaped; assess only the collected Magento deployment scope.",
+            "evidence_types": [
+              "review",
+              "runtime_scope"
+            ]
+          },
+          "target_modes": [
+            "LOCAL"
+          ],
+          "checks": [
+            {
+              "name": "code_phtml_escaped_output",
+              "args": {
+                "paths": [
+                  "app"
+                ],
+                "escape_functions": [
+                  "escapeHtml",
+                  "escapeHtmlAttr",
+                  "escapeUrl",
+                  "escapeJs",
+                  "escapeCss"
+                ]
+              }
+            }
+          ],
+          "op": "all"
+        },
+        {
+          "id": "MB-0022",
+          "revision": 1,
+          "title": "Escaping for JS context",
+          "criterion": "Escaping for JS context; assess only the collected Magento deployment scope.",
+          "control": "MB-C03",
+          "severity": "high",
+          "alignments": [],
+          "obligations": [
+            {
+              "id": "O001",
+              "op": "all",
+              "role": "mandatory",
+              "proof": "heuristic",
+              "checks": [
+                {
+                  "name": "code_js_context_escaping",
+                  "args": {
+                    "paths": [
+                      "app"
+                    ],
+                    "include_ext": [
+                      "phtml",
+                      "html"
+                    ]
+                  }
+                }
+              ]
+            }
+          ],
+          "coverage": "PARTIALLY_AUTOMATED",
+          "verification": "automated",
+          "review_state": "heuristic_supporting_only",
+          "human_evidence": {
+            "required": true,
+            "instructions": "Escaping for JS context; assess only the collected Magento deployment scope.",
+            "evidence_types": [
+              "review",
+              "runtime_scope"
+            ]
+          },
+          "target_modes": [
+            "LOCAL"
+          ],
+          "checks": [
+            {
+              "name": "code_js_context_escaping",
+              "args": {
+                "paths": [
+                  "app"
+                ],
+                "include_ext": [
+                  "phtml",
+                  "html"
+                ]
+              }
+            }
+          ],
+          "op": "all"
+        }
+      ]
+    },
+    {
+      "canonical_id": "MB-0109",
+      "retired_ids": [
+        "MB-0018"
+      ],
+      "classification": "coherent_policy_union_with_explicit_mandatory_subclauses",
+      "revision": 2,
+      "criterion": "Verify that the application protects against OS command injection and that operating system calls use parameterized OS queries or use contextual command line output encoding. Command execution is guarded; assess only the collected Magento deployment scope.",
+      "reason": "One OScommand-injection prevention policy owns explicit guard/parameterization/contextual commandencoding obligations; all originalbaseline conditions retained.",
+      "original_definitions": [
+        {
+          "id": "MB-0109",
+          "revision": 1,
+          "title": "The application protects against OS command injection and that operating system calls use parameterized OS queries…",
+          "criterion": "Verify that the application protects against OS command injection and that operating system calls use parameterized OS queries or use contextual command line output encoding.",
+          "control": "MB-C03",
+          "severity": "critical",
+          "alignments": [
+            {
+              "standard": "OWASP-ASVS",
+              "version": "5.0.0",
+              "reference": "1.2.5",
+              "relationship": "partial"
+            }
+          ],
+          "obligations": [
+            {
+              "id": "O001",
+              "op": "all",
+              "role": "supporting",
+              "proof": "heuristic",
+              "checks": [
+                {
+                  "name": "code_command_execution_safety",
+                  "args": {
+                    "paths": [
+                      "app"
+                    ],
+                    "include_ext": [
+                      "php"
+                    ]
+                  }
+                }
+              ]
+            }
+          ],
+          "coverage": "PARTIALLY_AUTOMATED",
+          "verification": "automated",
+          "review_state": "pending_security_review",
+          "human_evidence": {
+            "required": true,
+            "instructions": "Command execution sinks and guards are checked statically.",
+            "evidence_types": [
+              "review",
+              "runtime_scope"
+            ]
+          },
+          "target_modes": [
+            "LOCAL",
+            "REMOTE"
+          ],
+          "checks": [
+            {
+              "name": "code_command_execution_safety",
+              "args": {
+                "paths": [
+                  "app"
+                ],
+                "include_ext": [
+                  "php"
+                ]
+              }
+            }
+          ],
+          "op": "all",
+          "introduced_level": 1,
+          "source_metadata": {
+            "publisher": "OWASP Foundation / ASVS Project contributors",
+            "standard": "OWASP-ASVS",
+            "version": "5.0.0",
+            "reference": "1.2.5",
+            "introduced_level": 1,
+            "chapter": "Encoding and Sanitization",
+            "section": "Injection Prevention",
+            "source_url": "https://raw.githubusercontent.com/OWASP/ASVS/v5.0.0/5.0/docs_en/OWASP_Application_Security_Verification_Standard_5.0.0_en.json",
+            "source_sha256": "bcdbec214d70abcfad9284a31d4f9e5134305831d628aad3aa85d7e26626cb35",
+            "license": "CC-BY-SA-4.0",
+            "license_url": "https://creativecommons.org/licenses/by-sa/4.0/",
+            "source_license_url": "https://github.com/OWASP/ASVS/blob/v5.0.0/LICENSE.md",
+            "attribution": "Application Security Verification Standard 5.0.0, OWASP Foundation / ASVS Project contributors. Licensed under CC BY-SA 4.0.",
+            "modifications": "Criterion descriptions reproduced unchanged; internal IDs and shortened display titles added.",
+            "disclaimer": "Provided without warranty; no OWASP endorsement or certification is implied."
+          }
+        },
+        {
+          "id": "MB-0018",
+          "revision": 1,
+          "title": "Command execution is guarded",
+          "criterion": "Command execution is guarded; assess only the collected Magento deployment scope.",
+          "control": "MB-C03",
+          "severity": "critical",
+          "alignments": [],
+          "obligations": [
+            {
+              "id": "O001",
+              "op": "all",
+              "role": "mandatory",
+              "proof": "heuristic",
+              "checks": [
+                {
+                  "name": "code_command_execution_safety",
+                  "args": {
+                    "paths": [
+                      "app"
+                    ],
+                    "include_ext": [
+                      "php"
+                    ]
+                  }
+                }
+              ]
+            }
+          ],
+          "coverage": "PARTIALLY_AUTOMATED",
+          "verification": "automated",
+          "review_state": "heuristic_supporting_only",
+          "human_evidence": {
+            "required": true,
+            "instructions": "Command execution is guarded; assess only the collected Magento deployment scope.",
+            "evidence_types": [
+              "review",
+              "runtime_scope"
+            ]
+          },
+          "target_modes": [
+            "LOCAL"
+          ],
+          "checks": [
+            {
+              "name": "code_command_execution_safety",
+              "args": {
+                "paths": [
+                  "app"
+                ],
+                "include_ext": [
+                  "php"
+                ]
+              }
+            }
+          ],
+          "op": "all"
+        }
+      ]
+    },
+    {
+      "canonical_id": "MB-0108",
+      "retired_ids": [
+        "MB-0012"
+      ],
+      "classification": "coherent_policy_union_with_explicit_mandatory_subclauses",
+      "revision": 2,
+      "criterion": "Verify that data selection or database queries (e.g., SQL, HQL, NoSQL, Cypher) use parameterized queries, ORMs, entity frameworks, or are otherwise protected from SQL Injection and other database injection attacks. This is also relevant when writing stored procedures. No raw SQL without abstraction; assess only the collected Magento deployment scope.",
+      "reason": "One databasequery-construction policy retains injection defense AND explicitMagento no-rawSQL-without-abstraction restriction. Parameterized rawSQL alone does not erase the localabstraction condition.",
+      "original_definitions": [
+        {
+          "id": "MB-0108",
+          "revision": 1,
+          "title": "Data selection or database queries (e.g., SQL, HQL, NoSQL, Cypher) use parameterized queries, ORMs, entity…",
+          "criterion": "Verify that data selection or database queries (e.g., SQL, HQL, NoSQL, Cypher) use parameterized queries, ORMs, entity frameworks, or are otherwise protected from SQL Injection and other database injection attacks. This is also relevant when writing stored procedures.",
+          "control": "MB-C03",
+          "severity": "high",
+          "alignments": [
+            {
+              "standard": "OWASP-ASVS",
+              "version": "5.0.0",
+              "reference": "1.2.4",
+              "relationship": "partial"
+            }
+          ],
+          "obligations": [
+            {
+              "id": "O001",
+              "op": "all",
+              "role": "supporting",
+              "proof": "heuristic",
+              "checks": [
+                {
+                  "name": "code_raw_sql",
+                  "args": {
+                    "paths": [
+                      "app"
+                    ],
+                    "include_ext": [
+                      "php",
+                      "phtml"
+                    ]
+                  }
+                }
+              ]
+            }
+          ],
+          "coverage": "PARTIALLY_AUTOMATED",
+          "verification": "automated",
+          "review_state": "pending_security_review",
+          "human_evidence": {
+            "required": true,
+            "instructions": "Unsafe raw SQL patterns are checked; runtime query behavior is not exhaustively proven.",
+            "evidence_types": [
+              "review",
+              "runtime_scope"
+            ]
+          },
+          "target_modes": [
+            "LOCAL",
+            "REMOTE"
+          ],
+          "checks": [
+            {
+              "name": "code_raw_sql",
+              "args": {
+                "paths": [
+                  "app"
+                ],
+                "include_ext": [
+                  "php",
+                  "phtml"
+                ]
+              }
+            }
+          ],
+          "op": "all",
+          "introduced_level": 1,
+          "source_metadata": {
+            "publisher": "OWASP Foundation / ASVS Project contributors",
+            "standard": "OWASP-ASVS",
+            "version": "5.0.0",
+            "reference": "1.2.4",
+            "introduced_level": 1,
+            "chapter": "Encoding and Sanitization",
+            "section": "Injection Prevention",
+            "source_url": "https://raw.githubusercontent.com/OWASP/ASVS/v5.0.0/5.0/docs_en/OWASP_Application_Security_Verification_Standard_5.0.0_en.json",
+            "source_sha256": "bcdbec214d70abcfad9284a31d4f9e5134305831d628aad3aa85d7e26626cb35",
+            "license": "CC-BY-SA-4.0",
+            "license_url": "https://creativecommons.org/licenses/by-sa/4.0/",
+            "source_license_url": "https://github.com/OWASP/ASVS/blob/v5.0.0/LICENSE.md",
+            "attribution": "Application Security Verification Standard 5.0.0, OWASP Foundation / ASVS Project contributors. Licensed under CC BY-SA 4.0.",
+            "modifications": "Criterion descriptions reproduced unchanged; internal IDs and shortened display titles added.",
+            "disclaimer": "Provided without warranty; no OWASP endorsement or certification is implied."
+          }
+        },
+        {
+          "id": "MB-0012",
+          "revision": 1,
+          "title": "No raw SQL without abstraction",
+          "criterion": "No raw SQL without abstraction; assess only the collected Magento deployment scope.",
+          "control": "MB-C03",
+          "severity": "high",
+          "alignments": [],
+          "obligations": [
+            {
+              "id": "O001",
+              "op": "all",
+              "role": "mandatory",
+              "proof": "heuristic",
+              "checks": [
+                {
+                  "name": "code_raw_sql",
+                  "args": {
+                    "paths": [
+                      "app"
+                    ],
+                    "include_ext": [
+                      "php",
+                      "phtml"
+                    ]
+                  }
+                }
+              ]
+            }
+          ],
+          "coverage": "PARTIALLY_AUTOMATED",
+          "verification": "automated",
+          "review_state": "heuristic_supporting_only",
+          "human_evidence": {
+            "required": true,
+            "instructions": "No raw SQL without abstraction; assess only the collected Magento deployment scope.",
+            "evidence_types": [
+              "review",
+              "runtime_scope"
+            ]
+          },
+          "target_modes": [
+            "LOCAL"
+          ],
+          "checks": [
+            {
+              "name": "code_raw_sql",
+              "args": {
+                "paths": [
+                  "app"
+                ],
+                "include_ext": [
+                  "php",
+                  "phtml"
+                ]
+              }
+            }
+          ],
+          "op": "all"
+        }
+      ]
+    },
+    {
+      "canonical_id": "MB-0448",
+      "retired_ids": [
+        "MB-0467",
+        "MB-0478",
+        "MB-0507",
+        "MB-0513",
+        "MB-0526",
+        "MB-0545",
+        "MB-0557",
+        "MB-0586",
+        "MB-0613",
+        "MB-0641"
+      ],
+      "classification": "SCOPE_UNION_SAME_PREDICATE",
+      "revision": 2,
+      "criterion": "For every applicable PCI operational domain (network security controls; secure system configuration; stored account-data protection; transmission protection; malware protection; secure development and change management; least-privilege access; identity and authentication; physical account-data protection; security logging and monitoring; security testing), maintain its security policies and operating procedures as documented, current, in use and known to every affected party. Each domain must satisfy all four conditions; a policy covering one domain does not establish the others.",
+      "reason": "Eleven core criteria repeat the same four lifecycle conditions over different operational domains. One internal requirement owns the union; alignment metadata retains each original scope.",
+      "original_definitions": [
+        {
+          "id": "MB-0448",
+          "revision": 1,
+          "title": "PCI 1.1.1: All security policies and operational procedures that are identified in Requirement 1 are",
+          "criterion": "For the applicable assessment scope, verify this complete obligation: Maintain the security policies and operational procedures applicable to Requirement 1 as documented, current, operational and communicated to every affected party.",
+          "control": "PCI-DSS",
+          "severity": "medium",
+          "alignments": [
+            {
+              "standard": "PCI-DSS",
+              "version": "4.0.1",
+              "reference": "1.1.1",
+              "relationship": "supporting"
+            }
+          ],
+          "obligations": [],
+          "coverage": "UNMAPPED",
+          "verification": "manual",
+          "review_state": "pending_security_review",
+          "human_evidence": {
+            "required": true,
+            "instructions": "Use examine, interview evidence to establish every condition, alternative, scope exception and time interval in the criterion. Confirm entity applicability and retain dated artifacts and reviewer rationale. For the applicable assessment scope, verify this complete obligation: Maintain the security policies and operational procedures applicable to Requirement 1 as documented, current, operational and communicated to every affected party.",
+            "evidence_types": [
+              "examine",
+              "interview"
+            ]
+          },
+          "target_modes": [
+            "LOCAL",
+            "REMOTE"
+          ],
+          "checks": [],
+          "op": "all",
+          "source_metadata": {
+            "document": "PCI-DSS-v4_0_1.pdf",
+            "normative_pdf_pages": [
+              44
+            ],
+            "pdf_pages": [
+              44
+            ],
+            "normative_sha256": "617fd425a649b86cddcc47744bb231f9d84b4a67bf7053414445afaaa3969435",
+            "review_state": "source_criterion_defined_evidence_mapping_pending_security_review",
+            "pdf_sha256": "5e6b9093b84007b973097d20126a3768ea2f0a1d4200255c849b0fb3bf04ebc7"
+          },
+          "applicability": {
+            "entity_restriction": "all_applicable_entities",
+            "effective_from": null
+          }
+        },
+        {
+          "id": "MB-0467",
+          "revision": 1,
+          "title": "PCI 2.1.1: All security policies and operational procedures that are identified in Requirement 2 are",
+          "criterion": "For the applicable assessment scope, verify this complete obligation: Maintain the security policies and operational procedures applicable to Requirement 2 as documented, current, operational and communicated to every affected party.",
+          "control": "PCI-DSS",
+          "severity": "medium",
+          "alignments": [
+            {
+              "standard": "PCI-DSS",
+              "version": "4.0.1",
+              "reference": "2.1.1",
+              "relationship": "supporting"
+            }
+          ],
+          "obligations": [],
+          "coverage": "UNMAPPED",
+          "verification": "manual",
+          "review_state": "pending_security_review",
+          "human_evidence": {
+            "required": true,
+            "instructions": "Use examine, interview evidence to establish every condition, alternative, scope exception and time interval in the criterion. Confirm entity applicability and retain dated artifacts and reviewer rationale. For the applicable assessment scope, verify this complete obligation: Maintain the security policies and operational procedures applicable to Requirement 2 as documented, current, operational and communicated to every affected party.",
+            "evidence_types": [
+              "examine",
+              "interview"
+            ]
+          },
+          "target_modes": [
+            "LOCAL",
+            "REMOTE"
+          ],
+          "checks": [],
+          "op": "all",
+          "source_metadata": {
+            "document": "PCI-DSS-v4_0_1.pdf",
+            "normative_pdf_pages": [
+              66
+            ],
+            "pdf_pages": [
+              66
+            ],
+            "normative_sha256": "df015fc9ef0288ea199f48b3df284b1aed70384d9203defb35b08fe6cb5591ac",
+            "review_state": "source_criterion_defined_evidence_mapping_pending_security_review",
+            "pdf_sha256": "5e6b9093b84007b973097d20126a3768ea2f0a1d4200255c849b0fb3bf04ebc7"
+          },
+          "applicability": {
+            "entity_restriction": "all_applicable_entities",
+            "effective_from": null
+          }
+        },
+        {
+          "id": "MB-0478",
+          "revision": 1,
+          "title": "PCI 3.1.1: All security policies and operational procedures that are identified in Requirement 3 are",
+          "criterion": "For the applicable assessment scope, verify this complete obligation: Maintain the security policies and operational procedures applicable to Requirement 3 as documented, current, operational and communicated to every affected party.",
+          "control": "PCI-DSS",
+          "severity": "medium",
+          "alignments": [
+            {
+              "standard": "PCI-DSS",
+              "version": "4.0.1",
+              "reference": "3.1.1",
+              "relationship": "supporting"
+            }
+          ],
+          "obligations": [],
+          "coverage": "UNMAPPED",
+          "verification": "manual",
+          "review_state": "pending_security_review",
+          "human_evidence": {
+            "required": true,
+            "instructions": "Use examine, interview evidence to establish every condition, alternative, scope exception and time interval in the criterion. Confirm entity applicability and retain dated artifacts and reviewer rationale. For the applicable assessment scope, verify this complete obligation: Maintain the security policies and operational procedures applicable to Requirement 3 as documented, current, operational and communicated to every affected party.",
+            "evidence_types": [
+              "examine",
+              "interview"
+            ]
+          },
+          "target_modes": [
+            "LOCAL",
+            "REMOTE"
+          ],
+          "checks": [],
+          "op": "all",
+          "source_metadata": {
+            "document": "PCI-DSS-v4_0_1.pdf",
+            "normative_pdf_pages": [
+              79
+            ],
+            "pdf_pages": [
+              79
+            ],
+            "normative_sha256": "831fc56a12090471c9c499b900250ea986d3579f77ea03a369c7a560fc264415",
+            "review_state": "source_criterion_defined_evidence_mapping_pending_security_review",
+            "pdf_sha256": "5e6b9093b84007b973097d20126a3768ea2f0a1d4200255c849b0fb3bf04ebc7"
+          },
+          "applicability": {
+            "entity_restriction": "all_applicable_entities",
+            "effective_from": null
+          }
+        },
+        {
+          "id": "MB-0507",
+          "revision": 1,
+          "title": "PCI 4.1.1: All security policies and operational procedures that are identified in Requirement 4 are",
+          "criterion": "For the applicable assessment scope, verify this complete obligation: Maintain the security policies and operational procedures applicable to Requirement 4 as documented, current, operational and communicated to every affected party.",
+          "control": "PCI-DSS",
+          "severity": "medium",
+          "alignments": [
+            {
+              "standard": "PCI-DSS",
+              "version": "4.0.1",
+              "reference": "4.1.1",
+              "relationship": "supporting"
+            }
+          ],
+          "obligations": [],
+          "coverage": "UNMAPPED",
+          "verification": "manual",
+          "review_state": "pending_security_review",
+          "human_evidence": {
+            "required": true,
+            "instructions": "Use examine, interview evidence to establish every condition, alternative, scope exception and time interval in the criterion. Confirm entity applicability and retain dated artifacts and reviewer rationale. For the applicable assessment scope, verify this complete obligation: Maintain the security policies and operational procedures applicable to Requirement 4 as documented, current, operational and communicated to every affected party.",
+            "evidence_types": [
+              "examine",
+              "interview"
+            ]
+          },
+          "target_modes": [
+            "LOCAL",
+            "REMOTE"
+          ],
+          "checks": [],
+          "op": "all",
+          "source_metadata": {
+            "document": "PCI-DSS-v4_0_1.pdf",
+            "normative_pdf_pages": [
+              115
+            ],
+            "pdf_pages": [
+              115
+            ],
+            "normative_sha256": "aa2d35770ee5a31f15fdec7a6706969ba3449519ec563f031f99f30bb09b2e2a",
+            "review_state": "source_criterion_defined_evidence_mapping_pending_security_review",
+            "pdf_sha256": "5e6b9093b84007b973097d20126a3768ea2f0a1d4200255c849b0fb3bf04ebc7"
+          },
+          "applicability": {
+            "entity_restriction": "all_applicable_entities",
+            "effective_from": null
+          }
+        },
+        {
+          "id": "MB-0513",
+          "revision": 1,
+          "title": "PCI 5.1.1: All security policies and operational procedures that are identified in Requirement 5 are",
+          "criterion": "For the applicable assessment scope, verify this complete obligation: Maintain the security policies and operational procedures applicable to Requirement 5 as documented, current, operational and communicated to every affected party.",
+          "control": "PCI-DSS",
+          "severity": "medium",
+          "alignments": [
+            {
+              "standard": "PCI-DSS",
+              "version": "4.0.1",
+              "reference": "5.1.1",
+              "relationship": "supporting"
+            }
+          ],
+          "obligations": [],
+          "coverage": "UNMAPPED",
+          "verification": "manual",
+          "review_state": "pending_security_review",
+          "human_evidence": {
+            "required": true,
+            "instructions": "Use examine, interview evidence to establish every condition, alternative, scope exception and time interval in the criterion. Confirm entity applicability and retain dated artifacts and reviewer rationale. For the applicable assessment scope, verify this complete obligation: Maintain the security policies and operational procedures applicable to Requirement 5 as documented, current, operational and communicated to every affected party.",
+            "evidence_types": [
+              "examine",
+              "interview"
+            ]
+          },
+          "target_modes": [
+            "LOCAL",
+            "REMOTE"
+          ],
+          "checks": [],
+          "op": "all",
+          "source_metadata": {
+            "document": "PCI-DSS-v4_0_1.pdf",
+            "normative_pdf_pages": [
+              124
+            ],
+            "pdf_pages": [
+              124
+            ],
+            "normative_sha256": "3bad627ec3f7b7e032bd65471209880432aba4696390877905acfc4aa8bde821",
+            "review_state": "source_criterion_defined_evidence_mapping_pending_security_review",
+            "pdf_sha256": "5e6b9093b84007b973097d20126a3768ea2f0a1d4200255c849b0fb3bf04ebc7"
+          },
+          "applicability": {
+            "entity_restriction": "all_applicable_entities",
+            "effective_from": null
+          }
+        },
+        {
+          "id": "MB-0526",
+          "revision": 1,
+          "title": "PCI 6.1.1: All security policies and operational procedures that are identified in Requirement 6 are",
+          "criterion": "For the applicable assessment scope, verify this complete obligation: Maintain the security policies and operational procedures applicable to Requirement 6 as documented, current, operational and communicated to every affected party.",
+          "control": "PCI-DSS",
+          "severity": "medium",
+          "alignments": [
+            {
+              "standard": "PCI-DSS",
+              "version": "4.0.1",
+              "reference": "6.1.1",
+              "relationship": "supporting"
+            }
+          ],
+          "obligations": [],
+          "coverage": "UNMAPPED",
+          "verification": "manual",
+          "review_state": "pending_security_review",
+          "human_evidence": {
+            "required": true,
+            "instructions": "Use examine, interview evidence to establish every condition, alternative, scope exception and time interval in the criterion. Confirm entity applicability and retain dated artifacts and reviewer rationale. For the applicable assessment scope, verify this complete obligation: Maintain the security policies and operational procedures applicable to Requirement 6 as documented, current, operational and communicated to every affected party.",
+            "evidence_types": [
+              "examine",
+              "interview"
+            ]
+          },
+          "target_modes": [
+            "LOCAL",
+            "REMOTE"
+          ],
+          "checks": [],
+          "op": "all",
+          "source_metadata": {
+            "document": "PCI-DSS-v4_0_1.pdf",
+            "normative_pdf_pages": [
+              139
+            ],
+            "pdf_pages": [
+              139
+            ],
+            "normative_sha256": "d17cf8e886e211ea78eb8c1cfb1e80ed478ef3455c3c581af64c5d300dd3c73e",
+            "review_state": "source_criterion_defined_evidence_mapping_pending_security_review",
+            "pdf_sha256": "5e6b9093b84007b973097d20126a3768ea2f0a1d4200255c849b0fb3bf04ebc7"
+          },
+          "applicability": {
+            "entity_restriction": "all_applicable_entities",
+            "effective_from": null
+          }
+        },
+        {
+          "id": "MB-0545",
+          "revision": 1,
+          "title": "PCI 7.1.1: All security policies and operational procedures that are identified in Requirement 7 are",
+          "criterion": "For the applicable assessment scope, verify this complete obligation: Maintain the security policies and operational procedures applicable to Requirement 7 as documented, current, operational and communicated to every affected party.",
+          "control": "PCI-DSS",
+          "severity": "medium",
+          "alignments": [
+            {
+              "standard": "PCI-DSS",
+              "version": "4.0.1",
+              "reference": "7.1.1",
+              "relationship": "supporting"
+            }
+          ],
+          "obligations": [],
+          "coverage": "UNMAPPED",
+          "verification": "manual",
+          "review_state": "pending_security_review",
+          "human_evidence": {
+            "required": true,
+            "instructions": "Use examine, interview evidence to establish every condition, alternative, scope exception and time interval in the criterion. Confirm entity applicability and retain dated artifacts and reviewer rationale. For the applicable assessment scope, verify this complete obligation: Maintain the security policies and operational procedures applicable to Requirement 7 as documented, current, operational and communicated to every affected party.",
+            "evidence_types": [
+              "examine",
+              "interview"
+            ]
+          },
+          "target_modes": [
+            "LOCAL",
+            "REMOTE"
+          ],
+          "checks": [],
+          "op": "all",
+          "source_metadata": {
+            "document": "PCI-DSS-v4_0_1.pdf",
+            "normative_pdf_pages": [
+              166
+            ],
+            "pdf_pages": [
+              166
+            ],
+            "normative_sha256": "912431a0ebf9ccd6c2c95a7ad16ea4a114d6f3c44e1182312b8ea30947a54e7c",
+            "review_state": "source_criterion_defined_evidence_mapping_pending_security_review",
+            "pdf_sha256": "5e6b9093b84007b973097d20126a3768ea2f0a1d4200255c849b0fb3bf04ebc7"
+          },
+          "applicability": {
+            "entity_restriction": "all_applicable_entities",
+            "effective_from": null
+          }
+        },
+        {
+          "id": "MB-0557",
+          "revision": 1,
+          "title": "PCI 8.1.1: All security policies and operational procedures that are identified in Requirement 8 are",
+          "criterion": "For the applicable assessment scope, verify this complete obligation: Maintain the security policies and operational procedures applicable to Requirement 8 as documented, current, operational and communicated to every affected party.",
+          "control": "PCI-DSS",
+          "severity": "medium",
+          "alignments": [
+            {
+              "standard": "PCI-DSS",
+              "version": "4.0.1",
+              "reference": "8.1.1",
+              "relationship": "supporting"
+            }
+          ],
+          "obligations": [],
+          "coverage": "UNMAPPED",
+          "verification": "manual",
+          "review_state": "pending_security_review",
+          "human_evidence": {
+            "required": true,
+            "instructions": "Use examine, interview evidence to establish every condition, alternative, scope exception and time interval in the criterion. Confirm entity applicability and retain dated artifacts and reviewer rationale. For the applicable assessment scope, verify this complete obligation: Maintain the security policies and operational procedures applicable to Requirement 8 as documented, current, operational and communicated to every affected party.",
+            "evidence_types": [
+              "examine",
+              "interview"
+            ]
+          },
+          "target_modes": [
+            "LOCAL",
+            "REMOTE"
+          ],
+          "checks": [],
+          "op": "all",
+          "source_metadata": {
+            "document": "PCI-DSS-v4_0_1.pdf",
+            "normative_pdf_pages": [
+              180
+            ],
+            "pdf_pages": [
+              180
+            ],
+            "normative_sha256": "493707d8a0757471c0490de46361d3be313e70f81ae9df4411f1053066674e49",
+            "review_state": "source_criterion_defined_evidence_mapping_pending_security_review",
+            "pdf_sha256": "5e6b9093b84007b973097d20126a3768ea2f0a1d4200255c849b0fb3bf04ebc7"
+          },
+          "applicability": {
+            "entity_restriction": "all_applicable_entities",
+            "effective_from": null
+          }
+        },
+        {
+          "id": "MB-0586",
+          "revision": 1,
+          "title": "PCI 9.1.1: All security policies and operational procedures that are identified in Requirement 9 are",
+          "criterion": "For the applicable assessment scope, verify this complete obligation: Maintain the security policies and operational procedures applicable to Requirement 9 as documented, current, operational and communicated to every affected party.",
+          "control": "PCI-DSS",
+          "severity": "medium",
+          "alignments": [
+            {
+              "standard": "PCI-DSS",
+              "version": "4.0.1",
+              "reference": "9.1.1",
+              "relationship": "supporting"
+            }
+          ],
+          "obligations": [],
+          "coverage": "UNMAPPED",
+          "verification": "manual",
+          "review_state": "pending_security_review",
+          "human_evidence": {
+            "required": true,
+            "instructions": "Use examine, interview evidence to establish every condition, alternative, scope exception and time interval in the criterion. Confirm entity applicability and retain dated artifacts and reviewer rationale. For the applicable assessment scope, verify this complete obligation: Maintain the security policies and operational procedures applicable to Requirement 9 as documented, current, operational and communicated to every affected party.",
+            "evidence_types": [
+              "examine",
+              "interview"
+            ]
+          },
+          "target_modes": [
+            "LOCAL",
+            "REMOTE"
+          ],
+          "checks": [],
+          "op": "all",
+          "source_metadata": {
+            "document": "PCI-DSS-v4_0_1.pdf",
+            "normative_pdf_pages": [
+              215
+            ],
+            "pdf_pages": [
+              215
+            ],
+            "normative_sha256": "0d6059362e1082b91030975efd5063d5c2461244665bbc9663c0a7b3259c8c08",
+            "review_state": "source_criterion_defined_evidence_mapping_pending_security_review",
+            "pdf_sha256": "5e6b9093b84007b973097d20126a3768ea2f0a1d4200255c849b0fb3bf04ebc7"
+          },
+          "applicability": {
+            "entity_restriction": "all_applicable_entities",
+            "effective_from": null
+          }
+        },
+        {
+          "id": "MB-0613",
+          "revision": 1,
+          "title": "PCI 10.1.1: All security policies and operational procedures that are identified in Requirement 10 are",
+          "criterion": "For the applicable assessment scope, verify this complete obligation: Maintain the security policies and operational procedures applicable to Requirement 10 as documented, current, operational and communicated to every affected party.",
+          "control": "PCI-DSS",
+          "severity": "medium",
+          "alignments": [
+            {
+              "standard": "PCI-DSS",
+              "version": "4.0.1",
+              "reference": "10.1.1",
+              "relationship": "supporting"
+            }
+          ],
+          "obligations": [],
+          "coverage": "UNMAPPED",
+          "verification": "manual",
+          "review_state": "pending_security_review",
+          "human_evidence": {
+            "required": true,
+            "instructions": "Use examine, interview evidence to establish every condition, alternative, scope exception and time interval in the criterion. Confirm entity applicability and retain dated artifacts and reviewer rationale. For the applicable assessment scope, verify this complete obligation: Maintain the security policies and operational procedures applicable to Requirement 10 as documented, current, operational and communicated to every affected party.",
+            "evidence_types": [
+              "examine",
+              "interview"
+            ]
+          },
+          "target_modes": [
+            "LOCAL",
+            "REMOTE"
+          ],
+          "checks": [],
+          "op": "all",
+          "source_metadata": {
+            "document": "PCI-DSS-v4_0_1.pdf",
+            "normative_pdf_pages": [
+              241
+            ],
+            "pdf_pages": [
+              241
+            ],
+            "normative_sha256": "de6630e2beba25e9f80b877abaff527f40e4cdc68ebd9a3dc138f72d281697d8",
+            "review_state": "source_criterion_defined_evidence_mapping_pending_security_review",
+            "pdf_sha256": "5e6b9093b84007b973097d20126a3768ea2f0a1d4200255c849b0fb3bf04ebc7"
+          },
+          "applicability": {
+            "entity_restriction": "all_applicable_entities",
+            "effective_from": null
+          }
+        },
+        {
+          "id": "MB-0641",
+          "revision": 1,
+          "title": "PCI 11.1.1: All security policies and operational procedures that are identified in Requirement 11 are",
+          "criterion": "For the applicable assessment scope, verify this complete obligation: Maintain the security policies and operational procedures applicable to Requirement 11 as documented, current, operational and communicated to every affected party.",
+          "control": "PCI-DSS",
+          "severity": "medium",
+          "alignments": [
+            {
+              "standard": "PCI-DSS",
+              "version": "4.0.1",
+              "reference": "11.1.1",
+              "relationship": "supporting"
+            }
+          ],
+          "obligations": [],
+          "coverage": "UNMAPPED",
+          "verification": "manual",
+          "review_state": "pending_security_review",
+          "human_evidence": {
+            "required": true,
+            "instructions": "Use examine, interview evidence to establish every condition, alternative, scope exception and time interval in the criterion. Confirm entity applicability and retain dated artifacts and reviewer rationale. For the applicable assessment scope, verify this complete obligation: Maintain the security policies and operational procedures applicable to Requirement 11 as documented, current, operational and communicated to every affected party.",
+            "evidence_types": [
+              "examine",
+              "interview"
+            ]
+          },
+          "target_modes": [
+            "LOCAL",
+            "REMOTE"
+          ],
+          "checks": [],
+          "op": "all",
+          "source_metadata": {
+            "document": "PCI-DSS-v4_0_1.pdf",
+            "normative_pdf_pages": [
+              265
+            ],
+            "pdf_pages": [
+              265
+            ],
+            "normative_sha256": "7c5a2abc0f1199eec196bceb7c02284e1420704be3f4bed763593234238ab9bd",
+            "review_state": "source_criterion_defined_evidence_mapping_pending_security_review",
+            "pdf_sha256": "5e6b9093b84007b973097d20126a3768ea2f0a1d4200255c849b0fb3bf04ebc7"
+          },
+          "applicability": {
+            "entity_restriction": "all_applicable_entities",
+            "effective_from": null
+          }
+        }
+      ]
+    },
+    {
+      "canonical_id": "MB-0449",
+      "retired_ids": [
+        "MB-0468",
+        "MB-0479",
+        "MB-0508",
+        "MB-0514",
+        "MB-0527",
+        "MB-0546",
+        "MB-0558",
+        "MB-0587",
+        "MB-0614",
+        "MB-0642"
+      ],
+      "classification": "SCOPE_UNION_SAME_PREDICATE",
+      "revision": 2,
+      "criterion": "For every applicable PCI operational domain (network security controls; secure system configuration; stored account-data protection; transmission protection; malware protection; secure development and change management; least-privilege access; identity and authentication; physical account-data protection; security logging and monitoring; security testing), document and assign the roles and responsibilities for performing its security activities, and ensure responsible personnel understand them. Responsibility evidence must cover every applicable domain rather than merely naming an overall program owner.",
+      "reason": "Eleven core criteria repeat documented, assigned and understood responsibility conditions over different operational domains; no overlay or distinct annual review clause is absorbed.",
+      "original_definitions": [
+        {
+          "id": "MB-0449",
+          "revision": 1,
+          "title": "PCI 1.1.2: Roles and responsibilities for performing activities in Requirement 1 are documented, assigned, and understood",
+          "criterion": "For the applicable assessment scope, verify this complete obligation: Define, assign and ensure personnel understand the roles and responsibilities for activities in Requirement 1.",
+          "control": "PCI-DSS",
+          "severity": "medium",
+          "alignments": [
+            {
+              "standard": "PCI-DSS",
+              "version": "4.0.1",
+              "reference": "1.1.2",
+              "relationship": "supporting"
+            }
+          ],
+          "obligations": [],
+          "coverage": "UNMAPPED",
+          "verification": "manual",
+          "review_state": "pending_security_review",
+          "human_evidence": {
+            "required": true,
+            "instructions": "Use examine, interview evidence to establish every condition, alternative, scope exception and time interval in the criterion. Confirm entity applicability and retain dated artifacts and reviewer rationale. For the applicable assessment scope, verify this complete obligation: Define, assign and ensure personnel understand the roles and responsibilities for activities in Requirement 1.",
+            "evidence_types": [
+              "examine",
+              "interview"
+            ]
+          },
+          "target_modes": [
+            "LOCAL",
+            "REMOTE"
+          ],
+          "checks": [],
+          "op": "all",
+          "source_metadata": {
+            "document": "PCI-DSS-v4_0_1.pdf",
+            "normative_pdf_pages": [
+              45
+            ],
+            "pdf_pages": [
+              45
+            ],
+            "normative_sha256": "c3706bbb785d619eca34212d61abd0447da5e3a278852bec14d8ad5da289cedd",
+            "review_state": "source_criterion_defined_evidence_mapping_pending_security_review",
+            "pdf_sha256": "5e6b9093b84007b973097d20126a3768ea2f0a1d4200255c849b0fb3bf04ebc7"
+          },
+          "applicability": {
+            "entity_restriction": "all_applicable_entities",
+            "effective_from": null
+          }
+        },
+        {
+          "id": "MB-0468",
+          "revision": 1,
+          "title": "PCI 2.1.2: Roles and responsibilities for performing activities in Requirement 2 are documented, assigned, and understood",
+          "criterion": "For the applicable assessment scope, verify this complete obligation: Define, assign and ensure personnel understand the roles and responsibilities for activities in Requirement 2.",
+          "control": "PCI-DSS",
+          "severity": "medium",
+          "alignments": [
+            {
+              "standard": "PCI-DSS",
+              "version": "4.0.1",
+              "reference": "2.1.2",
+              "relationship": "supporting"
+            }
+          ],
+          "obligations": [],
+          "coverage": "UNMAPPED",
+          "verification": "manual",
+          "review_state": "pending_security_review",
+          "human_evidence": {
+            "required": true,
+            "instructions": "Use examine, interview evidence to establish every condition, alternative, scope exception and time interval in the criterion. Confirm entity applicability and retain dated artifacts and reviewer rationale. For the applicable assessment scope, verify this complete obligation: Define, assign and ensure personnel understand the roles and responsibilities for activities in Requirement 2.",
+            "evidence_types": [
+              "examine",
+              "interview"
+            ]
+          },
+          "target_modes": [
+            "LOCAL",
+            "REMOTE"
+          ],
+          "checks": [],
+          "op": "all",
+          "source_metadata": {
+            "document": "PCI-DSS-v4_0_1.pdf",
+            "normative_pdf_pages": [
+              67
+            ],
+            "pdf_pages": [
+              67
+            ],
+            "normative_sha256": "7b462dbbd902db6d4388609e1afc72f73778de0ff9aed5902e2261c8af09cef1",
+            "review_state": "source_criterion_defined_evidence_mapping_pending_security_review",
+            "pdf_sha256": "5e6b9093b84007b973097d20126a3768ea2f0a1d4200255c849b0fb3bf04ebc7"
+          },
+          "applicability": {
+            "entity_restriction": "all_applicable_entities",
+            "effective_from": null
+          }
+        },
+        {
+          "id": "MB-0479",
+          "revision": 1,
+          "title": "PCI 3.1.2: Roles and responsibilities for performing activities in Requirement 3 are documented, assigned, and understood",
+          "criterion": "For the applicable assessment scope, verify this complete obligation: Define, assign and ensure personnel understand the roles and responsibilities for activities in Requirement 3.",
+          "control": "PCI-DSS",
+          "severity": "medium",
+          "alignments": [
+            {
+              "standard": "PCI-DSS",
+              "version": "4.0.1",
+              "reference": "3.1.2",
+              "relationship": "supporting"
+            }
+          ],
+          "obligations": [],
+          "coverage": "UNMAPPED",
+          "verification": "manual",
+          "review_state": "pending_security_review",
+          "human_evidence": {
+            "required": true,
+            "instructions": "Use examine, interview evidence to establish every condition, alternative, scope exception and time interval in the criterion. Confirm entity applicability and retain dated artifacts and reviewer rationale. For the applicable assessment scope, verify this complete obligation: Define, assign and ensure personnel understand the roles and responsibilities for activities in Requirement 3.",
+            "evidence_types": [
+              "examine",
+              "interview"
+            ]
+          },
+          "target_modes": [
+            "LOCAL",
+            "REMOTE"
+          ],
+          "checks": [],
+          "op": "all",
+          "source_metadata": {
+            "document": "PCI-DSS-v4_0_1.pdf",
+            "normative_pdf_pages": [
+              80
+            ],
+            "pdf_pages": [
+              80
+            ],
+            "normative_sha256": "cdf3eef63e6aafbd73be0d2287334c7ca385b0c8a68faaf4c2c2aa940c8472bb",
+            "review_state": "source_criterion_defined_evidence_mapping_pending_security_review",
+            "pdf_sha256": "5e6b9093b84007b973097d20126a3768ea2f0a1d4200255c849b0fb3bf04ebc7"
+          },
+          "applicability": {
+            "entity_restriction": "all_applicable_entities",
+            "effective_from": null
+          }
+        },
+        {
+          "id": "MB-0508",
+          "revision": 1,
+          "title": "PCI 4.1.2: Roles and responsibilities for performing activities in Requirement 4 are documented, assigned, and understood",
+          "criterion": "For the applicable assessment scope, verify this complete obligation: Define, assign and ensure personnel understand the roles and responsibilities for activities in Requirement 4.",
+          "control": "PCI-DSS",
+          "severity": "medium",
+          "alignments": [
+            {
+              "standard": "PCI-DSS",
+              "version": "4.0.1",
+              "reference": "4.1.2",
+              "relationship": "supporting"
+            }
+          ],
+          "obligations": [],
+          "coverage": "UNMAPPED",
+          "verification": "manual",
+          "review_state": "pending_security_review",
+          "human_evidence": {
+            "required": true,
+            "instructions": "Use examine, interview evidence to establish every condition, alternative, scope exception and time interval in the criterion. Confirm entity applicability and retain dated artifacts and reviewer rationale. For the applicable assessment scope, verify this complete obligation: Define, assign and ensure personnel understand the roles and responsibilities for activities in Requirement 4.",
+            "evidence_types": [
+              "examine",
+              "interview"
+            ]
+          },
+          "target_modes": [
+            "LOCAL",
+            "REMOTE"
+          ],
+          "checks": [],
+          "op": "all",
+          "source_metadata": {
+            "document": "PCI-DSS-v4_0_1.pdf",
+            "normative_pdf_pages": [
+              116
+            ],
+            "pdf_pages": [
+              116
+            ],
+            "normative_sha256": "7b74cce8a5f5541690528402003bef7d9f9ef3a4bc87bff68d5693a98108739d",
+            "review_state": "source_criterion_defined_evidence_mapping_pending_security_review",
+            "pdf_sha256": "5e6b9093b84007b973097d20126a3768ea2f0a1d4200255c849b0fb3bf04ebc7"
+          },
+          "applicability": {
+            "entity_restriction": "all_applicable_entities",
+            "effective_from": null
+          }
+        },
+        {
+          "id": "MB-0514",
+          "revision": 1,
+          "title": "PCI 5.1.2: Roles and responsibilities for performing activities in Requirement 5 are documented, assigned, and understood",
+          "criterion": "For the applicable assessment scope, verify this complete obligation: Define, assign and ensure personnel understand the roles and responsibilities for activities in Requirement 5.",
+          "control": "PCI-DSS",
+          "severity": "medium",
+          "alignments": [
+            {
+              "standard": "PCI-DSS",
+              "version": "4.0.1",
+              "reference": "5.1.2",
+              "relationship": "supporting"
+            }
+          ],
+          "obligations": [],
+          "coverage": "UNMAPPED",
+          "verification": "manual",
+          "review_state": "pending_security_review",
+          "human_evidence": {
+            "required": true,
+            "instructions": "Use examine, interview evidence to establish every condition, alternative, scope exception and time interval in the criterion. Confirm entity applicability and retain dated artifacts and reviewer rationale. For the applicable assessment scope, verify this complete obligation: Define, assign and ensure personnel understand the roles and responsibilities for activities in Requirement 5.",
+            "evidence_types": [
+              "examine",
+              "interview"
+            ]
+          },
+          "target_modes": [
+            "LOCAL",
+            "REMOTE"
+          ],
+          "checks": [],
+          "op": "all",
+          "source_metadata": {
+            "document": "PCI-DSS-v4_0_1.pdf",
+            "normative_pdf_pages": [
+              125
+            ],
+            "pdf_pages": [
+              125
+            ],
+            "normative_sha256": "1c5e3e4ea27a896f58c28423425ba5074dcb4f190d2f1f227f688fa677037696",
+            "review_state": "source_criterion_defined_evidence_mapping_pending_security_review",
+            "pdf_sha256": "5e6b9093b84007b973097d20126a3768ea2f0a1d4200255c849b0fb3bf04ebc7"
+          },
+          "applicability": {
+            "entity_restriction": "all_applicable_entities",
+            "effective_from": null
+          }
+        },
+        {
+          "id": "MB-0527",
+          "revision": 1,
+          "title": "PCI 6.1.2: Roles and responsibilities for performing activities in Requirement 6 are documented, assigned, and understood",
+          "criterion": "For the applicable assessment scope, verify this complete obligation: Define, assign and ensure personnel understand the roles and responsibilities for activities in Requirement 6.",
+          "control": "PCI-DSS",
+          "severity": "medium",
+          "alignments": [
+            {
+              "standard": "PCI-DSS",
+              "version": "4.0.1",
+              "reference": "6.1.2",
+              "relationship": "supporting"
+            }
+          ],
+          "obligations": [],
+          "coverage": "UNMAPPED",
+          "verification": "manual",
+          "review_state": "pending_security_review",
+          "human_evidence": {
+            "required": true,
+            "instructions": "Use examine, interview evidence to establish every condition, alternative, scope exception and time interval in the criterion. Confirm entity applicability and retain dated artifacts and reviewer rationale. For the applicable assessment scope, verify this complete obligation: Define, assign and ensure personnel understand the roles and responsibilities for activities in Requirement 6.",
+            "evidence_types": [
+              "examine",
+              "interview"
+            ]
+          },
+          "target_modes": [
+            "LOCAL",
+            "REMOTE"
+          ],
+          "checks": [],
+          "op": "all",
+          "source_metadata": {
+            "document": "PCI-DSS-v4_0_1.pdf",
+            "normative_pdf_pages": [
+              140
+            ],
+            "pdf_pages": [
+              140
+            ],
+            "normative_sha256": "3baf65b998c93866000eed9e9621209a1dd86413cc7aa56c0f6ae05278cda260",
+            "review_state": "source_criterion_defined_evidence_mapping_pending_security_review",
+            "pdf_sha256": "5e6b9093b84007b973097d20126a3768ea2f0a1d4200255c849b0fb3bf04ebc7"
+          },
+          "applicability": {
+            "entity_restriction": "all_applicable_entities",
+            "effective_from": null
+          }
+        },
+        {
+          "id": "MB-0546",
+          "revision": 1,
+          "title": "PCI 7.1.2: Roles and responsibilities for performing activities in Requirement 7 are documented, assigned, and understood",
+          "criterion": "For the applicable assessment scope, verify this complete obligation: Define, assign and ensure personnel understand the roles and responsibilities for activities in Requirement 7.",
+          "control": "PCI-DSS",
+          "severity": "medium",
+          "alignments": [
+            {
+              "standard": "PCI-DSS",
+              "version": "4.0.1",
+              "reference": "7.1.2",
+              "relationship": "supporting"
+            }
+          ],
+          "obligations": [],
+          "coverage": "UNMAPPED",
+          "verification": "manual",
+          "review_state": "pending_security_review",
+          "human_evidence": {
+            "required": true,
+            "instructions": "Use examine, interview evidence to establish every condition, alternative, scope exception and time interval in the criterion. Confirm entity applicability and retain dated artifacts and reviewer rationale. For the applicable assessment scope, verify this complete obligation: Define, assign and ensure personnel understand the roles and responsibilities for activities in Requirement 7.",
+            "evidence_types": [
+              "examine",
+              "interview"
+            ]
+          },
+          "target_modes": [
+            "LOCAL",
+            "REMOTE"
+          ],
+          "checks": [],
+          "op": "all",
+          "source_metadata": {
+            "document": "PCI-DSS-v4_0_1.pdf",
+            "normative_pdf_pages": [
+              167
+            ],
+            "pdf_pages": [
+              167
+            ],
+            "normative_sha256": "b3cabac69962b11bc5a9558179ea14439bf765b2841b60e7446fc09444238359",
+            "review_state": "source_criterion_defined_evidence_mapping_pending_security_review",
+            "pdf_sha256": "5e6b9093b84007b973097d20126a3768ea2f0a1d4200255c849b0fb3bf04ebc7"
+          },
+          "applicability": {
+            "entity_restriction": "all_applicable_entities",
+            "effective_from": null
+          }
+        },
+        {
+          "id": "MB-0558",
+          "revision": 1,
+          "title": "PCI 8.1.2: Roles and responsibilities for performing activities in Requirement 8 are documented, assigned, and understood",
+          "criterion": "For the applicable assessment scope, verify this complete obligation: Define, assign and ensure personnel understand the roles and responsibilities for activities in Requirement 8.",
+          "control": "PCI-DSS",
+          "severity": "medium",
+          "alignments": [
+            {
+              "standard": "PCI-DSS",
+              "version": "4.0.1",
+              "reference": "8.1.2",
+              "relationship": "supporting"
+            }
+          ],
+          "obligations": [],
+          "coverage": "UNMAPPED",
+          "verification": "manual",
+          "review_state": "pending_security_review",
+          "human_evidence": {
+            "required": true,
+            "instructions": "Use examine, interview evidence to establish every condition, alternative, scope exception and time interval in the criterion. Confirm entity applicability and retain dated artifacts and reviewer rationale. For the applicable assessment scope, verify this complete obligation: Define, assign and ensure personnel understand the roles and responsibilities for activities in Requirement 8.",
+            "evidence_types": [
+              "examine",
+              "interview"
+            ]
+          },
+          "target_modes": [
+            "LOCAL",
+            "REMOTE"
+          ],
+          "checks": [],
+          "op": "all",
+          "source_metadata": {
+            "document": "PCI-DSS-v4_0_1.pdf",
+            "normative_pdf_pages": [
+              181
+            ],
+            "pdf_pages": [
+              181
+            ],
+            "normative_sha256": "7851bc40ebbdd39082512cd7a54f8b1e2c3653d6f5f3bf0a3f4a5638b95f8cf9",
+            "review_state": "source_criterion_defined_evidence_mapping_pending_security_review",
+            "pdf_sha256": "5e6b9093b84007b973097d20126a3768ea2f0a1d4200255c849b0fb3bf04ebc7"
+          },
+          "applicability": {
+            "entity_restriction": "all_applicable_entities",
+            "effective_from": null
+          }
+        },
+        {
+          "id": "MB-0587",
+          "revision": 1,
+          "title": "PCI 9.1.2: Roles and responsibilities for performing activities in Requirement 9 are documented, assigned, and understood",
+          "criterion": "For the applicable assessment scope, verify this complete obligation: Define, assign and ensure personnel understand the roles and responsibilities for activities in Requirement 9.",
+          "control": "PCI-DSS",
+          "severity": "medium",
+          "alignments": [
+            {
+              "standard": "PCI-DSS",
+              "version": "4.0.1",
+              "reference": "9.1.2",
+              "relationship": "supporting"
+            }
+          ],
+          "obligations": [],
+          "coverage": "UNMAPPED",
+          "verification": "manual",
+          "review_state": "pending_security_review",
+          "human_evidence": {
+            "required": true,
+            "instructions": "Use examine, interview evidence to establish every condition, alternative, scope exception and time interval in the criterion. Confirm entity applicability and retain dated artifacts and reviewer rationale. For the applicable assessment scope, verify this complete obligation: Define, assign and ensure personnel understand the roles and responsibilities for activities in Requirement 9.",
+            "evidence_types": [
+              "examine",
+              "interview"
+            ]
+          },
+          "target_modes": [
+            "LOCAL",
+            "REMOTE"
+          ],
+          "checks": [],
+          "op": "all",
+          "source_metadata": {
+            "document": "PCI-DSS-v4_0_1.pdf",
+            "normative_pdf_pages": [
+              216
+            ],
+            "pdf_pages": [
+              216
+            ],
+            "normative_sha256": "56e6d790c3d55a27183212f85b5084f63438dae002f5d45145fcf4f94c4ca3ae",
+            "review_state": "source_criterion_defined_evidence_mapping_pending_security_review",
+            "pdf_sha256": "5e6b9093b84007b973097d20126a3768ea2f0a1d4200255c849b0fb3bf04ebc7"
+          },
+          "applicability": {
+            "entity_restriction": "all_applicable_entities",
+            "effective_from": null
+          }
+        },
+        {
+          "id": "MB-0614",
+          "revision": 1,
+          "title": "PCI 10.1.2: Roles and responsibilities for performing activities in Requirement 10 are documented, assigned, and understood",
+          "criterion": "For the applicable assessment scope, verify this complete obligation: Define, assign and ensure personnel understand the roles and responsibilities for activities in Requirement 10.",
+          "control": "PCI-DSS",
+          "severity": "medium",
+          "alignments": [
+            {
+              "standard": "PCI-DSS",
+              "version": "4.0.1",
+              "reference": "10.1.2",
+              "relationship": "supporting"
+            }
+          ],
+          "obligations": [],
+          "coverage": "UNMAPPED",
+          "verification": "manual",
+          "review_state": "pending_security_review",
+          "human_evidence": {
+            "required": true,
+            "instructions": "Use examine, interview evidence to establish every condition, alternative, scope exception and time interval in the criterion. Confirm entity applicability and retain dated artifacts and reviewer rationale. For the applicable assessment scope, verify this complete obligation: Define, assign and ensure personnel understand the roles and responsibilities for activities in Requirement 10.",
+            "evidence_types": [
+              "examine",
+              "interview"
+            ]
+          },
+          "target_modes": [
+            "LOCAL",
+            "REMOTE"
+          ],
+          "checks": [],
+          "op": "all",
+          "source_metadata": {
+            "document": "PCI-DSS-v4_0_1.pdf",
+            "normative_pdf_pages": [
+              242
+            ],
+            "pdf_pages": [
+              242
+            ],
+            "normative_sha256": "d4172a41c7abe196d4722ded15f25d8bc46c65ca9ca0cd4ff5cf38c011f4719b",
+            "review_state": "source_criterion_defined_evidence_mapping_pending_security_review",
+            "pdf_sha256": "5e6b9093b84007b973097d20126a3768ea2f0a1d4200255c849b0fb3bf04ebc7"
+          },
+          "applicability": {
+            "entity_restriction": "all_applicable_entities",
+            "effective_from": null
+          }
+        },
+        {
+          "id": "MB-0642",
+          "revision": 1,
+          "title": "PCI 11.1.2: Roles and responsibilities for performing activities in Requirement 11 are documented, assigned, and understood",
+          "criterion": "For the applicable assessment scope, verify this complete obligation: Define, assign and ensure personnel understand the roles and responsibilities for activities in Requirement 11.",
+          "control": "PCI-DSS",
+          "severity": "medium",
+          "alignments": [
+            {
+              "standard": "PCI-DSS",
+              "version": "4.0.1",
+              "reference": "11.1.2",
+              "relationship": "supporting"
+            }
+          ],
+          "obligations": [],
+          "coverage": "UNMAPPED",
+          "verification": "manual",
+          "review_state": "pending_security_review",
+          "human_evidence": {
+            "required": true,
+            "instructions": "Use examine, interview evidence to establish every condition, alternative, scope exception and time interval in the criterion. Confirm entity applicability and retain dated artifacts and reviewer rationale. For the applicable assessment scope, verify this complete obligation: Define, assign and ensure personnel understand the roles and responsibilities for activities in Requirement 11.",
+            "evidence_types": [
+              "examine",
+              "interview"
+            ]
+          },
+          "target_modes": [
+            "LOCAL",
+            "REMOTE"
+          ],
+          "checks": [],
+          "op": "all",
+          "source_metadata": {
+            "document": "PCI-DSS-v4_0_1.pdf",
+            "normative_pdf_pages": [
+              266
+            ],
+            "pdf_pages": [
+              266
+            ],
+            "normative_sha256": "bf403fced2048c5c1cdcf60d21e84b3d01a02afadd96b6697a0c51c29782def1",
+            "review_state": "source_criterion_defined_evidence_mapping_pending_security_review",
+            "pdf_sha256": "5e6b9093b84007b973097d20126a3768ea2f0a1d4200255c849b0fb3bf04ebc7"
+          },
+          "applicability": {
+            "entity_restriction": "all_applicable_entities",
+            "effective_from": null
+          }
+        }
+      ]
+    },
+    {
+      "canonical_id": "MB-0481",
+      "retired_ids": [
+        "MB-0482",
+        "MB-0483",
+        "MB-0484"
+      ],
+      "classification": "PARENT_SUBTYPE_EQUIVALENT_CONSOLIDATION",
+      "revision": 2,
+      "criterion": "Upon completion of transaction authorization, do not retain sensitive authentication data, even encrypted, and render all received SAD unrecoverable. This includes full magnetic-stripe/track-equivalent data, card-verification codes/values, and PINs/PIN blocks. Confirm any documented legitimate issuing-business exception under PCI DSS 3.3.3 separately; issuer status alone establishes no exception.",
+      "reason": "PDF83 states SAD includes the data cited in3.3.1.1–3.3.1.3; these are subtype projections of the parent prohibition, not independent storage mechanisms. The common issuer exception is confirmed forCVV by officialFAQ1280 and allSAD byFAQ1574. Preserve separate preauthorization3.3.2 and legitimate-issuer-storage3.3.3 requirements.",
+      "original_definitions": [
+        {
+          "id": "MB-0481",
+          "revision": 1,
+          "title": "PCI 3.3.1: SAD is not stored after authorization, even if encrypted",
+          "criterion": "For the applicable assessment scope, verify this complete obligation: SAD is not stored after authorization, even if encrypted. All sensitive authentication data received is rendered unrecoverable upon completion of the authorization process.",
+          "control": "MB-C03",
+          "severity": "medium",
+          "alignments": [
+            {
+              "standard": "PCI-DSS",
+              "version": "4.0.1",
+              "reference": "3.3.1",
+              "relationship": "partial"
+            }
+          ],
+          "obligations": [
+            {
+              "id": "O001",
+              "op": "all",
+              "role": "supporting",
+              "proof": "heuristic",
+              "checks": [
+                {
+                  "name": "code_sensitive_logging",
+                  "args": {
+                    "paths": [
+                      "app"
+                    ],
+                    "include_ext": [
+                      "php"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "id": "O002",
+              "op": "all",
+              "role": "supporting",
+              "proof": "heuristic",
+              "checks": [
+                {
+                  "name": "code_third_party_logging_sanitized",
+                  "args": {
+                    "paths": [
+                      "app/code"
+                    ],
+                    "include_ext": [
+                      "php"
+                    ],
+                    "max_results": 100
+                  }
+                }
+              ]
+            },
+            {
+              "id": "O003",
+              "op": "all",
+              "role": "supporting",
+              "proof": "heuristic",
+              "checks": [
+                {
+                  "name": "code_cardholder_data_storage",
+                  "args": {
+                    "paths": [
+                      "app/code",
+                      "app/etc",
+                      "db"
+                    ],
+                    "include_ext": [
+                      "php",
+                      "xml",
+                      "sql",
+                      "json"
+                    ],
+                    "max_results": 100
+                  }
+                }
+              ]
+            },
+            {
+              "id": "O004",
+              "op": "all",
+              "role": "supporting",
+              "proof": "heuristic",
+              "checks": [
+                {
+                  "name": "code_cardholder_data_files",
+                  "args": {
+                    "paths": [
+                      "var/export",
+                      "var/import",
+                      "var/backups",
+                      "var/backup",
+                      "var/log",
+                      "var/report",
+                      "pub/media",
+                      "pub/import",
+                      "backups",
+                      "backup"
+                    ],
+                    "include_ext": [
+                      "csv",
+                      "sql",
+                      "txt",
+                      "log",
+                      "json",
+                      "xml",
+                      "bak",
+                      "old"
+                    ],
+                    "max_results": 100
+                  }
+                }
+              ]
+            },
+            {
+              "id": "O005",
+              "op": "all",
+              "role": "supporting",
+              "proof": "heuristic",
+              "checks": [
+                {
+                  "name": "code_cardholder_data_logs",
+                  "args": {
+                    "paths": [
+                      "var/log",
+                      "var/report",
+                      "pub/media/log",
+                      "pub/media/report"
+                    ],
+                    "include_ext": [
+                      "log",
+                      "txt",
+                      "json",
+                      "xml"
+                    ],
+                    "max_results": 100
+                  }
+                }
+              ]
+            }
+          ],
+          "coverage": "PARTIAL",
+          "verification": "automated",
+          "review_state": "pending_security_review",
+          "human_evidence": {
+            "required": true,
+            "instructions": "Use examine, observe evidence to establish every condition, alternative, scope exception and time interval in the criterion. Confirm entity applicability and retain dated artifacts and reviewer rationale. For the applicable assessment scope, verify this complete obligation: SAD is not stored after authorization, even if encrypted. All sensitive authentication data received is rendered unrecoverable upon completion of the authorization process.",
+            "evidence_types": [
+              "examine",
+              "observe"
+            ]
+          },
+          "target_modes": [
+            "LOCAL",
+            "REMOTE"
+          ],
+          "checks": [
+            {
+              "name": "code_sensitive_logging",
+              "args": {
+                "paths": [
+                  "app"
+                ],
+                "include_ext": [
+                  "php"
+                ]
+              }
+            },
+            {
+              "name": "code_third_party_logging_sanitized",
+              "args": {
+                "paths": [
+                  "app/code"
+                ],
+                "include_ext": [
+                  "php"
+                ],
+                "max_results": 100
+              }
+            },
+            {
+              "name": "code_cardholder_data_storage",
+              "args": {
+                "paths": [
+                  "app/code",
+                  "app/etc",
+                  "db"
+                ],
+                "include_ext": [
+                  "php",
+                  "xml",
+                  "sql",
+                  "json"
+                ],
+                "max_results": 100
+              }
+            },
+            {
+              "name": "code_cardholder_data_files",
+              "args": {
+                "paths": [
+                  "var/export",
+                  "var/import",
+                  "var/backups",
+                  "var/backup",
+                  "var/log",
+                  "var/report",
+                  "pub/media",
+                  "pub/import",
+                  "backups",
+                  "backup"
+                ],
+                "include_ext": [
+                  "csv",
+                  "sql",
+                  "txt",
+                  "log",
+                  "json",
+                  "xml",
+                  "bak",
+                  "old"
+                ],
+                "max_results": 100
+              }
+            },
+            {
+              "name": "code_cardholder_data_logs",
+              "args": {
+                "paths": [
+                  "var/log",
+                  "var/report",
+                  "pub/media/log",
+                  "pub/media/report"
+                ],
+                "include_ext": [
+                  "log",
+                  "txt",
+                  "json",
+                  "xml"
+                ],
+                "max_results": 100
+              }
+            }
+          ],
+          "op": "all",
+          "source_metadata": {
+            "document": "PCI-DSS-v4_0_1.pdf",
+            "normative_pdf_pages": [
+              83
+            ],
+            "pdf_pages": [
+              83
+            ],
+            "normative_sha256": "a4e5113a092fb7d095b134bdc58f8c576150557102dd0c485e0ace5cfb07d42d",
+            "review_state": "source_criterion_defined_evidence_mapping_pending_security_review",
+            "pdf_sha256": "5e6b9093b84007b973097d20126a3768ea2f0a1d4200255c849b0fb3bf04ebc7"
+          },
+          "applicability": {
+            "entity_restriction": "all_applicable_entities",
+            "effective_from": null
+          }
+        },
+        {
+          "id": "MB-0482",
+          "revision": 1,
+          "title": "PCI 3.3.1.1: The full contents of any track are not stored upon completion of the authorization process",
+          "criterion": "For the applicable assessment scope, verify this complete obligation: The full contents of any track are not stored upon completion of the authorization process.",
+          "control": "MB-C12",
+          "severity": "medium",
+          "alignments": [
+            {
+              "standard": "PCI-DSS",
+              "version": "4.0.1",
+              "reference": "3.3.1.1",
+              "relationship": "partial"
+            }
+          ],
+          "obligations": [
+            {
+              "id": "O001",
+              "op": "all",
+              "role": "supporting",
+              "proof": "heuristic",
+              "checks": [
+                {
+                  "name": "code_cardholder_data_storage",
+                  "args": {
+                    "paths": [
+                      "app/code",
+                      "app/etc",
+                      "db"
+                    ],
+                    "include_ext": [
+                      "php",
+                      "xml",
+                      "sql",
+                      "json"
+                    ],
+                    "max_results": 100
+                  }
+                }
+              ]
+            },
+            {
+              "id": "O002",
+              "op": "all",
+              "role": "supporting",
+              "proof": "heuristic",
+              "checks": [
+                {
+                  "name": "code_cardholder_data_files",
+                  "args": {
+                    "paths": [
+                      "var/export",
+                      "var/import",
+                      "var/backups",
+                      "var/backup",
+                      "var/log",
+                      "var/report",
+                      "pub/media",
+                      "pub/import",
+                      "backups",
+                      "backup"
+                    ],
+                    "include_ext": [
+                      "csv",
+                      "sql",
+                      "txt",
+                      "log",
+                      "json",
+                      "xml",
+                      "bak",
+                      "old"
+                    ],
+                    "max_results": 100
+                  }
+                }
+              ]
+            },
+            {
+              "id": "O003",
+              "op": "all",
+              "role": "supporting",
+              "proof": "heuristic",
+              "checks": [
+                {
+                  "name": "code_cardholder_data_logs",
+                  "args": {
+                    "paths": [
+                      "var/log",
+                      "var/report",
+                      "pub/media/log",
+                      "pub/media/report"
+                    ],
+                    "include_ext": [
+                      "log",
+                      "txt",
+                      "json",
+                      "xml"
+                    ],
+                    "max_results": 100
+                  }
+                }
+              ]
+            }
+          ],
+          "coverage": "PARTIAL",
+          "verification": "automated",
+          "review_state": "pending_security_review",
+          "human_evidence": {
+            "required": true,
+            "instructions": "Use examine evidence to establish every condition, alternative, scope exception and time interval in the criterion. Confirm entity applicability and retain dated artifacts and reviewer rationale. For the applicable assessment scope, verify this complete obligation: The full contents of any track are not stored upon completion of the authorization process.",
+            "evidence_types": [
+              "examine"
+            ]
+          },
+          "target_modes": [
+            "LOCAL",
+            "REMOTE"
+          ],
+          "checks": [
+            {
+              "name": "code_cardholder_data_storage",
+              "args": {
+                "paths": [
+                  "app/code",
+                  "app/etc",
+                  "db"
+                ],
+                "include_ext": [
+                  "php",
+                  "xml",
+                  "sql",
+                  "json"
+                ],
+                "max_results": 100
+              }
+            },
+            {
+              "name": "code_cardholder_data_files",
+              "args": {
+                "paths": [
+                  "var/export",
+                  "var/import",
+                  "var/backups",
+                  "var/backup",
+                  "var/log",
+                  "var/report",
+                  "pub/media",
+                  "pub/import",
+                  "backups",
+                  "backup"
+                ],
+                "include_ext": [
+                  "csv",
+                  "sql",
+                  "txt",
+                  "log",
+                  "json",
+                  "xml",
+                  "bak",
+                  "old"
+                ],
+                "max_results": 100
+              }
+            },
+            {
+              "name": "code_cardholder_data_logs",
+              "args": {
+                "paths": [
+                  "var/log",
+                  "var/report",
+                  "pub/media/log",
+                  "pub/media/report"
+                ],
+                "include_ext": [
+                  "log",
+                  "txt",
+                  "json",
+                  "xml"
+                ],
+                "max_results": 100
+              }
+            }
+          ],
+          "op": "all",
+          "source_metadata": {
+            "document": "PCI-DSS-v4_0_1.pdf",
+            "normative_pdf_pages": [
+              84
+            ],
+            "pdf_pages": [
+              84
+            ],
+            "normative_sha256": "8cf586a13b3b58aabf358ff2d86b8549a0456a4605c35f09be9889f90b8f030e",
+            "review_state": "source_criterion_defined_evidence_mapping_pending_security_review",
+            "pdf_sha256": "5e6b9093b84007b973097d20126a3768ea2f0a1d4200255c849b0fb3bf04ebc7"
+          },
+          "applicability": {
+            "entity_restriction": "all_applicable_entities",
+            "effective_from": null
+          }
+        },
+        {
+          "id": "MB-0483",
+          "revision": 1,
+          "title": "PCI 3.3.1.2: The card verification code is not stored upon completion of the authorization process",
+          "criterion": "For the applicable assessment scope, verify this complete obligation: The card verification code is not stored upon completion of the authorization process.",
+          "control": "MB-C12",
+          "severity": "medium",
+          "alignments": [
+            {
+              "standard": "PCI-DSS",
+              "version": "4.0.1",
+              "reference": "3.3.1.2",
+              "relationship": "partial"
+            }
+          ],
+          "obligations": [
+            {
+              "id": "O001",
+              "op": "all",
+              "role": "supporting",
+              "proof": "heuristic",
+              "checks": [
+                {
+                  "name": "code_cardholder_data_storage",
+                  "args": {
+                    "paths": [
+                      "app/code",
+                      "app/etc",
+                      "db"
+                    ],
+                    "include_ext": [
+                      "php",
+                      "xml",
+                      "sql",
+                      "json"
+                    ],
+                    "max_results": 100
+                  }
+                }
+              ]
+            },
+            {
+              "id": "O002",
+              "op": "all",
+              "role": "supporting",
+              "proof": "heuristic",
+              "checks": [
+                {
+                  "name": "code_cardholder_data_files",
+                  "args": {
+                    "paths": [
+                      "var/export",
+                      "var/import",
+                      "var/backups",
+                      "var/backup",
+                      "var/log",
+                      "var/report",
+                      "pub/media",
+                      "pub/import",
+                      "backups",
+                      "backup"
+                    ],
+                    "include_ext": [
+                      "csv",
+                      "sql",
+                      "txt",
+                      "log",
+                      "json",
+                      "xml",
+                      "bak",
+                      "old"
+                    ],
+                    "max_results": 100
+                  }
+                }
+              ]
+            },
+            {
+              "id": "O003",
+              "op": "all",
+              "role": "supporting",
+              "proof": "heuristic",
+              "checks": [
+                {
+                  "name": "code_cardholder_data_logs",
+                  "args": {
+                    "paths": [
+                      "var/log",
+                      "var/report",
+                      "pub/media/log",
+                      "pub/media/report"
+                    ],
+                    "include_ext": [
+                      "log",
+                      "txt",
+                      "json",
+                      "xml"
+                    ],
+                    "max_results": 100
+                  }
+                }
+              ]
+            }
+          ],
+          "coverage": "PARTIAL",
+          "verification": "automated",
+          "review_state": "pending_security_review",
+          "human_evidence": {
+            "required": true,
+            "instructions": "Use examine evidence to establish every condition, alternative, scope exception and time interval in the criterion. Confirm entity applicability and retain dated artifacts and reviewer rationale. For the applicable assessment scope, verify this complete obligation: The card verification code is not stored upon completion of the authorization process.",
+            "evidence_types": [
+              "examine"
+            ]
+          },
+          "target_modes": [
+            "LOCAL",
+            "REMOTE"
+          ],
+          "checks": [
+            {
+              "name": "code_cardholder_data_storage",
+              "args": {
+                "paths": [
+                  "app/code",
+                  "app/etc",
+                  "db"
+                ],
+                "include_ext": [
+                  "php",
+                  "xml",
+                  "sql",
+                  "json"
+                ],
+                "max_results": 100
+              }
+            },
+            {
+              "name": "code_cardholder_data_files",
+              "args": {
+                "paths": [
+                  "var/export",
+                  "var/import",
+                  "var/backups",
+                  "var/backup",
+                  "var/log",
+                  "var/report",
+                  "pub/media",
+                  "pub/import",
+                  "backups",
+                  "backup"
+                ],
+                "include_ext": [
+                  "csv",
+                  "sql",
+                  "txt",
+                  "log",
+                  "json",
+                  "xml",
+                  "bak",
+                  "old"
+                ],
+                "max_results": 100
+              }
+            },
+            {
+              "name": "code_cardholder_data_logs",
+              "args": {
+                "paths": [
+                  "var/log",
+                  "var/report",
+                  "pub/media/log",
+                  "pub/media/report"
+                ],
+                "include_ext": [
+                  "log",
+                  "txt",
+                  "json",
+                  "xml"
+                ],
+                "max_results": 100
+              }
+            }
+          ],
+          "op": "all",
+          "source_metadata": {
+            "document": "PCI-DSS-v4_0_1.pdf",
+            "normative_pdf_pages": [
+              85
+            ],
+            "pdf_pages": [
+              85
+            ],
+            "normative_sha256": "44101d98579d44f2da2436e7b2386f49b937e92c951db8fd88eff545c20391b1",
+            "review_state": "source_criterion_defined_evidence_mapping_pending_security_review",
+            "pdf_sha256": "5e6b9093b84007b973097d20126a3768ea2f0a1d4200255c849b0fb3bf04ebc7"
+          },
+          "applicability": {
+            "entity_restriction": "all_applicable_entities",
+            "effective_from": null
+          }
+        },
+        {
+          "id": "MB-0484",
+          "revision": 1,
+          "title": "PCI 3.3.1.3: The personal identification number (PIN) and the PIN block are not stored upon completion of the authorization process",
+          "criterion": "For the applicable assessment scope, verify this complete obligation: The personal identification number (PIN) and the PIN block are not stored upon completion of the authorization process.",
+          "control": "MB-C12",
+          "severity": "medium",
+          "alignments": [
+            {
+              "standard": "PCI-DSS",
+              "version": "4.0.1",
+              "reference": "3.3.1.3",
+              "relationship": "partial"
+            }
+          ],
+          "obligations": [
+            {
+              "id": "O001",
+              "op": "all",
+              "role": "supporting",
+              "proof": "heuristic",
+              "checks": [
+                {
+                  "name": "code_cardholder_data_storage",
+                  "args": {
+                    "paths": [
+                      "app/code",
+                      "app/etc",
+                      "db"
+                    ],
+                    "include_ext": [
+                      "php",
+                      "xml",
+                      "sql",
+                      "json"
+                    ],
+                    "max_results": 100
+                  }
+                }
+              ]
+            }
+          ],
+          "coverage": "SUPPORTING",
+          "verification": "automated",
+          "review_state": "pending_security_review",
+          "human_evidence": {
+            "required": true,
+            "instructions": "Use examine evidence to establish every condition, alternative, scope exception and time interval in the criterion. Confirm entity applicability and retain dated artifacts and reviewer rationale. For the applicable assessment scope, verify this complete obligation: The personal identification number (PIN) and the PIN block are not stored upon completion of the authorization process.",
+            "evidence_types": [
+              "examine"
+            ]
+          },
+          "target_modes": [
+            "LOCAL",
+            "REMOTE"
+          ],
+          "checks": [
+            {
+              "name": "code_cardholder_data_storage",
+              "args": {
+                "paths": [
+                  "app/code",
+                  "app/etc",
+                  "db"
+                ],
+                "include_ext": [
+                  "php",
+                  "xml",
+                  "sql",
+                  "json"
+                ],
+                "max_results": 100
+              }
+            }
+          ],
+          "op": "all",
+          "source_metadata": {
+            "document": "PCI-DSS-v4_0_1.pdf",
+            "normative_pdf_pages": [
+              86
+            ],
+            "pdf_pages": [
+              86
+            ],
+            "normative_sha256": "8278cbbbc7b59a69022e1dcd56bd9bd6a298153464773ac2f0b2b3f6d5dcb5a1",
+            "review_state": "source_criterion_defined_evidence_mapping_pending_security_review",
+            "pdf_sha256": "5e6b9093b84007b973097d20126a3768ea2f0a1d4200255c849b0fb3bf04ebc7"
+          },
+          "applicability": {
+            "entity_restriction": "all_applicable_entities",
+            "effective_from": null
+          }
+        }
+      ]
+    }
+  ],
+  "unmerged_candidates": []
+}

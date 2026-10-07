@@ -183,16 +183,17 @@ Selection order is: target pack → project policy → (`--rules` or profile) �
 
 ### Profiles
 
-| Profile | Rules selected by default |
+| Profile | Requirements selected by default |
 |---|---:|
-| `basic` | 21 |
-| `asvs-l1` | 42 (70 with manual review) |
-| `asvs-l2` | 90 (198 with manual review) |
-| `asvs-l3` | 98 (268 with manual review) |
-| `owasp` | 77 |
-| `pci` | 67 (68 with manual review) |
-| `hardening` | 91 (92 with manual review) |
-| `baseline` | 113 automated (371 with manual review) |
+| `basic` | 20 |
+| `asvs-l1` | 41 (69 with manual review) |
+| `asvs-l2` | 89 (197 with manual review, 252 with all capabilities) |
+| `asvs-l3` | 97 (267 with manual review, 344 with all capabilities) |
+| `owasp` | 69 |
+| `pci` | 32 (257 with manual review) |
+| `hardening` | 81 (82 with manual review) |
+| `baseline` | 211 technical (684 with manual review) |
+| `external` | 9 remote assessments |
 
 `all` and `magebean` are aliases for `baseline`. Custom profile files can be passed to `--profile`, including profiles stored under `.magebean/profiles`.
 

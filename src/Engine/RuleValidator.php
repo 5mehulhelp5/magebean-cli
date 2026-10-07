@@ -19,6 +19,12 @@ final class RuleValidator
                 continue;
             }
             $id = (string)($rule['id'] ?? '');
+            if (($pack['assessment_model'] ?? '') === 'internal-requirement-v1' || (preg_match('/^MB-[0-9]{4,}$/D', $id) === 1)) {
+                if (isset($seen[strtoupper($id)])) $errors[] = "Duplicate requirement id '{$id}'.";
+                $seen[strtoupper($id)] = true;
+                foreach (RequirementDefinitionValidator::validate($rule, $registry) as $error) $errors[] = $error;
+                continue;
+            }
             foreach (Rule::requiredKeys() as $key) {
                 if (!array_key_exists($key, $rule)) {
                     $errors[] = self::label($id, $index) . " is missing required key '{$key}'.";

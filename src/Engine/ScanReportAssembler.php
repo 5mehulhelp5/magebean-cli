@@ -39,6 +39,32 @@ final class ScanReportAssembler
         $result['meta']['profile_manual_rules_total'] = $profileManualRulesTotal;
         $result['meta']['manual_rules_hidden'] = $manualRulesExcluded;
         $result['meta']['manual_rules_included'] = $includeManualReview || $hasExplicitRuleSelection;
+        if (($plan->metadata['assessment_model'] ?? $plan->pack['assessment_model'] ?? '') === 'internal-requirement-v1') {
+            $result['meta']['assessment_model'] = 'internal-requirement-v1';
+            $result['meta']['capabilities'] = $plan->metadata['capabilities'] ?? [];
+            $selector = (string)($plan->metadata['profileSelector'] ?? $plan->metadata['profile_selector'] ?? $plan->request->options['profile'] ?? '');
+            $result['meta']['profile_selector'] = $selector !== '' ? $selector : (string)($activeProfile['id'] ?? 'baseline');
+            $result['meta']['url'] = $projectUrl;
+            $result['meta']['profile_inventory_count'] = (int)($plan->metadata['profileInventoryCount'] ?? $profileRulesTotal);
+            $result['meta']['omitted_requirements'] = $plan->metadata['omittedRequirements'] ?? [];
+        }
+
+        if (($activeProfile['automation_only'] ?? false) === true && ($result['meta']['assessment_model'] ?? '') === 'internal-requirement-v1') {
+            $executionErrors = [];
+            foreach ($result['findings'] as &$finding) {
+                if (!in_array(strtoupper((string)($finding['status'] ?? '')), ['UNKNOWN', 'MANUAL_REVIEW'], true)) continue;
+                $finding['message'] = preg_replace('/^Necessary requirement evidence is missing, incomplete or indeterminate\.\s*/', '', (string)($finding['message'] ?? '')) ?: 'Automated check could not complete; inspect collection details.';
+                $finding['classification'] = 'execution_error';
+                $finding['execution_status'] = 'ERROR';
+                $executionErrors[] = ['id' => $finding['id'], 'message' => $finding['message'] ?? '', 'reason_code' => $finding['reason_code'] ?? null];
+            }
+            unset($finding);
+            $result['meta']['automation_only'] = true;
+            $result['meta']['scan_complete'] = $executionErrors === [];
+            $result['execution_errors'] = $executionErrors;
+            $result['summary']['execution_errors'] = count($executionErrors);
+        }
+
         $result['summary']['path'] = $projectPath;
         $result['summary']['url'] = $projectUrl;
 
@@ -49,6 +75,27 @@ final class ScanReportAssembler
             $criterionReviewData = $this->loadJsonDocument(__DIR__ . '/../Rules/standards/pci-dss-v4.0.1-automation-candidate-review.json', 'PCI DSS criterion review');
             $requirement02ReviewData = $this->loadJsonDocument(__DIR__ . '/../Rules/standards/pci-dss-v4.0.1-requirement-02-review.json', 'PCI DSS Requirement 2 review');
             $criterionReviewData['requirements'] = array_merge($requirement02ReviewData['requirements'] ?? [], $criterionReviewData['requirements'] ?? []);
+            if (($plan->metadata['assessment_model'] ?? $plan->pack['assessment_model'] ?? '') === 'internal-requirement-v1') {
+                // Every registered criterion needs the primary assessment scope, even when
+                // a default scan omits human-only execution from its finding selection.
+                $primaryReviews = [];
+                foreach (RequirementCatalog::loadAll()['rules'] as $definition) {
+                    foreach ($definition['alignments'] ?? [] as $alignment) {
+                        if (($alignment['standard'] ?? '') !== 'PCI-DSS' || ($alignment['version'] ?? '') !== '4.0.1') continue;
+                        $primaryReviews[] = [
+                            'requirement' => (string)$alignment['reference'],
+                            'internal_requirement_id' => $definition['id'],
+                            'criterion' => $alignment['scoped_criterion'] ?? $definition['criterion'],
+                            'criterion_summary' => $alignment['scoped_criterion'] ?? $definition['criterion'],
+                            'human_assessment_scope' => $alignment['scoped_human_instructions'] ?? $definition['human_evidence']['instructions'] ?? $definition['criterion'],
+                            'testing_methods' => $alignment['testing_methods'] ?? $definition['human_evidence']['evidence_types'] ?? [],
+                            'source_metadata' => $alignment['source_metadata'] ?? $definition['source_metadata'] ?? [],
+                        ];
+                    }
+                }
+                $criterionReviewData['requirements'] = array_merge($criterionReviewData['requirements'], $primaryReviews);
+            }
+
             $compiler = new PciApplicabilityCompiler();
             $pciContext = $pciContextOpt !== '' ? $compiler->load(ProjectPath::resolve($pciContextOpt, $configBasePath)) : [
                 'schema_version' => 1, 'entity_type' => 'merchant', 'issuer_or_issuing_services' => false,

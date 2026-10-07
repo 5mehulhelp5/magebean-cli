@@ -11,7 +11,7 @@ final class AgentScanner
         $manifestIndex = $plan->metadata['manifestIndex'];
         $unsupported = $plan->metadata['unsupported'];
         $result = (new ScanService())->run($plan, $progress, null, $deadline, $checkpoint)->toLegacy();
-        return (new AgentResultMapper())->map($result, $manifest, $manifestIndex, $unsupported, $magentoPath);
+        return (new AgentResultMapper())->map($result, $manifest, $manifestIndex, $unsupported, $magentoPath, $plan->metadata['manifestBindings'] ?? []);
     }
 
     /** Compatibility wrapper for existing title callers. */

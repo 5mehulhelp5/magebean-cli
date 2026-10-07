@@ -71,6 +71,7 @@ final class CodeQueryChecks extends CodeSearchSupport
 
     public function noMixedContent(array $args): array
     {
+        if (!empty($args['strict_scope'])) return $this->strictLiteralMixedContent($args);
         $roots = $args['paths'] ?? ['app'];
         $inc = $args['include_ext'] ?? ['phtml', 'html', 'xml', 'js', 'css', 'less'];
         $max = max(1, (int)($args['max_results'] ?? 50));
@@ -103,6 +104,38 @@ final class CodeQueryChecks extends CodeSearchSupport
         }
 
         return [true, 'No insecure http:// asset references found in code'];
+    }
+
+
+    private function strictLiteralMixedContent(array $args): array
+    {
+        $roots = array_values($args['paths'] ?? ['app']);
+        $extensions = array_map('strtolower', $args['include_ext'] ?? ['phtml', 'html', 'xml', 'css', 'less']);
+        $abs = array_map(fn($p) => $this->ctx->abs($p), $roots);
+        foreach ($abs as $root) if (!is_dir($root) || !is_readable($root)) return [null, '[UNKNOWN] Source scope missing or unreadable', ['paths' => $roots]];
+        $offenders = []; $unreadable = []; $count = 0;
+        try {
+            foreach ($this->collectors->code->anyExtension($abs) as $file) {
+                if (!in_array(strtolower(pathinfo($file, PATHINFO_EXTENSION)), $extensions, true)) continue;
+                $content = $this->collectors->files->read($file);
+                if ($content === false) { $unreadable[] = $this->relativeFile($file); continue; }
+                $count++;
+                $clean = preg_replace(['~<!--[\s\S]*?-->~', '~/\*[\s\S]*?\*/~'], '', $content) ?? $content;
+                // Anchor hrefs, XML namespace identifiers and ordinary URL strings are not subresource loads.
+                $patterns = [
+                    'resource_attribute' => '~<(?:script|img|iframe|frame|link|audio|video|source|track|embed|object|input|form)\b[^>]*?\b(?:src|href|action|data|poster|srcset)\s*=\s*([\'"])(?P<url>[^\'"]*http://[^\'"]*)\1~i',
+                    'css_resource' => '~(?:url\(\s*[\'"]?|@import\s*[\'"])(?P<url>http://[^\'"\s)<>]+)~i',
+                ];
+                foreach ($patterns as $kind => $pattern) {
+                    preg_match_all($pattern, $clean, $matches, PREG_SET_ORDER | PREG_OFFSET_CAPTURE);
+                    foreach ($matches as $match) $offenders[] = ['file' => $this->relativeFile($file), 'kind' => $kind, 'url' => $match['url'][0], 'snippet' => substr($match[0][0], 0, 240)];
+                }
+            }
+        } catch (\UnexpectedValueException $e) { return [null, '[UNKNOWN] Cannot enumerate complete source scope', ['paths' => $roots]]; }
+        $evidence = ['paths' => $roots, 'files_scanned' => $count, 'unreadable' => $unreadable, 'offenders' => array_slice($offenders, 0, max(1, (int)($args['max_results'] ?? 50)))];
+        if ($offenders !== []) return [false, 'Literal insecure HTTP subresource/form references found', $evidence];
+        if ($unreadable !== [] || $count === 0) return [null, '[UNKNOWN] No complete readable markup/CSS source scope', $evidence];
+        return [true, 'No literal insecure HTTP subresource/form references in inspected markup/CSS', $evidence];
     }
 
     public function httpsEndpoints(array $args): array

@@ -6,5 +6,5 @@ function assertPciCli(bool $c,string $m):void{if(!$c)throw new RuntimeException(
 $command=(new Application())->find('scan');$definition=$command->getDefinition();
 foreach(['pci-context','pci-evidence','pci-report','include-manual-review'] as $option)assertPciCli($definition->hasOption($option),"Missing --{$option}");
 $help=$command->getHelp();assertPciCli(str_contains($help,'--pci-context=FILE')&&str_contains($help,'--pci-evidence=FILE')&&str_contains($help,'--pci-report=FILE'),'PCI options are missing from help');
-assertPciCli(str_contains($help,'371 including manual review'),'Baseline help count is stale');
+assertPciCli(str_contains($help,'Complete internal inventory')&&!str_contains($help,'371 including manual review'),'Help describes the current inventory without stale hardcoded counts');
 echo "PciCliOptionsTest: PASS\n";

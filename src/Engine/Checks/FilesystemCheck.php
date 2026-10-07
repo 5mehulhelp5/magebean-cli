@@ -16,6 +16,7 @@ final class FilesystemCheck
 
     public function noWorldWritable(array $args): array
     {
+        if (!empty($args['strict_observation'])) return $this->strictNoWorldWritable($args);
         $root = $this->ctx->abs($args['path'] ?? '.');
         $max = max(1, (int)($args['max_results'] ?? 50));
         if (!file_exists($root)) {
@@ -64,8 +65,10 @@ final class FilesystemCheck
         $file = $this->ctx->abs($rel);
         $allowedModeRaw = (string)($args['max_octal'] ?? '0640');
         $allowedMode = octdec($allowedModeRaw);
-        if (!is_file($file)) return [false, "{$rel} is missing"];
-        $perm = fileperms($file) & 0777;
+        if (!is_file($file)) return !empty($args['strict_observation']) ? [null, '[UNKNOWN] Required file is unavailable: ' . $rel] : [false, "{$rel} is missing"];
+        $stat = @fileperms($file);
+        if ($stat === false) return [null, '[UNKNOWN] Unable to read file permission mode: ' . $rel];
+        $perm = $stat & 0777;
 
         $extraBits = $perm & (~$allowedMode & 0777);
         $evidence = [
@@ -98,7 +101,7 @@ final class FilesystemCheck
 
         $file = $this->ctx->abs($rel);
         if (!is_file($file)) {
-            return [false, "{$rel} is missing"];
+            return !empty($args['strict_observation']) ? [null, '[UNKNOWN] ' . "{$rel} is missing"] : [false, "{$rel} is missing"];
         }
 
         $ownerRefRel = (string)($args['owner_reference'] ?? '.');
@@ -107,10 +110,10 @@ final class FilesystemCheck
         $groupRef = $this->ctx->abs($groupRefRel);
 
         if (!file_exists($ownerRef)) {
-            return [false, "Owner reference not found: {$ownerRefRel}"];
+            return !empty($args['strict_observation']) ? [null, '[UNKNOWN] ' . "Owner reference not found: {$ownerRefRel}"] : [false, "Owner reference not found: {$ownerRefRel}"];
         }
         if (!file_exists($groupRef)) {
-            return [false, "Group reference not found: {$groupRefRel}"];
+            return !empty($args['strict_observation']) ? [null, '[UNKNOWN] ' . "Group reference not found: {$groupRefRel}"] : [false, "Group reference not found: {$groupRefRel}"];
         }
 
         $owner = @fileowner($file);
@@ -118,7 +121,7 @@ final class FilesystemCheck
         $expectedOwner = @fileowner($ownerRef);
         $expectedGroup = @filegroup($groupRef);
         if ($owner === false || $group === false || $expectedOwner === false || $expectedGroup === false) {
-            return [false, "Could not stat ownership for {$rel}"];
+            return !empty($args['strict_observation']) ? [null, '[UNKNOWN] ' . "Could not stat ownership for {$rel}"] : [false, "Could not stat ownership for {$rel}"];
         }
 
         $evidence = [
@@ -580,6 +583,7 @@ final class FilesystemCheck
 
     public function staticContentDeployed(array $args): array
     {
+        if (!empty($args['strict_scope'])) return $this->strictStaticContentPresence($args);
         $staticRel = (string)($args['static_path'] ?? 'pub/static');
         $preprocessedRel = (string)($args['preprocessed_path'] ?? 'var/view_preprocessed');
         $minStaticFiles = max(1, (int)($args['min_static_files'] ?? 1));
@@ -630,6 +634,27 @@ final class FilesystemCheck
         }
 
         return [true, 'Static content directories contain deployed output', $evidence];
+    }
+
+
+    private function strictStaticContentPresence(array $args): array
+    {
+        $rel = (string)($args['static_path'] ?? 'pub/static');
+        $root = $this->ctx->abs($rel);
+        if (!is_dir($root)) return [false, 'Published static directory is missing', ['path' => $rel]];
+        $checked = []; $unknown = [];
+        try {
+            $it = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($root, \FilesystemIterator::SKIP_DOTS));
+            foreach ($it as $file) {
+                $relative = substr($file->getPathname(), strlen($root) + 1);
+                if (!preg_match('~^(?:frontend|adminhtml)/.+\.(?:css|js|woff2?|ttf|svg|png|jpe?g|gif|webp)$~i', $relative)) continue;
+                if (!$file->isFile() || !$file->isReadable()) { $unknown[] = $relative; continue; }
+                if ($file->getSize() > 0) $checked[] = $relative;
+            }
+        } catch (\UnexpectedValueException $e) { return [null, '[UNKNOWN] Cannot enumerate published static artifacts', ['path' => $rel]]; }
+        if ($checked !== []) return [true, 'Nonempty published frontend/admin static artifacts are present', ['path' => $rel, 'artifacts' => array_slice($checked, 0, 20), 'count' => count($checked)]];
+        if ($unknown !== []) return [null, '[UNKNOWN] Static artifacts exist but cannot be read', ['unreadable' => $unknown]];
+        return [false, 'No nonempty published frontend/admin static artifacts found', ['path' => $rel]];
     }
 
     public function indexersReady(array $args): array
@@ -746,6 +771,32 @@ final class FilesystemCheck
         } catch (\UnexpectedValueException) {
             return null;
         }
+    }
+
+    /** A concrete counterexample disproves the policy; incomplete traversal never proves it. */
+    private function strictNoWorldWritable(array $args): array
+    {
+        $root = $this->ctx->abs($args['path'] ?? '.');
+        $pending = [$root]; $gaps = []; $count = 0;
+        while ($pending !== []) {
+            $path = array_pop($pending);
+            clearstatcache(true, $path);
+            $stat = @lstat($path);
+            if ($stat === false) { $gaps[] = ['path' => $path, 'reason' => 'stat_unavailable']; continue; }
+            $type = $stat['mode'] & 0170000;
+            if ($type === 0120000) { $gaps[] = ['path' => $path, 'reason' => 'symlink_target_not_assessed']; continue; }
+            ++$count;
+            if (($stat['mode'] & 0002) !== 0) {
+                return [false, 'World-writable entry found: ' . $path, ['path' => $path, 'mode' => sprintf('%o', $stat['mode'] & 0777), 'entries_assessed' => $count]];
+            }
+            if ($type === 0040000) {
+                $entries = @scandir($path);
+                if ($entries === false) { $gaps[] = ['path' => $path, 'reason' => 'directory_unreadable']; continue; }
+                foreach ($entries as $entry) if ($entry !== '.' && $entry !== '..') $pending[] = $path . DIRECTORY_SEPARATOR . $entry;
+            }
+        }
+        if ($gaps !== []) return [null, '[UNKNOWN] Filesystem permission assessment is incomplete', ['entries_assessed' => $count, 'gaps' => $gaps]];
+        return [true, 'No world-writable entries found in the fully traversed deployment path', ['entries_assessed' => $count, 'root' => $root]];
     }
 
     private function collectWorldWritableOffender(string $path, array &$offenders, int $max, bool &$truncated): void

@@ -65,16 +65,46 @@ final class HttpCollector
         $body = @file_get_contents($url, false, $context);
         $hdrs = [];
         $status = 0;
+        $finalUrl = $url;
         if (isset($http_response_header) && is_array($http_response_header)) {
             $hdrs = $this->parseHeaders(implode("\r\n", $http_response_header));
-            foreach ($http_response_header as $line) if (preg_match('~^HTTP/\S+\s+(\d{3})~', $line, $m)) $status = (int)$m[1];
+            foreach ($http_response_header as $line) {
+                if (preg_match('~^HTTP/\S+\s+(\d{3})~', $line, $m)) $status = (int)$m[1];
+                elseif ($follow && $status >= 300 && $status < 400 && stripos($line, 'Location:') === 0) {
+                    $finalUrl = $this->redirectUrl($finalUrl, trim(substr($line, 9)));
+                }
+            }
         }
         if ($body === false) {
             $observe(false);
             return [null, '[UNKNOWN] HTTP error (stream)', ['url' => $url]];
         }
         $observe(true);
-        return [true, '', ['status' => $status, 'headers' => $hdrs, 'body' => $body, 'final_url' => $url]];
+        return [true, '', ['status' => $status, 'headers' => $hdrs, 'body' => $body, 'final_url' => $finalUrl]];
+    }
+    /** Resolve each redirect hop, including relative Location values, for stream evidence. */
+    private function redirectUrl(string $base, string $location): string
+    {
+        if (preg_match('~^https?://~i', $location)) return $location;
+        $parts = parse_url($base);
+        if (!is_array($parts) || !isset($parts['host'])) return $base;
+        $scheme = (string)($parts['scheme'] ?? 'http');
+        if (str_starts_with($location, '//')) return $scheme . ':' . $location;
+        $origin = $scheme . '://' . $parts['host'] . (isset($parts['port']) ? ':' . $parts['port'] : '');
+        $basePath = (string)($parts['path'] ?? '/');
+        if (str_starts_with($location, '?')) return $origin . $basePath . $location;
+        if (str_starts_with($location, '#')) return preg_replace('~#.*$~', '', $base) . $location;
+        $relative = parse_url($location);
+        if (!is_array($relative)) return $base;
+        $path = (string)($relative['path'] ?? '');
+        if (!str_starts_with($path, '/')) $path = substr($basePath, 0, (int)strrpos($basePath, '/') + 1) . $path;
+        $segments = [];
+        foreach (explode('/', $path) as $segment) {
+            if ($segment === '..') array_pop($segments);
+            elseif ($segment !== '.' && $segment !== '') $segments[] = $segment;
+        }
+        $path = '/' . implode('/', $segments) . (str_ends_with($path, '/') && $segments !== [] ? '/' : '');
+        return $origin . $path . (isset($relative['query']) ? '?' . $relative['query'] : '') . (isset($relative['fragment']) ? '#' . $relative['fragment'] : '');
     }
     private function parseHeaders(string $raw): array
     {

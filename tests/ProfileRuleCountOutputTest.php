@@ -6,14 +6,14 @@ use Symfony\Component\Console\Tester\CommandTester;
 function assertProfileCount(bool $condition,string $message):void{if(!$condition)throw new RuntimeException($message);}
 $command=(new Application())->find('rules:list');
 $profiles=[
-    'basic'=>[21,21,0],
-    'asvs-l1'=>[42,70,28],
-    'asvs-l2'=>[90,198,108],
-    'asvs-l3'=>[98,268,170],
-    'owasp'=>[77,77,0],
-    'pci'=>[67,68,1],
-    'hardening'=>[91,92,1],
-    'baseline'=>[113,371,258],
+    'basic'=>[20,20,0],
+    'asvs-l1'=>[41,69,28],
+    'asvs-l2'=>[89,197,108],
+    'asvs-l3'=>[97,267,170],
+    'owasp'=>[69,69,0],
+    'pci'=>[32,257,225],
+    'hardening'=>[81,82,1],
+    'baseline'=>[211,684,473],
 ];
 foreach($profiles as $profile=>[$listed,$total,$human]){
     $tester=new CommandTester($command);$tester->execute(['--profile'=>$profile,'--no-ansi'=>true]);$out=$tester->getDisplay();

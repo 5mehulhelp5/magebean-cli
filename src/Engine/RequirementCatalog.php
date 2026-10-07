@@ -1,112 +1,37 @@
 <?php
 declare(strict_types=1);
 namespace Magebean\Engine;
-
-/** Compiles legacy evidence mappings into one assessment definition per ASVS identity. */
+/** Standalone persisted requirement identities. Standards are alignment metadata. */
 final class RequirementCatalog
 {
-    public static function supports(array $profile): bool
+    public static function loadAll(array $controls = []): array
     {
-        return strtolower((string)($profile['standard']['id'] ?? '')) === 'owasp-asvs';
+        $data=self::read('internal-catalog');$rules=$data['requirements'];
+        if($controls!==[])$rules=array_values(array_filter($rules,static fn(array $r):bool=>self::matchesControls($r,$controls)));
+        return ['assessment_model'=>'internal-requirement-v1','controls'=>self::controlIds($rules),'rules'=>$rules,'inventory_count'=>count($data['requirements'])];
     }
-
-    public static function compile(array $pack, array $profile, array $capabilities = [], bool $restrictToAvailable = false): array
+    public static function forProfile(string $name,array $capabilities=[],string $mode='LOCAL'):array
     {
-        if (!self::supports($profile)) return $pack;
-        if (($profile['standard']['version'] ?? '') !== '5.0.0') throw new \RuntimeException('Unsupported ASVS requirement version.');
-        $standard = json_decode((string)file_get_contents(__DIR__ . '/../Rules/standards/owasp-asvs-v5.0.0.json'), true, 512, JSON_THROW_ON_ERROR);
-        $references = array_column($standard['requirements'], null, 'id');
-        $nativeCatalog = json_decode((string)file_get_contents(__DIR__ . '/../Rules/requirements/asvs-v5.0.0.json'), true, 512, JSON_THROW_ON_ERROR)['implementations'];
-        $assessmentLevel = (int)($profile['standard']['level'] ?? 0);
-        if (!in_array($assessmentLevel, [1, 2, 3], true)) throw new \RuntimeException('Invalid ASVS assessment level.');
-        $sources = []; $bundled = [];
-        foreach ($pack['rules'] ?? [] as $rule) $sources[strtoupper((string)$rule['id'])] = $rule;
-        foreach (RulePackLoader::loadAll()['rules'] as $rule) $bundled[strtoupper((string)$rule['id'])] = $rule;
-        $definitions = []; $seen = [];
-        foreach ($profile['requirement_coverage'] ?? [] as $coverage) {
-            $reference = trim((string)($coverage['id'] ?? ''));
-            if (!preg_match('/^\d+\.\d+\.\d+$/D', $reference) || isset($seen[$reference])) throw new \RuntimeException('Invalid or duplicate ASVS requirement identity: ' . $reference);
-            if (!isset($references[$reference]) || $references[$reference]['level'] > $assessmentLevel) throw new \RuntimeException('ASVS requirement is not valid at this assessment level: ' . $reference);
-            $seen[$reference] = true;
-            $id = 'OWASP-ASVS:5.0.0:' . $reference;
-            $native = isset($coverage['implementation']) ? ($nativeCatalog[$reference] ?? null) : null;
-            if ($native !== null && $coverage['implementation'] !== $native['id']) throw new \RuntimeException('Invalid native requirement implementation identity.');
-            if (isset($coverage['implementation']) && $native === null) throw new \RuntimeException('Unknown native requirement implementation.');
-            if ($restrictToAvailable && array_intersect(array_keys($sources), $coverage['rules'] ?? []) === [] && ($native === null || !in_array($native['control'], $pack['controls'] ?? [], true))) continue;
-            $groups = []; $sourceIds = []; $controls = []; $severity = 'low'; $active = false;
-            foreach ($coverage['rules'] ?? [] as $sourceId) {
-                $sourceId = strtoupper((string)$sourceId);
-                $source = $sources[$sourceId] ?? null; $template = $source ?? $bundled[$sourceId] ?? null;
-                $capability = $template['applicability']['capability'] ?? null;
-                if ($capability !== null && !self::enabled($capabilities, (string)$capability)) continue;
-                $active = true; $sourceIds[] = $sourceId;
-                if ($template !== null) {
-                    $controls[] = (string)$template['control'];
-                    if (self::rank((string)$template['severity']) > self::rank($severity)) $severity = (string)$template['severity'];
-                }
-                $groups[] = $source === null
-                    ? ['id' => $sourceId, 'op' => 'all', 'checks' => [], 'missing' => true]
-                    : ['id' => $sourceId, 'op' => $source['op'] ?? 'all', 'checks' => $source['checks'] ?? [], 'missing' => false];
-            }
-            if ($native !== null) {
-                $active = true; $controls[] = $native['control'];
-                if (self::rank($native['severity']) > self::rank($severity)) $severity = $native['severity'];
-                $groups[] = ['id' => $native['id'], 'op' => 'all', 'checks' => $native['checks'], 'missing' => false];
-            }
-            $requiredGroups = [];
-            foreach ($groups as $group) {
-                $human = []; $technical = [];
-                foreach ($group['checks'] as $check) {
-                    if (in_array($check['name'] ?? '', ['human_manual_review_required', 'manual_review'], true)) $human[] = $check;
-                    else $technical[] = $check;
-                }
-                if ($technical !== [] || $group['missing']) { $group['checks'] = $technical; $requiredGroups[] = $group; }
-                if ($human !== []) $requiredGroups[] = ['id' => $group['id'], 'op' => 'all', 'checks' => $human, 'missing' => false];
-            }
-            $groups = $requiredGroups;
-            // Explicitly disabled contextual requirements are omitted; unmapped criteria remain gaps.
-            if (!$active && ($coverage['rules'] ?? []) !== []) continue;
-            $status = (string)($coverage['status'] ?? 'NOT_YET_COVERED');
-            if (!in_array($status, ['AUTOMATED', 'PARTIALLY_AUTOMATED', 'MANUAL_REVIEW', 'CONTEXT_REQUIRED', 'NOT_YET_COVERED'], true)) throw new \RuntimeException('Unsupported requirement coverage status.');
-            if ($native !== null && $status !== $native['coverage']) throw new \RuntimeException('Native evidence coverage must remain partial.');
-            $manual = in_array($status, ['MANUAL_REVIEW', 'CONTEXT_REQUIRED'], true);
-            $requirement = ['standard' => 'OWASP-ASVS', 'version' => '5.0.0', 'id' => $reference, 'level' => $references[$reference]['level']];
-            $definitions[] = [
-                'id' => $id, 'title' => $native['title'] ?? 'ASVS 5.0.0 requirement ' . $reference,
-                'control' => (($availableControls = array_values(array_intersect($controls, $pack['controls'] ?? [])))[0] ?? $controls[0] ?? 'ASVS'), 'severity' => $severity,
-                'verification' => $manual ? 'manual' : 'automated', 'op' => 'all',
-                'assessment_level' => $assessmentLevel, 'requirement' => $requirement, 'requirements' => [$requirement],
-                'legacy_rule_ids' => array_values(array_unique(array_map('strtoupper', $coverage['rules'] ?? []))), 'source_controls' => array_values(array_unique($controls)),
-                'coverage' => $status,
-                'checks' => [['name' => 'requirement_assessment', 'args' => [
-                    'requirement' => $requirement, 'assessment_level' => $assessmentLevel, 'coverage' => $status,
-                    'groups' => $groups, 'review' => (string)($coverage['note'] ?? ''),
-                ]]],
-                'profile' => ['id' => $profile['id'], 'title' => $profile['title'] ?? '', 'mapping' => ['mappings' => [['requirement' => $reference, 'coverage' => $status]]]],
-            ];
+        $profile=RequirementProfileCatalog::load($name);$index=array_column(self::loadAll()['rules'],null,'id');$rules=[];$omitted=[];
+        foreach($profile['requirement_ids'] as $id){if(!isset($index[$id]))throw new \RuntimeException('Unknown internal requirement in profile: '.$id);$r=$index[$id];
+            if(!in_array(strtoupper($mode),$r['target_modes'],true)){$omitted[]=['id'=>$id,'reason_code'=>'TARGET_MODE_UNSUPPORTED'];continue;}
+            $cap=$r['applicability']['capability']??null;
+            if($cap!==null && $profile['id']!=='baseline' && !self::enabled($capabilities,$cap)){$omitted[]=['id'=>$id,'reason_code'=>'CAPABILITY_CONTEXT_MISSING','capability'=>$cap];continue;}
+            if(isset($profile['assessment_level']))$r['assessment_level']=$profile['assessment_level'];$rules[]=$r;
         }
-        if ($seen === []) throw new \RuntimeException('ASVS profile has no requirement coverage inventory.');
-        $pack['rules'] = $definitions;
-        $pack['controls'] = array_values(array_unique(array_column($definitions, 'control')));
-        $pack['assessment_model'] = 'requirement-v1';
-        return $pack;
+        $meta=$profile;unset($meta['requirement_ids']);
+        return ['assessment_model'=>'internal-requirement-v1','rules'=>$rules,'controls'=>self::controlIds($rules),'profile'=>$meta,'assessment_level'=>$profile['assessment_level']??null,'inventory_count'=>count($profile['requirement_ids']),'omitted_requirements'=>$omitted];
     }
-
-    private static function enabled(array $capabilities, string $name): bool
+    public static function matchesControls(array $definition,array $controls):bool{return array_intersect($controls,array_values(array_unique(array_merge([$definition['control']],$definition['control_tags']??[]))))!==[];}
+    public static function controlIds(array $definitions):array{$ids=[];foreach($definitions as $definition)$ids=array_merge($ids,[$definition['control']],$definition['control_tags']??[]);return array_values(array_unique($ids));}
+    public static function resolveAlias(string $id,?string $profile=null):array{return LegacyRequirementAliases::resolve($id,$profile);}
+    public static function metadata():array{return ['schema_version'=>'1.0','assessment_model'=>'internal-requirement-v1','count'=>count(self::loadAll()['rules']),'identity_namespace'=>'MB-REQ','allocation'=>self::read('allocation-manifest')];}
+    public static function read(string $file):array
     {
-        if (array_is_list($capabilities)) return in_array($name, $capabilities, true);
-        return filter_var($capabilities[$name] ?? false, FILTER_VALIDATE_BOOLEAN);
+        $path=__DIR__.'/../Rules/requirements/'.$file.'.json';$text=file_get_contents($path);if($text===false)throw new \RuntimeException('Missing persisted requirement data: '.$file);return json_decode($text,true,512,JSON_THROW_ON_ERROR);
     }
-
-    private static function rank(string $severity): int
-    {
-        return ['low' => 0, 'medium' => 1, 'high' => 2, 'critical' => 3][$severity] ?? 0;
-    }
-
-    /** Explicit canonical selection has no implicit profile-level choice. */
-    public static function forProfile(string $name, array $capabilities = []): array
-    {
-        $profile = ProfileLoader::loadBundled($name);
-        return self::compile(ProfileLoader::apply(RulePackLoader::loadAll(), $profile, false, $capabilities), $profile, $capabilities);
-    }
+    private static function enabled(array $caps,string $name):bool{return array_is_list($caps)?in_array($name,$caps,true):filter_var($caps[$name]??false,FILTER_VALIDATE_BOOLEAN);}
+    /** Deprecated compiler compatibility. Primary catalog never calls this adapter. */
+    public static function supports(array $profile):bool{return LegacyAsvsRequirementAdapter::supports($profile);}
+    public static function compile(array $pack,array $profile,array $capabilities=[],bool $restrictToAvailable=false):array{return LegacyAsvsRequirementAdapter::compile($pack,$profile,$capabilities,$restrictToAvailable);}
 }

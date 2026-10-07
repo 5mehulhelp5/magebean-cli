@@ -37,7 +37,7 @@ final class ProfileLoader
 
     public static function applyRequirements(array $pack, array $profile, bool $ignoreUnknownRules = false, array $capabilities = [], bool $restrictToAvailable = false): array
     {
-        return RequirementCatalog::compile(self::apply($pack, $profile, $ignoreUnknownRules, $capabilities), $profile, $capabilities, $restrictToAvailable);
+        return LegacyAsvsRequirementAdapter::compile(self::apply($pack, $profile, $ignoreUnknownRules, $capabilities), $profile, $capabilities, $restrictToAvailable);
     }
 
 

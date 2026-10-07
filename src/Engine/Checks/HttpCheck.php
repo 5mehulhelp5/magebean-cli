@@ -13,11 +13,15 @@ final class HttpCheck
     private CollectorSet $collectors;
     private int $transportOk = 0;
     private int $transportTotal = 0;
+    private bool $strictScope = false;
+    private MagentoCheck $magento;
+    private ?string $resolvedBaseUrl = null;
 
     public function __construct(Context $ctx, ?CollectorSet $collectors = null)
     {
         $this->ctx = $ctx;
         $this->collectors = $collectors ?? new CollectorSet();
+        $this->magento = new MagentoCheck($ctx, $this->collectors);
     }
 
     public function stub(array $args): array
@@ -28,6 +32,7 @@ final class HttpCheck
     /** Dispatch http_* checks */
     public function dispatch(string $name, array $args): array
     {
+        $this->strictScope = !empty($args['strict_scope']);
         return match ($name) {
             'http_force_https_redirect'              => $this->forceHttpsRedirect($args),
             'http_has_hsts'                          => $this->hasHsts($args),
@@ -86,7 +91,12 @@ final class HttpCheck
 
     private function baseUrl(): string
     {
-        $u = (string)$this->ctx->get('url', '');
+        $u = trim($this->ctx->url);
+        if ($u === '' || $u === '.') $u = (string)$this->ctx->get('url', '');
+        if ($u === '' && $this->strictScope) {
+            $this->resolvedBaseUrl ??= (string)($this->magento->configuredBaseUrl()['url'] ?? '');
+            $u = $this->resolvedBaseUrl;
+        }
         if ($u === '') return '';
         if (!preg_match('~^https?://~i', $u)) return '';
         return rtrim($u, '/');
@@ -122,8 +132,9 @@ final class HttpCheck
 
     private function forceHttpsRedirect(array $args): array
     {
+        if (!empty($args['strict_scope'])) return $this->strictHttpsRedirect($args);
         $base = $this->baseUrl();
-        if ($base === '') return [null, '[UNKNOWN] Missing URL in context'];
+        if ($base === '') return [null, '[UNKNOWN] Runtime URL unavailable; provide --url=https://your-store or configure Magento secure base URL'];
 
         // Always test HTTP entrypoint (no redirect follow)
         $http = preg_replace('~^https://~i', 'http://', $base);
@@ -154,10 +165,41 @@ final class HttpCheck
         return [$isRedirect, $isRedirect ? 'HTTP redirected to HTTPS' : 'No HTTP→HTTPS redirect', $evidence];
     }
 
+    /** Exact first-hop redirect predicate for explicitly observed storefront/backend entries. */
+    private function strictHttpsRedirect(array $args): array
+    {
+        $base = $this->baseUrl();
+        if ($base === '') return [null, '[UNKNOWN] Runtime URL unavailable; provide --url=https://your-store', []];
+        $paths = ['/'];
+        if (!empty($args['include_admin'])) {
+            $admin = $this->magento->adminFrontNameDeclared([]);
+            $route = $admin[2]['observed'] ?? null;
+            if (!is_string($route)) return [null, '[UNKNOWN] Cannot resolve backend.frontName for admin HTTPS probe', []];
+            $paths[] = '/' . $route . '/';
+        }
+        $checked = []; $unknown = false; $failed = false;
+        foreach ($paths as $path) {
+            $url = $this->joinUrl(preg_replace('~^https://~i', 'http://', $base), $path);
+            [$ok, $msg, $ev] = $this->fetch($url, 'GET', [], (int)($args['timeout_ms'] ?? 8000), false);
+            $status = (int)($ev['status'] ?? 0);
+            $location = $this->hget(array_change_key_case((array)($ev['headers'] ?? []), CASE_LOWER), 'location');
+            $parts = parse_url($location);
+            $valid = is_array($parts) && strtolower((string)($parts['scheme'] ?? '')) === 'https' &&
+                strtolower((string)($parts['host'] ?? '')) === strtolower((string)parse_url($url, PHP_URL_HOST)) && !isset($parts['user']) && !isset($parts['pass']);
+            $checked[] = ['request_url' => $url, 'status' => $status, 'location' => $location, 'https_redirect' => $valid];
+            if ($ok !== true || $status === 429 || $status >= 500 || $status <= 0) { $unknown = true; continue; }
+            if (!in_array($status, [301,302,303,307,308], true) || !$valid) $failed = true;
+        }
+        $evidence = ['scope' => 'first_hop_observed_entrypoints', 'checked' => $checked];
+        if ($failed) return [false, 'Observed HTTP entrypoint does not redirect directly to same-host HTTPS', $evidence];
+        if ($unknown) return [null, '[UNKNOWN] HTTP redirect probes are incomplete', $evidence];
+        return [true, 'Observed storefront/admin HTTP entrypoints redirect directly to same-host HTTPS', $evidence];
+    }
+
     private function hasHsts(array $args): array
     {
         $base = $this->baseUrl();
-        if ($base === '') return [null, '[UNKNOWN] Missing URL in context'];
+        if ($base === '') return [null, '[UNKNOWN] Runtime URL unavailable; provide --url=https://your-store or configure Magento secure base URL'];
         $url = preg_replace('~^http://~i', 'https://', $base);
         [$ok, $msg, $ev] = $this->fetch((string)$url, 'GET', [], (int)($args['timeout_ms'] ?? 8000), true);
         if ($ok === null) return [null, $msg, $ev];
@@ -191,7 +233,7 @@ final class HttpCheck
     private function noMixedContent(array $args): array
     {
         $base = $this->baseUrl();
-        if ($base === '') return [null, '[UNKNOWN] Missing URL in context'];
+        if ($base === '') return [null, '[UNKNOWN] Runtime URL unavailable; provide --url=https://your-store or configure Magento secure base URL'];
         $paths = $args['paths'] ?? ['/'];
         if (!is_array($paths)) {
             $paths = ['/'];
@@ -220,9 +262,13 @@ final class HttpCheck
                 continue;
             }
 
+            if (!empty($args['strict_scope']) && ((int)($ev['status'] ?? 0) !== 200 || !str_starts_with(strtolower((string)($ev['final_url'] ?? $url)), 'https://'))) {
+                $incomplete[] = ['url' => $url, 'reason' => 'Mixed-content probe requires a successful HTTPS page'];
+                continue;
+            }
             $successful++;
             $body = (string)($ev['body'] ?? '');
-            $pageOffenders = $this->mixedContentInMarkup($body);
+            $pageOffenders = $this->mixedContentInMarkup(!empty($args['strict_scope']) ? (preg_replace('~(<script\b[^>]*>)[\s\S]*?(</script>)~i', '$1$2', $body) ?? $body) : $body);
             $checked[] = ['url' => $url, 'ok' => true, 'status' => $ev['status'] ?? null, 'final_url' => $ev['final_url'] ?? null];
             foreach ($pageOffenders as $offender) {
                 $offender['page_url'] = $url;
@@ -296,9 +342,9 @@ final class HttpCheck
             return null;
         }
 
-        $flags = ' ' . strtolower($cookie) . ' ';
-        $hasSecure = str_contains($flags, ' secure');
-        $hasHttpOnly = str_contains($flags, ' httponly');
+        $attributes = array_map(static fn(string $part): string => strtolower(trim($part)), array_slice($parts, 1));
+        $hasSecure = in_array('secure', $attributes, true);
+        $hasHttpOnly = in_array('httponly', $attributes, true);
         $sameSite = null;
         foreach ($parts as $part) {
             $part = trim($part);
@@ -334,7 +380,7 @@ final class HttpCheck
     private function cookieFlags(array $args): array
     {
         $base = $this->baseUrl();
-        if ($base === '') return [null, '[UNKNOWN] Missing URL in context', []];
+        if ($base === '') return [null, '[UNKNOWN] Runtime URL unavailable; provide --url=https://your-store or configure Magento secure base URL', []];
         $paths = $args['paths'] ?? ['/', '/customer/account/login', '/checkout/cart'];
         if (!is_array($paths)) {
             $paths = ['/'];
@@ -392,6 +438,10 @@ final class HttpCheck
                 continue;
             }
 
+            if (!empty($args['strict_scope']) && ((int)($ev['status'] ?? 0) !== 200 || strtolower((string)parse_url((string)($ev['final_url'] ?? $url), PHP_URL_SCHEME)) !== 'https' || strtolower((string)parse_url((string)($ev['final_url'] ?? $url), PHP_URL_HOST)) !== strtolower((string)parse_url($url, PHP_URL_HOST)))) {
+                $incomplete[] = ['url' => $url, 'reason' => 'Cookie probe needs a successful same-host HTTPS response'];
+                continue;
+            }
             $successful++;
             $hdrs = array_change_key_case((array)($ev['headers'] ?? []), CASE_LOWER);
             $setCookies = $hdrs['set-cookie'] ?? [];
@@ -435,14 +485,15 @@ final class HttpCheck
     private function noDirectoryListing(array $args): array
     {
         $base = $this->baseUrl();
-        if ($base === '') return [null, '[UNKNOWN] Missing URL in context'];
+        if ($base === '') return [null, '[UNKNOWN] Runtime URL unavailable; provide --url=https://your-store or configure Magento secure base URL'];
         $paths = $args['paths'] ?? ['/media/', '/static/', '/errors/', '/var/'];
         $timeout = (int)($args['timeout_ms'] ?? 8000);
         $probed = 0;
         $unknowns = [];
+        $checked = [];
 
         foreach ($paths as $p) {
-            [$ok, $msg, $ev] = $this->fetch($base . $p, 'GET', [], $timeout, true);
+            [$ok, $msg, $ev] = $this->fetch($this->joinUrl($base, (string)$p), 'GET', [], $timeout, true);
             if ($ok === null) {
                 $unknowns[] = ['path' => $p, 'reason' => $msg];
                 continue;
@@ -453,12 +504,21 @@ final class HttpCheck
             }
 
             $probed++;
+            $checked[] = ['path'=>$p, 'status'=>$ev['status']??null, 'final_url'=>$ev['final_url']??null];
             $status = (int)($ev['status'] ?? 0);
             $headers = array_change_key_case((array)($ev['headers'] ?? []), CASE_LOWER);
             $b = strtolower(substr((string)($ev['body'] ?? ''), 0, 8192));
             $contentType = strtolower($this->hget($headers, 'content-type'));
 
             $matchedSignature = null;
+            if (!empty($args['strict_scope']) && strtolower((string)parse_url((string)($ev['final_url'] ?? $this->joinUrl($base, (string)$p)), PHP_URL_HOST)) !== strtolower((string)parse_url($base, PHP_URL_HOST))) {
+                $unknowns[] = ['path'=>$p, 'reason'=>'Directory probe redirected outside the deployment host'];
+                continue;
+            }
+            if (!empty($args['strict_scope']) && !in_array($status, [200, 401, 403, 404, 405, 410], true)) {
+                $unknowns[] = ['path' => $p, 'reason' => 'Unassessable HTTP status ' . $status];
+                continue;
+            }
             if ($status === 200) {
                 $signatures = [
                     'index of /',
@@ -467,6 +527,7 @@ final class HttpCheck
                     '<h1>index of ',
                     '<pre><a href=',
                 ];
+                if (!empty($args['strict_scope'])) $signatures = ['<title>index of ', '<h1>index of ', '<title>directory listing for'];
                 foreach ($signatures as $signature) {
                     if (str_contains($b, $signature)) {
                         $matchedSignature = $signature;
@@ -495,13 +556,14 @@ final class HttpCheck
         }
 
         if ($unknowns !== []) {
-            return [null, '[UNKNOWN] Directory listing check had incomplete coverage', [
+            return [null, '[UNKNOWN] Directory listing probes failed: ' . implode('; ', array_map(static fn(array $entry): string => $entry['path'] . ': ' . $entry['reason'], $unknowns)), [
                 'probed' => $probed,
                 'unknown_paths' => $unknowns,
+                'checked' => $checked,
             ]];
         }
 
-        return [true, 'No directory listing detected in common paths', ['probed' => $probed]];
+        return [true, 'No directory listing detected in common paths', ['probed' => $probed, 'checked' => $checked]];
     }
 
     private function noPublicArtifacts(array $args): array
@@ -581,7 +643,7 @@ final class HttpCheck
     private function noStacktrace(array $args): array
     {
         $base = $this->baseUrl();
-        if ($base === '') return [null, '[UNKNOWN] Missing URL in context', []];
+        if ($base === '') return [null, '[UNKNOWN] Runtime URL unavailable; provide --url=https://your-store or configure Magento secure base URL', []];
 
         $targets = [];
         $targets[] = rtrim($base, '/'); // home
@@ -639,7 +701,7 @@ final class HttpCheck
     private function noXdebugHeaders(array $args): array
     {
         $base = $this->baseUrl();
-        if ($base === '') return [null, '[UNKNOWN] Missing URL in context', []];
+        if ($base === '') return [null, '[UNKNOWN] Runtime URL unavailable; provide --url=https://your-store or configure Magento secure base URL', []];
         [$ok, $msg, $ev] = $this->fetch($base, 'GET', [], (int)($args['timeout_ms'] ?? 8000), false);
         if ($ok === null) return [null, $msg, $ev];
         if (!$ok) return [false, $msg, $ev];
@@ -825,7 +887,7 @@ final class HttpCheck
     private function headerIn(array $args): array
     {
         $base = $this->baseUrl();
-        if ($base === '') return [null, '[UNKNOWN] Missing URL in context', []];
+        if ($base === '') return [null, '[UNKNOWN] Runtime URL unavailable; provide --url=https://your-store or configure Magento secure base URL', []];
         $header = strtolower((string)($args['header'] ?? ''));
         $allowed = (array)($args['allowed'] ?? []);
         if ($header === '' || !$allowed) return [null, '[UNKNOWN] Missing header/allowed', []];
@@ -930,7 +992,7 @@ final class HttpCheck
     private function corsPreflightSafe(array $args): array
     {
         $base = $this->baseUrl();
-        if ($base === '') return [null, '[UNKNOWN] Missing URL in context', []];
+        if ($base === '') return [null, '[UNKNOWN] Runtime URL unavailable; provide --url=https://your-store or configure Magento secure base URL', []];
         // Real preflight with Origin + Access-Control-Request-Method
         $headers = [
             'Origin: https://example.com',
@@ -951,14 +1013,14 @@ final class HttpCheck
     private function tlsMinVersion(array $args): array
     {
         $base = $this->baseUrl();
-        if ($base === '') return [null, '[UNKNOWN] Missing URL in context', []];
+        if ($base === '') return [null, '[UNKNOWN] Runtime URL unavailable; provide --url=https://your-store or configure Magento secure base URL', []];
 
         $host = (string)parse_url($base, PHP_URL_HOST);
         if ($host === '') return [null, '[UNKNOWN] Invalid host', []];
         $port = (int)(parse_url($base, PHP_URL_PORT) ?: 443);
         $timeout = $this->timeoutSeconds($args, 10);
 
-        $streamProbe = $this->probeTlsVersionsWithStreams($host, $port, $timeout);
+        $streamProbe = !empty($args['strict_scope']) ? $this->strictTlsVersions($host, $port, $timeout) : $this->probeTlsVersionsWithStreams($host, $port, $timeout);
         $nmapProbe = $this->probeTlsWithNmap($host, $port, $timeout);
 
         $accepted = $streamProbe['accepted'] ?? [];
@@ -972,7 +1034,7 @@ final class HttpCheck
         }
 
         $hasLegacy = !empty($accepted['tls1.0']) || !empty($accepted['tls1.1']);
-        $hasModern = !empty($accepted['tls1.2']) || !empty($accepted['tls1.3']);
+        $hasModern = !empty($accepted['tls1.2']) || !empty($accepted['tls1.3']) || !empty($nmapProbe['modern']);
         $evidence = [
             'host' => $host,
             'port' => $port,
@@ -988,6 +1050,11 @@ final class HttpCheck
             return [false, 'TLS 1.2+ could not be negotiated', $evidence];
         }
 
+        if (!empty($args['strict_scope'])) {
+            if ($hasLegacy) return [false, 'Endpoint accepts TLS below 1.2', $evidence];
+            if (empty($nmapProbe['ok']) && empty($streamProbe['legacy_rejection_verified'])) return [null, '[UNKNOWN] Modern TLS accepted but legacy-protocol rejection is unverified; install nmap for active protocol enumeration', $evidence];
+        }
+
         $pass = !$hasLegacy;
         $msg  = $pass ? 'TLS < 1.2 disabled (nmap)' : 'Legacy TLS (1.0/1.1) still accepted (nmap)';
 
@@ -998,7 +1065,7 @@ final class HttpCheck
     private function tlsCertDaysLeft(array $args): array
     {
         $base = $this->baseUrl();
-        if ($base === '') return [null, '[UNKNOWN] Missing URL in context', []];
+        if ($base === '') return [null, '[UNKNOWN] Runtime URL unavailable; provide --url=https://your-store or configure Magento secure base URL', []];
         $host = (string)parse_url($base, PHP_URL_HOST);
         if ($host === '') return [null, '[UNKNOWN] Invalid host', []];
 
@@ -1021,7 +1088,7 @@ final class HttpCheck
     private function hstsPreloadReady(array $args): array
     {
         $base = $this->baseUrl();
-        if ($base === '') return [null, '[UNKNOWN] Missing URL in context', []];
+        if ($base === '') return [null, '[UNKNOWN] Runtime URL unavailable; provide --url=https://your-store or configure Magento secure base URL', []];
         [$ok, $msg, $ev] = $this->fetch($base, 'GET', [], (int)($args['timeout_ms'] ?? 8000), false);
         if ($ok === null) return [null, $msg, $ev];
         if (!$ok) return [false, $msg, $ev];
@@ -1043,7 +1110,7 @@ final class HttpCheck
     private function methodDisallowed(array $args): array
     {
         $base = $this->baseUrl();
-        if ($base === '') return [null, '[UNKNOWN] Missing URL in context', []];
+        if ($base === '') return [null, '[UNKNOWN] Runtime URL unavailable; provide --url=https://your-store or configure Magento secure base URL', []];
         $method = strtoupper((string)($args['method'] ?? 'TRACE'));
         [$ok, $msg, $ev] = $this->fetch($base, $method, [], (int)($args['timeout_ms'] ?? 8000), false);
         if ($ok === null) return [null, $msg, $ev];
@@ -1056,7 +1123,7 @@ final class HttpCheck
     private function optionsNotVerbose(array $args): array
     {
         $base = $this->baseUrl();
-        if ($base === '') return [null, '[UNKNOWN] Missing URL in context', []];
+        if ($base === '') return [null, '[UNKNOWN] Runtime URL unavailable; provide --url=https://your-store or configure Magento secure base URL', []];
         [$ok, $msg, $ev] = $this->fetch($base, 'OPTIONS', [], (int)($args['timeout_ms'] ?? 8000), false);
         if ($ok === null) return [null, $msg, $ev];
         if (!$ok) return [null, '[UNKNOWN] OPTIONS not allowed', $ev];
@@ -1069,7 +1136,7 @@ final class HttpCheck
     private function serverBannerNotVerbose(array $args): array
     {
         $base = $this->baseUrl();
-        if ($base === '') return [null, '[UNKNOWN] Missing URL in context', []];
+        if ($base === '') return [null, '[UNKNOWN] Runtime URL unavailable; provide --url=https://your-store or configure Magento secure base URL', []];
         [$ok, $msg, $ev] = $this->fetch($base, 'GET', [], (int)($args['timeout_ms'] ?? 8000), false);
         if ($ok === null) return [null, $msg, $ev];
         if (!$ok) return [false, $msg, $ev];
@@ -1082,7 +1149,7 @@ final class HttpCheck
     private function blockPath(array $args): array
     {
         $base = $this->baseUrl();
-        if ($base === '') return [null, '[UNKNOWN] Missing URL in context', []];
+        if ($base === '') return [null, '[UNKNOWN] Runtime URL unavailable; provide --url=https://your-store or configure Magento secure base URL', []];
         $paths = (array)($args['paths'] ?? []);
         $allowed = (array)($args['allowed_status'] ?? [404, 403, 401, 302, 301]);
         $timeout = (int)($args['timeout_ms'] ?? 8000);
@@ -1103,7 +1170,7 @@ final class HttpCheck
     private function graphqlIntrospectionDisabled(array $args): array
     {
         $base = $this->baseUrl();
-        if ($base === '') return [null, '[UNKNOWN] Missing URL in context', []];
+        if ($base === '') return [null, '[UNKNOWN] Runtime URL unavailable; provide --url=https://your-store or configure Magento secure base URL', []];
         $path = (string)($args['path'] ?? '/graphql');
         $url = rtrim($base, '/') . $path;
         $query = '{"query":"query IntrospectionQuery { __schema { types { name } } }"}';
@@ -1120,7 +1187,7 @@ final class HttpCheck
     private function restSensitiveEndpointsClosed(array $args): array
     {
         $base = $this->baseUrl();
-        if ($base === '') return [null, '[UNKNOWN] Missing URL in context', []];
+        if ($base === '') return [null, '[UNKNOWN] Runtime URL unavailable; provide --url=https://your-store or configure Magento secure base URL', []];
         $paths = (array)($args['paths'] ?? []);
         $timeout = (int)($args['timeout_ms'] ?? 8000);
         if (!$paths) return [null, '[UNKNOWN] No paths', []];
@@ -1140,8 +1207,9 @@ final class HttpCheck
     // === Hygiene & assets ===
     private function staticAssetsDeployed(array $args): array
     {
+        if (!empty($args['strict_scope'])) return $this->strictStaticAssets($args);
         $base = $this->baseUrl();
-        if ($base === '') return [null, '[UNKNOWN] Missing URL in context', []];
+        if ($base === '') return [null, '[UNKNOWN] Runtime URL unavailable; provide --url=https://your-store or configure Magento secure base URL', []];
         [$ok, $msg, $ev] = $this->fetch($base, 'GET', [], (int)($args['timeout_ms'] ?? 8000), true);
         if ($ok === null) return [null, $msg, $ev];
         if (!$ok) return [null, '[UNKNOWN] Unable to fetch homepage for static asset check', $ev];
@@ -1158,10 +1226,49 @@ final class HttpCheck
         return [true, 'Static assets deployed/versioned', ['hits' => $hits, 'response' => $ev]];
     }
 
+
+    private function strictStaticAssets(array $args): array
+    {
+        $base = $this->baseUrl();
+        if ($base === '') return [null, '[UNKNOWN] Runtime URL unavailable; provide --url=https://your-store', []];
+        [$ok, $msg, $page] = $this->fetch($base, 'GET', [], (int)($args['timeout_ms'] ?? 8000), true);
+        if ($ok !== true || (int)($page['status'] ?? 0) !== 200) return [null, '[UNKNOWN] Cannot retrieve storefront for static asset assessment', $page];
+        $html = preg_replace('~<!--[\s\S]*?-->~', '', (string)($page['body'] ?? '')) ?? '';
+        preg_match_all('~<(?:script|link)\b[^>]*\b(?:src|href)\s*=\s*([\'"])([^\'"]+)\1~i', $html, $matches, PREG_SET_ORDER);
+        $urls = [];
+        $final = (string)($page['final_url'] ?? $base);
+        $origin = (string)parse_url($final, PHP_URL_SCHEME) . '://' . (string)parse_url($final, PHP_URL_HOST);
+        $port = parse_url($final, PHP_URL_PORT); if ($port) $origin .= ':' . $port;
+        foreach ($matches as $m) {
+            $ref = html_entity_decode($m[2], ENT_QUOTES | ENT_HTML5);
+            if (!preg_match('~\.(?:css|js)(?:[?#]|$)~i', $ref)) continue;
+            if (str_starts_with($ref, '//')) $url = (string)parse_url($final, PHP_URL_SCHEME) . ':' . $ref;
+            elseif (preg_match('~^https?://~i', $ref)) $url = $ref;
+            elseif (str_starts_with($ref, '/')) $url = $origin . $ref;
+            else $url = preg_replace('~/[^/]*$~', '/', $final) . $ref;
+            if (parse_url($url, PHP_URL_HOST) !== parse_url($final, PHP_URL_HOST) || parse_url($url, PHP_URL_PORT) !== parse_url($final, PHP_URL_PORT)) continue;
+            if (!str_contains((string)parse_url($url, PHP_URL_PATH), '/static/')) continue;
+            $urls[$url] = true;
+        }
+        if ($urls === []) return [null, '[UNKNOWN] Storefront references no same-origin Magento static CSS/JS assets', ['page_url' => $final]];
+        $checked = []; $unknown = false; $failed = false;
+        foreach (array_keys($urls) as $url) {
+            [$ok, $msg, $ev] = $this->fetch($url, 'GET', [], (int)($args['timeout_ms'] ?? 8000), true);
+            $status = (int)($ev['status'] ?? 0); $body = (string)($ev['body'] ?? '');
+            $type = strtolower($this->hget((array)($ev['headers'] ?? []), 'content-type'));
+            $checked[] = ['url' => $url, 'status' => $status, 'bytes' => strlen($body), 'content_type' => $type];
+            if ($ok !== true || $status >= 500 || $status === 429) { $unknown = true; continue; }
+            if ($status !== 200 || $body === '' || str_contains($type, 'text/html') || preg_match('~^\s*(?:<!doctype|<html)~i', $body)) $failed = true;
+        }
+        if ($failed) return [false, 'Storefront references missing or invalid static assets', ['checked' => $checked]];
+        if ($unknown) return [null, '[UNKNOWN] Static asset retrieval incomplete', ['checked' => $checked]];
+        return [true, 'Referenced same-origin static CSS/JS assets are deployed and retrievable', ['checked' => $checked]];
+    }
+
     private function cacheSignals(array $args): array
     {
         $base = $this->baseUrl();
-        if ($base === '') return [null, '[UNKNOWN] Missing URL in context', []];
+        if ($base === '') return [null, '[UNKNOWN] Runtime URL unavailable; provide --url=https://your-store or configure Magento secure base URL', []];
         // First fetch
         [$ok1, $msg1, $ev1] = $this->fetch($base, 'GET', [], (int)($args['timeout_ms'] ?? 8000), true);
         if ($ok1 === null) return [null, $msg1, $ev1];
@@ -1212,7 +1319,7 @@ final class HttpCheck
     private function logsProtected(array $args): array
     {
         $base = $this->baseUrl();
-        if ($base === '') return [null, '[UNKNOWN] Missing URL in context', []];
+        if ($base === '') return [null, '[UNKNOWN] Runtime URL unavailable; provide --url=https://your-store or configure Magento secure base URL', []];
 
         $paths = ['/var/log/', '/var/report/'];
         $allowStatuses = [401, 403, 404, 405, 410, 301, 302, 307, 308];
@@ -1358,7 +1465,7 @@ final class HttpCheck
     private function paymentTlsMin(array $args): array
     {
         $base = $this->baseUrl();
-        if ($base === '') return [null, '[UNKNOWN] Missing URL in context', []];
+        if ($base === '') return [null, '[UNKNOWN] Runtime URL unavailable; provide --url=https://your-store or configure Magento secure base URL', []];
 
         [$ok, $msg, $ev] = $this->fetch($base, 'GET', [], 8000, true);
         if ($ok === null) return [null, $msg, $ev];
@@ -1401,6 +1508,29 @@ final class HttpCheck
         $pass = empty($weak);
         $msg  = $pass ? 'Payment/3rd-party endpoints enforce TLS ≥ 1.2' : ('Legacy TLS accepted by: ' . implode(', ', $weak));
         return [$pass, $msg, ['hosts_checked' => $evidences]];
+    }
+
+
+    private function strictTlsVersions(string $host, int $port, int $timeout): array
+    {
+        $accepted = []; $errors = []; $rejected = [];
+        foreach (['tls1.0' => 'STREAM_CRYPTO_METHOD_TLSv1_0_CLIENT', 'tls1.1' => 'STREAM_CRYPTO_METHOD_TLSv1_1_CLIENT', 'tls1.2' => 'STREAM_CRYPTO_METHOD_TLSv1_2_CLIENT', 'tls1.3' => 'STREAM_CRYPTO_METHOD_TLSv1_3_CLIENT'] as $version => $constant) {
+            $this->collectors->session->checkpoint();
+            if (!defined($constant)) { $errors[$version] = 'Client does not support protocol'; continue; }
+            $ctx = stream_context_create(['ssl' => ['SNI_enabled' => true, 'peer_name' => $host, 'verify_peer' => false, 'verify_peer_name' => false, 'ciphers' => 'ALL:@SECLEVEL=0']]);
+            $socket = @stream_socket_client("tcp://{$host}:{$port}", $errno, $errstr, $timeout, STREAM_CLIENT_CONNECT, $ctx);
+            if (!is_resource($socket)) { $errors[$version] = 'TCP connection failed'; continue; }
+            stream_set_timeout($socket, $timeout);
+            $warnings = [];
+            set_error_handler(static function (int $severity, string $message) use (&$warnings): bool { $warnings[] = $message; return true; });
+            try { $ok = stream_socket_enable_crypto($socket, true, constant($constant)); }
+            finally { restore_error_handler(); fclose($socket); }
+            $accepted[$version] = $ok === true;
+            $errors[$version] = implode('; ', $warnings);
+            // A peer protocol-version alert is a rejection; local cipher/client errors and timeouts prove nothing.
+            $rejected[$version] = $ok === false && preg_match('~alert protocol version|unsupported protocol.*alert~i', $errors[$version]) === 1;
+        }
+        return ['ok' => in_array(true, $accepted, true), 'accepted' => $accepted, 'errors' => $errors, 'legacy_rejection_verified' => !empty($rejected['tls1.0']) && !empty($rejected['tls1.1'])];
     }
 
     private function probeTlsVersionsWithStreams(string $host, int $port, int $timeout = 10): array
@@ -1507,7 +1637,7 @@ final class HttpCheck
         $has10 = $hasLegacy($out, 'TLSv?1\\.0');
         $has11 = $hasLegacy($out, 'TLSv?1\\.1');
 
-        return ['ok' => true, 'legacy' => ['tls1.0' => $has10, 'tls1.1' => $has11], 'raw' => $out];
+        return ['ok' => true, 'modern' => preg_match('/\bTLSv?1\.[23]\s*:/i', $out) === 1, 'legacy' => ['tls1.0' => $has10, 'tls1.1' => $has11], 'raw' => $out];
     }
 
     private function timeoutSeconds(array $args, int $default): int

@@ -4,8 +4,13 @@ namespace Magebean\Agent;
 /** Maps scan observations into the existing redacted Console transport schema. */
 final class AgentResultMapper
 {
-    public function map(array $result, array $manifest, array $manifestIndex, array $unsupported, string $magentoPath): array
+    public function map(array $result, array $manifest, array $manifestIndex, array $unsupported, string $magentoPath, array $manifestBindings = []): array
     {
+        if($manifestBindings!==[]){
+            $executed=array_column($result['findings'],null,'id');$mapped=[];
+            foreach($manifestBindings as $binding){$canonical=$binding['canonical_id'];if(!isset($executed[$canonical]))throw new \LogicException('Manifest binding has no canonical assessment result: '.$canonical);$finding=$executed[$canonical];$finding['id']=$binding['requested_key'];$manifestIndex[$binding['requested_key']]=['assessment_item_id'=>$binding['assessment_item_id']];$mapped[]=$finding;}
+            $result['findings']=$mapped;
+        }
         $findings=[];foreach($result['findings'] as $finding){$ruleKey=strtoupper((string)$finding['id']);$entry=$manifestIndex[$ruleKey];$status=match($finding['status']??'UNKNOWN'){'PASS'=>'pass','FAIL'=>'fail',default=>'error'};$findings[]=['assessment_item_id'=>(string)$entry['assessment_item_id'],'rule_key'=>$ruleKey,'status'=>$status,'message'=>$this->redact((string)$finding['message'],$magentoPath),'detail'=>$this->sanitize($finding['detail']??$finding['details']??[],$magentoPath),'evidence'=>$this->sanitize($finding['evidence']??[],$magentoPath),'checked_at'=>gmdate(DATE_ATOM)];}
         foreach ($findings as $position => $payload) {
             $findings[$position]['title'] = $this->resultTitle($payload);

@@ -24,7 +24,7 @@ final class ScanCommand extends Command
     /** Keep help text in one place */
     private const HELP = <<<'HELP'
 <fg=cyan;options=bold>Audit Magento 2 production readiness</> using selectable Magebean security profiles.
-The default <fg=green;options=bold>basic</> profile runs 21 fast, low-noise checks.
+The default <fg=green;options=bold>basic</> profile selects Magento production-readiness requirements.
 Docs: <href=https://magebean.com/documentation>magebean.com/documentation</>
 
 <options=bold>USAGE</>
@@ -34,18 +34,18 @@ Docs: <href=https://magebean.com/documentation>magebean.com/documentation</>
   • <fg=green;options=bold>LOCAL</> — --path only, or omit both target options to auto-detect the Magento root
   • <fg=blue;options=bold>REMOTE</> — --url only; verifies Magento and runs externally observable rules
   • <fg=magenta;options=bold>HYBRID</> — --path plus --url; combines local and HTTP evidence
-  • Basic contains 21 local rules and 9 applicable remote rules.
-  • Use --profile=baseline remotely to run all 10 external rules.
+  • Profiles select applicable internal requirements and preserve their evidence scope.
+  • Default REMOTE scans use the external profile; baseline selects the full applicable inventory.
 
 <options=bold>PROFILES</>
-  <fg=yellow>basic</>      Default; 21 basic production security and operations checks.
-  <fg=yellow>asvs-l1</>    42 requirements by default (including partial evidence checks); 70 including human review.
-  <fg=yellow>asvs-l2</>    90 requirements by default (including partial evidence checks); 198 including human review.
-  <fg=yellow>asvs-l3</>    98 requirements by default (including partial evidence checks); 268 including human review.
-  <fg=yellow>owasp</>      77 application-security rules mapped to OWASP Top 10 2025.
-  <fg=yellow>pci</>        67 rules by default; 68 including 1 human-verification rule.
-  <fg=yellow>hardening</>  91 rules by default; 92 with human verification enabled.
-  <fg=yellow>baseline</>   113 automated rules by default; 371 including manual review. Aliases: all, magebean.
+  <fg=yellow>basic</>      Default Magento production security and operations requirements.
+  <fg=yellow>asvs-l1</>    Internal requirements aligned with ASVS level 1.
+  <fg=yellow>asvs-l2</>    Internal requirements aligned with ASVS levels 1 and 2.
+  <fg=yellow>asvs-l3</>    Internal requirements aligned with ASVS levels 1, 2 and 3.
+  <fg=yellow>owasp</>      Application security requirements tagged with OWASP Top 10 categories.
+  <fg=yellow>pci</>        Consolidated PCI requirements; human verification remains mandatory.
+  <fg=yellow>hardening</>  Production hardening requirements.
+  <fg=yellow>baseline</>   Complete internal inventory; human-only entries excluded by default. Aliases: all, magebean.
   <fg=yellow>FILE</>       Custom JSON path or a profile under .magebean/profiles.
 
 <options=bold>COMMAND OPTIONS</>
@@ -55,8 +55,8 @@ Docs: <href=https://magebean.com/documentation>magebean.com/documentation</>
   <fg=yellow>--include-manual-review</>           Include human-review rules; excluded by default.
   <fg=yellow>--capabilities=NAME,NAME</>         Enable contextual profile rules (for example graphql,oauth_oidc).
   <fg=yellow>--controls=MB-Cxx,MB-Cxx</>       Restrict the loaded pack to control IDs.
-  <fg=yellow>--rules=MB-Rxxx,MB-Rxxx</>         Run listed rule IDs directly from the available catalog; bypasses profile selection.
-  <fg=yellow>--exclude-rules=MB-Rxxx,...</>     Remove rules after profile and project configuration.
+  <fg=yellow>--rules=MB-xxxx,MB-xxxx</>         Run listed rule IDs directly from the available catalog; bypasses profile selection.
+  <fg=yellow>--exclude-rules=MB-xxxx,...</>     Remove rules after profile and project configuration.
   <fg=yellow>--config=FILE</>                   Project policy file; auto-detected in LOCAL/HYBRID.
   <fg=yellow>--pci-context=FILE</>               PCI applicability context JSON (PCI profile only).
   <fg=yellow>--pci-evidence=FILE</>              Structured external evidence JSON (PCI profile only).
@@ -92,20 +92,20 @@ Docs: <href=https://magebean.com/documentation>magebean.com/documentation</>
   <fg=green>php magebean.phar scan --path=/var/www/magento --profile=baseline</>
 
   # Rule and control filters
-  <fg=green>php magebean.phar scan --path=/var/www/magento --rules=MB-R031,MB-R037</>
-  <fg=green>php magebean.phar scan --path=/var/www/magento --rules=MB-R020</>
+  <fg=green>php magebean.phar scan --path=/var/www/magento --rules=MB-0031,MB-0037</>
+  <fg=green>php magebean.phar scan --path=/var/www/magento --rules=MB-0020</>
   <fg=green>php magebean.phar scan --path=/var/www/magento --profile=hardening --controls=MB-C01,MB-C05</>
-  <fg=green>php magebean.phar scan --path=/var/www/magento --config=.magebean.yml --exclude-rules=MB-R032</>
+  <fg=green>php magebean.phar scan --path=/var/www/magento --config=.magebean.yml --exclude-rules=MB-0032</>
 
 <options=bold>SELECTION ORDER</>
   Target pack → project policy → (--rules OR profile) → --exclude-rules.
-  MB-R --rules bypasses profile selection. Canonical OWASP-ASVS IDs require an ASVS --profile for level context.
+  MB-REQ IDs select independent internal requirements. Deprecated MB-R and OWASP-ASVS selectors use the compatibility adapter; old ASVS selectors require an ASVS profile.
 
 <options=bold>NOTES</>
   • REMOTE results cover only publicly observable behavior; local-only checks are omitted.
   • --path must point to, or be below, a Magento root containing app/etc and vendor.
   • Unknown rule IDs in a custom profile fail validation against a full local pack.
-  • Confirmed findings determine the process exit code.
+  • Confirmed findings determine security exit codes; basic collection errors exit with code 3.
 
 <options=bold>SEE ALSO</>
   <fg=cyan>rules:list --help</>  List and filter rules by profile, control, and severity.
@@ -134,8 +134,8 @@ HELP;
             ->addOption('include-manual-review', null, InputOption::VALUE_NONE, 'Include human manual-review rules (excluded by default)')
             ->addOption('capabilities', null, InputOption::VALUE_OPTIONAL, 'Comma-separated application capabilities used to activate contextual profile rules')
             ->addOption('controls', null, InputOption::VALUE_OPTIONAL, 'Comma-separated control IDs to load (e.g., MB-C01,MB-C05 or MB-01,MB-05)')
-            ->addOption('rules', null, InputOption::VALUE_OPTIONAL, 'Legacy MB-R or canonical ASVS requirement IDs; canonical selection requires an ASVS profile')
-            ->addOption('exclude-rules', null, InputOption::VALUE_OPTIONAL, 'Legacy aliases or canonical requirement IDs to exclude after loading')
+            ->addOption('rules', null, InputOption::VALUE_OPTIONAL, 'Internal MB-REQ IDs; retired internal IDs redirect to canonical requirements; historical selectors use the compatibility adapter')
+            ->addOption('exclude-rules', null, InputOption::VALUE_OPTIONAL, 'Internal requirement IDs to exclude after loading; historical selectors use the compatibility adapter')
             ->addOption('config', null, InputOption::VALUE_OPTIONAL, 'Project policy file (.magebean.json or .magebean.yml)')
             ->addOption('pci-context', null, InputOption::VALUE_OPTIONAL, 'PCI DSS applicability context JSON')
             ->addOption('pci-evidence', null, InputOption::VALUE_OPTIONAL, 'PCI DSS structured external evidence JSON')

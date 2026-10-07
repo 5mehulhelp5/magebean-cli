@@ -143,6 +143,14 @@ final class ScanConsoleRenderer
         }
         $out->writeln('');
 
+        $automationOnly = !empty($result['meta']['automation_only']);
+        if ($automationOnly) {
+            foreach ($result['findings'] as &$finding) {
+                if (($finding['classification'] ?? '') === 'execution_error') $finding['status'] = 'ERROR';
+            }
+            unset($finding);
+        }
+        $executionErrorFindings = array_values(array_filter($result['findings'] ?? [], static fn(array $f): bool => ($f['status'] ?? '') === 'ERROR'));
         // Findings requiring attention
         $attentionFindings = array_values(array_filter(
             ($result['findings'] ?? []),
@@ -179,12 +187,14 @@ final class ScanConsoleRenderer
                 : ($inconclusiveFindings !== []
                 ? '<fg=magenta;options=bold>AUDIT COMPLETE · INCONCLUSIVE</>'
                 : '<info>AUDIT COMPLETE</info>'));
+        if ($executionErrorFindings !== []) $auditStatus = '<fg=red;options=bold>SCAN INCOMPLETE · EXECUTION ERRORS</>';
         $out->writeln($auditStatus);
         $out->writeln('');
         $out->writeln(sprintf('  Passed                    <info>%d / %d</info>', $passed, $total));
         $out->writeln(sprintf('  Confirmed findings        <fg=yellow;options=bold>%d</>', count($confirmedFindings)));
-        $out->writeln(sprintf('  Technical manual review   <fg=cyan;options=bold>%d</>', count($manualReviewFindings)));
-        $out->writeln(sprintf('  Inconclusive              <fg=magenta;options=bold>%d</>', count($inconclusiveFindings)));
+        if (!$automationOnly) $out->writeln(sprintf('  Technical manual review   <fg=cyan;options=bold>%d</>', count($manualReviewFindings)));
+        if (!$automationOnly) $out->writeln(sprintf('  Inconclusive              <fg=magenta;options=bold>%d</>', count($inconclusiveFindings)));
+        else $out->writeln(sprintf('  Execution errors          <fg=red;options=bold>%d</>', count($executionErrorFindings)));
         if ($confirmedFindings !== []) {
             $out->writeln(sprintf(
                 '  %sCritical %d</> · %sHigh %d</> · %sMedium %d</> · %sLow %d</>',
@@ -204,24 +214,35 @@ final class ScanConsoleRenderer
         $showRuleDetails = $rulesFilter !== [];
         if ($showRuleDetails) {
             $out->writeln(sprintf('<options=bold>Rule details</> (<fg=yellow>%d</>)', count($allFindings)));
-        } elseif ($confirmedFindings !== [] || $manualReviewFindings !== []) {
-            $out->writeln(sprintf('<options=bold>FINDINGS REQUIRING ATTENTION (%d)</>', count($confirmedFindings) + count($manualReviewFindings)));
+        } elseif ($confirmedFindings !== []) {
+            $out->writeln(sprintf('<options=bold>FINDINGS REQUIRING ATTENTION (%d)</>', count($confirmedFindings)));
         }
 
         $findingsToRender = $showRuleDetails ? $allFindings : array_merge($confirmedFindings, $manualReviewFindings);
         $currentSeverity = null;
+        $humanHeadingRendered = false;
         foreach ($findingsToRender as $f) {
             $sev = strtoupper((string)($f['severity'] ?? 'LOW'));
             $id = trim((string)($f['id'] ?? ''));
             $status = strtoupper((string)($f['status'] ?? ''));
+            if (!$showRuleDetails && $status === 'MANUAL_REVIEW' && !$humanHeadingRendered) {
+                $out->writeln('');
+                $out->writeln(sprintf('<options=bold>HUMAN VERIFICATION REQUIRED (%d)</>', count($manualReviewFindings)));
+                $out->writeln('  These requirements need additional evidence; they are not confirmed security findings.');
+                $humanHeadingRendered = true;
+            }
             $text = $showRuleDetails
                 ? $this->detailedFindingMessage($f)
                 : $this->compactFindingDescription($f);
+            if (!$showRuleDetails && $status === 'MANUAL_REVIEW') {
+                $text = trim((string)($f['title'] ?? '')) ?: $text;
+            }
             $statusTag = $showRuleDetails
                 ? match ($status) {
                     'PASS' => '<fg=green;options=bold>[PASS]</> ',
                     'MANUAL_REVIEW' => '<fg=cyan;options=bold>[HUMAN VERIFICATION REQUIRED]</> ',
                     'UNKNOWN' => '<fg=magenta;options=bold>[INCONCLUSIVE]</> ',
+                    'ERROR' => '<fg=red;options=bold>[EXECUTION ERROR]</> ',
                     default => '<fg=red;options=bold>[FAIL]</> ',
                 }
                 : ($status === 'MANUAL_REVIEW'
@@ -235,9 +256,19 @@ final class ScanConsoleRenderer
             $line = $id !== ''
                 ? sprintf('%s<href=https://magebean.com/baseline/%2$s>%2$s</>  %3$s', $statusTag, $id, $text)
                 : sprintf('%s%s', $statusTag, $text);
-            $out->writeln(($showRuleDetails ? '  ' . $sevBadge($sev) . ' ' : '    ') . $line);
+            $out->writeln(($showRuleDetails ? (in_array($status, ['PASS', 'FAIL'], true) ? '  ' . $sevBadge($sev) . ' ' : '  ') : '    ') . $line);
 
-            if ($id === 'MB-R072' && $status === 'UNKNOWN') {
+            if ($status === 'MANUAL_REVIEW') {
+                if ($showRuleDetails) {
+                    $out->writeln('    <options=bold>Evidence needed</>');
+                    $out->writeln('      ' . $this->detailedFindingMessage($f));
+                }
+                if ($id !== '' && !$showRuleDetails) {
+                    $out->writeln(sprintf('      Evidence details: <fg=green>php magebean.phar scan %s--rules=%s</>', $targetOption . $this->requirementRerunContext($id, $result), $id));
+                }
+            }
+
+            if ($id === 'MB-R072' && in_array($status, ['UNKNOWN', 'ERROR'], true)) {
                 $out->writeln('    Git history was not verified; INCONCLUSIVE does not mean the history is clean.');
                 $out->writeln('    Run this rule against the original source checkout containing .git:');
                 $out->writeln("      <fg=green>php magebean.phar scan --path='/path/to/magento-source' --rules=MB-R072</>");
@@ -248,24 +279,30 @@ final class ScanConsoleRenderer
                 $this->renderCheckDetails($out, $f);
             }
 
-            if ($showRuleDetails && in_array($status, ['FAIL', 'UNKNOWN'], true)) {
+            if ($showRuleDetails && in_array($status, ['FAIL', 'UNKNOWN', 'ERROR'], true)) {
                 $out->writeln('');
                 $out->writeln(sprintf('  <options=bold>How to resolve %s</>', $id !== '' ? $id : 'this check'));
-                $resolutionSteps = $status === 'UNKNOWN'
+                $resolutionSteps = in_array($status, ['UNKNOWN', 'ERROR'], true)
                     ? $this->inconclusiveResolutionSteps($f)
                     : $this->failureResolutionSteps($f);
                 foreach ($resolutionSteps as $step) {
                     $out->writeln('    - ' . $step);
                 }
-                if ($id !== '' && !($id === 'MB-R072' && $status === 'UNKNOWN')) {
-                    $out->writeln($status === 'UNKNOWN'
+                if ($id !== '' && !($id === 'MB-R072' && in_array($status, ['UNKNOWN', 'ERROR'], true))) {
+                    $out->writeln(in_array($status, ['UNKNOWN', 'ERROR'], true)
                         ? '    - Re-run after resolving the missing evidence:'
                         : '    - Re-run after applying the remediation:');
-                    $out->writeln(sprintf('      <fg=green>php magebean.phar scan %s--rules=%s</>', $targetOption . (str_starts_with($id, 'OWASP-ASVS:') ? '--profile=' . escapeshellarg((string)$result['meta']['profile']['id']) . ' ' : ''), $id));
+                    $out->writeln(sprintf('      <fg=green>php magebean.phar scan %s--rules=%s</>', $targetOption . $this->requirementRerunContext($id, $result), $id));
                 }
             }
         }
 
+        if (!$showRuleDetails && $executionErrorFindings !== []) {
+            $out->writeln('');
+            $out->writeln(sprintf('<options=bold>EXECUTION ERRORS (%d)</>', count($executionErrorFindings)));
+            $out->writeln('  The automated scan could not finish these checks. Resolve collection errors and run again.');
+            foreach ($executionErrorFindings as $finding) $out->writeln('  ' . ($finding['id'] ?? '') . '  ' . $this->compactFindingDescription($finding));
+        }
         if (!$showRuleDetails && $inconclusiveFindings !== []) {
             $out->writeln('');
             $out->writeln(sprintf(
@@ -280,7 +317,6 @@ final class ScanConsoleRenderer
                     ? sprintf('<href=https://magebean.com/baseline/%1$s>%1$s</>  %2$s', $id, $text)
                     : $text;
                 $out->writeln('  ' . $line);
-                $out->writeln(sprintf('    Potential severity: %s', ucfirst(strtolower($sev))));
                 if ($id === 'MB-R072') {
                     $out->writeln('    Git history was not verified; INCONCLUSIVE does not mean the history is clean.');
                     $out->writeln('    Run this rule against the original source checkout containing .git:');
@@ -298,14 +334,14 @@ final class ScanConsoleRenderer
             $out->writeln('<options=bold>NEXT STEPS</>');
             if ($exampleRules !== []) {
                 $out->writeln('  Review the highest-priority finding:');
-                $out->writeln(sprintf('    <fg=green>php magebean.phar scan %s--rules=%s</>', $targetOption . (str_starts_with($exampleRules[0], 'OWASP-ASVS:') ? '--profile=' . escapeshellarg((string)$result['meta']['profile']['id']) . ' ' : ''), $exampleRules[0]));
+                $out->writeln(sprintf('    <fg=green>php magebean.phar scan %s--rules=%s</>', $targetOption . $this->requirementRerunContext($exampleRules[0], $result), $exampleRules[0]));
 
             }
             if ($inconclusiveFindings !== []) {
                 $inconclusiveId = trim((string)($inconclusiveFindings[0]['id'] ?? ''));
                 if ($inconclusiveId !== '') {
                     $out->writeln('  Resolve an inconclusive check:');
-                    $out->writeln(sprintf('    <fg=green>php magebean.phar scan %s--rules=%s</>', $targetOption . (str_starts_with($inconclusiveId, 'OWASP-ASVS:') ? '--profile=' . escapeshellarg((string)$result['meta']['profile']['id']) . ' ' : ''), $inconclusiveId));
+                    $out->writeln(sprintf('    <fg=green>php magebean.phar scan %s--rules=%s</>', $targetOption . $this->requirementRerunContext($inconclusiveId, $result), $inconclusiveId));
                 }
             }
             $out->writeln('');
@@ -435,6 +471,22 @@ final class ScanConsoleRenderer
         return $message !== '' ? $message : trim((string)($finding['title'] ?? ''));
     }
 
+    private function requirementRerunContext(string $id, array $result): string
+    {
+        if (!str_starts_with($id, 'OWASP-ASVS:') && preg_match('/^MB-[0-9]{4,}$/D', $id) !== 1) return '';
+        $meta = $result['meta'] ?? [];
+        $profile = (string)($meta['profile_selector'] ?? $meta['profile']['id'] ?? 'baseline');
+        $context = '--profile=' . escapeshellarg($profile) . ' ';
+        $capabilities = $meta['capabilities'] ?? [];
+        if (is_array($capabilities)) {
+            $enabled = array_is_list($capabilities) ? $capabilities : array_keys(array_filter($capabilities, static fn(mixed $value): bool => filter_var($value, FILTER_VALIDATE_BOOLEAN)));
+            $enabled = array_values(array_filter(array_map('strval', $enabled)));
+            if ($enabled !== []) $context .= '--capabilities=' . escapeshellarg(implode(',', $enabled)) . ' ';
+        }
+        if (($meta['target_mode'] ?? '') === 'HYBRID' && !empty($meta['url'])) $context .= '--url=' . escapeshellarg((string)$meta['url']) . ' ';
+        return $context;
+    }
+
     private function renderCheckDetails(OutputInterface $out, array $finding): void
     {
         $items = is_array($finding['detail'] ?? null) ? $finding['detail'] : [];
@@ -543,7 +595,7 @@ final class ScanConsoleRenderer
         }
 
         return $id !== ''
-            ? ['Review the rule requirements and remediation guidance: https://magebean.com/baseline/' . rawurlencode($id)]
+            ? ((preg_match('/^MB-[0-9]{4,}$/D', $id) === 1) ? ['Review the requirement criterion and its evidence obligations in the scan report.'] : ['Review the rule requirements and remediation guidance: https://magebean.com/baseline/' . rawurlencode($id)])
             : ['Review the rule requirements and remediation guidance at https://magebean.com/baseline'];
     }
 }

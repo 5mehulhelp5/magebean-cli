@@ -1,6 +1,7 @@
 # Phase 3: scan planning and shared execution
 
-New documentation uses **requirement** for the assessment unit: one requirement has one assessment definition and can contain multiple reusable checks. ASVS profiles now compile one canonical assessment definition per requirement from legacy many-to-many evidence mappings. Other profiles remain legacy adapters. See [Requirement model](requirement-model.md) and [ASVS L1/L2 migration inventory](asvs-requirement-migration.md). Exact CLI names, JSON keys and transport fields below describe the current implementation; they have not been renamed.
+Current primary runtime: one internal `MB-…` requirement identity with reusable check functions and requirement-owned obligations. Profiles select identities; standards references are alignment metadata. Historical MB-R APIs/selectors/manifests remain compatibility adapters. Older examples and legacy API sections below must be read with that boundary. See [requirement model](requirement-model.md) and [migration contract](requirement-migration.md).
+
 
 `ScanPlanner` owns the selection of executable rules. Its two entry points make
 existing policies explicit rather than silently making the agent follow CLI defaults:
@@ -44,6 +45,6 @@ registry/progress forwarding and plan immutability.
 
 Phase 6 follow-up: target resolution and report enrichment now have dedicated services. Planner diagnostics are plain ScanDiagnostic objects, rendered only by ScanConsoleRenderer; the transitional formatted-string callback is superseded. See architecture.md.
 
-## ASVS requirement runtime migration
+## Independent requirement runtime
 
-`RequirementCatalog` compiles ASVS coverage metadata and legacy evidence definitions into one versioned requirement definition. `RequirementPolicy` applies canonical selection/presentation policy after compilation. `RequirementEvaluator` evaluates grouped evidence through the existing registry and scan deadline/lease callback. Necessary groups use AND; source alternatives preserve their operator, while mandatory human evidence is a separate obligation. Gap definitions produce UNKNOWN. Legacy `ProfileLoader::apply`, MB-R catalog loading and non-ASVS profiles remain adapters. See [runtime migration](requirement-migration.md) for scope and compatibility.
+`RequirementCatalog` loads persisted internal definitions and profile membership independently of legacy source objects. Each requirement owns its criterion, revision, applicability and evidence obligations; the check registry supplies reusable functions. The primary runner assesses one internal identity and attaches standard alignment as metadata. Legacy `ProfileLoader::apply`, `RulePackLoader` and historical explicit selector/manifest requests remain compatibility adapters. PCI reports use primary alignment rather than profile mappings. See [runtime migration](requirement-migration.md) for selection, report and transport acceptance gates.

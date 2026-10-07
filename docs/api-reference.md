@@ -1,6 +1,6 @@
 # Magebean API Reference
 
-New documentation uses **requirement** for the assessment unit: one requirement has one assessment definition and can contain multiple reusable checks. ASVS profiles now compile one canonical assessment definition per requirement from legacy many-to-many evidence mappings. Other profiles remain legacy adapters. See [Requirement model](requirement-model.md) and [ASVS L1/L2 migration inventory](asvs-requirement-migration.md). Exact CLI names, JSON keys and transport fields below describe the current implementation; they have not been renamed.
+Current primary runtime: one internal `MB-…` requirement identity with reusable check functions and requirement-owned obligations. Profiles select identities; standards references are alignment metadata. Historical MB-R APIs/selectors/manifests remain compatibility adapters. Older examples and legacy API sections below must be read with that boundary. See [requirement model](requirement-model.md) and [migration contract](requirement-migration.md).
 
 Magebean CLI performs most checks locally. Some dependency, package-lifecycle,
 and Adobe security-patch rules call `https://api.magebean.com`.

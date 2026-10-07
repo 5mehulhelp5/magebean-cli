@@ -17,16 +17,26 @@ final class GitHistoryCheck
 
     public function secretScan(array $args): array
     {
+        return $this->scan($args, true);
+    }
+
+    public function workingTreeScan(array $args): array
+    {
+        return $this->scan($args, false);
+    }
+
+    private function scan(array $args, bool $requireHistory): array
+    {
         $configuredPatterns = array_values(array_filter(array_map(
             static fn(mixed $pattern): string => trim((string)$pattern),
             (array)($args['patterns'] ?? [])
         ), static fn(string $pattern): bool => $pattern !== ''));
         $patterns = $this->validPatterns($configuredPatterns);
         if ($patterns === []) {
-            return [null, '[UNKNOWN] git_history_scan requires at least one valid pattern'];
+            return [null, '[UNKNOWN] secret scan requires at least one valid pattern'];
         }
         if (count($patterns) !== count($configuredPatterns)) {
-            return [null, '[UNKNOWN] git_history_scan contains an invalid regular expression'];
+            return [null, '[UNKNOWN] secret scan contains an invalid regular expression'];
         }
 
         $paths = array_values(array_filter(array_map(
@@ -48,21 +58,26 @@ final class GitHistoryCheck
         $maxFileBytes = max(1024, (int)($args['max_file_bytes'] ?? 1048576));
         $repoRoot = $this->ctx->abs('.');
 
+        try {
         $workingTree = $this->scanWorkingTree(
             $repoRoot,
             $paths,
             $excludeDirs,
             $patterns,
             $maxResults,
-            $maxFileBytes
+            $maxFileBytes,
+            !$requireHistory
         );
-        $history = $this->scanGitHistory(
+        } catch (\Throwable $error) {
+            return [null, '[UNKNOWN] Working-tree traversal failed: ' . $error->getMessage()];
+        }
+        $history = $requireHistory ? $this->scanGitHistory(
             $repoRoot,
             $paths,
             $excludeDirs,
             $patterns,
             $maxResults
-        );
+        ) : ['assessed' => false, 'commits_scanned' => 0, 'findings' => [], 'truncated' => false, 'error' => null];
 
         $findings = array_merge($workingTree['findings'], $history['findings']);
         $evidence = [
@@ -74,6 +89,10 @@ final class GitHistoryCheck
             'git_commits_scanned' => $history['commits_scanned'],
             'git_history_findings' => $history['findings'],
             'truncated' => $workingTree['truncated'] || $history['truncated'],
+            'history_required' => $requireHistory,
+            'scope' => $requireHistory ? 'Configured patterns; eligible nonbinary working-tree files up to max_file_bytes; all available local Git refs; configured paths and exclusions. Not proof that all possible secrets are absent.' : 'Configured patterns in readable nonbinary deployed working-tree files; configured paths and exclusions. Git history is outside this requirement.',
+            'git_history_error' => $history['error'],
+            'working_tree_gaps' => $workingTree['gaps'],
         ];
 
         if ($findings !== []) {
@@ -88,13 +107,16 @@ final class GitHistoryCheck
             if ($evidence['truncated']) {
                 $message .= "\n    Additional matches were omitted after reaching max_results.";
             }
-            if (!$history['assessed']) {
+            if ($requireHistory && !$history['assessed']) {
                 $message .= "\n    Git history was not assessable: " . $history['error'];
             }
             return [false, $message, $evidence];
         }
 
-        if (!$history['assessed']) {
+        if ($workingTree['gaps'] !== []) {
+            return [null, '[UNKNOWN] Working-tree coverage incomplete: ' . implode(', ', $workingTree['gaps']), $evidence];
+        }
+        if ($requireHistory && !$history['assessed']) {
             return [
                 null,
                 '[UNKNOWN] Working tree is clean, but Git history could not be assessed: '
@@ -105,7 +127,7 @@ final class GitHistoryCheck
 
         return [
             true,
-            'No secrets detected in the working tree or ' . $history['commits_scanned'] . ' Git commit(s)',
+            $requireHistory ? 'No configured secret-pattern matches in the eligible working tree or ' . $history['commits_scanned'] . ' Git commit(s)' : 'No configured secret-pattern matches in the deployed working tree',
             $evidence,
         ];
     }
@@ -128,28 +150,32 @@ final class GitHistoryCheck
         array $excludeDirs,
         array $patterns,
         int $maxResults,
-        int $maxFileBytes
+        int $maxFileBytes,
+        bool $strictCoverage = false
     ): array {
         $findings = [];
         $filesScanned = 0;
         $truncated = false;
+        $gaps = [];
 
         foreach ($paths as $relative) {
             $target = $relative === '.' ? $repoRoot : $repoRoot . DIRECTORY_SEPARATOR . $relative;
+            if (!file_exists($target)) { $gaps[] = 'configured_path_missing:' . $relative; continue; }
             foreach ($this->filesUnder($target, $repoRoot, $excludeDirs) as $file) {
-                if (!$file->isFile() || $file->isLink() || $file->getSize() > $maxFileBytes) {
+                if (!$file->isFile() || $file->isLink()) continue;
+                if ($file->getSize() > $maxFileBytes) {
+                    if ($strictCoverage) $gaps[] = 'file_size_limit:' . $this->relativePath($repoRoot, $file->getPathname());
                     continue;
                 }
                 $content = @file_get_contents($file->getPathname());
-                if (!is_string($content) || str_contains($content, "\0")) {
-                    continue;
-                }
+                if (!is_string($content)) { $gaps[] = 'file_unreadable:' . $this->relativePath($repoRoot, $file->getPathname()); continue; }
+                if (str_contains($content, "\0")) continue;
                 $filesScanned++;
                 $relativePath = $this->relativePath($repoRoot, $file->getPathname());
                 foreach ($patterns as $patternIndex => $pattern) {
-                    if (!preg_match_all($this->pcre($pattern), $content, $matches, PREG_OFFSET_CAPTURE)) {
-                        continue;
-                    }
+                    $matched = preg_match_all($this->pcre($pattern), $content, $matches, PREG_OFFSET_CAPTURE);
+                    if ($matched === false) { $gaps[] = 'pattern_execution_failed:' . $relativePath; continue; }
+                    if ($matched === 0) continue;
                     foreach ($matches[0] as $match) {
                         $findings[] = [
                             'scope' => 'working_tree',
@@ -169,6 +195,7 @@ final class GitHistoryCheck
         return [
             'findings' => $findings,
             'files_scanned' => $filesScanned,
+            'gaps' => array_values(array_unique($gaps)),
             'truncated' => $truncated,
         ];
     }

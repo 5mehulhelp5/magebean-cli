@@ -70,7 +70,7 @@ final class HtmlReporter
             $statusLabel = $status === 'MANUAL_REVIEW' ? 'HUMAN VERIFICATION REQUIRED' : $status;
             $userMsgRaw = (string)($f['message'] ?? '');
             if ($status === 'UNKNOWN' && trim($userMsgRaw) === '') {
-                $userMsgRaw = 'CVE file not found (requires --cve-data package)';
+                $userMsgRaw = isset($f['requirement']) ? 'Insufficient evidence to determine this requirement.' : 'CVE file not found (requires --cve-data package)';
             }
             $userMsg  = htmlspecialchars($userMsgRaw, ENT_QUOTES, 'UTF-8');
 
@@ -86,8 +86,9 @@ final class HtmlReporter
                 $messageParts[] = '<div style="margin-top:4px;"><i>' . $userMsg . '</i></div>';
             }
 
+            $identityCell = isset($f['requirement']) ? $id : '<a href="https://magebean.com/baseline/' . $id . '" target="_blank">' . $id . '</a>';
             $rows .= '<tr>'
-                . '<td><a href="https://magebean.com/baseline/' . $id . '" target="_blank">' . $id . '</a></td>'
+                . '<td>' . $identityCell . '</td>'
                 . '<td>' . $severity . '</td>'
                 . '<td class="' . $statusClass . '">' . $statusLabel . '</td>'
                 . '<td>' . implode('', $messageParts)
@@ -108,7 +109,10 @@ final class HtmlReporter
                 break;
             }
         }
-        if ($hasUnknown && !$isExternal) {
+        $hasPrimaryRequirements = count(array_filter($result['findings'] ?? [], static fn(array $finding): bool => isset($finding['requirement']))) > 0;
+        if ($hasUnknown && !$isExternal && $hasPrimaryRequirements) {
+            $html = str_replace('{{cve_section}}', '<div class="section"><strong>Note:</strong> UNKNOWN requirements have insufficient evidence. Review their observations, applicability and collection errors.</div>' . '{{cve_section}}', $html);
+        } elseif ($hasUnknown && !$isExternal) {
             $html = str_replace('{{cve_section}}', '<div class="section"><strong>Note:</strong> Some CVE-related rules are <span class="status-unknown">UNKNOWN</span> because CVE data was missing. Provide a CVE bundle via <code>--cve-data=path.zip</code> to enable full checks.</div>' . '{{cve_section}}', $html);
         }
 
