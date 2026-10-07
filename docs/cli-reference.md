@@ -479,3 +479,8 @@ Missing source/runtime/artifact evidence remains UNKNOWN. Partial technical obse
 ### Basic automation execution contract
 
 `scan --path=/path/to/magento --profile=basic` attempts twenty automated deployment predicates. It can discover the configured runtime URL; use `--url` when the configured endpoint is inaccessible from the scanning host. Run with permission to read deployment configuration and installed scheduler sources. Missing runtime/configuration/permission evidence causes a separate execution error and process exit3. It is never counted as a confirmed vulnerability. Complete scans retain exits0=clean,1=noncritical findings,2=critical findings.
+`--include-manual-review` includes requirements that declare mandatory human evidence, including those with automated technical checks. Without the flag, profile scans and listings exclude them. Explicit `--rules` selection remains an intentional opt-in.
+
+## OWASP scan quality review — 2026-10-07
+
+The OWASP deployment profile has 31 automated requirements by default and 38 requiring explicit human evidence. Broad heuristic checks require `--include-manual-review`; reviewed bounded criteria can conclude PASS/FAIL. Git history is replaced in this deployment profile by existing MB-0730, with MB-0072 retained globally. Missing runtime/API evidence includes concrete collection guidance rather than instructions to fix a tool implementation gate. See [the 33-item security review](owasp-scan-quality-review.md).

@@ -146,6 +146,7 @@ final class ComposerRepositoryChecks extends ComposerSupport
 
     public function abandonedApi(array $args): array
     {
+        if (($problem = $this->strictInventoryProblem($args, false)) !== null) return $problem;
         $lockFile = $this->ctx->abs($args['lock_file'] ?? 'composer.lock');
         if (!is_file($lockFile)) {
             return [null, '[UNKNOWN] composer.lock not found'];

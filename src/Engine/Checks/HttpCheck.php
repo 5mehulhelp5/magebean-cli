@@ -202,22 +202,43 @@ final class HttpCheck
         if ($base === '') return [null, '[UNKNOWN] Runtime URL unavailable; provide --url=https://your-store or configure Magento secure base URL'];
         $url = preg_replace('~^http://~i', 'https://', $base);
         [$ok, $msg, $ev] = $this->fetch((string)$url, 'GET', [], (int)($args['timeout_ms'] ?? 8000), true);
-        if ($ok === null) return [null, $msg, $ev];
-        if (!$ok) return [false, $msg, $ev];
+        if ($ok !== true) return [null, '[UNKNOWN] Cannot inspect HSTS: ' . $msg . '. Verify --url, network access and the HTTPS trust chain; install the trusted CA for private certificates.', $ev];
+        $final = (string)($ev['final_url'] ?? $url);
+        $status = (int)($ev['status'] ?? 0);
+        if ($status < 200 || $status >= 300 || strtolower((string)parse_url($final, PHP_URL_SCHEME)) !== 'https' || strtolower((string)parse_url($final, PHP_URL_HOST)) !== strtolower((string)parse_url((string)$url, PHP_URL_HOST))) return [null, '[UNKNOWN] HSTS probe requires a successful same-host HTTPS page; received HTTP ' . $status . ' at ' . $final . '. Set --url to the canonical HTTPS storefront.', $ev];
 
-        $h = $this->hget(array_change_key_case((array)($ev['headers'] ?? []), CASE_LOWER), 'strict-transport-security');
-        $finalUrl = (string)($ev['final_url'] ?? $url);
+        return $this->assessHstsPolicy((array)($ev['headers'] ?? []), (string)$url, $final, $args);
+    }
+
+    private function assessHstsPolicy(array $observedHeaders, string $url, string $final, array $args): array
+    {
+        $headers = array_change_key_case( $observedHeaders, CASE_LOWER);
+        $policies = $headers['strict-transport-security'] ?? [];
+        $policies = is_array($policies) ? $policies : ($policies === '' ? [] : [$policies]);
+        if (count($policies) > 1) return [false, 'Multiple HSTS headers are ambiguous; emit exactly one Strict-Transport-Security header.', ['observed'=>$policies]];
+        $h = (string)($policies[0] ?? '');
+        $directives = [];
+        foreach (explode(';', $h) as $part) {
+            $part = trim($part); if ($part === '') continue;
+            if (!preg_match('~^([a-zA-Z][a-zA-Z0-9-]*)(?:\s*=\s*(.+))?$~', $part, $directive)) return [false, 'Malformed HSTS directive; configure a valid Strict-Transport-Security header.', ['observed'=>$h]];
+            $key = strtolower($directive[1]);
+            if (array_key_exists($key, $directives)) return [false, 'Duplicate HSTS directive; emit each directive once.', ['observed'=>$h]];
+            $directives[$key] = $directive[2] ?? null;
+        }
+        foreach (['includesubdomains','preload'] as $flag) if (array_key_exists($flag, $directives) && $directives[$flag] !== null) return [false, 'Malformed HSTS flag; includeSubDomains and preload must not have values.', ['observed'=>$h]];
+        $finalUrl = $final;
         $evidence = [
             'request_url' => $url,
             'final_url' => $finalUrl,
             'observed' => $h,
             'max_age' => null,
-            'include_subdomains' => stripos($h, 'includesubdomains') !== false,
-            'preload' => stripos($h, 'preload') !== false,
+            'include_subdomains' => array_key_exists('includesubdomains', $directives),
+            'preload' => array_key_exists('preload', $directives),
         ];
 
         if ($h === '') return [false, 'HSTS header missing', $evidence];
-        if (preg_match('~max-age\s*=\s*(\d+)~i', $h, $m)) {
+        if (preg_match('~^(?:([0-9]+)|\x22([0-9]+)\x22)$~', (string)($directives['max-age'] ?? ''), $m)) {
+            $m[1] = ($m[1] ?? '') !== '' ? $m[1] : ($m[2] ?? '');
             $min = (int)($args['min_max_age'] ?? 31536000);
             $evidence['max_age'] = (int)$m[1];
             $evidence['min_max_age'] = $min;
@@ -470,10 +491,10 @@ final class HttpCheck
             'client_readable_cookies' => $clientReadable,
         ];
         if ($successful === 0) {
-            return [null, '[UNKNOWN] Unable to fetch any path for cookie flag check', $evidence];
+            return [null, '[UNKNOWN] Unable to inspect cookies. Verify --url, network access and the HTTPS trust chain. Probe errors: ' . implode('; ', array_map(static fn(array $entry): string => ($entry['url'] ?? '') . ': ' . ($entry['message'] ?? $entry['reason'] ?? 'Unavailable response'), $incomplete)), $evidence];
         }
         if ($observedSensitive === []) {
-            return [null, '[UNKNOWN] No sensitive cookies observed on probed paths', $evidence];
+            return [null, '[UNKNOWN] No session/authentication cookies observed; provide a reachable session-creating page or inspect declared Magento cookie settings. No Set-Cookie does not prove protection.', $evidence];
         }
         if ($incomplete !== [] && $failures === []) {
             return [null, '[UNKNOWN] Cookie flag check had incomplete HTTP coverage', $evidence];
@@ -927,8 +948,10 @@ final class HttpCheck
         $base = $this->baseUrl();
         if ($base === '') return [false, 'Missing URL in context'];
         [$ok, $msg, $ev] = $this->fetch($base, 'GET', [], (int)($args['timeout_ms'] ?? 8000), false);
-        if ($ok === null) return [null, $msg, $ev];
-        if (!$ok) return [false, $msg, $ev];
+        if ($ok !== true) return [null, '[UNKNOWN] Cannot inspect HSTS: ' . $msg . '. Verify --url, network access and the HTTPS trust chain; install the trusted CA for private certificates.', $ev];
+        $final = (string)($ev['final_url'] ?? $url);
+        $status = (int)($ev['status'] ?? 0);
+        if ($status < 200 || $status >= 300 || strtolower((string)parse_url($final, PHP_URL_SCHEME)) !== 'https' || strtolower((string)parse_url($final, PHP_URL_HOST)) !== strtolower((string)parse_url((string)$url, PHP_URL_HOST))) return [null, '[UNKNOWN] HSTS probe requires a successful same-host HTTPS page; received HTTP ' . $status . ' at ' . $final . '. Set --url to the canonical HTTPS storefront.', $ev];
 
         $h = array_change_key_case((array)($ev['headers'] ?? []), CASE_LOWER);
         $xfo = strtolower($this->hget($h, 'x-frame-options'));
@@ -959,8 +982,10 @@ final class HttpCheck
         $base = $this->baseUrl();
         if ($base === '') return [false, 'Missing URL in context'];
         [$ok, $msg, $ev] = $this->fetch($base, 'GET', [], (int)($args['timeout_ms'] ?? 8000), false);
-        if ($ok === null) return [null, $msg, $ev];
-        if (!$ok) return [false, $msg, $ev];
+        if ($ok !== true) return [null, '[UNKNOWN] Cannot inspect HSTS: ' . $msg . '. Verify --url, network access and the HTTPS trust chain; install the trusted CA for private certificates.', $ev];
+        $final = (string)($ev['final_url'] ?? $url);
+        $status = (int)($ev['status'] ?? 0);
+        if ($status < 200 || $status >= 300 || strtolower((string)parse_url($final, PHP_URL_SCHEME)) !== 'https' || strtolower((string)parse_url($final, PHP_URL_HOST)) !== strtolower((string)parse_url((string)$url, PHP_URL_HOST))) return [null, '[UNKNOWN] HSTS probe requires a successful same-host HTTPS page; received HTTP ' . $status . ' at ' . $final . '. Set --url to the canonical HTTPS storefront.', $ev];
 
         $h = array_change_key_case((array)($ev['headers'] ?? []), CASE_LOWER);
         $csp = strtolower($this->hget($h, 'content-security-policy'));
@@ -979,8 +1004,10 @@ final class HttpCheck
         $base = $this->baseUrl();
         if ($base === '') return [false, 'Missing URL in context'];
         [$ok, $msg, $ev] = $this->fetch($base, 'GET', [], (int)($args['timeout_ms'] ?? 8000), false);
-        if ($ok === null) return [null, $msg, $ev];
-        if (!$ok) return [false, $msg, $ev];
+        if ($ok !== true) return [null, '[UNKNOWN] Cannot inspect HSTS: ' . $msg . '. Verify --url, network access and the HTTPS trust chain; install the trusted CA for private certificates.', $ev];
+        $final = (string)($ev['final_url'] ?? $url);
+        $status = (int)($ev['status'] ?? 0);
+        if ($status < 200 || $status >= 300 || strtolower((string)parse_url($final, PHP_URL_SCHEME)) !== 'https' || strtolower((string)parse_url($final, PHP_URL_HOST)) !== strtolower((string)parse_url((string)$url, PHP_URL_HOST))) return [null, '[UNKNOWN] HSTS probe requires a successful same-host HTTPS page; received HTTP ' . $status . ' at ' . $final . '. Set --url to the canonical HTTPS storefront.', $ev];
 
         $h = array_change_key_case((array)($ev['headers'] ?? []), CASE_LOWER);
         $acao = strtolower($this->hget($h, 'access-control-allow-origin'));
@@ -1090,8 +1117,10 @@ final class HttpCheck
         $base = $this->baseUrl();
         if ($base === '') return [null, '[UNKNOWN] Runtime URL unavailable; provide --url=https://your-store or configure Magento secure base URL', []];
         [$ok, $msg, $ev] = $this->fetch($base, 'GET', [], (int)($args['timeout_ms'] ?? 8000), false);
-        if ($ok === null) return [null, $msg, $ev];
-        if (!$ok) return [false, $msg, $ev];
+        if ($ok !== true) return [null, '[UNKNOWN] Cannot inspect HSTS: ' . $msg . '. Verify --url, network access and the HTTPS trust chain; install the trusted CA for private certificates.', $ev];
+        $final = (string)($ev['final_url'] ?? $url);
+        $status = (int)($ev['status'] ?? 0);
+        if ($status < 200 || $status >= 300 || strtolower((string)parse_url($final, PHP_URL_SCHEME)) !== 'https' || strtolower((string)parse_url($final, PHP_URL_HOST)) !== strtolower((string)parse_url((string)$url, PHP_URL_HOST))) return [null, '[UNKNOWN] HSTS probe requires a successful same-host HTTPS page; received HTTP ' . $status . ' at ' . $final . '. Set --url to the canonical HTTPS storefront.', $ev];
 
         $h = array_change_key_case((array)($ev['headers'] ?? []), CASE_LOWER);
         $hst = strtolower($this->hget($h, 'strict-transport-security'));

@@ -1,0 +1,28 @@
+<?php
+declare(strict_types=1);
+require __DIR__ . '/../vendor/autoload.php';
+use Magebean\Engine\Checks\Families\ComposerVersionChecks;
+use Magebean\Engine\Context;
+$check = new ComposerVersionChecks(new Context('/unused', ''));
+$method = new ReflectionMethod($check, 'assessCompleteYankedStatuses');
+$packages = [['name' => 'acme/a', 'version' => '1.0.0'], ['name' => 'acme/b', 'version' => '2.0.0']];
+$complete = ['acme/a' => ['installed' => '1.0.0', 'yanked' => false], 'acme/b' => ['installed' => '2.0.0', 'yanked' => false]];
+$count = 0;
+$assert = static function (bool $condition, string $message) use (&$count): void { $count++; if (!$condition) throw new RuntimeException($message); };
+$evaluate = static fn(array $statuses) => $method->invoke($check, $packages, $statuses);
+$assert($evaluate($complete)[0] === true, 'Complete explicit non-yanked version statuses pass');
+$positive = $complete; $positive['acme/a']['yanked'] = true;
+$assert($evaluate($positive)[0] === false, 'Explicit yanked installed version fails');
+$assert($evaluate([])[0] === null, 'Empty successful service response cannot pass');
+$missing = $complete; unset($missing['acme/b']);
+$assert($evaluate($missing)[0] === null, 'Partial response cannot pass');
+$missingFlag = $complete; unset($missingFlag['acme/b']['yanked']);
+$assert($evaluate($missingFlag)[0] === null, 'Missing yanked flag cannot pass');
+$wrong = $complete; $wrong['acme/b']['installed'] = '3.0.0';
+$assert($evaluate($wrong)[0] === null, 'Status for another version cannot pass');
+$unknown = $complete; $unknown['acme/b']['yanked_status_known'] = false;
+$assert($evaluate($unknown)[0] === null, 'Explicit unknown status cannot pass');
+$positiveMissing = ['acme/a' => $positive['acme/a']];
+$result = $evaluate($positiveMissing);
+$assert($result[0] === false && count($result[2]['packages_unknown']) === 1, 'Positive finding preserved alongside incomplete inventory');
+echo "Composer withdrawal coverage: $count assertions passed\n";

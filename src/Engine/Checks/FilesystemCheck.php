@@ -192,6 +192,7 @@ final class FilesystemCheck
 
     public function logsReportsNotInWebroot(array $args): array
     {
+        if (!empty($args['strict_scope'])) return $this->strictLogsReportsPlacement($args);
         $webrootRel = (string)($args['webroot'] ?? 'pub');
         $webroot = $this->ctx->abs($webrootRel);
         if (!is_dir($webroot)) {
@@ -268,6 +269,74 @@ final class FilesystemCheck
         return [true, 'Log and report paths are not exposed under webroot', ['webroot' => $webrootRel, 'checked' => $forbidden]];
     }
 
+    /** Enumerate every directory without silently suppressing inaccessible children. */
+    private function strictPathInventory(array $roots): array
+    {
+        $paths = []; $gaps = []; $pending = $roots; $seen = [];
+        while ($pending !== []) {
+            $path = array_pop($pending);
+            if (isset($seen[$path])) continue;
+            $seen[$path] = true;
+            if (!file_exists($path) && !is_link($path)) { $gaps[] = $path; continue; }
+            $paths[] = $path;
+            if (is_link($path)) {
+                if (realpath($path) === false || is_dir($path)) $gaps[] = $path;
+                continue;
+            }
+            if (!is_dir($path)) continue;
+            $children = @scandir($path);
+            if ($children === false) { $gaps[] = $path; continue; }
+            foreach ($children as $child) if ($child !== '.' && $child !== '..') $pending[] = $path . DIRECTORY_SEPARATOR . $child;
+        }
+        return [$paths, array_values(array_unique($gaps))];
+    }
+
+    private function strictCodeModes(array $args): array
+    {
+        $dirs = array_values($args['dirs'] ?? ['app', 'vendor', 'lib']);
+        if ($dirs === []) return [null, '[UNKNOWN] No code directories configured'];
+        [$paths, $gaps] = $this->strictPathInventory(array_map(fn($dir) => $this->ctx->abs((string)$dir), $dirs));
+        $offenders = [];
+        foreach ($paths as $path) {
+            $mode = @fileperms($path);
+            if ($mode === false) { $gaps[] = $path; continue; }
+            if (($mode & 0222) !== 0) $offenders[] = ['path' => $path, 'mode' => sprintf('%04o', $mode & 0777)];
+        }
+        $evidence = ['dirs' => $dirs, 'paths_checked' => count($paths), 'coverage_gaps' => array_values(array_unique($gaps)), 'offenders' => array_slice($offenders, 0, max(1, (int)($args['max_results'] ?? 50)))];
+        if ($offenders !== []) return [false, 'Code paths have Unix permission write bits enabled', $evidence];
+        if ($gaps !== []) return [null, '[UNKNOWN] Cannot inspect all configured code path permissions', $evidence];
+        return [true, 'Inspected code paths have no Unix permission write bits', $evidence];
+    }
+
+    private function strictLogsReportsPlacement(array $args): array
+    {
+        $relative = (string)($args['webroot'] ?? 'pub');
+        $webroot = realpath($this->ctx->abs($relative));
+        if ($webroot === false || !is_dir($webroot)) return [null, '[UNKNOWN] Configured webroot is unavailable', ['webroot' => $relative]];
+        $forbidden = array_values($args['forbidden_paths'] ?? ['var/log', 'var/report']);
+        if ($forbidden === []) return [null, '[UNKNOWN] No forbidden log/report paths configured'];
+        [$paths, $gaps] = $this->strictPathInventory([$webroot]);
+        $targets = []; $matches = [];
+        foreach ($forbidden as $item) {
+            $target = realpath($this->ctx->abs((string)$item));
+            if ($target !== false) $targets[] = $target;
+        }
+        foreach ($paths as $path) {
+            $under = str_replace('\\', '/', ltrim(substr($path, strlen($webroot)), DIRECTORY_SEPARATOR));
+            foreach ($forbidden as $item) {
+                $item = trim(str_replace('\\', '/', (string)$item), '/');
+                if ($under === $item || str_starts_with($under, $item . '/')) $matches[] = ['path' => $path, 'reason' => 'forbidden_relative_path'];
+            }
+            if (is_link($path)) {
+                $target = realpath($path);
+                if ($target !== false) foreach ($targets as $forbiddenTarget) if ($target === $forbiddenTarget || str_starts_with($target, $forbiddenTarget . DIRECTORY_SEPARATOR)) $matches[] = ['path' => $path, 'reason' => 'forbidden_symlink_target'];
+            }
+        }
+        $evidence = ['webroot' => $relative, 'paths_checked' => count($paths), 'coverage_gaps' => $gaps, 'matches' => $matches];
+        if ($matches !== []) return [false, 'Configured log/report paths are physically present or linked in webroot', $evidence];
+        if ($gaps !== []) return [null, '[UNKNOWN] Cannot inspect all configured webroot paths and links', $evidence];
+        return [true, 'Configured log/report paths are absent from inspected webroot', $evidence];
+    }
     public function logRotationConfigured(array $args): array
     {
         $fileRel = (string)($args['file'] ?? 'devops/logrotate.conf');
@@ -309,6 +378,7 @@ final class FilesystemCheck
 
     public function codeDirsReadonly(array $args): array
     {
+        if (!empty($args['strict_scope'])) return $this->strictCodeModes($args);
         $dirs = $args['dirs'] ?? ['app', 'vendor', 'lib'];
         $max = max(1, (int)($args['max_results'] ?? 50));
         $off = [];
@@ -731,8 +801,7 @@ final class FilesystemCheck
             $count = 0;
             $iterator = new \RecursiveIteratorIterator(
                 new \RecursiveDirectoryIterator($root, \FilesystemIterator::SKIP_DOTS),
-                \RecursiveIteratorIterator::LEAVES_ONLY,
-                \RecursiveIteratorIterator::CATCH_GET_CHILD
+                \RecursiveIteratorIterator::LEAVES_ONLY
             );
             foreach ($iterator as $file) {
                 if (!$file->isFile()) {

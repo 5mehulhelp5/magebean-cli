@@ -8,6 +8,7 @@ final class CodeQueryChecks extends CodeSearchSupport
 {
     public function grep(array $args): array
     {
+        if (!empty($args['strict_scope'])) return $this->strictPhpSuperglobals($args);
         $roots = $args['paths'] ?? ['app', 'vendor', 'lib', 'app/design'];
         $inc   = $args['include_ext'] ?? ['php','phtml','js','html','xml'];
         $must  = $args['must_match'] ?? [];
@@ -69,6 +70,38 @@ final class CodeQueryChecks extends CodeSearchSupport
         return [true, 'code_grep OK (patterns satisfied)'];
     }
 
+    private function strictPhpSuperglobals(array $args): array
+    {
+        $roots = array_values($args['paths'] ?? ['app']);
+        $forbidden = array_values($args['forbidden_superglobals'] ?? ['$_GET', '$_POST', '$_REQUEST', '$_COOKIE', '$_FILES', '$_SERVER']);
+        if ($roots === [] || $forbidden === []) return [null, '[UNKNOWN] Superglobal token policy has no configured scope'];
+        $files = []; $gaps = []; $matches = []; $count = 0;
+        foreach ($roots as $relative) {
+            $root = $this->ctx->abs((string)$relative);
+            if (!is_dir($root) || !is_readable($root)) { $gaps[] = (string)$relative; continue; }
+            try {
+                $iterator = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($root, \FilesystemIterator::SKIP_DOTS));
+                foreach ($iterator as $entry) {
+                    if ($entry->isLink()) { $gaps[] = $this->relativeFile($entry->getPathname()); continue; }
+                    if ($entry->isFile() && strtolower($entry->getExtension()) === 'php') $files[] = $entry->getPathname();
+                }
+            } catch (\UnexpectedValueException $e) { $gaps[] = (string)$relative; }
+        }
+        foreach (array_unique($files) as $file) {
+            $content = $this->collectors->files->read($file);
+            if ($content === false) { $gaps[] = $this->relativeFile($file); continue; }
+            try { $tokens = token_get_all($content, TOKEN_PARSE); }
+            catch (\ParseError $e) { $gaps[] = $this->relativeFile($file); continue; }
+            $count++;
+            foreach ($tokens as $token) {
+                if (is_array($token) && $token[0] === T_VARIABLE && in_array($token[1], $forbidden, true)) $matches[] = ['file' => $this->relativeFile($file), 'line' => $token[2], 'variable' => $token[1]];
+            }
+        }
+        $evidence = ['files_scanned' => $count, 'scope' => $roots, 'coverage_gaps' => array_values(array_unique($gaps)), 'matches' => array_slice($matches, 0, max(1, (int)($args['max_results'] ?? 50)))];
+        if ($matches !== []) return [false, 'Direct PHP superglobal references found in inspected application source', $evidence];
+        if ($gaps !== []) return [null, '[UNKNOWN] Cannot read and parse the complete configured PHP source scope', $evidence];
+        return [true, 'No direct PHP superglobal tokens in the inspected application source', $evidence];
+    }
     public function noMixedContent(array $args): array
     {
         if (!empty($args['strict_scope'])) return $this->strictLiteralMixedContent($args);

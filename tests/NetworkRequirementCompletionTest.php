@@ -54,6 +54,11 @@ ROUTER);
     networkAssert(count($method->invoke($http,'<img src="http://assets.test/a.png">'))===1,'Rendered HTTP resource is detected.');
     $missing=new HttpCheck(new Context($root,'','',[]));
     networkAssert(str_contains($missing->dispatch('http_no_directory_listing',['strict_scope'=>true])[1],'--url'),'Missing runtime evidence gives a concrete URL hint.');
+    $policy = new ReflectionMethod(HttpCheck::class, 'assessHstsPolicy');
+    foreach ([['max-age=31536000; includeSubDomains',true],['max-age="31536000"',true],['xmax-age=31536000',false],['max-age=31536000evil',false],['max-age=31536000; max-age=0',false],['max-age=31536000; includeSubDomains=true',false]] as [$header,$expected]) {
+        networkAssert($policy->invoke($http,['Strict-Transport-Security'=>[$header]],'https://store.test','https://store.test',[])[0] === $expected,'Exact HSTS directives: '.$header);
+    }
+    networkAssert($policy->invoke($http,['strict-transport-security'=>['max-age=31536000','max-age=0']],'https://store.test','https://store.test',[])[0] === false,'Duplicate HSTS headers cannot prove the scoped policy.');
     // Real OpenSSL endpoint proves protocol rejection, not merely the negotiated preferred version.
     $cmd=proc_open(['openssl','req','-x509','-newkey','rsa:2048','-nodes','-keyout',$root.'/key.pem','-out',$root.'/cert.pem','-days','1','-subj','/CN=localhost'],[0=>['file','/dev/null','r'],1=>['file',$root.'/cert.out','w'],2=>['file',$root.'/cert.err','w']],$pipes);
     networkAssert(is_resource($cmd)&&proc_close($cmd)===0,'TLS fixture certificate generation.');
@@ -64,6 +69,12 @@ ROUTER);
         $url='https://'.$address;$http=new HttpCheck(new Context($root,$url,'',['url'=>$url]));
         $result=$http->dispatch('http_tls_min_version',['strict_scope'=>true,'timeout_ms'=>1000]);
         networkAssert($result[0]===$expected,'Active TLS probe '.$protocol.': '.json_encode($result));
+        if ($protocol === '-tls1_2') {
+            $hsts = $http->dispatch('http_has_hsts', ['strict_scope'=>true,'timeout_ms'=>1000]);
+            networkAssert($hsts[0] === null && str_contains($hsts[1], 'trusted CA'), 'Untrusted TLS does not establish HSTS failure and supplies trust-chain remediation.');
+            $cookies = $http->dispatch('http_cookie_flags', ['strict_scope'=>true,'paths'=>['/'],'timeout_ms'=>1000]);
+            networkAssert($cookies[0] === null && str_contains($cookies[1], $url) && str_contains($cookies[1], 'trust chain'), 'Cookie collection failure preserves endpoint and concrete trust-chain action.');
+        }
         proc_terminate($tls);proc_close($tls);$tls=null;
     }
     echo "NetworkRequirementCompletionTest passed\n";

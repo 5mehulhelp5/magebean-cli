@@ -25,6 +25,12 @@ try {
     $assert(!str_contains(json_encode($result), $secret), 'Secret never appears in evidence');
     unlink($root . '/secret.php');
     $assert($check->workingTreeScan($args + ['paths' => ['missing']])[0] === null, 'Missing configured path cannot pass');
+    file_put_contents($root . '/font.ttf', "\0" . str_repeat('x', 2 * 1024 * 1024));
+    $assert($check->workingTreeScan($args)[0] === true, 'Oversized binary fonts are outside text scope, not coverage errors');
+    unlink($root . '/font.ttf');
+    file_put_contents($root . '/large.js', str_repeat('x', 1100000) . "\n" . $secret);
+    $assert($check->workingTreeScan($args + ['max_file_bytes' => 16777216])[0] === false, 'Secret beyond old1MB cutoff is detected in expanded bounded text scope');
+    unlink($root . '/large.js');
     file_put_contents($root . '/large.php', str_repeat('x', 2048));
     $assert($check->workingTreeScan($args + ['max_file_bytes' => 1024])[0] === null, 'Oversized text creates coverage gap');
     unlink($root . '/large.php');

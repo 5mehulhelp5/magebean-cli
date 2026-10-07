@@ -623,6 +623,7 @@ final class ComposerAdvisoryChecks extends ComposerSupport
 
     public function advisoryLatencyApi(array $args): array
     {
+        if (($problem = $this->strictInventoryProblem($args, false)) !== null) return $problem;
         $audit = $this->auditApi($args);
         $status = $audit[0] ?? null;
         $evidence = is_array($audit[2] ?? null) ? $audit[2] : [];
@@ -689,7 +690,7 @@ final class ComposerAdvisoryChecks extends ComposerSupport
                 }
                 return $text;
             }, $visible);
-            $message = 'Unresolved advisories exceed the ' . $slaDays . "-day SLA:\n    - "
+            $message = 'Affected advisories exceed the ' . $slaDays . "-day publication-age threshold:\n    - "
                 . implode("\n    - ", $details);
             if ($missingPublished !== []) {
                 $missingDetails = array_map(
@@ -727,6 +728,7 @@ final class ComposerAdvisoryChecks extends ComposerSupport
 
     public function transitiveAuditApi(array $args): array
     {
+        if (($problem = $this->strictInventoryProblem($args, true)) !== null) return $problem;
         $lockFile = $this->ctx->abs($args['lock_file'] ?? 'composer.lock');
         $composerFile = $this->ctx->abs($args['composer_file'] ?? 'composer.json');
         if (!is_file($lockFile)) {
@@ -832,6 +834,7 @@ final class ComposerAdvisoryChecks extends ComposerSupport
 
     public function constraintsConflictApi(array $args): array
     {
+        if (($problem = $this->strictInventoryProblem($args, true)) !== null) return $problem;
         $composerFile = $this->ctx->abs($args['json_file'] ?? 'composer.json');
         $lockFile = $this->ctx->abs($args['lock_file'] ?? 'composer.lock');
         if (!is_file($composerFile)) {

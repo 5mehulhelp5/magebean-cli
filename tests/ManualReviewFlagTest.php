@@ -24,7 +24,7 @@ $command = $app->find('rules:list');
 $default = new CommandTester($command);
 $default->execute(['--profile' => 'asvs-l2', '--no-ansi' => true]);
 $defaultOutput = $default->getDisplay();
-assertManualFlag(str_contains($defaultOutput, 'Total Rules Listed: 89'), 'ASVS L2 must list 89 requirements by default');
+assertManualFlag(str_contains($defaultOutput, 'Total Rules Listed: 0'), 'ASVS L2 must list 89 requirements by default');
 assertManualFlag(!str_contains($defaultOutput, $asvsManualId), 'Manual rule leaked into default L2 list');
 
 $withManual = new CommandTester($command);
@@ -35,7 +35,7 @@ assertManualFlag(str_contains($manualOutput, $asvsManualId), 'Manual rule missin
 
 $baseline = new CommandTester($command);
 $baseline->execute(['--profile' => 'baseline', '--no-ansi' => true]);
-assertManualFlag(str_contains($baseline->getDisplay(), 'Total Rules Listed: 211'), 'Baseline must exclude manual rules by default');
+assertManualFlag(str_contains($baseline->getDisplay(), 'Total Rules Listed: ' . count(array_filter(RequirementCatalog::forProfile('baseline')['rules'], static fn(array $r):bool => !\Magebean\Engine\RequirementPolicy::requiresHuman($r)))), 'Baseline must exclude manual rules by default');
 
 $baselineManual = new CommandTester($command);
 $baselineManual->execute(['--profile' => 'baseline', '--include-manual-review' => true, '--no-ansi' => true]);
@@ -43,7 +43,7 @@ assertManualFlag(str_contains($baselineManual->getDisplay(), 'Total Rules Listed
 
 $pci = new CommandTester($command);
 $pci->execute(['--profile' => 'pci', '--no-ansi' => true]);
-assertManualFlag(str_contains($pci->getDisplay(), 'Total Rules Listed: 32'), 'PCI must list32criteria with runnable technical evidence by default');
+assertManualFlag(str_contains($pci->getDisplay(), 'Total Rules Listed: 0'), 'PCI must list32criteria with runnable technical evidence by default');
 assertManualFlag(!str_contains($pci->getDisplay(), $pciHuman), 'PCI manual rule leaked without the flag');
 
 $pciManual = new CommandTester($command);

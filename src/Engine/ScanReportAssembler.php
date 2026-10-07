@@ -47,9 +47,15 @@ final class ScanReportAssembler
             $result['meta']['url'] = $projectUrl;
             $result['meta']['profile_inventory_count'] = (int)($plan->metadata['profileInventoryCount'] ?? $profileRulesTotal);
             $result['meta']['omitted_requirements'] = $plan->metadata['omittedRequirements'] ?? [];
+            foreach ($result['findings'] as &$finding) {
+                if (($finding['status'] ?? '') !== 'UNKNOWN') continue;
+                $finding['collection_guidance'] = RequirementDiagnostics::forFinding($finding);
+                $finding['message'] = preg_replace('/^Necessary requirement evidence is missing, incomplete or indeterminate\.\s*/', '', (string)($finding['message'] ?? '')) ?: 'Required scan input is unavailable.';
+            }
+            unset($finding);
         }
 
-        if (($activeProfile['automation_only'] ?? false) === true && ($result['meta']['assessment_model'] ?? '') === 'internal-requirement-v1') {
+        if (($plan->metadata['automationOnly'] ?? $activeProfile['automation_only'] ?? false) === true && ($result['meta']['assessment_model'] ?? '') === 'internal-requirement-v1') {
             $executionErrors = [];
             foreach ($result['findings'] as &$finding) {
                 if (!in_array(strtoupper((string)($finding['status'] ?? '')), ['UNKNOWN', 'MANUAL_REVIEW'], true)) continue;

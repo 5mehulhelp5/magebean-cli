@@ -4,6 +4,14 @@ namespace Magebean\Engine;
 /** Project policy selects identities; it cannot rewrite an obligation. */
 final class RequirementPolicy
 {
+    public static function requiresHuman(array $rule): bool
+    {
+        if (($rule['verification'] ?? 'automated') === 'manual' || !empty($rule['human_evidence']['required'])) return true;
+        foreach ($rule['obligations'] ?? [] as $obligation) {
+            if (($obligation['role'] ?? 'mandatory') !== 'supporting' && ($obligation['proof'] ?? '') === 'human') return true;
+        }
+        return false;
+    }
     public static function resolveIds(array $ids, ?string $profile=null): array
     {
         $resolved=[];

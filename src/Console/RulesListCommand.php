@@ -91,11 +91,11 @@ HELP;
             $out->writeln(sprintf('<info>Profile:</info> %s (%s)', (string)($profile['id'] ?? $profileOpt), (string)($profile['title'] ?? '')));
         }
         $profileRulesTotal = count($pack['rules'] ?? []);
-        $profileManualRulesTotal = count(array_filter($pack['rules'] ?? [], static fn(array $rule): bool => strtolower((string)($rule['verification'] ?? 'automated')) === 'manual'));
+        $profileManualRulesTotal = count(array_filter($pack['rules'] ?? [], static fn(array $rule): bool => \Magebean\Engine\RequirementPolicy::requiresHuman($rule)));
         if (!$includeManualReview) {
             $pack['rules'] = array_values(array_filter(
                 $pack['rules'] ?? [],
-                static fn(array $rule): bool => strtolower((string)($rule['verification'] ?? 'automated')) !== 'manual'
+                static fn(array $rule): bool => !\Magebean\Engine\RequirementPolicy::requiresHuman($rule)
             ));
         }
         $sev = $in->getOption('severity');

@@ -83,7 +83,7 @@ final class MagentoCheck
     /** Read installed Magento module defaults, not scanner-invented fallback values. */
     private function installedModuleDefault(string $path): array
     {
-        $moduleFiles = ['Magento_Backend' => 'backend', 'Magento_Captcha' => 'captcha', 'Magento_Developer' => 'developer', 'Magento_Translation' => 'translation', 'Magento_User' => 'user'];
+        $moduleFiles = ['Magento_Backend' => 'backend', 'Magento_Captcha' => 'captcha', 'Magento_Developer' => 'developer', 'Magento_Translation' => 'translation', 'Magento_User' => 'user', 'Magento_Security' => 'security'];
         $config = $this->loadArray('app/etc/config.php');
         $modules = $config['modules'] ?? [];
         if (isset($config['__ERROR__']) || !is_array($modules)) return [false, null, 'app/etc/config.php', 'Installed module states are unavailable'];
@@ -566,49 +566,16 @@ final class MagentoCheck
 
     public function adminSessionTimeout(array $args): array
     {
-        $file = (string)($args['file'] ?? 'app/etc/config.php');
-        $basePath = (string)($args['base_path'] ?? 'system.default.admin.security');
-        $maxSeconds = (int)($args['max_seconds'] ?? 900);
-
-        $arr = $this->loadArray($file);
-        if (isset($arr['__ERROR__'])) {
-            return [false, $arr['__ERROR__']];
-        }
-
-        $paths = $this->policyPaths($basePath, ['session_lifetime', 'session_timeout']);
-        [$foundPath, $value] = $this->firstExistingPath($arr, $paths);
-        $evidence = [
-            'file' => $file,
-            'base_path' => $basePath,
-            'path' => $foundPath,
-            'observed' => $value,
-            'max_seconds' => $maxSeconds,
-        ];
-
-        if ($foundPath === null) {
-            return [false, "Admin session lifetime is not configured", $evidence];
-        }
-
-        if (!is_numeric($value)) {
-            $evidence['reason'] = 'not_numeric';
-            return [false, "Admin session lifetime is not numeric", $evidence];
-        }
-
+        $maxSeconds = max(1, (int)($args['max_seconds'] ?? 900));
+        [$found, $value, $source, $reason] = $this->primaryConfigValue('admin/security/session_lifetime');
+        $evidence = ['source' => $source, 'path' => 'admin/security/session_lifetime', 'observed' => $value, 'max_seconds' => $maxSeconds, 'scope' => 'default_configuration'];
+        if (!$found) return [null, '[UNKNOWN] Admin session lifetime cannot be resolved: ' . $reason, $evidence];
+        if ((!is_int($value) && !is_string($value)) || preg_match('/^[0-9]+$/D', (string)$value) !== 1) return [null, '[UNKNOWN] Admin session lifetime is not a valid integer', $evidence];
         $seconds = (int)$value;
         $evidence['observed_seconds'] = $seconds;
-        if ($seconds <= 0) {
-            $evidence['reason'] = 'non_positive';
-            return [false, "Admin session lifetime must be positive", $evidence];
-        }
-
-        if ($seconds > $maxSeconds) {
-            $evidence['reason'] = 'too_long';
-            return [false, "Admin session lifetime exceeds {$maxSeconds} seconds", $evidence];
-        }
-
-        return [true, "Admin session lifetime is at or below {$maxSeconds} seconds", $evidence];
+        $ok = $seconds > 0 && $seconds <= $maxSeconds;
+        return [$ok, $ok ? 'Configured admin session lifetime is at or below ' . $maxSeconds . ' seconds' : 'Configured admin session lifetime is ' . $seconds . ' seconds; set admin/security/session_lifetime to between 1 and ' . $maxSeconds, $evidence];
     }
-
     public function adminExposureRestricted(array $args): array
     {
         $envFile = (string)($args['env_file'] ?? 'app/etc/env.php');

@@ -1,0 +1,171 @@
+{
+  "date": "2026-10-07",
+  "reviewed_count": 33,
+  "decisions": [
+    {
+      "id": "MB-0010",
+      "decision": "human_evidence_required",
+      "reason": "Verify the effective admin route and active reverse-proxy/firewall allowlist; repository ACL hints do not prove access restriction."
+    },
+    {
+      "id": "MB-0015",
+      "decision": "human_evidence_required",
+      "reason": "Verify server-side CSRF validation and exemptions for each state-changing route; token markup alone does not prove CSRF protection."
+    },
+    {
+      "id": "MB-0016",
+      "decision": "human_evidence_required",
+      "reason": "Trace attacker-controlled URLs to outbound requests and verify scheme, destination and redirect validation; nearby keywords do not prove SSRF prevention."
+    },
+    {
+      "id": "MB-0019",
+      "decision": "human_evidence_required",
+      "reason": "Review dynamic execution arguments and runtime PHP semantics; boolean assert and nearby request tokens do not prove code injection."
+    },
+    {
+      "id": "MB-0020",
+      "decision": "human_evidence_required",
+      "reason": "Trace untrusted file paths and verify canonicalization and containment at the actual filesystem sink."
+    },
+    {
+      "id": "MB-0021",
+      "decision": "human_evidence_required",
+      "reason": "Review effective upload validation, storage and execution restrictions including delegated framework validators."
+    },
+    {
+      "id": "MB-0023",
+      "decision": "human_evidence_required",
+      "reason": "Determine which generated values are security-sensitive and verify their entropy source; ordinary rand usage is not a cryptographic vulnerability."
+    },
+    {
+      "id": "MB-0025",
+      "decision": "human_evidence_required",
+      "reason": "Review cryptographic algorithms, parameters and session configuration; raw OpenSSL or sodium use is not automatically unsafe."
+    },
+    {
+      "id": "MB-0043",
+      "decision": "human_evidence_required",
+      "reason": "Verify effective installed logrotate, journald or managed logging retention and activation; a project logrotate file is optional evidence, not the entire logging policy."
+    },
+    {
+      "id": "MB-0073",
+      "decision": "human_evidence_required",
+      "reason": "Review actual runtime outbound endpoint configuration including dynamic URLs; literal source URL observations alone do not establish HTTPS-only communication."
+    },
+    {
+      "id": "MB-0078",
+      "decision": "human_evidence_required",
+      "reason": "Verify active gateway TLS protocols and cipher negotiation; inactive repository web-server configuration is supporting evidence only."
+    },
+    {
+      "id": "MB-0079",
+      "decision": "human_evidence_required",
+      "reason": "Review secret storage and database configuration with redacted evidence; static source scanning cannot establish absence of API keys in the database."
+    },
+    {
+      "id": "MB-0089",
+      "decision": "human_evidence_required",
+      "reason": "Verify enforcing CSP headers on actual checkout responses and the effective Magento CSP mode; source declarations alone do not prove enforcement."
+    },
+    {
+      "id": "MB-0096",
+      "decision": "human_evidence_required",
+      "reason": "Verify security headers emitted by successful application responses; source declarations alone do not prove runtime policy."
+    },
+    {
+      "id": "MB-0097",
+      "decision": "human_evidence_required",
+      "reason": "Confirm whether flagged literals are actual credentials and inspect dynamic secret sources; secret-like constant names alone do not prove hardcoded secrets."
+    },
+    {
+      "id": "MB-0098",
+      "decision": "human_evidence_required",
+      "reason": "Review XML parser version, entity options and actual untrusted input; a nearby LIBXML flag alone does not prove exploitable XXE."
+    },
+    {
+      "id": "MB-0004",
+      "decision": "human_evidence_required",
+      "reason": "Verify code is not writable by the actual PHP/web-server process, including ACLs and mount policy. Deploy-owner write bits alone do not establish runtime write access; do not chmod a deployment recursively from this observation."
+    },
+    {
+      "id": "MB-0009",
+      "decision": "reviewed_scoped_automation",
+      "criterion": "The effective default-scope Magento admin/security/session_lifetime setting resolved from env.php, config.php, core_config_data or actual installed module defaults is a positive integer not exceeding 900 seconds."
+    },
+    {
+      "id": "MB-0014",
+      "decision": "reviewed_scoped_automation",
+      "criterion": "Valid PHP files in the configured app subtree contain no T_VARIABLE references to $_GET, $_POST, $_REQUEST, $_COOKIE, $_FILES or $_SERVER. Comments and literal strings are ignored. This is a source coding policy, not proof of input validation."
+    },
+    {
+      "id": "MB-0027",
+      "decision": "reviewed_scoped_automation",
+      "criterion": "A successful same-host HTTPS response at the configured runtime URL emits one unambiguous Strict-Transport-Security header with an exact integer max-age directive of at least 31536000 seconds. Repository web-server declarations are not runtime proof."
+    },
+    {
+      "id": "MB-0034",
+      "decision": "reviewed_scoped_automation",
+      "criterion": "At least one readable PHP artifact exists in each configured generated/metadata and generated/code directory. This assesses artifact presence, not DI compilation correctness or freshness."
+    },
+    {
+      "id": "MB-0042",
+      "decision": "reviewed_scoped_automation",
+      "criterion": "Within the collected pub tree, no configured var/log or var/report relative path, nor symlink to the corresponding project target, is present. This is filesystem placement, not a live HTTP exposure assertion."
+    },
+    {
+      "id": "MB-0055",
+      "decision": "reviewed_scoped_automation",
+      "criterion": "No transitive package version in the complete collected Composer lock inventory is identified as affected by applicable advisories returned by the configured OSV service. Coverage is limited to the queried inventory and service data."
+    },
+    {
+      "id": "MB-0056",
+      "decision": "reviewed_scoped_automation",
+      "criterion": "For returned applicable advisory findings with published fixed versions, the combined declared dependency constraints intersect versions at or above the published fixed version. This does not establish complete Composer solver feasibility, platform compatibility or every fixed branch."
+    },
+    {
+      "id": "MB-0057",
+      "decision": "reviewed_scoped_automation",
+      "criterion": "Every package version in the complete collected Composer lock inventory has an explicit non-yanked status from the configured package-status source. Missing per-package status cannot establish a clean result."
+    },
+    {
+      "id": "MB-0059",
+      "decision": "reviewed_scoped_automation",
+      "criterion": "No returned advisory affecting an installed Composer package version has a publication age greater than the configured 30-day threshold. This is publication age, not organizational discovery time or a measured remediation SLA."
+    },
+    {
+      "id": "MB-0061",
+      "decision": "reviewed_scoped_automation",
+      "criterion": "No dependency package in the complete assessed Composer inventory is marked abandoned by the configured package-maintenance source; a clean conclusion requires explicit known status for every assessed package."
+    },
+    {
+      "id": "MB-0069",
+      "decision": "reviewed_scoped_automation",
+      "criterion": "Collected direct Composer package versions are not older than the latest stable release reported by the configured package-status source. This is a maintenance policy, not proof of an exploitable vulnerability."
+    },
+    {
+      "id": "MB-0070",
+      "decision": "reviewed_scoped_automation",
+      "criterion": "composer.lock has a matching Composer content-hash, no duplicate or malformed package identities, and contains or provides/replaces each declared root package dependency. This does not prove the full dependency solver result or installed vendor file integrity."
+    },
+    {
+      "id": "MB-0072",
+      "decision": "deployment_profile_uses_MB-0730",
+      "reason": "History scope retained globally; deployments without .git use existing working-tree requirement, not false clean history."
+    },
+    {
+      "id": "MB-0030",
+      "decision": "collection_diagnostics",
+      "reason": "Report actual endpoint and TLS/network cause; no clean conclusion without emitted sensitive cookies."
+    },
+    {
+      "id": "MB-0379",
+      "decision": "human_filtered_by_default",
+      "reason": "Default configuration cannot establish debug-disabled for all production components."
+    },
+    {
+      "id": "MB-0077",
+      "decision": "human_filtered_by_default",
+      "reason": "Static string matching cannot establish third-party PII minimization."
+    }
+  ]
+}

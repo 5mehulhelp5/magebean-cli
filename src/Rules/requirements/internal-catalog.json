@@ -199,9 +199,9 @@
     },
     {
       "id": "MB-0004",
-      "revision": 2,
+      "revision": 3,
       "title": "Code directories are read-only",
-      "criterion": "Code directories are read-only; assess only the collected Magento deployment scope.",
+      "criterion": "Code directories are read-only for the application runtime in the collected Magento deployment; assess effective runtime identity, permissions, ACLs and read-only mounts.",
       "control": "MB-C01",
       "severity": "high",
       "alignments": [],
@@ -220,22 +220,19 @@
                   "vendor",
                   "lib"
                 ],
-                "max_results": 50
+                "max_results": 50,
+                "strict_scope": true
               }
             }
           ]
         }
       ],
-      "coverage": "PARTIALLY_AUTOMATED",
+      "coverage": "PARTIAL",
       "verification": "automated",
-      "review_state": "heuristic_supporting_only",
+      "review_state": "security_reviewed",
       "human_evidence": {
-        "required": false,
-        "instructions": "Detector implementation or evidence coverage is incomplete; this is an automated assessment limitation, not a required human workflow.",
-        "evidence_types": [
-          "review",
-          "runtime_scope"
-        ]
+        "required": true,
+        "instructions": "Verify code is not writable by the actual PHP/web-server process, including ACLs and mount policy. Deploy-owner write bits alone do not establish runtime write access; do not chmod a deployment recursively from this observation."
       },
       "target_modes": [
         "LOCAL"
@@ -249,7 +246,8 @@
               "vendor",
               "lib"
             ],
-            "max_results": 50
+            "max_results": 50,
+            "strict_scope": true
           }
         }
       ],
@@ -462,9 +460,9 @@
     },
     {
       "id": "MB-0009",
-      "revision": 2,
-      "title": "Admin session timeout <= 900s",
-      "criterion": "Admin session timeout <= 900s; assess only the collected Magento deployment scope.",
+      "revision": 3,
+      "title": "Configured admin session lifetime is at most 900 seconds",
+      "criterion": "The effective default-scope Magento admin/security/session_lifetime setting resolved from env.php, config.php, core_config_data or actual installed module defaults is a positive integer not exceeding 900 seconds.",
       "control": "MB-C02",
       "severity": "medium",
       "alignments": [],
@@ -473,7 +471,7 @@
           "id": "O001",
           "op": "all",
           "role": "mandatory",
-          "proof": "heuristic",
+          "proof": "verified_predicate",
           "checks": [
             {
               "name": "magento_admin_session_timeout",
@@ -486,12 +484,12 @@
           ]
         }
       ],
-      "coverage": "PARTIALLY_AUTOMATED",
+      "coverage": "DIRECT",
       "verification": "automated",
-      "review_state": "heuristic_supporting_only",
+      "review_state": "accepted_scoped_criterion",
       "human_evidence": {
         "required": false,
-        "instructions": "Detector implementation or evidence coverage is incomplete; this is an automated assessment limitation, not a required human workflow.",
+        "instructions": "",
         "evidence_types": [
           "review",
           "runtime_scope"
@@ -514,7 +512,7 @@
     },
     {
       "id": "MB-0010",
-      "revision": 2,
+      "revision": 3,
       "title": "Admin URL exposure restricted",
       "criterion": "Admin URL exposure restricted; assess only the collected Magento deployment scope.",
       "control": "MB-C02",
@@ -547,12 +545,12 @@
           ]
         }
       ],
-      "coverage": "PARTIALLY_AUTOMATED",
+      "coverage": "PARTIAL",
       "verification": "automated",
-      "review_state": "heuristic_supporting_only",
+      "review_state": "security_reviewed",
       "human_evidence": {
-        "required": false,
-        "instructions": "Detector implementation or evidence coverage is incomplete; this is an automated assessment limitation, not a required human workflow.",
+        "required": true,
+        "instructions": "Verify the effective admin route and active reverse-proxy/firewall allowlist; repository ACL hints do not prove access restriction.",
         "evidence_types": [
           "review",
           "runtime_scope"
@@ -638,9 +636,9 @@
     },
     {
       "id": "MB-0014",
-      "revision": 2,
-      "title": "Avoid PHP superglobals directly",
-      "criterion": "Avoid PHP superglobals directly; assess only the collected Magento deployment scope.",
+      "revision": 3,
+      "title": "No direct PHP superglobal references in inspected application files",
+      "criterion": "Valid PHP files in the configured app subtree contain no T_VARIABLE references to $_GET, $_POST, $_REQUEST, $_COOKIE, $_FILES or $_SERVER. Comments and literal strings are ignored. This is a source coding policy, not proof of input validation.",
       "control": "MB-C03",
       "severity": "high",
       "alignments": [],
@@ -649,7 +647,7 @@
           "id": "O001",
           "op": "all",
           "role": "mandatory",
-          "proof": "heuristic",
+          "proof": "verified_predicate",
           "checks": [
             {
               "name": "code_grep",
@@ -662,18 +660,19 @@
                 ],
                 "must_not_match": [
                   "\\$_(?:GET|POST|REQUEST|COOKIE|FILES|SERVER)\\b"
-                ]
+                ],
+                "strict_scope": true
               }
             }
           ]
         }
       ],
-      "coverage": "PARTIALLY_AUTOMATED",
+      "coverage": "DIRECT",
       "verification": "automated",
-      "review_state": "heuristic_supporting_only",
+      "review_state": "accepted_scoped_criterion",
       "human_evidence": {
         "required": false,
-        "instructions": "Detector implementation or evidence coverage is incomplete; this is an automated assessment limitation, not a required human workflow.",
+        "instructions": "",
         "evidence_types": [
           "review",
           "runtime_scope"
@@ -694,7 +693,8 @@
             ],
             "must_not_match": [
               "\\$_(?:GET|POST|REQUEST|COOKIE|FILES|SERVER)\\b"
-            ]
+            ],
+            "strict_scope": true
           }
         }
       ],
@@ -702,7 +702,7 @@
     },
     {
       "id": "MB-0015",
-      "revision": 2,
+      "revision": 3,
       "title": "Forms include CSRF tokens (form_key)",
       "criterion": "Forms include CSRF tokens (form_key); assess only the collected Magento deployment scope.",
       "control": "MB-C03",
@@ -726,12 +726,12 @@
           ]
         }
       ],
-      "coverage": "PARTIALLY_AUTOMATED",
+      "coverage": "PARTIAL",
       "verification": "automated",
-      "review_state": "heuristic_supporting_only",
+      "review_state": "security_reviewed",
       "human_evidence": {
-        "required": false,
-        "instructions": "Detector implementation or evidence coverage is incomplete; this is an automated assessment limitation, not a required human workflow.",
+        "required": true,
+        "instructions": "Verify server-side CSRF validation and exemptions for each state-changing route; token markup alone does not prove CSRF protection.",
         "evidence_types": [
           "review",
           "runtime_scope"
@@ -754,7 +754,7 @@
     },
     {
       "id": "MB-0016",
-      "revision": 2,
+      "revision": 3,
       "title": "SSRF protections present",
       "criterion": "SSRF protections present; assess only the collected Magento deployment scope.",
       "control": "MB-C03",
@@ -781,12 +781,12 @@
           ]
         }
       ],
-      "coverage": "PARTIALLY_AUTOMATED",
+      "coverage": "PARTIAL",
       "verification": "automated",
-      "review_state": "heuristic_supporting_only",
+      "review_state": "security_reviewed",
       "human_evidence": {
-        "required": false,
-        "instructions": "Detector implementation or evidence coverage is incomplete; this is an automated assessment limitation, not a required human workflow.",
+        "required": true,
+        "instructions": "Trace attacker-controlled URLs to outbound requests and verify scheme, destination and redirect validation; nearby keywords do not prove SSRF prevention.",
         "evidence_types": [
           "review",
           "runtime_scope"
@@ -812,7 +812,7 @@
     },
     {
       "id": "MB-0019",
-      "revision": 2,
+      "revision": 3,
       "title": "No eval/assert/dynamic execution",
       "criterion": "No eval/assert/dynamic execution; assess only the collected Magento deployment scope.",
       "control": "MB-C03",
@@ -839,12 +839,12 @@
           ]
         }
       ],
-      "coverage": "PARTIALLY_AUTOMATED",
+      "coverage": "PARTIAL",
       "verification": "automated",
-      "review_state": "heuristic_supporting_only",
+      "review_state": "security_reviewed",
       "human_evidence": {
-        "required": false,
-        "instructions": "Detector implementation or evidence coverage is incomplete; this is an automated assessment limitation, not a required human workflow.",
+        "required": true,
+        "instructions": "Review dynamic execution arguments and runtime PHP semantics; boolean assert and nearby request tokens do not prove code injection.",
         "evidence_types": [
           "review",
           "runtime_scope"
@@ -870,7 +870,7 @@
     },
     {
       "id": "MB-0020",
-      "revision": 2,
+      "revision": 3,
       "title": "Path traversal protections",
       "criterion": "Path traversal protections; assess only the collected Magento deployment scope.",
       "control": "MB-C03",
@@ -897,12 +897,12 @@
           ]
         }
       ],
-      "coverage": "PARTIALLY_AUTOMATED",
+      "coverage": "PARTIAL",
       "verification": "automated",
-      "review_state": "heuristic_supporting_only",
+      "review_state": "security_reviewed",
       "human_evidence": {
-        "required": false,
-        "instructions": "Detector implementation or evidence coverage is incomplete; this is an automated assessment limitation, not a required human workflow.",
+        "required": true,
+        "instructions": "Trace untrusted file paths and verify canonicalization and containment at the actual filesystem sink.",
         "evidence_types": [
           "review",
           "runtime_scope"
@@ -928,7 +928,7 @@
     },
     {
       "id": "MB-0021",
-      "revision": 2,
+      "revision": 3,
       "title": "Secure file upload handling",
       "criterion": "Secure file upload handling; assess only the collected Magento deployment scope.",
       "control": "MB-C03",
@@ -955,12 +955,12 @@
           ]
         }
       ],
-      "coverage": "PARTIALLY_AUTOMATED",
+      "coverage": "PARTIAL",
       "verification": "automated",
-      "review_state": "heuristic_supporting_only",
+      "review_state": "security_reviewed",
       "human_evidence": {
-        "required": false,
-        "instructions": "Detector implementation or evidence coverage is incomplete; this is an automated assessment limitation, not a required human workflow.",
+        "required": true,
+        "instructions": "Review effective upload validation, storage and execution restrictions including delegated framework validators.",
         "evidence_types": [
           "review",
           "runtime_scope"
@@ -986,7 +986,7 @@
     },
     {
       "id": "MB-0023",
-      "revision": 2,
+      "revision": 3,
       "title": "Use CSPRNG; avoid weak PRNG",
       "criterion": "Use CSPRNG; avoid weak PRNG; assess only the collected Magento deployment scope.",
       "control": "MB-C03",
@@ -1013,12 +1013,12 @@
           ]
         }
       ],
-      "coverage": "PARTIALLY_AUTOMATED",
+      "coverage": "PARTIAL",
       "verification": "automated",
-      "review_state": "heuristic_supporting_only",
+      "review_state": "security_reviewed",
       "human_evidence": {
-        "required": false,
-        "instructions": "Detector implementation or evidence coverage is incomplete; this is an automated assessment limitation, not a required human workflow.",
+        "required": true,
+        "instructions": "Determine which generated values are security-sensitive and verify their entropy source; ordinary rand usage is not a cryptographic vulnerability.",
         "evidence_types": [
           "review",
           "runtime_scope"
@@ -1044,7 +1044,7 @@
     },
     {
       "id": "MB-0025",
-      "revision": 2,
+      "revision": 3,
       "title": "No unsafe raw crypto or session APIs in custom code",
       "criterion": "No unsafe raw crypto or session APIs in custom code; assess only the collected Magento deployment scope.",
       "control": "MB-C03",
@@ -1071,12 +1071,12 @@
           ]
         }
       ],
-      "coverage": "PARTIALLY_AUTOMATED",
+      "coverage": "PARTIAL",
       "verification": "automated",
-      "review_state": "heuristic_supporting_only",
+      "review_state": "security_reviewed",
       "human_evidence": {
-        "required": false,
-        "instructions": "Detector implementation or evidence coverage is incomplete; this is an automated assessment limitation, not a required human workflow.",
+        "required": true,
+        "instructions": "Review cryptographic algorithms, parameters and session configuration; raw OpenSSL or sodium use is not automatically unsafe.",
         "evidence_types": [
           "review",
           "runtime_scope"
@@ -1179,46 +1179,36 @@
     },
     {
       "id": "MB-0027",
-      "revision": 2,
-      "title": "HSTS max-age is at least one year",
-      "criterion": "HSTS max-age is at least one year; assess only the collected Magento deployment scope.",
+      "revision": 3,
+      "title": "Observed HTTPS response has HSTS max-age of at least one year",
+      "criterion": "A successful same-host HTTPS response at the configured runtime URL emits one unambiguous Strict-Transport-Security header with an exact integer max-age directive of at least 31536000 seconds. Repository web-server declarations are not runtime proof.",
       "control": "MB-C04",
       "severity": "medium",
       "alignments": [],
       "obligations": [
         {
           "id": "O001",
-          "op": "any",
+          "op": "all",
           "role": "mandatory",
-          "proof": "heuristic",
+          "proof": "verified_predicate",
           "checks": [
             {
               "name": "http_has_hsts",
               "args": {
                 "min_max_age": 31536000,
-                "timeout_ms": 8000
-              }
-            },
-            {
-              "name": "webserver_hsts_config",
-              "args": {
-                "files": [
-                  "nginx.conf",
-                  "pub/.htaccess",
-                  ".htaccess"
-                ],
-                "min_max_age": 31536000
+                "timeout_ms": 8000,
+                "strict_scope": true
               }
             }
           ]
         }
       ],
-      "coverage": "PARTIALLY_AUTOMATED",
+      "coverage": "DIRECT",
       "verification": "automated",
-      "review_state": "heuristic_supporting_only",
+      "review_state": "accepted_scoped_criterion",
       "human_evidence": {
         "required": false,
-        "instructions": "Detector implementation or evidence coverage is incomplete; this is an automated assessment limitation, not a required human workflow.",
+        "instructions": "",
         "evidence_types": [
           "review",
           "runtime_scope"
@@ -1233,18 +1223,8 @@
           "name": "http_has_hsts",
           "args": {
             "min_max_age": 31536000,
-            "timeout_ms": 8000
-          }
-        },
-        {
-          "name": "webserver_hsts_config",
-          "args": {
-            "files": [
-              "nginx.conf",
-              "pub/.htaccess",
-              ".htaccess"
-            ],
-            "min_max_age": 31536000
+            "timeout_ms": 8000,
+            "strict_scope": true
           }
         }
       ],
@@ -1583,9 +1563,9 @@
     },
     {
       "id": "MB-0034",
-      "revision": 2,
-      "title": "Compiled DI generated (metadata & code)",
-      "criterion": "Compiled DI generated (metadata & code); assess only the collected Magento deployment scope.",
+      "revision": 3,
+      "title": "Generated DI PHP artifacts are present",
+      "criterion": "At least one readable PHP artifact exists in each configured generated/metadata and generated/code directory. This assesses artifact presence, not DI compilation correctness or freshness.",
       "control": "MB-C05",
       "severity": "low",
       "alignments": [],
@@ -1594,7 +1574,7 @@
           "id": "O001",
           "op": "all",
           "role": "mandatory",
-          "proof": "heuristic",
+          "proof": "verified_predicate",
           "checks": [
             {
               "name": "fs_di_compiled",
@@ -1608,12 +1588,12 @@
           ]
         }
       ],
-      "coverage": "PARTIALLY_AUTOMATED",
+      "coverage": "DIRECT",
       "verification": "automated",
-      "review_state": "heuristic_supporting_only",
+      "review_state": "accepted_scoped_criterion",
       "human_evidence": {
         "required": false,
-        "instructions": "Detector implementation or evidence coverage is incomplete; this is an automated assessment limitation, not a required human workflow.",
+        "instructions": "",
         "evidence_types": [
           "review",
           "runtime_scope"
@@ -1987,9 +1967,9 @@
     },
     {
       "id": "MB-0042",
-      "revision": 2,
-      "title": "Logs and reports not exposed under pub/",
-      "criterion": "Logs and reports not exposed under pub/; assess only the collected Magento deployment scope.",
+      "revision": 3,
+      "title": "Log/report paths are absent from the collected webroot",
+      "criterion": "Within the collected pub tree, no configured var/log or var/report relative path, nor symlink to the corresponding project target, is present. This is filesystem placement, not a live HTTP exposure assertion.",
       "control": "MB-C07",
       "severity": "high",
       "alignments": [],
@@ -1998,7 +1978,7 @@
           "id": "O001",
           "op": "all",
           "role": "mandatory",
-          "proof": "heuristic",
+          "proof": "verified_predicate",
           "checks": [
             {
               "name": "fs_logs_reports_not_in_webroot",
@@ -2007,18 +1987,19 @@
                 "forbidden_paths": [
                   "var/log",
                   "var/report"
-                ]
+                ],
+                "strict_scope": true
               }
             }
           ]
         }
       ],
-      "coverage": "PARTIALLY_AUTOMATED",
+      "coverage": "DIRECT",
       "verification": "automated",
-      "review_state": "heuristic_supporting_only",
+      "review_state": "accepted_scoped_criterion",
       "human_evidence": {
         "required": false,
-        "instructions": "Detector implementation or evidence coverage is incomplete; this is an automated assessment limitation, not a required human workflow.",
+        "instructions": "",
         "evidence_types": [
           "review",
           "runtime_scope"
@@ -2035,7 +2016,8 @@
             "forbidden_paths": [
               "var/log",
               "var/report"
-            ]
+            ],
+            "strict_scope": true
           }
         }
       ],
@@ -2043,7 +2025,7 @@
     },
     {
       "id": "MB-0043",
-      "revision": 2,
+      "revision": 3,
       "title": "Log rotation configured",
       "criterion": "Log rotation configured; assess only the collected Magento deployment scope.",
       "control": "MB-C07",
@@ -2065,12 +2047,12 @@
           ]
         }
       ],
-      "coverage": "PARTIALLY_AUTOMATED",
+      "coverage": "PARTIAL",
       "verification": "automated",
-      "review_state": "heuristic_supporting_only",
+      "review_state": "security_reviewed",
       "human_evidence": {
-        "required": false,
-        "instructions": "Detector implementation or evidence coverage is incomplete; this is an automated assessment limitation, not a required human workflow.",
+        "required": true,
+        "instructions": "Verify effective installed logrotate, journald or managed logging retention and activation; a project logrotate file is optional evidence, not the entire logging policy.",
         "evidence_types": [
           "review",
           "runtime_scope"
@@ -2608,9 +2590,9 @@
     },
     {
       "id": "MB-0055",
-      "revision": 2,
-      "title": "Transitive dependencies checked for CVEs",
-      "criterion": "Transitive dependencies checked for CVEs; assess only the collected Magento deployment scope.",
+      "revision": 3,
+      "title": "Collected transitive versions have no returned applicable advisories",
+      "criterion": "No transitive package version in the complete collected Composer lock inventory is identified as affected by applicable advisories returned by the configured OSV service. Coverage is limited to the queried inventory and service data.",
       "control": "MB-C09",
       "severity": "critical",
       "alignments": [],
@@ -2619,7 +2601,7 @@
           "id": "O001",
           "op": "all",
           "role": "mandatory",
-          "proof": "heuristic",
+          "proof": "verified_predicate",
           "checks": [
             {
               "name": "composer_transitive_audit_api",
@@ -2629,18 +2611,19 @@
                 "endpoint": "https://api.magebean.com/v1/osv/advisories",
                 "timeout_ms": 10000,
                 "batch_size": 500,
-                "allow_private_http_fallback": true
+                "allow_private_http_fallback": true,
+                "strict_scope": true
               }
             }
           ]
         }
       ],
-      "coverage": "PARTIALLY_AUTOMATED",
+      "coverage": "DIRECT",
       "verification": "automated",
-      "review_state": "heuristic_supporting_only",
+      "review_state": "accepted_scoped_criterion",
       "human_evidence": {
         "required": false,
-        "instructions": "Detector implementation or evidence coverage is incomplete; this is an automated assessment limitation, not a required human workflow.",
+        "instructions": "",
         "evidence_types": [
           "review",
           "runtime_scope"
@@ -2658,7 +2641,8 @@
             "endpoint": "https://api.magebean.com/v1/osv/advisories",
             "timeout_ms": 10000,
             "batch_size": 500,
-            "allow_private_http_fallback": true
+            "allow_private_http_fallback": true,
+            "strict_scope": true
           }
         }
       ],
@@ -2666,9 +2650,9 @@
     },
     {
       "id": "MB-0056",
-      "revision": 2,
-      "title": "No constraints blocking security updates",
-      "criterion": "No constraints blocking security updates; assess only the collected Magento deployment scope.",
+      "revision": 3,
+      "title": "Declared constraints permit returned advisory fixed versions",
+      "criterion": "For returned applicable advisory findings with published fixed versions, the combined declared dependency constraints intersect versions at or above the published fixed version. This does not establish complete Composer solver feasibility, platform compatibility or every fixed branch.",
       "control": "MB-C09",
       "severity": "high",
       "alignments": [],
@@ -2677,7 +2661,7 @@
           "id": "O001",
           "op": "all",
           "role": "mandatory",
-          "proof": "heuristic",
+          "proof": "verified_predicate",
           "checks": [
             {
               "name": "composer_constraints_conflict_api",
@@ -2687,18 +2671,19 @@
                 "endpoint": "https://api.magebean.com/v1/osv/advisories",
                 "timeout_ms": 10000,
                 "batch_size": 500,
-                "allow_private_http_fallback": true
+                "allow_private_http_fallback": true,
+                "strict_scope": true
               }
             }
           ]
         }
       ],
-      "coverage": "PARTIALLY_AUTOMATED",
+      "coverage": "DIRECT",
       "verification": "automated",
-      "review_state": "heuristic_supporting_only",
+      "review_state": "accepted_scoped_criterion",
       "human_evidence": {
         "required": false,
-        "instructions": "Detector implementation or evidence coverage is incomplete; this is an automated assessment limitation, not a required human workflow.",
+        "instructions": "",
         "evidence_types": [
           "review",
           "runtime_scope"
@@ -2716,7 +2701,8 @@
             "endpoint": "https://api.magebean.com/v1/osv/advisories",
             "timeout_ms": 10000,
             "batch_size": 500,
-            "allow_private_http_fallback": true
+            "allow_private_http_fallback": true,
+            "strict_scope": true
           }
         }
       ],
@@ -2724,9 +2710,9 @@
     },
     {
       "id": "MB-0057",
-      "revision": 2,
-      "title": "No yanked/withdrawn packages",
-      "criterion": "No yanked/withdrawn packages; assess only the collected Magento deployment scope.",
+      "revision": 3,
+      "title": "Collected package versions are not reported withdrawn",
+      "criterion": "Every package version in the complete collected Composer lock inventory has an explicit non-yanked status from the configured package-status source. Missing per-package status cannot establish a clean result.",
       "control": "MB-C09",
       "severity": "high",
       "alignments": [],
@@ -2735,7 +2721,7 @@
           "id": "O001",
           "op": "all",
           "role": "mandatory",
-          "proof": "heuristic",
+          "proof": "verified_predicate",
           "checks": [
             {
               "name": "composer_yanked_api",
@@ -2744,18 +2730,19 @@
                 "status_endpoint": "https://api.magebean.com/v1/packages/status",
                 "timeout_ms": 10000,
                 "batch_size": 500,
-                "allow_private_http_fallback": true
+                "allow_private_http_fallback": true,
+                "strict_scope": true
               }
             }
           ]
         }
       ],
-      "coverage": "PARTIALLY_AUTOMATED",
+      "coverage": "DIRECT",
       "verification": "automated",
-      "review_state": "heuristic_supporting_only",
+      "review_state": "accepted_scoped_criterion",
       "human_evidence": {
         "required": false,
-        "instructions": "Detector implementation or evidence coverage is incomplete; this is an automated assessment limitation, not a required human workflow.",
+        "instructions": "",
         "evidence_types": [
           "review",
           "runtime_scope"
@@ -2772,7 +2759,8 @@
             "status_endpoint": "https://api.magebean.com/v1/packages/status",
             "timeout_ms": 10000,
             "batch_size": 500,
-            "allow_private_http_fallback": true
+            "allow_private_http_fallback": true,
+            "strict_scope": true
           }
         }
       ],
@@ -2838,9 +2826,9 @@
     },
     {
       "id": "MB-0059",
-      "revision": 2,
-      "title": "Unresolved advisories are within remediation SLA",
-      "criterion": "Unresolved advisories are within remediation SLA; assess only the collected Magento deployment scope.",
+      "revision": 3,
+      "title": "Affected advisory publication age is within 30 days",
+      "criterion": "No returned advisory affecting an installed Composer package version has a publication age greater than the configured 30-day threshold. This is publication age, not organizational discovery time or a measured remediation SLA.",
       "control": "MB-C09",
       "severity": "low",
       "alignments": [],
@@ -2849,7 +2837,7 @@
           "id": "O001",
           "op": "all",
           "role": "mandatory",
-          "proof": "heuristic",
+          "proof": "verified_predicate",
           "checks": [
             {
               "name": "composer_advisory_latency_api",
@@ -2859,18 +2847,19 @@
                 "timeout_ms": 10000,
                 "batch_size": 500,
                 "allow_private_http_fallback": true,
-                "latency_days": 30
+                "latency_days": 30,
+                "strict_scope": true
               }
             }
           ]
         }
       ],
-      "coverage": "PARTIALLY_AUTOMATED",
+      "coverage": "DIRECT",
       "verification": "automated",
-      "review_state": "heuristic_supporting_only",
+      "review_state": "accepted_scoped_criterion",
       "human_evidence": {
         "required": false,
-        "instructions": "Detector implementation or evidence coverage is incomplete; this is an automated assessment limitation, not a required human workflow.",
+        "instructions": "",
         "evidence_types": [
           "review",
           "runtime_scope"
@@ -2888,7 +2877,8 @@
             "timeout_ms": 10000,
             "batch_size": 500,
             "allow_private_http_fallback": true,
-            "latency_days": 30
+            "latency_days": 30,
+            "strict_scope": true
           }
         }
       ],
@@ -2952,17 +2942,18 @@
     },
     {
       "id": "MB-0061",
-      "revision": 3,
-      "title": "Dependencies are not marked abandoned",
-      "criterion": "No dependency package in the assessed Composer inventory is marked abandoned by the authoritative package-maintenance source.",
+      "revision": 4,
+      "title": "Collected dependencies are not reported abandoned",
+      "criterion": "No dependency package in the complete assessed Composer inventory is marked abandoned by the configured package-maintenance source; a clean conclusion requires explicit known status for every assessed package.",
       "control": "MB-C10",
       "severity": "high",
       "alignments": [],
       "obligations": [
         {
+          "id": "O001",
           "op": "all",
           "role": "mandatory",
-          "proof": "heuristic",
+          "proof": "verified_predicate",
           "checks": [
             {
               "name": "composer_abandoned_api",
@@ -2970,16 +2961,17 @@
                 "lock_file": "composer.lock",
                 "status_endpoint": "https://api.magebean.com/v1/packages/status",
                 "timeout_ms": 10000,
-                "allow_private_http_fallback": true
+                "allow_private_http_fallback": true,
+                "strict_scope": true
               }
             }
-          ],
-          "id": "O001"
+          ]
         },
         {
+          "id": "O002",
           "op": "all",
           "role": "mandatory",
-          "proof": "heuristic",
+          "proof": "verified_predicate",
           "checks": [
             {
               "name": "composer_abandoned_api",
@@ -2991,19 +2983,19 @@
                 "allow_private_http_fallback": true,
                 "package_types": [
                   "library"
-                ]
+                ],
+                "strict_scope": true
               }
             }
-          ],
-          "id": "O002"
+          ]
         }
       ],
-      "coverage": "PARTIALLY_AUTOMATED",
+      "coverage": "DIRECT",
       "verification": "automated",
-      "review_state": "pending_security_review",
+      "review_state": "accepted_scoped_criterion",
       "human_evidence": {
         "required": false,
-        "instructions": "Detector implementation or evidence coverage is incomplete; this is an automated assessment limitation, not a required human workflow.",
+        "instructions": "",
         "evidence_types": [
           "review",
           "runtime_scope"
@@ -3019,7 +3011,8 @@
             "lock_file": "composer.lock",
             "status_endpoint": "https://api.magebean.com/v1/packages/status",
             "timeout_ms": 10000,
-            "allow_private_http_fallback": true
+            "allow_private_http_fallback": true,
+            "strict_scope": true
           }
         },
         {
@@ -3032,7 +3025,8 @@
             "allow_private_http_fallback": true,
             "package_types": [
               "library"
-            ]
+            ],
+            "strict_scope": true
           }
         }
       ],
@@ -3390,18 +3384,18 @@
     },
     {
       "id": "MB-0069",
-      "revision": 2,
-      "title": "Direct dependencies up-to-date",
-      "criterion": "Direct dependencies up-to-date; assess only the collected Magento deployment scope.",
+      "revision": 3,
+      "title": "Direct locked versions match the reported latest stable release",
+      "criterion": "Collected direct Composer package versions are not older than the latest stable release reported by the configured package-status source. This is a maintenance policy, not proof of an exploitable vulnerability.",
       "control": "MB-C11",
-      "severity": "medium",
+      "severity": "low",
       "alignments": [],
       "obligations": [
         {
           "id": "O001",
           "op": "all",
           "role": "mandatory",
-          "proof": "heuristic",
+          "proof": "verified_predicate",
           "checks": [
             {
               "name": "composer_direct_outdated_api",
@@ -3412,18 +3406,19 @@
                 "timeout_ms": 10000,
                 "status_batch_size": 500,
                 "allow_private_http_fallback": true,
-                "include_dev": true
+                "include_dev": true,
+                "strict_scope": true
               }
             }
           ]
         }
       ],
-      "coverage": "PARTIALLY_AUTOMATED",
+      "coverage": "DIRECT",
       "verification": "automated",
-      "review_state": "heuristic_supporting_only",
+      "review_state": "accepted_scoped_criterion",
       "human_evidence": {
         "required": false,
-        "instructions": "Detector implementation or evidence coverage is incomplete; this is an automated assessment limitation, not a required human workflow.",
+        "instructions": "",
         "evidence_types": [
           "review",
           "runtime_scope"
@@ -3442,7 +3437,8 @@
             "timeout_ms": 10000,
             "status_batch_size": 500,
             "allow_private_http_fallback": true,
-            "include_dev": true
+            "include_dev": true,
+            "strict_scope": true
           }
         }
       ],
@@ -3450,9 +3446,9 @@
     },
     {
       "id": "MB-0070",
-      "revision": 2,
-      "title": "composer.lock integrity with composer.json",
-      "criterion": "composer.lock integrity with composer.json; assess only the collected Magento deployment scope.",
+      "revision": 3,
+      "title": "Composer lock hash and dependency identities are consistent",
+      "criterion": "composer.lock has a matching Composer content-hash, no duplicate or malformed package identities, and contains or provides/replaces each declared root package dependency. This does not prove the full dependency solver result or installed vendor file integrity.",
       "control": "MB-C11",
       "severity": "medium",
       "alignments": [],
@@ -3461,7 +3457,7 @@
           "id": "O001",
           "op": "all",
           "role": "mandatory",
-          "proof": "heuristic",
+          "proof": "verified_predicate",
           "checks": [
             {
               "name": "composer_lock_integrity",
@@ -3473,12 +3469,12 @@
           ]
         }
       ],
-      "coverage": "PARTIALLY_AUTOMATED",
+      "coverage": "DIRECT",
       "verification": "automated",
-      "review_state": "heuristic_supporting_only",
+      "review_state": "accepted_scoped_criterion",
       "human_evidence": {
         "required": false,
-        "instructions": "Detector implementation or evidence coverage is incomplete; this is an automated assessment limitation, not a required human workflow.",
+        "instructions": "",
         "evidence_types": [
           "review",
           "runtime_scope"
@@ -3601,7 +3597,7 @@
     },
     {
       "id": "MB-0073",
-      "revision": 2,
+      "revision": 3,
       "title": "HTTPS-only endpoints configured",
       "criterion": "HTTPS-only endpoints configured; assess only the collected Magento deployment scope.",
       "control": "MB-C12",
@@ -3643,12 +3639,12 @@
           ]
         }
       ],
-      "coverage": "PARTIALLY_AUTOMATED",
+      "coverage": "PARTIAL",
       "verification": "automated",
-      "review_state": "heuristic_supporting_only",
+      "review_state": "security_reviewed",
       "human_evidence": {
-        "required": false,
-        "instructions": "Detector implementation or evidence coverage is incomplete; this is an automated assessment limitation, not a required human workflow.",
+        "required": true,
+        "instructions": "Review actual runtime outbound endpoint configuration including dynamic URLs; literal source URL observations alone do not establish HTTPS-only communication.",
         "evidence_types": [
           "review",
           "runtime_scope"
@@ -3885,7 +3881,7 @@
     },
     {
       "id": "MB-0078",
-      "revision": 2,
+      "revision": 3,
       "title": "Strong TLS ciphers on upstream gateways",
       "criterion": "Strong TLS ciphers on upstream gateways; assess only the collected Magento deployment scope.",
       "control": "MB-C12",
@@ -3914,12 +3910,12 @@
           ]
         }
       ],
-      "coverage": "PARTIALLY_AUTOMATED",
+      "coverage": "PARTIAL",
       "verification": "automated",
-      "review_state": "heuristic_supporting_only",
+      "review_state": "security_reviewed",
       "human_evidence": {
-        "required": false,
-        "instructions": "Detector implementation or evidence coverage is incomplete; this is an automated assessment limitation, not a required human workflow.",
+        "required": true,
+        "instructions": "Verify active gateway TLS protocols and cipher negotiation; inactive repository web-server configuration is supporting evidence only.",
         "evidence_types": [
           "review",
           "runtime_scope"
@@ -3947,7 +3943,7 @@
     },
     {
       "id": "MB-0079",
-      "revision": 2,
+      "revision": 3,
       "title": "API keys stored in env.php (not in DB/plain code)",
       "criterion": "API keys stored in env.php (not in DB/plain code); assess only the collected Magento deployment scope.",
       "control": "MB-C12",
@@ -3982,12 +3978,12 @@
           ]
         }
       ],
-      "coverage": "PARTIALLY_AUTOMATED",
+      "coverage": "PARTIAL",
       "verification": "automated",
-      "review_state": "heuristic_supporting_only",
+      "review_state": "security_reviewed",
       "human_evidence": {
-        "required": false,
-        "instructions": "Detector implementation or evidence coverage is incomplete; this is an automated assessment limitation, not a required human workflow.",
+        "required": true,
+        "instructions": "Review secret storage and database configuration with redacted evidence; static source scanning cannot establish absence of API keys in the database.",
         "evidence_types": [
           "review",
           "runtime_scope"
@@ -4535,7 +4531,7 @@
     },
     {
       "id": "MB-0089",
-      "revision": 2,
+      "revision": 3,
       "title": "Checkout Content Security Policy enforced",
       "criterion": "Checkout Content Security Policy enforced; assess only the collected Magento deployment scope.",
       "control": "MB-C04",
@@ -4581,12 +4577,12 @@
           ]
         }
       ],
-      "coverage": "PARTIALLY_AUTOMATED",
+      "coverage": "PARTIAL",
       "verification": "automated",
-      "review_state": "heuristic_supporting_only",
+      "review_state": "security_reviewed",
       "human_evidence": {
-        "required": false,
-        "instructions": "Detector implementation or evidence coverage is incomplete; this is an automated assessment limitation, not a required human workflow.",
+        "required": true,
+        "instructions": "Verify enforcing CSP headers on actual checkout responses and the effective Magento CSP mode; source declarations alone do not prove enforcement.",
         "evidence_types": [
           "review",
           "runtime_scope"
@@ -4993,7 +4989,7 @@
     },
     {
       "id": "MB-0096",
-      "revision": 2,
+      "revision": 3,
       "title": "Security headers baseline enforced",
       "criterion": "Security headers baseline enforced; assess only the collected Magento deployment scope.",
       "control": "MB-C04",
@@ -5030,12 +5026,12 @@
           ]
         }
       ],
-      "coverage": "PARTIALLY_AUTOMATED",
+      "coverage": "PARTIAL",
       "verification": "automated",
-      "review_state": "heuristic_supporting_only",
+      "review_state": "security_reviewed",
       "human_evidence": {
-        "required": false,
-        "instructions": "Detector implementation or evidence coverage is incomplete; this is an automated assessment limitation, not a required human workflow.",
+        "required": true,
+        "instructions": "Verify security headers emitted by successful application responses; source declarations alone do not prove runtime policy.",
         "evidence_types": [
           "review",
           "runtime_scope"
@@ -5071,7 +5067,7 @@
     },
     {
       "id": "MB-0097",
-      "revision": 2,
+      "revision": 3,
       "title": "Secrets are not hardcoded in custom code",
       "criterion": "Secrets are not hardcoded in custom code; assess only the collected Magento deployment scope.",
       "control": "MB-C03",
@@ -5114,12 +5110,12 @@
           ]
         }
       ],
-      "coverage": "PARTIALLY_AUTOMATED",
+      "coverage": "PARTIAL",
       "verification": "automated",
-      "review_state": "heuristic_supporting_only",
+      "review_state": "security_reviewed",
       "human_evidence": {
-        "required": false,
-        "instructions": "Detector implementation or evidence coverage is incomplete; this is an automated assessment limitation, not a required human workflow.",
+        "required": true,
+        "instructions": "Confirm whether flagged literals are actual credentials and inspect dynamic secret sources; secret-like constant names alone do not prove hardcoded secrets.",
         "evidence_types": [
           "review",
           "runtime_scope"
@@ -5161,7 +5157,7 @@
     },
     {
       "id": "MB-0098",
-      "revision": 2,
+      "revision": 3,
       "title": "Unsafe XML parsing disabled",
       "criterion": "Unsafe XML parsing disabled; assess only the collected Magento deployment scope.",
       "control": "MB-C03",
@@ -5189,12 +5185,12 @@
           ]
         }
       ],
-      "coverage": "PARTIALLY_AUTOMATED",
+      "coverage": "PARTIAL",
       "verification": "automated",
-      "review_state": "heuristic_supporting_only",
+      "review_state": "security_reviewed",
       "human_evidence": {
-        "required": false,
-        "instructions": "Detector implementation or evidence coverage is incomplete; this is an automated assessment limitation, not a required human workflow.",
+        "required": true,
+        "instructions": "Review XML parser version, entity options and actual untrusted input; a nearby LIBXML flag alone does not prove exploitable XXE.",
         "evidence_types": [
           "review",
           "runtime_scope"
@@ -46547,7 +46543,7 @@
     },
     {
       "id": "MB-0730",
-      "revision": 1,
+      "revision": 2,
       "title": "No configured secret patterns in deployed application files",
       "criterion": "Eligible deployed working-tree text files within configured paths and exclusions contain no configured secret-pattern matches. Git history is outside this basic deployment check. Runtime credential configuration app/etc/env.php is excluded; unreadable or oversized eligible files are collection errors.",
       "control": "MB-C12",
@@ -46591,7 +46587,7 @@
                   "(api[_-]?key|client[_-]?secret|access[_-]?token|password)[[:space:]]*[\"']?[[:space:]]*(=>|=|:)[[:space:]]*[\"'][A-Za-z0-9_./+=-]{16,}[\"']"
                 ],
                 "max_results": 200,
-                "max_file_bytes": 1048576
+                "max_file_bytes": 16777216
               }
             }
           ]
@@ -46642,7 +46638,7 @@
               "(api[_-]?key|client[_-]?secret|access[_-]?token|password)[[:space:]]*[\"']?[[:space:]]*(=>|=|:)[[:space:]]*[\"'][A-Za-z0-9_./+=-]{16,}[\"']"
             ],
             "max_results": 200,
-            "max_file_bytes": 1048576
+            "max_file_bytes": 16777216
           }
         }
       ],

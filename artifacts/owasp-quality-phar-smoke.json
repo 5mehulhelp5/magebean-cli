@@ -1,0 +1,20 @@
+{
+  "checks": [
+    {
+      "case": "five_real_scoped_checks_pass",
+      "source_phar_exit": 0
+    },
+    {
+      "case": "actual_superglobal_policy_fails",
+      "source_phar_exit": 1
+    },
+    {
+      "case": "runtime_unavailable_is_actionable_execution_error",
+      "source_phar_exit": 3
+    }
+  ],
+  "phar_contract": true,
+  "default_automated": 31,
+  "human_opt_in": 38,
+  "phar_sha256": "353997c65c6420f6c6f87e97b3a42f98b003470121a3682e87b63a8e31b634ec"
+}

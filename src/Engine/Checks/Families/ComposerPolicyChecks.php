@@ -1096,6 +1096,18 @@ final class ComposerPolicyChecks extends ComposerSupport
             ];
         }
 
+        foreach (['packages', 'packages-dev'] as $bucket) {
+            if (!array_key_exists($bucket, $lock)) {
+                if ($bucket === 'packages-dev') continue;
+                return [false, 'composer.lock is missing the packages array', ['problems' => ['package_list_missing']]];
+            }
+            if (!is_array($lock[$bucket]) || !array_is_list($lock[$bucket])) return [false, 'composer.lock has an invalid ' . $bucket . ' list', ['problems' => ['package_list_invalid']]];
+            foreach ($lock[$bucket] as $package) {
+                if (!is_array($package) || !is_string($package['name'] ?? null) || trim($package['name']) === '' || !is_string($package['version'] ?? null) || trim($package['version']) === '') {
+                    return [false, 'composer.lock has a malformed package identity or version in ' . $bucket, ['problems' => ['package_identity_invalid']]];
+                }
+            }
+        }
         $pkgs = [];
         $dups = [];
         $provided = [];

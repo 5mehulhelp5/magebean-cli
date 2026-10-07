@@ -651,6 +651,39 @@ abstract class ComposerSupport
         return $response;
     }
 
+    /** Strict inventory completeness before narrowing an API query to a package subset. */
+    protected function strictInventoryProblem(array $args, bool $rootRequired = false): ?array
+    {
+        if (empty($args['strict_scope'])) return null;
+        $path = $this->ctx->abs($args['lock_file'] ?? 'composer.lock');
+        $raw = $this->collectors->files->read($path);
+        $data = is_string($raw) ? json_decode($raw, true) : null;
+        $bad = !is_array($data) || !isset($data['packages']) || !is_array($data['packages']) || !array_is_list($data['packages']);
+        $seen = [];
+        foreach (['packages','packages-dev'] as $section) {
+            if (isset($data[$section]) && (!is_array($data[$section]) || !array_is_list($data[$section]))) { $bad = true; continue; }
+            foreach ($data[$section] ?? [] as $package) {
+                if (!is_array($package) || !is_string($package['name'] ?? null) || preg_match('~^[a-z0-9_.-]+/[a-z0-9_.-]+$~iD', $package['name']) !== 1 || !is_string($package['version'] ?? null) || trim($package['version']) === '') { $bad = true; continue; }
+                $name = strtolower($package['name']);
+                if (isset($seen[$name])) $bad = true;
+                $seen[$name] = true;
+                if (isset($package['require']) && !is_array($package['require'])) $bad = true;
+            }
+        }
+        if ($bad) return [null, '[UNKNOWN] composer.lock inventory is missing or malformed; restore a complete lock file before querying package status.', ['file'=>'composer.lock']];
+        if (!$rootRequired) return null;
+        $rootPath = $this->ctx->abs($args['composer_file'] ?? $args['json_file'] ?? 'composer.json');
+        $raw = $this->collectors->files->read($rootPath);
+        $data = is_string($raw) ? json_decode($raw, true) : null;
+        $bad = !is_array($data);
+        foreach (['require','require-dev'] as $section) {
+            if (isset($data[$section]) && !is_array($data[$section])) { $bad = true; continue; }
+            foreach ($data[$section] ?? [] as $name => $constraint) if (!is_string($name) || !is_string($constraint) || trim($constraint) === '') $bad = true;
+        }
+        if ($bad) return [null, '[UNKNOWN] composer.json dependency declarations are missing or malformed; restore the project manifest.', ['file'=>'composer.json']];
+        return null;
+    }
+
     protected function readLockPackages(string $lockPath): ?array
     {
         return $this->collectors->composer->packages($lockPath);

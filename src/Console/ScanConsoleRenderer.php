@@ -301,7 +301,10 @@ final class ScanConsoleRenderer
             $out->writeln('');
             $out->writeln(sprintf('<options=bold>EXECUTION ERRORS (%d)</>', count($executionErrorFindings)));
             $out->writeln('  The automated scan could not finish these checks. Resolve collection errors and run again.');
-            foreach ($executionErrorFindings as $finding) $out->writeln('  ' . ($finding['id'] ?? '') . '  ' . $this->compactFindingDescription($finding));
+            foreach ($executionErrorFindings as $finding) {
+                $out->writeln('  ' . ($finding['id'] ?? '') . '  ' . $this->detailedFindingMessage($finding));
+                if (!empty($finding['collection_guidance']['action'])) $out->writeln('    Action: ' . \Symfony\Component\Console\Formatter\OutputFormatter::escape($finding['collection_guidance']['action']));
+            }
         }
         if (!$showRuleDetails && $inconclusiveFindings !== []) {
             $out->writeln('');
@@ -314,9 +317,12 @@ final class ScanConsoleRenderer
                 $id = trim((string)($f['id'] ?? ''));
                 $text = $this->compactFindingDescription($f);
                 $line = $id !== ''
-                    ? sprintf('<href=https://magebean.com/baseline/%1$s>%1$s</>  %2$s', $id, $text)
+                    ? (preg_match('/^MB-[0-9]{4,}$/D', $id) === 1 ? $id . '  ' . $text : sprintf('<href=https://magebean.com/baseline/%1$s>%1$s</>  %2$s', $id, $text))
                     : $text;
                 $out->writeln('  ' . $line);
+                if (!empty($f['collection_guidance']['action'])) {
+                    $out->writeln('    Action: ' . \Symfony\Component\Console\Formatter\OutputFormatter::escape($f['collection_guidance']['action']));
+                }
                 if ($id === 'MB-R072') {
                     $out->writeln('    Git history was not verified; INCONCLUSIVE does not mean the history is clean.');
                     $out->writeln('    Run this rule against the original source checkout containing .git:');

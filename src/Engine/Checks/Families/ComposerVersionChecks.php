@@ -182,6 +182,7 @@ final class ComposerVersionChecks extends ComposerSupport
 
     public function yankedApi(array $args): array
     {
+        if (($problem = $this->strictInventoryProblem($args, false)) !== null) return $problem;
         $lockFile = $this->ctx->abs($args['lock_file'] ?? 'composer.lock');
         if (!is_file($lockFile)) {
             return [null, '[UNKNOWN] composer.lock not found'];
@@ -207,6 +208,8 @@ final class ComposerVersionChecks extends ComposerSupport
         if (!$ok) {
             return [null, '[UNKNOWN] Package status API request failed: ' . $message];
         }
+
+        if (!empty($args['strict_scope'])) return $this->assessCompleteYankedStatuses($packages, $statuses);
 
         $hits = array_values(array_filter(
             $statuses,
@@ -235,6 +238,27 @@ final class ComposerVersionChecks extends ComposerSupport
         return [false, $resultMessage, $evidence];
     }
 
+    private function assessCompleteYankedStatuses(array $packages, array $statuses): array
+    {
+        $hits = []; $unknown = [];
+        foreach ($packages as $package) {
+            $name = strtolower((string)$package['name']);
+            $status = $statuses[$name] ?? null;
+            if (!is_array($status)
+                || !is_bool($status['yanked'] ?? null)
+                || (array_key_exists('yanked_status_known', $status) && $status['yanked_status_known'] !== true)
+                || !is_string($status['installed'] ?? null)
+                || ltrim($status['installed'], 'vV') !== ltrim((string)$package['version'], 'vV')) {
+                $unknown[] = $package;
+                continue;
+            }
+            if ($status['yanked']) $hits[] = ['name' => $name, 'installed' => $package['version']];
+        }
+        $evidence = ['packages_checked' => count($packages), 'yanked_packages' => $hits, 'packages_unknown' => $unknown];
+        if ($hits !== []) return [false, 'Installed package versions explicitly marked yanked or withdrawn by package-status source', $evidence];
+        if ($unknown !== []) return [null, '[UNKNOWN] Package-status source did not assess every requested version for withdrawal status', $evidence];
+        return [true, 'All requested installed package versions explicitly have non-withdrawn status', $evidence];
+    }
     public function marketplaceOutdatedApi(array $args): array
     {
         $lockFile = $this->ctx->abs($args['lock_file'] ?? 'composer.lock');
@@ -407,6 +431,7 @@ final class ComposerVersionChecks extends ComposerSupport
 
     public function directOutdatedApi(array $args): array
     {
+        if (($problem = $this->strictInventoryProblem($args, true)) !== null) return $problem;
         $lockFile = $this->ctx->abs($args['lock_file'] ?? 'composer.lock');
         $jsonFile = $this->ctx->abs($args['json_file'] ?? 'composer.json');
         if (!is_file($lockFile)) {

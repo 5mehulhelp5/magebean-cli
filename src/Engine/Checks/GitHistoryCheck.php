@@ -163,6 +163,10 @@ final class GitHistoryCheck
             if (!file_exists($target)) { $gaps[] = 'configured_path_missing:' . $relative; continue; }
             foreach ($this->filesUnder($target, $repoRoot, $excludeDirs) as $file) {
                 if (!$file->isFile() || $file->isLink()) continue;
+                // Binary assets are outside the text scope, regardless of their file size.
+                $prefix = @file_get_contents($file->getPathname(), false, null, 0, 8192);
+                if (!is_string($prefix)) { $gaps[] = 'file_unreadable:' . $this->relativePath($repoRoot, $file->getPathname()); continue; }
+                if (str_contains($prefix, "\0")) continue;
                 if ($file->getSize() > $maxFileBytes) {
                     if ($strictCoverage) $gaps[] = 'file_size_limit:' . $this->relativePath($repoRoot, $file->getPathname());
                     continue;

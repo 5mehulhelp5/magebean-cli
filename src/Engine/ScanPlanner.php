@@ -59,11 +59,11 @@ final class ScanPlanner
         }
         $pack = RequirementPolicy::apply($pack, $config);
         $total = count($pack['rules']);
-        $manualTotal = count(array_filter($pack['rules'], static fn(array $r): bool => ($r['verification'] ?? 'automated') === 'manual'));
+        $manualTotal = count(array_filter($pack['rules'], static fn(array $r): bool => RequirementPolicy::requiresHuman($r)));
         $includeManual = (bool)($options['include-manual-review'] ?? false);
         $hidden = 0;
         if ($requested === [] && !$includeManual) {
-            $pack['rules'] = array_values(array_filter($pack['rules'], static fn(array $r): bool => ($r['verification'] ?? 'automated') !== 'manual'));
+            $pack['rules'] = array_values(array_filter($pack['rules'], static fn(array $r): bool => !RequirementPolicy::requiresHuman($r)));
             $hidden = $total - count($pack['rules']);
         }
         if ($requested !== []) {
@@ -91,7 +91,7 @@ final class ScanPlanner
             $pack = RequirementPolicy::apply($all, $config);
             $selected = $pack['rules'];
             $total = count($selected);
-            $manualTotal = count(array_filter($selected, static fn(array $r): bool => ($r['verification'] ?? '') === 'manual'));
+            $manualTotal = count(array_filter($selected, static fn(array $r): bool => RequirementPolicy::requiresHuman($r)));
         }
         $excluded = RequirementPolicy::resolveIds(self::ids($options['exclude-rules'] ?? ''), $activeProfile['id'] ?? null);
         $pack['rules'] = array_values(array_filter($pack['rules'], static fn(array $r): bool => !in_array($r['id'], $excluded, true)));
@@ -122,7 +122,7 @@ final class ScanPlanner
             'configBasePath'=>$base,'configFile'=>$configFile,'activeProfile'=>$activeProfile,'standard'=>$standard,'isPciProfile'=>$pci,
             'profileRulesTotal'=>$total,'profileManualRulesTotal'=>$manualTotal,'manualRulesExcluded'=>$hidden,
             'includeManualReview'=>$includeManual,'hasExplicitRuleSelection'=>$requested!==[],'requestedIds'=>$requested,'controlsFilter'=>$controls,
-            'capabilities'=>$caps,'profile_selector'=>$profile,'assessment_model'=>'internal-requirement-v1','profileInventoryCount'=>$profileInventoryCount,'omittedRequirements'=>$omittedRequirements,
+            'automationOnly'=>(($activeProfile['automation_only']??false)===true || (($activeProfile['id']??'')==='owasp-top-10-2025' && !$includeManual && array_filter($pack['rules'],[RequirementPolicy::class,'requiresHuman'])===[])),'capabilities'=>$caps,'profile_selector'=>$profile,'assessment_model'=>'internal-requirement-v1','profileInventoryCount'=>$profileInventoryCount,'omittedRequirements'=>$omittedRequirements,
         ]);
     }
 
