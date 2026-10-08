@@ -122,7 +122,7 @@ final class ScanPlanner
             'configBasePath'=>$base,'configFile'=>$configFile,'activeProfile'=>$activeProfile,'standard'=>$standard,'isPciProfile'=>$pci,
             'profileRulesTotal'=>$total,'profileManualRulesTotal'=>$manualTotal,'manualRulesExcluded'=>$hidden,
             'includeManualReview'=>$includeManual,'hasExplicitRuleSelection'=>$requested!==[],'requestedIds'=>$requested,'controlsFilter'=>$controls,
-            'automationOnly'=>(($activeProfile['automation_only']??false)===true || (($activeProfile['id']??'')==='owasp-top-10-2025' && !$includeManual && array_filter($pack['rules'],[RequirementPolicy::class,'requiresHuman'])===[])),'capabilities'=>$caps,'profile_selector'=>$profile,'assessment_model'=>'internal-requirement-v1','profileInventoryCount'=>$profileInventoryCount,'omittedRequirements'=>$omittedRequirements,
+            'automationOnly'=>(($activeProfile['automation_only']??false)===true || (!$includeManual && $pack['rules']!==[] && array_filter($pack['rules'],[RequirementPolicy::class,'requiresHuman'])===[])),'capabilities'=>$caps,'profile_selector'=>$profile,'assessment_model'=>'internal-requirement-v1','profileInventoryCount'=>$profileInventoryCount,'omittedRequirements'=>$omittedRequirements,
         ]);
     }
 

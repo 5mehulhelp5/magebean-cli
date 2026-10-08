@@ -808,6 +808,7 @@ final class FilesystemCheck
                     continue;
                 }
                 if (strtolower(pathinfo($file->getFilename(), PATHINFO_EXTENSION)) === 'php') {
+                    if (!$file->isReadable()) return null;
                     $count++;
                 }
             }

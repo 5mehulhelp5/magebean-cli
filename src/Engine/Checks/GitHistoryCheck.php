@@ -247,7 +247,7 @@ final class GitHistoryCheck
         $truncated = false;
         foreach (array_chunk($commits, 50) as $batch) {
             $command = array_merge(
-                ['git', '-C', $repoRoot, 'grep', '-I', '-i', '-n', '-E', $ere],
+                ['git', '-C', $repoRoot, 'grep', '-I', '-i', '-n', '-P', $ere],
                 $batch,
                 ['--'],
                 $pathspecs

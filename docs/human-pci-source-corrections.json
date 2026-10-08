@@ -1,0 +1,85 @@
+{
+  "date": "2026-10-07",
+  "scope": "Three human-required standalone PCI definitions restored from complete persisted source registry; no detector or compliance promotion.",
+  "changed_count": 3,
+  "changes": [
+    {
+      "id": "MB-0486",
+      "reference": "3.3.3",
+      "prior_revision": 1,
+      "revision": 2,
+      "old_criterion": "For the applicable assessment scope, verify this complete obligation: Additional requirement for issuers and companies that support issuing services and store sensitive authentication data: Any storage of sensitive authentication data is: ; L imited to that which is needed for a legitimate issuing business need and is secured. ; Encrypted using strong cryptography. This bullet is a best practice until its effective date; refer to",
+      "restored_criterion": "For the applicable assessment scope, verify this complete obligation: Additional requirement for issuers and companies that support issuing services and store sensitive authentication data: Any storage of sensitive authentication data is: ; L imited to that which is needed for a legitimate issuing business need and is secured. ; Encrypted using strong cryptography.",
+      "source_file": "src/Rules/requirements/pci-criterion-definitions.json",
+      "source_metadata": {
+        "document": "PCI-DSS-v4_0_1.pdf",
+        "normative_pdf_pages": [
+          89
+        ],
+        "pdf_pages": [
+          89
+        ],
+        "normative_sha256": "fa9c498ea0c992102147b695578ab74fa060f2010c1663138d0de8bab0e9b8bd",
+        "review_state": "source_criterion_defined_evidence_mapping_pending_security_review"
+      },
+      "applicability": {
+        "entity_restriction": "issuer_or_issuing_services_only",
+        "effective_from": null
+      },
+      "restoration_reason": "3.6.1.1 missing key-usage description and HSM/KMS/SCD inventory clauses restored; 3.3.3/3.4.1 extraction fragments removed.",
+      "checks_obligations_human_scope_unchanged": true
+    },
+    {
+      "id": "MB-0487",
+      "reference": "3.4.1",
+      "prior_revision": 1,
+      "revision": 2,
+      "old_criterion": "For the applicable assessment scope, verify this complete obligation: PAN is masked when displayed (the BIN and last four digits are the maximum number of digits to be displayed), such that only personnel with a legitimate business need can see more than the BIN and last four digits of the PAN. (continued on next page)",
+      "restored_criterion": "For the applicable assessment scope, verify this complete obligation: PAN is masked when displayed (the BIN and last four digits are the maximum number of digits to be displayed), such that only personnel with a legitimate business need can see more than the BIN and last four digits of the PAN.",
+      "source_file": "src/Rules/requirements/pci-criterion-definitions.json",
+      "source_metadata": {
+        "document": "PCI-DSS-v4_0_1.pdf",
+        "normative_pdf_pages": [
+          91
+        ],
+        "pdf_pages": [
+          91
+        ],
+        "normative_sha256": "bcc82447219c5884700b516af1294426e57f6a5e20853d49c33316b238d28ec5",
+        "review_state": "source_criterion_defined_evidence_mapping_pending_security_review"
+      },
+      "applicability": {
+        "entity_restriction": "all_applicable_entities",
+        "effective_from": null
+      },
+      "restoration_reason": "3.6.1.1 missing key-usage description and HSM/KMS/SCD inventory clauses restored; 3.3.3/3.4.1 extraction fragments removed.",
+      "checks_obligations_human_scope_unchanged": true
+    },
+    {
+      "id": "MB-0494",
+      "reference": "3.6.1.1",
+      "prior_revision": 1,
+      "revision": 2,
+      "old_criterion": "For the applicable assessment scope, verify this complete obligation: Additional requirement for service providers only: A documented description of the cryptographic architecture is maintained that includes: ; Details of all algorithms, protocols, and keys used for the protection of stored account data, including key strength and expiry date. ; Preventing the use of the same cryptographic keys in production and test environments. This bullet is a best practice until its effective date; refer to",
+      "restored_criterion": "For the applicable assessment scope, verify this complete obligation: Additional requirement for service providers only: A documented description of the cryptographic architecture is maintained that includes: ; Details of all algorithms, protocols, and keys used for the protection of stored account data, including key strength and expiry date. ; Preventing the use of the same cryptographic keys in production and test environments. ; Description of the key usage for each key. ; Inventory of any hardware security modules (HSMs), key management systems (KMS), and other secure cryptographic devices (SCDs) used for key management, including type and location of devices, to support meeting Requirement 12.3.4.",
+      "source_file": "src/Rules/requirements/pci-criterion-definitions.json",
+      "source_metadata": {
+        "document": "PCI-DSS-v4_0_1.pdf",
+        "normative_pdf_pages": [
+          101
+        ],
+        "pdf_pages": [
+          101
+        ],
+        "normative_sha256": "f723024d815865ce64ba716adfaaad112deb973f6638aa7c790d0ff16a326012",
+        "review_state": "source_criterion_defined_evidence_mapping_pending_security_review"
+      },
+      "applicability": {
+        "entity_restriction": "service_provider_only",
+        "effective_from": null
+      },
+      "restoration_reason": "3.6.1.1 missing key-usage description and HSM/KMS/SCD inventory clauses restored; 3.3.3/3.4.1 extraction fragments removed.",
+      "checks_obligations_human_scope_unchanged": true
+    }
+  ]
+}

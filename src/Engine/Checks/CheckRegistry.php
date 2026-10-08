@@ -45,6 +45,7 @@ final class CheckRegistry
         $installedCron = new InstalledCronCheck($ctx);
         $registry->register('fs_webroot_artifact_policy', fn(array $args): array => $deployment->webrootArtifacts($args));
         $registry->register('cache_type_enabled', fn(array $args): array => $deployment->cacheTypeEnabled($args));
+        $registry->register('deployment_indexers_database_ready', fn(array $args): array => $deployment->indexersDatabaseReady($args));
         $registry->register('installed_magento_cron', fn(array $args): array => $installedCron->configured($args));
         $registry->register('magento_admin_password_minimum_configured', fn(array $args): array => $mage->adminPasswordMinimumConfigured($args));
         $registry->register('magento_deployment_debug_flags_disabled', fn(array $args): array => $mage->deploymentDebugFlagsDisabled($args));

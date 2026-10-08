@@ -16,5 +16,5 @@
   "phar_contract": true,
   "default_automated": 31,
   "human_opt_in": 38,
-  "phar_sha256": "353997c65c6420f6c6f87e97b3a42f98b003470121a3682e87b63a8e31b634ec"
+  "phar_sha256": "3bfd33e41823f0729917c10815959cb63dedcaa81f08276d6b1d34d443069eeb"
 }

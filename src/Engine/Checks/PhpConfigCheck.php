@@ -301,7 +301,7 @@ final class PhpConfigCheck
             }
             $rawPath = (string)$path;
             $normPath = str_replace('/', '.', $rawPath);
-            $value = $this->getByDotPath($arr, $normPath, '__NOT_FOUND__');
+            $value = $this->configurationValue($arr, $rawPath);
             if ($value === '__NOT_FOUND__') {
                 $observed[] = ['path' => $rawPath, 'normalized_path' => $normPath, 'present' => false, 'ok' => true];
                 continue;
@@ -349,7 +349,7 @@ final class PhpConfigCheck
             }
             $rawPath = (string)$path;
             $normPath = str_replace('/', '.', $rawPath);
-            $value = $this->getByDotPath($arr, $normPath, '__NOT_FOUND__');
+            $value = $this->configurationValue($arr, $rawPath);
             if ($value === '__NOT_FOUND__') {
                 $observed[] = ['path' => $rawPath, 'normalized_path' => $normPath, 'present' => false, 'ok' => true];
                 continue;
@@ -450,7 +450,7 @@ final class PhpConfigCheck
         }
 
         $normPath = str_replace('/', '.', $path);
-        $value = $this->getByDotPath($arr, $normPath, '__NOT_FOUND__');
+        $value = $this->configurationValue($arr, $path);
         if ($value === '__NOT_FOUND__') {
             return [null, "[UNKNOWN] Path '{$path}' not found in {$file}", [
                 'file' => $file,
@@ -508,7 +508,7 @@ final class PhpConfigCheck
             }
             $rawPath = (string)$path;
             $normPath = str_replace('/', '.', $rawPath);
-            $value = $this->getByDotPath($arr, $normPath, '__NOT_FOUND__');
+            $value = $this->configurationValue($arr, $rawPath);
             if ($value === '__NOT_FOUND__') {
                 $observed[] = ['path' => $rawPath, 'normalized_path' => $normPath, 'present' => false, 'ok' => false];
                 continue;
@@ -560,7 +560,7 @@ final class PhpConfigCheck
 
         $saveOk = is_string($save) && strtolower(trim($save)) === 'redis';
         $passwordPresent = $password !== '__NOT_FOUND__';
-        $passwordOk = $passwordPresent && !$this->configFalsey($password);
+        $passwordOk = $passwordPresent && is_string($password) && $password !== '';
 
         $evidence = [
             'file' => $file,
@@ -619,7 +619,7 @@ final class PhpConfigCheck
             }
             $rawPath = (string)$path;
             $normPath = str_replace('/', '.', $rawPath);
-            $value = $this->getByDotPath($arr, $normPath, '__NOT_FOUND__');
+            $value = $this->configurationValue($arr, $rawPath);
             if ($value === '__NOT_FOUND__') {
                 $observed[] = ['path' => $rawPath, 'normalized_path' => $normPath, 'present' => false, 'file_backend' => false];
                 continue;
@@ -640,6 +640,18 @@ final class PhpConfigCheck
 
         if ($fileBackends !== []) {
             return [false, 'File-based cache backend detected', $evidence + ['failures' => $fileBackends]];
+        }
+        $shared = $this->getByDotPath($arr, 'cache.backend', '__NOT_FOUND__');
+        foreach (['default', 'page_cache'] as $frontend) {
+            $backend = $this->getByDotPath($arr, 'cache.frontend.' . $frontend . '.backend', $shared);
+            if ($backend === '__NOT_FOUND__') {
+                // Varnish replaces the page cache frontend only when explicitly declared.
+                $varnish = $this->configurationValue($arr, 'system.default.system/full_page_cache/caching_application');
+                if ($frontend === 'page_cache' && in_array($varnish, [2, '2'], true)) continue;
+                return [false, 'Cache frontend ' . $frontend . ' has no declared backend; Magento falls back to file storage', $evidence + ['frontend' => $frontend]];
+            }
+            if (!is_string($backend) || trim($backend) === '') return [null, '[UNKNOWN] Cache backend declaration is malformed; inspect cache.frontend.' . $frontend . '.backend in ' . $file, $evidence];
+            if (!$this->isProductionCacheBackend('cache.frontend.' . $frontend . '.backend', $backend)) return [false, 'Cache frontend ' . $frontend . ' does not declare a supported Redis backend', $evidence + ['frontend' => $frontend]];
         }
         if ($present === []) {
             return [false, 'No cache backend configuration found; Magento defaults to file cache', $evidence];
@@ -716,6 +728,17 @@ final class PhpConfigCheck
         }
         $normalized = strtolower(trim((string)$value));
         return in_array($normalized, ['', '0', 'false', 'off', 'no', 'null'], true);
+    }
+
+    /** Preserve Magento slash-delimited keys below system.default. */
+    private function configurationValue(array $arr, string $path): mixed
+    {
+        if (str_starts_with($path, 'system.default.')) {
+            $key = substr($path, strlen('system.default.'));
+            $default = $arr['system']['default'] ?? [];
+            if (is_array($default) && array_key_exists($key, $default)) return $default[$key];
+        }
+        return $this->getByDotPath($arr, str_replace('/', '.', $path), '__NOT_FOUND__');
     }
 
     private function isProductionCacheBackend(string $path, mixed $value): bool

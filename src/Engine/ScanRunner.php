@@ -13,6 +13,7 @@ final class ScanRunner
     /** Scoped observations are reused only during one primary execution. */
     private array $primaryObservations = [];
     private $checkpoint;
+    private ?\Throwable $checkpointError = null;
     private CheckRegistry $registry;
     /** @var null|callable(array): void */
     private $progressCallback;
@@ -21,7 +22,10 @@ final class ScanRunner
     {
         $this->ctx = $ctx instanceof ScanContext ? $ctx->toLegacy() : $ctx;
         $this->pack = $pack;
-        $this->checkpoint = $checkpoint;
+        $this->checkpoint = $checkpoint === null ? null : function () use ($checkpoint): void {
+            try { $checkpoint(); }
+            catch (\Throwable $error) { $this->checkpointError = $error; throw $error; }
+        };
         $this->registry = $registry ?? CheckRegistry::fromContext($this->ctx);
         $this->progressCallback = $progressCallback;
     }
@@ -48,7 +52,17 @@ final class ScanRunner
             }
             return $this->primaryObservations[$key];
         }
-        $result = $this->evalCheckWithEvidence($name, $args);
+        try {
+            $result = $this->evalCheckWithEvidence($name, $args);
+        } catch (\Throwable $error) {
+            // Worker checkpoints/cancellation must retain their existing propagation contract.
+            if ($this->checkpointError !== null) throw $this->checkpointError;
+            $result = CheckResult::of(CheckOutcome::Unknown,
+                'Check '.$name.' failed internally; report this check and scanner version to Magebean support.',
+                ['reason_code'=>'CHECK_EXECUTION_FAILED','exception_class'=>get_class($error)],
+                'CHECK_EXECUTION_FAILED', $name);
+        }
+        if ($this->checkpointError !== null && !$this->checkpointError instanceof ScanDeadlineExceeded) throw $this->checkpointError;
         if ($this->deadline?->expired()) return CheckResult::of(CheckOutcome::Unknown, 'Scan deadline exceeded before the observation was completed.', [], 'SCAN_DEADLINE_EXCEEDED', $name);
         if ($result->reasonCode !== 'SCAN_DEADLINE_EXCEEDED') $this->primaryObservations[$key] = $result;
         return $result;
@@ -90,6 +104,7 @@ final class ScanRunner
     private function executeReport(): ScanReport
     {
         $this->primaryObservations = [];
+        $this->checkpointError = null;
         $findings = [];
         $checkResults = [];
         $passed = 0;
@@ -137,6 +152,28 @@ final class ScanRunner
                     'alignment'=>$rule['alignments'] ?? [],'coverage'=>$rule['coverage'],'applicability'=>$assessment->applicability,
                     'reason_code'=>$assessment->reasonCode,
                 ];
+                // Optional technical collection gaps still need an action even when human
+                // evidence owns the final conclusion or a counterexample already proves FAIL.
+                foreach ($finding['evidence']['obligations'] as &$obligationEvidence) {
+                    foreach ($obligationEvidence['checks'] as &$checkEvidence) {
+                        if (($checkEvidence['status'] ?? '') !== 'UNKNOWN') continue;
+                        $checkScope = $rule;
+                        $checkScope['checks'] = array_values(array_filter($rule['checks'] ?? [], static fn(array $c): bool => $c['name'] === $checkEvidence['check']));
+                        $checkEvidence['collection_guidance'] = RequirementDiagnostics::forFinding([
+                            'id'=>$rule['id'],'message'=>$checkEvidence['message'],
+                            'reason_code'=>$checkEvidence['reason_code'],
+                            'evidence'=>['obligations'=>[['role'=>'mandatory','checks'=>[$checkEvidence]]]],
+                        ], $checkScope);
+                        foreach ($finding['detail'] as &$detailItem) if ($detailItem['check'] === $checkEvidence['check'] && $detailItem['status'] === 'UNKNOWN') $detailItem['collection_guidance'] = $checkEvidence['collection_guidance'];
+                        unset($detailItem);
+                    }
+                    unset($checkEvidence);
+                }
+                unset($obligationEvidence);
+                if ($status === 'UNKNOWN') {
+                    $finding['collection_guidance'] = RequirementDiagnostics::forFinding($finding, $rule);
+                    $finding['evidence']['collection_guidance'] = $finding['collection_guidance'];
+                }
                 foreach(['profile','remediation','assessment_level'] as $field) if(isset($rule[$field]))$finding[$field]=$rule[$field];
                 $findings[]=$finding; $checkResults[]=$observations;
                 if($status==='PASS')$passed++;

@@ -1087,6 +1087,9 @@ final class ComposerPolicyChecks extends ComposerSupport
         }
 
         $lockRaw = $this->collectors->files->read($lockPath);
+        if ($lockRaw === false) {
+            return [null, '[UNKNOWN] Cannot read existing composer.lock; grant the scanner read access to the deployment lock file', ['json_file' => $jsonPath, 'lock_file' => $lockPath, 'reason' => 'lock_unreadable']];
+        }
         $lock    = is_string($lockRaw) ? json_decode($lockRaw, true) : null;
         if (!is_array($lock)) {
             return [

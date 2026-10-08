@@ -38,6 +38,18 @@ try {
         chmod($root . '/app/safe.php', 0000);
         $assert($grep()->grep($args)[0] === null, 'Unreadable PHP cannot pass token scan');
         chmod($root . '/app/safe.php', 0644);
+        mkdir($root . '/generated'); mkdir($root . '/generated/code'); mkdir($root . '/generated/metadata');
+        file_put_contents($root . '/generated/code/a.php', '<?php return [];');
+        file_put_contents($root . '/generated/metadata/a.php', '<?php return [];');
+        chmod($root . '/generated/code/a.php', 0000);
+        $assert($fs->diCompiled([])[0] === null, 'Unreadable generated PHP cannot satisfy readable artifact policy');
+        chmod($root . '/generated/code/a.php', 0644); unlink($root . '/generated/code/a.php'); unlink($root . '/generated/metadata/a.php');
+        rmdir($root . '/generated/code'); rmdir($root . '/generated/metadata'); rmdir($root . '/generated');
+        file_put_contents($root . '/composer.json', '{}'); file_put_contents($root . '/composer.lock', '{}');
+        chmod($root . '/composer.lock', 0000);
+        $composer = new \Magebean\Engine\Checks\Families\ComposerPolicyChecks(new Context($root, ''));
+        $assert($composer->lockIntegrity([])[0] === null, 'Unreadable existing lock is collection failure, not confirmed invalid-lock finding');
+        chmod($root . '/composer.lock', 0644); unlink($root . '/composer.lock'); unlink($root . '/composer.json');
         chmod($root . '/pub', 0000);
         $assert($fs->logsReportsNotInWebroot(['strict_scope' => true])[0] === null, 'Unreadable webroot cannot pass placement scan');
         chmod($root . '/pub', 0755);

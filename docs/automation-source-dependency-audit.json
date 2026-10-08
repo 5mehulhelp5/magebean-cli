@@ -1,0 +1,246 @@
+{
+  "date": "2026-10-07",
+  "audited_count": 29,
+  "scope": "Non-human source, filesystem, Composer and Git requirements from the 47-item pre-audit inventory; includes prior validated requirements for regression review and three payment requirements retained as genuine human scope.",
+  "not_claimed": "This targeted automation review does not approve the complete 687-item standards inventory or its human evidence obligations.",
+  "tests": [
+    "ScopedSourceFilesystemPolicyTest: 15 assertions",
+    "ComposerMaintenanceCoverageTest: 11 assertions",
+    "SensitivePatternEvidenceSafetyTest: 5 assertions",
+    "AdvisoryCompletionTest: 25 assertions"
+  ],
+  "records": [
+    {
+      "id": "MB-0001",
+      "decision": "retain_bounded_automation",
+      "evidence": "FilesystemCheck::strictNoWorldWritable",
+      "automated_scope": "Unix other-write bit is absent throughout traversed deployment entries.",
+      "limitations_and_false_result_risks": "ACLs and actual PHP process privileges are outside this predicate. Symlink targets are deliberately unassessed and produce collection diagnostics.",
+      "client_action": "Inspect the reported exact path and owner; remove only inappropriate other-write permission. Resolve unreadable or symlink paths before claiming coverage."
+    },
+    {
+      "id": "MB-0002",
+      "decision": "clarify_bounded_criterion",
+      "evidence": "FilesystemCheck::fileModeMax,fileOwnerGroupMatches",
+      "automated_scope": "env.php permission bits are a subset of 0640 and UID/GID equal configured owner/group references.",
+      "limitations_and_false_result_risks": "Matching project-root ownership is a deployment policy, not universal Magento security truth. Custom shared group ownership may differ legitimately. ACL restrictions are not assessed.",
+      "client_action": "Inspect only app/etc/env.php and configured ownership references. Configure legitimate reference paths rather than recursively chown/chmod the application."
+    },
+    {
+      "id": "MB-0003",
+      "decision": "retain_bounded_automation",
+      "evidence": "DeploymentStateCheck::webrootArtifacts",
+      "automated_scope": "Forbidden artifact basenames are absent throughout readable pub tree, following resolvable project-contained symlinks.",
+      "limitations_and_false_result_risks": "External or unresolved symlinks cannot be silently clean. This does not establish live HTTP reachability or arbitrary backup formats.",
+      "client_action": "Remove the identified artifact from pub; inspect external links and restore traversal/read permission for exact incomplete paths."
+    },
+    {
+      "id": "MB-0014",
+      "decision": "retain_bounded_automation",
+      "evidence": "CodeQueryChecks::strictPhpSuperglobals",
+      "automated_scope": "No configured direct superglobal T_VARIABLE tokens in valid PHP under app.",
+      "limitations_and_false_result_risks": "Dynamic variable references and broader input-validation correctness are outside scope. Syntax/read/link gaps cannot pass; comments and literal strings are ignored.",
+      "client_action": "Use Magento request abstractions at reported file/line. Resolve parse or read failures separately, without treating them as vulnerabilities."
+    },
+    {
+      "id": "MB-0029",
+      "decision": "retain_bounded_automation",
+      "evidence": "CodeQueryChecks::strictLiteralMixedContent",
+      "automated_scope": "No literal insecure HTTP subresource or form-action references in selected markup/CSS.",
+      "limitations_and_false_result_risks": "Dynamic JS URLs and live responses are outside scope. No eligible readable source is a collection limitation rather than proof of secure assets.",
+      "client_action": "Replace the reported literal with the correct HTTPS resource. Supply readable markup/CSS source or assess the runtime response separately."
+    },
+    {
+      "id": "MB-0034",
+      "decision": "fixed_readability_guard",
+      "evidence": "FilesystemCheck::diCompiled,countPhpFiles",
+      "automated_scope": "At least one readable generated PHP artifact exists in each configured generated directory.",
+      "limitations_and_false_result_risks": "Prior countPhpFiles counted unreadable PHP as readable artifacts, producing false PASS. Fixed. Presence does not prove freshness or compilation correctness.",
+      "client_action": "Generate DI artifacts during the deployment build. If artifacts exist but cannot be read, grant scanner read access to the exact generated subtree."
+    },
+    {
+      "id": "MB-0035",
+      "decision": "retain_bounded_automation",
+      "evidence": "FilesystemCheck::strictStaticContentPresence",
+      "automated_scope": "At least one nonempty readable published frontend/admin static artifact is present.",
+      "limitations_and_false_result_risks": "Presence is existential, so some unrelated unreadable artifacts need not invalidate an observed readable artifact. This is not every theme/locale completeness.",
+      "client_action": "Publish static assets during deployment; inspect the configured static directory and permissions when nothing readable is observed."
+    },
+    {
+      "id": "MB-0037",
+      "decision": "retain_bounded_declared_automation",
+      "evidence": "DeploymentStateCheck::cacheTypeEnabled",
+      "automated_scope": "Collected app/etc/env.php cache_types.full_page is explicitly enabled.",
+      "limitations_and_false_result_risks": "Declared cache type state does not prove functioning cache backend, hit ratio, Varnish gateway or all runtime routes. Missing/malformed deployed state is a collection limitation, not automatically disabled cache.",
+      "client_action": "If explicitly disabled, enable the Full Page Cache type through the deployed Magento configuration workflow. If state is absent, collect Magento cache:status or the persisted readable deployment state."
+    },
+    {
+      "id": "MB-0039",
+      "decision": "runtime_team_handoff",
+      "evidence": "FilesystemCheck::indexersReady,DeploymentStateCheck::indexersDatabaseReady",
+      "automated_scope": "Automate against recorded Magento indexer_state, not optional var/.indexer_status file.",
+      "limitations_and_false_result_risks": "The old optional file is not an authoritative runtime source, can be stale, and does not prove backlog absence. Runtime team implements real read-only DB assessment.",
+      "client_action": "Use the deployed DB connection with SELECT permission. Inspect invalid/working indexers and schedule safe reindexing according to operational context."
+    },
+    {
+      "id": "MB-0042",
+      "decision": "retain_bounded_automation",
+      "evidence": "FilesystemCheck::strictLogsReportsPlacement",
+      "automated_scope": "Configured log/report paths or their corresponding project symlink targets are absent from collected pub.",
+      "limitations_and_false_result_risks": "Physical placement does not establish actual HTTP exposure. Traversal gaps and unresolved links cannot prove absence.",
+      "client_action": "Move the identified log/report location outside pub or remove its public link. Resolve exact unreadable/link gaps separately."
+    },
+    {
+      "id": "MB-0049",
+      "decision": "retain_bounded_automation",
+      "evidence": "ComposerAdvisoryChecks::auditApi,validateLockScope",
+      "automated_scope": "Applicable advisory matches are absent in the successfully queried configured dataset for collected lock versions.",
+      "limitations_and_false_result_risks": "Cannot establish absence of unknown vulnerabilities or uncollected runtime dependencies. Invalid lock records or malformed API replies cannot pass.",
+      "client_action": "Update reported package through a controlled Composer change; verify advisory-specific patch evidence. For transport failure, verify endpoint/trust/network without disabling certificate validation."
+    },
+    {
+      "id": "MB-0050",
+      "decision": "retain_bounded_automation",
+      "evidence": "ComposerAdvisoryChecks::adobeSecurityPatchesApi",
+      "automated_scope": "Collected Magento product branch is current or required patches have verified local alternatives.",
+      "limitations_and_false_result_risks": "Only collected Composer version and supported patch response are evaluated; runtime installation and unknown branches are not inferred.",
+      "client_action": "Apply the stated Adobe security release or verify patch evidence in the collected files. Resolve unsupported branch separately from a service/network collection error."
+    },
+    {
+      "id": "MB-0055",
+      "decision": "retain_bounded_automation",
+      "evidence": "ComposerAdvisoryChecks::transitiveAuditApi",
+      "automated_scope": "Collected transitive lock versions have no returned applicable advisory matches.",
+      "limitations_and_false_result_risks": "Classification depends on valid root manifest and complete lock inventory; advisory dataset scope remains explicit.",
+      "client_action": "Update the vulnerable dependency or requiring parent named in evidence; repair malformed manifest/lock or service connectivity separately."
+    },
+    {
+      "id": "MB-0056",
+      "decision": "retain_bounded_automation",
+      "evidence": "ComposerAdvisoryChecks::constraintsConflictApi",
+      "automated_scope": "Combined declared constraints intersect versions at or above a returned advisory published fixed version.",
+      "limitations_and_false_result_risks": "This is not full dependency solver feasibility, platform compatibility, or every fixed branch. No-fix advisories do not prove a blocked update.",
+      "client_action": "Adjust the reported root/parent constraint in a controlled dependency update; separately confirm Composer solver and platform compatibility."
+    },
+    {
+      "id": "MB-0057",
+      "decision": "retain_bounded_automation",
+      "evidence": "ComposerVersionChecks::assessCompleteYankedStatuses",
+      "automated_scope": "Every requested installed version has explicit matching non-yanked status.",
+      "limitations_and_false_result_risks": "An empty, partial, unknown, or wrong-version service response cannot pass. Positive withdrawn versions remain failures despite other coverage gaps.",
+      "client_action": "Replace the specifically withdrawn version. If status is missing, verify service coverage for that package/version rather than deleting or upgrading blindly."
+    },
+    {
+      "id": "MB-0059",
+      "decision": "retain_bounded_automation",
+      "evidence": "ComposerAdvisoryChecks::advisoryLatencyApi",
+      "automated_scope": "Affected returned advisory publication age does not exceed configured threshold.",
+      "limitations_and_false_result_risks": "Publication age is not organization discovery time or measured remediation SLA; missing or future publication timestamps cannot pass.",
+      "client_action": "Review the identified affected advisory and update/patch dependency. Request corrected publication metadata when service data is incomplete."
+    },
+    {
+      "id": "MB-0061",
+      "decision": "retain_bounded_automation",
+      "evidence": "ComposerRepositoryChecks::abandonedApi",
+      "automated_scope": "No queried dependency has authoritative known abandoned status.",
+      "limitations_and_false_result_risks": "The duplicated library-subset obligation is redundant but does not duplicate findings. Unknown status must not mean maintained. Abandonment is maintenance policy, not exploitability.",
+      "client_action": "Migrate the named abandoned package to its reported maintained replacement, after compatibility review. Resolve unknown service classification separately."
+    },
+    {
+      "id": "MB-0062",
+      "decision": "fixed_complete_release_coverage",
+      "evidence": "ComposerRepositoryChecks::releaseRecencyApi,assessReleaseRecencyStatuses",
+      "automated_scope": "Every queried package has known latest release time within configured calendar-month threshold.",
+      "limitations_and_false_result_risks": "Missing response previously referenced undefined variables and could yield false PASS. Unavailable history was silently excluded. Fixed; future dates rejected. Old age is maintenance policy, not a vulnerability.",
+      "client_action": "Inspect the named package release history and maintenance need. Missing classification requires service metadata coverage, not an automatic upgrade of every dependency."
+    },
+    {
+      "id": "MB-0063",
+      "decision": "fixed_complete_repository_coverage",
+      "evidence": "ComposerRepositoryChecks::repoArchivedApi,assessRepositoryStatuses",
+      "automated_scope": "Every applicable source repository is explicitly assessed and is not archived, disabled, or missing.",
+      "limitations_and_false_result_risks": "Prior partial response could pass when any repository was active. Strict scope now rejects partial coverage, missing boolean flags, and unsupported providers. Explicit repository_not_applicable remains excluded.",
+      "client_action": "Inspect the specific upstream repository and choose a maintained successor if needed. Ask the status service to collect unsupported/unassessed providers; do not infer archive from transport failure."
+    },
+    {
+      "id": "MB-0065",
+      "decision": "retain_bounded_automation",
+      "evidence": "ComposerPolicyChecks::jsonConstraints",
+      "automated_scope": "Configured root dependency sections contain no wildcard constraints.",
+      "limitations_and_false_result_risks": "Exact source constraint policy is not proof of insecure dependencies. Project-local manifest prevents unrelated CLI package metadata substituting for target.",
+      "client_action": "Replace only the reported wildcard with a compatible maintained constraint and regenerate/test lock deliberately."
+    },
+    {
+      "id": "MB-0066",
+      "decision": "retain_bounded_automation",
+      "evidence": "ComposerPolicyChecks::jsonConstraints",
+      "automated_scope": "Configured root dependency sections contain no development branch constraints.",
+      "limitations_and_false_result_risks": "Root-manifest policy does not cover every transitive lock branch; development constraints may be intentional nonproduction exceptions.",
+      "client_action": "Choose a stable compatible package version or document scope-specific development exception; do not label every dev dependency an exploitable flaw."
+    },
+    {
+      "id": "MB-0067",
+      "decision": "retain_bounded_automation",
+      "evidence": "ComposerPolicyChecks::jsonKv",
+      "automated_scope": "Target composer.json has boolean prefer-stable=true.",
+      "limitations_and_false_result_risks": "Missing prefer-stable may legitimately retain Composer defaults; it violates this declared project policy only, not a vulnerability by itself.",
+      "client_action": "Set prefer-stable=true if adopting the policy and validate dependency resolution; ensure the reported target manifest is readable and valid JSON."
+    },
+    {
+      "id": "MB-0069",
+      "decision": "retain_bounded_automation",
+      "evidence": "ComposerVersionChecks::directOutdatedApi",
+      "automated_scope": "Collected direct lock versions match reported latest stable versions.",
+      "limitations_and_false_result_risks": "Latest version is maintenance policy; major upgrades may intentionally be constrained. Unknown or unparsable reported versions cannot mean current.",
+      "client_action": "Review reported direct package latest version and compatibility before updating. Do not force major updates from security severity alone."
+    },
+    {
+      "id": "MB-0070",
+      "decision": "retain_bounded_automation",
+      "evidence": "ComposerPolicyChecks::lockIntegrity",
+      "automated_scope": "Composer content-hash and dependency identities/provider coverage are consistent.",
+      "limitations_and_false_result_risks": "This does not prove full solver result or installed vendor integrity. Missing lock violates lock policy; existing unreadable lock previously failed as invalid JSON and is now a separate collection error.",
+      "client_action": "Regenerate and review composer.lock in a controlled build using the target manifest. Grant read access if collector cannot access existing files; never silently regenerate production files."
+    },
+    {
+      "id": "MB-0072",
+      "decision": "fixed_history_regex_engine_parity",
+      "evidence": "GitHistoryCheck::scanGitHistory",
+      "automated_scope": "Configured PCRE patterns have no eligible working-tree or local-ref history line matches.",
+      "limitations_and_false_result_risks": "History previously used POSIX ERE while working tree used PCRE, silently missing custom digit patterns. Changed to git grep -P. Multiline history matching remains outside line-based scope; missing Git metadata remains incomplete.",
+      "client_action": "Inspect reported commit/path with redacted evidence, rotate a real credential if confirmed, then apply deliberate history cleanup. Deployment scans without Git should use MB-0730."
+    },
+    {
+      "id": "MB-0082",
+      "decision": "human_scope_preserved",
+      "evidence": "PaymentSourceChecks::cardholderDataStorage",
+      "automated_scope": "Source schema/SQL/write patterns can support a real database assessment.",
+      "limitations_and_false_result_risks": "Pattern scans cannot establish actual database contents, encrypted storage, runtime paths, or legitimate misleading field names. Missing files must not be a confirmed security finding.",
+      "client_action": "Inspect flagged schema/write sites and actual relevant database storage using masked evidence; keep broad requirement human-reviewed until authoritative storage evidence exists."
+    },
+    {
+      "id": "MB-0083",
+      "decision": "human_scope_preserved_and_data_redacted",
+      "evidence": "PaymentSourceChecks::cardholderDataFiles",
+      "automated_scope": "Luhn-valid PAN-like and sensitive field patterns can support a file assessment.",
+      "limitations_and_false_result_risks": "Patterns can match test data or unrelated identifiers; unreadable/large/omitted file scope cannot establish card-free storage. Raw PAN/CVV snippets were exposed in structured evidence; fixed redaction.",
+      "client_action": "Inspect the specific flagged export/backup/log with masked evidence; determine actual card data and storage policy. Do not copy full PAN/CVV into scan reports or tickets."
+    },
+    {
+      "id": "MB-0086",
+      "decision": "human_scope_preserved",
+      "evidence": "PaymentSourceChecks::checkoutRawCardCollection",
+      "automated_scope": "Checkout source form/POST patterns can identify candidate raw-card handling.",
+      "limitations_and_false_result_risks": "Static field names and checkout keywords do not prove actual runtime collection, gateway tokenization, or hosted-field behavior.",
+      "client_action": "Trace the flagged checkout input to server/gateway handling and verify hosted/tokenized collection with masked evidence; retain human scope for this broad requirement."
+    },
+    {
+      "id": "MB-0730",
+      "decision": "retain_bounded_automation",
+      "evidence": "GitHistoryCheck::workingTreeScan",
+      "automated_scope": "Configured secret patterns are absent in readable nonbinary deployed files within configured paths/exclusions.",
+      "limitations_and_false_result_risks": "Patterns do not certify every secret format, excluded runtime env.php, binary files, or Git history. Oversized/unreadable files cannot pass under strict deployment coverage.",
+      "client_action": "Inspect reported path with redacted evidence and rotate a confirmed credential. Resolve exact read/size coverage gaps or explicitly define exclusions before claiming a clean bounded scan."
+    }
+  ]
+}

@@ -36,7 +36,7 @@ final class HttpCollector
                 $err = curl_error($ch);
                 curl_close($ch);
                 $observe(false);
-                return [null, '[UNKNOWN] HTTP error: ' . $err, ['url' => $url]];
+                return $this->transportFailure($url, $err, 'curl');
             }
             $status   = curl_getinfo($ch, CURLINFO_RESPONSE_CODE);
             $hdrSize  = curl_getinfo($ch, CURLINFO_HEADER_SIZE);
@@ -62,7 +62,9 @@ final class HttpCollector
             ]
         ];
         $context = stream_context_create($opts);
+        error_clear_last();
         $body = @file_get_contents($url, false, $context);
+        $streamError = error_get_last();
         $hdrs = [];
         $status = 0;
         $finalUrl = $url;
@@ -77,10 +79,33 @@ final class HttpCollector
         }
         if ($body === false) {
             $observe(false);
-            return [null, '[UNKNOWN] HTTP error (stream)', ['url' => $url]];
+            return $this->transportFailure($url, (string)($streamError['message'] ?? 'Stream request failed'), 'stream');
         }
         $observe(true);
         return [true, '', ['status' => $status, 'headers' => $hdrs, 'body' => $body, 'final_url' => $finalUrl]];
+    }
+    private function transportFailure(string $url, string $error, string $backend): array
+    {
+        $kind = 'HTTP_TRANSPORT_FAILED';
+        $action = 'Verify that the resolved URL is reachable from the scanner and retry; inspect proxy/firewall routing if the site works only from your browser.';
+        if (preg_match('~certificate|peer verification|self.signed~i', $error)) {
+            $kind = 'HTTP_TLS_TRUST_FAILED';
+            $action = 'Check the endpoint certificate hostname and trust chain. Install the private root CA in the scanner trust store or configure curl.cainfo / openssl.cafile; keep certificate verification enabled.';
+        } elseif (preg_match('~SSL|crypto|TLS~i', $error)) {
+            $kind = 'HTTP_TLS_FAILED';
+            $action = 'Verify that the resolved HTTPS port serves TLS and supports modern protocols/ciphers accepted by the scanner OpenSSL/cURL client; inspect the negotiation error before rerunning.';
+        } elseif (preg_match('~resolve|name resolution|getaddrinfo|php_network_getaddresses~i', $error)) {
+            $kind = 'HTTP_DNS_FAILED';
+            $action = 'Resolve the storefront hostname from the scanner environment (including WSL/container DNS or hosts mapping), then retry the same URL.';
+        } elseif (preg_match('~timed? ?out|timeout~i', $error)) {
+            $kind = 'HTTP_TIMEOUT';
+            $action = 'Check endpoint latency and firewall routing from the scanner; increase this check timeout only after connectivity is confirmed.';
+        }
+        // Errors may include URL credentials/query secrets; never retain them in diagnostics.
+        $safeUrl = preg_replace('~^(https?://)[^/@]+@~i', '$1', $url) ?? $url;
+        $safeUrl = preg_replace('~[?#].*$~', '', $safeUrl) ?? $safeUrl;
+        $safeError = str_replace($url, $safeUrl, $error);
+        return [null, '[UNKNOWN] HTTP error: ' . $safeError, ['url' => $safeUrl, 'transport_error' => true, 'reason_code' => $kind, 'backend' => $backend, 'action' => $action]];
     }
     /** Resolve each redirect hop, including relative Location values, for stream evidence. */
     private function redirectUrl(string $base, string $location): string

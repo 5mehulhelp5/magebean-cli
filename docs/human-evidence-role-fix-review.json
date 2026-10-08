@@ -1,0 +1,2380 @@
+{
+  "date": "2026-10-07",
+  "scope": "Only unaligned human requirements; PCI and ASVS definitions unchanged in this mutation.",
+  "changed_definition_count": 39,
+  "mandatory_heuristic_to_supporting_definition_count": 37,
+  "instructions_improved_count": 22,
+  "changes": [
+    {
+      "id": "MB-0004",
+      "prior_revision": 3,
+      "revision": 4,
+      "role_changed_obligation_ids": [
+        "O001"
+      ],
+      "instructions_improved": false,
+      "reason": "The complete criterion requires independent runtime/process evidence; missing optional heuristic observations must not override the human-review result.",
+      "previous_obligations": [
+        {
+          "id": "O001",
+          "op": "all",
+          "role": "mandatory",
+          "proof": "heuristic",
+          "checks": [
+            {
+              "name": "code_dirs_readonly",
+              "args": {
+                "dirs": [
+                  "app",
+                  "vendor",
+                  "lib"
+                ],
+                "max_results": 50,
+                "strict_scope": true
+              }
+            }
+          ]
+        }
+      ],
+      "current_obligations": [
+        {
+          "id": "O001",
+          "op": "all",
+          "role": "supporting",
+          "proof": "heuristic",
+          "checks": [
+            {
+              "name": "code_dirs_readonly",
+              "args": {
+                "dirs": [
+                  "app",
+                  "vendor",
+                  "lib"
+                ],
+                "max_results": 50,
+                "strict_scope": true
+              }
+            }
+          ]
+        }
+      ],
+      "criterion_unchanged": true,
+      "checks_arguments_proof_operators_unchanged": true
+    },
+    {
+      "id": "MB-0010",
+      "prior_revision": 3,
+      "revision": 4,
+      "role_changed_obligation_ids": [
+        "O001"
+      ],
+      "instructions_improved": false,
+      "reason": "The complete criterion requires independent runtime/process evidence; missing optional heuristic observations must not override the human-review result.",
+      "previous_obligations": [
+        {
+          "id": "O001",
+          "op": "all",
+          "role": "mandatory",
+          "proof": "heuristic",
+          "checks": [
+            {
+              "name": "magento_admin_exposure_restricted",
+              "args": {
+                "env_file": "app/etc/env.php",
+                "paths": [
+                  "/admin/",
+                  "/index.php/admin/",
+                  "/backend/"
+                ],
+                "acl_files": [
+                  "nginx.conf",
+                  "pub/.htaccess",
+                  ".htaccess"
+                ],
+                "timeout_ms": 8000
+              }
+            }
+          ]
+        }
+      ],
+      "current_obligations": [
+        {
+          "id": "O001",
+          "op": "all",
+          "role": "supporting",
+          "proof": "heuristic",
+          "checks": [
+            {
+              "name": "magento_admin_exposure_restricted",
+              "args": {
+                "env_file": "app/etc/env.php",
+                "paths": [
+                  "/admin/",
+                  "/index.php/admin/",
+                  "/backend/"
+                ],
+                "acl_files": [
+                  "nginx.conf",
+                  "pub/.htaccess",
+                  ".htaccess"
+                ],
+                "timeout_ms": 8000
+              }
+            }
+          ]
+        }
+      ],
+      "criterion_unchanged": true,
+      "checks_arguments_proof_operators_unchanged": true
+    },
+    {
+      "id": "MB-0015",
+      "prior_revision": 3,
+      "revision": 4,
+      "role_changed_obligation_ids": [
+        "O001"
+      ],
+      "instructions_improved": false,
+      "reason": "The complete criterion requires independent runtime/process evidence; missing optional heuristic observations must not override the human-review result.",
+      "previous_obligations": [
+        {
+          "id": "O001",
+          "op": "all",
+          "role": "mandatory",
+          "proof": "heuristic",
+          "checks": [
+            {
+              "name": "code_csrf_form_key",
+              "args": {
+                "paths": [
+                  "app"
+                ]
+              }
+            }
+          ]
+        }
+      ],
+      "current_obligations": [
+        {
+          "id": "O001",
+          "op": "all",
+          "role": "supporting",
+          "proof": "heuristic",
+          "checks": [
+            {
+              "name": "code_csrf_form_key",
+              "args": {
+                "paths": [
+                  "app"
+                ]
+              }
+            }
+          ]
+        }
+      ],
+      "criterion_unchanged": true,
+      "checks_arguments_proof_operators_unchanged": true
+    },
+    {
+      "id": "MB-0016",
+      "prior_revision": 3,
+      "revision": 4,
+      "role_changed_obligation_ids": [
+        "O001"
+      ],
+      "instructions_improved": false,
+      "reason": "The complete criterion requires independent runtime/process evidence; missing optional heuristic observations must not override the human-review result.",
+      "previous_obligations": [
+        {
+          "id": "O001",
+          "op": "all",
+          "role": "mandatory",
+          "proof": "heuristic",
+          "checks": [
+            {
+              "name": "code_ssrf_safeguards",
+              "args": {
+                "paths": [
+                  "app"
+                ],
+                "include_ext": [
+                  "php"
+                ]
+              }
+            }
+          ]
+        }
+      ],
+      "current_obligations": [
+        {
+          "id": "O001",
+          "op": "all",
+          "role": "supporting",
+          "proof": "heuristic",
+          "checks": [
+            {
+              "name": "code_ssrf_safeguards",
+              "args": {
+                "paths": [
+                  "app"
+                ],
+                "include_ext": [
+                  "php"
+                ]
+              }
+            }
+          ]
+        }
+      ],
+      "criterion_unchanged": true,
+      "checks_arguments_proof_operators_unchanged": true
+    },
+    {
+      "id": "MB-0019",
+      "prior_revision": 3,
+      "revision": 4,
+      "role_changed_obligation_ids": [
+        "O001"
+      ],
+      "instructions_improved": false,
+      "reason": "The complete criterion requires independent runtime/process evidence; missing optional heuristic observations must not override the human-review result.",
+      "previous_obligations": [
+        {
+          "id": "O001",
+          "op": "all",
+          "role": "mandatory",
+          "proof": "heuristic",
+          "checks": [
+            {
+              "name": "code_dynamic_execution_safety",
+              "args": {
+                "paths": [
+                  "app"
+                ],
+                "include_ext": [
+                  "php"
+                ]
+              }
+            }
+          ]
+        }
+      ],
+      "current_obligations": [
+        {
+          "id": "O001",
+          "op": "all",
+          "role": "supporting",
+          "proof": "heuristic",
+          "checks": [
+            {
+              "name": "code_dynamic_execution_safety",
+              "args": {
+                "paths": [
+                  "app"
+                ],
+                "include_ext": [
+                  "php"
+                ]
+              }
+            }
+          ]
+        }
+      ],
+      "criterion_unchanged": true,
+      "checks_arguments_proof_operators_unchanged": true
+    },
+    {
+      "id": "MB-0020",
+      "prior_revision": 3,
+      "revision": 4,
+      "role_changed_obligation_ids": [
+        "O001"
+      ],
+      "instructions_improved": false,
+      "reason": "The complete criterion requires independent runtime/process evidence; missing optional heuristic observations must not override the human-review result.",
+      "previous_obligations": [
+        {
+          "id": "O001",
+          "op": "all",
+          "role": "mandatory",
+          "proof": "heuristic",
+          "checks": [
+            {
+              "name": "code_path_traversal_safety",
+              "args": {
+                "paths": [
+                  "app"
+                ],
+                "include_ext": [
+                  "php"
+                ]
+              }
+            }
+          ]
+        }
+      ],
+      "current_obligations": [
+        {
+          "id": "O001",
+          "op": "all",
+          "role": "supporting",
+          "proof": "heuristic",
+          "checks": [
+            {
+              "name": "code_path_traversal_safety",
+              "args": {
+                "paths": [
+                  "app"
+                ],
+                "include_ext": [
+                  "php"
+                ]
+              }
+            }
+          ]
+        }
+      ],
+      "criterion_unchanged": true,
+      "checks_arguments_proof_operators_unchanged": true
+    },
+    {
+      "id": "MB-0021",
+      "prior_revision": 3,
+      "revision": 4,
+      "role_changed_obligation_ids": [
+        "O001"
+      ],
+      "instructions_improved": false,
+      "reason": "The complete criterion requires independent runtime/process evidence; missing optional heuristic observations must not override the human-review result.",
+      "previous_obligations": [
+        {
+          "id": "O001",
+          "op": "all",
+          "role": "mandatory",
+          "proof": "heuristic",
+          "checks": [
+            {
+              "name": "code_upload_safety",
+              "args": {
+                "paths": [
+                  "app"
+                ],
+                "include_ext": [
+                  "php"
+                ]
+              }
+            }
+          ]
+        }
+      ],
+      "current_obligations": [
+        {
+          "id": "O001",
+          "op": "all",
+          "role": "supporting",
+          "proof": "heuristic",
+          "checks": [
+            {
+              "name": "code_upload_safety",
+              "args": {
+                "paths": [
+                  "app"
+                ],
+                "include_ext": [
+                  "php"
+                ]
+              }
+            }
+          ]
+        }
+      ],
+      "criterion_unchanged": true,
+      "checks_arguments_proof_operators_unchanged": true
+    },
+    {
+      "id": "MB-0023",
+      "prior_revision": 3,
+      "revision": 4,
+      "role_changed_obligation_ids": [
+        "O001"
+      ],
+      "instructions_improved": false,
+      "reason": "The complete criterion requires independent runtime/process evidence; missing optional heuristic observations must not override the human-review result.",
+      "previous_obligations": [
+        {
+          "id": "O001",
+          "op": "all",
+          "role": "mandatory",
+          "proof": "heuristic",
+          "checks": [
+            {
+              "name": "code_csprng_safety",
+              "args": {
+                "paths": [
+                  "app"
+                ],
+                "include_ext": [
+                  "php"
+                ]
+              }
+            }
+          ]
+        }
+      ],
+      "current_obligations": [
+        {
+          "id": "O001",
+          "op": "all",
+          "role": "supporting",
+          "proof": "heuristic",
+          "checks": [
+            {
+              "name": "code_csprng_safety",
+              "args": {
+                "paths": [
+                  "app"
+                ],
+                "include_ext": [
+                  "php"
+                ]
+              }
+            }
+          ]
+        }
+      ],
+      "criterion_unchanged": true,
+      "checks_arguments_proof_operators_unchanged": true
+    },
+    {
+      "id": "MB-0025",
+      "prior_revision": 3,
+      "revision": 4,
+      "role_changed_obligation_ids": [
+        "O001"
+      ],
+      "instructions_improved": false,
+      "reason": "The complete criterion requires independent runtime/process evidence; missing optional heuristic observations must not override the human-review result.",
+      "previous_obligations": [
+        {
+          "id": "O001",
+          "op": "all",
+          "role": "mandatory",
+          "proof": "heuristic",
+          "checks": [
+            {
+              "name": "code_magento_api_crypto_session",
+              "args": {
+                "paths": [
+                  "app"
+                ],
+                "include_ext": [
+                  "php"
+                ]
+              }
+            }
+          ]
+        }
+      ],
+      "current_obligations": [
+        {
+          "id": "O001",
+          "op": "all",
+          "role": "supporting",
+          "proof": "heuristic",
+          "checks": [
+            {
+              "name": "code_magento_api_crypto_session",
+              "args": {
+                "paths": [
+                  "app"
+                ],
+                "include_ext": [
+                  "php"
+                ]
+              }
+            }
+          ]
+        }
+      ],
+      "criterion_unchanged": true,
+      "checks_arguments_proof_operators_unchanged": true
+    },
+    {
+      "id": "MB-0043",
+      "prior_revision": 3,
+      "revision": 4,
+      "role_changed_obligation_ids": [
+        "O001"
+      ],
+      "instructions_improved": false,
+      "reason": "The complete criterion requires independent runtime/process evidence; missing optional heuristic observations must not override the human-review result.",
+      "previous_obligations": [
+        {
+          "id": "O001",
+          "op": "all",
+          "role": "mandatory",
+          "proof": "heuristic",
+          "checks": [
+            {
+              "name": "fs_log_rotation_configured",
+              "args": {
+                "file": "devops/logrotate.conf"
+              }
+            }
+          ]
+        }
+      ],
+      "current_obligations": [
+        {
+          "id": "O001",
+          "op": "all",
+          "role": "supporting",
+          "proof": "heuristic",
+          "checks": [
+            {
+              "name": "fs_log_rotation_configured",
+              "args": {
+                "file": "devops/logrotate.conf"
+              }
+            }
+          ]
+        }
+      ],
+      "criterion_unchanged": true,
+      "checks_arguments_proof_operators_unchanged": true
+    },
+    {
+      "id": "MB-0051",
+      "prior_revision": 1,
+      "revision": 2,
+      "role_changed_obligation_ids": [],
+      "instructions_improved": true,
+      "reason": "The complete criterion requires independent runtime/process evidence; missing optional heuristic observations must not override the human-review result.",
+      "previous_obligations": [
+        {
+          "id": "O001",
+          "op": "all",
+          "role": "supporting",
+          "proof": "heuristic",
+          "checks": [
+            {
+              "name": "composer_fix_version_api",
+              "args": {
+                "lock_file": "composer.lock",
+                "endpoint": "https://api.magebean.com/v1/osv/advisories",
+                "timeout_ms": 10000,
+                "batch_size": 500,
+                "allow_private_http_fallback": true
+              }
+            }
+          ]
+        }
+      ],
+      "current_obligations": [
+        {
+          "id": "O001",
+          "op": "all",
+          "role": "supporting",
+          "proof": "heuristic",
+          "checks": [
+            {
+              "name": "composer_fix_version_api",
+              "args": {
+                "lock_file": "composer.lock",
+                "endpoint": "https://api.magebean.com/v1/osv/advisories",
+                "timeout_ms": 10000,
+                "batch_size": 500,
+                "allow_private_http_fallback": true
+              }
+            }
+          ]
+        }
+      ],
+      "criterion_unchanged": true,
+      "checks_arguments_proof_operators_unchanged": true
+    },
+    {
+      "id": "MB-0052",
+      "prior_revision": 1,
+      "revision": 2,
+      "role_changed_obligation_ids": [
+        "O001"
+      ],
+      "instructions_improved": true,
+      "reason": "The complete criterion requires independent runtime/process evidence; missing optional heuristic observations must not override the human-review result.",
+      "previous_obligations": [
+        {
+          "id": "O001",
+          "op": "all",
+          "role": "mandatory",
+          "proof": "heuristic",
+          "checks": [
+            {
+              "name": "composer_risk_surface_tag",
+              "args": {
+                "lock_file": "composer.lock",
+                "status_endpoint": "https://api.magebean.com/v1/packages/status",
+                "timeout_ms": 10000,
+                "batch_size": 500,
+                "allow_private_http_fallback": true
+              }
+            }
+          ]
+        }
+      ],
+      "current_obligations": [
+        {
+          "id": "O001",
+          "op": "all",
+          "role": "supporting",
+          "proof": "heuristic",
+          "checks": [
+            {
+              "name": "composer_risk_surface_tag",
+              "args": {
+                "lock_file": "composer.lock",
+                "status_endpoint": "https://api.magebean.com/v1/packages/status",
+                "timeout_ms": 10000,
+                "batch_size": 500,
+                "allow_private_http_fallback": true
+              }
+            }
+          ]
+        }
+      ],
+      "criterion_unchanged": true,
+      "checks_arguments_proof_operators_unchanged": true
+    },
+    {
+      "id": "MB-0053",
+      "prior_revision": 1,
+      "revision": 2,
+      "role_changed_obligation_ids": [
+        "O001"
+      ],
+      "instructions_improved": true,
+      "reason": "The complete criterion requires independent runtime/process evidence; missing optional heuristic observations must not override the human-review result.",
+      "previous_obligations": [
+        {
+          "id": "O001",
+          "op": "all",
+          "role": "mandatory",
+          "proof": "heuristic",
+          "checks": [
+            {
+              "name": "security_mitigations_documented",
+              "args": {
+                "path": "SECURITY.md"
+              }
+            }
+          ]
+        }
+      ],
+      "current_obligations": [
+        {
+          "id": "O001",
+          "op": "all",
+          "role": "supporting",
+          "proof": "heuristic",
+          "checks": [
+            {
+              "name": "security_mitigations_documented",
+              "args": {
+                "path": "SECURITY.md"
+              }
+            }
+          ]
+        }
+      ],
+      "criterion_unchanged": true,
+      "checks_arguments_proof_operators_unchanged": true
+    },
+    {
+      "id": "MB-0054",
+      "prior_revision": 1,
+      "revision": 2,
+      "role_changed_obligation_ids": [
+        "O001"
+      ],
+      "instructions_improved": true,
+      "reason": "The complete criterion requires independent runtime/process evidence; missing optional heuristic observations must not override the human-review result.",
+      "previous_obligations": [
+        {
+          "id": "O001",
+          "op": "all",
+          "role": "mandatory",
+          "proof": "heuristic",
+          "checks": [
+            {
+              "name": "composer_kev_advisories_api",
+              "args": {
+                "lock_file": "composer.lock",
+                "endpoint": "https://api.magebean.com/v1/osv/advisories",
+                "timeout_ms": 10000,
+                "batch_size": 500,
+                "allow_private_http_fallback": true
+              }
+            }
+          ]
+        }
+      ],
+      "current_obligations": [
+        {
+          "id": "O001",
+          "op": "all",
+          "role": "supporting",
+          "proof": "heuristic",
+          "checks": [
+            {
+              "name": "composer_kev_advisories_api",
+              "args": {
+                "lock_file": "composer.lock",
+                "endpoint": "https://api.magebean.com/v1/osv/advisories",
+                "timeout_ms": 10000,
+                "batch_size": 500,
+                "allow_private_http_fallback": true
+              }
+            }
+          ]
+        }
+      ],
+      "criterion_unchanged": true,
+      "checks_arguments_proof_operators_unchanged": true
+    },
+    {
+      "id": "MB-0058",
+      "prior_revision": 1,
+      "revision": 2,
+      "role_changed_obligation_ids": [
+        "O001"
+      ],
+      "instructions_improved": true,
+      "reason": "The complete criterion requires independent runtime/process evidence; missing optional heuristic observations must not override the human-review result.",
+      "previous_obligations": [
+        {
+          "id": "O001",
+          "op": "all",
+          "role": "mandatory",
+          "proof": "heuristic",
+          "checks": [
+            {
+              "name": "composer_marketplace_outdated_api",
+              "args": {
+                "lock_file": "composer.lock",
+                "status_endpoint": "https://api.magebean.com/v1/packages/status",
+                "timeout_ms": 10000,
+                "batch_size": 500,
+                "allow_private_http_fallback": true,
+                "max_age_days": 365
+              }
+            }
+          ]
+        }
+      ],
+      "current_obligations": [
+        {
+          "id": "O001",
+          "op": "all",
+          "role": "supporting",
+          "proof": "heuristic",
+          "checks": [
+            {
+              "name": "composer_marketplace_outdated_api",
+              "args": {
+                "lock_file": "composer.lock",
+                "status_endpoint": "https://api.magebean.com/v1/packages/status",
+                "timeout_ms": 10000,
+                "batch_size": 500,
+                "allow_private_http_fallback": true,
+                "max_age_days": 365
+              }
+            }
+          ]
+        }
+      ],
+      "criterion_unchanged": true,
+      "checks_arguments_proof_operators_unchanged": true
+    },
+    {
+      "id": "MB-0060",
+      "prior_revision": 1,
+      "revision": 2,
+      "role_changed_obligation_ids": [
+        "O001"
+      ],
+      "instructions_improved": true,
+      "reason": "The complete criterion requires independent runtime/process evidence; missing optional heuristic observations must not override the human-review result.",
+      "previous_obligations": [
+        {
+          "id": "O001",
+          "op": "all",
+          "role": "mandatory",
+          "proof": "heuristic",
+          "checks": [
+            {
+              "name": "composer_vendor_support_api",
+              "args": {
+                "lock_file": "composer.lock",
+                "status_endpoint": "https://api.magebean.com/v1/packages/status",
+                "timeout_ms": 10000,
+                "batch_size": 500,
+                "allow_private_http_fallback": true
+              }
+            }
+          ]
+        }
+      ],
+      "current_obligations": [
+        {
+          "id": "O001",
+          "op": "all",
+          "role": "supporting",
+          "proof": "heuristic",
+          "checks": [
+            {
+              "name": "composer_vendor_support_api",
+              "args": {
+                "lock_file": "composer.lock",
+                "status_endpoint": "https://api.magebean.com/v1/packages/status",
+                "timeout_ms": 10000,
+                "batch_size": 500,
+                "allow_private_http_fallback": true
+              }
+            }
+          ]
+        }
+      ],
+      "criterion_unchanged": true,
+      "checks_arguments_proof_operators_unchanged": true
+    },
+    {
+      "id": "MB-0064",
+      "prior_revision": 1,
+      "revision": 2,
+      "role_changed_obligation_ids": [
+        "O001"
+      ],
+      "instructions_improved": true,
+      "reason": "The complete criterion requires independent runtime/process evidence; missing optional heuristic observations must not override the human-review result.",
+      "previous_obligations": [
+        {
+          "id": "O001",
+          "op": "all",
+          "role": "mandatory",
+          "proof": "heuristic",
+          "checks": [
+            {
+              "name": "composer_risky_fork_api",
+              "args": {
+                "lock_file": "composer.lock",
+                "status_endpoint": "https://api.magebean.com/v1/packages/status",
+                "timeout_ms": 10000,
+                "allow_private_http_fallback": true
+              }
+            }
+          ]
+        }
+      ],
+      "current_obligations": [
+        {
+          "id": "O001",
+          "op": "all",
+          "role": "supporting",
+          "proof": "heuristic",
+          "checks": [
+            {
+              "name": "composer_risky_fork_api",
+              "args": {
+                "lock_file": "composer.lock",
+                "status_endpoint": "https://api.magebean.com/v1/packages/status",
+                "timeout_ms": 10000,
+                "allow_private_http_fallback": true
+              }
+            }
+          ]
+        }
+      ],
+      "criterion_unchanged": true,
+      "checks_arguments_proof_operators_unchanged": true
+    },
+    {
+      "id": "MB-0073",
+      "prior_revision": 3,
+      "revision": 4,
+      "role_changed_obligation_ids": [
+        "O001"
+      ],
+      "instructions_improved": false,
+      "reason": "The complete criterion requires independent runtime/process evidence; missing optional heuristic observations must not override the human-review result.",
+      "previous_obligations": [
+        {
+          "id": "O001",
+          "op": "all",
+          "role": "mandatory",
+          "proof": "heuristic",
+          "checks": [
+            {
+              "name": "code_https_endpoints",
+              "args": {
+                "paths": [
+                  "app/etc",
+                  "app/code",
+                  "app/design"
+                ],
+                "include_ext": [
+                  "php",
+                  "phtml",
+                  "xml",
+                  "json",
+                  "yaml",
+                  "yml",
+                  "ini",
+                  "js",
+                  "html",
+                  "css"
+                ],
+                "required_files": [
+                  "app/etc/env.php"
+                ],
+                "max_results": 200
+              }
+            }
+          ]
+        }
+      ],
+      "current_obligations": [
+        {
+          "id": "O001",
+          "op": "all",
+          "role": "supporting",
+          "proof": "heuristic",
+          "checks": [
+            {
+              "name": "code_https_endpoints",
+              "args": {
+                "paths": [
+                  "app/etc",
+                  "app/code",
+                  "app/design"
+                ],
+                "include_ext": [
+                  "php",
+                  "phtml",
+                  "xml",
+                  "json",
+                  "yaml",
+                  "yml",
+                  "ini",
+                  "js",
+                  "html",
+                  "css"
+                ],
+                "required_files": [
+                  "app/etc/env.php"
+                ],
+                "max_results": 200
+              }
+            }
+          ]
+        }
+      ],
+      "criterion_unchanged": true,
+      "checks_arguments_proof_operators_unchanged": true
+    },
+    {
+      "id": "MB-0075",
+      "prior_revision": 1,
+      "revision": 2,
+      "role_changed_obligation_ids": [
+        "O001"
+      ],
+      "instructions_improved": true,
+      "reason": "The complete criterion requires independent runtime/process evidence; missing optional heuristic observations must not override the human-review result.",
+      "previous_obligations": [
+        {
+          "id": "O001",
+          "op": "all",
+          "role": "mandatory",
+          "proof": "heuristic",
+          "checks": [
+            {
+              "name": "code_webhook_signature_validation",
+              "args": {
+                "paths": [
+                  "app/code",
+                  "app/etc",
+                  "routes"
+                ],
+                "include_ext": [
+                  "php",
+                  "xml"
+                ],
+                "max_results": 100
+              }
+            }
+          ]
+        }
+      ],
+      "current_obligations": [
+        {
+          "id": "O001",
+          "op": "all",
+          "role": "supporting",
+          "proof": "heuristic",
+          "checks": [
+            {
+              "name": "code_webhook_signature_validation",
+              "args": {
+                "paths": [
+                  "app/code",
+                  "app/etc",
+                  "routes"
+                ],
+                "include_ext": [
+                  "php",
+                  "xml"
+                ],
+                "max_results": 100
+              }
+            }
+          ]
+        }
+      ],
+      "criterion_unchanged": true,
+      "checks_arguments_proof_operators_unchanged": true
+    },
+    {
+      "id": "MB-0076",
+      "prior_revision": 1,
+      "revision": 2,
+      "role_changed_obligation_ids": [
+        "O001"
+      ],
+      "instructions_improved": true,
+      "reason": "The complete criterion requires independent runtime/process evidence; missing optional heuristic observations must not override the human-review result.",
+      "previous_obligations": [
+        {
+          "id": "O001",
+          "op": "any",
+          "role": "mandatory",
+          "proof": "heuristic",
+          "checks": [
+            {
+              "name": "system_egress_restricted",
+              "args": []
+            },
+            {
+              "name": "code_outbound_egress_controls",
+              "args": {
+                "paths": [
+                  "app/code",
+                  "app/etc"
+                ],
+                "include_ext": [
+                  "php"
+                ],
+                "max_results": 100
+              }
+            }
+          ]
+        }
+      ],
+      "current_obligations": [
+        {
+          "id": "O001",
+          "op": "any",
+          "role": "supporting",
+          "proof": "heuristic",
+          "checks": [
+            {
+              "name": "system_egress_restricted",
+              "args": []
+            },
+            {
+              "name": "code_outbound_egress_controls",
+              "args": {
+                "paths": [
+                  "app/code",
+                  "app/etc"
+                ],
+                "include_ext": [
+                  "php"
+                ],
+                "max_results": 100
+              }
+            }
+          ]
+        }
+      ],
+      "criterion_unchanged": true,
+      "checks_arguments_proof_operators_unchanged": true
+    },
+    {
+      "id": "MB-0077",
+      "prior_revision": 1,
+      "revision": 2,
+      "role_changed_obligation_ids": [
+        "O001"
+      ],
+      "instructions_improved": true,
+      "reason": "The complete criterion requires independent runtime/process evidence; missing optional heuristic observations must not override the human-review result.",
+      "previous_obligations": [
+        {
+          "id": "O001",
+          "op": "all",
+          "role": "mandatory",
+          "proof": "heuristic",
+          "checks": [
+            {
+              "name": "code_pii_minimization",
+              "args": {
+                "paths": [
+                  "app/code"
+                ],
+                "include_ext": [
+                  "php"
+                ],
+                "max_results": 100
+              }
+            }
+          ]
+        }
+      ],
+      "current_obligations": [
+        {
+          "id": "O001",
+          "op": "all",
+          "role": "supporting",
+          "proof": "heuristic",
+          "checks": [
+            {
+              "name": "code_pii_minimization",
+              "args": {
+                "paths": [
+                  "app/code"
+                ],
+                "include_ext": [
+                  "php"
+                ],
+                "max_results": 100
+              }
+            }
+          ]
+        }
+      ],
+      "criterion_unchanged": true,
+      "checks_arguments_proof_operators_unchanged": true
+    },
+    {
+      "id": "MB-0078",
+      "prior_revision": 3,
+      "revision": 4,
+      "role_changed_obligation_ids": [
+        "O001"
+      ],
+      "instructions_improved": false,
+      "reason": "The complete criterion requires independent runtime/process evidence; missing optional heuristic observations must not override the human-review result.",
+      "previous_obligations": [
+        {
+          "id": "O001",
+          "op": "all",
+          "role": "mandatory",
+          "proof": "heuristic",
+          "checks": [
+            {
+              "name": "webserver_tls_ciphers",
+              "args": {
+                "files": [
+                  "nginx.conf",
+                  "pub/.htaccess",
+                  ".htaccess",
+                  "apache.conf"
+                ],
+                "require_protocols": true,
+                "require_ciphers": true
+              }
+            }
+          ]
+        }
+      ],
+      "current_obligations": [
+        {
+          "id": "O001",
+          "op": "all",
+          "role": "supporting",
+          "proof": "heuristic",
+          "checks": [
+            {
+              "name": "webserver_tls_ciphers",
+              "args": {
+                "files": [
+                  "nginx.conf",
+                  "pub/.htaccess",
+                  ".htaccess",
+                  "apache.conf"
+                ],
+                "require_protocols": true,
+                "require_ciphers": true
+              }
+            }
+          ]
+        }
+      ],
+      "criterion_unchanged": true,
+      "checks_arguments_proof_operators_unchanged": true
+    },
+    {
+      "id": "MB-0079",
+      "prior_revision": 3,
+      "revision": 4,
+      "role_changed_obligation_ids": [
+        "O001"
+      ],
+      "instructions_improved": false,
+      "reason": "The complete criterion requires independent runtime/process evidence; missing optional heuristic observations must not override the human-review result.",
+      "previous_obligations": [
+        {
+          "id": "O001",
+          "op": "all",
+          "role": "mandatory",
+          "proof": "heuristic",
+          "checks": [
+            {
+              "name": "code_api_key_storage",
+              "args": {
+                "env_file": "app/etc/env.php",
+                "paths": [
+                  "app/code",
+                  "app/etc",
+                  "app/design",
+                  "setup"
+                ],
+                "include_ext": [
+                  "php",
+                  "phtml",
+                  "xml",
+                  "sql"
+                ],
+                "max_results": 100
+              }
+            }
+          ]
+        }
+      ],
+      "current_obligations": [
+        {
+          "id": "O001",
+          "op": "all",
+          "role": "supporting",
+          "proof": "heuristic",
+          "checks": [
+            {
+              "name": "code_api_key_storage",
+              "args": {
+                "env_file": "app/etc/env.php",
+                "paths": [
+                  "app/code",
+                  "app/etc",
+                  "app/design",
+                  "setup"
+                ],
+                "include_ext": [
+                  "php",
+                  "phtml",
+                  "xml",
+                  "sql"
+                ],
+                "max_results": 100
+              }
+            }
+          ]
+        }
+      ],
+      "criterion_unchanged": true,
+      "checks_arguments_proof_operators_unchanged": true
+    },
+    {
+      "id": "MB-0081",
+      "prior_revision": 1,
+      "revision": 2,
+      "role_changed_obligation_ids": [
+        "O001"
+      ],
+      "instructions_improved": true,
+      "reason": "The complete criterion requires independent runtime/process evidence; missing optional heuristic observations must not override the human-review result.",
+      "previous_obligations": [
+        {
+          "id": "O001",
+          "op": "all",
+          "role": "mandatory",
+          "proof": "heuristic",
+          "checks": [
+            {
+              "name": "code_saas_integration_scoped",
+              "args": {
+                "paths": [
+                  "app/code",
+                  "app/etc"
+                ],
+                "include_ext": [
+                  "php",
+                  "xml"
+                ],
+                "max_results": 100
+              }
+            }
+          ]
+        }
+      ],
+      "current_obligations": [
+        {
+          "id": "O001",
+          "op": "all",
+          "role": "supporting",
+          "proof": "heuristic",
+          "checks": [
+            {
+              "name": "code_saas_integration_scoped",
+              "args": {
+                "paths": [
+                  "app/code",
+                  "app/etc"
+                ],
+                "include_ext": [
+                  "php",
+                  "xml"
+                ],
+                "max_results": 100
+              }
+            }
+          ]
+        }
+      ],
+      "criterion_unchanged": true,
+      "checks_arguments_proof_operators_unchanged": true
+    },
+    {
+      "id": "MB-0085",
+      "prior_revision": 1,
+      "revision": 2,
+      "role_changed_obligation_ids": [],
+      "instructions_improved": true,
+      "reason": "The complete criterion requires independent runtime/process evidence; missing optional heuristic observations must not override the human-review result.",
+      "previous_obligations": [
+        {
+          "id": "O001",
+          "op": "all",
+          "role": "supporting",
+          "proof": "heuristic",
+          "checks": [
+            {
+              "name": "code_payment_method_scope",
+              "args": {
+                "paths": [
+                  "app/code",
+                  "app/design"
+                ],
+                "include_ext": [
+                  "php",
+                  "phtml",
+                  "js",
+                  "xml"
+                ],
+                "max_results": 100
+              }
+            }
+          ]
+        }
+      ],
+      "current_obligations": [
+        {
+          "id": "O001",
+          "op": "all",
+          "role": "supporting",
+          "proof": "heuristic",
+          "checks": [
+            {
+              "name": "code_payment_method_scope",
+              "args": {
+                "paths": [
+                  "app/code",
+                  "app/design"
+                ],
+                "include_ext": [
+                  "php",
+                  "phtml",
+                  "js",
+                  "xml"
+                ],
+                "max_results": 100
+              }
+            }
+          ]
+        }
+      ],
+      "criterion_unchanged": true,
+      "checks_arguments_proof_operators_unchanged": true
+    },
+    {
+      "id": "MB-0087",
+      "prior_revision": 1,
+      "revision": 2,
+      "role_changed_obligation_ids": [
+        "O001"
+      ],
+      "instructions_improved": true,
+      "reason": "The complete criterion requires independent runtime/process evidence; missing optional heuristic observations must not override the human-review result.",
+      "previous_obligations": [
+        {
+          "id": "O001",
+          "op": "all",
+          "role": "mandatory",
+          "proof": "heuristic",
+          "checks": [
+            {
+              "name": "code_payment_script_inventory",
+              "args": {
+                "inventory_files": [
+                  ".magebean/payment-scripts.json",
+                  "docs/payment-script-inventory.md"
+                ],
+                "paths": [
+                  "app/design",
+                  "app/code"
+                ],
+                "include_ext": [
+                  "xml",
+                  "phtml",
+                  "html",
+                  "js"
+                ],
+                "max_results": 100
+              }
+            }
+          ]
+        }
+      ],
+      "current_obligations": [
+        {
+          "id": "O001",
+          "op": "all",
+          "role": "supporting",
+          "proof": "heuristic",
+          "checks": [
+            {
+              "name": "code_payment_script_inventory",
+              "args": {
+                "inventory_files": [
+                  ".magebean/payment-scripts.json",
+                  "docs/payment-script-inventory.md"
+                ],
+                "paths": [
+                  "app/design",
+                  "app/code"
+                ],
+                "include_ext": [
+                  "xml",
+                  "phtml",
+                  "html",
+                  "js"
+                ],
+                "max_results": 100
+              }
+            }
+          ]
+        }
+      ],
+      "criterion_unchanged": true,
+      "checks_arguments_proof_operators_unchanged": true
+    },
+    {
+      "id": "MB-0088",
+      "prior_revision": 1,
+      "revision": 2,
+      "role_changed_obligation_ids": [
+        "O001"
+      ],
+      "instructions_improved": true,
+      "reason": "The complete criterion requires independent runtime/process evidence; missing optional heuristic observations must not override the human-review result.",
+      "previous_obligations": [
+        {
+          "id": "O001",
+          "op": "all",
+          "role": "mandatory",
+          "proof": "heuristic",
+          "checks": [
+            {
+              "name": "code_payment_script_integrity",
+              "args": {
+                "evidence_files": [
+                  ".magebean/payment-script-integrity.json"
+                ],
+                "paths": [
+                  "app/design",
+                  "app/code"
+                ],
+                "include_ext": [
+                  "xml",
+                  "phtml",
+                  "html",
+                  "js"
+                ],
+                "max_results": 100
+              }
+            }
+          ]
+        }
+      ],
+      "current_obligations": [
+        {
+          "id": "O001",
+          "op": "all",
+          "role": "supporting",
+          "proof": "heuristic",
+          "checks": [
+            {
+              "name": "code_payment_script_integrity",
+              "args": {
+                "evidence_files": [
+                  ".magebean/payment-script-integrity.json"
+                ],
+                "paths": [
+                  "app/design",
+                  "app/code"
+                ],
+                "include_ext": [
+                  "xml",
+                  "phtml",
+                  "html",
+                  "js"
+                ],
+                "max_results": 100
+              }
+            }
+          ]
+        }
+      ],
+      "criterion_unchanged": true,
+      "checks_arguments_proof_operators_unchanged": true
+    },
+    {
+      "id": "MB-0089",
+      "prior_revision": 3,
+      "revision": 4,
+      "role_changed_obligation_ids": [
+        "O001"
+      ],
+      "instructions_improved": false,
+      "reason": "The complete criterion requires independent runtime/process evidence; missing optional heuristic observations must not override the human-review result.",
+      "previous_obligations": [
+        {
+          "id": "O001",
+          "op": "all",
+          "role": "mandatory",
+          "proof": "heuristic",
+          "checks": [
+            {
+              "name": "code_checkout_csp_enforced",
+              "args": {
+                "paths": [
+                  "app/code",
+                  "app/etc",
+                  "app/design",
+                  "pub/.htaccess",
+                  ".htaccess",
+                  "nginx.conf"
+                ],
+                "include_ext": [
+                  "xml",
+                  "php",
+                  "phtml",
+                  "html",
+                  "conf",
+                  "htaccess"
+                ],
+                "required_directives": [
+                  "script-src",
+                  "connect-src",
+                  "frame-src",
+                  "form-action",
+                  "object-src",
+                  "base-uri"
+                ],
+                "require_reporting": true
+              }
+            }
+          ]
+        }
+      ],
+      "current_obligations": [
+        {
+          "id": "O001",
+          "op": "all",
+          "role": "supporting",
+          "proof": "heuristic",
+          "checks": [
+            {
+              "name": "code_checkout_csp_enforced",
+              "args": {
+                "paths": [
+                  "app/code",
+                  "app/etc",
+                  "app/design",
+                  "pub/.htaccess",
+                  ".htaccess",
+                  "nginx.conf"
+                ],
+                "include_ext": [
+                  "xml",
+                  "php",
+                  "phtml",
+                  "html",
+                  "conf",
+                  "htaccess"
+                ],
+                "required_directives": [
+                  "script-src",
+                  "connect-src",
+                  "frame-src",
+                  "form-action",
+                  "object-src",
+                  "base-uri"
+                ],
+                "require_reporting": true
+              }
+            }
+          ]
+        }
+      ],
+      "criterion_unchanged": true,
+      "checks_arguments_proof_operators_unchanged": true
+    },
+    {
+      "id": "MB-0090",
+      "prior_revision": 1,
+      "revision": 2,
+      "role_changed_obligation_ids": [
+        "O001"
+      ],
+      "instructions_improved": true,
+      "reason": "The complete criterion requires independent runtime/process evidence; missing optional heuristic observations must not override the human-review result.",
+      "previous_obligations": [
+        {
+          "id": "O001",
+          "op": "all",
+          "role": "mandatory",
+          "proof": "heuristic",
+          "checks": [
+            {
+              "name": "code_payment_page_tamper_monitoring",
+              "args": {
+                "evidence_files": [
+                  ".magebean/payment-page-monitoring.json",
+                  "docs/payment-page-monitoring.md"
+                ],
+                "paths": [
+                  "app/code",
+                  "app/etc",
+                  "app/design",
+                  "pub/.htaccess",
+                  ".htaccess",
+                  "nginx.conf"
+                ],
+                "include_ext": [
+                  "xml",
+                  "php",
+                  "phtml",
+                  "js",
+                  "html",
+                  "conf",
+                  "htaccess"
+                ]
+              }
+            }
+          ]
+        }
+      ],
+      "current_obligations": [
+        {
+          "id": "O001",
+          "op": "all",
+          "role": "supporting",
+          "proof": "heuristic",
+          "checks": [
+            {
+              "name": "code_payment_page_tamper_monitoring",
+              "args": {
+                "evidence_files": [
+                  ".magebean/payment-page-monitoring.json",
+                  "docs/payment-page-monitoring.md"
+                ],
+                "paths": [
+                  "app/code",
+                  "app/etc",
+                  "app/design",
+                  "pub/.htaccess",
+                  ".htaccess",
+                  "nginx.conf"
+                ],
+                "include_ext": [
+                  "xml",
+                  "php",
+                  "phtml",
+                  "js",
+                  "html",
+                  "conf",
+                  "htaccess"
+                ]
+              }
+            }
+          ]
+        }
+      ],
+      "criterion_unchanged": true,
+      "checks_arguments_proof_operators_unchanged": true
+    },
+    {
+      "id": "MB-0092",
+      "prior_revision": 1,
+      "revision": 2,
+      "role_changed_obligation_ids": [
+        "O001"
+      ],
+      "instructions_improved": true,
+      "reason": "The complete criterion requires independent runtime/process evidence; missing optional heuristic observations must not override the human-review result.",
+      "previous_obligations": [
+        {
+          "id": "O001",
+          "op": "all",
+          "role": "mandatory",
+          "proof": "heuristic",
+          "checks": [
+            {
+              "name": "code_webhook_signature_validation",
+              "args": {
+                "paths": [
+                  "app/code",
+                  "app/etc",
+                  "routes"
+                ],
+                "include_ext": [
+                  "php",
+                  "xml"
+                ],
+                "payment_only": true,
+                "require_timestamp": true,
+                "require_replay_window": true,
+                "require_idempotency": true,
+                "max_results": 100
+              }
+            }
+          ]
+        }
+      ],
+      "current_obligations": [
+        {
+          "id": "O001",
+          "op": "all",
+          "role": "supporting",
+          "proof": "heuristic",
+          "checks": [
+            {
+              "name": "code_webhook_signature_validation",
+              "args": {
+                "paths": [
+                  "app/code",
+                  "app/etc",
+                  "routes"
+                ],
+                "include_ext": [
+                  "php",
+                  "xml"
+                ],
+                "payment_only": true,
+                "require_timestamp": true,
+                "require_replay_window": true,
+                "require_idempotency": true,
+                "max_results": 100
+              }
+            }
+          ]
+        }
+      ],
+      "criterion_unchanged": true,
+      "checks_arguments_proof_operators_unchanged": true
+    },
+    {
+      "id": "MB-0093",
+      "prior_revision": 1,
+      "revision": 2,
+      "role_changed_obligation_ids": [
+        "O001"
+      ],
+      "instructions_improved": true,
+      "reason": "The complete criterion requires independent runtime/process evidence; missing optional heuristic observations must not override the human-review result.",
+      "previous_obligations": [
+        {
+          "id": "O001",
+          "op": "all",
+          "role": "mandatory",
+          "proof": "heuristic",
+          "checks": [
+            {
+              "name": "pci_manual_evidence_documented",
+              "args": {
+                "paths": [
+                  ".magebean/pci-evidence.md",
+                  "docs/pci-evidence.md",
+                  "SECURITY.md"
+                ],
+                "required_topics": [
+                  "payment_scope",
+                  "saq_notes",
+                  "access_review",
+                  "incident_response",
+                  "vendor_responsibilities"
+                ]
+              }
+            }
+          ]
+        }
+      ],
+      "current_obligations": [
+        {
+          "id": "O001",
+          "op": "all",
+          "role": "supporting",
+          "proof": "heuristic",
+          "checks": [
+            {
+              "name": "pci_manual_evidence_documented",
+              "args": {
+                "paths": [
+                  ".magebean/pci-evidence.md",
+                  "docs/pci-evidence.md",
+                  "SECURITY.md"
+                ],
+                "required_topics": [
+                  "payment_scope",
+                  "saq_notes",
+                  "access_review",
+                  "incident_response",
+                  "vendor_responsibilities"
+                ]
+              }
+            }
+          ]
+        }
+      ],
+      "criterion_unchanged": true,
+      "checks_arguments_proof_operators_unchanged": true
+    },
+    {
+      "id": "MB-0094",
+      "prior_revision": 1,
+      "revision": 2,
+      "role_changed_obligation_ids": [
+        "O001"
+      ],
+      "instructions_improved": true,
+      "reason": "The complete criterion requires independent runtime/process evidence; missing optional heuristic observations must not override the human-review result.",
+      "previous_obligations": [
+        {
+          "id": "O001",
+          "op": "all",
+          "role": "mandatory",
+          "proof": "heuristic",
+          "checks": [
+            {
+              "name": "code_custom_authorization_checks",
+              "args": {
+                "paths": [
+                  "app/code",
+                  "app/etc"
+                ],
+                "include_ext": [
+                  "php",
+                  "xml"
+                ],
+                "max_results": 100
+              }
+            }
+          ]
+        }
+      ],
+      "current_obligations": [
+        {
+          "id": "O001",
+          "op": "all",
+          "role": "supporting",
+          "proof": "heuristic",
+          "checks": [
+            {
+              "name": "code_custom_authorization_checks",
+              "args": {
+                "paths": [
+                  "app/code",
+                  "app/etc"
+                ],
+                "include_ext": [
+                  "php",
+                  "xml"
+                ],
+                "max_results": 100
+              }
+            }
+          ]
+        }
+      ],
+      "criterion_unchanged": true,
+      "checks_arguments_proof_operators_unchanged": true
+    },
+    {
+      "id": "MB-0095",
+      "prior_revision": 1,
+      "revision": 2,
+      "role_changed_obligation_ids": [
+        "O001"
+      ],
+      "instructions_improved": true,
+      "reason": "The complete criterion requires independent runtime/process evidence; missing optional heuristic observations must not override the human-review result.",
+      "previous_obligations": [
+        {
+          "id": "O001",
+          "op": "all",
+          "role": "mandatory",
+          "proof": "heuristic",
+          "checks": [
+            {
+              "name": "code_api_exposure_minimized",
+              "args": {
+                "paths": [
+                  "app/code",
+                  "app/etc"
+                ],
+                "include_ext": [
+                  "xml",
+                  "graphqls",
+                  "php"
+                ],
+                "max_results": 100
+              }
+            }
+          ]
+        }
+      ],
+      "current_obligations": [
+        {
+          "id": "O001",
+          "op": "all",
+          "role": "supporting",
+          "proof": "heuristic",
+          "checks": [
+            {
+              "name": "code_api_exposure_minimized",
+              "args": {
+                "paths": [
+                  "app/code",
+                  "app/etc"
+                ],
+                "include_ext": [
+                  "xml",
+                  "graphqls",
+                  "php"
+                ],
+                "max_results": 100
+              }
+            }
+          ]
+        }
+      ],
+      "criterion_unchanged": true,
+      "checks_arguments_proof_operators_unchanged": true
+    },
+    {
+      "id": "MB-0096",
+      "prior_revision": 3,
+      "revision": 4,
+      "role_changed_obligation_ids": [
+        "O001"
+      ],
+      "instructions_improved": false,
+      "reason": "The complete criterion requires independent runtime/process evidence; missing optional heuristic observations must not override the human-review result.",
+      "previous_obligations": [
+        {
+          "id": "O001",
+          "op": "all",
+          "role": "mandatory",
+          "proof": "heuristic",
+          "checks": [
+            {
+              "name": "code_security_headers_baseline",
+              "args": {
+                "paths": [
+                  "app/etc",
+                  "app/code",
+                  "app/design",
+                  "pub/.htaccess",
+                  ".htaccess",
+                  "nginx.conf"
+                ],
+                "include_ext": [
+                  "xml",
+                  "php",
+                  "phtml",
+                  "html",
+                  "conf",
+                  "htaccess"
+                ]
+              }
+            }
+          ]
+        }
+      ],
+      "current_obligations": [
+        {
+          "id": "O001",
+          "op": "all",
+          "role": "supporting",
+          "proof": "heuristic",
+          "checks": [
+            {
+              "name": "code_security_headers_baseline",
+              "args": {
+                "paths": [
+                  "app/etc",
+                  "app/code",
+                  "app/design",
+                  "pub/.htaccess",
+                  ".htaccess",
+                  "nginx.conf"
+                ],
+                "include_ext": [
+                  "xml",
+                  "php",
+                  "phtml",
+                  "html",
+                  "conf",
+                  "htaccess"
+                ]
+              }
+            }
+          ]
+        }
+      ],
+      "criterion_unchanged": true,
+      "checks_arguments_proof_operators_unchanged": true
+    },
+    {
+      "id": "MB-0097",
+      "prior_revision": 3,
+      "revision": 4,
+      "role_changed_obligation_ids": [
+        "O001"
+      ],
+      "instructions_improved": false,
+      "reason": "The complete criterion requires independent runtime/process evidence; missing optional heuristic observations must not override the human-review result.",
+      "previous_obligations": [
+        {
+          "id": "O001",
+          "op": "all",
+          "role": "mandatory",
+          "proof": "heuristic",
+          "checks": [
+            {
+              "name": "code_hardcoded_secrets",
+              "args": {
+                "paths": [
+                  "app",
+                  "app/design"
+                ],
+                "include_ext": [
+                  "php",
+                  "phtml",
+                  "js",
+                  "xml",
+                  "json",
+                  "env",
+                  "dist",
+                  "txt",
+                  "pem",
+                  "key",
+                  "yml",
+                  "yaml"
+                ],
+                "allowed_files": [
+                  "app/etc/env.php"
+                ],
+                "max_results": 100
+              }
+            }
+          ]
+        }
+      ],
+      "current_obligations": [
+        {
+          "id": "O001",
+          "op": "all",
+          "role": "supporting",
+          "proof": "heuristic",
+          "checks": [
+            {
+              "name": "code_hardcoded_secrets",
+              "args": {
+                "paths": [
+                  "app",
+                  "app/design"
+                ],
+                "include_ext": [
+                  "php",
+                  "phtml",
+                  "js",
+                  "xml",
+                  "json",
+                  "env",
+                  "dist",
+                  "txt",
+                  "pem",
+                  "key",
+                  "yml",
+                  "yaml"
+                ],
+                "allowed_files": [
+                  "app/etc/env.php"
+                ],
+                "max_results": 100
+              }
+            }
+          ]
+        }
+      ],
+      "criterion_unchanged": true,
+      "checks_arguments_proof_operators_unchanged": true
+    },
+    {
+      "id": "MB-0098",
+      "prior_revision": 3,
+      "revision": 4,
+      "role_changed_obligation_ids": [
+        "O001"
+      ],
+      "instructions_improved": false,
+      "reason": "The complete criterion requires independent runtime/process evidence; missing optional heuristic observations must not override the human-review result.",
+      "previous_obligations": [
+        {
+          "id": "O001",
+          "op": "all",
+          "role": "mandatory",
+          "proof": "heuristic",
+          "checks": [
+            {
+              "name": "code_unsafe_xml_parsing",
+              "args": {
+                "paths": [
+                  "app"
+                ],
+                "include_ext": [
+                  "php"
+                ],
+                "max_results": 100
+              }
+            }
+          ]
+        }
+      ],
+      "current_obligations": [
+        {
+          "id": "O001",
+          "op": "all",
+          "role": "supporting",
+          "proof": "heuristic",
+          "checks": [
+            {
+              "name": "code_unsafe_xml_parsing",
+              "args": {
+                "paths": [
+                  "app"
+                ],
+                "include_ext": [
+                  "php"
+                ],
+                "max_results": 100
+              }
+            }
+          ]
+        }
+      ],
+      "criterion_unchanged": true,
+      "checks_arguments_proof_operators_unchanged": true
+    },
+    {
+      "id": "MB-0099",
+      "prior_revision": 1,
+      "revision": 2,
+      "role_changed_obligation_ids": [
+        "O001"
+      ],
+      "instructions_improved": true,
+      "reason": "The complete criterion requires independent runtime/process evidence; missing optional heuristic observations must not override the human-review result.",
+      "previous_obligations": [
+        {
+          "id": "O001",
+          "op": "all",
+          "role": "mandatory",
+          "proof": "heuristic",
+          "checks": [
+            {
+              "name": "code_download_export_authorization",
+              "args": {
+                "paths": [
+                  "app/code"
+                ],
+                "include_ext": [
+                  "php",
+                  "xml"
+                ],
+                "max_results": 100
+              }
+            }
+          ]
+        }
+      ],
+      "current_obligations": [
+        {
+          "id": "O001",
+          "op": "all",
+          "role": "supporting",
+          "proof": "heuristic",
+          "checks": [
+            {
+              "name": "code_download_export_authorization",
+              "args": {
+                "paths": [
+                  "app/code"
+                ],
+                "include_ext": [
+                  "php",
+                  "xml"
+                ],
+                "max_results": 100
+              }
+            }
+          ]
+        }
+      ],
+      "criterion_unchanged": true,
+      "checks_arguments_proof_operators_unchanged": true
+    },
+    {
+      "id": "MB-0101",
+      "prior_revision": 1,
+      "revision": 2,
+      "role_changed_obligation_ids": [
+        "O001"
+      ],
+      "instructions_improved": true,
+      "reason": "The complete criterion requires independent runtime/process evidence; missing optional heuristic observations must not override the human-review result.",
+      "previous_obligations": [
+        {
+          "id": "O001",
+          "op": "all",
+          "role": "mandatory",
+          "proof": "heuristic",
+          "checks": [
+            {
+              "name": "magento_admin_global_acl_restricted",
+              "args": {
+                "env_file": "app/etc/env.php",
+                "global_resources": [
+                  "Magento_Backend::all",
+                  "Magento_Adminhtml::all"
+                ],
+                "approved_global_role_ids": [],
+                "approved_global_role_names": [],
+                "approved_global_user_ids": [],
+                "approved_global_usernames": []
+              }
+            }
+          ]
+        }
+      ],
+      "current_obligations": [
+        {
+          "id": "O001",
+          "op": "all",
+          "role": "supporting",
+          "proof": "heuristic",
+          "checks": [
+            {
+              "name": "magento_admin_global_acl_restricted",
+              "args": {
+                "env_file": "app/etc/env.php",
+                "global_resources": [
+                  "Magento_Backend::all",
+                  "Magento_Adminhtml::all"
+                ],
+                "approved_global_role_ids": [],
+                "approved_global_role_names": [],
+                "approved_global_user_ids": [],
+                "approved_global_usernames": []
+              }
+            }
+          ]
+        }
+      ],
+      "criterion_unchanged": true,
+      "checks_arguments_proof_operators_unchanged": true
+    },
+    {
+      "id": "MB-0102",
+      "prior_revision": 1,
+      "revision": 2,
+      "role_changed_obligation_ids": [
+        "O001"
+      ],
+      "instructions_improved": true,
+      "reason": "The complete criterion requires independent runtime/process evidence; missing optional heuristic observations must not override the human-review result.",
+      "previous_obligations": [
+        {
+          "id": "O001",
+          "op": "all",
+          "role": "mandatory",
+          "proof": "heuristic",
+          "checks": [
+            {
+              "name": "pci_vendor_default_accounts_evidence",
+              "args": {
+                "paths": [
+                  ".magebean/pci/2.2.2-vendor-default-accounts.json",
+                  ".magebean/pci-2.2.2-evidence.json"
+                ]
+              }
+            }
+          ]
+        }
+      ],
+      "current_obligations": [
+        {
+          "id": "O001",
+          "op": "all",
+          "role": "supporting",
+          "proof": "heuristic",
+          "checks": [
+            {
+              "name": "pci_vendor_default_accounts_evidence",
+              "args": {
+                "paths": [
+                  ".magebean/pci/2.2.2-vendor-default-accounts.json",
+                  ".magebean/pci-2.2.2-evidence.json"
+                ]
+              }
+            }
+          ]
+        }
+      ],
+      "criterion_unchanged": true,
+      "checks_arguments_proof_operators_unchanged": true
+    }
+  ],
+  "limits": "No criterion, detector arguments, proof, operator or required-human policy changed. No automation promotion or external compliance conclusion."
+}

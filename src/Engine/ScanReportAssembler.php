@@ -49,7 +49,8 @@ final class ScanReportAssembler
             $result['meta']['omitted_requirements'] = $plan->metadata['omittedRequirements'] ?? [];
             foreach ($result['findings'] as &$finding) {
                 if (($finding['status'] ?? '') !== 'UNKNOWN') continue;
-                $finding['collection_guidance'] = RequirementDiagnostics::forFinding($finding);
+                $finding['collection_guidance'] ??= RequirementDiagnostics::forFinding($finding);
+                $finding['evidence']['collection_guidance'] = $finding['collection_guidance'];
                 $finding['message'] = preg_replace('/^Necessary requirement evidence is missing, incomplete or indeterminate\.\s*/', '', (string)($finding['message'] ?? '')) ?: 'Required scan input is unavailable.';
             }
             unset($finding);
@@ -62,7 +63,7 @@ final class ScanReportAssembler
                 $finding['message'] = preg_replace('/^Necessary requirement evidence is missing, incomplete or indeterminate\.\s*/', '', (string)($finding['message'] ?? '')) ?: 'Automated check could not complete; inspect collection details.';
                 $finding['classification'] = 'execution_error';
                 $finding['execution_status'] = 'ERROR';
-                $executionErrors[] = ['id' => $finding['id'], 'message' => $finding['message'] ?? '', 'reason_code' => $finding['reason_code'] ?? null];
+                $executionErrors[] = ['id' => $finding['id'], 'message' => $finding['message'] ?? '', 'reason_code' => $finding['reason_code'] ?? null, 'collection_guidance' => $finding['collection_guidance'] ?? null];
             }
             unset($finding);
             $result['meta']['automation_only'] = true;

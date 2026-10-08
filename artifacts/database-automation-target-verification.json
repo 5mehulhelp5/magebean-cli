@@ -1,0 +1,17 @@
+{
+  "target": "local Magento deployment",
+  "requirements": [
+    "MB-0038",
+    "MB-0039",
+    "MB-0040",
+    "MB-0047",
+    "MB-0048",
+    "MB-0100"
+  ],
+  "exit": 1,
+  "execution_errors": 0,
+  "passed": 3,
+  "failed": 3,
+  "read_only_queries": true,
+  "concrete_failure_remediation": true
+}

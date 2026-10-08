@@ -1,0 +1,40 @@
+<?php
+declare(strict_types=1);
+require __DIR__.'/../vendor/autoload.php';
+use Magebean\Engine\Context;
+use Magebean\Engine\Checks\PhpConfigCheck;
+use Magebean\Engine\Checks\CronCheck;
+use Magebean\Engine\Checks\AdminAclCheck;
+use Magebean\Engine\Checks\DeploymentStateCheck;
+$root=sys_get_temp_dir().'/mb-config-audit-'.bin2hex(random_bytes(4));mkdir($root.'/app/etc',0777,true);
+$n=0;$assert=static function(bool $ok,string $m)use(&$n){++$n;if(!$ok)throw new RuntimeException($m);};
+$check=static function(array $env)use($root):PhpConfigCheck{file_put_contents($root.'/app/etc/env.php','<?php return '.var_export($env,true).';');return new PhpConfigCheck(new Context($root,''));};
+try {
+ $redis=['backend'=>'Magento\\Framework\\Cache\\Backend\\Redis'];
+ $c=$check(['cache'=>['frontend'=>['default'=>$redis]]]);$assert($c->noFileCacheBackend([])[0]===false,'omitted page cache cannot pass on default Redis alone');
+ $c=$check(['cache'=>['frontend'=>['default'=>$redis,'page_cache'=>$redis]]]);$assert($c->noFileCacheBackend([])[0]===true,'both explicit Redis cache frontends pass');
+ $c=$check(['cache'=>['frontend'=>['default'=>$redis]],'system'=>['default'=>['system/full_page_cache/caching_application'=>2]]]);$assert($c->noFileCacheBackend([])[0]===true,'slash-key Varnish declaration replaces page cache fallback');
+ $assert($c->cacheBackendConfigured([])[0]===true,'slash-key Varnish recognized as cache signal');
+ $c=$check(['cache'=>['frontend'=>['default'=>$redis,'page_cache'=>['backend'=>'Unsupported_Custom_Backend']]]]);$assert($c->noFileCacheBackend([])[0]===false,'unsupported custom backend cannot combine with Redis signal into PASS');
+ $c=$check(['session'=>['save'=>'redis','redis'=>['password'=>'0']]]);$r=$c->sessionStorageHardened([]);$assert($r[0]===true,'nonempty zero string Redis credential is not falsey');$assert(!str_contains(json_encode($r[2]),'"password":"0"'),'password value never emitted');
+ $c=$check(['session'=>['save'=>'redis','redis'=>['password'=>[]]]]);$assert($c->sessionStorageHardened([])[0]===false,'array is not a credential');
+ $incomplete=new Context($root,'','',['admin_acl_rows'=>['admin_user'=>[]]]);$assert((new AdminAclCheck($incomplete))->roleAssignmentsValid([])[0]===null,'partial ACL rows cannot become empty PASS');
+ $malformed=new Context($root,'','',['admin_acl_rows'=>['admin_user'=>[['user_id'=>1]],'authorization_role'=>[],'authorization_rule'=>[]]]);$assert((new AdminAclCheck($malformed))->roleAssignmentsValid([])[0]===null,'malformed ACL columns do not produce false finding');
+ $pdo=new PDO('sqlite::memory:');$pdo->setAttribute(PDO::ATTR_ERRMODE,PDO::ERRMODE_EXCEPTION);
+ $pdo->exec('CREATE TABLE cron_schedule (status TEXT, executed_at TEXT, scheduled_at TEXT)');
+ $cron=new CronCheck(new Context($root,'','',['pdo'=>$pdo]));$args=['database_only'=>true];
+ $assert($cron->heartbeatRecent($args)[0]===false,'empty collected scheduler table has no execution');
+ $insert=$pdo->prepare('INSERT INTO cron_schedule VALUES (?, ?, ?)');$insert->execute(['success',gmdate('Y-m-d H:i:s',time()-10),gmdate('Y-m-d H:i:s',time()-20)]);
+ $assert($cron->heartbeatRecent($args)[0]===true,'actual execution timestamp proves heartbeat');
+ $insert->execute(['pending',null,gmdate('Y-m-d H:i:s',time()+3600)]);$assert($cron->backlogBelowThreshold($args+['max'=>1])[0]===true,'future pending jobs excluded from backlog');
+ $insert->execute(['pending',null,gmdate('Y-m-d H:i:s',time()-10)]);$assert($cron->backlogBelowThreshold($args+['max'=>1])[0]===false,'due count at threshold fails');
+ $insert->execute(['success',gmdate('Y-m-d H:i:s',time()+3600),gmdate('Y-m-d H:i:s')]);$assert($cron->heartbeatRecent($args)[0]===null,'future timestamp requires clock correction');
+ $pdo->exec('DROP TABLE cron_schedule');$r=$cron->backlogBelowThreshold($args);$assert($r[0]===null && str_contains($r[1],'SELECT permission') && !str_contains($r[1],'SQLSTATE'),'query failure has safe actionable message');
+ $pdo->exec('CREATE TABLE indexer_state (indexer_id TEXT, status TEXT)');$deployment=new DeploymentStateCheck(new Context($root,'','',['pdo'=>$pdo]));
+ $assert($deployment->indexersDatabaseReady([])[0]===null,'empty indexer table cannot pass');
+ $pdo->exec("INSERT INTO indexer_state VALUES ('catalog_product_price','valid')");$assert($deployment->indexersDatabaseReady([])[0]===true,'valid DB indexer row proves recorded readiness');
+ $pdo->exec("UPDATE indexer_state SET status='working'");$assert($deployment->indexersDatabaseReady([])[0]===false,'working indexer not ready');
+ $pdo->exec("UPDATE indexer_state SET status='unrecognized'");$assert($deployment->indexersDatabaseReady([])[0]===null,'unknown status is collection error rather than security finding');
+ $cycle=new Context($root,'','',['admin_acl_rows'=>['admin_user'=>[],'authorization_role'=>[['role_id'=>1,'parent_id'=>1,'role_type'=>'G','user_id'=>0,'role_name'=>'cyclic']],'authorization_rule'=>[]]]);$assert((new AdminAclCheck($cycle))->roleAssignmentsValid([])[0]===false,'cyclic role ancestry cannot pass valid-role predicate');
+ echo "Automation config/runtime audit: $n assertions passed\n";
+}finally{unlink($root.'/app/etc/env.php');rmdir($root.'/app/etc');rmdir($root.'/app');rmdir($root);}

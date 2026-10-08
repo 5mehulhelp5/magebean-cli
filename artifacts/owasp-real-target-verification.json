@@ -7,9 +7,9 @@
     "EXECUTION ERRORS (2)",
     "  The automated scan could not finish these checks. Resolve collection errors and run again.",
     "  MB-0027  Cannot inspect HSTS: [UNKNOWN] HTTP error: SSL certificate problem: self-signed certificate. Verify --url, network access and the HTTPS trust chain; install the trusted CA for private certificates.",
-    "    Action: Provide the correct HTTPS --url and install the site CA in the scanner trust store (PHP/cURL uses that store). For public sites, fix the served certificate chain. Keep TLS verification enabled.",
+    "    Action: Check the endpoint certificate hostname and trust chain. Install the private root CA in the scanner trust store or configure curl.cainfo / openssl.cafile; keep certificate verification enabled.",
     "  MB-0030  Unable to inspect cookies. Verify --url, network access and the HTTPS trust chain. Probe errors: http://magento.local/: Cookie probe needs a successful same-host HTTPS response; http://magento.local/customer/account/login: Cookie probe needs a successful same-host HTTPS response; http://magento.local/checkout/cart: Cookie probe needs a successful same-host HTTPS response",
-    "    Action: Provide --url=https://your-store reachable from this scanner; verify the login/cart pages return successful same-host HTTPS responses that emit session cookies. See per-path collection details.",
+    "    Action: The identified URL did not produce successful same-host HTTPS responses for this cookie policy. Check the effective web/secure/base_url, redirects, response status and TLS endpoint; use --url only to override an incorrect discovered URL. Site availability and cookie protection are separate observations.",
     ""
   ]
 }

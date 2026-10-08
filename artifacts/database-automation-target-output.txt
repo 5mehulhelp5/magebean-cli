@@ -1,0 +1,66 @@
+[1/4] Resolving LOCAL target and input options
+Target mode: LOCAL
+[2/4] Loading rule pack
+Loaded profile: baseline
+[3/4] Running 6 audit rules
+
+[4/4] Rendering command-line summary
+
+Magebean CLI 1.0.0
+Audit         Security Audit · Baseline 1.0
+Target        /var/www/magento
+Profile ID    BASELINE
+Profile       Complete internal requirement inventory
+Rules         6 / 6 selected
+Manual rules  None in the current profile selection
+Environment   PHP 8.4 · DEVELOPER · 2026-10-07 20:41
+
+AUDIT COMPLETE · ATTENTION REQUIRED
+
+  Passed                    3 / 6
+  Confirmed findings        3
+  Execution errors          0
+  Critical 0 · High 2 · Medium 1 · Low 0
+
+Rule details (6)
+  [HIGH] [FAIL] MB-0040  Session storage is not hardened
+    Detail
+      - php_session_storage_hardened [FAIL]: Session storage is not hardened
+
+  How to resolve MB-0040
+    - Inspect session.save and session.redis.password in the deployed app/etc/env.php. Configure Redis session storage with a nonempty string credential through the deployment secret/configuration workflow; do not paste credentials into scan evidence.
+    - Have the operator verify the configured Redis authentication and session connectivity, then rerun MB-0040. This checks the authentication declaration; TLS, server ACL enforcement and network isolation require separate validation.
+    - Re-run after applying the remediation:
+      php magebean.phar scan --path='/var/www/magento' --profile='baseline' --rules=MB-0040
+  [HIGH] [FAIL] MB-0047  No executed cron job is recorded in cron_schedule
+    Detail
+      - cron_heartbeat_recent [FAIL]: No executed cron job is recorded in cron_schedule
+
+  How to resolve MB-0047
+    - Inspect the latest executed_at in this deployment cron_schedule table and the Magento cron logs. Verify the installed scheduler invokes this deployment bin/magento cron:run under the deployment owner and that scanner/database clocks agree.
+    - Have the operator investigate blocked or failing cron jobs and, when appropriate, run bin/magento cron:run under the deployment owner. Confirm a recent execution is recorded, then rerun MB-0047. An empty or old table can also reflect scheduler retention; this predicate does not identify the root cause or prove job success.
+    - Re-run after applying the remediation:
+      php magebean.phar scan --path='/var/www/magento' --profile='baseline' --rules=MB-0047
+  [HIGH] [PASS] MB-0100  All mandatory conditions were verified in the declared requirement scope.
+    Detail
+      - magento_admin_role_assignments_valid [PASS]: Active Magento Admin users have valid role and ACL assignments
+  [MEDIUM] [FAIL] MB-0038  No production cache backend configuration found; Magento defaults to file cache
+    Detail
+      - php_cache_backend_configured [FAIL]: No production cache backend configuration found; Magento defaults to file cache
+      - php_no_file_cache_backend [FAIL]: Cache frontend default has no declared backend; Magento falls back to file storage
+
+  How to resolve MB-0038
+    - Inspect the reported cache.frontend.default.backend and cache.frontend.page_cache.backend declarations in app/etc/env.php. Configure a supported Redis backend for the default frontend and Redis for page cache, or explicitly configure Varnish as the full-page cache application; remove declared file backends within this assessed scope.
+    - Have the deployment operator verify Redis/Varnish connectivity and review credentials without exposing them in reports. Apply the change through the deployment configuration workflow, perform any required Magento cache clean/flush under the deployment owner, then rerun MB-0038. This result describes configuration declarations, not cache service availability.
+    - Re-run after applying the remediation:
+      php magebean.phar scan --path='/var/www/magento' --profile='baseline' --rules=MB-0038
+  [MEDIUM] [PASS] MB-0039  All mandatory conditions were verified in the declared requirement scope.
+    Detail
+      - deployment_indexers_database_ready [PASS]: All recorded Magento indexers have valid state
+  [MEDIUM] [PASS] MB-0048  All mandatory conditions were verified in the declared requirement scope.
+    Detail
+      - cron_backlog_below_threshold [PASS]: Due pending cron backlog is below threshold
+
+
+Contact: support@magebean.com
+

@@ -1,0 +1,520 @@
+{
+  "date": "2026-10-07",
+  "shared_detector_fixes": [
+    "Removed copied HSTS guards and undefined URL from clickjacking/CSP/CORS/preload checks",
+    "Reject redirect/error responses as header-policy coverage",
+    "Accept only valid DENY/SAMEORIGIN X-Frame-Options",
+    "TLS certificate probe honors configured endpoint port",
+    "Preserve HTTP DNS/TLS/timeout causes and actionable evidence without disabling trust",
+    "Preserve scoped redirect path errors and actions",
+    "Runtime evidence collection failures retain transport cause/action"
+  ],
+  "remaining_automation_ids": [
+    "MB-0005",
+    "MB-0026",
+    "MB-0028"
+  ],
+  "review_scope": "HTTP, TLS, webserver config and runtime-evidence direct bindings; remaining automation prioritized",
+  "validation": [
+    "NetworkDiagnosticsTest",
+    "HttpRuntimeCompletionTest",
+    "HttpCollectorTest",
+    "NetworkRequirementCompletionTest"
+  ],
+  "requirements": [
+    {
+      "title": "Directory listing absent on probed Magento paths",
+      "automation": true,
+      "checks": [
+        "http_no_directory_listing"
+      ],
+      "prior_33_review": false,
+      "action": "Inspect failed directory path/status. Resolve DNS, TLS trust, WAF/rate limiting or server errors for each configured path; 403/404 are assessable and do not require manual review.",
+      "evidence": "HttpRuntimeCompletionTest: 403/404 PASS, listing FAIL, mixed 503 UNKNOWN with exact path/status",
+      "id": "MB-0005",
+      "verdict": "reviewed_scoped_automation"
+    },
+    {
+      "title": "Force HTTPS in admin and storefront",
+      "automation": true,
+      "checks": [
+        "http_force_https_redirect"
+      ],
+      "prior_33_review": false,
+      "action": "Run on readable Magento deployment to resolve backend.frontName; inspect each first-hop request/status and restore HTTP port reachability before rerunning.",
+      "evidence": "HttpRuntimeCompletionTest: storefront/admin paths; direct HTTPS redirect PASS; HTTP/cross-host FAIL; 503 UNKNOWN",
+      "id": "MB-0026",
+      "verdict": "reviewed_scoped_automation"
+    },
+    {
+      "title": "Observed HTTPS response has HSTS max-age of at least one year",
+      "automation": true,
+      "checks": [
+        "http_has_hsts"
+      ],
+      "prior_33_review": true,
+      "action": "Inspect HTTP transport reason_code/action and individual path/status; supply canonical same-host application responses. Wider standard coverage retains explicit human evidence.",
+      "evidence": "Source review of registered HTTP/webserver/runtime evidence binding; broader criterion cannot be inferred from a single unauthenticated page",
+      "id": "MB-0027",
+      "verdict": "reviewed_scoped_automation"
+    },
+    {
+      "title": "Runtime endpoint rejects legacy TLS",
+      "automation": true,
+      "checks": [
+        "http_tls_min_version"
+      ],
+      "prior_33_review": false,
+      "action": "Verify resolved host/port TCP connectivity; inspect stream_probe and nmap_probe; install nmap when local OpenSSL cannot establish legacy rejection.",
+      "evidence": "NetworkRequirementCompletionTest: local TLS server rejects legacy and accepts modern; failure remains explicit with endpoint guidance",
+      "id": "MB-0028",
+      "verdict": "reviewed_scoped_automation"
+    },
+    {
+      "title": "Sensitive cookies use Secure, HttpOnly, and SameSite",
+      "automation": true,
+      "checks": [
+        "http_cookie_flags"
+      ],
+      "prior_33_review": true,
+      "action": "Inspect HTTP transport reason_code/action and individual path/status; supply canonical same-host application responses. Wider standard coverage retains explicit human evidence.",
+      "evidence": "Source review of registered HTTP/webserver/runtime evidence binding; broader criterion cannot be inferred from a single unauthenticated page",
+      "id": "MB-0030",
+      "verdict": "reviewed_scoped_automation"
+    },
+    {
+      "title": "Strong TLS ciphers on upstream gateways",
+      "automation": false,
+      "checks": [
+        "webserver_tls_ciphers"
+      ],
+      "prior_33_review": true,
+      "action": "Inspect HTTP transport reason_code/action and individual path/status; supply canonical same-host application responses. Wider standard coverage retains explicit human evidence.",
+      "evidence": "Source review of registered HTTP/webserver/runtime evidence binding; broader criterion cannot be inferred from a single unauthenticated page",
+      "id": "MB-0078",
+      "verdict": "shared_detector_review_human_coverage_preserved"
+    },
+    {
+      "title": "Cookies have the 'Secure' attribute set, and if the '\\__Host-' prefix is not used for the cookie name, the…",
+      "automation": false,
+      "checks": [
+        "magento_cookie_flags_secure",
+        "http_cookie_flags"
+      ],
+      "prior_33_review": false,
+      "action": "Inspect HTTP transport reason_code/action and individual path/status; supply canonical same-host application responses. Wider standard coverage retains explicit human evidence.",
+      "evidence": "Source review of registered HTTP/webserver/runtime evidence binding; broader criterion cannot be inferred from a single unauthenticated page",
+      "id": "MB-0150",
+      "verdict": "shared_detector_review_human_coverage_preserved"
+    },
+    {
+      "title": "Each cookie's 'SameSite' attribute value is set according to the purpose of the cookie, to limit exposure to user…",
+      "automation": false,
+      "checks": [
+        "magento_cookie_flags_secure",
+        "http_cookie_flags"
+      ],
+      "prior_33_review": false,
+      "action": "Inspect HTTP transport reason_code/action and individual path/status; supply canonical same-host application responses. Wider standard coverage retains explicit human evidence.",
+      "evidence": "Source review of registered HTTP/webserver/runtime evidence binding; broader criterion cannot be inferred from a single unauthenticated page",
+      "id": "MB-0151",
+      "verdict": "shared_detector_review_human_coverage_preserved"
+    },
+    {
+      "title": "If the value of a cookie is not meant to be accessible to client-side scripts (such as a session token), the cookie…",
+      "automation": false,
+      "checks": [
+        "magento_cookie_flags_secure",
+        "http_cookie_flags"
+      ],
+      "prior_33_review": false,
+      "action": "Inspect HTTP transport reason_code/action and individual path/status; supply canonical same-host application responses. Wider standard coverage retains explicit human evidence.",
+      "evidence": "Source review of registered HTTP/webserver/runtime evidence binding; broader criterion cannot be inferred from a single unauthenticated page",
+      "id": "MB-0153",
+      "verdict": "shared_detector_review_human_coverage_preserved"
+    },
+    {
+      "title": "A Strict-Transport-Security header field is included on all responses to enforce an HTTP Strict Transport Security…",
+      "automation": false,
+      "checks": [
+        "http_has_hsts",
+        "webserver_hsts_config"
+      ],
+      "prior_33_review": false,
+      "action": "Inspect HTTP transport reason_code/action and individual path/status; supply canonical same-host application responses. Wider standard coverage retains explicit human evidence.",
+      "evidence": "Source review of registered HTTP/webserver/runtime evidence binding; broader criterion cannot be inferred from a single unauthenticated page",
+      "id": "MB-0155",
+      "verdict": "shared_detector_review_human_coverage_preserved"
+    },
+    {
+      "title": "The Cross-Origin Resource Sharing (CORS) Access-Control-Allow-Origin header field is a fixed value by the…",
+      "automation": false,
+      "checks": [
+        "http_cors_no_wildcard_with_credentials",
+        "http_cors_preflight_safe"
+      ],
+      "prior_33_review": false,
+      "action": "Inspect HTTP transport reason_code/action and individual path/status; supply canonical same-host application responses. Wider standard coverage retains explicit human evidence.",
+      "evidence": "Source review of registered HTTP/webserver/runtime evidence binding; broader criterion cannot be inferred from a single unauthenticated page",
+      "id": "MB-0156",
+      "verdict": "shared_detector_review_human_coverage_preserved"
+    },
+    {
+      "title": "The application sets a referrer policy to prevent leakage of technically sensitive data to third-party services via…",
+      "automation": false,
+      "checks": [
+        "http_header_in"
+      ],
+      "prior_33_review": false,
+      "action": "Inspect HTTP transport reason_code/action and individual path/status; supply canonical same-host application responses. Wider standard coverage retains explicit human evidence.",
+      "evidence": "Source review of registered HTTP/webserver/runtime evidence binding; broader criterion cannot be inferred from a single unauthenticated page",
+      "id": "MB-0159",
+      "verdict": "shared_detector_review_human_coverage_preserved"
+    },
+    {
+      "title": "Verify that, if the application relies on the CORS preflight mechanism to prevent disallowed cross-origin use of…",
+      "automation": false,
+      "checks": [
+        "http_cors_no_wildcard_with_credentials",
+        "http_cors_preflight_safe"
+      ],
+      "prior_33_review": false,
+      "action": "Inspect HTTP transport reason_code/action and individual path/status; supply canonical same-host application responses. Wider standard coverage retains explicit human evidence.",
+      "evidence": "Source review of registered HTTP/webserver/runtime evidence binding; broader criterion cannot be inferred from a single unauthenticated page",
+      "id": "MB-0164",
+      "verdict": "shared_detector_review_human_coverage_preserved"
+    },
+    {
+      "title": "The application's top-level domain (e.g., site.tld) is added to the public preload list for HTTP Strict Transport…",
+      "automation": false,
+      "checks": [
+        "http_hsts_preload_ready"
+      ],
+      "prior_33_review": false,
+      "action": "Inspect HTTP transport reason_code/action and individual path/status; supply canonical same-host application responses. Wider standard coverage retains explicit human evidence.",
+      "evidence": "Source review of registered HTTP/webserver/runtime evidence binding; broader criterion cannot be inferred from a single unauthenticated page",
+      "id": "MB-0175",
+      "verdict": "shared_detector_review_human_coverage_preserved"
+    },
+    {
+      "title": "Every HTTP response with a message body contains a Content-Type header field that matches the actual content of the…",
+      "automation": false,
+      "checks": [
+        "http_response_media_evidence"
+      ],
+      "prior_33_review": false,
+      "action": "Inspect HTTP transport reason_code/action and individual path/status; supply canonical same-host application responses. Wider standard coverage retains explicit human evidence.",
+      "evidence": "Source review of registered HTTP/webserver/runtime evidence binding; broader criterion cannot be inferred from a single unauthenticated page",
+      "id": "MB-0177",
+      "verdict": "shared_detector_review_human_coverage_preserved"
+    },
+    {
+      "title": "Only HTTP methods that are explicitly supported by the application or its API (including OPTIONS during preflight…",
+      "automation": false,
+      "checks": [
+        "http_method_disallowed",
+        "http_options_not_overly_verbose"
+      ],
+      "prior_33_review": false,
+      "action": "Inspect HTTP transport reason_code/action and individual path/status; supply canonical same-host application responses. Wider standard coverage retains explicit human evidence.",
+      "evidence": "Source review of registered HTTP/webserver/runtime evidence binding; broader criterion cannot be inferred from a single unauthenticated page",
+      "id": "MB-0180",
+      "verdict": "shared_detector_review_human_coverage_preserved"
+    },
+    {
+      "title": "GraphQL introspection queries are disabled in the production environment unless the GraphQL API is meant to be used…",
+      "automation": false,
+      "checks": [
+        "code_api_exposure_minimized",
+        "http_graphql_introspection_disabled"
+      ],
+      "prior_33_review": false,
+      "action": "Inspect HTTP transport reason_code/action and individual path/status; supply canonical same-host application responses. Wider standard coverage retains explicit human evidence.",
+      "evidence": "Source review of registered HTTP/webserver/runtime evidence binding; broader criterion cannot be inferred from a single unauthenticated page",
+      "id": "MB-0188",
+      "verdict": "shared_detector_review_human_coverage_preserved"
+    },
+    {
+      "title": "Verify that, during the initial HTTP WebSocket handshake, the Origin header field is checked against a list of…",
+      "automation": false,
+      "checks": [
+        "http_cors_no_wildcard_with_credentials",
+        "http_cors_preflight_safe"
+      ],
+      "prior_33_review": false,
+      "action": "Inspect HTTP transport reason_code/action and individual path/status; supply canonical same-host application responses. Wider standard coverage retains explicit human evidence.",
+      "evidence": "Source review of registered HTTP/webserver/runtime evidence binding; broader criterion cannot be inferred from a single unauthenticated page",
+      "id": "MB-0190",
+      "verdict": "shared_detector_review_human_coverage_preserved"
+    },
+    {
+      "title": "Default user accounts (e.g., \"root\", \"admin\", or \"sa\") are not present in the application or are disabled.",
+      "automation": false,
+      "checks": [
+        "identity_inventory_evidence"
+      ],
+      "prior_33_review": false,
+      "action": "Inspect HTTP transport reason_code/action and individual path/status; supply canonical same-host application responses. Wider standard coverage retains explicit human evidence.",
+      "evidence": "Source review of registered HTTP/webserver/runtime evidence binding; broader criterion cannot be inferred from a single unauthenticated page",
+      "id": "MB-0222",
+      "verdict": "shared_detector_review_human_coverage_preserved"
+    },
+    {
+      "title": "Only the latest recommended versions of the TLS protocol are enabled, such as TLS 1.2 and TLS 1.3. The latest…",
+      "automation": false,
+      "checks": [
+        "http_tls_min_version"
+      ],
+      "prior_33_review": false,
+      "action": "Inspect HTTP transport reason_code/action and individual path/status; supply canonical same-host application responses. Wider standard coverage retains explicit human evidence.",
+      "evidence": "Source review of registered HTTP/webserver/runtime evidence binding; broader criterion cannot be inferred from a single unauthenticated page",
+      "id": "MB-0352",
+      "verdict": "shared_detector_review_human_coverage_preserved"
+    },
+    {
+      "title": "Only recommended cipher suites are enabled, with the strongest cipher suites set as preferred. L3 applications must…",
+      "automation": false,
+      "checks": [
+        "http_tls_min_version",
+        "webserver_tls_ciphers"
+      ],
+      "prior_33_review": false,
+      "action": "Inspect HTTP transport reason_code/action and individual path/status; supply canonical same-host application responses. Wider standard coverage retains explicit human evidence.",
+      "evidence": "Source review of registered HTTP/webserver/runtime evidence binding; broader criterion cannot be inferred from a single unauthenticated page",
+      "id": "MB-0353",
+      "verdict": "shared_detector_review_human_coverage_preserved"
+    },
+    {
+      "title": "External facing services use publicly trusted TLS certificates.",
+      "automation": false,
+      "checks": [
+        "http_tls_cert_days_left"
+      ],
+      "prior_33_review": false,
+      "action": "Inspect HTTP transport reason_code/action and individual path/status; supply canonical same-host application responses. Wider standard coverage retains explicit human evidence.",
+      "evidence": "Source review of registered HTTP/webserver/runtime evidence binding; broader criterion cannot be inferred from a single unauthenticated page",
+      "id": "MB-0358",
+      "verdict": "shared_detector_review_human_coverage_preserved"
+    },
+    {
+      "title": "An encrypted protocol such as TLS is used for all inbound and outbound connections to and from the application,…",
+      "automation": false,
+      "checks": [
+        "code_https_endpoints",
+        "system_egress_restricted",
+        "code_outbound_egress_controls",
+        "webserver_tls_ciphers"
+      ],
+      "prior_33_review": false,
+      "action": "Inspect HTTP transport reason_code/action and individual path/status; supply canonical same-host application responses. Wider standard coverage retains explicit human evidence.",
+      "evidence": "Source review of registered HTTP/webserver/runtime evidence binding; broader criterion cannot be inferred from a single unauthenticated page",
+      "id": "MB-0359",
+      "verdict": "shared_detector_review_human_coverage_preserved"
+    },
+    {
+      "title": "TLS clients validate certificates received before communicating with a TLS server.",
+      "automation": false,
+      "checks": [
+        "http_tls_cert_days_left"
+      ],
+      "prior_33_review": false,
+      "action": "Inspect HTTP transport reason_code/action and individual path/status; supply canonical same-host application responses. Wider standard coverage retains explicit human evidence.",
+      "evidence": "Source review of registered HTTP/webserver/runtime evidence binding; broader criterion cannot be inferred from a single unauthenticated page",
+      "id": "MB-0360",
+      "verdict": "shared_detector_review_human_coverage_preserved"
+    },
+    {
+      "title": "The application is deployed either without any source control metadata, including the .git or .svn folders, or in a…",
+      "automation": false,
+      "checks": [
+        "http_no_vcs_misc"
+      ],
+      "prior_33_review": false,
+      "action": "Inspect HTTP transport reason_code/action and individual path/status; supply canonical same-host application responses. Wider standard coverage retains explicit human evidence.",
+      "evidence": "Source review of registered HTTP/webserver/runtime evidence binding; broader criterion cannot be inferred from a single unauthenticated page",
+      "id": "MB-0378",
+      "verdict": "shared_detector_review_human_coverage_preserved"
+    },
+    {
+      "title": "Production debug and error-display policy",
+      "automation": false,
+      "checks": [
+        "magento_production_mode",
+        "php_xdebug_disabled",
+        "http_no_xdebug_headers",
+        "php_template_hints_disabled",
+        "php_dev_debug_config_disabled",
+        "php_third_party_debug_disabled",
+        "php_xdebug_disabled",
+        "http_no_xdebug_headers",
+        "php_display_errors_disabled",
+        "http_no_stacktrace",
+        "php_template_hints_disabled",
+        "php_dev_debug_config_disabled",
+        "php_third_party_debug_disabled",
+        "magento_debug_configuration_observed"
+      ],
+      "prior_33_review": true,
+      "action": "Inspect HTTP transport reason_code/action and individual path/status; supply canonical same-host application responses. Wider standard coverage retains explicit human evidence.",
+      "evidence": "Source review of registered HTTP/webserver/runtime evidence binding; broader criterion cannot be inferred from a single unauthenticated page",
+      "id": "MB-0379",
+      "verdict": "shared_detector_review_human_coverage_preserved"
+    },
+    {
+      "title": "Web servers do not expose directory listings to clients unless explicitly intended.",
+      "automation": false,
+      "checks": [
+        "http_no_directory_listing"
+      ],
+      "prior_33_review": false,
+      "action": "Inspect HTTP transport reason_code/action and individual path/status; supply canonical same-host application responses. Wider standard coverage retains explicit human evidence.",
+      "evidence": "Source review of registered HTTP/webserver/runtime evidence binding; broader criterion cannot be inferred from a single unauthenticated page",
+      "id": "MB-0380",
+      "verdict": "shared_detector_review_human_coverage_preserved"
+    },
+    {
+      "title": "Using the HTTP TRACE method is not supported in production environments, to avoid potential information leakage.",
+      "automation": false,
+      "checks": [
+        "http_method_disallowed"
+      ],
+      "prior_33_review": false,
+      "action": "Inspect HTTP transport reason_code/action and individual path/status; supply canonical same-host application responses. Wider standard coverage retains explicit human evidence.",
+      "evidence": "Source review of registered HTTP/webserver/runtime evidence binding; broader criterion cannot be inferred from a single unauthenticated page",
+      "id": "MB-0381",
+      "verdict": "shared_detector_review_human_coverage_preserved"
+    },
+    {
+      "title": "The application does not expose detailed version information of backend components.",
+      "automation": false,
+      "checks": [
+        "http_server_banner_not_verbose"
+      ],
+      "prior_33_review": false,
+      "action": "Inspect HTTP transport reason_code/action and individual path/status; supply canonical same-host application responses. Wider standard coverage retains explicit human evidence.",
+      "evidence": "Source review of registered HTTP/webserver/runtime evidence binding; broader criterion cannot be inferred from a single unauthenticated page",
+      "id": "MB-0383",
+      "verdict": "shared_detector_review_human_coverage_preserved"
+    },
+    {
+      "title": "The web tier is configured to only serve files with specific file extensions to prevent unintentional information,…",
+      "automation": false,
+      "checks": [
+        "webroot_hygiene",
+        "http_no_vcs_misc"
+      ],
+      "prior_33_review": false,
+      "action": "Inspect HTTP transport reason_code/action and individual path/status; supply canonical same-host application responses. Wider standard coverage retains explicit human evidence.",
+      "evidence": "Source review of registered HTTP/webserver/runtime evidence binding; broader criterion cannot be inferred from a single unauthenticated page",
+      "id": "MB-0384",
+      "verdict": "shared_detector_review_human_coverage_preserved"
+    },
+    {
+      "title": "The production environment only includes functionality that is required for the application to function, and does…",
+      "automation": false,
+      "checks": [
+        "magento_production_mode",
+        "php_xdebug_disabled",
+        "http_no_xdebug_headers",
+        "php_template_hints_disabled",
+        "php_dev_debug_config_disabled"
+      ],
+      "prior_33_review": false,
+      "action": "Inspect HTTP transport reason_code/action and individual path/status; supply canonical same-host application responses. Wider standard coverage retains explicit human evidence.",
+      "evidence": "Source review of registered HTTP/webserver/runtime evidence binding; broader criterion cannot be inferred from a single unauthenticated page",
+      "id": "MB-0405",
+      "verdict": "shared_detector_review_human_coverage_preserved"
+    },
+    {
+      "title": "A generic message is returned to the consumer when an unexpected or security-sensitive error occurs, ensuring no…",
+      "automation": false,
+      "checks": [
+        "php_display_errors_disabled",
+        "http_no_stacktrace"
+      ],
+      "prior_33_review": false,
+      "action": "Inspect HTTP transport reason_code/action and individual path/status; supply canonical same-host application responses. Wider standard coverage retains explicit human evidence.",
+      "evidence": "Source review of registered HTTP/webserver/runtime evidence binding; broader criterion cannot be inferred from a single unauthenticated page",
+      "id": "MB-0432",
+      "verdict": "shared_detector_review_human_coverage_preserved"
+    },
+    {
+      "title": "PCI 2.2.1: Configuration standards are developed, implemented, and maintained to",
+      "automation": false,
+      "checks": [
+        "fs_no_world_writable",
+        "webroot_hygiene",
+        "http_no_directory_listing",
+        "magento_production_mode",
+        "php_xdebug_disabled",
+        "http_no_xdebug_headers",
+        "php_display_errors_disabled",
+        "http_no_stacktrace",
+        "fs_di_compiled",
+        "php_template_hints_disabled",
+        "php_dev_debug_config_disabled",
+        "php_third_party_debug_disabled"
+      ],
+      "prior_33_review": false,
+      "action": "Inspect HTTP transport reason_code/action and individual path/status; supply canonical same-host application responses. Wider standard coverage retains explicit human evidence.",
+      "evidence": "Source review of registered HTTP/webserver/runtime evidence binding; broader criterion cannot be inferred from a single unauthenticated page",
+      "id": "MB-0469",
+      "verdict": "shared_detector_review_human_coverage_preserved"
+    },
+    {
+      "title": "PCI 2.2.6: System security parameters are configured to prevent misuse",
+      "automation": false,
+      "checks": [
+        "magento_production_mode",
+        "php_xdebug_disabled",
+        "http_no_xdebug_headers",
+        "php_display_errors_disabled",
+        "http_no_stacktrace",
+        "php_template_hints_disabled"
+      ],
+      "prior_33_review": false,
+      "action": "Inspect HTTP transport reason_code/action and individual path/status; supply canonical same-host application responses. Wider standard coverage retains explicit human evidence.",
+      "evidence": "Source review of registered HTTP/webserver/runtime evidence binding; broader criterion cannot be inferred from a single unauthenticated page",
+      "id": "MB-0474",
+      "verdict": "shared_detector_review_human_coverage_preserved"
+    },
+    {
+      "title": "PCI 2.2.7: All non-console administrative access is encrypted using strong cryptography",
+      "automation": false,
+      "checks": [
+        "magento_https_enforced",
+        "http_has_hsts",
+        "webserver_hsts_config",
+        "http_tls_min_version"
+      ],
+      "prior_33_review": false,
+      "action": "Inspect HTTP transport reason_code/action and individual path/status; supply canonical same-host application responses. Wider standard coverage retains explicit human evidence.",
+      "evidence": "Source review of registered HTTP/webserver/runtime evidence binding; broader criterion cannot be inferred from a single unauthenticated page",
+      "id": "MB-0475",
+      "verdict": "shared_detector_review_human_coverage_preserved"
+    },
+    {
+      "title": "PCI 4.2.1: Strong cryptography and security protocols are implemented as follows to safeguard PAN during transmission over open, public networks",
+      "automation": false,
+      "checks": [
+        "magento_https_enforced",
+        "http_has_hsts",
+        "webserver_hsts_config",
+        "http_tls_min_version",
+        "code_no_mixed_content",
+        "http_no_mixed_content",
+        "code_https_endpoints",
+        "webserver_tls_ciphers"
+      ],
+      "prior_33_review": false,
+      "action": "Inspect HTTP transport reason_code/action and individual path/status; supply canonical same-host application responses. Wider standard coverage retains explicit human evidence.",
+      "evidence": "Source review of registered HTTP/webserver/runtime evidence binding; broader criterion cannot be inferred from a single unauthenticated page",
+      "id": "MB-0509",
+      "verdict": "shared_detector_review_human_coverage_preserved"
+    }
+  ],
+  "prior_automation_ids": [
+    "MB-0027",
+    "MB-0030"
+  ]
+}

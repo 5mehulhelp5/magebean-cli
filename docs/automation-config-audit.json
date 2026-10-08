@@ -1,0 +1,169 @@
+{
+  "date": "2026-10-07",
+  "scope": "Non-human configuration, Magento declared policies, deployment readiness, cron runtime and DB ACL",
+  "reviewed_count": 14,
+  "decisions": [
+    {
+      "id": "MB-0006",
+      "title": "Declared backend route differs from admin",
+      "previously_reviewed": false,
+      "decision": "retained_verified_declared_scope",
+      "reason": "Declared backend.frontName only; unreadable file or malformed route requires readable deployed env.php, not a security finding.",
+      "checks": [
+        "magento_admin_frontname_declared"
+      ],
+      "evidence": "tests/AutomationConfigRuntimeAuditTest.php: 21 assertions; tests/AdminAclCheckTest.php PASS; tests/BasicDeploymentPoliciesTest.php:14 assertions PASS"
+    },
+    {
+      "id": "MB-0007",
+      "title": "Admin 2FA core and provider modules declared enabled",
+      "previously_reviewed": false,
+      "decision": "retained_verified_declared_scope",
+      "reason": "Declared enabled 2FA modules only; no claim of runtime enrollment.",
+      "checks": [
+        "magento_admin_2fa_enabled"
+      ],
+      "evidence": "tests/AutomationConfigRuntimeAuditTest.php: 21 assertions; tests/AdminAclCheckTest.php PASS; tests/BasicDeploymentPoliciesTest.php:14 assertions PASS"
+    },
+    {
+      "id": "MB-0009",
+      "title": "Configured admin session lifetime is at most 900 seconds",
+      "previously_reviewed": true,
+      "decision": "retained_verified_default_scope",
+      "reason": "Resolved default admin session lifetime; DB/default module resolver failures remain execution errors with source path and SELECT action.",
+      "checks": [
+        "magento_admin_session_timeout"
+      ],
+      "evidence": "tests/AutomationConfigRuntimeAuditTest.php: 21 assertions; tests/AdminAclCheckTest.php PASS; tests/BasicDeploymentPoliciesTest.php:14 assertions PASS"
+    },
+    {
+      "id": "MB-0011",
+      "title": "Configured admin login CAPTCHA or bounded lockout",
+      "previously_reviewed": false,
+      "decision": "retained_verified_default_scope",
+      "reason": "Configured CAPTCHA or bounded lockout only; no assertion of full attack resistance.",
+      "checks": [
+        "magento_admin_login_protection_configured"
+      ],
+      "evidence": "tests/AutomationConfigRuntimeAuditTest.php: 21 assertions; tests/AdminAclCheckTest.php PASS; tests/BasicDeploymentPoliciesTest.php:14 assertions PASS"
+    },
+    {
+      "id": "MB-0031",
+      "title": "Declared Magento deployment mode is production",
+      "previously_reviewed": false,
+      "decision": "retained_verified_declared_scope",
+      "reason": "Declared deployment MAGE_MODE; missing/malformed env data must not PASS.",
+      "checks": [
+        "magento_production_mode"
+      ],
+      "evidence": "tests/AutomationConfigRuntimeAuditTest.php: 21 assertions; tests/AdminAclCheckTest.php PASS; tests/BasicDeploymentPoliciesTest.php:14 assertions PASS"
+    },
+    {
+      "id": "MB-0038",
+      "title": "Production cache backends exclude file storage",
+      "previously_reviewed": false,
+      "decision": "verified_after_detector_fix",
+      "reason": "Require declared non-file default and page cache backend; explicit Varnish page-cache declaration recognized with exact Magento slash keys. Omitted page cache formerly false PASS on default Redis alone. Scope is declaration, not running Redis availability.",
+      "checks": [
+        "php_cache_backend_configured",
+        "php_no_file_cache_backend"
+      ],
+      "evidence": "tests/AutomationConfigRuntimeAuditTest.php: 21 assertions; tests/AdminAclCheckTest.php PASS; tests/BasicDeploymentPoliciesTest.php:14 assertions PASS"
+    },
+    {
+      "id": "MB-0039",
+      "title": "Indexers are READY (no backlog)",
+      "previously_reviewed": false,
+      "decision": "verified_database_readiness",
+      "reason": "New deployment_indexers_database_ready reads indexer_state; valid rows PASS, working/invalid FAIL readiness, empty or unrecognized rows/query failure are actionable collection errors. Does not assert every extension indexer registered or queue empty.",
+      "checks": [
+        "fs_indexers_ready"
+      ],
+      "evidence": "tests/AutomationConfigRuntimeAuditTest.php: 21 assertions; tests/AdminAclCheckTest.php PASS; tests/BasicDeploymentPoliciesTest.php:14 assertions PASS"
+    },
+    {
+      "id": "MB-0040",
+      "title": "Session storage hardened (Redis with auth)",
+      "previously_reviewed": false,
+      "decision": "verified_after_detector_fix",
+      "reason": "Declared session.save=redis and nonempty string Redis credential; string 0 valid credential, array rejected; credential never emitted. Does not claim Redis ACL/network enforcement.",
+      "checks": [
+        "php_session_storage_hardened"
+      ],
+      "evidence": "tests/AutomationConfigRuntimeAuditTest.php: 21 assertions; tests/AdminAclCheckTest.php PASS; tests/BasicDeploymentPoliciesTest.php:14 assertions PASS"
+    },
+    {
+      "id": "MB-0046",
+      "title": "Installed Magento cron entry present",
+      "previously_reviewed": false,
+      "decision": "retained_verified_installed_scheduler",
+      "reason": "Installed project-specific cron:run only; missing owner crontab privileges include unavailable_sources/collection_errors and read-permission action. Repository script is insufficient.",
+      "checks": [
+        "installed_magento_cron"
+      ],
+      "evidence": "tests/AutomationConfigRuntimeAuditTest.php: 21 assertions; tests/AdminAclCheckTest.php PASS; tests/BasicDeploymentPoliciesTest.php:14 assertions PASS"
+    },
+    {
+      "id": "MB-0047",
+      "title": "Cron heartbeat is recent (<= 900s)",
+      "previously_reviewed": false,
+      "decision": "verified_database_execution_timestamp",
+      "reason": "database_only:true reads MAX(executed_at) for success/running/error actual execution records. No executions FAIL, stale FAIL, future beyond60s UNKNOWN clock sync action. Existing legacy file-mtime branch remains supporting signal, not canonical proof.",
+      "checks": [
+        "cron_heartbeat_recent"
+      ],
+      "evidence": "tests/AutomationConfigRuntimeAuditTest.php: 21 assertions; tests/AdminAclCheckTest.php PASS; tests/BasicDeploymentPoliciesTest.php:14 assertions PASS"
+    },
+    {
+      "id": "MB-0048",
+      "title": "Cron backlog below threshold",
+      "previously_reviewed": false,
+      "decision": "verified_database_due_backlog",
+      "reason": "database_only:true counts pending cron_schedule rows scheduled_at <= scanner UTC time; future scheduled jobs excluded. Below threshold PASS; equal or above FAIL. Missing/query-denied DB UNKNOWN SELECT action. Legacy JSON negative/fractional metrics no longer accepted.",
+      "checks": [
+        "cron_backlog_below_threshold"
+      ],
+      "evidence": "tests/AutomationConfigRuntimeAuditTest.php: 21 assertions; tests/AdminAclCheckTest.php PASS; tests/BasicDeploymentPoliciesTest.php:14 assertions PASS"
+    },
+    {
+      "id": "MB-0100",
+      "title": "Admin role assignments are valid",
+      "previously_reviewed": false,
+      "decision": "verified_database_assignment_integrity",
+      "reason": "DB admin_user/authorization_role/authorization_rule assignment integrity; missing tables/columns UNKNOWN, cyclic group ancestors or invalid parent type FAIL. No least-privilege claim; SQL errors redacted and SELECT/table action explicit.",
+      "checks": [
+        "magento_admin_role_assignments_valid"
+      ],
+      "evidence": "tests/AutomationConfigRuntimeAuditTest.php: 21 assertions; tests/AdminAclCheckTest.php PASS; tests/BasicDeploymentPoliciesTest.php:14 assertions PASS"
+    },
+    {
+      "id": "MB-0728",
+      "title": "Configured admin password minimum is at least eight",
+      "previously_reviewed": false,
+      "decision": "retained_verified_declared_scope",
+      "reason": "Configured/installed admin minimum length only; unresolvable validator or malformed setting UNKNOWN action inspect installed User module and configured minimum.",
+      "checks": [
+        "magento_admin_password_minimum_configured"
+      ],
+      "evidence": "tests/AutomationConfigRuntimeAuditTest.php: 21 assertions; tests/AdminAclCheckTest.php PASS; tests/BasicDeploymentPoliciesTest.php:14 assertions PASS"
+    },
+    {
+      "id": "MB-0729",
+      "title": "Declared project debug settings are disabled",
+      "previously_reviewed": false,
+      "decision": "retained_verified_declared_scope",
+      "reason": "Declared project debug flags and ini only; not blanket FPM runtime proof. Malformed flags/ini/read errors identify source in evidence.",
+      "checks": [
+        "magento_deployment_debug_flags_disabled"
+      ],
+      "evidence": "tests/AutomationConfigRuntimeAuditTest.php: 21 assertions; tests/AdminAclCheckTest.php PASS; tests/BasicDeploymentPoliciesTest.php:14 assertions PASS"
+    }
+  ],
+  "canonical_db_checks_require": "Readable deployed app/etc/env.php, reachable configured DB, SELECT on relevant tables; no writes and no secret values in diagnostics",
+  "limitations": [
+    "Declared configuration checks do not prove runtime extension enforcement",
+    "Legacy file heartbeat remains a heuristic only; canonical requirement must use database_only:true",
+    "Cron scheduler retention may erase all records: absence then describes current table evidence rather than cause of scheduler failure",
+    "mview queue/version readiness is not asserted by indexer_state predicate"
+  ]
+}

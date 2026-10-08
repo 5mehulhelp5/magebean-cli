@@ -269,6 +269,7 @@ final class ComposerRepositoryChecks extends ComposerSupport
 
     public function releaseRecencyApi(array $args): array
     {
+        if (($problem = $this->strictInventoryProblem($args, false)) !== null) return $problem;
         $lockFile = $this->ctx->abs($args['lock_file'] ?? 'composer.lock');
         if (!is_file($lockFile)) {
             return [null, '[UNKNOWN] composer.lock not found'];
@@ -302,6 +303,11 @@ final class ComposerRepositoryChecks extends ComposerSupport
             ];
         }
 
+        return $this->assessReleaseRecencyStatuses($packages, $statuses, $args);
+    }
+
+    private function assessReleaseRecencyStatuses(array $packages, array $statuses, array $args): array
+    {
         $months = max(1, (int)($args['months'] ?? 24));
         $cutoff = (new \DateTimeImmutable('now'))->modify('-' . $months . ' months');
         $now = time();
@@ -313,15 +319,11 @@ final class ComposerRepositoryChecks extends ComposerSupport
         foreach ($packages as $package) {
             $status = $statuses[$package['name']] ?? null;
             if (!is_array($status)) {
-                $unassessed[] = $package + [
-                    'installed' => $package['version'],
-                    'reason' => 'missing_status',
-                    'repository_url' => $package['repository_url'],
-                ];
+                $unknown[] = $package + ['reason' => 'missing_status'];
                 continue;
             }
-            if (empty($status['release_history_known'])) {
-                $excluded[] = $package + ['reason' => 'release_history_unavailable'];
+            if (($status['release_history_known'] ?? null) !== true) {
+                $unknown[] = $package + ['reason' => 'release_history_unavailable'];
                 continue;
             }
 
@@ -333,7 +335,7 @@ final class ComposerRepositoryChecks extends ComposerSupport
             } catch (\Exception) {
                 $latestAt = null;
             }
-            if ($latestAt === null) {
+            if ($latestAt === null || $latestAt->getTimestamp() > $now) {
                 $unknown[] = $package + ['reason' => 'latest_date_invalid'];
                 continue;
             }
@@ -412,6 +414,7 @@ final class ComposerRepositoryChecks extends ComposerSupport
 
     public function repoArchivedApi(array $args): array
     {
+        if (($problem = $this->strictInventoryProblem($args, false)) !== null) return $problem;
         $lockFile = $this->ctx->abs($args['lock_file'] ?? 'composer.lock');
         if (!is_file($lockFile)) {
             return [null, '[UNKNOWN] composer.lock not found'];
@@ -448,6 +451,11 @@ final class ComposerRepositoryChecks extends ComposerSupport
             ];
         }
 
+        return $this->assessRepositoryStatuses($packages, $statuses, $args);
+    }
+
+    private function assessRepositoryStatuses(array $packages, array $statuses, array $args): array
+    {
         $findings = [];
         $unknown = [];
         $unassessed = [];
@@ -464,6 +472,11 @@ final class ComposerRepositoryChecks extends ComposerSupport
                 continue;
             }
 
+            if (!empty($args['strict_scope']) && (($status['repository_status_known'] ?? null) === true)
+                && (!is_bool($status['repository_archived'] ?? null) || !is_bool($status['repository_disabled'] ?? null))) {
+                $unassessed[] = $package + ['reason' => 'repository_flags_invalid'];
+                continue;
+            }
             if (empty($status['repository_status_known'])) {
                 $reason = trim((string)($status['repository_status_reason'] ?? ''));
                 $item = $package + [
@@ -485,7 +498,8 @@ final class ComposerRepositoryChecks extends ComposerSupport
                     'repository_not_applicable',
                     'repository_provider_unsupported',
                 ], true)) {
-                    $excluded[] = $item;
+                    if (!empty($args['strict_scope']) && $item['reason'] === 'repository_provider_unsupported') $unassessed[] = $item;
+                    else $excluded[] = $item;
                 } else {
                     $unassessed[] = $item;
                 }
@@ -574,7 +588,7 @@ final class ComposerRepositoryChecks extends ComposerSupport
         }
         $coverage = implode(', ', $coverageParts);
 
-        if ($active === [] && $unassessed !== []) {
+        if ($unassessed !== [] && (!empty($args['strict_scope']) || $active === [])) {
             return [
                 null,
                 '[UNKNOWN] Repository status coverage is insufficient to assess archived or disabled repositories ('

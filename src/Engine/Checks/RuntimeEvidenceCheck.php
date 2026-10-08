@@ -14,7 +14,7 @@ final class RuntimeEvidenceCheck
         $url = $this->ctx->url;
         if (!preg_match('~^https?://~i', $url)) return $this->unknown('A store URL is required for response evidence.', []);
         [$ok,$message,$response] = $this->collectors->http->fetch($url, 'GET', [], 5000, false);
-        if ($ok !== true) return $this->unknown('HTTP response could not be collected.', ['transport_error'=>true]);
+        if ($ok !== true) return $this->unknown('HTTP response could not be collected: ' . $message, $response + ['transport_error'=>true]);
         $evidence = self::inspectResponse($response);
         $evidence['required_follow_up']=(string)($args['review']??'');
         $status = (int)($response['status'] ?? 0);
@@ -83,6 +83,7 @@ final class RuntimeEvidenceCheck
 
     private function unknown(string $message,array $evidence): CheckResult
     {
+        if (!isset($evidence['action'])) $evidence['action'] = isset($evidence['file']) ? 'Provide a fresh application account inventory at ' . $evidence['file'] . ' with schema_version=1.0, scope=application, complete=true, generated_at in ISO 8601 and accounts containing username/enabled; protect the artifact from public access, then rerun.' : 'Use a canonical reachable storefront URL returning a successful HTML/JSON/XML body with an explicit Content-Type; inspect redirects, WAF challenges and HTTP errors, then rerun.';
         return CheckResult::of(CheckOutcome::Unknown,'[UNKNOWN] '.$message,$evidence,'RUNTIME_EVIDENCE_MISSING');
     }
 }

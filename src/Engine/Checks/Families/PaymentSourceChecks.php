@@ -1239,6 +1239,7 @@ final class PaymentSourceChecks extends CodeSearchSupport
 
             $evidence = $this->matchEvidence($file, $content, 'pan', $offset);
             $evidence['kind'] = 'pan';
+            $evidence['snippet'] = '[REDACTED: payment data]';
             $evidence['field'] = 'Luhn-valid PAN-like value ending ' . substr($digits, -4);
             $findings[] = $evidence;
         }
@@ -1277,6 +1278,7 @@ final class PaymentSourceChecks extends CodeSearchSupport
 
                 $evidence = $this->matchEvidence($file, $content, $kind, $offset);
                 $evidence['kind'] = $kind;
+                $evidence['snippet'] = '[REDACTED: payment data]';
                 $evidence['field'] = $field;
                 $evidence['offset'] = $offset;
                 $findings[] = $evidence;

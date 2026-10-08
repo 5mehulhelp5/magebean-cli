@@ -39,4 +39,41 @@ final class DeploymentStateCheck
         $ok=in_array($value,[1,'1',true],true);
         return[$ok,$ok?'Declared Full Page Cache type is enabled.':'Declared Full Page Cache type is disabled.',['file'=>$relative,'cache_type'=>$type,'enabled'=>$ok]];
     }
+    /** Bounded readiness predicate on the actual Magento indexer_state table. */
+    public function indexersDatabaseReady(array $args): array
+    {
+        $evidence = ['source' => 'indexer_state', 'scope' => 'deployment_database'];
+        $pdo = $this->ctx->get('pdo');
+        $prefix = (string)$this->ctx->get('db_table_prefix', '');
+        try {
+            if (!$pdo instanceof \PDO) {
+                $relative = (string)($args['env_file'] ?? 'app/etc/env.php');
+                $file = $this->ctx->abs($relative);
+                $config = $this->collectors->php->load($file, $relative, static function () use ($file): mixed { return include $file; });
+                if (isset($config['__ERROR__'])) return [null, '[UNKNOWN] Indexer database configuration is unreadable; allow the scanner to read ' . $relative, $evidence + ['reason' => 'env_file_unavailable']];
+                $db = $config['db']['connection']['default'] ?? null;
+                if (!is_array($db)) return [null, '[UNKNOWN] Magento default database connection is missing; provide the deployed app/etc/env.php', $evidence + ['reason' => 'db_config_missing']];
+                $host = (string)($db['host'] ?? 'localhost'); $name = (string)($db['dbname'] ?? ''); $port = $db['port'] ?? null;
+                if ($port === null && substr_count($host, ':') === 1) [$host, $port] = explode(':', $host, 2);
+                if ($name === '' || str_contains($name, ';') || str_contains($host, ';') || ($port !== null && (!ctype_digit((string)$port) || (int)$port < 1 || (int)$port > 65535))) throw new \RuntimeException('Invalid connection settings');
+                $dsn = 'mysql:host=' . $host . ';dbname=' . $name . ';charset=utf8mb4';
+                if ($port !== null) $dsn .= ';port=' . $port;
+                $pdo = new \PDO($dsn, (string)($db['username'] ?? ''), (string)($db['password'] ?? ''), [\PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION, \PDO::ATTR_TIMEOUT => 2]);
+                $prefix = (string)($config['db']['table_prefix'] ?? '');
+            }
+            if (preg_match('/^[A-Za-z0-9_]*$/D', $prefix) !== 1) throw new \RuntimeException('Invalid table prefix');
+            $statement = $pdo->query('SELECT indexer_id, status FROM `' . $prefix . 'indexer_state`');
+            $rows = $statement->fetchAll(\PDO::FETCH_ASSOC);
+            if ($rows === []) return [null, '[UNKNOWN] indexer_state has no rows; initialize Magento indexers and collect their installed state', $evidence + ['reason' => 'indexer_rows_empty']];
+            $notReady = [];
+            foreach ($rows as $row) {
+                if (!is_string($row['indexer_id'] ?? null) || $row['indexer_id'] === '' || !in_array($row['status'] ?? null, ['valid', 'invalid', 'working'], true)) return [null, '[UNKNOWN] indexer_state contains an unrecognized status; verify the deployment schema and indexer data', $evidence + ['reason' => 'indexer_rows_malformed']];
+                if ($row['status'] !== 'valid') $notReady[] = $row;
+            }
+            return [$notReady === [], $notReady === [] ? 'All recorded Magento indexers have valid state' : 'Recorded Magento indexers are invalid or working', $evidence + ['indexers_seen' => count($rows), 'not_ready' => $notReady]];
+        } catch (\Throwable $error) {
+            return [null, '[UNKNOWN] Unable to read Magento indexer_state; verify the deployed DB connection and SELECT permission on indexer_state', $evidence + ['reason' => 'indexer_database_collection_failed']];
+        }
+    }
+
 }

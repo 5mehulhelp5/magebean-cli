@@ -126,6 +126,7 @@ final class CronCheck
 
     public function heartbeatRecent(array $args): array
     {
+        if (!empty($args['database_only'])) return $this->databaseMetric('heartbeat', $args);
         if ($this->ctx === null) {
             return [null, '[UNKNOWN] Project context is unavailable for cron heartbeat check', []];
         }
@@ -193,6 +194,7 @@ final class CronCheck
 
     public function backlogBelowThreshold(array $args): array
     {
+        if (!empty($args['database_only'])) return $this->databaseMetric('backlog', $args);
         if ($this->ctx === null) {
             return [null, '[UNKNOWN] Project context is unavailable for cron backlog check', []];
         }
@@ -259,6 +261,59 @@ final class CronCheck
         }
 
         return [null, '[UNKNOWN] No parseable cron backlog metrics found', $evidence];
+    }
+
+    /** Read only the deployment's actual Magento scheduler table. */
+    private function databaseMetric(string $metric, array $args): array
+    {
+        $evidence = ['source' => 'cron_schedule', 'scope' => 'deployment_database'];
+        if ($this->ctx === null) return [null, '[UNKNOWN] Deployment path is unavailable for cron database collection', $evidence];
+        $pdo = $this->ctx->get('pdo');
+        $prefix = (string)$this->ctx->get('db_table_prefix', '');
+        try {
+            if (!$pdo instanceof \PDO) {
+                $relative = (string)($args['env_file'] ?? 'app/etc/env.php');
+                $file = $this->ctx->abs($relative);
+                if (!is_file($file) || !is_readable($file)) return [null, '[UNKNOWN] Magento database configuration is unreadable; allow the scanner to read ' . $relative, $evidence + ['reason' => 'env_file_unavailable']];
+                $env = include $file;
+                $connection = is_array($env) ? ($env['db']['connection']['default'] ?? null) : null;
+                if (!is_array($connection)) return [null, '[UNKNOWN] Magento default database configuration is missing; run on the deployed Magento installation with readable app/etc/env.php', $evidence + ['reason' => 'db_config_missing']];
+                $host = (string)($connection['host'] ?? 'localhost');
+                $name = (string)($connection['dbname'] ?? '');
+                if (str_contains($host, ';') || str_contains($name, ';') || $name === '') throw new \RuntimeException('Invalid database configuration');
+                $port = $connection['port'] ?? null;
+                if ($port === null && substr_count($host, ':') === 1) [$host, $port] = explode(':', $host, 2);
+                if ($port !== null && (!ctype_digit((string)$port) || (int)$port < 1 || (int)$port > 65535)) throw new \RuntimeException('Invalid database port');
+                $dsn = 'mysql:host=' . $host . ';dbname=' . $name . ';charset=utf8mb4';
+                if ($port !== null) $dsn .= ';port=' . $port;
+                $pdo = new \PDO($dsn, (string)($connection['username'] ?? ''), (string)($connection['password'] ?? ''), [\PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION, \PDO::ATTR_TIMEOUT => 2]);
+                $prefix = (string)($env['db']['table_prefix'] ?? '');
+            }
+            if (preg_match('/^[A-Za-z0-9_]*$/D', $prefix) !== 1) throw new \RuntimeException('Invalid table prefix');
+            $table = '`' . $prefix . 'cron_schedule`';
+            if ($metric === 'heartbeat') {
+                $maxAge = (int)($args['seconds'] ?? 900);
+                if ($maxAge <= 0) return [null, '[UNKNOWN] Cron heartbeat seconds must be positive', $evidence];
+                $statement = $pdo->query('SELECT MAX(executed_at) FROM ' . $table . " WHERE status IN ('success', 'running', 'error') AND executed_at IS NOT NULL");
+                $raw = $statement->fetchColumn();
+                if ($raw === null || $raw === false || $raw === '') return [false, 'No executed cron job is recorded in cron_schedule', $evidence + ['max_age_seconds' => $maxAge]];
+                $date = \DateTimeImmutable::createFromFormat('!Y-m-d H:i:s', (string)$raw, new \DateTimeZone('UTC'));
+                if ($date === false || $date->format('Y-m-d H:i:s') !== (string)$raw) return [null, '[UNKNOWN] cron_schedule.executed_at is malformed; check scheduler timestamp integrity', $evidence];
+                $age = time() - $date->getTimestamp();
+                if ($age < -60) return [null, '[UNKNOWN] Cron execution timestamp is in the future; synchronize the scanner and database clocks', $evidence + ['reason' => 'clock_skew']];
+                $ok = $age <= $maxAge;
+                return [$ok, $ok ? 'Recorded cron execution is recent' : 'Recorded cron execution is stale', $evidence + ['executed_at' => $raw, 'age_seconds' => max(0, $age), 'max_age_seconds' => $maxAge]];
+            }
+            $threshold = (int)($args['max'] ?? $args['threshold'] ?? 1000);
+            if ($threshold < 0) return [null, '[UNKNOWN] Cron backlog threshold must be nonnegative', $evidence];
+            $statement = $pdo->prepare('SELECT COUNT(*) FROM ' . $table . " WHERE status = 'pending' AND scheduled_at <= ?");
+            $statement->execute([gmdate('Y-m-d H:i:s')]);
+            $count = (int)$statement->fetchColumn();
+            $ok = $count < $threshold;
+            return [$ok, $ok ? 'Due pending cron backlog is below threshold' : 'Due pending cron backlog meets or exceeds threshold', $evidence + ['due_pending_count' => $count, 'threshold' => $threshold, 'future_jobs_excluded' => true]];
+        } catch (\Throwable $error) {
+            return [null, '[UNKNOWN] Unable to read Magento cron_schedule; verify the deployed DB connection and SELECT permission for the scheduler table', $evidence + ['reason' => 'cron_database_collection_failed']];
+        }
     }
 
     private function readUserCrontab(string $user, int $timeoutMs): ?string
@@ -346,7 +401,7 @@ final class CronCheck
         $json = json_decode($trimmed, true);
         if (is_array($json)) {
             foreach (['count', 'queue_size', 'backlog', 'pending', 'missed'] as $key) {
-                if (isset($json[$key]) && is_numeric($json[$key])) {
+                if (isset($json[$key]) && (is_int($json[$key]) || is_string($json[$key])) && preg_match('/^[0-9]+$/D', (string)$json[$key]) === 1) {
                     return (int)$json[$key];
                 }
             }

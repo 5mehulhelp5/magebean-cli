@@ -519,6 +519,7 @@ final class ScanConsoleRenderer
             $lines = preg_split('/\R/', $message) ?: [];
             $first = array_shift($lines) ?: '';
             $out->writeln(sprintf('      - %s [%s]: %s', $check, $status, $first));
+            if (!empty($item['collection_guidance']['action'])) $out->writeln('        Action: ' . \Symfony\Component\Console\Formatter\OutputFormatter::escape($item['collection_guidance']['action']));
             foreach ($lines as $line) {
                 if (trim($line) !== '') {
                     $out->writeln('        ' . rtrim($line));
@@ -529,6 +530,7 @@ final class ScanConsoleRenderer
 
     private function inconclusiveResolutionSteps(array $finding): array
     {
+        if (!empty($finding['collection_guidance']['action'])) return [$finding['collection_guidance']['action']];
         $id = strtoupper(trim((string)($finding['id'] ?? '')));
         $message = strtolower((string)($finding['message'] ?? ''));
 

@@ -174,7 +174,7 @@ final class HttpCheck
         if (!empty($args['include_admin'])) {
             $admin = $this->magento->adminFrontNameDeclared([]);
             $route = $admin[2]['observed'] ?? null;
-            if (!is_string($route)) return [null, '[UNKNOWN] Cannot resolve backend.frontName for admin HTTPS probe', []];
+            if (!is_string($route)) return [null, '[UNKNOWN] Cannot resolve backend.frontName for admin HTTPS probe', ['action' => 'Run on the Magento deployment with readable app/etc/env.php and a nonempty backend.frontName; the scanner will probe the actual admin route.']];
             $paths[] = '/' . $route . '/';
         }
         $checked = []; $unknown = false; $failed = false;
@@ -186,13 +186,13 @@ final class HttpCheck
             $parts = parse_url($location);
             $valid = is_array($parts) && strtolower((string)($parts['scheme'] ?? '')) === 'https' &&
                 strtolower((string)($parts['host'] ?? '')) === strtolower((string)parse_url($url, PHP_URL_HOST)) && !isset($parts['user']) && !isset($parts['pass']);
-            $checked[] = ['request_url' => $url, 'status' => $status, 'location' => $location, 'https_redirect' => $valid];
+            $checked[] = ['request_url' => $url, 'status' => $status, 'location' => $location, 'https_redirect' => $valid] + ($ok !== true ? ['transport_error' => $msg, 'reason_code' => $ev['reason_code'] ?? 'HTTP_TRANSPORT_FAILED', 'action' => $ev['action'] ?? 'Verify scanner connectivity to this HTTP entrypoint.'] : []);
             if ($ok !== true || $status === 429 || $status >= 500 || $status <= 0) { $unknown = true; continue; }
             if (!in_array($status, [301,302,303,307,308], true) || !$valid) $failed = true;
         }
         $evidence = ['scope' => 'first_hop_observed_entrypoints', 'checked' => $checked];
         if ($failed) return [false, 'Observed HTTP entrypoint does not redirect directly to same-host HTTPS', $evidence];
-        if ($unknown) return [null, '[UNKNOWN] HTTP redirect probes are incomplete', $evidence];
+        if ($unknown) return [null, '[UNKNOWN] HTTP redirect probes are incomplete', $evidence + ['action' => 'Inspect each checked entrypoint/status below; restore HTTP port reachability, resolve rate limiting or server errors, then rerun.']];
         return [true, 'Observed storefront/admin HTTP entrypoints redirect directly to same-host HTTPS', $evidence];
     }
 
@@ -489,6 +489,7 @@ final class HttpCheck
             'failures' => $failures,
             'allowed_samesite' => $allowedSameSite,
             'client_readable_cookies' => $clientReadable,
+            'incomplete_paths' => $incomplete,
         ];
         if ($successful === 0) {
             return [null, '[UNKNOWN] Unable to inspect cookies. Verify --url, network access and the HTTPS trust chain. Probe errors: ' . implode('; ', array_map(static fn(array $entry): string => ($entry['url'] ?? '') . ': ' . ($entry['message'] ?? $entry['reason'] ?? 'Unavailable response'), $incomplete)), $evidence];
@@ -516,11 +517,11 @@ final class HttpCheck
         foreach ($paths as $p) {
             [$ok, $msg, $ev] = $this->fetch($this->joinUrl($base, (string)$p), 'GET', [], $timeout, true);
             if ($ok === null) {
-                $unknowns[] = ['path' => $p, 'reason' => $msg];
+                $unknowns[] = ['path' => $p, 'reason' => $msg, 'evidence' => $ev];
                 continue;
             }
             if (!$ok) {
-                $unknowns[] = ['path' => $p, 'reason' => $msg];
+                $unknowns[] = ['path' => $p, 'reason' => $msg, 'evidence' => $ev];
                 continue;
             }
 
@@ -942,22 +943,37 @@ final class HttpCheck
         return [$absent, $absent ? "Header {$header} absent" : "Header {$header} present", $ev];
     }
 
+    /** A transport response or redirect is not evidence about application headers. */
+    private function responseAssessmentIssue(?bool $ok, string $message, array $evidence, string $url, string $purpose, bool $httpsRequired = false): ?array
+    {
+        if ($ok !== true) {
+            $evidence['action'] ??= 'Check scanner DNS/network connectivity and certificate trust for the resolved URL, then rerun.';
+            return [null, '[UNKNOWN] Cannot inspect ' . $purpose . ': ' . $message, $evidence];
+        }
+        $final = (string)($evidence['final_url'] ?? $url);
+        $status = (int)($evidence['status'] ?? 0);
+        $sameHost = strtolower((string)parse_url($final, PHP_URL_HOST)) === strtolower((string)parse_url($url, PHP_URL_HOST));
+        if ($status < 200 || $status >= 300 || !$sameHost || ($httpsRequired && strtolower((string)parse_url($final, PHP_URL_SCHEME)) !== 'https')) {
+            $evidence['action'] = 'Use the canonical ' . ($httpsRequired ? 'HTTPS ' : '') . 'storefront URL returning a successful page from this scanner; resolve redirects, access challenges or server errors first.';
+            return [null, '[UNKNOWN] Cannot inspect ' . $purpose . ': HTTP ' . $status . ' at ' . $final . ' is not an assessable same-host ' . ($httpsRequired ? 'HTTPS ' : '') . 'application response.', $evidence];
+        }
+        return null;
+    }
+
     // === Security headers / policies ===
     private function clickjackingProtection(array $args): array
     {
         $base = $this->baseUrl();
-        if ($base === '') return [false, 'Missing URL in context'];
+        if ($base === '') return [null, '[UNKNOWN] Runtime URL unavailable; supply the canonical storefront --url or configure Magento base URL', []];
         [$ok, $msg, $ev] = $this->fetch($base, 'GET', [], (int)($args['timeout_ms'] ?? 8000), false);
-        if ($ok !== true) return [null, '[UNKNOWN] Cannot inspect HSTS: ' . $msg . '. Verify --url, network access and the HTTPS trust chain; install the trusted CA for private certificates.', $ev];
-        $final = (string)($ev['final_url'] ?? $url);
-        $status = (int)($ev['status'] ?? 0);
-        if ($status < 200 || $status >= 300 || strtolower((string)parse_url($final, PHP_URL_SCHEME)) !== 'https' || strtolower((string)parse_url($final, PHP_URL_HOST)) !== strtolower((string)parse_url((string)$url, PHP_URL_HOST))) return [null, '[UNKNOWN] HSTS probe requires a successful same-host HTTPS page; received HTTP ' . $status . ' at ' . $final . '. Set --url to the canonical HTTPS storefront.', $ev];
+        $issue = $this->responseAssessmentIssue($ok, $msg, $ev, $base, 'clickjacking headers', false);
+        if ($issue !== null) return $issue;
 
         $h = array_change_key_case((array)($ev['headers'] ?? []), CASE_LOWER);
         $xfo = strtolower($this->hget($h, 'x-frame-options'));
         $csp = $this->hget($h, 'content-security-policy');
         $pass = false;
-        if ($xfo !== '' && $xfo !== 'allowall') $pass = true;
+        if (in_array($xfo, ['deny', 'sameorigin'], true)) $pass = true;
         if (!$pass && $csp !== '') {
             $pass = (bool)preg_match('~frame-ancestors\s+([^;]+)~i', $csp) && !preg_match('~frame-ancestors\s+\*~i', $csp);
         }
@@ -980,12 +996,10 @@ final class HttpCheck
     private function cspNotOverlyPermissive(array $args): array
     {
         $base = $this->baseUrl();
-        if ($base === '') return [false, 'Missing URL in context'];
+        if ($base === '') return [null, '[UNKNOWN] Runtime URL unavailable; supply the canonical storefront --url or configure Magento base URL', []];
         [$ok, $msg, $ev] = $this->fetch($base, 'GET', [], (int)($args['timeout_ms'] ?? 8000), false);
-        if ($ok !== true) return [null, '[UNKNOWN] Cannot inspect HSTS: ' . $msg . '. Verify --url, network access and the HTTPS trust chain; install the trusted CA for private certificates.', $ev];
-        $final = (string)($ev['final_url'] ?? $url);
-        $status = (int)($ev['status'] ?? 0);
-        if ($status < 200 || $status >= 300 || strtolower((string)parse_url($final, PHP_URL_SCHEME)) !== 'https' || strtolower((string)parse_url($final, PHP_URL_HOST)) !== strtolower((string)parse_url((string)$url, PHP_URL_HOST))) return [null, '[UNKNOWN] HSTS probe requires a successful same-host HTTPS page; received HTTP ' . $status . ' at ' . $final . '. Set --url to the canonical HTTPS storefront.', $ev];
+        $issue = $this->responseAssessmentIssue($ok, $msg, $ev, $base, 'Content-Security-Policy', false);
+        if ($issue !== null) return $issue;
 
         $h = array_change_key_case((array)($ev['headers'] ?? []), CASE_LOWER);
         $csp = strtolower($this->hget($h, 'content-security-policy'));
@@ -1002,12 +1016,10 @@ final class HttpCheck
     private function corsNoWildcardWithCreds(array $args): array
     {
         $base = $this->baseUrl();
-        if ($base === '') return [false, 'Missing URL in context'];
+        if ($base === '') return [null, '[UNKNOWN] Runtime URL unavailable; supply the canonical storefront --url or configure Magento base URL', []];
         [$ok, $msg, $ev] = $this->fetch($base, 'GET', [], (int)($args['timeout_ms'] ?? 8000), false);
-        if ($ok !== true) return [null, '[UNKNOWN] Cannot inspect HSTS: ' . $msg . '. Verify --url, network access and the HTTPS trust chain; install the trusted CA for private certificates.', $ev];
-        $final = (string)($ev['final_url'] ?? $url);
-        $status = (int)($ev['status'] ?? 0);
-        if ($status < 200 || $status >= 300 || strtolower((string)parse_url($final, PHP_URL_SCHEME)) !== 'https' || strtolower((string)parse_url($final, PHP_URL_HOST)) !== strtolower((string)parse_url((string)$url, PHP_URL_HOST))) return [null, '[UNKNOWN] HSTS probe requires a successful same-host HTTPS page; received HTTP ' . $status . ' at ' . $final . '. Set --url to the canonical HTTPS storefront.', $ev];
+        $issue = $this->responseAssessmentIssue($ok, $msg, $ev, $base, 'CORS headers', false);
+        if ($issue !== null) return $issue;
 
         $h = array_change_key_case((array)($ev['headers'] ?? []), CASE_LOWER);
         $acao = strtolower($this->hget($h, 'access-control-allow-origin'));
@@ -1071,7 +1083,7 @@ final class HttpCheck
         ];
 
         if (!$hasModern && empty($nmapProbe['ok']) && empty($streamProbe['ok'])) {
-            return [null, '[UNKNOWN] TLS probing failed', $evidence];
+            return [null, '[UNKNOWN] TLS probing failed for ' . $host . ':' . $port, $evidence + ['action' => 'Verify TCP reachability to the TLS endpoint from the scanner and inspect stream_probe.errors / nmap_probe; install nmap if the local OpenSSL client cannot enumerate legacy protocols.']];
         }
         if (!$hasModern) {
             return [false, 'TLS 1.2+ could not be negotiated', $evidence];
@@ -1096,9 +1108,10 @@ final class HttpCheck
         $host = (string)parse_url($base, PHP_URL_HOST);
         if ($host === '') return [null, '[UNKNOWN] Invalid host', []];
 
-        $context = stream_context_create(['ssl' => ['capture_peer_cert' => true, 'SNI_enabled' => true]]);
-        $client = @stream_socket_client("ssl://{$host}:443", $errno, $errstr, 10, STREAM_CLIENT_CONNECT, $context);
-        if (!$client) return [null, '[UNKNOWN] TLS connect failed', []];
+        $port = (int)(parse_url($base, PHP_URL_PORT) ?: 443);
+        $context = stream_context_create(['ssl' => ['capture_peer_cert' => true, 'SNI_enabled' => true, 'peer_name' => $host]]);
+        $client = @stream_socket_client("ssl://{$host}:{$port}", $errno, $errstr, $this->timeoutSeconds($args, 10), STREAM_CLIENT_CONNECT, $context);
+        if (!$client) return [null, '[UNKNOWN] Cannot collect certificate from ' . $host . ':' . $port . ': ' . $errstr, ['host' => $host, 'port' => $port, 'transport_error' => true, 'action' => 'Verify scanner DNS/network access and trusted CA chain for this TLS endpoint; configure openssl.cafile for private CAs, then rerun.']];
         $params = stream_context_get_params($client);
         @fclose($client);
         $x = $params['options']['ssl']['peer_certificate'] ?? null;
@@ -1117,10 +1130,8 @@ final class HttpCheck
         $base = $this->baseUrl();
         if ($base === '') return [null, '[UNKNOWN] Runtime URL unavailable; provide --url=https://your-store or configure Magento secure base URL', []];
         [$ok, $msg, $ev] = $this->fetch($base, 'GET', [], (int)($args['timeout_ms'] ?? 8000), false);
-        if ($ok !== true) return [null, '[UNKNOWN] Cannot inspect HSTS: ' . $msg . '. Verify --url, network access and the HTTPS trust chain; install the trusted CA for private certificates.', $ev];
-        $final = (string)($ev['final_url'] ?? $url);
-        $status = (int)($ev['status'] ?? 0);
-        if ($status < 200 || $status >= 300 || strtolower((string)parse_url($final, PHP_URL_SCHEME)) !== 'https' || strtolower((string)parse_url($final, PHP_URL_HOST)) !== strtolower((string)parse_url((string)$url, PHP_URL_HOST))) return [null, '[UNKNOWN] HSTS probe requires a successful same-host HTTPS page; received HTTP ' . $status . ' at ' . $final . '. Set --url to the canonical HTTPS storefront.', $ev];
+        $issue = $this->responseAssessmentIssue($ok, $msg, $ev, $base, 'HSTS preload policy', true);
+        if ($issue !== null) return $issue;
 
         $h = array_change_key_case((array)($ev['headers'] ?? []), CASE_LOWER);
         $hst = strtolower($this->hget($h, 'strict-transport-security'));
@@ -1548,7 +1559,7 @@ final class HttpCheck
             if (!defined($constant)) { $errors[$version] = 'Client does not support protocol'; continue; }
             $ctx = stream_context_create(['ssl' => ['SNI_enabled' => true, 'peer_name' => $host, 'verify_peer' => false, 'verify_peer_name' => false, 'ciphers' => 'ALL:@SECLEVEL=0']]);
             $socket = @stream_socket_client("tcp://{$host}:{$port}", $errno, $errstr, $timeout, STREAM_CLIENT_CONNECT, $ctx);
-            if (!is_resource($socket)) { $errors[$version] = 'TCP connection failed'; continue; }
+            if (!is_resource($socket)) { $errors[$version] = 'TCP connection failed: ' . $errstr; continue; }
             stream_set_timeout($socket, $timeout);
             $warnings = [];
             set_error_handler(static function (int $severity, string $message) use (&$warnings): bool { $warnings[] = $message; return true; });

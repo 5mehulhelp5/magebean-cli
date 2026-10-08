@@ -23,6 +23,9 @@ final class AdminAclCheck
         $envFile = (string)($args['env_file'] ?? 'app/etc/env.php');
         $injectedRows = $this->ctx->get('admin_acl_rows');
         if (is_array($injectedRows)) {
+            foreach (['admin_user', 'authorization_role', 'authorization_rule'] as $table) {
+                if (!isset($injectedRows[$table]) || !is_array($injectedRows[$table])) return [null, '[UNKNOWN] Admin ACL evidence is incomplete; collect all three admin_user, authorization_role and authorization_rule tables', ['source' => 'context_rows', 'missing_table' => $table]];
+            }
             $users = is_array($injectedRows['admin_user'] ?? null) ? $injectedRows['admin_user'] : [];
             $roles = is_array($injectedRows['authorization_role'] ?? null) ? $injectedRows['authorization_role'] : [];
             $rules = is_array($injectedRows['authorization_rule'] ?? null) ? $injectedRows['authorization_rule'] : [];
@@ -44,9 +47,15 @@ final class AdminAclCheck
                     'rule_id', 'role_id', 'resource_id', 'permission',
                 ]);
             } catch (Throwable $e) {
-                return [null, '[UNKNOWN] Unable to read Magento Admin ACL tables: ' . $e->getMessage(), $connectionEvidence + [
+                return [null, '[UNKNOWN] Unable to read Magento Admin ACL tables; verify SELECT permission on admin_user, authorization_role and authorization_rule', $connectionEvidence + [
                     'reason' => 'acl_query_failed',
                 ]];
+            }
+        }
+
+        foreach ([[$users, ['user_id', 'username', 'is_active']], [$roles, ['role_id', 'parent_id', 'role_type', 'user_id', 'role_name']], [$rules, ['rule_id', 'role_id', 'resource_id', 'permission']]] as [$rows, $columns]) {
+            foreach ($rows as $row) {
+                if (!is_array($row) || array_diff($columns, array_keys($row)) !== []) return [null, '[UNKNOWN] Admin ACL evidence has missing columns; collect complete table rows', $connectionEvidence + ['reason' => 'acl_rows_malformed']];
             }
         }
 
@@ -118,6 +127,20 @@ final class AdminAclCheck
                 'role_id' => $roleId,
                 'role_type' => (string)$role['role_type'],
             ]);
+        }
+
+        foreach ($roles as $role) {
+            if (strtoupper(trim((string)$role['role_type'])) !== 'G') continue;
+            $origin = (int)$role['role_id']; $seen = []; $cursor = $origin;
+            while ($cursor > 0 && isset($rolesById[$cursor])) {
+                if (isset($seen[$cursor])) { $findings[] = $this->finding('cyclic_group_role', ['role_id' => $origin]); break; }
+                $seen[$cursor] = true;
+                $parent = (int)$rolesById[$cursor]['parent_id'];
+                if ($parent > 0 && isset($rolesById[$parent]) && strtoupper(trim((string)$rolesById[$parent]['role_type'])) !== 'G') {
+                    $findings[] = $this->finding('invalid_group_parent_role_type', ['role_id' => $origin, 'parent_id' => $parent]); break;
+                }
+                $cursor = $parent;
+            }
         }
 
         foreach ($users as $user) {
@@ -192,6 +215,9 @@ final class AdminAclCheck
         $envFile = (string)($args['env_file'] ?? 'app/etc/env.php');
         $injectedRows = $this->ctx->get('admin_acl_rows');
         if (is_array($injectedRows)) {
+            foreach (['admin_user', 'authorization_role', 'authorization_rule'] as $table) {
+                if (!isset($injectedRows[$table]) || !is_array($injectedRows[$table])) return [null, '[UNKNOWN] Admin ACL evidence is incomplete; collect all three admin_user, authorization_role and authorization_rule tables', ['source' => 'context_rows', 'missing_table' => $table]];
+            }
             $users = is_array($injectedRows['admin_user'] ?? null) ? $injectedRows['admin_user'] : [];
             $roles = is_array($injectedRows['authorization_role'] ?? null) ? $injectedRows['authorization_role'] : [];
             $rules = is_array($injectedRows['authorization_rule'] ?? null) ? $injectedRows['authorization_rule'] : [];
@@ -213,7 +239,7 @@ final class AdminAclCheck
                     'rule_id', 'role_id', 'resource_id', 'permission',
                 ]);
             } catch (Throwable $e) {
-                return [null, '[UNKNOWN] Unable to read Magento Admin ACL tables: ' . $e->getMessage(), $connectionEvidence + [
+                return [null, '[UNKNOWN] Unable to read Magento Admin ACL tables; verify SELECT permission on admin_user, authorization_role and authorization_rule', $connectionEvidence + [
                     'reason' => 'acl_query_failed',
                 ]];
             }
@@ -227,6 +253,12 @@ final class AdminAclCheck
         $approvedRoleNames = $this->normalizedStrings($args['approved_global_role_names'] ?? []);
         $approvedUserIds = $this->normalizedIds($args['approved_global_user_ids'] ?? []);
         $approvedUsernames = $this->normalizedStrings($args['approved_global_usernames'] ?? []);
+
+        foreach ([[$users, ['user_id', 'username', 'is_active']], [$roles, ['role_id', 'parent_id', 'role_type', 'user_id', 'role_name']], [$rules, ['rule_id', 'role_id', 'resource_id', 'permission']]] as [$rows, $columns]) {
+            foreach ($rows as $row) {
+                if (!is_array($row) || array_diff($columns, array_keys($row)) !== []) return [null, '[UNKNOWN] Admin ACL evidence has missing columns; collect complete table rows', $connectionEvidence + ['reason' => 'acl_rows_malformed']];
+            }
+        }
 
         $usersById = [];
         foreach ($users as $user) {
@@ -396,6 +428,9 @@ final class AdminAclCheck
         if ($port === '' && substr_count($host, ':') === 1) {
             [$host, $port] = explode(':', $host, 2);
         }
+        if (str_contains($host, ';') || str_contains($dbname, ';') || ($port !== '' && (!ctype_digit($port) || (int)$port < 1 || (int)$port > 65535))) {
+            return [null, '', ['source' => $envFile, 'reason' => 'invalid_db_config'], 'Magento database host, name or port is malformed; correct the deployed connection settings'];
+        }
         if ($dbname === '' || $username === '') {
             return [null, '', ['source' => $envFile, 'reason' => 'incomplete_db_config'], 'Magento database configuration is incomplete'];
         }
@@ -409,6 +444,7 @@ final class AdminAclCheck
             $pdo = new PDO($dsn, $username, $password, [
                 PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
                 PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+                PDO::ATTR_TIMEOUT => 2,
             ]);
         } catch (PDOException $e) {
             return [null, '', [
