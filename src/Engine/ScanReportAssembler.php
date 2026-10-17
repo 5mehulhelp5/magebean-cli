@@ -43,7 +43,7 @@ final class ScanReportAssembler
             $result['meta']['assessment_model'] = 'internal-requirement-v1';
             $result['meta']['capabilities'] = $plan->metadata['capabilities'] ?? [];
             $selector = (string)($plan->metadata['profileSelector'] ?? $plan->metadata['profile_selector'] ?? $plan->request->options['profile'] ?? '');
-            $result['meta']['profile_selector'] = $selector !== '' ? $selector : (string)($activeProfile['id'] ?? 'baseline');
+            $result['meta']['profile_selector'] = $selector !== '' ? $selector : (string)($activeProfile['id'] ?? 'basic');
             $result['meta']['url'] = $projectUrl;
             $result['meta']['profile_inventory_count'] = (int)($plan->metadata['profileInventoryCount'] ?? $profileRulesTotal);
             $result['meta']['omitted_requirements'] = $plan->metadata['omittedRequirements'] ?? [];

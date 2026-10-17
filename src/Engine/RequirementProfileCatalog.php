@@ -6,7 +6,7 @@ final class RequirementProfileCatalog
     public static function load(string $name):array
     {
         if(is_file($name)){$p=json_decode((string)file_get_contents($name),true,512,JSON_THROW_ON_ERROR);if(!is_array($p['requirement_ids']??null))throw new \RuntimeException('Primary profiles require requirement_ids.');$p+=['id'=>basename($name,'.json'),'title'=>'Custom requirements'];return self::validate($p);}
-        $name=strtolower(trim($name));$name=['default'=>'basic','best-practices'=>'basic','owasp'=>'owasp-top-10-2025','pci'=>'pci-dss-v4.0.1','pci-dss'=>'pci-dss-v4.0.1','production'=>'hardening','production-hardening'=>'hardening','all'=>'baseline','magebean'=>'baseline'][$name]??$name;
+        $name=strtolower(trim($name));$name=['default'=>'basic','best-practices'=>'basic','owasp'=>'owasp-top-10-2025','pci'=>'pci-dss-v4.0.1','pci-dss'=>'pci-dss-v4.0.1','production'=>'hardening','production-hardening'=>'hardening'][$name]??$name;
         $all=RequirementCatalog::read('internal-profiles')['profiles'];foreach($all as $key=>$p)if($key===$name||in_array($name,$p['aliases']??[],true))return self::validate($p);throw new \RuntimeException('Unknown internal requirement profile: '.$name);
     }
     public static function all():array{return RequirementCatalog::read('internal-profiles')['profiles'];}

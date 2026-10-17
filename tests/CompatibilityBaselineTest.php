@@ -120,14 +120,14 @@ try {
         'control' => $rule['control'], 'severity' => $rule['severity'], 'verification' => $rule['verification'] ?? 'automated',
         'definition_sha256' => hash('sha256', json_encode($rule, JSON_THROW_ON_ERROR)),
     ];
-    foreach (['basic', 'asvs-l1', 'asvs-l2', 'asvs-l3', 'owasp', 'pci', 'hardening', 'baseline', 'all', 'magebean'] as $profile) {
-        $selected = in_array($profile, ['baseline', 'all', 'magebean'], true) ? $pack : ProfileLoader::apply($pack, ProfileLoader::load($profile, $root));
+    foreach (['basic', 'asvs-l1', 'asvs-l2', 'asvs-l3', 'owasp', 'pci', 'hardening'] as $profile) {
+        $selected = ProfileLoader::apply($pack, ProfileLoader::load($profile, $root));
         $actual['profiles'][$profile] = [
             'all_ids' => array_column($selected['rules'], 'id'),
             'automated_ids' => array_values(array_column(array_filter($selected['rules'], static fn(array $r): bool => ($r['verification'] ?? 'automated') !== 'manual'), 'id')),
         ];
     }
-    foreach ([[], ['--profile' => 'baseline', '--control' => 'MB-C03', '--severity' => 'high'], ['--profile' => 'asvs-l1', '--include-manual-review' => true, '--control' => 'MB-C02'], ['--profile' => 'asvs-l3', '--capabilities' => 'graphql,oauth_oidc', '--control' => 'MB-C03']] as $i => $input)
+    foreach ([[], ['--profile' => 'hardening', '--control' => 'MB-C03', '--severity' => 'high'], ['--profile' => 'asvs-l1', '--include-manual-review' => true, '--control' => 'MB-C02'], ['--profile' => 'asvs-l3', '--capabilities' => 'graphql,oauth_oidc', '--control' => 'MB-C03']] as $i => $input)
         $actual['rule_listing'][$i] = compatibilityCommand('rules:list', $input);
 
     $fixtureRules = [compatibilityRule('QA-PASS', 'fs_exists', ['path' => 'present.txt']), compatibilityRule('QA-FAIL', 'fs_exists', ['path' => 'missing.txt'], 'high'), compatibilityRule('QA-CRITICAL', 'fs_exists', ['path' => 'missing.txt'], 'critical')];

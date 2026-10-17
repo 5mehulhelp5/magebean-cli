@@ -62,10 +62,10 @@ try {
 
     $command = (new \Magebean\Application())->find('rules:list');
     $tester = new \Symfony\Component\Console\Tester\CommandTester($command);
-    $tester->execute(['--profile'=>'baseline','--include-manual-review'=>true,'--no-ansi'=>true]); $text = $tester->getDisplay();
+    $tester->execute(['--profile'=>'hardening','--include-manual-review'=>true,'--no-ansi'=>true]); $text = $tester->getDisplay();
     preg_match_all('/^(MB-\d+) \[/m',$text,$ids);
-    $expectedIds = array_column(\Magebean\Engine\RequirementCatalog::forProfile("baseline")['rules'],'id'); $listedIds = $ids[1]; sort($expectedIds); sort($listedIds);
-    expectConsumer($listedIds === $expectedIds && count(array_unique($listedIds)) === count($listedIds),'Baseline listing contains each selected persisted identity once, with no retired aliases');
+    $expectedIds = array_column(\Magebean\Engine\RequirementCatalog::forProfile("hardening")['rules'],'id'); $listedIds = $ids[1]; sort($expectedIds); sort($listedIds);
+    expectConsumer($listedIds === $expectedIds && count(array_unique($listedIds)) === count($listedIds),'Hardening listing contains each selected persisted identity once, with no retired aliases');
     expectConsumer(preg_match('/\bMB-R\d{3}\b/', $text) !== 1 && !str_contains($text,'OWASP-ASVS:'),'Primary listing excludes compatibility inventory identities');
     $tester->execute(['--profile'=>'basic','--control'=>'MB-C01','--no-ansi'=>true]); $text = $tester->getDisplay();
     preg_match_all('/^MB-\d+ \[([^\]]+)\]/m',$text,$controls);

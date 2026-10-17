@@ -16,7 +16,7 @@ final class RequirementCatalog
         foreach($profile['requirement_ids'] as $id){if(!isset($index[$id]))throw new \RuntimeException('Unknown internal requirement in profile: '.$id);$r=$index[$id];
             if(!in_array(strtoupper($mode),$r['target_modes'],true)){$omitted[]=['id'=>$id,'reason_code'=>'TARGET_MODE_UNSUPPORTED'];continue;}
             $cap=$r['applicability']['capability']??null;
-            if($cap!==null && $profile['id']!=='baseline' && !self::enabled($capabilities,$cap)){$omitted[]=['id'=>$id,'reason_code'=>'CAPABILITY_CONTEXT_MISSING','capability'=>$cap];continue;}
+            if($cap!==null && !self::enabled($capabilities,$cap)){$omitted[]=['id'=>$id,'reason_code'=>'CAPABILITY_CONTEXT_MISSING','capability'=>$cap];continue;}
             if(isset($profile['assessment_level']))$r['assessment_level']=$profile['assessment_level'];$rules[]=$r;
         }
         $meta=$profile;unset($meta['requirement_ids']);

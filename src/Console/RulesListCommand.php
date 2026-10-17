@@ -24,7 +24,6 @@ PROFILES
   owasp      Application requirements tagged with OWASP Top 10 categories.
   pci        PCI DSS requirement evidence and human verification obligations.
   hardening  Production hardening requirements.
-  baseline   Complete requirement inventory. Aliases: all, magebean.
   FILE       Custom profile JSON selecting requirement IDs.
 
 Counts are calculated from the selected catalog and capability context.
@@ -49,7 +48,7 @@ EXAMPLES
   php magebean.phar rules:list --profile=asvs-l2 --include-manual-review --capabilities=oauth_oidc
   php magebean.phar rules:list --profile=asvs-l3 --include-manual-review
   php magebean.phar rules:list --profile=hardening
-  php magebean.phar rules:list --profile=baseline --control=MB-C03
+  php magebean.phar rules:list --profile=hardening --control=MB-C03
   php magebean.phar rules:list --profile=owasp --severity=critical
   php magebean.phar rules:list --profile=.magebean/profiles/acme.json
 
@@ -61,13 +60,13 @@ HELP;
         $this->setName('rules:list')
             ->setDescription('List and filter Magebean rules by profile, control, and severity.')
             ->addUsage('--profile=hardening')
-            ->addUsage('--profile=baseline --control=MB-C03')
+            ->addUsage('--profile=hardening --control=MB-C03')
             ->addUsage('--profile=owasp --severity=critical')
             ->setHelp(self::HELP)
             ->addOption('include-manual-review', null, InputOption::VALUE_NONE, 'Include human manual-review rules (excluded by default)')
             ->addOption('capabilities', null, InputOption::VALUE_OPTIONAL, 'Comma list of application capabilities for contextual rules')
             ->addOption('control', null, InputOption::VALUE_OPTIONAL, 'Comma list of controls (e.g. MB-C01,MB-C02)')
-            ->addOption('profile', null, InputOption::VALUE_OPTIONAL, 'Profile: basic (default) | asvs-l1 | asvs-l2 | asvs-l3 | owasp | pci | hardening | baseline | custom JSON')
+            ->addOption('profile', null, InputOption::VALUE_OPTIONAL, 'Profile: basic (default) | asvs-l1 | asvs-l2 | asvs-l3 | owasp | pci | hardening | custom JSON')
             ->addOption('severity', null, InputOption::VALUE_OPTIONAL, 'low|medium|high|critical');
     }
     protected function execute(InputInterface $in, OutputInterface $out): int

@@ -46,7 +46,7 @@ final class HtmlReporter
         $meta = (array)($result['meta'] ?? []);
         $suppressConfidence = (bool)($meta['suppress_confidence'] ?? false);
         $profile = (array)($meta['profile'] ?? []);
-        $profileId = htmlspecialchars((string)($profile['id'] ?? 'baseline'), ENT_QUOTES, 'UTF-8');
+        $profileId = htmlspecialchars((string)($profile['id'] ?? 'basic'), ENT_QUOTES, 'UTF-8');
         $profileTitle = htmlspecialchars((string)($profile['title'] ?? 'Magebean Baseline'), ENT_QUOTES, 'UTF-8');
         $profileDescription = htmlspecialchars((string)($profile['description'] ?? ''), ENT_QUOTES, 'UTF-8');
 

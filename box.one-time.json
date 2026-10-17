@@ -1,0 +1,20 @@
+{
+  "$schema": "https://box-project.github.io/box/schema.json",
+  "output": "artifacts/magebean-one-time.phar",
+  "main": "bin/magebean",
+  "chmod": "0755",
+  "stub": true,
+  "compression": "GZ",
+  "directories": [
+    "bin",
+    "src",
+    "resources",
+    "vendor"
+  ],
+  "files": [
+    "composer.json",
+    "LICENSE"
+  ],
+  "banner": "Magebean CLI",
+  "check-requirements": false
+}

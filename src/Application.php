@@ -26,6 +26,7 @@ final class Application extends ConsoleApp
         $name = 'Magebean CLI — Magento 2 Security Audit';
         parent::__construct($name, self::VERSION);
         $this->add(new ScanCommand());
+        $this->add(new \Magebean\Console\OneTimeAssessmentCommand());
         $this->add(new RulesListCommand());
         $this->add(new AgentConnectCommand());
         $this->add(new AgentStatusCommand());

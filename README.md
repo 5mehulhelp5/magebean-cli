@@ -2,7 +2,7 @@
 
 Magebean CLI audits Magento 2 installations and public storefronts against versioned security profiles. Run it locally, remotely, or in hybrid mode to turn filesystem, configuration, dependency, and HTTP evidence into actionable findings.
 
-Use the fast production-readiness profile for routine checks, map an assessment to OWASP ASVS, OWASP Top 10, or PCI DSS, or run the complete Magebean baseline. The CLI supports both automated checks and structured human verification, works in CI, and can connect a Magento host to Magebean Security Dashboard for managed assessments.
+Use the fast production-readiness profile for routine checks, map an assessment to OWASP ASVS, OWASP Top 10, or PCI DSS. The CLI supports both automated checks and structured human verification, works in CI, and can connect a Magento host to Magebean Security Dashboard for managed assessments.
 
 > **Goal**: “Audit in minutes. Know exactly what to fix and why.”
 
@@ -18,8 +18,8 @@ Read the [requirement model](docs/requirement-model.md) and [ASVS L1/L2 migratio
 ## ✨ Features
 
 - **Target-aware scanning**: audit a Magento filesystem in LOCAL mode, a public storefront in REMOTE mode, or combine both evidence sources in HYBRID mode.
-- **Security profiles**: choose `basic`, ASVS Level 1–3, OWASP Top 10 2025, PCI DSS v4.0.1, `hardening`, the full `baseline`, or a custom profile.
-- **Automated and human checks**: run 113 automated legacy assessment definitions by default in the full baseline and opt into 258 structured `HUMAN VERIFICATION REQUIRED` definitions when an assessment needs human evidence.
+- **Security profiles**: choose `basic`, ASVS Level 1–3, OWASP Top 10 2025, PCI DSS v4.0.1, `hardening`, or a custom profile.
+- **Automated and human checks**: selected profiles combine technical observations with structured human verification when independent evidence is required.
 - **Actionable results**: distinguish PASS, confirmed findings, and INCONCLUSIVE checks; inspect evidence, remediation guidance, and re-run commands for individual rules.
 - **PCI DSS workflow**: compile applicability context, import structured external evidence, and generate an evidence-readiness JSON report.
 - **Project policy**: customize capabilities, controls, exclusions, rule overrides, project-specific rules, and additional rule packs with `.magebean.json` or YAML.
@@ -66,7 +66,7 @@ php bin/magebean rules:list
 
 The current rule library contains **19 controls and 371 rules**: **113 automated** and **258 marked `HUMAN VERIFICATION REQUIRED`**.
 
-`scan` and `rules:list` use the 21-rule `basic` profile by default. Select `asvs-l1`, `asvs-l2`, `asvs-l3`, `owasp`, `pci`, or `hardening` with `--profile`, or use `--profile=baseline` for the full catalog. The `asvs-l1`, `asvs-l2`, and `asvs-l3` profiles exclude manual-review rules by default; add `--include-manual-review` when human evidence collection is desired. The PCI profile runs 67 rules by default and 68 with human verification enabled; use `--pci-context`, `--pci-evidence`, and `--pci-report` for applicability compilation and evidence-readiness reporting.
+`scan` and `rules:list` use the 21-rule `basic` profile by default. Select `asvs-l1`, `asvs-l2`, `asvs-l3`, `owasp`, `pci`, or `hardening` with `--profile`. The `asvs-l1`, `asvs-l2`, and `asvs-l3` profiles exclude manual-review rules by default; add `--include-manual-review` when human evidence collection is desired. The PCI profile runs 67 rules by default and 68 with human verification enabled; use `--pci-context`, `--pci-evidence`, and `--pci-report` for applicability compilation and evidence-readiness reporting.
 
 See [CLI Reference](docs/cli-reference.md) for all commands, options, profiles, target modes, and examples.
 
@@ -158,7 +158,7 @@ Inconclusive checks do not change the exit code because they are not confirmed f
 
 Target mode is selected from the explicitly provided options:
 
-- `--url` without `--path`: **REMOTE**; confirm Magento 2 first, then run 10 externally observable rules.
+- `--url` without `--path`: **REMOTE**; confirm Magento 2 first, then run the selected profile's externally observable requirements (`basic` by default).
 - `--path` without `--url`: **LOCAL**.
 - `--path` with `--url`: **HYBRID**, combining local and HTTP evidence.
 - No target options: auto-detect a Magento root and run **LOCAL**.
@@ -192,17 +192,15 @@ Selection order is: target pack → project policy → (`--rules` or profile) �
 | `owasp` | 69 |
 | `pci` | 32 (257 with manual review) |
 | `hardening` | 81 (82 with manual review) |
-| `baseline` | 211 technical (684 with manual review) |
-| `external` | 9 remote assessments |
 
-`all` and `magebean` are aliases for `baseline`. Custom profile files can be passed to `--profile`, including profiles stored under `.magebean/profiles`.
+Custom profile files can be passed to `--profile`, including profiles stored under `.magebean/profiles`.
 
 ### List and filter rules
 
 ```bash
 php magebean.phar rules:list
 php magebean.phar rules:list --profile=asvs-l2 --include-manual-review
-php magebean.phar rules:list --profile=baseline --control=MB-C03
+php magebean.phar rules:list --profile=hardening --control=MB-C03
 php magebean.phar rules:list --profile=owasp --severity=critical
 ```
 
@@ -210,7 +208,7 @@ php magebean.phar rules:list --profile=owasp --severity=critical
 
 ### Project-specific policy
 
-Create `.magebean.json` in the Magento root to tune the baseline per project without changing the CLI:
+Create `.magebean.json` in the Magento root to tune assessment policy per project without changing the CLI:
 
 ```json
 {

@@ -13,7 +13,6 @@ $profiles=[
     'owasp'=>[69,69,0],
     'pci'=>[32,257,225],
     'hardening'=>[81,82,1],
-    'baseline'=>[211,684,473],
 ];
 foreach($profiles as $profile=>[$listed,$total,$human]){
     $definitions=\Magebean\Engine\RequirementCatalog::forProfile($profile)['rules'];

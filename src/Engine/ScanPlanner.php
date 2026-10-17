@@ -38,7 +38,7 @@ final class ScanPlanner
         $caps = is_array($config['capabilities'] ?? null) ? $config['capabilities'] : [];
         foreach (self::ids($options['capabilities'] ?? '') as $cap) $caps[strtolower($cap)] = true;
         $profile = trim((string)($options['profile'] ?? ''));
-        if ($profile === '') $profile = $requested !== [] ? 'baseline' : ($mode === 'REMOTE' ? 'external' : (in_array(strtolower((string)($options['standard'] ?? '')), ['owasp','pci'], true) ? strtolower($options['standard']) : 'basic'));
+        if ($profile === '') $profile = $requested !== [] ? 'basic' : (in_array(strtolower((string)($options['standard'] ?? '')), ['owasp','pci'], true) ? strtolower($options['standard']) : 'basic');
         if (is_file(ProjectPath::resolve($profile, $base))) $profile = ProjectPath::resolve($profile, $base);
         if(is_file($profile)){$custom=json_decode((string)file_get_contents($profile),true,512,JSON_THROW_ON_ERROR);if(!isset($custom['requirement_ids'])){if($internal!==[])throw new \RuntimeException('Internal selections require a primary requirement_ids profile.');$diagnostic(new ScanDiagnostic('comment','Using the deprecated custom-profile compatibility adapter.'));return (new LegacyScanPlanner())->planCli($request,$registry,$diagnostic);}}
         if (in_array(strtolower($profile),['pci','pci-dss','pci-dss-v4.0.1'],true) && (!empty($options['controls']) || !empty($config['include_controls']))) {

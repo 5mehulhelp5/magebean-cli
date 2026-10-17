@@ -18,6 +18,9 @@ final class LegacyScanPlanner
         $options = $request->options;
         $standard = strtolower((string)($options['standard'] ?? 'magebean'));
         $profileOpt = trim((string)($options['profile'] ?? ''));
+        if (in_array(strtolower($profileOpt), ['baseline', 'all', 'magebean', 'external'], true) && !is_file(ProjectPath::resolve($profileOpt, $targetMode === 'REMOTE' ? (string)getcwd() : $projectPath))) {
+            throw new \RuntimeException('Unknown internal requirement profile: ' . $profileOpt);
+        }
         $rulesOpt = (string)($options['rules'] ?? '');
         $excludeRulesOpt = (string)($options['exclude-rules'] ?? '');
         $controlsOpt = (string)($options['controls'] ?? '');
@@ -66,20 +69,12 @@ final class LegacyScanPlanner
 
         $pack = RulePackMerger::applyProjectConfig($pack, LegacyAsvsRequirementPolicy::evidenceConfig($projectConfig));
 
-        $activeProfile = $targetMode === 'REMOTE'
-            ? [
-                'id' => 'external',
-                'title' => 'Magebean External Magento Audit',
-                'description' => 'Publicly observable checks that require only a store URL.',
+        $activeProfile = [
+                'id' => 'basic',
+                'title' => 'Magebean Basic',
+                'description' => 'Selected deployment security checks.',
                 'report_template' => 'standard',
-                '_source' => 'builtin:external',
-            ]
-            : [
-                'id' => 'baseline',
-                'title' => 'Magebean Baseline',
-                'description' => 'All enabled rules from the Magebean rule catalog.',
-                'report_template' => 'standard',
-                '_source' => 'builtin:baseline',
+                '_source' => 'builtin:basic',
             ];
         $hasExplicitRuleSelection = trim($rulesOpt) !== '';
         if ($hasExplicitRuleSelection) {
@@ -93,7 +88,7 @@ final class LegacyScanPlanner
             if ($profileOpt === '') {
                 $profileOpt = in_array($standard, ['owasp', 'pci'], true) ? $standard : 'basic';
             }
-            if ($profileOpt !== '' && !in_array(strtolower($profileOpt), ['baseline', 'all', 'magebean', 'external'], true)) {
+            if ($profileOpt !== '') {
                 $profileBasePath = $targetMode === 'REMOTE' ? (string)getcwd() : $projectPath;
                 $profile = ProfileLoader::load($profileOpt, $profileBasePath);
                 $profileCanBePartial = $targetMode === 'REMOTE'

@@ -34,12 +34,12 @@ assertManualFlag(str_contains($manualOutput, 'Total Rules Listed: 197'), 'ASVS L
 assertManualFlag(str_contains($manualOutput, $asvsManualId), 'Manual rule missing when flag is enabled');
 
 $baseline = new CommandTester($command);
-$baseline->execute(['--profile' => 'baseline', '--no-ansi' => true]);
-assertManualFlag(str_contains($baseline->getDisplay(), 'Total Rules Listed: ' . count(array_filter(RequirementCatalog::forProfile('baseline')['rules'], static fn(array $r):bool => !\Magebean\Engine\RequirementPolicy::requiresHuman($r)))), 'Baseline must exclude manual rules by default');
+$baseline->execute(['--profile' => 'hardening', '--no-ansi' => true]);
+assertManualFlag(str_contains($baseline->getDisplay(), 'Total Rules Listed: ' . count(array_filter(RequirementCatalog::forProfile('hardening')['rules'], static fn(array $r):bool => !\Magebean\Engine\RequirementPolicy::requiresHuman($r)))), 'Hardening must exclude manual rules by default');
 
 $baselineManual = new CommandTester($command);
-$baselineManual->execute(['--profile' => 'baseline', '--include-manual-review' => true, '--no-ansi' => true]);
-assertManualFlag(str_contains($baselineManual->getDisplay(), 'Total Rules Listed: 684'), 'Baseline manual flag must list all 684 baseline requirements');
+$baselineManual->execute(['--profile' => 'hardening', '--include-manual-review' => true, '--no-ansi' => true]);
+assertManualFlag(str_contains($baselineManual->getDisplay(), 'Total Rules Listed: 82'), 'Hardening manual flag must list all 82 hardening requirements');
 
 $pci = new CommandTester($command);
 $pci->execute(['--profile' => 'pci', '--no-ansi' => true]);

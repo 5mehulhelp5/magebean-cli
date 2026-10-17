@@ -80,7 +80,6 @@ When neither `--path` nor `--url` is supplied, Magebean searches for a Magento r
 | `owasp` | Application predicates tagged with Top 10 categories; categories are not requirement IDs. |
 | `pci` | 280 PCI DSS 4.0.1-aligned identities with applicable human/evidence obligations. |
 | `hardening` | Production hardening predicates. |
-| `baseline` | Complete primary inventory. Aliases: `all`, `magebean`. |
 | `FILE` | Custom profile selecting internal identities. |
 
 `rules:list` reports actual selected counts. Human and capability filters reduce execution selection and do not increase the underlying unique inventory.
@@ -198,7 +197,6 @@ php magebean.phar scan --path=/var/www/magento --profile=owasp
 php magebean.phar scan --path=/var/www/magento --profile=pci
 php magebean.phar scan --path=/var/www/magento --profile=pci --pci-context=.magebean/pci-context.json --pci-evidence=.magebean/pci-evidence.json --include-manual-review --pci-report=var/report/magebean-pci.json
 php magebean.phar scan --path=/var/www/magento --profile=hardening
-php magebean.phar scan --path=/var/www/magento --profile=baseline
 ```
 
 Filter controls or rules:
@@ -211,7 +209,7 @@ php magebean.phar scan \
 
 php magebean.phar scan \
   --path=/var/www/magento \
-  --profile=baseline \
+  --profile=hardening \
   --rules=MB-R049,MB-R050
 
 php magebean.phar scan \
@@ -255,7 +253,7 @@ php magebean.phar rules:list [options]
 ```bash
 php magebean.phar rules:list
 php magebean.phar rules:list --profile=hardening
-php magebean.phar rules:list --profile=baseline --control=MB-C03
+php magebean.phar rules:list --profile=hardening --control=MB-C03
 php magebean.phar rules:list --profile=owasp --severity=critical
 php magebean.phar rules:list --profile=.magebean/profiles/acme.json
 ```

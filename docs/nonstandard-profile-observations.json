@@ -1,0 +1,88 @@
+{
+    "date": "2026-10-08",
+    "inspection_only": true,
+    "network_requests": 0,
+    "real_deployment_conformance_claimed": false,
+    "local_selected_counts": {
+        "basic": 20,
+        "hardening": 41,
+        "baseline": 41,
+        "external": 8,
+        "all": 41,
+        "magebean": 41
+    },
+    "hardening_baseline_same_autonomous_ids": true,
+    "basic_missing_in_hardening": [
+        "MB-0728",
+        "MB-0729",
+        "MB-0730"
+    ],
+    "remote_default_profile": "external",
+    "remote_default_selected": 8,
+    "remote_best_case_assessments": [
+        {
+            "id": "MB-0005",
+            "status": "PASS",
+            "reason_code": "REQUIREMENT_CONDITIONS_VERIFIED",
+            "check_names": [
+                "http_no_directory_listing"
+            ]
+        },
+        {
+            "id": "MB-0026",
+            "status": "PASS",
+            "reason_code": "REQUIREMENT_CONDITIONS_VERIFIED",
+            "check_names": [
+                "http_force_https_redirect"
+            ]
+        },
+        {
+            "id": "MB-0027",
+            "status": "UNKNOWN",
+            "reason_code": "REQUIREMENT_AUTOMATION_INSUFFICIENT",
+            "check_names": [
+                "http_has_hsts"
+            ]
+        },
+        {
+            "id": "MB-0028",
+            "status": "PASS",
+            "reason_code": "REQUIREMENT_CONDITIONS_VERIFIED",
+            "check_names": [
+                "http_tls_min_version"
+            ]
+        },
+        {
+            "id": "MB-0029",
+            "status": "PASS",
+            "reason_code": "REQUIREMENT_CONDITIONS_VERIFIED",
+            "check_names": [
+                "http_no_mixed_content"
+            ]
+        },
+        {
+            "id": "MB-0030",
+            "status": "PASS",
+            "reason_code": "REQUIREMENT_CONDITIONS_VERIFIED",
+            "check_names": [
+                "http_cookie_flags"
+            ]
+        },
+        {
+            "id": "MB-0035",
+            "status": "PASS",
+            "reason_code": "REQUIREMENT_CONDITIONS_VERIFIED",
+            "check_names": [
+                "http_static_assets_deployed"
+            ]
+        },
+        {
+            "id": "MB-0037",
+            "status": "UNKNOWN",
+            "reason_code": "REQUIREMENT_AUTOMATION_INSUFFICIENT",
+            "check_names": [
+                "http_cache_signals"
+            ]
+        }
+    ]
+}

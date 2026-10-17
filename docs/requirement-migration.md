@@ -26,7 +26,6 @@ The primary inventory contains **684 active internal definition IDs** after crit
 | asvs-l2 | 89 | 197 | 108 |
 | asvs-l3 | 97 | 267 | 170 |
 | pci | 32 | 257 | 225 |
-| baseline | 211 | 684 | 473 |
 | external | 9 | 9 | 0 |
 
 The allocator retains 727 historical allocations: the previously confirmed Composer duplicate plus 42 identities retired through 13 approved semantic consolidation groups. Retired IDs redirect to surviving IDs and are never reassigned. Definitions with combined criteria increment their revisions and retain mandatory human review; consolidation does not approve detector sufficiency.
@@ -35,7 +34,7 @@ Complete ASVS profile memberships are 69/252/344 with all optional capabilities 
 
 Merged definitions preserve multiple `control_tags`; catalog, CLI and listing filters match any retained tag. Excluding one of those controls excludes the canonical requirement rather than removing an obligation from it. CLI selectors and custom profiles resolve retired internal IDs and deduplicate membership. Agent manifests may request several different keys that redirect to one canonical definition: execution occurs once, while results retain each requested key and assessment item. Summary totals count unique executed assessments and may differ from transported result cardinality.
 
-Current catalog totals can be checked through `rules:list --profile=baseline --include-manual-review` and the persisted catalog, with capability and mode filters labeled explicitly. ASVS and PCI reference counts are 345 and 280; they must not be treated as automation coverage or added to alias counts.
+Global catalog totals can be checked in `src/Rules/requirements/internal-catalog.json`; use `rules:list --profile=hardening --include-manual-review` for the hardening selection, with capability and mode filters labeled explicitly. ASVS and PCI reference counts are 345 and 280; they must not be treated as automation coverage or added to alias counts.
 
 ## Consumers
 
@@ -78,6 +77,6 @@ The consumer contract test exercises a real primary PCI planner/service/assemble
 
 ## Basic deployment automation profile
 
-Basic now selects twenty reviewed automated deployment predicates with no human obligations. It uses MB-0728/0729/0730 for observed admin-password policy, declared project debug flags, and deployed working-tree pattern scanning. Broad ASVS MB-0209/0379 and Git-history MB-0072 remain unchanged outside basic. Other profile memberships, including the 684-entry baseline assessment profile, remain unchanged to avoid selecting both representations and duplicating findings. The global inventory is 687 identities; historical allocations730, next ID731, all625 standard references preserved.
+Basic now selects twenty reviewed automated deployment predicates with no human obligations. It uses MB-0728/0729/0730 for observed admin-password policy, declared project debug flags, and deployed working-tree pattern scanning. Broad ASVS MB-0209/0379 and Git-history MB-0072 remain unchanged outside basic. Use a named assessment profile or explicit `--rules` selection; the former full-inventory profile and its `all`/`magebean` aliases are no longer available. The global inventory is 687 identities; historical allocations730, next ID731, all625 standard references preserved.
 
 Basic marks missing/invalid collection as execution errors, scan_complete=false and exit3; its console has no INCONCLUSIVE or human-review section. Internal UNKNOWN remains compatible with existing transport; classification=execution_error and execution_status=ERROR explicitly distinguish incomplete execution from policy violations. Existing security exit codes0/1/2 remain unchanged for completed scans. This policy does not convert missing evidence to PASS or security FAIL.

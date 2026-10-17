@@ -28,7 +28,7 @@ try{
  $ctx=new ScanContext($root,'https://fixture.example','',['meta'=>['target_mode'=>'HYBRID']]);$registry=CheckRegistry::fromContext($ctx->toLegacy());$plan=(new ScanPlanner())->planCli(new ScanRequest($ctx,['rules'=>$production['id']]),$registry);workflowAssert($plan!==null,'Primary CLI plan');
  $report=(new ScanService())->run($plan,null,$registry);$assembled=(new ScanReportAssembler())->assemble($report,$plan)->toLegacy();
  workflowAssert($assembled['findings'][0]['requirement']['id']===$production['id'],'Report singular identity');
- workflowAssert(($assembled['meta']['assessment_model']??'')==='internal-requirement-v1'&&($assembled['meta']['profile_selector']??'')==='baseline','Rerun context persisted');
+ workflowAssert(($assembled['meta']['assessment_model']??'')==='internal-requirement-v1'&&($assembled['meta']['profile_selector']??'')==='basic','Rerun context persisted');
  workflowAssert(($assembled['meta']['url']??'')==='https://fixture.example','Hybrid URL preserved');
  echo "InternalRequirementWorkflowTest: $assertions assertions passed\n";
 }finally{if(is_file($root.'/app/etc/env.php'))unlink($root.'/app/etc/env.php');rmdir($root.'/app/etc');rmdir($root.'/app');rmdir($root);}

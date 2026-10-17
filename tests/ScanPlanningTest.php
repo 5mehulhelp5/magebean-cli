@@ -24,17 +24,19 @@ try {
     $expected = ProfileLoader::apply(RulePackLoader::loadAll(), ProfileLoader::load('basic', $root));
     $expected = array_values(array_filter($expected['rules'], static fn(array $rule): bool => strtolower((string)($rule['verification'] ?? 'automated')) !== 'manual'));
     planningAssert($ids($basic) === array_column($expected, 'id'), 'Default basic selection retains catalog/profile order.');
-    $all = $planner->planCli($make(['profile' => 'baseline', 'include-manual-review' => true]), $registry);
-    $auto = $planner->planCli($make(['profile' => 'baseline']), $registry);
-    planningAssert(count($ids($all)) === 371 && count($ids($auto)) === 113 && $auto->metadata['manualRulesExcluded'] === 258, 'Manual policy preserves totals.');
+    $all = $planner->planCli($make(['profile' => 'hardening', 'include-manual-review' => true]), $registry);
+    $auto = $planner->planCli($make(['profile' => 'hardening']), $registry);
+    $humanCount = count(array_filter($all->pack['rules'], static fn(array $r): bool => ($r['verification'] ?? 'automated') === 'manual'));
+    planningAssert($humanCount > 0 && count($ids($all)) === count($ids($auto)) + $humanCount && $auto->metadata['manualRulesExcluded'] === $humanCount, 'Hardening manual policy preserves totals.');
     $invalidEvents = [];
     $invalid = $planner->planCli($make(['rules' => 'missing']), $registry, static function (\Magebean\Engine\ScanDiagnostic $message) use (&$invalidEvents): void { $invalidEvents[] = $message; });
     planningAssert($invalid === null && count($invalidEvents) === 3, 'Invalid explicit selection never becomes executable.');
     $invalid = $planner->planCli($make(['rules' => 'MB-R031', 'exclude-rules' => 'MB-R031']), $registry);
     planningAssert($invalid === null, 'CLI excludes every rule: reject plan before execution.');
     $remoteContext = new ScanContext('URL:https://fixture.example', 'https://fixture.example', '', ['meta' => ['target_mode' => 'REMOTE']]);
-    $remote = $planner->planCli(new ScanRequest($remoteContext, ['profile' => 'baseline']), CheckRegistry::fromContext($remoteContext->toLegacy()));
-    planningAssert(count($ids($remote)) === 10 && $remote->metadata['configFile'] === null, 'Remote catalog does not discover local project policy.');
+    $remote = $planner->planCli(new ScanRequest($remoteContext, []), CheckRegistry::fromContext($remoteContext->toLegacy()));
+    $expectedRemote = ProfileLoader::apply(RulePackLoader::loadExternalMagento(), ProfileLoader::load('basic', $root), true);
+    planningAssert($ids($remote) === array_column($expectedRemote['rules'], 'id') && $remote->metadata['configFile'] === null && $remote->metadata['activeProfile']['id'] === 'basic', 'Remote basic catalog does not discover local project policy.');
     foreach ([['controls' => 'invalid'], ['pci-context' => 'context.json']] as $options) {
         $thrown = false;
         try { $planner->planCli($make($options), $registry); } catch (RuntimeException) { $thrown = true; }

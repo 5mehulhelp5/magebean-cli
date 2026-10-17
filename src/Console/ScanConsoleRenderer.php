@@ -187,14 +187,14 @@ final class ScanConsoleRenderer
                 : ($inconclusiveFindings !== []
                 ? '<fg=magenta;options=bold>AUDIT COMPLETE · INCONCLUSIVE</>'
                 : '<info>AUDIT COMPLETE</info>'));
-        if ($executionErrorFindings !== []) $auditStatus = '<fg=red;options=bold>SCAN INCOMPLETE · EXECUTION ERRORS</>';
+        if ($executionErrorFindings !== []) $auditStatus = '<fg=red;options=bold>SCAN INCOMPLETE · NEEDS ATTENTION</>';
         $out->writeln($auditStatus);
         $out->writeln('');
         $out->writeln(sprintf('  Passed                    <info>%d / %d</info>', $passed, $total));
         $out->writeln(sprintf('  Confirmed findings        <fg=yellow;options=bold>%d</>', count($confirmedFindings)));
         if (!$automationOnly) $out->writeln(sprintf('  Technical manual review   <fg=cyan;options=bold>%d</>', count($manualReviewFindings)));
         if (!$automationOnly) $out->writeln(sprintf('  Inconclusive              <fg=magenta;options=bold>%d</>', count($inconclusiveFindings)));
-        else $out->writeln(sprintf('  Execution errors          <fg=red;options=bold>%d</>', count($executionErrorFindings)));
+        else $out->writeln(sprintf('  Needs attention          <fg=red;options=bold>%d</>', count($executionErrorFindings)));
         if ($confirmedFindings !== []) {
             $out->writeln(sprintf(
                 '  %sCritical %d</> · %sHigh %d</> · %sMedium %d</> · %sLow %d</>',
@@ -242,7 +242,7 @@ final class ScanConsoleRenderer
                     'PASS' => '<fg=green;options=bold>[PASS]</> ',
                     'MANUAL_REVIEW' => '<fg=cyan;options=bold>[HUMAN VERIFICATION REQUIRED]</> ',
                     'UNKNOWN' => '<fg=magenta;options=bold>[INCONCLUSIVE]</> ',
-                    'ERROR' => '<fg=red;options=bold>[EXECUTION ERROR]</> ',
+                    'ERROR' => '<fg=red;options=bold>[NEEDS ATTENTION]</> ',
                     default => '<fg=red;options=bold>[FAIL]</> ',
                 }
                 : ($status === 'MANUAL_REVIEW'
@@ -299,7 +299,7 @@ final class ScanConsoleRenderer
 
         if (!$showRuleDetails && $executionErrorFindings !== []) {
             $out->writeln('');
-            $out->writeln(sprintf('<options=bold>EXECUTION ERRORS (%d)</>', count($executionErrorFindings)));
+            $out->writeln(sprintf('<options=bold>NEEDS ATTENTION (%d)</>', count($executionErrorFindings)));
             $out->writeln('  The automated scan could not finish these checks. Resolve collection errors and run again.');
             foreach ($executionErrorFindings as $finding) {
                 $out->writeln('  ' . ($finding['id'] ?? '') . '  ' . $this->detailedFindingMessage($finding));
@@ -481,7 +481,7 @@ final class ScanConsoleRenderer
     {
         if (!str_starts_with($id, 'OWASP-ASVS:') && preg_match('/^MB-[0-9]{4,}$/D', $id) !== 1) return '';
         $meta = $result['meta'] ?? [];
-        $profile = (string)($meta['profile_selector'] ?? $meta['profile']['id'] ?? 'baseline');
+        $profile = (string)($meta['profile_selector'] ?? $meta['profile']['id'] ?? 'basic');
         $context = '--profile=' . escapeshellarg($profile) . ' ';
         $capabilities = $meta['capabilities'] ?? [];
         if (is_array($capabilities)) {

@@ -9,7 +9,7 @@ $n=0;function basicAutoAssert(bool$v,string$m):void{global$n;++$n;if(!$v)throw n
 $root=sys_get_temp_dir().'/mb-basic-auto-'.bin2hex(random_bytes(6));mkdir($root);
 try{
  $context=new ScanContext($root,'');$registry=CheckRegistry::fromContext($context->toLegacy());$plan=(new ScanPlanner())->planCli(new ScanRequest($context,['profile'=>'basic']),$registry);basicAutoAssert($plan!==null&&count($plan->pack['rules'])===20,'Basic selects twenty checks');
- basicAutoAssert(count(RequirementCatalog::forProfile('baseline')['rules'])===684,'Broad baseline does not also select basic scoped alternatives and double-count the same observation');
+ basicAutoAssert(count(array_unique(array_column($plan->pack['rules'],'id')))===20,'Basic profile contains each scoped requirement exactly once');
  $ids=array_column($plan->pack['rules'],'id');basicAutoAssert(!in_array('MB-0209',$ids,true)&&!in_array('MB-0379',$ids,true)&&!in_array('MB-0072',$ids,true),'Basic uses distinct deployment criteria rather than broad compliance/history');
  foreach($plan->pack['rules']as$r)basicAutoAssert(!$r['human_evidence']['required']&&$r['review_state']==='accepted_scoped_criterion','Every basic requirement is reviewed and automated');
  $catalog=array_column(RequirementCatalog::loadAll()['rules'],null,'id');basicAutoAssert($catalog['MB-0209']['human_evidence']['required']&&$catalog['MB-0379']['human_evidence']['required'],'Standard criterion meanings preserved');
@@ -18,7 +18,7 @@ try{
   basicAutoAssert(!str_contains(strtoupper($text),'INCONCLUSIVE')&&!str_contains($text,'HUMAN VERIFICATION REQUIRED'),'Basic has no inconclusive/human presentation');
   basicAutoAssert($result['summary']['total']===20,'Alltwenty are attempted');
   if($case==='PASS'){basicAutoAssert($result['summary']['passed']===20&&$result['meta']['scan_complete'],'All verified basic checks pass');basicAutoAssert((new ScanExitPolicy())->code($result)===0,'Completed clean scan exits zero');}
-  if($case==='ERROR'){basicAutoAssert(count($result['execution_errors'])===1&&str_contains($text,'EXECUTION ERRORS (1)')&&!$result['meta']['scan_complete'],'Collection failure blocks scan completion');basicAutoAssert($result['summary']['failed']===0&&$result['findings'][array_search('MB-0030',$ids,true)]['status']==='UNKNOWN','Execution gap is neither vulnerability nor false PASS; wire status remains compatible');basicAutoAssert((new ScanExitPolicy())->code($result)===3,'Execution error exits three');}
+  if($case==='ERROR'){basicAutoAssert(count($result['execution_errors'])===1&&str_contains($text,'NEEDS ATTENTION (1)')&&!$result['meta']['scan_complete'],'Collection failure blocks scan completion');basicAutoAssert($result['summary']['failed']===0&&$result['findings'][array_search('MB-0030',$ids,true)]['status']==='UNKNOWN','Execution gap is neither vulnerability nor false PASS; wire status remains compatible');basicAutoAssert((new ScanExitPolicy())->code($result)===3,'Execution error exits three');}
   if($case==='FAIL')basicAutoAssert((new ScanExitPolicy())->code($result)===1&&$result['summary']['failed']===1,'Verified policy violation remains finding exitone');
  }
  basicAutoAssert((new ScanExitPolicy())->code(['findings'=>[['status'=>'UNKNOWN']]])===0,'Other profile exit policy unchanged');

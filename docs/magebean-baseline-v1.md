@@ -42,7 +42,7 @@ A **check** collects or validates evidence for a requirement. A requirement may 
 
 ### 1.4 Baseline
 
-The **Baseline** is the complete current catalog of **19 controls and 371 rules**. The `baseline` profile selects all **113 automated rules** by default and all **371 rules** when `--include-manual-review` is supplied, subject to target applicability and capability filters.
+The **Baseline** is the historical catalog of **19 controls and 371 rules**. This is a historical security catalog, not an executable full-inventory profile. Use `basic`, `hardening`, a standards profile, or explicit `--rules` selectors for current assessments.
 
 ### 1.5 Profile
 
@@ -2752,7 +2752,7 @@ Run a scan against a Magento 2 installation:
 ```
 
 - `--path` specifies the root directory of the Magento 2 project.
-- Without a profile, the tool applies the 21-rule `basic` profile for a fast, low-noise production check. Use `--profile=baseline` to run the full catalog.
+- Without a profile, the tool applies the `basic` profile for a fast production check. Use `hardening` for a broader assessment or `--rules` to select specific requirements.
 
 ### 4.3 Profile-based Scans
 Profiles select a curated subset of baseline rules for a specific assessment lens. Rules remain canonical `MB-Rxxx` entries in the baseline catalog, while each profile provides selection, mapping, and report metadata.
@@ -2762,7 +2762,6 @@ Profiles select a curated subset of baseline rules for a specific assessment len
 ./magebean.phar scan --path=/var/www/magento --profile=pci
 ./magebean.phar scan --path=/var/www/magento --profile=.magebean/profiles/acme.json
 ./magebean.phar scan --path=/var/www/magento --profile=hardening
-./magebean.phar scan --path=/var/www/magento --profile=baseline
 ```
 
 - **Basic profile (default):** Runs 21 fast, low-noise Magento production readiness checks.
