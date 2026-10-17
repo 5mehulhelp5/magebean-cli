@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "next_id": 773,
+  "next_id": 786,
   "allocations": [
     {
       "id": "MB-0001",
@@ -11,7 +11,7 @@
     {
       "id": "MB-0002",
       "allocation_key": "baseline/MB-R002",
-      "revision": 2,
+      "revision": 3,
       "verdict": "accepted_scoped_criterion"
     },
     {
@@ -35,13 +35,13 @@
     {
       "id": "MB-0006",
       "allocation_key": "baseline/MB-R006",
-      "revision": 3,
+      "revision": 4,
       "verdict": "accepted_scoped_criterion"
     },
     {
       "id": "MB-0007",
       "allocation_key": "baseline/MB-R007",
-      "revision": 2,
+      "revision": 4,
       "verdict": "accepted_scoped_criterion"
     },
     {
@@ -55,8 +55,8 @@
     {
       "id": "MB-0009",
       "allocation_key": "baseline/MB-R009",
-      "revision": 2,
-      "verdict": "heuristic_supporting_only"
+      "revision": 3,
+      "verdict": "accepted_scoped_criterion"
     },
     {
       "id": "MB-0010",
@@ -169,14 +169,14 @@
     {
       "id": "MB-0026",
       "allocation_key": "baseline/MB-R026",
-      "revision": 3,
+      "revision": 4,
       "verdict": "accepted_scoped_criterion"
     },
     {
       "id": "MB-0027",
       "allocation_key": "baseline/MB-R027",
-      "revision": 2,
-      "verdict": "heuristic_supporting_only"
+      "revision": 4,
+      "verdict": "accepted_scoped_criterion"
     },
     {
       "id": "MB-0028",
@@ -241,7 +241,7 @@
     {
       "id": "MB-0037",
       "allocation_key": "baseline/MB-R037",
-      "revision": 3,
+      "revision": 4,
       "verdict": "accepted_scoped_criterion"
     },
     {
@@ -273,8 +273,8 @@
     {
       "id": "MB-0042",
       "allocation_key": "baseline/MB-R042",
-      "revision": 2,
-      "verdict": "heuristic_supporting_only"
+      "revision": 3,
+      "verdict": "accepted_scoped_criterion"
     },
     {
       "id": "MB-0043",
@@ -301,7 +301,7 @@
     {
       "id": "MB-0046",
       "allocation_key": "baseline/MB-R046",
-      "revision": 3,
+      "revision": 4,
       "verdict": "accepted_scoped_criterion"
     },
     {
@@ -642,8 +642,8 @@
     {
       "id": "MB-0100",
       "allocation_key": "baseline/MB-R100",
-      "revision": 2,
-      "verdict": "heuristic_supporting_only"
+      "revision": 3,
+      "verdict": "accepted_scoped_criterion"
     },
     {
       "id": "MB-0101",
@@ -4470,7 +4470,7 @@
     {
       "id": "MB-0730",
       "allocation_key": "basic-deployment/working_tree_secret_scan",
-      "revision": 1,
+      "revision": 2,
       "verdict": "accepted_scoped_criterion"
     },
     {
@@ -4808,6 +4808,84 @@
       "verdict": "family_separated_source_restoration",
       "status": "active",
       "restored_from": "MB-0642"
+    },
+    {
+      "id": "MB-0773",
+      "allocation_key": "magebean/basic-adobe/MB-0773",
+      "revision": 1,
+      "verdict": "accepted_scoped_criterion"
+    },
+    {
+      "id": "MB-0774",
+      "allocation_key": "magebean/basic-adobe/MB-0774",
+      "revision": 1,
+      "verdict": "accepted_scoped_criterion"
+    },
+    {
+      "id": "MB-0775",
+      "allocation_key": "magebean/basic-adobe/MB-0775",
+      "revision": 1,
+      "verdict": "accepted_scoped_criterion"
+    },
+    {
+      "id": "MB-0776",
+      "allocation_key": "magebean/basic-adobe/MB-0776",
+      "revision": 1,
+      "verdict": "accepted_scoped_criterion"
+    },
+    {
+      "id": "MB-0777",
+      "allocation_key": "magebean/basic-adobe/MB-0777",
+      "revision": 1,
+      "verdict": "accepted_scoped_criterion"
+    },
+    {
+      "id": "MB-0778",
+      "allocation_key": "magebean/basic-adobe/MB-0778",
+      "revision": 1,
+      "verdict": "accepted_scoped_criterion"
+    },
+    {
+      "id": "MB-0779",
+      "allocation_key": "magebean/basic-adobe/MB-0779",
+      "revision": 1,
+      "verdict": "accepted_scoped_criterion"
+    },
+    {
+      "id": "MB-0780",
+      "allocation_key": "magebean/basic-adobe/MB-0780",
+      "revision": 1,
+      "verdict": "accepted_scoped_criterion"
+    },
+    {
+      "id": "MB-0781",
+      "allocation_key": "magebean/basic-adobe/MB-0781",
+      "revision": 1,
+      "verdict": "accepted_scoped_criterion"
+    },
+    {
+      "id": "MB-0782",
+      "allocation_key": "magebean/basic-adobe/MB-0782",
+      "revision": 1,
+      "verdict": "accepted_scoped_criterion"
+    },
+    {
+      "id": "MB-0783",
+      "allocation_key": "magebean/basic-adobe/MB-0783",
+      "revision": 1,
+      "verdict": "accepted_scoped_criterion"
+    },
+    {
+      "id": "MB-0784",
+      "allocation_key": "magebean/basic-adobe/MB-0784",
+      "revision": 1,
+      "verdict": "accepted_scoped_criterion"
+    },
+    {
+      "id": "MB-0785",
+      "allocation_key": "magebean/basic-adobe/MB-0785",
+      "revision": 1,
+      "verdict": "accepted_scoped_criterion"
     }
   ],
   "identity_policy": {

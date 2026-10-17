@@ -76,6 +76,24 @@ final class ScanReportAssembler
         $result['summary']['path'] = $projectPath;
         $result['summary']['url'] = $projectUrl;
 
+        // Presentation lanes describe the criterion; they never change its outcome.
+        $definitions = array_column($plan->pack['rules'] ?? [], null, 'id');
+        $lanes = [];
+        foreach ($result['findings'] as &$finding) {
+            $lane = $definitions[$finding['id'] ?? '']['lane'] ?? null;
+            if (!in_array($lane, ['security', 'readiness'], true)) continue;
+            $finding['requirement']['lane'] = $lane;
+            $lanes[$lane] ??= ['total' => 0, 'passed' => 0, 'failed' => 0, 'unresolved' => 0];
+            ++$lanes[$lane]['total'];
+            $bucket = match ($finding['status'] ?? '') { 'PASS' => 'passed', 'FAIL' => 'failed', default => 'unresolved' };
+            ++$lanes[$lane][$bucket];
+        }
+        unset($finding);
+        if ($lanes !== []) $result['summary']['lanes'] = $lanes;
+        if (!empty($activeProfile['evidence_tasks'])) {
+            $result['evidence_tasks'] = array_map(static fn(array $task): array => array_merge($task, ['status' => 'NOT_ASSESSED']), $activeProfile['evidence_tasks']);
+        }
+
         if ($isPciProfile) {
             $registryData = $this->loadJsonDocument(__DIR__ . '/../Rules/standards/pci-dss-v4.0.1.json', 'PCI DSS registry');
             $coverageData = $this->loadJsonDocument(__DIR__ . '/../Rules/standards/pci-dss-v4.0.1-coverage.json', 'PCI DSS coverage matrix');

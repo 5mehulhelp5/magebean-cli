@@ -28,8 +28,8 @@ final class MagentoCheck
         if (!is_string($route) || trim($route) === '' || preg_match('/^[a-z0-9][a-z0-9_-]*$/i', $route) !== 1) {
             return [null, '[UNKNOWN] backend.frontName is missing or malformed'];
         }
-        $ok = strtolower($route) !== 'admin';
-        return [$ok, $ok ? 'Declared backend route differs from admin' : 'Declared backend route is the default admin', ['file' => $file, 'path' => 'backend.frontName', 'observed' => $route, 'scope' => 'declared_configuration']];
+        $ok = !in_array(strtolower($route), ['admin', 'backend'], true);
+        return [$ok, $ok ? 'Declared backend route differs from common admin and backend routes' : 'Declared backend route uses a common admin or backend route', ['file' => $file, 'path' => 'backend.frontName', 'observed' => $route, 'scope' => 'declared_configuration']];
     }
 
     /** Configuration resolver for exact primary predicates; legacy APIs are unchanged. */
@@ -83,7 +83,7 @@ final class MagentoCheck
     /** Read installed Magento module defaults, not scanner-invented fallback values. */
     private function installedModuleDefault(string $path): array
     {
-        $moduleFiles = ['Magento_Backend' => 'backend', 'Magento_Captcha' => 'captcha', 'Magento_Developer' => 'developer', 'Magento_Translation' => 'translation', 'Magento_User' => 'user', 'Magento_Security' => 'security'];
+        $moduleFiles = ['Magento_Backend' => 'backend', 'Magento_Captcha' => 'captcha', 'Magento_Developer' => 'developer', 'Magento_Translation' => 'translation', 'Magento_User' => 'user', 'Magento_Security' => 'security', 'Magento_TwoFactorAuth' => 'two-factor-auth'];
         $config = $this->loadArray('app/etc/config.php');
         $modules = $config['modules'] ?? [];
         if (isset($config['__ERROR__']) || !is_array($modules)) return [false, null, 'app/etc/config.php', 'Installed module states are unavailable'];
@@ -371,75 +371,72 @@ final class MagentoCheck
         return [true, "Admin frontName is non-default and not trivially guessable", $evidence];
     }
 
+    /** Native provider configuration only; enrollment and IMS MFA remain external evidence. */
     public function adminTwoFactorAuthEnabled(array $args): array
     {
         $file = (string)($args['file'] ?? 'app/etc/config.php');
-        $coreModule = (string)($args['core_module'] ?? 'Magento_TwoFactorAuth');
-        $providerModules = $args['provider_modules'] ?? [
-            'Magento_GoogleAuthenticator',
-            'Magento_DuoSecurity',
-            'Magento_U2fKey',
-            'Magento_AdminAdobeImsTwoFactorAuth',
-        ];
-        if (!is_array($providerModules)) {
-            $providerModules = [];
-        }
-        $providerModules = array_values(array_filter(array_map(
-            static fn(mixed $value): string => trim((string)$value),
-            $providerModules
-        )));
-
         $arr = $this->loadArray($file);
-        if (isset($arr['__ERROR__'])) {
-            return !empty($args['declared_scope_only']) ? [null, '[UNKNOWN] ' . $arr['__ERROR__']] : [false, $arr['__ERROR__']];
+        $modules = $arr['modules'] ?? null;
+        if (isset($arr['__ERROR__']) || !is_array($modules)) return [null, '[UNKNOWN] Installed authentication module states are unavailable'];
+        foreach (['Magento_TwoFactorAuth', 'Magento_AdminAdobeIms', 'Magento_AdminAdobeImsTwoFactorAuth'] as $module) {
+            if (array_key_exists($module, $modules) && !in_array($modules[$module], [0, 1, '0', '1', false, true], true)) return [null, '[UNKNOWN] Authentication module state is malformed', ['module' => $module]];
         }
-
-        if (!empty($args['declared_scope_only']) && (!array_key_exists('modules', $arr) || !is_array($arr['modules']))) {
-            return [null, '[UNKNOWN] Declared modules configuration is unavailable or malformed'];
+        $evidence = ['file' => $file, 'scope' => 'native_admin_provider_configuration', 'enrollment_verified' => false];
+        // Module presence does not establish an active IMS integration or its MFA policy.
+        if ($this->moduleEnabled($modules, 'Magento_AdminAdobeIms') || $this->moduleEnabled($modules, 'Magento_AdminAdobeImsTwoFactorAuth')) {
+            return [null, '[UNKNOWN] Adobe IMS modules are enabled; active authentication mode and identity-provider MFA require evidence', $evidence + ['authentication_mode' => 'ims_possible']];
         }
-        $modules = $this->getByDotPath($arr, 'modules', []);
-        if (!empty($args['declared_scope_only'])) {
-            foreach (array_merge([$coreModule], $providerModules) as $module) {
-                if (array_key_exists($module, $modules) && !in_array($modules[$module], [0, 1, '0', '1', false, true], true)) {
-                    return [null, '[UNKNOWN] Declared module state is malformed', ['module' => $module]];
-                }
-            }
+        if (!array_key_exists('Magento_TwoFactorAuth', $modules)) return [null, '[UNKNOWN] Native Admin 2FA module state is missing', $evidence];
+        if (!$this->moduleEnabled($modules, 'Magento_TwoFactorAuth')) return [false, 'Native Admin 2FA is disabled and no IMS module is declared', $evidence];
+        [$found, $value, $source, $reason] = $this->primaryConfigValue('twofactorauth/general/force_providers');
+        $evidence += ['source' => $source, 'reason' => $reason];
+        if (!$found || (!is_string($value) && !is_array($value))) return [null, '[UNKNOWN] Native Admin 2FA provider configuration cannot be resolved', $evidence];
+        $providers = is_string($value) ? explode(',', $value) : $value;
+        $normalized = [];
+        foreach ($providers as $provider) {
+            if (!is_string($provider)) return [null, '[UNKNOWN] Native Admin 2FA provider configuration is malformed', $evidence];
+            if (trim($provider) !== '') $normalized[] = trim($provider);
         }
-        if (!is_array($modules)) {
-            return [false, "Path 'modules' in $file is not an array"];
-        }
-
-        $coreEnabled = $this->moduleEnabled($modules, $coreModule);
-        $enabledProviders = [];
-        $disabledProviders = [];
-        foreach ($providerModules as $module) {
-            if ($this->moduleEnabled($modules, $module)) {
-                $enabledProviders[] = $module;
-            } else {
-                $disabledProviders[] = $module;
-            }
-        }
-
-        $evidence = [
-            'file' => $file,
-            'core_module' => $coreModule,
-            'core_enabled' => $coreEnabled,
-            'provider_modules' => $providerModules,
-            'enabled_providers' => $enabledProviders,
-            'disabled_or_missing_providers' => $disabledProviders,
-        ];
-
-        if (!$coreEnabled) {
-            return [false, "{$coreModule} is disabled or missing", $evidence];
-        }
-
-        if ($enabledProviders === []) {
-            return [false, "No enabled Magento admin 2FA provider modules found", $evidence];
-        }
-
-        return [true, "Admin 2FA core module and provider are enabled", $evidence];
+        $normalized = array_values(array_unique($normalized));
+        $evidence['providers'] = $normalized;
+        if ($normalized === []) return [null, '[UNKNOWN] No providers are forced; available providers and account enrollment require additional evidence', $evidence];
+        // These engines belong to Magento_TwoFactorAuth; they are not separate modules.
+        if (array_diff($normalized, ['google', 'duo_security', 'authy', 'u2fkey']) !== []) return [null, '[UNKNOWN] Custom or unrecognized 2FA provider requires installed-engine validation', $evidence];
+        return [true, 'Native Admin 2FA is enabled with recognized configured provider engines; account enrollment is not verified', $evidence];
     }
 
+    /** Exact default-scope Admin flag; no claim about custom authentication handlers. */
+    public function adminSecurityFlagConfigured(array $args): array
+    {
+        $allowed = ['admin/security/use_form_key' => true, 'admin/security/use_case_sensitive_login' => true, 'admin/security/admin_account_sharing' => false];
+        $path = (string)($args['path'] ?? '');
+        if (!array_key_exists($path, $allowed)) return [null, '[UNKNOWN] Unsupported Admin security configuration path'];
+        [$found, $value, $source, $reason] = $this->primaryConfigValue($path);
+        $evidence = ['path' => $path, 'source' => $source, 'observed' => $value, 'reason' => $reason, 'scope' => 'resolved_default_configuration'];
+        if (!$found || !in_array($value, [0, 1, '0', '1', false, true], true)) return [null, '[UNKNOWN] Admin security flag cannot be resolved', $evidence];
+        $ok = $this->truthy($value) === $allowed[$path];
+        return [$ok, $ok ? 'Resolved Admin security flag meets deployment policy' : 'Resolved Admin security flag violates deployment policy', $evidence];
+    }
+
+    /** Check independent reset throttles without exercising a real account recovery flow. */
+    public function adminPasswordResetProtectionConfigured(array $args): array
+    {
+        $paths = ['admin/security/password_reset_protection_type', 'admin/security/max_number_password_reset_requests', 'admin/security/min_time_between_password_reset_requests'];
+        $values = []; $evidence = ['scope' => 'resolved_default_password_reset_configuration'];
+        foreach ($paths as $path) {
+            [$found, $value, $source, $reason] = $this->primaryConfigValue($path);
+            $evidence[$path] = ['source' => $source, 'observed' => $value, 'reason' => $reason];
+            if (!$found || !is_scalar($value) || preg_match('/^[0-9]+$/D', (string)$value) !== 1) return [null, '[UNKNOWN] Admin password reset protection cannot be resolved', $evidence];
+            $values[$path] = (int)$value;
+        }
+        $type = $values[$paths[0]];
+        if (!in_array($type, [0, 1, 2, 3], true)) return [null, '[UNKNOWN] Admin password reset protection type is unrecognized', $evidence];
+        $maximum = max(1, (int)($args['max_requests_per_hour'] ?? 5));
+        $minimum = max(1, (int)($args['min_interval_minutes'] ?? 1));
+        $evidence['policy'] = ['max_requests_per_hour' => $maximum, 'min_interval_minutes' => $minimum, 'owner' => 'Magebean'];
+        $ok = $type !== 0 && $values[$paths[1]] > 0 && $values[$paths[1]] <= $maximum && $values[$paths[2]] >= $minimum;
+        return [$ok, $ok ? 'Resolved Admin password reset protection enables bounded requests and cooldown' : 'Resolved Admin password reset protection lacks required protection or bounded throttles', $evidence];
+    }
     public function adminPasswordPolicyStrong(array $args): array
     {
         $file = (string)($args['file'] ?? 'app/etc/config.php');

@@ -154,6 +154,9 @@ final class ScanRunner
                 ];
                 if(isset($rule['family']))$finding['requirement']['family']=$rule['family'];
                 if(isset($rule['source']))$finding['requirement']['source']=$rule['source'];
+                foreach (['policy_source', 'guidance_sources', 'lane'] as $field) {
+                    if (isset($rule[$field])) $finding['requirement'][$field] = $rule[$field];
+                }
                 // Optional technical collection gaps still need an action even when human
                 // evidence owns the final conclusion or a counterexample already proves FAIL.
                 foreach ($finding['evidence']['obligations'] as &$obligationEvidence) {

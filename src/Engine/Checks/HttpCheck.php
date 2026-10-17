@@ -170,14 +170,22 @@ final class HttpCheck
     {
         $base = $this->baseUrl();
         if ($base === '') return [null, '[UNKNOWN] Runtime URL unavailable; provide --url=https://your-store', []];
-        $paths = ['/'];
-        if (!empty($args['include_admin'])) {
-            $admin = $this->magento->adminFrontNameDeclared([]);
-            $route = $admin[2]['observed'] ?? null;
-            if (!is_string($route)) return [null, '[UNKNOWN] Cannot resolve backend.frontName for admin HTTPS probe', ['action' => 'Run on the Magento deployment with readable app/etc/env.php and a nonempty backend.frontName; the scanner will probe the actual admin route.']];
-            $paths[] = '/' . $route . '/';
+        $paths = !empty($args['admin_only']) ? [] : ['/'];
+        $unknown = false; $adminIssue = null;
+        if (!empty($args['include_admin']) || !empty($args['admin_only'])) {
+            $route = $args['admin_path'] ?? $this->ctx->get('admin_path');
+            if ($route === null) {
+                $admin = $this->magento->adminFrontNameDeclared([]);
+                $route = $admin[2]['observed'] ?? null;
+            }
+            if (!is_string($route) || preg_match('~^/?([a-z0-9][a-z0-9_-]*)/?$~iD', $route, $match) !== 1) {
+                $unknown = true;
+                $adminIssue = 'Provide a single Admin route through admin_path or readable app/etc/env.php backend.frontName.';
+            } else {
+                $paths[] = '/' . $match[1] . '/';
+            }
         }
-        $checked = []; $unknown = false; $failed = false;
+        $checked = []; $failed = false;
         foreach ($paths as $path) {
             $url = $this->joinUrl(preg_replace('~^https://~i', 'http://', $base), $path);
             [$ok, $msg, $ev] = $this->fetch($url, 'GET', [], (int)($args['timeout_ms'] ?? 8000), false);
@@ -190,7 +198,7 @@ final class HttpCheck
             if ($ok !== true || $status === 429 || $status >= 500 || $status <= 0) { $unknown = true; continue; }
             if (!in_array($status, [301,302,303,307,308], true) || !$valid) $failed = true;
         }
-        $evidence = ['scope' => 'first_hop_observed_entrypoints', 'checked' => $checked];
+        $evidence = ['scope' => 'first_hop_observed_entrypoints', 'checked' => $checked, 'admin_route_issue' => $adminIssue];
         if ($failed) return [false, 'Observed HTTP entrypoint does not redirect directly to same-host HTTPS', $evidence];
         if ($unknown) return [null, '[UNKNOWN] HTTP redirect probes are incomplete', $evidence + ['action' => 'Inspect each checked entrypoint/status below; restore HTTP port reachability, resolve rate limiting or server errors, then rerun.']];
         return [true, 'Observed storefront/admin HTTP entrypoints redirect directly to same-host HTTPS', $evidence];
@@ -969,17 +977,36 @@ final class HttpCheck
         $issue = $this->responseAssessmentIssue($ok, $msg, $ev, $base, 'clickjacking headers', false);
         if ($issue !== null) return $issue;
 
-        $h = array_change_key_case((array)($ev['headers'] ?? []), CASE_LOWER);
-        $xfo = strtolower($this->hget($h, 'x-frame-options'));
-        $csp = $this->hget($h, 'content-security-policy');
-        $pass = false;
-        if (in_array($xfo, ['deny', 'sameorigin'], true)) $pass = true;
-        if (!$pass && $csp !== '') {
-            $pass = (bool)preg_match('~frame-ancestors\s+([^;]+)~i', $csp) && !preg_match('~frame-ancestors\s+\*~i', $csp);
-        }
-        return [$pass, $pass ? 'Clickjacking protection present' : 'No X-Frame-Options or CSP frame-ancestors', $ev];
+        [$pass, $reason] = $this->assessClickjackingPolicy((array)($ev['headers'] ?? []));
+        return [$pass, $reason, $ev + ['scope' => 'observed_response_framing_headers']];
     }
 
+    private function assessClickjackingPolicy(array $headers): array
+    {
+        $headers = array_change_key_case($headers, CASE_LOWER);
+        $xfo = $headers['x-frame-options'] ?? [];
+        $xfo = is_array($xfo) ? $xfo : [$xfo];
+        $xfoValid = count($xfo) === 1 && in_array(strtolower(trim((string)$xfo[0])), ['deny', 'sameorigin'], true);
+        $policies = $headers['content-security-policy'] ?? [];
+        $policies = is_array($policies) ? $policies : [$policies];
+        if ($policies === []) return [$xfoValid, $xfoValid ? 'Valid X-Frame-Options protects the observed response' : 'Framing protection is missing'];
+        if (count($policies) !== 1 || !is_string($policies[0])) return [false, 'A single unambiguous framing policy is required'];
+        $ancestors = [];
+        foreach (explode(';', $policies[0]) as $directive) {
+            if (preg_match('~^\s*frame-ancestors(?:\s+(.*))?\s*$~iD', $directive, $match)) $ancestors[] = trim($match[1] ?? '');
+        }
+        if ($ancestors === []) return [$xfoValid, $xfoValid ? 'Valid X-Frame-Options protects the observed response' : 'Framing protection is missing'];
+        if (count($ancestors) !== 1 || $ancestors[0] === '') return [false, 'CSP frame-ancestors is missing, empty or duplicated'];
+        $tokens = preg_split('/\s+/', $ancestors[0]);
+        if ($tokens === ["'none'"]) return [true, 'CSP frame-ancestors denies framing'];
+        foreach ($tokens as $token) {
+            if ($token === "'self'") continue;
+            if (str_contains($token, '*') || !preg_match('~^https?://[a-z0-9.-]+(?::[0-9]{1,5})?/?$~iD', $token)) return [false, 'CSP frame-ancestors must name explicit origins or self; wildcard and scheme-wide sources are disallowed'];
+            $parts = parse_url($token);
+            if (!is_array($parts) || empty($parts['host']) || isset($parts['user']) || isset($parts['pass']) || (isset($parts['port']) && ($parts['port'] < 1 || $parts['port'] > 65535))) return [false, 'CSP frame-ancestors origin is malformed'];
+        }
+        return [true, 'CSP frame-ancestors limits framing to explicit origins'];
+    }
     private function cspPresent(array $args): array
     {
         $base = $this->baseUrl();
@@ -1109,7 +1136,7 @@ final class HttpCheck
         if ($host === '') return [null, '[UNKNOWN] Invalid host', []];
 
         $port = (int)(parse_url($base, PHP_URL_PORT) ?: 443);
-        $context = stream_context_create(['ssl' => ['capture_peer_cert' => true, 'SNI_enabled' => true, 'peer_name' => $host]]);
+        $context = stream_context_create(['ssl' => ['capture_peer_cert' => true, 'SNI_enabled' => true, 'peer_name' => $host, 'verify_peer' => true, 'verify_peer_name' => true, 'allow_self_signed' => false]]);
         $client = @stream_socket_client("ssl://{$host}:{$port}", $errno, $errstr, $this->timeoutSeconds($args, 10), STREAM_CLIENT_CONNECT, $context);
         if (!$client) return [null, '[UNKNOWN] Cannot collect certificate from ' . $host . ':' . $port . ': ' . $errstr, ['host' => $host, 'port' => $port, 'transport_error' => true, 'action' => 'Verify scanner DNS/network access and trusted CA chain for this TLS endpoint; configure openssl.cafile for private CAs, then rerun.']];
         $params = stream_context_get_params($client);
@@ -1117,14 +1144,22 @@ final class HttpCheck
         $x = $params['options']['ssl']['peer_certificate'] ?? null;
         if (!$x) return [null, '[UNKNOWN] No certificate', []];
         $arr = openssl_x509_parse($x);
-        $validTo = (int)($arr['validTo_time_t'] ?? 0);
-        if ($validTo <= 0) return [null, '[UNKNOWN] No validTo', []];
-        $days = (int)floor(($validTo - time()) / 86400);
-        $minDays = (int)($args['min_days'] ?? 15);
-        $pass = $days >= $minDays;
-        return [$pass, $pass ? "Cert valid ~{$days} days" : "Cert expires in {$days} days", []];
+        if (!is_array($arr)) return [null, '[UNKNOWN] Certificate validity fields cannot be parsed', ['host'=>$host,'port'=>$port]];
+        return $this->assessCertificateValidity($arr, $args, ['host'=>$host, 'port'=>$port, 'trust_chain_verified'=>true, 'hostname_verified'=>true, 'scope'=>'verified_tls_endpoint']);
     }
 
+    private function assessCertificateValidity(array $certificate, array $args, array $evidence): array
+    {
+        $validTo = (int)($certificate['validTo_time_t'] ?? 0);
+        $validFrom = (int)($certificate['validFrom_time_t'] ?? 0);
+        if ($validTo <= 0 || $validFrom <= 0 || $validTo < $validFrom) return [null, '[UNKNOWN] Certificate validity interval is unavailable or malformed', $evidence];
+        $now = time();
+        $days = (int)floor(($validTo - $now) / 86400);
+        $minDays = max(0, (int)($args['min_days'] ?? 15));
+        $evidence += ['valid_from'=>$validFrom, 'valid_to'=>$validTo, 'days_remaining'=>$days, 'minimum_days'=>$minDays, 'currently_valid'=>$validFrom <= $now && $validTo >= $now];
+        $pass = $evidence['currently_valid'] && $days >= $minDays;
+        return [$pass, $pass ? "Verified TLS certificate has approximately {$days} days remaining" : 'TLS certificate validity or remaining lifetime violates deployment policy', $evidence];
+    }
     private function hstsPreloadReady(array $args): array
     {
         $base = $this->baseUrl();

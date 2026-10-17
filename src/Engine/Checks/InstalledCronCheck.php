@@ -14,7 +14,32 @@ final class InstalledCronCheck
             foreach(preg_split('/\r?\n/',(string)$s['content'])as$line){$command=$this->command(trim($line),(bool)($s['system']??false));if($command!==null&&$this->isProjectCron($command))return[true,'Installed Magento cron:run entry found for this deployment.',['source'=>$s['name'],'command'=>$command,'sources_assessed'=>$assessed]];}
         }
         if($gaps!==[]||$assessed===0)return[null,'[UNKNOWN] Cannot verify installed cron for this deployment; run with permission to read the deployment owner crontab and /etc/cron.d. Repository deployment scripts are not installed crontabs.',['unavailable_sources'=>$gaps,'sources_assessed'=>$assessed,'collection_errors'=>$collectionErrors]];
+        if(($args['allow_external_scheduler']??false)===true)return[null,'[UNKNOWN] No installed Magento cron entry was observed; provide Cloud, container or external scheduler configuration and execution evidence.',['sources_assessed'=>$assessed,'reason'=>'external_scheduler_evidence_required']];
         return[false,'No Magento cron:run entry exists in the completely collected installed cron sources for this deployment.',['sources_assessed'=>$assessed]];
+    }
+    /** Observes an every-minute schedule, not successful execution of jobs. */
+    public function cadence(array $args): array
+    {
+        $sources=$this->collect!==null?($this->collect)($args):$this->sources($args);
+        $found=false;$gaps=[];$unsupported=false;
+        foreach($sources as $source){
+            if(!($source['available']??false)||($source['complete']??true)!==true){$gaps[]=$source['name']??'unknown';continue;}
+            foreach(preg_split('/\r?\n/',(string)($source['content']??'')) as $line){
+                $line=trim($line);$command=$this->command($line,(bool)($source['system']??false));
+                if($command===null||!$this->isProjectCron($command))continue;
+                $found=true;$fields=preg_split('/\s+/',$line);
+                $schedule=array_slice($fields,0,5);
+                $full=[['*','*/1','0-59','0-59/1'],['*','*/1','0-23','0-23/1'],['*','*/1','1-31','1-31/1'],['*','*/1','1-12','1-12/1'],['*','*/1','0-6','0-7','0-6/1','0-7/1']];
+                $every=count($schedule)===5;
+                foreach($schedule as $index=>$field)if(!in_array($field,$full[$index],true))$every=false;
+                if($every)return[true,'An installed Magento cron:run entry runs every minute.',['source'=>$source['name'],'scope'=>'installed schedule; execution health is separate']];
+                // Only these representations establish a slower cadence directly.
+                // Composite cron expressions can combine to cover every minute.
+                if(!str_starts_with($line,'@')&&!(preg_match('~^\*/([2-9]|[1-5][0-9]|60)$~D',$fields[0])&&array_slice($schedule,1)===['*','*','*','*']))$unsupported=true;
+            }
+        }
+        if($gaps!==[]||!$found||$unsupported)return[null,'[UNKNOWN] Every-minute Magento scheduling is unverified; external, container or composite scheduler evidence may be required.',['unavailable_sources'=>$gaps,'matching_entry_found'=>$found,'unsupported_cadence_representation'=>$unsupported]];
+        return[false,'Installed Magento cron entries do not include an every-minute schedule.',['scope'=>'installed crontab cadence; external scheduler alternatives require evidence']];
     }
     private function command(string $line,bool $system): ?string
     {

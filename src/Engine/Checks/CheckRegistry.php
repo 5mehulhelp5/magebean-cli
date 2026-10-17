@@ -43,6 +43,16 @@ final class CheckRegistry
 
         $deployment = new DeploymentStateCheck($ctx, $collectors);
         $installedCron = new InstalledCronCheck($ctx);
+        $basicPractice = new BasicPracticeCheck($ctx);
+        $basicExposure = new BasicExposureCheck($ctx);
+        $registry->register('magento_admin_security_flag', fn(array $args): array => $mage->adminSecurityFlagConfigured($args));
+        $registry->register('magento_admin_password_reset_protection', fn(array $args): array => $mage->adminPasswordResetProtectionConfigured($args));
+        $registry->register('installed_cron_cadence', fn(array $args): array => $installedCron->cadence($args));
+        $registry->register('env_not_tracked', fn(array $args): array => $basicPractice->envNotTracked($args));
+        $registry->register('cron_health', fn(array $args): array => $basicPractice->cronHealth($args));
+        $registry->register('static_scopes_ready', fn(array $args): array => $basicPractice->staticScopesReady($args));
+        $registry->register('basic_media_executable_files', fn(array $args): array => $basicExposure->mediaExecutableFiles($args));
+        $registry->register('basic_sensitive_http_paths', fn(array $args): array => $basicExposure->sensitiveHttpPaths($args));
         $registry->register('fs_webroot_artifact_policy', fn(array $args): array => $deployment->webrootArtifacts($args));
         $registry->register('cache_type_enabled', fn(array $args): array => $deployment->cacheTypeEnabled($args));
         $registry->register('deployment_indexers_database_ready', fn(array $args): array => $deployment->indexersDatabaseReady($args));

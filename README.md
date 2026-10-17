@@ -66,7 +66,7 @@ php bin/magebean rules:list
 
 The current rule library contains **19 controls and 371 rules**: **113 automated** and **258 marked `HUMAN VERIFICATION REQUIRED`**.
 
-`scan` and `rules:list` use the 20-requirement `basic` profile by default. Basic, Hardening and OWASP select Magebean criteria; ASVS and PCI select their own document clauses. Requirements needing human evidence are excluded by default; use `--include-manual-review` to include them. ASVS and PCI currently require that flag to produce an assessment plan. PCI supports `--pci-context`, `--pci-evidence` and `--pci-report` for applicability and readiness reporting.
+`scan` and `rules:list` use the 37-requirement `basic` profile by default. Basic includes 30 security and 7 readiness criteria plus six external evidence task groups, informed by Adobe guidance. Evidence tasks are never counted as PASS. Numeric thresholds are Magebean policy; observations do not certify Adobe compliance. Basic, Hardening and OWASP select Magebean criteria; ASVS and PCI select their own document clauses. Requirements needing human evidence are excluded by default; use `--include-manual-review` to include them. ASVS and PCI currently require that flag to produce an assessment plan. PCI supports `--pci-context`, `--pci-evidence` and `--pci-report` for applicability and readiness reporting.
 
 See [CLI Reference](docs/cli-reference.md) for all commands, options, profiles, target modes, and examples.
 
@@ -185,7 +185,7 @@ Selection order is: target pack → project policy → (`--rules` or profile) �
 
 | Profile | Source family | Inventory | Default LOCAL selection |
 |---|---|---:|---:|
-| `basic` | Magebean | 20 | 20 |
+| `basic` | Magebean | 37 | 37 |
 | `hardening` | Magebean | 91 | 41 |
 | `owasp` | Magebean | 77 | 31 |
 | `asvs-l1` | ASVS 5.0.0 | 70 | 0 |

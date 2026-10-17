@@ -1,0 +1,54 @@
+{
+    "date": "2026-10-17",
+    "type": "Local artificial input fixtures, not complete Magento integration or external security test.",
+    "observations": [
+        {
+            "case": "native_google_provider_representation",
+            "requirement": "MB-0007",
+            "check": "magento_admin_2fa_enabled",
+            "outcome": "FAIL",
+            "message": "No enabled Magento admin 2FA provider modules found",
+            "interpretation_limit": "Native provider engine is not a separate provider module; fixture does not prove real enrollment/authentication."
+        },
+        {
+            "case": "synthetic_provider_module_entry",
+            "requirement": "MB-0007",
+            "check": "magento_admin_2fa_enabled",
+            "outcome": "PASS",
+            "message": "Admin 2FA core module and provider are enabled",
+            "interpretation_limit": "Contrived input shows a declared invented/provider module entry is accepted without reading provider settings or enforcement. Not a real installed Magento sample."
+        },
+        {
+            "case": "ims_indicated_native_disabled",
+            "requirement": "MB-0007",
+            "check": "magento_admin_2fa_enabled",
+            "outcome": "FAIL",
+            "message": "Magento_TwoFactorAuth is disabled or missing",
+            "interpretation_limit": "IMS module indication is not proof IMS authentication is active; check has no IMS applicability branch and immediately fails native disabled."
+        },
+        {
+            "case": "common_backend_route",
+            "requirement": "MB-0006",
+            "check": "magento_admin_frontname_declared",
+            "outcome": "PASS",
+            "message": "Declared backend route differs from admin",
+            "interpretation_limit": "PASS matches current not-admin criterion but does not implement broader Adobe uncommon-route guidance."
+        },
+        {
+            "case": "yearly_cron_presence",
+            "requirement": "MB-0046",
+            "check": "installed_magento_cron",
+            "outcome": "PASS",
+            "message": "Installed Magento cron:run entry found for this deployment.",
+            "interpretation_limit": "Current claim is entry presence only; this does not establish adequate schedule or recent successful jobs."
+        },
+        {
+            "case": "url_only_admin_route_unavailable",
+            "requirement": "MB-0026",
+            "check": "http_force_https_redirect",
+            "outcome": "UNKNOWN",
+            "message": "[UNKNOWN] Cannot resolve backend.frontName for admin HTTPS probe",
+            "interpretation_limit": "Returns before HTTP collection because declared admin route is unavailable; no endpoint was scanned."
+        }
+    ]
+}

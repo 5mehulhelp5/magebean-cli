@@ -59,6 +59,15 @@
         "document": "Magebean security requirements",
         "version": "1",
         "reference": "baseline/MB-R001"
+      },
+      "lane": "security",
+      "guidance_sources": [
+        "https://experienceleague.adobe.com/en/docs/commerce-operations/implementation-playbook/best-practices/launch/security-best-practices"
+      ],
+      "policy_source": {
+        "owner": "Magebean",
+        "version": "basic-2",
+        "note": "Numeric thresholds are Magebean policy; Adobe guidance informs topics and applicability."
       }
     },
     {
@@ -142,6 +151,15 @@
         "document": "Magebean security requirements",
         "version": "1",
         "reference": "baseline/MB-R002"
+      },
+      "lane": "security",
+      "guidance_sources": [
+        "https://experienceleague.adobe.com/en/docs/commerce-operations/implementation-playbook/best-practices/launch/security-best-practices"
+      ],
+      "policy_source": {
+        "owner": "Magebean",
+        "version": "basic-2",
+        "note": "Numeric thresholds are Magebean policy; Adobe guidance informs topics and applicability."
       }
     },
     {
@@ -221,6 +239,15 @@
         "document": "Magebean security requirements",
         "version": "1",
         "reference": "baseline/MB-R003"
+      },
+      "lane": "security",
+      "guidance_sources": [
+        "https://experienceleague.adobe.com/en/docs/commerce-operations/implementation-playbook/best-practices/launch/security-best-practices"
+      ],
+      "policy_source": {
+        "owner": "Magebean",
+        "version": "basic-2",
+        "note": "Numeric thresholds are Magebean policy; Adobe guidance informs topics and applicability."
       }
     },
     {
@@ -387,13 +414,22 @@
         "document": "Magebean security requirements",
         "version": "1",
         "reference": "baseline/MB-R005"
+      },
+      "lane": "security",
+      "guidance_sources": [
+        "https://experienceleague.adobe.com/en/docs/commerce-operations/implementation-playbook/best-practices/launch/security-best-practices"
+      ],
+      "policy_source": {
+        "owner": "Magebean",
+        "version": "basic-2",
+        "note": "Numeric thresholds are Magebean policy; Adobe guidance informs topics and applicability."
       }
     },
     {
       "id": "MB-0006",
-      "revision": 3,
-      "title": "Declared backend route differs from admin",
-      "criterion": "The collected app/etc/env.php backend.frontName declaration is a valid non-empty route and differs case-insensitively from admin. This assesses the configured backend route; route entropy and actual public reachability require separate evidence.",
+      "revision": 4,
+      "title": "Declared Admin route avoids common names",
+      "criterion": "The collected backend.frontName is a valid nonempty route other than admin or backend. Route obscurity is not authentication or access control.",
       "control": "MB-C02",
       "severity": "high",
       "alignments": [],
@@ -436,6 +472,11 @@
         {
           "revision": 2,
           "criterion": "Non-default admin path (not /admin); assess only the collected Magento deployment scope."
+        },
+        {
+          "revision": 3,
+          "criterion": "The collected app/etc/env.php backend.frontName declaration is a valid non-empty route and differs case-insensitively from admin. This assesses the configured backend route; route entropy and actual public reachability require separate evidence.",
+          "reason": "Basic Adobe best-practices review: explicit observation scope and corrected binding."
         }
       ],
       "family": "magebean",
@@ -443,13 +484,22 @@
         "document": "Magebean security requirements",
         "version": "1",
         "reference": "baseline/MB-R006"
+      },
+      "lane": "security",
+      "guidance_sources": [
+        "https://experienceleague.adobe.com/en/docs/commerce-operations/implementation-playbook/best-practices/launch/security-best-practices"
+      ],
+      "policy_source": {
+        "owner": "Magebean",
+        "version": "basic-2",
+        "note": "Numeric thresholds are Magebean policy; Adobe guidance informs topics and applicability."
       }
     },
     {
       "id": "MB-0007",
-      "revision": 2,
-      "title": "Admin 2FA core and provider modules declared enabled",
-      "criterion": "In app/etc/config.php, the Magento_TwoFactorAuth module and at least one configured Magento admin 2FA provider module are declared enabled; this predicate assesses declared module state only.",
+      "revision": 4,
+      "title": "Native Admin MFA provider configuration declared",
+      "criterion": "For a native Admin authentication deployment, Magento_TwoFactorAuth is declared enabled and resolved twofactorauth/general/force_providers names recognized native engines. Possible Adobe IMS mode, unforced providers or an unsupported provider require additional evidence. An empty force_providers setting does not prove MFA is disabled. This predicate does not prove enrollment, enforcement or absence of bypass.",
       "control": "MB-C02",
       "severity": "critical",
       "alignments": [],
@@ -462,17 +512,7 @@
           "checks": [
             {
               "name": "magento_admin_2fa_enabled",
-              "args": {
-                "file": "app/etc/config.php",
-                "core_module": "Magento_TwoFactorAuth",
-                "provider_modules": [
-                  "Magento_GoogleAuthenticator",
-                  "Magento_DuoSecurity",
-                  "Magento_U2fKey",
-                  "Magento_AdminAdobeImsTwoFactorAuth"
-                ],
-                "declared_scope_only": true
-              }
+              "args": {}
             }
           ]
         }
@@ -494,17 +534,7 @@
       "checks": [
         {
           "name": "magento_admin_2fa_enabled",
-          "args": {
-            "file": "app/etc/config.php",
-            "core_module": "Magento_TwoFactorAuth",
-            "provider_modules": [
-              "Magento_GoogleAuthenticator",
-              "Magento_DuoSecurity",
-              "Magento_U2fKey",
-              "Magento_AdminAdobeImsTwoFactorAuth"
-            ],
-            "declared_scope_only": true
-          }
+          "args": {}
         }
       ],
       "op": "all",
@@ -513,6 +543,27 @@
         "document": "Magebean security requirements",
         "version": "1",
         "reference": "baseline/MB-R007"
+      },
+      "criterion_history": [
+        {
+          "revision": 2,
+          "criterion": "In app/etc/config.php, the Magento_TwoFactorAuth module and at least one configured Magento admin 2FA provider module are declared enabled; this predicate assesses declared module state only.",
+          "reason": "Basic Adobe best-practices review: explicit observation scope and corrected binding."
+        },
+        {
+          "revision": 3,
+          "criterion": "For a native Admin authentication deployment, Magento_TwoFactorAuth is declared enabled and resolved twofactorauth/general/force_providers names recognized native engines. Possible Adobe IMS mode or an unsupported provider requires additional evidence. This predicate does not prove enrollment, enforcement or absence of bypass.",
+          "reason": "Basic Adobe best-practices review: explicit observation scope and corrected binding."
+        }
+      ],
+      "lane": "security",
+      "guidance_sources": [
+        "https://experienceleague.adobe.com/en/docs/commerce-operations/implementation-playbook/best-practices/launch/security-best-practices"
+      ],
+      "policy_source": {
+        "owner": "Magebean",
+        "version": "basic-2",
+        "note": "Numeric thresholds are Magebean policy; Adobe guidance informs topics and applicability."
       }
     },
     {
@@ -571,6 +622,15 @@
         "document": "Magebean security requirements",
         "version": "1",
         "reference": "baseline/MB-R009"
+      },
+      "lane": "security",
+      "guidance_sources": [
+        "https://experienceleague.adobe.com/en/docs/commerce-operations/implementation-playbook/best-practices/launch/security-best-practices"
+      ],
+      "policy_source": {
+        "owner": "Magebean",
+        "version": "basic-2",
+        "note": "Numeric thresholds are Magebean policy; Adobe guidance informs topics and applicability."
       }
     },
     {
@@ -714,6 +774,15 @@
         "document": "Magebean security requirements",
         "version": "1",
         "reference": "baseline/MB-R011"
+      },
+      "lane": "security",
+      "guidance_sources": [
+        "https://experienceleague.adobe.com/en/docs/commerce-operations/implementation-playbook/best-practices/launch/security-best-practices"
+      ],
+      "policy_source": {
+        "owner": "Magebean",
+        "version": "basic-2",
+        "note": "Numeric thresholds are Magebean policy; Adobe guidance informs topics and applicability."
       }
     },
     {
@@ -1281,9 +1350,9 @@
     },
     {
       "id": "MB-0026",
-      "revision": 3,
-      "title": "Force HTTPS in admin and storefront",
-      "criterion": "The observed HTTP storefront root and declared backend.frontName entrypoint redirect directly with 301/302/303/307/308 to same-host HTTPS. This is an entrypoint probe, not a universal guarantee for every deployment route.",
+      "revision": 4,
+      "title": "Observed storefront entrypoint redirects to HTTPS",
+      "criterion": "The observed HTTP storefront root redirects directly with 301/302/303/307/308 to same-host HTTPS. Admin and other store entrypoints are assessed separately.",
       "control": "MB-C04",
       "severity": "high",
       "alignments": [],
@@ -1298,7 +1367,7 @@
               "name": "http_force_https_redirect",
               "args": {
                 "strict_scope": true,
-                "include_admin": true
+                "include_admin": false
               }
             }
           ]
@@ -1323,7 +1392,7 @@
           "name": "http_force_https_redirect",
           "args": {
             "strict_scope": true,
-            "include_admin": true
+            "include_admin": false
           }
         }
       ],
@@ -1341,7 +1410,7 @@
                   "name": "http_force_https_redirect",
                   "args": {
                     "strict_scope": true,
-                    "include_admin": true
+                    "include_admin": false
                   }
                 }
               ]
@@ -1353,6 +1422,11 @@
         {
           "revision": 2,
           "criterion": "Force HTTPS in admin and storefront; assess only the collected Magento deployment scope."
+        },
+        {
+          "revision": 3,
+          "criterion": "The observed HTTP storefront root and declared backend.frontName entrypoint redirect directly with 301/302/303/307/308 to same-host HTTPS. This is an entrypoint probe, not a universal guarantee for every deployment route.",
+          "reason": "Basic Adobe best-practices review: explicit observation scope and corrected binding."
         }
       ],
       "family": "magebean",
@@ -1360,11 +1434,20 @@
         "document": "Magebean security requirements",
         "version": "1",
         "reference": "baseline/MB-R026"
+      },
+      "lane": "security",
+      "guidance_sources": [
+        "https://experienceleague.adobe.com/en/docs/commerce-operations/implementation-playbook/best-practices/launch/security-best-practices"
+      ],
+      "policy_source": {
+        "owner": "Magebean",
+        "version": "basic-2",
+        "note": "Numeric thresholds are Magebean policy; Adobe guidance informs topics and applicability."
       }
     },
     {
       "id": "MB-0027",
-      "revision": 3,
+      "revision": 4,
       "title": "Observed HTTPS response has HSTS max-age of at least one year",
       "criterion": "A successful same-host HTTPS response at the configured runtime URL emits one unambiguous Strict-Transport-Security header with an exact integer max-age directive of at least 31536000 seconds. Repository web-server declarations are not runtime proof.",
       "control": "MB-C04",
@@ -1421,13 +1504,14 @@
               "id": "O001",
               "op": "all",
               "role": "mandatory",
-              "proof": "heuristic",
+              "proof": "verified_predicate",
               "checks": [
                 {
                   "name": "http_has_hsts",
                   "args": {
-                    "min_max_age": 15552000,
-                    "timeout_ms": 8000
+                    "min_max_age": 31536000,
+                    "timeout_ms": 8000,
+                    "strict_scope": true
                   }
                 }
               ]
@@ -1440,7 +1524,24 @@
         "document": "Magebean security requirements",
         "version": "1",
         "reference": "baseline/MB-R027"
-      }
+      },
+      "lane": "security",
+      "guidance_sources": [
+        "https://experienceleague.adobe.com/en/docs/commerce-operations/implementation-playbook/best-practices/launch/security-best-practices"
+      ],
+      "policy_source": {
+        "owner": "Magebean",
+        "version": "basic-2",
+        "note": "Numeric thresholds are Magebean policy; Adobe guidance informs topics and applicability."
+      },
+      "criterion_history": [
+        {
+          "revision": 3,
+          "criterion": "A successful same-host HTTPS response at the configured runtime URL emits one unambiguous Strict-Transport-Security header with an exact integer max-age directive of at least 31536000 seconds. Repository web-server declarations are not runtime proof.",
+          "reason": "Align mode-specific recipes with the same observed criterion; remove heuristic remote FPC declaration proof."
+        }
+      ],
+      "basic_review_version": 2
     },
     {
       "id": "MB-0028",
@@ -1519,6 +1620,15 @@
         "document": "Magebean security requirements",
         "version": "1",
         "reference": "baseline/MB-R028"
+      },
+      "lane": "security",
+      "guidance_sources": [
+        "https://experienceleague.adobe.com/en/docs/commerce-operations/implementation-playbook/best-practices/launch/security-best-practices"
+      ],
+      "policy_source": {
+        "owner": "Magebean",
+        "version": "basic-2",
+        "note": "Numeric thresholds are Magebean policy; Adobe guidance informs topics and applicability."
       }
     },
     {
@@ -1621,6 +1731,15 @@
         "document": "Magebean security requirements",
         "version": "1",
         "reference": "baseline/MB-R029"
+      },
+      "lane": "security",
+      "guidance_sources": [
+        "https://experienceleague.adobe.com/en/docs/commerce-operations/implementation-playbook/best-practices/launch/security-best-practices"
+      ],
+      "policy_source": {
+        "owner": "Magebean",
+        "version": "basic-2",
+        "note": "Numeric thresholds are Magebean policy; Adobe guidance informs topics and applicability."
       }
     },
     {
@@ -1716,6 +1835,15 @@
         "document": "Magebean security requirements",
         "version": "1",
         "reference": "baseline/MB-R030"
+      },
+      "lane": "security",
+      "guidance_sources": [
+        "https://experienceleague.adobe.com/en/docs/commerce-operations/implementation-playbook/best-practices/launch/security-best-practices"
+      ],
+      "policy_source": {
+        "owner": "Magebean",
+        "version": "basic-2",
+        "note": "Numeric thresholds are Magebean policy; Adobe guidance informs topics and applicability."
       }
     },
     {
@@ -1774,6 +1902,15 @@
         "document": "Magebean security requirements",
         "version": "1",
         "reference": "baseline/MB-R031"
+      },
+      "lane": "readiness",
+      "guidance_sources": [
+        "https://experienceleague.adobe.com/en/docs/commerce-operations/implementation-playbook/best-practices/launch/security-best-practices"
+      ],
+      "policy_source": {
+        "owner": "Magebean",
+        "version": "basic-2",
+        "note": "Numeric thresholds are Magebean policy; Adobe guidance informs topics and applicability."
       }
     },
     {
@@ -1919,11 +2056,20 @@
         "document": "Magebean security requirements",
         "version": "1",
         "reference": "baseline/MB-R035"
+      },
+      "lane": "readiness",
+      "guidance_sources": [
+        "https://experienceleague.adobe.com/en/docs/commerce-operations/implementation-playbook/best-practices/launch/security-best-practices"
+      ],
+      "policy_source": {
+        "owner": "Magebean",
+        "version": "basic-2",
+        "note": "Numeric thresholds are Magebean policy; Adobe guidance informs topics and applicability."
       }
     },
     {
       "id": "MB-0037",
-      "revision": 3,
+      "revision": 4,
       "title": "Declared Full Page Cache type enabled",
       "criterion": "The collected deployment app/etc/env.php declares cache_types.full_page enabled. This verifies the persisted Magento cache type state; Varnish selection and actual cache hit rates are separate observations.",
       "control": "MB-C06",
@@ -1958,8 +2104,7 @@
         ]
       },
       "target_modes": [
-        "LOCAL",
-        "REMOTE"
+        "LOCAL"
       ],
       "checks": [
         {
@@ -1971,31 +2116,16 @@
         }
       ],
       "op": "all",
-      "execution_variants": {
-        "REMOTE": {
-          "obligations": [
-            {
-              "id": "O001",
-              "op": "all",
-              "role": "mandatory",
-              "proof": "heuristic",
-              "checks": [
-                {
-                  "name": "http_cache_signals",
-                  "args": {
-                    "timeout_ms": 8000
-                  }
-                }
-              ]
-            }
-          ]
-        }
-      },
       "criterion_history": [
         {
           "revision": 2,
           "criterion": "Full Page Cache (FPC) enabled; assess only the collected Magento deployment scope.",
           "reason": "Detector sufficiency review and explicit observation scope."
+        },
+        {
+          "revision": 3,
+          "criterion": "The collected deployment app/etc/env.php declares cache_types.full_page enabled. This verifies the persisted Magento cache type state; Varnish selection and actual cache hit rates are separate observations.",
+          "reason": "Align mode-specific recipes with the same observed criterion; remove heuristic remote FPC declaration proof."
         }
       ],
       "family": "magebean",
@@ -2003,7 +2133,17 @@
         "document": "Magebean security requirements",
         "version": "1",
         "reference": "baseline/MB-R037"
-      }
+      },
+      "lane": "readiness",
+      "guidance_sources": [
+        "https://experienceleague.adobe.com/en/docs/commerce-operations/implementation-playbook/best-practices/launch/security-best-practices"
+      ],
+      "policy_source": {
+        "owner": "Magebean",
+        "version": "basic-2",
+        "note": "Numeric thresholds are Magebean policy; Adobe guidance informs topics and applicability."
+      },
+      "basic_review_version": 2
     },
     {
       "id": "MB-0038",
@@ -2287,6 +2427,15 @@
         "document": "Magebean security requirements",
         "version": "1",
         "reference": "baseline/MB-R042"
+      },
+      "lane": "security",
+      "guidance_sources": [
+        "https://experienceleague.adobe.com/en/docs/commerce-operations/implementation-playbook/best-practices/launch/security-best-practices"
+      ],
+      "policy_source": {
+        "owner": "Magebean",
+        "version": "basic-2",
+        "note": "Numeric thresholds are Magebean policy; Adobe guidance informs topics and applicability."
       }
     },
     {
@@ -2352,32 +2501,23 @@
     },
     {
       "id": "MB-0046",
-      "revision": 3,
-      "title": "Installed Magento cron entry present",
-      "criterion": "At least one installed, syntactically valid cron entry invokes bin/magento cron:run for the collected deployment path. Sources include deployment-owner/current-user and configured-user crontabs plus /etc/crontab and /etc/cron.d. This verifies entry presence, not successful execution or an external orchestrator.",
+      "revision": 4,
+      "title": "Installed Magento scheduler observed",
+      "criterion": "A collected installed cron:run entry targets this deployment. Missing installed entries remain unresolved when an external/cloud/container scheduler may apply; cadence and execution health are separate observations.",
       "control": "MB-C08",
       "severity": "medium",
       "alignments": [],
       "obligations": [
         {
           "id": "O001",
+          "op": "all",
           "role": "mandatory",
           "proof": "verified_predicate",
-          "op": "all",
           "checks": [
             {
               "name": "installed_magento_cron",
               "args": {
-                "users": [
-                  "www-data",
-                  "nginx",
-                  "apache",
-                  "http",
-                  "www",
-                  "magento",
-                  "deploy"
-                ],
-                "timeout_ms": 2500
+                "allow_external_scheduler": true
               }
             }
           ]
@@ -2401,16 +2541,7 @@
         {
           "name": "installed_magento_cron",
           "args": {
-            "users": [
-              "www-data",
-              "nginx",
-              "apache",
-              "http",
-              "www",
-              "magento",
-              "deploy"
-            ],
-            "timeout_ms": 2500
+            "allow_external_scheduler": true
           }
         }
       ],
@@ -2420,6 +2551,11 @@
           "revision": 2,
           "criterion": "Crontab entries present (Magento cron); assess only the collected Magento deployment scope.",
           "reason": "Detector sufficiency review and explicit observation scope."
+        },
+        {
+          "revision": 3,
+          "criterion": "At least one installed, syntactically valid cron entry invokes bin/magento cron:run for the collected deployment path. Sources include deployment-owner/current-user and configured-user crontabs plus /etc/crontab and /etc/cron.d. This verifies entry presence, not successful execution or an external orchestrator.",
+          "reason": "Basic Adobe best-practices review: explicit observation scope and corrected binding."
         }
       ],
       "family": "magebean",
@@ -2427,6 +2563,15 @@
         "document": "Magebean security requirements",
         "version": "1",
         "reference": "baseline/MB-R046"
+      },
+      "lane": "readiness",
+      "guidance_sources": [
+        "https://experienceleague.adobe.com/en/docs/commerce-operations/implementation-playbook/best-practices/launch/security-best-practices"
+      ],
+      "policy_source": {
+        "owner": "Magebean",
+        "version": "basic-2",
+        "note": "Numeric thresholds are Magebean policy; Adobe guidance informs topics and applicability."
       }
     },
     {
@@ -2630,6 +2775,15 @@
         "document": "Magebean security requirements",
         "version": "1",
         "reference": "baseline/MB-R049"
+      },
+      "lane": "security",
+      "guidance_sources": [
+        "https://experienceleague.adobe.com/en/docs/commerce-operations/implementation-playbook/best-practices/launch/security-best-practices"
+      ],
+      "policy_source": {
+        "owner": "Magebean",
+        "version": "basic-2",
+        "note": "Numeric thresholds are Magebean policy; Adobe guidance informs topics and applicability."
       }
     },
     {
@@ -2691,6 +2845,15 @@
         "document": "Magebean security requirements",
         "version": "1",
         "reference": "baseline/MB-R050"
+      },
+      "lane": "security",
+      "guidance_sources": [
+        "https://experienceleague.adobe.com/en/docs/commerce-operations/implementation-playbook/best-practices/launch/security-best-practices"
+      ],
+      "policy_source": {
+        "owner": "Magebean",
+        "version": "basic-2",
+        "note": "Numeric thresholds are Magebean policy; Adobe guidance informs topics and applicability."
       }
     },
     {
@@ -6212,6 +6375,15 @@
         "document": "Magebean security requirements",
         "version": "1",
         "reference": "baseline/MB-R100"
+      },
+      "lane": "security",
+      "guidance_sources": [
+        "https://experienceleague.adobe.com/en/docs/commerce-operations/implementation-playbook/best-practices/launch/security-best-practices"
+      ],
+      "policy_source": {
+        "owner": "Magebean",
+        "version": "basic-2",
+        "note": "Numeric thresholds are Magebean policy; Adobe guidance informs topics and applicability."
       }
     },
     {
@@ -6415,6 +6587,15 @@
         "document": "Magebean security requirements",
         "version": "1",
         "reference": "basic-deployment/magento_admin_password_minimum_configured"
+      },
+      "lane": "security",
+      "guidance_sources": [
+        "https://experienceleague.adobe.com/en/docs/commerce-operations/implementation-playbook/best-practices/launch/security-best-practices"
+      ],
+      "policy_source": {
+        "owner": "Magebean",
+        "version": "basic-2",
+        "note": "Numeric thresholds are Magebean policy; Adobe guidance informs topics and applicability."
       }
     },
     {
@@ -6464,6 +6645,15 @@
         "document": "Magebean security requirements",
         "version": "1",
         "reference": "basic-deployment/magento_deployment_debug_flags_disabled"
+      },
+      "lane": "security",
+      "guidance_sources": [
+        "https://experienceleague.adobe.com/en/docs/commerce-operations/implementation-playbook/best-practices/launch/security-best-practices"
+      ],
+      "policy_source": {
+        "owner": "Magebean",
+        "version": "basic-2",
+        "note": "Numeric thresholds are Magebean policy; Adobe guidance informs topics and applicability."
       }
     },
     {
@@ -6573,6 +6763,15 @@
         "document": "Magebean security requirements",
         "version": "1",
         "reference": "basic-deployment/working_tree_secret_scan"
+      },
+      "lane": "security",
+      "guidance_sources": [
+        "https://experienceleague.adobe.com/en/docs/commerce-operations/implementation-playbook/best-practices/launch/security-best-practices"
+      ],
+      "policy_source": {
+        "owner": "Magebean",
+        "version": "basic-2",
+        "note": "Numeric thresholds are Magebean policy; Adobe guidance informs topics and applicability."
       }
     },
     {
@@ -7823,6 +8022,813 @@
         "document": "Magebean security requirements",
         "version": "1",
         "reference": "baseline/MB-R091"
+      }
+    },
+    {
+      "id": "MB-0773",
+      "revision": 1,
+      "title": "Admin secret URL keys enabled",
+      "criterion": "The resolved default-scope native Admin admin/security/use_form_key configuration is enabled. Authenticated route enforcement requires separate verification.",
+      "control": "MB-C02",
+      "severity": "medium",
+      "alignments": [],
+      "obligations": [
+        {
+          "id": "O001",
+          "op": "all",
+          "role": "mandatory",
+          "proof": "verified_predicate",
+          "checks": [
+            {
+              "name": "magento_admin_security_flag",
+              "args": {
+                "path": "admin/security/use_form_key"
+              }
+            }
+          ]
+        }
+      ],
+      "coverage": "AUTOMATED",
+      "verification": "automated",
+      "review_state": "accepted_scoped_criterion",
+      "human_evidence": {
+        "required": false,
+        "instructions": "",
+        "evidence_types": [
+          "scoped_observation"
+        ]
+      },
+      "target_modes": [
+        "LOCAL"
+      ],
+      "checks": [
+        {
+          "name": "magento_admin_security_flag",
+          "args": {
+            "path": "admin/security/use_form_key"
+          }
+        }
+      ],
+      "op": "all",
+      "family": "magebean",
+      "source": {
+        "document": "Magebean security requirements",
+        "version": "1",
+        "reference": "magebean/basic-adobe/MB-0773"
+      },
+      "lane": "security",
+      "guidance_sources": [
+        "https://experienceleague.adobe.com/en/docs/commerce-admin/systems/security/security-admin"
+      ],
+      "policy_source": {
+        "owner": "Magebean",
+        "version": "basic-2",
+        "note": "Numeric thresholds are Magebean policy; Adobe guidance informs topics and applicability."
+      }
+    },
+    {
+      "id": "MB-0774",
+      "revision": 1,
+      "title": "Admin login names are case sensitive",
+      "criterion": "The resolved default-scope native Admin admin/security/use_case_sensitive_login configuration is enabled; this is a configuration observation, not an authentication flow test.",
+      "control": "MB-C02",
+      "severity": "medium",
+      "alignments": [],
+      "obligations": [
+        {
+          "id": "O001",
+          "op": "all",
+          "role": "mandatory",
+          "proof": "verified_predicate",
+          "checks": [
+            {
+              "name": "magento_admin_security_flag",
+              "args": {
+                "path": "admin/security/use_case_sensitive_login"
+              }
+            }
+          ]
+        }
+      ],
+      "coverage": "AUTOMATED",
+      "verification": "automated",
+      "review_state": "accepted_scoped_criterion",
+      "human_evidence": {
+        "required": false,
+        "instructions": "",
+        "evidence_types": [
+          "scoped_observation"
+        ]
+      },
+      "target_modes": [
+        "LOCAL"
+      ],
+      "checks": [
+        {
+          "name": "magento_admin_security_flag",
+          "args": {
+            "path": "admin/security/use_case_sensitive_login"
+          }
+        }
+      ],
+      "op": "all",
+      "family": "magebean",
+      "source": {
+        "document": "Magebean security requirements",
+        "version": "1",
+        "reference": "magebean/basic-adobe/MB-0774"
+      },
+      "lane": "security",
+      "guidance_sources": [
+        "https://experienceleague.adobe.com/en/docs/commerce-admin/systems/security/security-admin"
+      ],
+      "policy_source": {
+        "owner": "Magebean",
+        "version": "basic-2",
+        "note": "Numeric thresholds are Magebean policy; Adobe guidance informs topics and applicability."
+      }
+    },
+    {
+      "id": "MB-0775",
+      "revision": 1,
+      "title": "Admin account sharing disabled",
+      "criterion": "The resolved default-scope native Admin admin/security/admin_account_sharing configuration is disabled. This does not establish that each person has a unique approved account.",
+      "control": "MB-C02",
+      "severity": "medium",
+      "alignments": [],
+      "obligations": [
+        {
+          "id": "O001",
+          "op": "all",
+          "role": "mandatory",
+          "proof": "verified_predicate",
+          "checks": [
+            {
+              "name": "magento_admin_security_flag",
+              "args": {
+                "path": "admin/security/admin_account_sharing"
+              }
+            }
+          ]
+        }
+      ],
+      "coverage": "AUTOMATED",
+      "verification": "automated",
+      "review_state": "accepted_scoped_criterion",
+      "human_evidence": {
+        "required": false,
+        "instructions": "",
+        "evidence_types": [
+          "scoped_observation"
+        ]
+      },
+      "target_modes": [
+        "LOCAL"
+      ],
+      "checks": [
+        {
+          "name": "magento_admin_security_flag",
+          "args": {
+            "path": "admin/security/admin_account_sharing"
+          }
+        }
+      ],
+      "op": "all",
+      "family": "magebean",
+      "source": {
+        "document": "Magebean security requirements",
+        "version": "1",
+        "reference": "magebean/basic-adobe/MB-0775"
+      },
+      "lane": "security",
+      "guidance_sources": [
+        "https://experienceleague.adobe.com/en/docs/commerce-admin/systems/security/security-admin"
+      ],
+      "policy_source": {
+        "owner": "Magebean",
+        "version": "basic-2",
+        "note": "Numeric thresholds are Magebean policy; Adobe guidance informs topics and applicability."
+      }
+    },
+    {
+      "id": "MB-0776",
+      "revision": 1,
+      "title": "Admin password reset protection configured",
+      "criterion": "Resolved native Admin reset protection is enabled with bounded hourly requests and a positive cooldown meeting Magebean policy (at most 5 requests/hour and at least 1 minute). This does not exercise reset tokens or email delivery.",
+      "control": "MB-C02",
+      "severity": "medium",
+      "alignments": [],
+      "obligations": [
+        {
+          "id": "O001",
+          "op": "all",
+          "role": "mandatory",
+          "proof": "verified_predicate",
+          "checks": [
+            {
+              "name": "magento_admin_password_reset_protection",
+              "args": {
+                "max_requests_per_hour": 5,
+                "min_interval_minutes": 1
+              }
+            }
+          ]
+        }
+      ],
+      "coverage": "AUTOMATED",
+      "verification": "automated",
+      "review_state": "accepted_scoped_criterion",
+      "human_evidence": {
+        "required": false,
+        "instructions": "",
+        "evidence_types": [
+          "scoped_observation"
+        ]
+      },
+      "target_modes": [
+        "LOCAL"
+      ],
+      "checks": [
+        {
+          "name": "magento_admin_password_reset_protection",
+          "args": {
+            "max_requests_per_hour": 5,
+            "min_interval_minutes": 1
+          }
+        }
+      ],
+      "op": "all",
+      "family": "magebean",
+      "source": {
+        "document": "Magebean security requirements",
+        "version": "1",
+        "reference": "magebean/basic-adobe/MB-0776"
+      },
+      "lane": "security",
+      "guidance_sources": [
+        "https://experienceleague.adobe.com/en/docs/commerce-admin/systems/security/security-admin"
+      ],
+      "policy_source": {
+        "owner": "Magebean",
+        "version": "basic-2",
+        "note": "Numeric thresholds are Magebean policy; Adobe guidance informs topics and applicability."
+      }
+    },
+    {
+      "id": "MB-0777",
+      "revision": 1,
+      "title": "Observed Admin entrypoint redirects to HTTPS",
+      "criterion": "The explicitly supplied or locally resolved Admin HTTP entrypoint redirects directly to same-host HTTPS. Missing Admin route evidence remains unresolved without preventing the separate storefront probe.",
+      "control": "MB-C04",
+      "severity": "high",
+      "alignments": [],
+      "obligations": [
+        {
+          "id": "O001",
+          "op": "all",
+          "role": "mandatory",
+          "proof": "verified_predicate",
+          "checks": [
+            {
+              "name": "http_force_https_redirect",
+              "args": {
+                "strict_scope": true,
+                "admin_only": true
+              }
+            }
+          ]
+        }
+      ],
+      "coverage": "AUTOMATED",
+      "verification": "automated",
+      "review_state": "accepted_scoped_criterion",
+      "human_evidence": {
+        "required": false,
+        "instructions": "",
+        "evidence_types": [
+          "scoped_observation"
+        ]
+      },
+      "target_modes": [
+        "LOCAL"
+      ],
+      "checks": [
+        {
+          "name": "http_force_https_redirect",
+          "args": {
+            "strict_scope": true,
+            "admin_only": true
+          }
+        }
+      ],
+      "op": "all",
+      "family": "magebean",
+      "source": {
+        "document": "Magebean security requirements",
+        "version": "1",
+        "reference": "magebean/basic-adobe/MB-0777"
+      },
+      "lane": "security",
+      "guidance_sources": [
+        "https://experienceleague.adobe.com/en/docs/commerce-operations/implementation-playbook/best-practices/launch/security-best-practices"
+      ],
+      "policy_source": {
+        "owner": "Magebean",
+        "version": "basic-2",
+        "note": "Numeric thresholds are Magebean policy; Adobe guidance informs topics and applicability."
+      }
+    },
+    {
+      "id": "MB-0778",
+      "revision": 1,
+      "title": "Observed TLS certificate has trusted hostname and renewal margin",
+      "criterion": "The configured endpoint completes a peer-verified TLS connection for its hostname with a currently valid certificate and at least 15 days remaining under Magebean renewal policy. Uncollectable trust or network evidence is unresolved.",
+      "control": "MB-C04",
+      "severity": "medium",
+      "alignments": [],
+      "obligations": [
+        {
+          "id": "O001",
+          "op": "all",
+          "role": "mandatory",
+          "proof": "verified_predicate",
+          "checks": [
+            {
+              "name": "http_tls_cert_days_left",
+              "args": {
+                "min_days": 15,
+                "timeout_ms": 8000
+              }
+            }
+          ]
+        }
+      ],
+      "coverage": "AUTOMATED",
+      "verification": "automated",
+      "review_state": "accepted_scoped_criterion",
+      "human_evidence": {
+        "required": false,
+        "instructions": "",
+        "evidence_types": [
+          "scoped_observation"
+        ]
+      },
+      "target_modes": [
+        "LOCAL",
+        "REMOTE"
+      ],
+      "checks": [
+        {
+          "name": "http_tls_cert_days_left",
+          "args": {
+            "min_days": 15,
+            "timeout_ms": 8000
+          }
+        }
+      ],
+      "op": "all",
+      "family": "magebean",
+      "source": {
+        "document": "Magebean security requirements",
+        "version": "1",
+        "reference": "magebean/basic-adobe/MB-0778"
+      },
+      "lane": "security",
+      "guidance_sources": [
+        "https://experienceleague.adobe.com/en/docs/commerce-operations/implementation-playbook/best-practices/launch/security-best-practices"
+      ],
+      "policy_source": {
+        "owner": "Magebean",
+        "version": "basic-2",
+        "note": "Numeric thresholds are Magebean policy; Adobe guidance informs topics and applicability."
+      }
+    },
+    {
+      "id": "MB-0779",
+      "revision": 1,
+      "title": "Observed page restricts framing",
+      "criterion": "A successful same-host application response emits an unambiguous enforced restrictive CSP frame-ancestors policy, or valid X-Frame-Options DENY/SAMEORIGIN when no enforced frame-ancestors overrides it. This scopes the observation to the requested page.",
+      "control": "MB-C04",
+      "severity": "medium",
+      "alignments": [],
+      "obligations": [
+        {
+          "id": "O001",
+          "op": "all",
+          "role": "mandatory",
+          "proof": "verified_predicate",
+          "checks": [
+            {
+              "name": "http_clickjacking_protection",
+              "args": {
+                "strict_scope": true,
+                "timeout_ms": 8000
+              }
+            }
+          ]
+        }
+      ],
+      "coverage": "AUTOMATED",
+      "verification": "automated",
+      "review_state": "accepted_scoped_criterion",
+      "human_evidence": {
+        "required": false,
+        "instructions": "",
+        "evidence_types": [
+          "scoped_observation"
+        ]
+      },
+      "target_modes": [
+        "LOCAL",
+        "REMOTE"
+      ],
+      "checks": [
+        {
+          "name": "http_clickjacking_protection",
+          "args": {
+            "strict_scope": true,
+            "timeout_ms": 8000
+          }
+        }
+      ],
+      "op": "all",
+      "family": "magebean",
+      "source": {
+        "document": "Magebean security requirements",
+        "version": "1",
+        "reference": "magebean/basic-adobe/MB-0779"
+      },
+      "lane": "security",
+      "guidance_sources": [
+        "https://experienceleague.adobe.com/en/docs/commerce-operations/implementation-playbook/best-practices/launch/security-best-practices"
+      ],
+      "policy_source": {
+        "owner": "Magebean",
+        "version": "basic-2",
+        "note": "Numeric thresholds are Magebean policy; Adobe guidance informs topics and applicability."
+      }
+    },
+    {
+      "id": "MB-0780",
+      "revision": 1,
+      "title": "Media inventory has no executable PHP-like filenames",
+      "criterion": "The bounded readable pub/media filename inventory contains no PHP-like executable extension, including double extensions. Symlinks, unreadable subtrees and budget gaps remain unresolved. Web-server execution policy is separate evidence.",
+      "control": "MB-C01",
+      "severity": "high",
+      "alignments": [],
+      "obligations": [
+        {
+          "id": "O001",
+          "op": "all",
+          "role": "mandatory",
+          "proof": "verified_predicate",
+          "checks": [
+            {
+              "name": "basic_media_executable_files",
+              "args": {
+                "max_entries": 10000
+              }
+            }
+          ]
+        }
+      ],
+      "coverage": "AUTOMATED",
+      "verification": "automated",
+      "review_state": "accepted_scoped_criterion",
+      "human_evidence": {
+        "required": false,
+        "instructions": "",
+        "evidence_types": [
+          "scoped_observation"
+        ]
+      },
+      "target_modes": [
+        "LOCAL"
+      ],
+      "checks": [
+        {
+          "name": "basic_media_executable_files",
+          "args": {
+            "max_entries": 10000
+          }
+        }
+      ],
+      "op": "all",
+      "family": "magebean",
+      "source": {
+        "document": "Magebean security requirements",
+        "version": "1",
+        "reference": "magebean/basic-adobe/MB-0780"
+      },
+      "lane": "security",
+      "guidance_sources": [
+        "https://experienceleague.adobe.com/en/docs/commerce-operations/implementation-playbook/best-practices/launch/security-best-practices"
+      ],
+      "policy_source": {
+        "owner": "Magebean",
+        "version": "basic-2",
+        "note": "Numeric thresholds are Magebean policy; Adobe guidance informs topics and applicability."
+      }
+    },
+    {
+      "id": "MB-0781",
+      "revision": 1,
+      "title": "Named sensitive HTTP paths are denied or absent",
+      "criterion": "Six named deployment artifact paths are denied or absent over HTTP. A bounded prefix containing a recognizable artifact signature is a violation; ambiguous 200 pages, redirects and transport gaps remain unresolved. No response contents are retained.",
+      "control": "MB-C01",
+      "severity": "high",
+      "alignments": [],
+      "obligations": [
+        {
+          "id": "O001",
+          "op": "all",
+          "role": "mandatory",
+          "proof": "verified_predicate",
+          "checks": [
+            {
+              "name": "basic_sensitive_http_paths",
+              "args": {
+                "timeout_ms": 2000
+              }
+            }
+          ]
+        }
+      ],
+      "coverage": "AUTOMATED",
+      "verification": "automated",
+      "review_state": "accepted_scoped_criterion",
+      "human_evidence": {
+        "required": false,
+        "instructions": "",
+        "evidence_types": [
+          "scoped_observation"
+        ]
+      },
+      "target_modes": [
+        "LOCAL",
+        "REMOTE"
+      ],
+      "checks": [
+        {
+          "name": "basic_sensitive_http_paths",
+          "args": {
+            "timeout_ms": 2000
+          }
+        }
+      ],
+      "op": "all",
+      "family": "magebean",
+      "source": {
+        "document": "Magebean security requirements",
+        "version": "1",
+        "reference": "magebean/basic-adobe/MB-0781"
+      },
+      "lane": "security",
+      "guidance_sources": [
+        "https://experienceleague.adobe.com/en/docs/commerce-operations/implementation-playbook/best-practices/launch/security-best-practices"
+      ],
+      "policy_source": {
+        "owner": "Magebean",
+        "version": "basic-2",
+        "note": "Numeric thresholds are Magebean policy; Adobe guidance informs topics and applicability."
+      }
+    },
+    {
+      "id": "MB-0782",
+      "revision": 1,
+      "title": "Sensitive deployment configuration excluded from Git index",
+      "criterion": "The readable current deployment Git index does not track app/etc/env.php. Historical commits, remote repositories and deployments without a readable Git index require separate evidence.",
+      "control": "MB-C01",
+      "severity": "high",
+      "alignments": [],
+      "obligations": [
+        {
+          "id": "O001",
+          "op": "all",
+          "role": "mandatory",
+          "proof": "verified_predicate",
+          "checks": [
+            {
+              "name": "env_not_tracked",
+              "args": {}
+            }
+          ]
+        }
+      ],
+      "coverage": "AUTOMATED",
+      "verification": "automated",
+      "review_state": "accepted_scoped_criterion",
+      "human_evidence": {
+        "required": false,
+        "instructions": "",
+        "evidence_types": [
+          "scoped_observation"
+        ]
+      },
+      "target_modes": [
+        "LOCAL"
+      ],
+      "checks": [
+        {
+          "name": "env_not_tracked",
+          "args": {}
+        }
+      ],
+      "op": "all",
+      "family": "magebean",
+      "source": {
+        "document": "Magebean security requirements",
+        "version": "1",
+        "reference": "magebean/basic-adobe/MB-0782"
+      },
+      "lane": "security",
+      "guidance_sources": [
+        "https://experienceleague.adobe.com/en/docs/commerce-operations/configuration-guide/deployment/overview"
+      ],
+      "policy_source": {
+        "owner": "Magebean",
+        "version": "basic-2",
+        "note": "Numeric thresholds are Magebean policy; Adobe guidance informs topics and applicability."
+      }
+    },
+    {
+      "id": "MB-0783",
+      "revision": 1,
+      "title": "Installed Magento cron has every-minute cadence",
+      "criterion": "The observed installed cron:run schedule has every-minute cadence for the assessed project. External/cloud/container scheduling without a matching installed entry requires separate scheduler evidence; presence alone is insufficient.",
+      "control": "MB-C07",
+      "severity": "low",
+      "alignments": [],
+      "obligations": [
+        {
+          "id": "O001",
+          "op": "all",
+          "role": "mandatory",
+          "proof": "verified_predicate",
+          "checks": [
+            {
+              "name": "installed_cron_cadence",
+              "args": {}
+            }
+          ]
+        }
+      ],
+      "coverage": "AUTOMATED",
+      "verification": "automated",
+      "review_state": "accepted_scoped_criterion",
+      "human_evidence": {
+        "required": false,
+        "instructions": "",
+        "evidence_types": [
+          "scoped_observation"
+        ]
+      },
+      "target_modes": [
+        "LOCAL"
+      ],
+      "checks": [
+        {
+          "name": "installed_cron_cadence",
+          "args": {}
+        }
+      ],
+      "op": "all",
+      "family": "magebean",
+      "source": {
+        "document": "Magebean security requirements",
+        "version": "1",
+        "reference": "magebean/basic-adobe/MB-0783"
+      },
+      "lane": "readiness",
+      "guidance_sources": [
+        "https://experienceleague.adobe.com/en/docs/commerce-operations/configuration-guide/cli/configure-cron-jobs"
+      ],
+      "policy_source": {
+        "owner": "Magebean",
+        "version": "basic-2",
+        "note": "Numeric thresholds are Magebean policy; Adobe guidance informs topics and applicability."
+      }
+    },
+    {
+      "id": "MB-0784",
+      "revision": 1,
+      "title": "Published theme and locale static scopes have representative assets",
+      "criterion": "The bounded observed published frontend theme/locale scopes contain representative readable nonempty CSS and JavaScript artifacts. Explicit intended scopes may refine this observation. Active-store coverage, asset freshness and headless deployment applicability require separate evidence.",
+      "control": "MB-C05",
+      "severity": "low",
+      "alignments": [],
+      "obligations": [
+        {
+          "id": "O001",
+          "op": "all",
+          "role": "mandatory",
+          "proof": "verified_predicate",
+          "checks": [
+            {
+              "name": "static_scopes_ready",
+              "args": {}
+            }
+          ]
+        }
+      ],
+      "coverage": "AUTOMATED",
+      "verification": "automated",
+      "review_state": "accepted_scoped_criterion",
+      "human_evidence": {
+        "required": false,
+        "instructions": "",
+        "evidence_types": [
+          "scoped_observation"
+        ]
+      },
+      "target_modes": [
+        "LOCAL"
+      ],
+      "checks": [
+        {
+          "name": "static_scopes_ready",
+          "args": {}
+        }
+      ],
+      "op": "all",
+      "family": "magebean",
+      "source": {
+        "document": "Magebean security requirements",
+        "version": "1",
+        "reference": "magebean/basic-adobe/MB-0784"
+      },
+      "lane": "readiness",
+      "guidance_sources": [
+        "https://experienceleague.adobe.com/en/docs/commerce-operations/configuration-guide/cli/static-view/static-view-file-deployment"
+      ],
+      "policy_source": {
+        "owner": "Magebean",
+        "version": "basic-2",
+        "note": "Numeric thresholds are Magebean policy; Adobe guidance informs topics and applicability."
+      }
+    },
+    {
+      "id": "MB-0785",
+      "revision": 1,
+      "title": "Magento cron execution has recent success and bounded backlog",
+      "criterion": "The read-only bounded cron_schedule observation contains recent successful execution within 24 hours and no overdue pending jobs beyond 15 minutes under Magebean readiness policy. The reported collection window is explicit; job-group completeness and external schedulers require separate evidence.",
+      "control": "MB-C07",
+      "severity": "low",
+      "alignments": [],
+      "obligations": [
+        {
+          "id": "O001",
+          "op": "all",
+          "role": "mandatory",
+          "proof": "verified_predicate",
+          "checks": [
+            {
+              "name": "cron_health",
+              "args": {
+                "recent_hours": 24,
+                "overdue_minutes": 15
+              }
+            }
+          ]
+        }
+      ],
+      "coverage": "AUTOMATED",
+      "verification": "automated",
+      "review_state": "accepted_scoped_criterion",
+      "human_evidence": {
+        "required": false,
+        "instructions": "",
+        "evidence_types": [
+          "scoped_observation"
+        ]
+      },
+      "target_modes": [
+        "LOCAL"
+      ],
+      "checks": [
+        {
+          "name": "cron_health",
+          "args": {
+            "recent_hours": 24,
+            "overdue_minutes": 15
+          }
+        }
+      ],
+      "op": "all",
+      "family": "magebean",
+      "source": {
+        "document": "Magebean security requirements",
+        "version": "1",
+        "reference": "magebean/basic-adobe/MB-0785"
+      },
+      "lane": "readiness",
+      "guidance_sources": [
+        "https://experienceleague.adobe.com/en/docs/commerce-operations/configuration-guide/cli/configure-cron-jobs"
+      ],
+      "policy_source": {
+        "owner": "Magebean",
+        "version": "basic-2",
+        "note": "Numeric thresholds are Magebean policy; Adobe guidance informs topics and applicability."
       }
     }
   ]

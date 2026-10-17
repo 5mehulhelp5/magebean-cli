@@ -722,7 +722,24 @@
         "MB-0046",
         "MB-0049",
         "MB-0050",
-        "MB-0730"
+        "MB-0730",
+        "MB-0009",
+        "MB-0027",
+        "MB-0042",
+        "MB-0100",
+        "MB-0773",
+        "MB-0774",
+        "MB-0775",
+        "MB-0776",
+        "MB-0777",
+        "MB-0778",
+        "MB-0779",
+        "MB-0780",
+        "MB-0781",
+        "MB-0782",
+        "MB-0783",
+        "MB-0784",
+        "MB-0785"
       ],
       "aliases": [
         "default",
@@ -730,7 +747,68 @@
       ],
       "report_template": "standard",
       "automation_only": true,
-      "family": "magebean"
+      "family": "magebean",
+      "revision": 2,
+      "description": "Magebean checks informed by Adobe guidance, separated into security, readiness and external evidence. Observations are scoped; this is not Adobe compliance certification.",
+      "evidence_tasks": [
+        {
+          "id": "basic-auth-enforcement",
+          "title": "Admin authentication and least privilege",
+          "evidence_needed": [
+            "Identify native authentication versus Adobe IMS and retain provider/MFA policy evidence.",
+            "Verify administrator enrollment, bypass resistance, unique accounts and approved least-privilege roles.",
+            "Confirm authenticated Admin session expiry and protections at the actual Admin origin."
+          ],
+          "applicability": "All Admin deployments; native settings may not apply to IMS."
+        },
+        {
+          "id": "basic-runtime-boundary",
+          "title": "Web runtime permissions and effective document root",
+          "evidence_needed": [
+            "Confirm the effective web document root is pub, or document an equivalent reviewed boundary.",
+            "Demonstrate that the actual PHP/web identity cannot write production code, including ACLs and mounts.",
+            "Verify media execution denial and sensitive configuration locks/precedence."
+          ],
+          "applicability": "Local or hosted Magento deployments; deployment-owner write access is not runtime access."
+        },
+        {
+          "id": "basic-edge-access",
+          "title": "WAF, Admin access restrictions and SSH MFA",
+          "evidence_needed": [
+            "Retain WAF policy and monitoring evidence for the chosen hosting architecture.",
+            "Review Admin network access controls and SSH MFA or equivalent controlled administrative access."
+          ],
+          "applicability": "Hosting/access model dependent; Fastly or Adobe Cloud is not mandatory."
+        },
+        {
+          "id": "basic-monitoring",
+          "title": "Scheduled security scanning and notification ownership",
+          "evidence_needed": [
+            "Provide an Adobe Security Scan or equivalent schedule, recent results and remediation owner.",
+            "Verify notification routing and follow-up on findings."
+          ],
+          "applicability": "Public and operational deployments; scanner access must match scope."
+        },
+        {
+          "id": "basic-recovery",
+          "title": "Backups and tested restore",
+          "evidence_needed": [
+            "Retain backup schedule, retention/access controls and a recent successful restore exercise."
+          ],
+          "applicability": "Production data and recovery architecture."
+        },
+        {
+          "id": "basic-deployment-coverage",
+          "title": "Store, cache, static and scheduler runtime coverage",
+          "evidence_needed": [
+            "Confirm all active store and Admin origins use valid TLS and secure policies.",
+            "Match active themes/locales to deployed artifacts or document headless delivery.",
+            "Verify actual cache behavior and external/cloud/container scheduler execution, job groups and old failed/missed jobs.",
+            "Review effective runtime mode, worker/store debug overrides and lock precedence."
+          ],
+          "applicability": "Production readiness; bounded CLI observations do not establish complete runtime coverage."
+        }
+      ]
     },
     "hardening": {
       "id": "hardening",

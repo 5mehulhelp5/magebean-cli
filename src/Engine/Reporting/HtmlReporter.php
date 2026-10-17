@@ -82,6 +82,15 @@ final class HtmlReporter
 
             // Cột nội dung: chỉ in message theo yêu cầu mới
             $messageParts = ['<div style="color:#333;margin-top:4px;">' . $title . '</div>'];
+            if (in_array($f['requirement']['lane'] ?? '', ['security', 'readiness'], true)) {
+                $messageParts[] = '<div><strong>' . ucfirst($f['requirement']['lane']) . '</strong></div>';
+            }
+            if ($this->showDetails && !empty($f['requirement']['policy_source'])) {
+                $policy = $f['requirement']['policy_source'];
+                $label = trim(($policy['owner'] ?? '') . ' ' . ($policy['version'] ?? ''));
+                $messageParts[] = '<div>Policy: ' . htmlspecialchars($label, ENT_QUOTES, 'UTF-8') . '</div>';
+                if (!empty($policy['note'])) $messageParts[] = '<div>' . htmlspecialchars((string)$policy['note'], ENT_QUOTES, 'UTF-8') . '</div>';
+            }
             if ($userMsg !== '') {
                 $messageParts[] = '<div style="margin-top:4px;"><i>' . $userMsg . '</i></div>';
             }
@@ -162,6 +171,25 @@ final class HtmlReporter
             $html = str_replace('</body>', $confHtml . '</body>', $html);
         }
 
+        $coverageHtml = '';
+        foreach ($sum['lanes'] ?? [] as $lane => $counts) {
+            $coverageHtml .= '<p>' . htmlspecialchars(ucfirst((string)$lane), ENT_QUOTES, 'UTF-8') . ': '
+                . (int)$counts['passed'] . ' passed · ' . (int)$counts['failed'] . ' failed · ' . (int)$counts['unresolved'] . ' unresolved</p>';
+        }
+        if ($coverageHtml !== '') $coverageHtml = '<section><h3>Requirement lanes</h3>' . $coverageHtml . '</section>';
+        if (!empty($result['evidence_tasks'])) {
+            $escape = static fn(string $text): string => htmlspecialchars($text, ENT_QUOTES, 'UTF-8');
+            $coverageHtml .= '<section><h3>External evidence checklist</h3><p>Not assessed by this scan; excluded from automated pass counts.</p><ul>';
+            foreach ($result['evidence_tasks'] as $task) {
+                $needed = $task['evidence_needed'] ?? '';
+                if (is_array($needed)) $needed = implode('; ', $needed);
+                $coverageHtml .= '<li><strong>NOT ASSESSED: ' . $escape((string)($task['title'] ?? $task['id'] ?? 'Evidence')) . '</strong><p>Evidence: ' . $escape((string)$needed) . '</p>';
+                if (!empty($task['applicability'])) $coverageHtml .= '<p>Applies: ' . $escape((string)$task['applicability']) . '</p>';
+                $coverageHtml .= '</li>';
+            }
+            $coverageHtml .= '</ul></section>';
+        }
+        $html = str_replace('</body>', $coverageHtml . '</body>', $html);
         $footer = '<p>This report was generated using Magebean CLI, based on the <a href="https://magebean.com/baseline" target="_blank">Magebean Security Baseline v1</a>. Findings are provided for informational and audit purposes only.</p>';
         $html = str_replace('</body>', $footer . '</body>', $html);
 

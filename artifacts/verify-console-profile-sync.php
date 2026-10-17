@@ -20,7 +20,9 @@ foreach($profiles as $profile){
     echo $profile->key,': ',count($ids),' requirements; source: ',$profile->requirement_source_label,PHP_EOL;
 }
 $html=view('console.baseline-profile-options',['pickerProfiles'=>$profiles,'pickerContext'=>'create'])->render();
-if(str_contains($html,'Complete internal requirement inventory')||str_contains($html,'External deployment evidence')||str_contains($html,' checks'))throw new RuntimeException('Coverage picker still offers old profile or counts checks.');
+if(str_contains($html,'Complete internal requirement inventory')||str_contains($html,'External deployment evidence')||preg_match('/\b\d+\s+checks\b/',$html))throw new RuntimeException('Coverage picker still offers old profile or counts checks.');
+$basic=$profiles->firstWhere('key','basic');
+if(count($basic->external_evidence_tasks??[])!==count($catalog['basic']['evidence_tasks']??[]))throw new RuntimeException('Basic external evidence checklist differs from CLI.');
 foreach(['baseline','external'] as $key){
     $old=App\Models\Profile::query()->where('key',$key)->first();
     echo 'Removed profile ',$key,': ',$old?->status??'absent',PHP_EOL;

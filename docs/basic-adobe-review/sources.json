@@ -1,0 +1,84 @@
+{
+  "reviewed_at": "2026-10-17",
+  "profile": "basic",
+  "sources": [
+    {
+      "title": "Secure your Commerce site and infrastructure",
+      "url": "https://experienceleague.adobe.com/en/docs/commerce-operations/implementation-playbook/best-practices/launch/security-best-practices",
+      "accessed": "2026-10-17",
+      "publisher": "Adobe",
+      "use": "Recommendation provenance; exact automation thresholds remain Magebean policy"
+    },
+    {
+      "title": "Configure Admin security",
+      "url": "https://experienceleague.adobe.com/en/docs/commerce-admin/systems/security/security-admin",
+      "accessed": "2026-10-17",
+      "publisher": "Adobe",
+      "use": "Recommendation provenance; exact automation thresholds remain Magebean policy"
+    },
+    {
+      "title": "Store URLs",
+      "url": "https://experienceleague.adobe.com/en/docs/commerce-admin/stores-sales/site-store/store-urls",
+      "accessed": "2026-10-17",
+      "publisher": "Adobe",
+      "use": "Recommendation provenance; exact automation thresholds remain Magebean policy"
+    },
+    {
+      "title": "File systems access permissions",
+      "url": "https://experienceleague.adobe.com/en/docs/commerce-operations/configuration-guide/deployment/file-system-permissions",
+      "accessed": "2026-10-17",
+      "publisher": "Adobe",
+      "use": "Recommendation provenance; exact automation thresholds remain Magebean policy"
+    },
+    {
+      "title": "File ownership and permissions",
+      "url": "https://experienceleague.adobe.com/en/docs/commerce-operations/installation-guide/prerequisites/file-system/overview",
+      "accessed": "2026-10-17",
+      "publisher": "Adobe",
+      "use": "Recommendation provenance; exact automation thresholds remain Magebean policy"
+    },
+    {
+      "title": "Modify docroot to improve security",
+      "url": "https://experienceleague.adobe.com/en/docs/commerce-operations/installation-guide/tutorials/docroot",
+      "accessed": "2026-10-17",
+      "publisher": "Adobe",
+      "use": "Recommendation provenance; exact automation thresholds remain Magebean policy",
+      "verification_note": "Coordinator could not refetch this page; docroot candidate requires additional source verification before implementation."
+    },
+    {
+      "title": "Configure cron jobs",
+      "url": "https://experienceleague.adobe.com/en/docs/commerce-operations/configuration-guide/cli/configure-cron-jobs",
+      "accessed": "2026-10-17",
+      "publisher": "Adobe",
+      "use": "Recommendation provenance; exact automation thresholds remain Magebean policy"
+    },
+    {
+      "title": "Code compiler",
+      "url": "https://experienceleague.adobe.com/en/docs/commerce-operations/configuration-guide/cli/code-compiler",
+      "accessed": "2026-10-17",
+      "publisher": "Adobe",
+      "use": "Recommendation provenance; exact automation thresholds remain Magebean policy"
+    },
+    {
+      "title": "Commerce PHP Extensions security",
+      "url": "https://developer.adobe.com/commerce/php/best-practices/security/",
+      "accessed": "2026-10-17",
+      "publisher": "Adobe",
+      "use": "Recommendation provenance; exact automation thresholds remain Magebean policy"
+    },
+    {
+      "title": "Prevent clickjacking exploits",
+      "url": "https://experienceleague.adobe.com/en/docs/commerce-operations/configuration-guide/security/xframe-options",
+      "accessed": "2026-10-17",
+      "publisher": "Adobe",
+      "use": "Recommendation provenance; exact automation thresholds remain Magebean policy"
+    },
+    {
+      "title": "Magento native TwoFactorAuth provider DI",
+      "url": "https://raw.githubusercontent.com/magento/security-package/develop/TwoFactorAuth/etc/di.xml",
+      "accessed": "2026-10-17",
+      "publisher": "Magento / Adobe",
+      "use": "Provider engine architecture; develop branch snapshot, not certification of every release"
+    }
+  ]
+}

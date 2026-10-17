@@ -102,6 +102,21 @@ final class ScanConsoleRenderer
         $manualRulesHidden = (int)($result['meta']['manual_rules_hidden'] ?? 0);
         $manualRulesIncluded = (bool)($result['meta']['manual_rules_included'] ?? false);
         $out->writeln(sprintf('Rules         <info>%d</info> / <info>%d</info> selected', $total, $profileRulesTotal));
+        foreach ($sum['lanes'] ?? [] as $lane => $counts) {
+            $out->writeln(sprintf('%-14s%d passed · %d failed · %d unresolved', ucfirst($lane), $counts['passed'], $counts['failed'], $counts['unresolved']));
+        }
+        if (!empty($result['evidence_tasks'])) {
+            $out->writeln('<options=bold>EXTERNAL EVIDENCE CHECKLIST</>');
+            $out->writeln('  Not assessed by this scan; these items do not contribute to automated pass counts.');
+            foreach ($result['evidence_tasks'] as $task) {
+                $escape = static fn(string $text): string => \Symfony\Component\Console\Formatter\OutputFormatter::escape($text);
+                $out->writeln('  [NOT ASSESSED] ' . $escape((string)($task['title'] ?? $task['id'] ?? 'Evidence')));
+                $needed = $task['evidence_needed'] ?? '';
+                if (is_array($needed)) $needed = implode('; ', $needed);
+                if ($needed !== '') $out->writeln('    Evidence: ' . $escape((string)$needed));
+                if (!empty($task['applicability'])) $out->writeln('    Applies: ' . $escape((string)$task['applicability']));
+            }
+        }
         if ($manualRulesHidden > 0) {
             $out->writeln(sprintf('Manual rules  <fg=cyan;options=bold>%d not evaluated</> (use <info>--include-manual-review</info> to include)', $manualRulesHidden));
         } elseif ($manualRulesIncluded && $profileManualRulesTotal > 0) {
@@ -256,6 +271,7 @@ final class ScanConsoleRenderer
             $line = $id !== ''
                 ? sprintf('%s<href=https://magebean.com/baseline/%2$s>%2$s</>  %3$s', $statusTag, $id, $text)
                 : sprintf('%s%s', $statusTag, $text);
+            if (($f['requirement']['lane'] ?? '') === 'readiness') $line = '[READINESS] ' . $line;
             $out->writeln(($showRuleDetails ? (in_array($status, ['PASS', 'FAIL'], true) ? '  ' . $sevBadge($sev) . ' ' : '  ') : '    ') . $line);
 
             if ($status === 'MANUAL_REVIEW') {
@@ -276,6 +292,12 @@ final class ScanConsoleRenderer
 
 
             if ($showRuleDetails) {
+                $policy = $f['requirement']['policy_source'] ?? [];
+                if ($policy !== []) {
+                    $label = trim((string)($policy['owner'] ?? '') . ' ' . (string)($policy['version'] ?? ''));
+                    $out->writeln('    Policy: ' . \Symfony\Component\Console\Formatter\OutputFormatter::escape($label));
+                    if (!empty($policy['note'])) $out->writeln('    ' . \Symfony\Component\Console\Formatter\OutputFormatter::escape((string)$policy['note']));
+                }
                 $this->renderCheckDetails($out, $f);
             }
 

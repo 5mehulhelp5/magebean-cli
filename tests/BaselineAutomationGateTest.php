@@ -22,7 +22,7 @@ try {
  gateAssert($fs->fileOwnerGroupMatches(['strict_observation'=>true,'file'=>'app/etc/env.php','owner_reference'=>'missing'])[0]===null,'Missing ownership reference UNKNOWN');
  $magento=new MagentoCheck(new Context($dir,''));$moduleArgs=['declared_scope_only'=>true];
  gateAssert($magento->adminTwoFactorAuthEnabled($moduleArgs)[0]===null,'Missing config UNKNOWN');
- foreach ([['modules'=>[]],['modules'=>['Magento_TwoFactorAuth'=>0,'Magento_GoogleAuthenticator'=>1]],['modules'=>['Magento_TwoFactorAuth'=>1,'Magento_GoogleAuthenticator'=>1]]] as $i=>$cfg){file_put_contents($dir.'/app/etc/config.php','<?php return '.var_export($cfg,true).';');gateAssert($magento->adminTwoFactorAuthEnabled($moduleArgs)[0]===($i===2),'Declared core plus provider state evaluated');}
+ foreach ([['modules'=>[]],['modules'=>['Magento_TwoFactorAuth'=>0]],['modules'=>['Magento_TwoFactorAuth'=>1],'system'=>['default'=>['twofactorauth/general/force_providers'=>'google']]]] as $i=>$cfg){file_put_contents($dir.'/app/etc/config.php','<?php return '.var_export($cfg,true).';');gateAssert($magento->adminTwoFactorAuthEnabled($moduleArgs)[0]===([null,false,true][$i]),'Missing state, disabled native MFA and configured engine are distinct');}
  file_put_contents($dir.'/app/etc/config.php','<?php return ["modules"=>["Magento_TwoFactorAuth"=>"invalid"]];');gateAssert($magento->adminTwoFactorAuthEnabled($moduleArgs)[0]===null,'Malformed declared state UNKNOWN');
  $composer=new ComposerPolicyChecks(new Context($dir,''));$policy=['project_local_only'=>true,'sections'=>['require','require-dev'],'deny_wildcard'=>true];
  gateAssert($composer->jsonConstraints($policy)[0]===null,'Missing project manifest UNKNOWN');

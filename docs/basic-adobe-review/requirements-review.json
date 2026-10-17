@@ -1,0 +1,644 @@
+{
+    "reviewed_at": "2026-10-17",
+    "scope": "Current20 Basic Magebean definitions and implementation/source review; not20 completed integration validations. Decision changes not applied.",
+    "catalog_sha256": "1ebed1206ad3e24e7f879b3eb84469598ab2013231b4ee31dc15845a2c5f0901",
+    "profiles_sha256": "f839b50e645d5cc85424c161063e0ba69d66041fbc4e4a67b7e5c65457dd2638",
+    "requirements": [
+        {
+            "id": "MB-0001",
+            "title": "No world-writable files or directories",
+            "family": "magebean",
+            "current_criterion": "No world-writable files or directories; assess only the collected Magento deployment scope.",
+            "checks": [
+                {
+                    "name": "fs_no_world_writable",
+                    "args": {
+                        "path": ".",
+                        "max_results": 50,
+                        "strict_observation": true
+                    }
+                }
+            ],
+            "execution_variants": [],
+            "decision": "KEEP",
+            "topic": "Permissions",
+            "lane": "security",
+            "action": "Keep world-write findings; inventory must disclose symlink/unreadable/traversal gaps."
+        },
+        {
+            "id": "MB-0002",
+            "title": "env.php satisfies configured mode and ownership policy",
+            "family": "magebean",
+            "current_criterion": "The collected app/etc/env.php Unix permission bits are a subset of configured mode 0640, and its owner and group match the configured reference paths (the project root by default). This is an explicit deployment ownership policy, not proof of effective ACL or web-process access restrictions.",
+            "checks": [
+                {
+                    "name": "file_mode_max",
+                    "args": {
+                        "file": "app/etc/env.php",
+                        "max_octal": "0640",
+                        "strict_observation": true
+                    }
+                },
+                {
+                    "name": "file_owner_group_matches",
+                    "args": {
+                        "file": "app/etc/env.php",
+                        "owner_reference": ".",
+                        "group_reference": ".",
+                        "strict_observation": true
+                    }
+                }
+            ],
+            "execution_variants": [],
+            "decision": "REVISE",
+            "topic": "Permissions",
+            "lane": "security",
+            "action": "Retain env.php protection; configurable deployment ownership and ACL/runtime access evidence instead of treating project-root owner and0640 as Adobe universal policy."
+        },
+        {
+            "id": "MB-0003",
+            "title": "Webroot hygiene (no .git/.env/backups in pub/)",
+            "family": "magebean",
+            "current_criterion": "Webroot hygiene (no .git/.env/backups in pub/); assess only the collected Magento deployment scope.",
+            "checks": [
+                {
+                    "name": "fs_webroot_artifact_policy",
+                    "args": {
+                        "webroot": "pub",
+                        "forbidden": [
+                            ".git",
+                            ".env",
+                            ".env.local",
+                            ".env.*",
+                            "*.bak",
+                            "*.old",
+                            "*~"
+                        ]
+                    }
+                }
+            ],
+            "execution_variants": [],
+            "decision": "EXPAND",
+            "topic": "Exposure",
+            "lane": "security",
+            "action": "Filesystem pub hygiene is partial; add effective document-root/context and safe HTTP sensitive-path observations."
+        },
+        {
+            "id": "MB-0005",
+            "title": "Directory listing absent on probed Magento paths",
+            "family": "magebean",
+            "current_criterion": "Successful responses from the configured runtime endpoint on /media/, /static/, /errors/ and /var/ must not expose recognizable directory-index markup. Scope is these paths at scan time; transport or unsupported responses are inconclusive.",
+            "checks": [
+                {
+                    "name": "http_no_directory_listing",
+                    "args": {
+                        "paths": [
+                            "/media/",
+                            "/static/",
+                            "/errors/",
+                            "/var/"
+                        ],
+                        "timeout_ms": 8000,
+                        "strict_scope": true
+                    }
+                }
+            ],
+            "execution_variants": {
+                "REMOTE": {
+                    "obligations": [
+                        {
+                            "id": "O001",
+                            "op": "all",
+                            "role": "mandatory",
+                            "proof": "verified_predicate",
+                            "checks": [
+                                {
+                                    "name": "http_no_directory_listing",
+                                    "args": {
+                                        "paths": [
+                                            "/media/",
+                                            "/static/",
+                                            "/errors/",
+                                            "/var/"
+                                        ],
+                                        "timeout_ms": 8000,
+                                        "strict_scope": true
+                                    }
+                                }
+                            ]
+                        }
+                    ]
+                }
+            },
+            "decision": "KEEP",
+            "topic": "Exposure",
+            "lane": "security",
+            "action": "Keep bounded directory-listing observations; no claim that all routes/hosts are tested."
+        },
+        {
+            "id": "MB-0006",
+            "title": "Declared backend route differs from admin",
+            "family": "magebean",
+            "current_criterion": "The collected app/etc/env.php backend.frontName declaration is a valid non-empty route and differs case-insensitively from admin. This assesses the configured backend route; route entropy and actual public reachability require separate evidence.",
+            "checks": [
+                {
+                    "name": "magento_admin_frontname_declared",
+                    "args": []
+                }
+            ],
+            "execution_variants": [],
+            "decision": "REVISE",
+            "topic": "Admin",
+            "lane": "security",
+            "action": "Only rejects admin; common backend passes. Scope uncommon route policy and effective custom URL overrides; route concealment is not authorization."
+        },
+        {
+            "id": "MB-0007",
+            "title": "Admin 2FA core and provider modules declared enabled",
+            "family": "magebean",
+            "current_criterion": "In app/etc/config.php, the Magento_TwoFactorAuth module and at least one configured Magento admin 2FA provider module are declared enabled; this predicate assesses declared module state only.",
+            "checks": [
+                {
+                    "name": "magento_admin_2fa_enabled",
+                    "args": {
+                        "file": "app/etc/config.php",
+                        "core_module": "Magento_TwoFactorAuth",
+                        "provider_modules": [
+                            "Magento_GoogleAuthenticator",
+                            "Magento_DuoSecurity",
+                            "Magento_U2fKey",
+                            "Magento_AdminAdobeImsTwoFactorAuth"
+                        ],
+                        "declared_scope_only": true
+                    }
+                }
+            ],
+            "execution_variants": [],
+            "decision": "REPLACE_BINDING",
+            "topic": "MFA",
+            "lane": "security",
+            "action": "Provider engines/required-provider settings and native-versus-IMS applicability must replace the separate-provider-module assumption. Enrollment/enforcement remains separate evidence."
+        },
+        {
+            "id": "MB-0728",
+            "title": "Configured admin password minimum is at least eight",
+            "family": "magebean",
+            "current_criterion": "The collected admin password minimum declaration, or the installed Magento User validator minimum when no declaration overrides it, is at least eight characters. This checks the observed admin policy, not every user password or ASVS conformance.",
+            "checks": [
+                {
+                    "name": "magento_admin_password_minimum_configured",
+                    "args": {
+                        "min_length": 8
+                    }
+                }
+            ],
+            "execution_variants": [],
+            "decision": "KEEP_WITH_POLICY_LABEL",
+            "topic": "Admin",
+            "lane": "security",
+            "action": "Current resolver uses installed config/validator. Threshold8 is Magebean policy, not an Adobe universal minimum; version capability and IMS scope required."
+        },
+        {
+            "id": "MB-0011",
+            "title": "Configured admin login CAPTCHA or bounded lockout",
+            "family": "magebean",
+            "current_criterion": "Default-scope Magento admin login configuration enables native CAPTCHA for backend_login, recognized backend_login reCAPTCHA, or a positive lockout failure limit at most 10 with a positive lockout threshold. Locked env.php/config.php settings precede core_config_data. Custom authentication enforcement and runtime effectiveness require separate evidence.",
+            "checks": [
+                {
+                    "name": "magento_admin_login_protection_configured",
+                    "args": {
+                        "max_lockout_failures": 10
+                    }
+                }
+            ],
+            "execution_variants": [],
+            "decision": "SPLIT_OR_REPORT_COMPONENTS",
+            "topic": "Admin",
+            "lane": "security",
+            "action": "CAPTCHA OR bounded lockout does not report both protections independently; add reset throttling and do not label all Admin security satisfied. Current resolver already reads locked files/database/installed defaults."
+        },
+        {
+            "id": "MB-0026",
+            "title": "Force HTTPS in admin and storefront",
+            "family": "magebean",
+            "current_criterion": "The observed HTTP storefront root and declared backend.frontName entrypoint redirect directly with 301/302/303/307/308 to same-host HTTPS. This is an entrypoint probe, not a universal guarantee for every deployment route.",
+            "checks": [
+                {
+                    "name": "http_force_https_redirect",
+                    "args": {
+                        "strict_scope": true,
+                        "include_admin": true
+                    }
+                }
+            ],
+            "execution_variants": {
+                "REMOTE": {
+                    "obligations": [
+                        {
+                            "id": "O001",
+                            "op": "all",
+                            "role": "mandatory",
+                            "proof": "verified_predicate",
+                            "checks": [
+                                {
+                                    "name": "http_force_https_redirect",
+                                    "args": {
+                                        "strict_scope": true,
+                                        "include_admin": true
+                                    }
+                                }
+                            ]
+                        }
+                    ]
+                }
+            },
+            "decision": "REVISE",
+            "topic": "Transport",
+            "lane": "security",
+            "action": "Split storefront/admin evidence; URL-only admin route unavailable leads UNKNOWN. Explicit admin context or separate omission must preserve storefront results."
+        },
+        {
+            "id": "MB-0028",
+            "title": "Runtime endpoint rejects legacy TLS",
+            "family": "magebean",
+            "current_criterion": "The assessed runtime host and port must accept TLS 1.2 or 1.3 and reject TLS 1.0 and 1.1. Rejection requires peer protocol-version alerts or successful active protocol enumeration; client-side protocol restrictions and connection failures are not proof.",
+            "checks": [
+                {
+                    "name": "http_tls_min_version",
+                    "args": {
+                        "timeout_ms": 8000,
+                        "strict_scope": true
+                    }
+                }
+            ],
+            "execution_variants": {
+                "REMOTE": {
+                    "obligations": [
+                        {
+                            "id": "O001",
+                            "op": "all",
+                            "role": "mandatory",
+                            "proof": "verified_predicate",
+                            "checks": [
+                                {
+                                    "name": "http_tls_min_version",
+                                    "args": {
+                                        "timeout_ms": 8000,
+                                        "strict_scope": true
+                                    }
+                                }
+                            ]
+                        }
+                    ]
+                }
+            },
+            "decision": "KEEP",
+            "topic": "Transport",
+            "lane": "security",
+            "action": "Bounded legacy TLS rejection is useful; independently report certificate/hostname validity and proxy endpoint scope."
+        },
+        {
+            "id": "MB-0029",
+            "title": "Literal HTTP asset references absent in assessed markup/CSS",
+            "family": "magebean",
+            "current_criterion": "In LOCAL mode, readable markup/CSS files under app must contain no literal HTTP subresource or form-action references. In REMOTE mode, successful HTTPS pages at configured paths must contain no literal HTTP subresource/form references. Dynamic code-generated URLs, external stylesheets and unvisited routes require separate assessment.",
+            "checks": [
+                {
+                    "name": "code_no_mixed_content",
+                    "args": {
+                        "paths": [
+                            "app"
+                        ],
+                        "include_ext": [
+                            "phtml",
+                            "html",
+                            "xml",
+                            "css",
+                            "less"
+                        ],
+                        "max_results": 50,
+                        "strict_scope": true
+                    }
+                }
+            ],
+            "execution_variants": {
+                "REMOTE": {
+                    "obligations": [
+                        {
+                            "id": "O001",
+                            "op": "all",
+                            "role": "mandatory",
+                            "proof": "verified_predicate",
+                            "checks": [
+                                {
+                                    "name": "http_no_mixed_content",
+                                    "args": {
+                                        "paths": [
+                                            "/"
+                                        ],
+                                        "timeout_ms": 8000,
+                                        "strict_scope": true
+                                    }
+                                }
+                            ]
+                        }
+                    ]
+                }
+            },
+            "decision": "KEEP_SCOPED",
+            "topic": "Transport",
+            "lane": "security",
+            "action": "Literal HTTP references in assessed markup are partial; include deployed/theme/storefront scope and omitted dynamic assets."
+        },
+        {
+            "id": "MB-0030",
+            "title": "Sensitive cookies use Secure, HttpOnly, and SameSite",
+            "family": "magebean",
+            "current_criterion": "Sensitive session/admin cookies actually emitted by successful same-host HTTPS responses on the configured probe paths have exact Secure and HttpOnly attributes and SameSite=Lax or Strict. This assesses observed cookie emissions, not unobserved authenticated sessions.",
+            "checks": [
+                {
+                    "name": "http_cookie_flags",
+                    "args": {
+                        "strict_scope": true,
+                        "paths": [
+                            "/",
+                            "/customer/account/login",
+                            "/checkout/cart"
+                        ]
+                    }
+                }
+            ],
+            "execution_variants": {
+                "REMOTE": {
+                    "obligations": [
+                        {
+                            "id": "O001",
+                            "op": "all",
+                            "role": "mandatory",
+                            "proof": "verified_predicate",
+                            "checks": [
+                                {
+                                    "name": "http_cookie_flags",
+                                    "args": {
+                                        "strict_scope": true,
+                                        "paths": [
+                                            "/",
+                                            "/customer/account/login",
+                                            "/checkout/cart"
+                                        ]
+                                    }
+                                }
+                            ]
+                        }
+                    ]
+                }
+            },
+            "decision": "REVISE",
+            "topic": "Cookies",
+            "lane": "security",
+            "action": "Observed anonymous cookie emissions are partial; authenticated Admin/session and integration-specific SameSite exceptions need context."
+        },
+        {
+            "id": "MB-0031",
+            "title": "Declared Magento deployment mode is production",
+            "family": "magebean",
+            "current_criterion": "The collected app/etc/env.php MAGE_MODE declaration equals production. Runtime environment overrides and actual web process state require separate evidence.",
+            "checks": [
+                {
+                    "name": "magento_production_mode",
+                    "args": {
+                        "file": "app/etc/env.php",
+                        "path": "MAGE_MODE",
+                        "equals": "production"
+                    }
+                }
+            ],
+            "execution_variants": [],
+            "decision": "KEEP_SCOPED",
+            "topic": "Deployment",
+            "lane": "readiness",
+            "action": "Persisted production mode is useful; report that environment/runtime can override it."
+        },
+        {
+            "id": "MB-0729",
+            "title": "Declared project debug settings are disabled",
+            "family": "magebean",
+            "current_criterion": "Inspected default-scope project Magento debug/inline-translation declarations and project PHP ini display_errors/display_startup_errors and Xdebug declarations must not enable debug output. Absent declarations are not enabled declarations in this scope; web-worker runtime, custom integrations and all-component ASVS conformance are outside this predicate.",
+            "checks": [
+                {
+                    "name": "magento_deployment_debug_flags_disabled",
+                    "args": []
+                }
+            ],
+            "execution_variants": [],
+            "decision": "KEEP_SCOPED",
+            "topic": "Debug",
+            "lane": "security",
+            "action": "Default-scope declarations are useful; do not confuse absence with web-worker/website/store runtime proof. Current resolver already supports database/installed defaults."
+        },
+        {
+            "id": "MB-0035",
+            "title": "Published static artifacts present in assessed deployment",
+            "family": "magebean",
+            "current_criterion": "In LOCAL mode, pub/static/frontend or pub/static/adminhtml must contain at least one readable, nonempty published CSS/JS/font/image artifact. In REMOTE mode, same-origin Magento static CSS/JS assets referenced by the retrieved storefront must return nonempty non-HTML content with HTTP 200. This verifies observed deployment artifacts, not completeness of every theme, locale or route.",
+            "checks": [
+                {
+                    "name": "fs_static_content_deployed",
+                    "args": {
+                        "static_path": "pub/static",
+                        "preprocessed_path": "var/view_preprocessed",
+                        "min_static_files": 1,
+                        "min_preprocessed_files": 1,
+                        "strict_scope": true
+                    }
+                }
+            ],
+            "execution_variants": {
+                "REMOTE": {
+                    "obligations": [
+                        {
+                            "id": "O001",
+                            "op": "all",
+                            "role": "mandatory",
+                            "proof": "verified_predicate",
+                            "checks": [
+                                {
+                                    "name": "http_static_assets_deployed",
+                                    "args": {
+                                        "timeout_ms": 8000,
+                                        "strict_scope": true
+                                    }
+                                }
+                            ]
+                        }
+                    ]
+                }
+            },
+            "decision": "STRENGTHEN",
+            "topic": "Deployment",
+            "lane": "readiness",
+            "action": "Keep static deployment topic; a single nonempty artifact is not active theme/locale/asset readiness."
+        },
+        {
+            "id": "MB-0037",
+            "title": "Declared Full Page Cache type enabled",
+            "family": "magebean",
+            "current_criterion": "The collected deployment app/etc/env.php declares cache_types.full_page enabled. This verifies the persisted Magento cache type state; Varnish selection and actual cache hit rates are separate observations.",
+            "checks": [
+                {
+                    "name": "cache_type_enabled",
+                    "args": {
+                        "file": "app/etc/env.php",
+                        "type": "full_page"
+                    }
+                }
+            ],
+            "execution_variants": {
+                "REMOTE": {
+                    "obligations": [
+                        {
+                            "id": "O001",
+                            "op": "all",
+                            "role": "mandatory",
+                            "proof": "heuristic",
+                            "checks": [
+                                {
+                                    "name": "http_cache_signals",
+                                    "args": {
+                                        "timeout_ms": 8000
+                                    }
+                                }
+                            ]
+                        }
+                    ]
+                }
+            },
+            "decision": "STRENGTHEN_AND_SPLIT_MODE",
+            "topic": "Cache",
+            "lane": "readiness",
+            "action": "Keep cache/FPC readiness; distinguish declaration/current status/observed runtime behavior. HTTP cache signals cannot prove local env.php declaration."
+        },
+        {
+            "id": "MB-0046",
+            "title": "Installed Magento cron entry present",
+            "family": "magebean",
+            "current_criterion": "At least one installed, syntactically valid cron entry invokes bin/magento cron:run for the collected deployment path. Sources include deployment-owner/current-user and configured-user crontabs plus /etc/crontab and /etc/cron.d. This verifies entry presence, not successful execution or an external orchestrator.",
+            "checks": [
+                {
+                    "name": "installed_magento_cron",
+                    "args": {
+                        "users": [
+                            "www-data",
+                            "nginx",
+                            "apache",
+                            "http",
+                            "www",
+                            "magento",
+                            "deploy"
+                        ],
+                        "timeout_ms": 2500
+                    }
+                }
+            ],
+            "execution_variants": [],
+            "decision": "STRENGTHEN",
+            "topic": "Cron",
+            "lane": "readiness",
+            "action": "Keep scheduler readiness; entry presence accepts yearly schedule and does not establish recent successful execution. External orchestrator context required."
+        },
+        {
+            "id": "MB-0049",
+            "title": "Composer dependency OSV advisory matches",
+            "family": "magebean",
+            "current_criterion": "Collected versioned Composer lock dependencies have no applicable OSV advisory matches in the successfully queried dataset, accounting for locally verified advisory-specific hotfix evidence. This does not certify absence of unknown vulnerabilities or uncollected runtime dependencies.",
+            "checks": [
+                {
+                    "name": "composer_audit_api",
+                    "args": {
+                        "lock_file": "composer.lock",
+                        "endpoint": "https://api.magebean.com/v1/osv/advisories",
+                        "timeout_ms": 10000,
+                        "batch_size": 500,
+                        "allow_private_http_fallback": true,
+                        "strict_scope": true
+                    }
+                }
+            ],
+            "execution_variants": [],
+            "decision": "KEEP_SCOPED",
+            "topic": "Dependencies",
+            "lane": "security",
+            "action": "Known advisory inventory remains valuable; show coverage/freshness/hotfix evidence and excluded runtime/browser dependencies. No claim zero unknown vulnerabilities."
+        },
+        {
+            "id": "MB-0050",
+            "title": "Adobe security release patch assessment",
+            "family": "magebean",
+            "current_criterion": "The collected Composer-locked Magento product version is current for its Adobe security release branch according to the successfully queried patch dataset, or each required advisory patch is satisfied by verified local alternative evidence. Unsupported branches and missing required patches fail; this does not certify runtime patch deployment outside collected files.",
+            "checks": [
+                {
+                    "name": "composer_adobe_security_patches_api",
+                    "args": {
+                        "lock_file": "composer.lock",
+                        "endpoint": "https://api.magebean.com/v1/adobe/security-patches",
+                        "timeout_ms": 10000,
+                        "allow_private_http_fallback": true,
+                        "strict_scope": true
+                    }
+                }
+            ],
+            "execution_variants": [],
+            "decision": "KEEP_SCOPED",
+            "topic": "Patches",
+            "lane": "security",
+            "action": "Keep branch security patch and alternative evidence assessment; distinguish edition/support entitlement/isolated patch applicability from latest-major upgrade preference."
+        },
+        {
+            "id": "MB-0730",
+            "title": "No configured secret patterns in deployed application files",
+            "family": "magebean",
+            "current_criterion": "Eligible deployed working-tree text files within configured paths and exclusions contain no configured secret-pattern matches. Git history is outside this basic deployment check. Runtime credential configuration app/etc/env.php is excluded; unreadable or oversized eligible files are collection errors.",
+            "checks": [
+                {
+                    "name": "working_tree_secret_scan",
+                    "args": {
+                        "paths": [
+                            "."
+                        ],
+                        "exclude_dirs": [
+                            ".git",
+                            "vendor",
+                            "var",
+                            "generated",
+                            "node_modules",
+                            "pub/media",
+                            "pub/static",
+                            "pub/cache",
+                            "setup",
+                            "dev/tests",
+                            "dev/tools",
+                            "app/etc/env.php"
+                        ],
+                        "patterns": [
+                            "AKIA[0-9A-Z]{16}",
+                            "ASIA[0-9A-Z]{16}",
+                            "AIza[0-9A-Za-z\\-_]{35}",
+                            "-----BEGIN [A-Z0-9 ]*PRIVATE KEY-----",
+                            "xox[baprs]-[0-9A-Za-z\\-]{10,48}",
+                            "sk_live_[0-9a-zA-Z]{24,}",
+                            "gh[pousr]_[0-9A-Za-z]{36,255}",
+                            "(api[_-]?key|client[_-]?secret|access[_-]?token|password)[[:space:]]*[\"']?[[:space:]]*(=>|=|:)[[:space:]]*[\"'][A-Za-z0-9_./+=-]{16,}[\"']"
+                        ],
+                        "max_results": 200,
+                        "max_file_bytes": 16777216
+                    }
+                }
+            ],
+            "execution_variants": [],
+            "decision": "KEEP_SCOPED",
+            "topic": "Secrets",
+            "lane": "security",
+            "action": "Keep bounded deployed pattern discovery with redaction; env.php is intentionally excluded from secret matching, so exposure/source-control checks are complementary."
+        }
+    ]
+}
