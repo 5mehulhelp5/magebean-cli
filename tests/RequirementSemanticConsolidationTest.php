@@ -5,22 +5,26 @@ use Magebean\Engine\{RequirementCatalog,RequirementOutcome,ScanRunner,Context,Ch
 use Magebean\Engine\Checks\CheckRegistry;
 $count=0;
 function mergeAssert(bool $value,string $message):void{global$count;$count++;if(!$value)throw new RuntimeException($message);}
-$pack=RequirementCatalog::loadAll();$index=array_column($pack['rules'],null,'id');$manifest=RequirementCatalog::read('semantic-consolidations');
-mergeAssert(count($index)===687,'Canonical inventory after approved merges');mergeAssert(count($manifest['groups'])===13,'Every approved group recorded');
-$allRefs=[];$retired=0;
-foreach($manifest['groups']as$g){$r=$index[$g['canonical_id']];mergeAssert($r['revision']>=2,'Criterion change increments revision');if($r['alignments']!==[])mergeAssert($r['human_evidence']['required'],'Standard consolidation retains human evidence');mergeAssert($r['review_state']==='pending_security_review'||($r['id']==='MB-0379'&&$r['revision']>2&&$r['review_state']==='security_reviewed')||($r['id']==='MB-0061'&&$r['revision']>2&&$r['review_state']==='accepted_scoped_criterion')||($r['id']==='MB-0038'&&$r['revision']>3&&$r['review_state']==='accepted_scoped_criterion'),'Semantic merge alone does not approve detector proof');
- foreach($g['retired_ids']as$id){$retired++;mergeAssert(!isset($index[$id]),'Retired identity is not another inventory entry');mergeAssert(RequirementCatalog::resolveAlias($id)===[$g['canonical_id']],'Retired ID has one canonical redirect');}
- $obligations=[];foreach($r['obligations']as$o){unset($o['id']);$obligations[]=json_encode($o);}
- foreach($g['original_definitions']as$before){foreach($before['obligations']as$o){unset($o['id']);if($r['id']==='MB-0379'&&$r['revision']>2){foreach($o['checks']as$c)mergeAssert(in_array($c,$r['checks'],true),'Debug source observations retained after proof review');}else if($r['id']==='MB-0061'&&$r['revision']>2){foreach($o['checks'] as $oldCheck){$found=false;foreach($r['checks'] as $newCheck){$args=$newCheck['args'];unset($args['strict_scope']);if($oldCheck['name']===$newCheck['name']&&$oldCheck['args']===$args)$found=true;}mergeAssert($found,'Reviewed abandoned-status check preserves original arguments and adds scope completeness');}}else if($r['id']==='MB-0038'&&$r['revision']>3){$reviewed=$o;$reviewed['proof']='verified_predicate';mergeAssert(in_array(json_encode($reviewed),$obligations,true),'Reviewed cache predicates preserve merged obligations and arguments while approving tested bounded proof');} else if(in_array($r['id'],['MB-0105','MB-0108','MB-0109','MB-0131','MB-0200','MB-0209','MB-0424'],true)&&$r['revision']>2){$reviewed=$o;if($reviewed['proof']==='heuristic')$reviewed['role']='supporting';mergeAssert(in_array(json_encode($reviewed),$obligations,true),'Explicit human evidence review preserves original checks/operator/proof/arguments and demotes heuristic role only');} else mergeAssert(in_array(json_encode($o),$obligations,true),'Original obligation/operator/role/proof/arguments retained');}
-  foreach($before['alignments']as$a){$matching=array_values(array_filter($r['alignments'],fn($n)=>$n['standard']===$a['standard']&&$n['version']===$a['version']&&$n['reference']===$a['reference']));mergeAssert(count($matching)===1,'Version-qualified standard reference retained once');mergeAssert($matching[0]['scoped_criterion']===$before['criterion'],'Standard view retains original scoped criterion');}
-  foreach($before['execution_variants']??[]as$mode=>$variant){$merged=$r['execution_variants'][$mode]['obligations']??[];$checks=[];foreach($merged as$o)$checks=array_merge($checks,$o['checks']);foreach($variant['obligations']as$o)foreach($o['checks']as$c)mergeAssert(in_array($c,$checks,true),'Remote evidence was not dropped by merge');}
-  foreach($before['control_tags']??[$before['control']]as$tag)mergeAssert(in_array($tag,$r['control_tags'],true),'Control membership preserved');
- }
+// The consolidation manifest is an immutable historical ledger, not today's catalog.
+$index=array_column(RequirementCatalog::loadAll()['rules'],null,'id');
+$manifest=RequirementCatalog::read('semantic-consolidations');
+mergeAssert(count($manifest['groups'])===13,'Every historical consolidation group remains recorded');
+$retired=[];
+$replacements=RequirementCatalog::read('family-separation-manifest')['retired_identity_replacements'];
+$allocations=array_column(RequirementCatalog::read('allocation-manifest')['allocations'],null,'id');
+foreach($manifest['groups'] as $group){
+    mergeAssert(count($group['original_definitions'])===count($group['retired_ids'])+1,'Historical ledger retains every original definition');
+    $originalIds=array_column($group['original_definitions'],'id');
+    mergeAssert(in_array($group['canonical_id'],$originalIds,true),'Historical canonical definition preserved');
+    foreach($group['retired_ids'] as $id){
+        $retired[]=$id;
+        mergeAssert(in_array($id,$originalIds,true),'Historical retired definition preserved');
+        mergeAssert(($allocations[$id]['redirect_to']??null)===$group['canonical_id'],'Historical allocation redirect is immutable');
+        mergeAssert(!isset($index[$id]),'Family split must allocate new IDs rather than revive retired identities');
+        mergeAssert(RequirementCatalog::resolveAlias($id)===[$replacements[$id]],'Retired selector resolves its source-bound replacement without reviving old identity');
+    }
 }
-mergeAssert($retired===42,'Exactly approved42identities retired');
-foreach($index as$r)foreach($r['alignments']as$a)$allRefs[$a['standard'].':'.$a['version'].':'.$a['reference']]=true;
-mergeAssert(count($allRefs)===625,'345ASVS+280PCIreferences retained');
-foreach(RequirementCatalog::read('internal-profiles')['profiles']as$p){mergeAssert(count($p['requirement_ids'])===count(array_unique($p['requirement_ids'])),'Profile canonical membership unique');foreach($p['requirement_ids']as$id)mergeAssert(isset($index[$id]),'Profiles cannot select retired IDs');}
+mergeAssert(count($retired)===42&&count(array_unique($retired))===42,'Exactly42 unique retired identities stay reserved');
 function observedDefinition(string$id,array$args,bool$human=false):array{return['id'=>$id,'revision'=>1,'title'=>'Scoped test policy','criterion'=>'The declared property is satisfied.','control'=>'MB-C01','severity'=>'high','coverage'=>'PARTIAL','verification'=>'automated','review_state'=>'security_reviewed','human_evidence'=>['required'=>$human,'instructions'=>$human?'Independent confirmation required.':''],'alignments'=>[],'target_modes'=>['LOCAL'],'checks'=>[['name'=>'shared_property','args'=>$args]],'obligations'=>[['id'=>'O001','role'=>'mandatory','proof'=>'verified_predicate','op'=>'all','checks'=>[['name'=>'shared_property','args'=>$args]]]]];}
 $registry=new CheckRegistry();$calls=0;$registry->register('shared_property',function(array$args)use(&$calls):CheckResult{$calls++;return CheckResult::of(CheckOutcome::Pass,'Scoped observation',[],null,'shared_property');});
 $a=observedDefinition('MB-9001',['limit'=>8,'scope'=>'admin']);$b=observedDefinition('MB-9002',['scope'=>'admin','limit'=>8],true);

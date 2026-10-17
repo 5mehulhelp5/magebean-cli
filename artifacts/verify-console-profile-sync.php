@@ -14,8 +14,10 @@ foreach($profiles as $profile){
     $ids=$profile->rules->pluck('rule_key')->sort()->values()->all();
     $expectedIds=$source['requirement_ids'];sort($expectedIds);
     if($ids!==$expectedIds)throw new RuntimeException('Profile membership differs: '.$profile->key);
+    foreach($profile->rules as$rule)if(($rule->standard_mapping['family']??null)!==$source['family'])throw new RuntimeException('Imported requirement family differs: '.$rule->rule_key);
+    if($profile->requirement_source_label===null)throw new RuntimeException('Profile source label missing: '.$profile->key);
     $profile->available=true;
-    echo $profile->key,': ',count($ids),' requirements',PHP_EOL;
+    echo $profile->key,': ',count($ids),' requirements; source: ',$profile->requirement_source_label,PHP_EOL;
 }
 $html=view('console.baseline-profile-options',['pickerProfiles'=>$profiles,'pickerContext'=>'create'])->render();
 if(str_contains($html,'Complete internal requirement inventory')||str_contains($html,'External deployment evidence')||str_contains($html,' checks'))throw new RuntimeException('Coverage picker still offers old profile or counts checks.');

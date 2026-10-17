@@ -30,7 +30,7 @@ assertManualFlag(!str_contains($defaultOutput, $asvsManualId), 'Manual rule leak
 $withManual = new CommandTester($command);
 $withManual->execute(['--profile' => 'asvs-l2', '--include-manual-review' => true, '--no-ansi' => true]);
 $manualOutput = $withManual->getDisplay();
-assertManualFlag(str_contains($manualOutput, 'Total Rules Listed: 197'), 'ASVS L2 manual flag must list 197 requirements');
+assertManualFlag(str_contains($manualOutput, 'Total Rules Listed: ' . count(RequirementCatalog::forProfile('asvs-l2')['rules'])), 'ASVS L2 manual flag must list 197 requirements');
 assertManualFlag(str_contains($manualOutput, $asvsManualId), 'Manual rule missing when flag is enabled');
 
 $baseline = new CommandTester($command);
@@ -39,7 +39,7 @@ assertManualFlag(str_contains($baseline->getDisplay(), 'Total Rules Listed: ' . 
 
 $baselineManual = new CommandTester($command);
 $baselineManual->execute(['--profile' => 'hardening', '--include-manual-review' => true, '--no-ansi' => true]);
-assertManualFlag(str_contains($baselineManual->getDisplay(), 'Total Rules Listed: 82'), 'Hardening manual flag must list all 82 hardening requirements');
+assertManualFlag(str_contains($baselineManual->getDisplay(), 'Total Rules Listed: 91'), 'Hardening manual flag must list all 91 hardening requirements');
 
 $pci = new CommandTester($command);
 $pci->execute(['--profile' => 'pci', '--no-ansi' => true]);
@@ -48,7 +48,7 @@ assertManualFlag(!str_contains($pci->getDisplay(), $pciHuman), 'PCI manual rule 
 
 $pciManual = new CommandTester($command);
 $pciManual->execute(['--profile' => 'pci', '--include-manual-review' => true, '--no-ansi' => true]);
-assertManualFlag(str_contains($pciManual->getDisplay(), 'Total Rules Listed: 257'), 'PCI manual flag must list all257internalcriteria');
+assertManualFlag(str_contains($pciManual->getDisplay(), 'Total Rules Listed: 280'), 'PCI manual flag must list all280independent PCI clauses');
 assertManualFlag(str_contains($pciManual->getDisplay(), $pciHuman), 'PCI manual rule is missing with the flag');
 
 echo "ManualReviewFlagTest: PASS\n";

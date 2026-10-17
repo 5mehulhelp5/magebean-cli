@@ -1,0 +1,3119 @@
+{
+    "scope": "Current active catalog. Exact criterion normalization only lowercases and collapses whitespace. Same check+args set or repeated observations do NOT prove equivalent obligations, scope, applicability or conformance. Default obligations only for detector comparisons; mode variants counted separately in other binding inventories. Empty check sets excluded.",
+    "catalog_count": 687,
+    "unique_ids": 687,
+    "requirements_with_default_checks": 215,
+    "default_check_occurrences": 366,
+    "distinct_default_check_argument_bindings": 165,
+    "within_requirement_repetition_count": 10,
+    "identical_criterion_group_count": 0,
+    "identical_check_set_group_count": 33,
+    "shared_binding_group_count": 87,
+    "profile_membership_rows": 1093,
+    "distinct_profile_requirement_ids": 678,
+    "duplicate_ids_within_profiles": [],
+    "historical_consolidation_retired_count": 42,
+    "historical_consolidation_group_count": 13,
+    "exact_criterion_groups": [],
+    "same_check_set_groups": [
+        {
+            "ids": [
+                "MB-0009",
+                "MB-0260",
+                "MB-0566"
+            ],
+            "titles": [
+                "Configured admin session lifetime is at most 900 seconds",
+                "There is an inactivity timeout such that re-authentication is enforced according to risk analysis and documented\u2026",
+                "PCI 8.2.8: If a user session has been idle for more than 15 minutes, the user is required to re-authenticate to re-activate the terminal or session"
+            ],
+            "checks": [
+                [
+                    "magento_admin_session_timeout",
+                    {
+                        "base_path": "system.default.admin.security",
+                        "file": "app/etc/config.php",
+                        "max_seconds": 900
+                    }
+                ]
+            ]
+        },
+        {
+            "ids": [
+                "MB-0015",
+                "MB-0163"
+            ],
+            "titles": [
+                "Forms include CSRF tokens (form_key)",
+                "Verify that, if the application does not rely on the CORS preflight mechanism to prevent disallowed cross-origin\u2026"
+            ],
+            "checks": [
+                [
+                    "code_csrf_form_key",
+                    {
+                        "paths": [
+                            "app"
+                        ]
+                    }
+                ]
+            ]
+        },
+        {
+            "ids": [
+                "MB-0016",
+                "MB-0120"
+            ],
+            "titles": [
+                "SSRF protections present",
+                "The application protects against Server-side Request Forgery (SSRF) attacks, by validating untrusted data against an\u2026"
+            ],
+            "checks": [
+                [
+                    "code_ssrf_safeguards",
+                    {
+                        "include_ext": [
+                            "php"
+                        ],
+                        "paths": [
+                            "app"
+                        ]
+                    }
+                ]
+            ]
+        },
+        {
+            "ids": [
+                "MB-0019",
+                "MB-0116"
+            ],
+            "titles": [
+                "No eval/assert/dynamic execution",
+                "The application avoids the use of eval() or other dynamic code execution features such as Spring Expression Language\u2026"
+            ],
+            "checks": [
+                [
+                    "code_dynamic_execution_safety",
+                    {
+                        "include_ext": [
+                            "php"
+                        ],
+                        "paths": [
+                            "app"
+                        ]
+                    }
+                ]
+            ]
+        },
+        {
+            "ids": [
+                "MB-0021",
+                "MB-0194",
+                "MB-0195",
+                "MB-0196"
+            ],
+            "titles": [
+                "Secure file upload handling",
+                "The application will only accept files of a size which it can process without causing a loss of performance or a\u2026",
+                "When the application accepts a file, either on its own or within an archive such as a zip file, it checks if the\u2026",
+                "The application checks compressed files (e.g., zip, gz, docx, odt) against maximum allowed uncompressed size and\u2026"
+            ],
+            "checks": [
+                [
+                    "code_upload_safety",
+                    {
+                        "include_ext": [
+                            "php"
+                        ],
+                        "paths": [
+                            "app"
+                        ]
+                    }
+                ]
+            ]
+        },
+        {
+            "ids": [
+                "MB-0023",
+                "MB-0346"
+            ],
+            "titles": [
+                "Use CSPRNG; avoid weak PRNG",
+                "All random numbers and strings which are intended to be non-guessable must be generated using a cryptographically\u2026"
+            ],
+            "checks": [
+                [
+                    "code_csprng_safety",
+                    {
+                        "include_ext": [
+                            "php"
+                        ],
+                        "paths": [
+                            "app"
+                        ]
+                    }
+                ]
+            ]
+        },
+        {
+            "ids": [
+                "MB-0025",
+                "MB-0332",
+                "MB-0343"
+            ],
+            "titles": [
+                "No unsafe raw crypto or session APIs in custom code",
+                "Industry-validated implementations (including libraries and hardware-accelerated implementations) are used for\u2026",
+                "Passwords are stored using an approved, computationally intensive, key derivation function (also known as a\u2026"
+            ],
+            "checks": [
+                [
+                    "code_magento_api_crypto_session",
+                    {
+                        "include_ext": [
+                            "php"
+                        ],
+                        "paths": [
+                            "app"
+                        ]
+                    }
+                ]
+            ]
+        },
+        {
+            "ids": [
+                "MB-0043",
+                "MB-0634"
+            ],
+            "titles": [
+                "Log rotation configured",
+                "PCI 10.5.1: Retain audit log history for at least 12 months, with at least the most recent three months immediately available for analysis"
+            ],
+            "checks": [
+                [
+                    "fs_log_rotation_configured",
+                    {
+                        "file": "devops/logrotate.conf"
+                    }
+                ]
+            ]
+        },
+        {
+            "ids": [
+                "MB-0072",
+                "MB-0493"
+            ],
+            "titles": [
+                "No configured secret-pattern matches in collected VCS scope",
+                "PCI 3.6.1: Procedures are defined and implemented to protect cryptographic keys used to protect stored account data against disclosure and misuse that include"
+            ],
+            "checks": [
+                [
+                    "git_history_scan",
+                    {
+                        "exclude_dirs": [
+                            ".git",
+                            "vendor",
+                            "var",
+                            "generated",
+                            "node_modules",
+                            "pub/media",
+                            "pub/static",
+                            "pub/cache",
+                            "setup",
+                            "dev/tests",
+                            "dev/tools"
+                        ],
+                        "max_file_bytes": 1048576,
+                        "max_results": 200,
+                        "paths": [
+                            "."
+                        ],
+                        "patterns": [
+                            "AKIA[0-9A-Z]{16}",
+                            "ASIA[0-9A-Z]{16}",
+                            "AIza[0-9A-Za-z\\-_]{35}",
+                            "-----BEGIN [A-Z0-9 ]*PRIVATE KEY-----",
+                            "xox[baprs]-[0-9A-Za-z\\-]{10,48}",
+                            "sk_live_[0-9a-zA-Z]{24,}",
+                            "gh[pousr]_[0-9A-Za-z]{36,255}",
+                            "(api[_-]?key|client[_-]?secret|access[_-]?token|password)[[:space:]]*[\"']?[[:space:]]*(=>|=|:)[[:space:]]*[\"'][A-Za-z0-9_./+=-]{16,}[\"']"
+                        ]
+                    }
+                ]
+            ]
+        },
+        {
+            "ids": [
+                "MB-0073",
+                "MB-0361"
+            ],
+            "titles": [
+                "HTTPS-only endpoints configured",
+                "TLS or another appropriate transport encryption mechanism used for all connectivity between internal, HTTP-based\u2026"
+            ],
+            "checks": [
+                [
+                    "code_https_endpoints",
+                    {
+                        "include_ext": [
+                            "php",
+                            "phtml",
+                            "xml",
+                            "json",
+                            "yaml",
+                            "yml",
+                            "ini",
+                            "js",
+                            "html",
+                            "css"
+                        ],
+                        "max_results": 200,
+                        "paths": [
+                            "app/etc",
+                            "app/code",
+                            "app/design"
+                        ],
+                        "required_files": [
+                            "app/etc/env.php"
+                        ]
+                    }
+                ]
+            ]
+        },
+        {
+            "ids": [
+                "MB-0076",
+                "MB-0371",
+                "MB-0372",
+                "MB-0459"
+            ],
+            "titles": [
+                "Outbound connections restricted by allow-list",
+                "An allowlist is used to define the external resources or systems with which the application is permitted to\u2026",
+                "The web or application server is configured with an allowlist of resources or systems to which the server can send\u2026",
+                "PCI 1.3.2: Outbound traffic from the CDE is restricted as follows"
+            ],
+            "checks": [
+                [
+                    "code_outbound_egress_controls",
+                    {
+                        "include_ext": [
+                            "php"
+                        ],
+                        "max_results": 100,
+                        "paths": [
+                            "app/code",
+                            "app/etc"
+                        ]
+                    }
+                ],
+                [
+                    "system_egress_restricted",
+                    []
+                ]
+            ]
+        },
+        {
+            "ids": [
+                "MB-0077",
+                "MB-0389"
+            ],
+            "titles": [
+                "PII minimization for third-party flows",
+                "Defined sensitive data is not sent to untrusted parties (e.g., user trackers) to prevent unwanted collection of data\u2026"
+            ],
+            "checks": [
+                [
+                    "code_pii_minimization",
+                    {
+                        "include_ext": [
+                            "php"
+                        ],
+                        "max_results": 100,
+                        "paths": [
+                            "app/code"
+                        ]
+                    }
+                ]
+            ]
+        },
+        {
+            "ids": [
+                "MB-0079",
+                "MB-0584"
+            ],
+            "titles": [
+                "API keys stored in env.php (not in DB/plain code)",
+                "PCI 8.6.2: Passwords/passphrases for any application and system accounts that can be used for interactive login are not hard coded in scripts,..."
+            ],
+            "checks": [
+                [
+                    "code_api_key_storage",
+                    {
+                        "env_file": "app/etc/env.php",
+                        "include_ext": [
+                            "php",
+                            "phtml",
+                            "xml",
+                            "sql"
+                        ],
+                        "max_results": 100,
+                        "paths": [
+                            "app/code",
+                            "app/etc",
+                            "app/design",
+                            "setup"
+                        ]
+                    }
+                ]
+            ]
+        },
+        {
+            "ids": [
+                "MB-0081",
+                "MB-0369",
+                "MB-0375"
+            ],
+            "titles": [
+                "SaaS integrations scoped by ACL (least privilege/IP allowlist)",
+                "Communications between backend application components, including local or operating system services, APIs,\u2026",
+                "Access to secret assets adheres to the principle of least privilege."
+            ],
+            "checks": [
+                [
+                    "code_saas_integration_scoped",
+                    {
+                        "include_ext": [
+                            "php",
+                            "xml"
+                        ],
+                        "max_results": 100,
+                        "paths": [
+                            "app/code",
+                            "app/etc"
+                        ]
+                    }
+                ]
+            ]
+        },
+        {
+            "ids": [
+                "MB-0085",
+                "MB-0674"
+            ],
+            "titles": [
+                "Payment method inventory and data-flow scope are documented",
+                "PCI 12.5.2: PCI DSS scope is documented and confirmed by the entity at least once every 12 months and upon significant change to the in-scope environment"
+            ],
+            "checks": [
+                [
+                    "code_payment_method_scope",
+                    {
+                        "include_ext": [
+                            "php",
+                            "phtml",
+                            "js",
+                            "xml"
+                        ],
+                        "max_results": 100,
+                        "paths": [
+                            "app/code",
+                            "app/design"
+                        ]
+                    }
+                ]
+            ]
+        },
+        {
+            "ids": [
+                "MB-0089",
+                "MB-0157",
+                "MB-0161"
+            ],
+            "titles": [
+                "Checkout Content Security Policy enforced",
+                "HTTP responses include a Content-Security-Policy response header field which defines directives to ensure the\u2026",
+                "The Content-Security-Policy header field specifies a location to report violations."
+            ],
+            "checks": [
+                [
+                    "code_checkout_csp_enforced",
+                    {
+                        "include_ext": [
+                            "xml",
+                            "php",
+                            "phtml",
+                            "html",
+                            "conf",
+                            "htaccess"
+                        ],
+                        "paths": [
+                            "app/code",
+                            "app/etc",
+                            "app/design",
+                            "pub/.htaccess",
+                            ".htaccess",
+                            "nginx.conf"
+                        ],
+                        "require_reporting": true,
+                        "required_directives": [
+                            "script-src",
+                            "connect-src",
+                            "frame-src",
+                            "form-action",
+                            "object-src",
+                            "base-uri"
+                        ]
+                    }
+                ]
+            ]
+        },
+        {
+            "ids": [
+                "MB-0093",
+                "MB-0687",
+                "MB-0690"
+            ],
+            "titles": [
+                "PCI manual evidence checklist present",
+                "PCI 12.8.5: Information is maintained about which PCI DSS requirements are managed by each TPSP, which are managed by the entity, and any that are shared between...",
+                "PCI 12.10.1: An incident response plan exists and is ready to be activated in the event of a suspected or confirmed security incident"
+            ],
+            "checks": [
+                [
+                    "pci_manual_evidence_documented",
+                    {
+                        "paths": [
+                            ".magebean/pci-evidence.md",
+                            "docs/pci-evidence.md",
+                            "SECURITY.md"
+                        ],
+                        "required_topics": [
+                            "payment_scope",
+                            "saq_notes",
+                            "access_review",
+                            "incident_response",
+                            "vendor_responsibilities"
+                        ]
+                    }
+                ]
+            ]
+        },
+        {
+            "ids": [
+                "MB-0095",
+                "MB-0187"
+            ],
+            "titles": [
+                "GraphQL and API exposure minimized",
+                "A query allowlist, depth limiting, amount limiting, or query cost analysis is used to prevent GraphQL or data layer\u2026"
+            ],
+            "checks": [
+                [
+                    "code_api_exposure_minimized",
+                    {
+                        "include_ext": [
+                            "xml",
+                            "graphqls",
+                            "php"
+                        ],
+                        "max_results": 100,
+                        "paths": [
+                            "app/code",
+                            "app/etc"
+                        ]
+                    }
+                ]
+            ]
+        },
+        {
+            "ids": [
+                "MB-0096",
+                "MB-0147",
+                "MB-0158",
+                "MB-0160"
+            ],
+            "titles": [
+                "Security headers baseline enforced",
+                "Security controls are in place to prevent browsers from rendering content or functionality in HTTP responses in an\u2026",
+                "All HTTP responses contain an 'X-Content-Type-Options: nosniff' header field. This instructs browsers not to use\u2026",
+                "The web application uses the frame-ancestors directive of the Content-Security-Policy header field for every HTTP\u2026"
+            ],
+            "checks": [
+                [
+                    "code_security_headers_baseline",
+                    {
+                        "include_ext": [
+                            "xml",
+                            "php",
+                            "phtml",
+                            "html",
+                            "conf",
+                            "htaccess"
+                        ],
+                        "paths": [
+                            "app/etc",
+                            "app/code",
+                            "app/design",
+                            "pub/.htaccess",
+                            ".htaccess",
+                            "nginx.conf"
+                        ]
+                    }
+                ]
+            ]
+        },
+        {
+            "ids": [
+                "MB-0097",
+                "MB-0370"
+            ],
+            "titles": [
+                "Secrets are not hardcoded in custom code",
+                "If a credential has to be used for service authentication, the credential being used by the consumer is not a\u2026"
+            ],
+            "checks": [
+                [
+                    "code_hardcoded_secrets",
+                    {
+                        "allowed_files": [
+                            "app/etc/env.php"
+                        ],
+                        "include_ext": [
+                            "php",
+                            "phtml",
+                            "js",
+                            "xml",
+                            "json",
+                            "env",
+                            "dist",
+                            "txt",
+                            "pem",
+                            "key",
+                            "yml",
+                            "yaml"
+                        ],
+                        "max_results": 100,
+                        "paths": [
+                            "app",
+                            "app/design"
+                        ]
+                    }
+                ]
+            ]
+        },
+        {
+            "ids": [
+                "MB-0098",
+                "MB-0130"
+            ],
+            "titles": [
+                "Unsafe XML parsing disabled",
+                "The application configures XML parsers to use a restrictive configuration and that unsafe features such as resolving\u2026"
+            ],
+            "checks": [
+                [
+                    "code_unsafe_xml_parsing",
+                    {
+                        "include_ext": [
+                            "php"
+                        ],
+                        "max_results": 100,
+                        "paths": [
+                            "app"
+                        ]
+                    }
+                ]
+            ]
+        },
+        {
+            "ids": [
+                "MB-0099",
+                "MB-0203"
+            ],
+            "titles": [
+                "File download and export endpoints require authorization",
+                "The application validates or ignores user-submitted filenames, including in a JSON, JSONP, or URL parameter and\u2026"
+            ],
+            "checks": [
+                [
+                    "code_download_export_authorization",
+                    {
+                        "include_ext": [
+                            "php",
+                            "xml"
+                        ],
+                        "max_results": 100,
+                        "paths": [
+                            "app/code"
+                        ]
+                    }
+                ]
+            ]
+        },
+        {
+            "ids": [
+                "MB-0101",
+                "MB-0554"
+            ],
+            "titles": [
+                "Global Admin ACL limited to approved roles",
+                "PCI 7.3.1: An access control system(s) is in place that restricts access based on a user's need to know and covers all system components"
+            ],
+            "checks": [
+                [
+                    "magento_admin_global_acl_restricted",
+                    {
+                        "approved_global_role_ids": [],
+                        "approved_global_role_names": [],
+                        "approved_global_user_ids": [],
+                        "approved_global_usernames": [],
+                        "env_file": "app/etc/env.php",
+                        "global_resources": [
+                            "Magento_Backend::all",
+                            "Magento_Adminhtml::all"
+                        ]
+                    }
+                ]
+            ]
+        },
+        {
+            "ids": [
+                "MB-0102",
+                "MB-0470"
+            ],
+            "titles": [
+                "PCI vendor default account evidence assessment",
+                "PCI 2.2.2: Vendor default accounts are managed as follows"
+            ],
+            "checks": [
+                [
+                    "pci_vendor_default_accounts_evidence",
+                    {
+                        "paths": [
+                            ".magebean/pci/2.2.2-vendor-default-accounts.json",
+                            ".magebean/pci-2.2.2-evidence.json"
+                        ]
+                    }
+                ]
+            ]
+        },
+        {
+            "ids": [
+                "MB-0144",
+                "MB-0221",
+                "MB-0245",
+                "MB-0570"
+            ],
+            "titles": [
+                "Anti-automation controls are in place to protect against excessive calls to application functions that could lead to\u2026",
+                "Controls to prevent attacks such as credential stuffing and password brute force are implemented according to the\u2026",
+                "A code based out-of-band authentication mechanism is protected against brute force attacks by using rate limiting.\u2026",
+                "PCI 8.3.4: Invalid authentication attempts are limited by"
+            ],
+            "checks": [
+                [
+                    "magento_admin_captcha_or_rate_limit",
+                    {
+                        "file": "app/etc/config.php",
+                        "max_lockout_failures": 10
+                    }
+                ]
+            ]
+        },
+        {
+            "ids": [
+                "MB-0150",
+                "MB-0151",
+                "MB-0153"
+            ],
+            "titles": [
+                "Cookies have the 'Secure' attribute set, and if the '\\__Host-' prefix is not used for the cookie name, the\u2026",
+                "Each cookie's 'SameSite' attribute value is set according to the purpose of the cookie, to limit exposure to user\u2026",
+                "If the value of a cookie is not meant to be accessible to client-side scripts (such as a session token), the cookie\u2026"
+            ],
+            "checks": [
+                [
+                    "http_cookie_flags",
+                    {
+                        "paths": [
+                            "/",
+                            "/customer/account/login",
+                            "/checkout/cart"
+                        ],
+                        "timeout_ms": 8000
+                    }
+                ],
+                [
+                    "magento_cookie_flags_secure",
+                    {
+                        "allowed_samesite": [
+                            "lax",
+                            "strict"
+                        ],
+                        "files": [
+                            "app/etc/config.php",
+                            "app/etc/env.php"
+                        ]
+                    }
+                ]
+            ]
+        },
+        {
+            "ids": [
+                "MB-0156",
+                "MB-0164",
+                "MB-0190"
+            ],
+            "titles": [
+                "The Cross-Origin Resource Sharing (CORS) Access-Control-Allow-Origin header field is a fixed value by the\u2026",
+                "Verify that, if the application relies on the CORS preflight mechanism to prevent disallowed cross-origin use of\u2026",
+                "Verify that, during the initial HTTP WebSocket handshake, the Origin header field is checked against a list of\u2026"
+            ],
+            "checks": [
+                [
+                    "http_cors_no_wildcard_with_credentials",
+                    {
+                        "timeout_ms": 8000
+                    }
+                ],
+                [
+                    "http_cors_preflight_safe",
+                    {
+                        "method": "POST",
+                        "origin": "https://magebean.invalid",
+                        "timeout_ms": 8000
+                    }
+                ]
+            ]
+        },
+        {
+            "ids": [
+                "MB-0209",
+                "MB-0572"
+            ],
+            "titles": [
+                "Password minimum length for user and administrator accounts",
+                "PCI 8.3.6: If passwords/passphrases are used as authentication factors to meet Requirement 8.3.1, they meet the following minimum level of complexity"
+            ],
+            "checks": [
+                [
+                    "magento_admin_password_policy_strong",
+                    {
+                        "base_path": "system.default.admin.security",
+                        "file": "app/etc/config.php",
+                        "min_password_length": 8
+                    }
+                ]
+            ]
+        },
+        {
+            "ids": [
+                "MB-0223",
+                "MB-0579",
+                "MB-0580",
+                "MB-0581"
+            ],
+            "titles": [
+                "Either a multi-factor authentication mechanism or a combination of single-factor authentication mechanisms, must be\u2026",
+                "PCI 8.4.1: MFA is implemented for all non-console access into the CDE for personnel with administrative access",
+                "PCI 8.4.2: MFA is implemented for all non-console access into the CDE",
+                "PCI 8.4.3: MFA is implemented for all remote access originating from outside the entity's network that could access or impact the CDE"
+            ],
+            "checks": [
+                [
+                    "magento_admin_2fa_enabled",
+                    {
+                        "core_module": "Magento_TwoFactorAuth",
+                        "file": "app/etc/config.php",
+                        "provider_modules": [
+                            "Magento_GoogleAuthenticator",
+                            "Magento_DuoSecurity",
+                            "Magento_U2fKey",
+                            "Magento_AdminAdobeImsTwoFactorAuth"
+                        ]
+                    }
+                ]
+            ]
+        },
+        {
+            "ids": [
+                "MB-0330",
+                "MB-0338"
+            ],
+            "titles": [
+                "Cryptographic discovery mechanisms are employed to identify all instances of cryptography in the system, including\u2026",
+                "Only approved ciphers and modes such as AES with GCM are used."
+            ],
+            "checks": [
+                [
+                    "code_grep",
+                    {
+                        "include_ext": [
+                            "php",
+                            "phtml",
+                            "js",
+                            "xml"
+                        ],
+                        "max_results": 100,
+                        "must_not_match": [
+                            "\\b(?:aes[-_ ]?\\d*[-_ ]?ecb|des[-_ ]?ecb|openssl_public_encrypt\\s*\\([^;]*OPENSSL_PKCS1_PADDING|mcrypt_(?:encrypt|decrypt|module_open))\\b"
+                        ],
+                        "paths": [
+                            "app"
+                        ]
+                    }
+                ],
+                [
+                    "code_magento_api_crypto_session",
+                    {
+                        "include_ext": [
+                            "php"
+                        ],
+                        "paths": [
+                            "app"
+                        ]
+                    }
+                ]
+            ]
+        },
+        {
+            "ids": [
+                "MB-0334",
+                "MB-0337",
+                "MB-0339",
+                "MB-0348"
+            ],
+            "titles": [
+                "All cryptographic primitives utilize a minimum of 128-bits of security based on the algorithm, key size, and\u2026",
+                "Insecure block modes (e.g., ECB) and weak padding schemes (e.g., PKCS#1 v1.5) are not used.",
+                "Encrypted data is protected against unauthorized modification preferably by using an approved authenticated\u2026",
+                "Only approved cryptographic algorithms and modes of operation are used for key generation and seeding, and digital\u2026"
+            ],
+            "checks": [
+                [
+                    "code_grep",
+                    {
+                        "include_ext": [
+                            "php",
+                            "phtml",
+                            "js",
+                            "xml"
+                        ],
+                        "max_results": 100,
+                        "must_not_match": [
+                            "\\b(?:aes[-_ ]?\\d*[-_ ]?ecb|des[-_ ]?ecb|openssl_public_encrypt\\s*\\([^;]*OPENSSL_PKCS1_PADDING|mcrypt_(?:encrypt|decrypt|module_open))\\b"
+                        ],
+                        "paths": [
+                            "app"
+                        ]
+                    }
+                ]
+            ]
+        },
+        {
+            "ids": [
+                "MB-0358",
+                "MB-0360"
+            ],
+            "titles": [
+                "External facing services use publicly trusted TLS certificates.",
+                "TLS clients validate certificates received before communicating with a TLS server."
+            ],
+            "checks": [
+                [
+                    "http_tls_cert_days_left",
+                    {
+                        "min_days": 1,
+                        "timeout_ms": 8000
+                    }
+                ]
+            ]
+        },
+        {
+            "ids": [
+                "MB-0624",
+                "MB-0625"
+            ],
+            "titles": [
+                "PCI 10.3.1: Read access to audit logs files is limited to those with a job-related need",
+                "PCI 10.3.2: Audit log files are protected to prevent modifications by individuals"
+            ],
+            "checks": [
+                [
+                    "fs_logs_reports_not_in_webroot",
+                    {
+                        "forbidden_paths": [
+                            "var/log",
+                            "var/report"
+                        ],
+                        "webroot": "pub"
+                    }
+                ]
+            ]
+        }
+    ],
+    "within_requirement_repetitions": [
+        {
+            "id": "MB-0105",
+            "title": "Context-specific output encoding and escaping",
+            "duplicates": [
+                {
+                    "check": [
+                        "code_phtml_escaped_output",
+                        {
+                            "escape_functions": [
+                                "escapeHtml",
+                                "escapeHtmlAttr",
+                                "escapeUrl",
+                                "escapeJs",
+                                "escapeCss"
+                            ],
+                            "paths": [
+                                "app"
+                            ]
+                        }
+                    ],
+                    "occurrences": 2,
+                    "extra_occurrences": 1
+                },
+                {
+                    "check": [
+                        "code_js_context_escaping",
+                        {
+                            "include_ext": [
+                                "phtml",
+                                "html"
+                            ],
+                            "paths": [
+                                "app"
+                            ]
+                        }
+                    ],
+                    "occurrences": 2,
+                    "extra_occurrences": 1
+                }
+            ]
+        },
+        {
+            "id": "MB-0108",
+            "title": "Database queries use safe construction and abstraction",
+            "duplicates": [
+                {
+                    "check": [
+                        "code_raw_sql",
+                        {
+                            "include_ext": [
+                                "php",
+                                "phtml"
+                            ],
+                            "paths": [
+                                "app"
+                            ]
+                        }
+                    ],
+                    "occurrences": 2,
+                    "extra_occurrences": 1
+                }
+            ]
+        },
+        {
+            "id": "MB-0109",
+            "title": "OS commands use approved, injection-safe execution",
+            "duplicates": [
+                {
+                    "check": [
+                        "code_command_execution_safety",
+                        {
+                            "include_ext": [
+                                "php"
+                            ],
+                            "paths": [
+                                "app"
+                            ]
+                        }
+                    ],
+                    "occurrences": 2,
+                    "extra_occurrences": 1
+                }
+            ]
+        },
+        {
+            "id": "MB-0131",
+            "title": "Safe deserialization of untrusted data",
+            "duplicates": [
+                {
+                    "check": [
+                        "code_unserialize_safety",
+                        {
+                            "include_ext": [
+                                "php"
+                            ],
+                            "paths": [
+                                "app"
+                            ]
+                        }
+                    ],
+                    "occurrences": 2,
+                    "extra_occurrences": 1
+                }
+            ]
+        },
+        {
+            "id": "MB-0200",
+            "title": "Uploaded and generated files cannot execute code",
+            "duplicates": [
+                {
+                    "check": [
+                        "code_media_executable_code",
+                        {
+                            "max_file_bytes": 1048576,
+                            "max_results": 100,
+                            "paths": [
+                                "pub/media",
+                                "pub/import",
+                                "var/import",
+                                "var/export"
+                            ]
+                        }
+                    ],
+                    "occurrences": 2,
+                    "extra_occurrences": 1
+                }
+            ]
+        },
+        {
+            "id": "MB-0209",
+            "title": "Password minimum length for user and administrator accounts",
+            "duplicates": [
+                {
+                    "check": [
+                        "magento_admin_password_policy_strong",
+                        {
+                            "base_path": "system.default.admin.security",
+                            "file": "app/etc/config.php",
+                            "min_password_length": 8
+                        }
+                    ],
+                    "occurrences": 2,
+                    "extra_occurrences": 1
+                }
+            ]
+        },
+        {
+            "id": "MB-0379",
+            "title": "Production debug and error-display policy",
+            "duplicates": [
+                {
+                    "check": [
+                        "php_xdebug_disabled",
+                        {
+                            "files": [
+                                "php.ini",
+                                ".user.ini"
+                            ]
+                        }
+                    ],
+                    "occurrences": 2,
+                    "extra_occurrences": 1
+                },
+                {
+                    "check": [
+                        "http_no_xdebug_headers",
+                        {
+                            "timeout_ms": 8000
+                        }
+                    ],
+                    "occurrences": 2,
+                    "extra_occurrences": 1
+                },
+                {
+                    "check": [
+                        "php_template_hints_disabled",
+                        {
+                            "file": "app/etc/env.php",
+                            "paths": [
+                                "system.default.dev/debug/template_hints"
+                            ]
+                        }
+                    ],
+                    "occurrences": 2,
+                    "extra_occurrences": 1
+                },
+                {
+                    "check": [
+                        "php_dev_debug_config_disabled",
+                        {
+                            "file": "app/etc/env.php",
+                            "paths": [
+                                "system.default.dev/translate_inline/active",
+                                "system.default.dev/debug/template_hints_storefront"
+                            ]
+                        }
+                    ],
+                    "occurrences": 2,
+                    "extra_occurrences": 1
+                },
+                {
+                    "check": [
+                        "php_third_party_debug_disabled",
+                        {
+                            "files": [
+                                "app/etc/env.php",
+                                "app/etc/config.php"
+                            ]
+                        }
+                    ],
+                    "occurrences": 2,
+                    "extra_occurrences": 1
+                }
+            ]
+        },
+        {
+            "id": "MB-0399",
+            "title": "An inventory catalog, such as software bill of materials (SBOM), is maintained of all third-party libraries in use,\u2026",
+            "duplicates": [
+                {
+                    "check": [
+                        "composer_audit_api",
+                        {
+                            "allow_private_http_fallback": true,
+                            "batch_size": 500,
+                            "endpoint": "https://api.magebean.com/v1/osv/advisories",
+                            "lock_file": "composer.lock",
+                            "timeout_ms": 10000
+                        }
+                    ],
+                    "occurrences": 2,
+                    "extra_occurrences": 1
+                }
+            ]
+        },
+        {
+            "id": "MB-0424",
+            "title": "Sensitive-data logging restrictions and redaction",
+            "duplicates": [
+                {
+                    "check": [
+                        "code_sensitive_logging",
+                        {
+                            "include_ext": [
+                                "php"
+                            ],
+                            "paths": [
+                                "app"
+                            ]
+                        }
+                    ],
+                    "occurrences": 2,
+                    "extra_occurrences": 1
+                },
+                {
+                    "check": [
+                        "code_sensitive_logging",
+                        {
+                            "include_ext": [
+                                "php"
+                            ],
+                            "max_results": 50,
+                            "paths": [
+                                "app"
+                            ]
+                        }
+                    ],
+                    "occurrences": 2,
+                    "extra_occurrences": 1
+                },
+                {
+                    "check": [
+                        "code_third_party_logging_sanitized",
+                        {
+                            "include_ext": [
+                                "php"
+                            ],
+                            "max_results": 100,
+                            "paths": [
+                                "app/code"
+                            ]
+                        }
+                    ],
+                    "occurrences": 2,
+                    "extra_occurrences": 1
+                },
+                {
+                    "check": [
+                        "code_cardholder_data_logs",
+                        {
+                            "include_ext": [
+                                "log",
+                                "txt",
+                                "json",
+                                "xml"
+                            ],
+                            "max_results": 100,
+                            "paths": [
+                                "var/log",
+                                "var/report",
+                                "pub/media/log",
+                                "pub/media/report"
+                            ]
+                        }
+                    ],
+                    "occurrences": 2,
+                    "extra_occurrences": 1
+                }
+            ]
+        },
+        {
+            "id": "MB-0533",
+            "title": "PCI 6.3.1: Security vulnerabilities are identified and managed as follows",
+            "duplicates": [
+                {
+                    "check": [
+                        "composer_audit_api",
+                        {
+                            "allow_private_http_fallback": true,
+                            "batch_size": 500,
+                            "endpoint": "https://api.magebean.com/v1/osv/advisories",
+                            "lock_file": "composer.lock",
+                            "timeout_ms": 10000
+                        }
+                    ],
+                    "occurrences": 2,
+                    "extra_occurrences": 1
+                }
+            ]
+        }
+    ],
+    "shared_bindings": [
+        {
+            "check": [
+                "code_upload_safety",
+                {
+                    "include_ext": [
+                        "php"
+                    ],
+                    "paths": [
+                        "app"
+                    ]
+                }
+            ],
+            "requirements": [
+                "MB-0021",
+                "MB-0194",
+                "MB-0195",
+                "MB-0196",
+                "MB-0200",
+                "MB-0201",
+                "MB-0204"
+            ],
+            "count": 7
+        },
+        {
+            "check": [
+                "magento_production_mode",
+                {
+                    "equals": "production",
+                    "file": "app/etc/env.php",
+                    "path": "MAGE_MODE"
+                }
+            ],
+            "requirements": [
+                "MB-0031",
+                "MB-0379",
+                "MB-0405",
+                "MB-0469",
+                "MB-0474",
+                "MB-0540"
+            ],
+            "count": 6
+        },
+        {
+            "check": [
+                "code_grep",
+                {
+                    "include_ext": [
+                        "php",
+                        "phtml",
+                        "js",
+                        "xml"
+                    ],
+                    "max_results": 100,
+                    "must_not_match": [
+                        "\\b(?:aes[-_ ]?\\d*[-_ ]?ecb|des[-_ ]?ecb|openssl_public_encrypt\\s*\\([^;]*OPENSSL_PKCS1_PADDING|mcrypt_(?:encrypt|decrypt|module_open))\\b"
+                    ],
+                    "paths": [
+                        "app"
+                    ]
+                }
+            ],
+            "requirements": [
+                "MB-0330",
+                "MB-0334",
+                "MB-0337",
+                "MB-0338",
+                "MB-0339",
+                "MB-0348"
+            ],
+            "count": 6
+        },
+        {
+            "check": [
+                "code_magento_api_crypto_session",
+                {
+                    "include_ext": [
+                        "php"
+                    ],
+                    "paths": [
+                        "app"
+                    ]
+                }
+            ],
+            "requirements": [
+                "MB-0025",
+                "MB-0330",
+                "MB-0332",
+                "MB-0338",
+                "MB-0343"
+            ],
+            "count": 5
+        },
+        {
+            "check": [
+                "code_https_endpoints",
+                {
+                    "include_ext": [
+                        "php",
+                        "phtml",
+                        "xml",
+                        "json",
+                        "yaml",
+                        "yml",
+                        "ini",
+                        "js",
+                        "html",
+                        "css"
+                    ],
+                    "max_results": 200,
+                    "paths": [
+                        "app/etc",
+                        "app/code",
+                        "app/design"
+                    ],
+                    "required_files": [
+                        "app/etc/env.php"
+                    ]
+                }
+            ],
+            "requirements": [
+                "MB-0073",
+                "MB-0357",
+                "MB-0359",
+                "MB-0361",
+                "MB-0509"
+            ],
+            "count": 5
+        },
+        {
+            "check": [
+                "system_egress_restricted",
+                []
+            ],
+            "requirements": [
+                "MB-0076",
+                "MB-0359",
+                "MB-0371",
+                "MB-0372",
+                "MB-0459"
+            ],
+            "count": 5
+        },
+        {
+            "check": [
+                "code_outbound_egress_controls",
+                {
+                    "include_ext": [
+                        "php"
+                    ],
+                    "max_results": 100,
+                    "paths": [
+                        "app/code",
+                        "app/etc"
+                    ]
+                }
+            ],
+            "requirements": [
+                "MB-0076",
+                "MB-0359",
+                "MB-0371",
+                "MB-0372",
+                "MB-0459"
+            ],
+            "count": 5
+        },
+        {
+            "check": [
+                "code_download_export_authorization",
+                {
+                    "include_ext": [
+                        "php",
+                        "xml"
+                    ],
+                    "max_results": 100,
+                    "paths": [
+                        "app/code"
+                    ]
+                }
+            ],
+            "requirements": [
+                "MB-0099",
+                "MB-0203",
+                "MB-0204",
+                "MB-0276",
+                "MB-0278"
+            ],
+            "count": 5
+        },
+        {
+            "check": [
+                "code_ssrf_safeguards",
+                {
+                    "include_ext": [
+                        "php"
+                    ],
+                    "paths": [
+                        "app"
+                    ]
+                }
+            ],
+            "requirements": [
+                "MB-0016",
+                "MB-0106",
+                "MB-0120",
+                "MB-0201"
+            ],
+            "count": 4
+        },
+        {
+            "check": [
+                "composer_marketplace_outdated_api",
+                {
+                    "allow_private_http_fallback": true,
+                    "batch_size": 500,
+                    "lock_file": "composer.lock",
+                    "max_age_days": 365,
+                    "status_endpoint": "https://api.magebean.com/v1/packages/status",
+                    "timeout_ms": 10000
+                }
+            ],
+            "requirements": [
+                "MB-0058",
+                "MB-0172",
+                "MB-0399",
+                "MB-0535"
+            ],
+            "count": 4
+        },
+        {
+            "check": [
+                "code_pii_minimization",
+                {
+                    "include_ext": [
+                        "php"
+                    ],
+                    "max_results": 100,
+                    "paths": [
+                        "app/code"
+                    ]
+                }
+            ],
+            "requirements": [
+                "MB-0077",
+                "MB-0389",
+                "MB-0390",
+                "MB-0480"
+            ],
+            "count": 4
+        },
+        {
+            "check": [
+                "webserver_tls_ciphers",
+                {
+                    "files": [
+                        "nginx.conf",
+                        "pub/.htaccess",
+                        ".htaccess",
+                        "apache.conf"
+                    ],
+                    "require_ciphers": true,
+                    "require_protocols": true
+                }
+            ],
+            "requirements": [
+                "MB-0078",
+                "MB-0353",
+                "MB-0359",
+                "MB-0509"
+            ],
+            "count": 4
+        },
+        {
+            "check": [
+                "code_saas_integration_scoped",
+                {
+                    "include_ext": [
+                        "php",
+                        "xml"
+                    ],
+                    "max_results": 100,
+                    "paths": [
+                        "app/code",
+                        "app/etc"
+                    ]
+                }
+            ],
+            "requirements": [
+                "MB-0081",
+                "MB-0369",
+                "MB-0375",
+                "MB-0547"
+            ],
+            "count": 4
+        },
+        {
+            "check": [
+                "code_cardholder_data_files",
+                {
+                    "include_ext": [
+                        "csv",
+                        "sql",
+                        "txt",
+                        "log",
+                        "json",
+                        "xml",
+                        "bak",
+                        "old"
+                    ],
+                    "max_results": 100,
+                    "paths": [
+                        "var/export",
+                        "var/import",
+                        "var/backups",
+                        "var/backup",
+                        "var/log",
+                        "var/report",
+                        "pub/media",
+                        "pub/import",
+                        "backups",
+                        "backup"
+                    ]
+                }
+            ],
+            "requirements": [
+                "MB-0083",
+                "MB-0390",
+                "MB-0480",
+                "MB-0481"
+            ],
+            "count": 4
+        },
+        {
+            "check": [
+                "code_payment_script_integrity",
+                {
+                    "evidence_files": [
+                        ".magebean/payment-script-integrity.json"
+                    ],
+                    "include_ext": [
+                        "xml",
+                        "phtml",
+                        "html",
+                        "js"
+                    ],
+                    "max_results": 100,
+                    "paths": [
+                        "app/design",
+                        "app/code"
+                    ]
+                }
+            ],
+            "requirements": [
+                "MB-0088",
+                "MB-0171",
+                "MB-0538",
+                "MB-0661"
+            ],
+            "count": 4
+        },
+        {
+            "check": [
+                "code_checkout_csp_enforced",
+                {
+                    "include_ext": [
+                        "xml",
+                        "php",
+                        "phtml",
+                        "html",
+                        "conf",
+                        "htaccess"
+                    ],
+                    "paths": [
+                        "app/code",
+                        "app/etc",
+                        "app/design",
+                        "pub/.htaccess",
+                        ".htaccess",
+                        "nginx.conf"
+                    ],
+                    "require_reporting": true,
+                    "required_directives": [
+                        "script-src",
+                        "connect-src",
+                        "frame-src",
+                        "form-action",
+                        "object-src",
+                        "base-uri"
+                    ]
+                }
+            ],
+            "requirements": [
+                "MB-0089",
+                "MB-0157",
+                "MB-0161",
+                "MB-0538"
+            ],
+            "count": 4
+        },
+        {
+            "check": [
+                "code_api_exposure_minimized",
+                {
+                    "include_ext": [
+                        "xml",
+                        "graphqls",
+                        "php"
+                    ],
+                    "max_results": 100,
+                    "paths": [
+                        "app/code",
+                        "app/etc"
+                    ]
+                }
+            ],
+            "requirements": [
+                "MB-0095",
+                "MB-0187",
+                "MB-0188",
+                "MB-0382"
+            ],
+            "count": 4
+        },
+        {
+            "check": [
+                "code_security_headers_baseline",
+                {
+                    "include_ext": [
+                        "xml",
+                        "php",
+                        "phtml",
+                        "html",
+                        "conf",
+                        "htaccess"
+                    ],
+                    "paths": [
+                        "app/etc",
+                        "app/code",
+                        "app/design",
+                        "pub/.htaccess",
+                        ".htaccess",
+                        "nginx.conf"
+                    ]
+                }
+            ],
+            "requirements": [
+                "MB-0096",
+                "MB-0147",
+                "MB-0158",
+                "MB-0160"
+            ],
+            "count": 4
+        },
+        {
+            "check": [
+                "magento_admin_global_acl_restricted",
+                {
+                    "approved_global_role_ids": [],
+                    "approved_global_role_names": [],
+                    "approved_global_user_ids": [],
+                    "approved_global_usernames": [],
+                    "env_file": "app/etc/env.php",
+                    "global_resources": [
+                        "Magento_Backend::all",
+                        "Magento_Adminhtml::all"
+                    ]
+                }
+            ],
+            "requirements": [
+                "MB-0101",
+                "MB-0278",
+                "MB-0548",
+                "MB-0554"
+            ],
+            "count": 4
+        },
+        {
+            "check": [
+                "magento_admin_captcha_or_rate_limit",
+                {
+                    "file": "app/etc/config.php",
+                    "max_lockout_failures": 10
+                }
+            ],
+            "requirements": [
+                "MB-0144",
+                "MB-0221",
+                "MB-0245",
+                "MB-0570"
+            ],
+            "count": 4
+        },
+        {
+            "check": [
+                "composer_audit_api",
+                {
+                    "allow_private_http_fallback": true,
+                    "batch_size": 500,
+                    "endpoint": "https://api.magebean.com/v1/osv/advisories",
+                    "lock_file": "composer.lock",
+                    "timeout_ms": 10000
+                }
+            ],
+            "requirements": [
+                "MB-0172",
+                "MB-0399",
+                "MB-0403",
+                "MB-0533"
+            ],
+            "count": 4
+        },
+        {
+            "check": [
+                "magento_https_enforced",
+                {
+                    "files": [
+                        "app/etc/config.php",
+                        "app/etc/env.php"
+                    ],
+                    "timeout_ms": 8000
+                }
+            ],
+            "requirements": [
+                "MB-0178",
+                "MB-0357",
+                "MB-0475",
+                "MB-0509"
+            ],
+            "count": 4
+        },
+        {
+            "check": [
+                "magento_admin_2fa_enabled",
+                {
+                    "core_module": "Magento_TwoFactorAuth",
+                    "file": "app/etc/config.php",
+                    "provider_modules": [
+                        "Magento_GoogleAuthenticator",
+                        "Magento_DuoSecurity",
+                        "Magento_U2fKey",
+                        "Magento_AdminAdobeImsTwoFactorAuth"
+                    ]
+                }
+            ],
+            "requirements": [
+                "MB-0223",
+                "MB-0579",
+                "MB-0580",
+                "MB-0581"
+            ],
+            "count": 4
+        },
+        {
+            "check": [
+                "http_tls_min_version",
+                {
+                    "timeout_ms": 8000
+                }
+            ],
+            "requirements": [
+                "MB-0352",
+                "MB-0353",
+                "MB-0475",
+                "MB-0509"
+            ],
+            "count": 4
+        },
+        {
+            "check": [
+                "php_xdebug_disabled",
+                {
+                    "files": [
+                        "php.ini",
+                        ".user.ini"
+                    ]
+                }
+            ],
+            "requirements": [
+                "MB-0379",
+                "MB-0405",
+                "MB-0469",
+                "MB-0474"
+            ],
+            "count": 4
+        },
+        {
+            "check": [
+                "http_no_xdebug_headers",
+                {
+                    "timeout_ms": 8000
+                }
+            ],
+            "requirements": [
+                "MB-0379",
+                "MB-0405",
+                "MB-0469",
+                "MB-0474"
+            ],
+            "count": 4
+        },
+        {
+            "check": [
+                "php_template_hints_disabled",
+                {
+                    "file": "app/etc/env.php",
+                    "paths": [
+                        "system.default.dev/debug/template_hints"
+                    ]
+                }
+            ],
+            "requirements": [
+                "MB-0379",
+                "MB-0405",
+                "MB-0469",
+                "MB-0474"
+            ],
+            "count": 4
+        },
+        {
+            "check": [
+                "php_display_errors_disabled",
+                {
+                    "files": [
+                        "php.ini",
+                        ".user.ini"
+                    ]
+                }
+            ],
+            "requirements": [
+                "MB-0379",
+                "MB-0432",
+                "MB-0469",
+                "MB-0474"
+            ],
+            "count": 4
+        },
+        {
+            "check": [
+                "http_no_stacktrace",
+                {
+                    "timeout_ms": 8000
+                }
+            ],
+            "requirements": [
+                "MB-0379",
+                "MB-0432",
+                "MB-0469",
+                "MB-0474"
+            ],
+            "count": 4
+        },
+        {
+            "check": [
+                "magento_admin_session_timeout",
+                {
+                    "base_path": "system.default.admin.security",
+                    "file": "app/etc/config.php",
+                    "max_seconds": 900
+                }
+            ],
+            "requirements": [
+                "MB-0009",
+                "MB-0260",
+                "MB-0566"
+            ],
+            "count": 3
+        },
+        {
+            "check": [
+                "code_path_traversal_safety",
+                {
+                    "include_ext": [
+                        "php"
+                    ],
+                    "paths": [
+                        "app"
+                    ]
+                }
+            ],
+            "requirements": [
+                "MB-0020",
+                "MB-0106",
+                "MB-0201"
+            ],
+            "count": 3
+        },
+        {
+            "check": [
+                "code_csprng_safety",
+                {
+                    "include_ext": [
+                        "php"
+                    ],
+                    "paths": [
+                        "app"
+                    ]
+                }
+            ],
+            "requirements": [
+                "MB-0023",
+                "MB-0346",
+                "MB-0532"
+            ],
+            "count": 3
+        },
+        {
+            "check": [
+                "fs_log_rotation_configured",
+                {
+                    "file": "devops/logrotate.conf"
+                }
+            ],
+            "requirements": [
+                "MB-0043",
+                "MB-0430",
+                "MB-0634"
+            ],
+            "count": 3
+        },
+        {
+            "check": [
+                "composer_vendor_support_api",
+                {
+                    "allow_private_http_fallback": true,
+                    "batch_size": 500,
+                    "lock_file": "composer.lock",
+                    "status_endpoint": "https://api.magebean.com/v1/packages/status",
+                    "timeout_ms": 10000
+                }
+            ],
+            "requirements": [
+                "MB-0060",
+                "MB-0399",
+                "MB-0533"
+            ],
+            "count": 3
+        },
+        {
+            "check": [
+                "composer_lock_integrity",
+                {
+                    "json_file": "composer.json",
+                    "lock_file": "composer.lock"
+                }
+            ],
+            "requirements": [
+                "MB-0070",
+                "MB-0399",
+                "MB-0540"
+            ],
+            "count": 3
+        },
+        {
+            "check": [
+                "git_history_scan",
+                {
+                    "exclude_dirs": [
+                        ".git",
+                        "vendor",
+                        "var",
+                        "generated",
+                        "node_modules",
+                        "pub/media",
+                        "pub/static",
+                        "pub/cache",
+                        "setup",
+                        "dev/tests",
+                        "dev/tools"
+                    ],
+                    "max_file_bytes": 1048576,
+                    "max_results": 200,
+                    "paths": [
+                        "."
+                    ],
+                    "patterns": [
+                        "AKIA[0-9A-Z]{16}",
+                        "ASIA[0-9A-Z]{16}",
+                        "AIza[0-9A-Za-z\\-_]{35}",
+                        "-----BEGIN [A-Z0-9 ]*PRIVATE KEY-----",
+                        "xox[baprs]-[0-9A-Za-z\\-]{10,48}",
+                        "sk_live_[0-9a-zA-Z]{24,}",
+                        "gh[pousr]_[0-9A-Za-z]{36,255}",
+                        "(api[_-]?key|client[_-]?secret|access[_-]?token|password)[[:space:]]*[\"']?[[:space:]]*(=>|=|:)[[:space:]]*[\"'][A-Za-z0-9_./+=-]{16,}[\"']"
+                    ]
+                }
+            ],
+            "requirements": [
+                "MB-0072",
+                "MB-0374",
+                "MB-0493"
+            ],
+            "count": 3
+        },
+        {
+            "check": [
+                "code_api_key_storage",
+                {
+                    "env_file": "app/etc/env.php",
+                    "include_ext": [
+                        "php",
+                        "phtml",
+                        "xml",
+                        "sql"
+                    ],
+                    "max_results": 100,
+                    "paths": [
+                        "app/code",
+                        "app/etc",
+                        "app/design",
+                        "setup"
+                    ]
+                }
+            ],
+            "requirements": [
+                "MB-0079",
+                "MB-0374",
+                "MB-0584"
+            ],
+            "count": 3
+        },
+        {
+            "check": [
+                "code_cardholder_data_storage",
+                {
+                    "include_ext": [
+                        "php",
+                        "xml",
+                        "sql",
+                        "json"
+                    ],
+                    "max_results": 100,
+                    "paths": [
+                        "app/code",
+                        "app/etc",
+                        "db"
+                    ]
+                }
+            ],
+            "requirements": [
+                "MB-0082",
+                "MB-0480",
+                "MB-0481"
+            ],
+            "count": 3
+        },
+        {
+            "check": [
+                "code_checkout_raw_card_collection",
+                {
+                    "include_ext": [
+                        "php",
+                        "phtml",
+                        "js",
+                        "html",
+                        "xml"
+                    ],
+                    "max_results": 100,
+                    "paths": [
+                        "app/code",
+                        "app/design"
+                    ]
+                }
+            ],
+            "requirements": [
+                "MB-0086",
+                "MB-0480",
+                "MB-0532"
+            ],
+            "count": 3
+        },
+        {
+            "check": [
+                "code_payment_script_inventory",
+                {
+                    "include_ext": [
+                        "xml",
+                        "phtml",
+                        "html",
+                        "js"
+                    ],
+                    "inventory_files": [
+                        ".magebean/payment-scripts.json",
+                        "docs/payment-script-inventory.md"
+                    ],
+                    "max_results": 100,
+                    "paths": [
+                        "app/design",
+                        "app/code"
+                    ]
+                }
+            ],
+            "requirements": [
+                "MB-0087",
+                "MB-0171",
+                "MB-0538"
+            ],
+            "count": 3
+        },
+        {
+            "check": [
+                "pci_manual_evidence_documented",
+                {
+                    "paths": [
+                        ".magebean/pci-evidence.md",
+                        "docs/pci-evidence.md",
+                        "SECURITY.md"
+                    ],
+                    "required_topics": [
+                        "payment_scope",
+                        "saq_notes",
+                        "access_review",
+                        "incident_response",
+                        "vendor_responsibilities"
+                    ]
+                }
+            ],
+            "requirements": [
+                "MB-0093",
+                "MB-0687",
+                "MB-0690"
+            ],
+            "count": 3
+        },
+        {
+            "check": [
+                "code_custom_authorization_checks",
+                {
+                    "include_ext": [
+                        "php",
+                        "xml"
+                    ],
+                    "max_results": 100,
+                    "paths": [
+                        "app/code",
+                        "app/etc"
+                    ]
+                }
+            ],
+            "requirements": [
+                "MB-0094",
+                "MB-0276",
+                "MB-0278"
+            ],
+            "count": 3
+        },
+        {
+            "check": [
+                "code_hardcoded_secrets",
+                {
+                    "allowed_files": [
+                        "app/etc/env.php"
+                    ],
+                    "include_ext": [
+                        "php",
+                        "phtml",
+                        "js",
+                        "xml",
+                        "json",
+                        "env",
+                        "dist",
+                        "txt",
+                        "pem",
+                        "key",
+                        "yml",
+                        "yaml"
+                    ],
+                    "max_results": 100,
+                    "paths": [
+                        "app",
+                        "app/design"
+                    ]
+                }
+            ],
+            "requirements": [
+                "MB-0097",
+                "MB-0370",
+                "MB-0374"
+            ],
+            "count": 3
+        },
+        {
+            "check": [
+                "magento_admin_role_assignments_valid",
+                {
+                    "env_file": "app/etc/env.php"
+                }
+            ],
+            "requirements": [
+                "MB-0100",
+                "MB-0278",
+                "MB-0548"
+            ],
+            "count": 3
+        },
+        {
+            "check": [
+                "magento_cookie_flags_secure",
+                {
+                    "allowed_samesite": [
+                        "lax",
+                        "strict"
+                    ],
+                    "files": [
+                        "app/etc/config.php",
+                        "app/etc/env.php"
+                    ]
+                }
+            ],
+            "requirements": [
+                "MB-0150",
+                "MB-0151",
+                "MB-0153"
+            ],
+            "count": 3
+        },
+        {
+            "check": [
+                "http_cookie_flags",
+                {
+                    "paths": [
+                        "/",
+                        "/customer/account/login",
+                        "/checkout/cart"
+                    ],
+                    "timeout_ms": 8000
+                }
+            ],
+            "requirements": [
+                "MB-0150",
+                "MB-0151",
+                "MB-0153"
+            ],
+            "count": 3
+        },
+        {
+            "check": [
+                "http_has_hsts",
+                {
+                    "min_max_age": 31536000,
+                    "timeout_ms": 8000
+                }
+            ],
+            "requirements": [
+                "MB-0155",
+                "MB-0475",
+                "MB-0509"
+            ],
+            "count": 3
+        },
+        {
+            "check": [
+                "webserver_hsts_config",
+                {
+                    "files": [
+                        "nginx.conf",
+                        "pub/.htaccess",
+                        ".htaccess"
+                    ],
+                    "min_max_age": 31536000
+                }
+            ],
+            "requirements": [
+                "MB-0155",
+                "MB-0475",
+                "MB-0509"
+            ],
+            "count": 3
+        },
+        {
+            "check": [
+                "http_cors_no_wildcard_with_credentials",
+                {
+                    "timeout_ms": 8000
+                }
+            ],
+            "requirements": [
+                "MB-0156",
+                "MB-0164",
+                "MB-0190"
+            ],
+            "count": 3
+        },
+        {
+            "check": [
+                "http_cors_preflight_safe",
+                {
+                    "method": "POST",
+                    "origin": "https://magebean.invalid",
+                    "timeout_ms": 8000
+                }
+            ],
+            "requirements": [
+                "MB-0156",
+                "MB-0164",
+                "MB-0190"
+            ],
+            "count": 3
+        },
+        {
+            "check": [
+                "php_dev_debug_config_disabled",
+                {
+                    "file": "app/etc/env.php",
+                    "paths": [
+                        "system.default.dev/translate_inline/active",
+                        "system.default.dev/debug/template_hints_storefront"
+                    ]
+                }
+            ],
+            "requirements": [
+                "MB-0379",
+                "MB-0405",
+                "MB-0469"
+            ],
+            "count": 3
+        },
+        {
+            "check": [
+                "fs_logs_reports_not_in_webroot",
+                {
+                    "forbidden_paths": [
+                        "var/log",
+                        "var/report"
+                    ],
+                    "webroot": "pub"
+                }
+            ],
+            "requirements": [
+                "MB-0382",
+                "MB-0624",
+                "MB-0625"
+            ],
+            "count": 3
+        },
+        {
+            "check": [
+                "code_sensitive_logging",
+                {
+                    "include_ext": [
+                        "php"
+                    ],
+                    "paths": [
+                        "app"
+                    ]
+                }
+            ],
+            "requirements": [
+                "MB-0390",
+                "MB-0424",
+                "MB-0481"
+            ],
+            "count": 3
+        },
+        {
+            "check": [
+                "code_cardholder_data_logs",
+                {
+                    "include_ext": [
+                        "log",
+                        "txt",
+                        "json",
+                        "xml"
+                    ],
+                    "max_results": 100,
+                    "paths": [
+                        "var/log",
+                        "var/report",
+                        "pub/media/log",
+                        "pub/media/report"
+                    ]
+                }
+            ],
+            "requirements": [
+                "MB-0424",
+                "MB-0480",
+                "MB-0481"
+            ],
+            "count": 3
+        },
+        {
+            "check": [
+                "code_dirs_readonly",
+                {
+                    "dirs": [
+                        "app",
+                        "vendor",
+                        "lib"
+                    ],
+                    "max_results": 50
+                }
+            ],
+            "requirements": [
+                "MB-0430",
+                "MB-0540",
+                "MB-0660"
+            ],
+            "count": 3
+        },
+        {
+            "check": [
+                "magento_admin_exposure_restricted",
+                {
+                    "acl_files": [
+                        "nginx.conf",
+                        "pub/.htaccess",
+                        ".htaccess"
+                    ],
+                    "env_file": "app/etc/env.php",
+                    "paths": [
+                        "/admin/",
+                        "/index.php/admin/",
+                        "/backend/"
+                    ],
+                    "timeout_ms": 8000
+                }
+            ],
+            "requirements": [
+                "MB-0010",
+                "MB-0547"
+            ],
+            "count": 2
+        },
+        {
+            "check": [
+                "code_csrf_form_key",
+                {
+                    "paths": [
+                        "app"
+                    ]
+                }
+            ],
+            "requirements": [
+                "MB-0015",
+                "MB-0163"
+            ],
+            "count": 2
+        },
+        {
+            "check": [
+                "code_dynamic_execution_safety",
+                {
+                    "include_ext": [
+                        "php"
+                    ],
+                    "paths": [
+                        "app"
+                    ]
+                }
+            ],
+            "requirements": [
+                "MB-0019",
+                "MB-0116"
+            ],
+            "count": 2
+        },
+        {
+            "check": [
+                "fs_di_compiled",
+                {
+                    "code_path": "generated/code",
+                    "metadata_path": "generated/metadata",
+                    "min_code_php_files": 1,
+                    "min_metadata_php_files": 1
+                }
+            ],
+            "requirements": [
+                "MB-0034",
+                "MB-0469"
+            ],
+            "count": 2
+        },
+        {
+            "check": [
+                "composer_fix_version_api",
+                {
+                    "allow_private_http_fallback": true,
+                    "batch_size": 500,
+                    "endpoint": "https://api.magebean.com/v1/osv/advisories",
+                    "lock_file": "composer.lock",
+                    "timeout_ms": 10000
+                }
+            ],
+            "requirements": [
+                "MB-0051",
+                "MB-0535"
+            ],
+            "count": 2
+        },
+        {
+            "check": [
+                "composer_risk_surface_tag",
+                {
+                    "allow_private_http_fallback": true,
+                    "batch_size": 500,
+                    "lock_file": "composer.lock",
+                    "status_endpoint": "https://api.magebean.com/v1/packages/status",
+                    "timeout_ms": 10000
+                }
+            ],
+            "requirements": [
+                "MB-0052",
+                "MB-0533"
+            ],
+            "count": 2
+        },
+        {
+            "check": [
+                "security_mitigations_documented",
+                {
+                    "path": "SECURITY.md"
+                }
+            ],
+            "requirements": [
+                "MB-0053",
+                "MB-0535"
+            ],
+            "count": 2
+        },
+        {
+            "check": [
+                "composer_kev_advisories_api",
+                {
+                    "allow_private_http_fallback": true,
+                    "batch_size": 500,
+                    "endpoint": "https://api.magebean.com/v1/osv/advisories",
+                    "lock_file": "composer.lock",
+                    "timeout_ms": 10000
+                }
+            ],
+            "requirements": [
+                "MB-0054",
+                "MB-0533"
+            ],
+            "count": 2
+        },
+        {
+            "check": [
+                "composer_risky_fork_api",
+                {
+                    "allow_private_http_fallback": true,
+                    "lock_file": "composer.lock",
+                    "status_endpoint": "https://api.magebean.com/v1/packages/status",
+                    "timeout_ms": 10000
+                }
+            ],
+            "requirements": [
+                "MB-0064",
+                "MB-0406"
+            ],
+            "count": 2
+        },
+        {
+            "check": [
+                "code_webhook_signature_validation",
+                {
+                    "include_ext": [
+                        "php",
+                        "xml"
+                    ],
+                    "max_results": 100,
+                    "paths": [
+                        "app/code",
+                        "app/etc",
+                        "routes"
+                    ]
+                }
+            ],
+            "requirements": [
+                "MB-0075",
+                "MB-0532"
+            ],
+            "count": 2
+        },
+        {
+            "check": [
+                "code_payment_method_scope",
+                {
+                    "include_ext": [
+                        "php",
+                        "phtml",
+                        "js",
+                        "xml"
+                    ],
+                    "max_results": 100,
+                    "paths": [
+                        "app/code",
+                        "app/design"
+                    ]
+                }
+            ],
+            "requirements": [
+                "MB-0085",
+                "MB-0674"
+            ],
+            "count": 2
+        },
+        {
+            "check": [
+                "code_payment_page_tamper_monitoring",
+                {
+                    "evidence_files": [
+                        ".magebean/payment-page-monitoring.json",
+                        "docs/payment-page-monitoring.md"
+                    ],
+                    "include_ext": [
+                        "xml",
+                        "php",
+                        "phtml",
+                        "js",
+                        "html",
+                        "conf",
+                        "htaccess"
+                    ],
+                    "paths": [
+                        "app/code",
+                        "app/etc",
+                        "app/design",
+                        "pub/.htaccess",
+                        ".htaccess",
+                        "nginx.conf"
+                    ]
+                }
+            ],
+            "requirements": [
+                "MB-0090",
+                "MB-0661"
+            ],
+            "count": 2
+        },
+        {
+            "check": [
+                "code_webhook_signature_validation",
+                {
+                    "include_ext": [
+                        "php",
+                        "xml"
+                    ],
+                    "max_results": 100,
+                    "paths": [
+                        "app/code",
+                        "app/etc",
+                        "routes"
+                    ],
+                    "payment_only": true,
+                    "require_idempotency": true,
+                    "require_replay_window": true,
+                    "require_timestamp": true
+                }
+            ],
+            "requirements": [
+                "MB-0092",
+                "MB-0532"
+            ],
+            "count": 2
+        },
+        {
+            "check": [
+                "code_unsafe_xml_parsing",
+                {
+                    "include_ext": [
+                        "php"
+                    ],
+                    "max_results": 100,
+                    "paths": [
+                        "app"
+                    ]
+                }
+            ],
+            "requirements": [
+                "MB-0098",
+                "MB-0130"
+            ],
+            "count": 2
+        },
+        {
+            "check": [
+                "pci_vendor_default_accounts_evidence",
+                {
+                    "paths": [
+                        ".magebean/pci/2.2.2-vendor-default-accounts.json",
+                        ".magebean/pci-2.2.2-evidence.json"
+                    ]
+                }
+            ],
+            "requirements": [
+                "MB-0102",
+                "MB-0470"
+            ],
+            "count": 2
+        },
+        {
+            "check": [
+                "http_method_disallowed",
+                {
+                    "method": "TRACE",
+                    "timeout_ms": 8000
+                }
+            ],
+            "requirements": [
+                "MB-0180",
+                "MB-0381"
+            ],
+            "count": 2
+        },
+        {
+            "check": [
+                "code_media_executable_code",
+                {
+                    "max_file_bytes": 1048576,
+                    "max_results": 100,
+                    "paths": [
+                        "pub/media",
+                        "pub/import",
+                        "var/import",
+                        "var/export"
+                    ]
+                }
+            ],
+            "requirements": [
+                "MB-0200",
+                "MB-0532"
+            ],
+            "count": 2
+        },
+        {
+            "check": [
+                "magento_admin_password_policy_strong",
+                {
+                    "base_path": "system.default.admin.security",
+                    "file": "app/etc/config.php",
+                    "min_password_length": 8
+                }
+            ],
+            "requirements": [
+                "MB-0209",
+                "MB-0572"
+            ],
+            "count": 2
+        },
+        {
+            "check": [
+                "http_tls_cert_days_left",
+                {
+                    "min_days": 1,
+                    "timeout_ms": 8000
+                }
+            ],
+            "requirements": [
+                "MB-0358",
+                "MB-0360"
+            ],
+            "count": 2
+        },
+        {
+            "check": [
+                "http_no_vcs_misc",
+                {
+                    "timeout_ms": 8000
+                }
+            ],
+            "requirements": [
+                "MB-0378",
+                "MB-0384"
+            ],
+            "count": 2
+        },
+        {
+            "check": [
+                "php_third_party_debug_disabled",
+                {
+                    "files": [
+                        "app/etc/env.php",
+                        "app/etc/config.php"
+                    ]
+                }
+            ],
+            "requirements": [
+                "MB-0379",
+                "MB-0469"
+            ],
+            "count": 2
+        },
+        {
+            "check": [
+                "http_no_directory_listing",
+                {
+                    "paths": [
+                        "/media/",
+                        "/static/",
+                        "/errors/",
+                        "/var/"
+                    ],
+                    "timeout_ms": 8000
+                }
+            ],
+            "requirements": [
+                "MB-0380",
+                "MB-0469"
+            ],
+            "count": 2
+        },
+        {
+            "check": [
+                "webroot_hygiene",
+                {
+                    "forbidden": [
+                        ".git",
+                        ".env",
+                        ".env.local",
+                        ".env.*",
+                        "*.bak",
+                        "*.old",
+                        "*~"
+                    ],
+                    "webroot": "pub"
+                }
+            ],
+            "requirements": [
+                "MB-0384",
+                "MB-0469"
+            ],
+            "count": 2
+        },
+        {
+            "check": [
+                "code_sensitive_logging",
+                {
+                    "include_ext": [
+                        "php"
+                    ],
+                    "max_results": 50,
+                    "paths": [
+                        "app"
+                    ]
+                }
+            ],
+            "requirements": [
+                "MB-0390",
+                "MB-0424"
+            ],
+            "count": 2
+        },
+        {
+            "check": [
+                "composer_transitive_audit_api",
+                {
+                    "allow_private_http_fallback": true,
+                    "batch_size": 500,
+                    "composer_file": "composer.json",
+                    "endpoint": "https://api.magebean.com/v1/osv/advisories",
+                    "lock_file": "composer.lock",
+                    "timeout_ms": 10000
+                }
+            ],
+            "requirements": [
+                "MB-0399",
+                "MB-0533"
+            ],
+            "count": 2
+        },
+        {
+            "check": [
+                "composer_repo_archived_api",
+                {
+                    "allow_private_http_fallback": true,
+                    "lock_file": "composer.lock",
+                    "status_endpoint": "https://api.magebean.com/v1/packages/status",
+                    "timeout_ms": 10000
+                }
+            ],
+            "requirements": [
+                "MB-0399",
+                "MB-0406"
+            ],
+            "count": 2
+        },
+        {
+            "check": [
+                "composer_adobe_security_patches_api",
+                {
+                    "allow_private_http_fallback": true,
+                    "endpoint": "https://api.magebean.com/v1/adobe/security-patches",
+                    "lock_file": "composer.lock",
+                    "timeout_ms": 10000
+                }
+            ],
+            "requirements": [
+                "MB-0403",
+                "MB-0535"
+            ],
+            "count": 2
+        },
+        {
+            "check": [
+                "composer_advisory_latency_api",
+                {
+                    "allow_private_http_fallback": true,
+                    "batch_size": 500,
+                    "endpoint": "https://api.magebean.com/v1/osv/advisories",
+                    "latency_days": 30,
+                    "lock_file": "composer.lock",
+                    "timeout_ms": 10000
+                }
+            ],
+            "requirements": [
+                "MB-0403",
+                "MB-0535"
+            ],
+            "count": 2
+        },
+        {
+            "check": [
+                "code_third_party_logging_sanitized",
+                {
+                    "include_ext": [
+                        "php"
+                    ],
+                    "max_results": 100,
+                    "paths": [
+                        "app/code"
+                    ]
+                }
+            ],
+            "requirements": [
+                "MB-0424",
+                "MB-0481"
+            ],
+            "count": 2
+        },
+        {
+            "check": [
+                "fs_no_world_writable",
+                {
+                    "max_results": 50,
+                    "path": "."
+                }
+            ],
+            "requirements": [
+                "MB-0430",
+                "MB-0469"
+            ],
+            "count": 2
+        },
+        {
+            "check": [
+                "file_mode_max",
+                {
+                    "file": "app/etc/env.php",
+                    "max_octal": "0640"
+                }
+            ],
+            "requirements": [
+                "MB-0430",
+                "MB-0547"
+            ],
+            "count": 2
+        },
+        {
+            "check": [
+                "file_owner_group_matches",
+                {
+                    "file": "app/etc/env.php",
+                    "group_reference": ".",
+                    "owner_reference": "."
+                }
+            ],
+            "requirements": [
+                "MB-0430",
+                "MB-0547"
+            ],
+            "count": 2
+        }
+    ],
+    "profile_overlap": {
+        "asvs-l1": {
+            "asvs-l2": 69,
+            "asvs-l3": 69,
+            "basic": 0,
+            "hardening": 5,
+            "owasp-top-10-2025": 5,
+            "pci-dss-v4.0.1": 0
+        },
+        "asvs-l2": {
+            "asvs-l1": 69,
+            "asvs-l3": 252,
+            "basic": 0,
+            "hardening": 8,
+            "owasp-top-10-2025": 8,
+            "pci-dss-v4.0.1": 0
+        },
+        "asvs-l3": {
+            "asvs-l1": 69,
+            "asvs-l2": 252,
+            "basic": 0,
+            "hardening": 8,
+            "owasp-top-10-2025": 8,
+            "pci-dss-v4.0.1": 0
+        },
+        "basic": {
+            "asvs-l1": 0,
+            "asvs-l2": 0,
+            "asvs-l3": 0,
+            "hardening": 17,
+            "owasp-top-10-2025": 16,
+            "pci-dss-v4.0.1": 0
+        },
+        "hardening": {
+            "asvs-l1": 5,
+            "asvs-l2": 8,
+            "asvs-l3": 8,
+            "basic": 17,
+            "owasp-top-10-2025": 68,
+            "pci-dss-v4.0.1": 0
+        },
+        "owasp-top-10-2025": {
+            "asvs-l1": 5,
+            "asvs-l2": 8,
+            "asvs-l3": 8,
+            "basic": 16,
+            "hardening": 68,
+            "pci-dss-v4.0.1": 0
+        },
+        "pci-dss-v4.0.1": {
+            "asvs-l1": 0,
+            "asvs-l2": 0,
+            "asvs-l3": 0,
+            "basic": 0,
+            "hardening": 0,
+            "owasp-top-10-2025": 0
+        }
+    }
+}

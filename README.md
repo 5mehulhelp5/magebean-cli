@@ -10,7 +10,7 @@ Use the fast production-readiness profile for routine checks, map an assessment 
 
 ## Assessment terminology
 
-We use **requirement** for the unit assessed and reported. The accepted model is **one requirement = one assessment definition (legacy name: rule)**, containing one or more reusable checks. ASVS profiles compile one definition per versioned requirement. The underlying MB-R catalog remains a compatibility/evidence catalog; other profiles continue using it. Exact command names such as `rules:list`, options such as `--rules`, and JSON `rules` keys remain supported as implemented today.
+We use **requirement** for the unit assessed and reported. The accepted model is **one requirement = one assessment definition (legacy name: rule)**, containing one or more reusable checks. ASVS profiles compile one definition per versioned requirement. The underlying MB-R catalog remains a compatibility/evidence catalog; all seven customer profiles use persisted source-family definitions. Exact command names such as `rules:list`, options such as `--rules`, and JSON `rules` keys remain supported as implemented today.
 
 Read the [requirement model](docs/requirement-model.md) and [ASVS L1/L2 migration inventory](docs/asvs-requirement-migration.md) for the mapping and implementation boundary. A technical check PASS does not resolve an unverified human obligation.
 
@@ -66,7 +66,7 @@ php bin/magebean rules:list
 
 The current rule library contains **19 controls and 371 rules**: **113 automated** and **258 marked `HUMAN VERIFICATION REQUIRED`**.
 
-`scan` and `rules:list` use the 21-rule `basic` profile by default. Select `asvs-l1`, `asvs-l2`, `asvs-l3`, `owasp`, `pci`, or `hardening` with `--profile`. The `asvs-l1`, `asvs-l2`, and `asvs-l3` profiles exclude manual-review rules by default; add `--include-manual-review` when human evidence collection is desired. The PCI profile runs 67 rules by default and 68 with human verification enabled; use `--pci-context`, `--pci-evidence`, and `--pci-report` for applicability compilation and evidence-readiness reporting.
+`scan` and `rules:list` use the 20-requirement `basic` profile by default. Basic, Hardening and OWASP select Magebean criteria; ASVS and PCI select their own document clauses. Requirements needing human evidence are excluded by default; use `--include-manual-review` to include them. ASVS and PCI currently require that flag to produce an assessment plan. PCI supports `--pci-context`, `--pci-evidence` and `--pci-report` for applicability and readiness reporting.
 
 See [CLI Reference](docs/cli-reference.md) for all commands, options, profiles, target modes, and examples.
 
@@ -179,20 +179,21 @@ Target mode is selected from the explicitly provided options:
 | `--pci-evidence` | PCI DSS structured external evidence JSON | none |
 | `--pci-report` | Write a PCI evidence-readiness report as JSON | none |
 
-Selection order is: target pack → project policy → (`--rules` or profile) → `--exclude-rules`. An explicit `--rules` list bypasses profile selection and chooses IDs from the available catalog.
+Selection order is: target pack → project policy → (`--rules` or profile) → `--exclude-rules`. An explicit `--rules` list selects IDs within one source family; an explicit profile must match that family.
 
 ### Profiles
 
-| Profile | Requirements selected by default |
-|---|---:|
-| `basic` | 20 |
-| `asvs-l1` | 41 (69 with manual review) |
-| `asvs-l2` | 89 (197 with manual review, 252 with all capabilities) |
-| `asvs-l3` | 97 (267 with manual review, 344 with all capabilities) |
-| `owasp` | 69 |
-| `pci` | 32 (257 with manual review) |
-| `hardening` | 81 (82 with manual review) |
+| Profile | Source family | Inventory | Default LOCAL selection |
+|---|---|---:|---:|
+| `basic` | Magebean | 20 | 20 |
+| `hardening` | Magebean | 91 | 41 |
+| `owasp` | Magebean | 77 | 31 |
+| `asvs-l1` | ASVS 5.0.0 | 70 | 0 |
+| `asvs-l2` | ASVS 5.0.0 | 253 | 0 |
+| `asvs-l3` | ASVS 5.0.0 | 345 | 0 |
+| `pci` | PCI DSS 4.0.1 | 280 | 0 |
 
+Inventory includes contextual and human requirements. `--include-manual-review` enables human-required entries; capabilities and target mode can further limit execution. Zero default selection describes the current human gate, not absence of reusable technical checks. See [requirement source families](docs/requirement-source-families.md).
 Custom profile files can be passed to `--profile`, including profiles stored under `.magebean/profiles`.
 
 ### List and filter rules

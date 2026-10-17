@@ -88,6 +88,7 @@ HELP;
         $profile = $pack['profile'] ?? [];
         if ($profile !== []) {
             $out->writeln(sprintf('<info>Profile:</info> %s (%s)', (string)($profile['id'] ?? $profileOpt), (string)($profile['title'] ?? '')));
+            if(isset($profile['family']))$out->writeln('<info>Requirement source:</info> '.match($profile['family']){'magebean'=>'Magebean','asvs'=>'OWASP ASVS','pci'=>'PCI DSS',default=>(string)$profile['family']});
         }
         $profileRulesTotal = count($pack['rules'] ?? []);
         $profileManualRulesTotal = count(array_filter($pack['rules'] ?? [], static fn(array $rule): bool => \Magebean\Engine\RequirementPolicy::requiresHuman($rule)));

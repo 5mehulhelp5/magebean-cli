@@ -1,0 +1,845 @@
+{
+  "profile": "basic",
+  "review_date": "2026-10-17",
+  "review_type": "static source and catalog review; no runtime change",
+  "items": [
+    {
+      "id": "MB-0001",
+      "title": "No world-writable files or directories",
+      "decision": "KEEP",
+      "priority": "P1",
+      "current_checks": [
+        {
+          "name": "fs_no_world_writable",
+          "args": {
+            "path": ".",
+            "max_results": 50,
+            "strict_observation": true
+          }
+        }
+      ],
+      "remote_variant": null,
+      "implementation_refs": [
+        "src/Engine/Checks/FilesystemCheck.php:847"
+      ],
+      "actual_claim": "Unix world-write trong cây deployment; symlink là gap UNKNOWN.",
+      "proposed_scope_and_evidence": "Giữ lỗi world-write; báo số entry và gap; traversal cần deadline/budget.",
+      "customer_risk": "Khách hàng có thể hiểu rộng hơn bằng chứng của predicate; kết quả phải giới hạn đúng deployment/URL/config đã quan sát.",
+      "fixtures": {
+        "safe": "Cây đọc đủ mode 0755/0640 PASS",
+        "unsafe": "File hoặc thư mục 0777 FAIL",
+        "missing": "Unreadable hoặc symlink UNKNOWN"
+      },
+      "verification": "Đã đọc implementation và catalog; fixture đề xuất, chưa chạy mới trong lượt này."
+    },
+    {
+      "id": "MB-0002",
+      "title": "env.php satisfies configured mode and ownership policy",
+      "decision": "REVISE",
+      "priority": "P1",
+      "current_checks": [
+        {
+          "name": "file_mode_max",
+          "args": {
+            "file": "app/etc/env.php",
+            "max_octal": "0640",
+            "strict_observation": true
+          }
+        },
+        {
+          "name": "file_owner_group_matches",
+          "args": {
+            "file": "app/etc/env.php",
+            "owner_reference": ".",
+            "group_reference": ".",
+            "strict_observation": true
+          }
+        }
+      ],
+      "remote_variant": null,
+      "implementation_refs": [
+        "src/Engine/Checks/FilesystemCheck.php:62",
+        "src/Engine/Checks/FilesystemCheck.php:95"
+      ],
+      "actual_claim": "Mode phải là subset 0640 và owner/group bằng project root; chưa kiểm ACL.",
+      "proposed_scope_and_evidence": "Giữ kiểm env.php other-read/write là core security; tách owner-reference và execute-bit thành policy có cấu hình; không suy ra effective access.",
+      "customer_risk": "Khách hàng có thể hiểu rộng hơn bằng chứng của predicate; kết quả phải giới hạn đúng deployment/URL/config đã quan sát.",
+      "fixtures": {
+        "safe": "0600/0640 với approved owner PASS",
+        "unsafe": "0644 lộ world-read;0666 world-write FAIL",
+        "missing": "stat/file thiếu UNKNOWN; ACL chưa quan sát ghi gap"
+      },
+      "verification": "Đã đọc implementation và catalog; fixture đề xuất, chưa chạy mới trong lượt này."
+    },
+    {
+      "id": "MB-0003",
+      "title": "Webroot hygiene (no .git/.env/backups in pub/)",
+      "decision": "KEEP",
+      "priority": "P1",
+      "current_checks": [
+        {
+          "name": "fs_webroot_artifact_policy",
+          "args": {
+            "webroot": "pub",
+            "forbidden": [
+              ".git",
+              ".env",
+              ".env.local",
+              ".env.*",
+              "*.bak",
+              "*.old",
+              "*~"
+            ]
+          }
+        }
+      ],
+      "remote_variant": null,
+      "implementation_refs": [
+        "src/Engine/Checks/DeploymentStateCheck.php:11"
+      ],
+      "actual_claim": "Tìm forbidden basenames trong pub; duyệt internal symlink; external/unreadable UNKNOWN.",
+      "proposed_scope_and_evidence": "Giữ local precursor; bổ sung quan sát HTTP file nhạy cảm riêng; path hiện diện không đồng nghĩa public exposure.",
+      "customer_risk": "Khách hàng có thể hiểu rộng hơn bằng chứng của predicate; kết quả phải giới hạn đúng deployment/URL/config đã quan sát.",
+      "fixtures": {
+        "safe": "Pub đầy đủ không forbidden PASS",
+        "unsafe": "pub/.git hoặc backup qua symlink nội bộ FAIL",
+        "missing": "external symlink/unreadable/budget UNKNOWN"
+      },
+      "verification": "Đã đọc implementation và catalog; fixture đề xuất, chưa chạy mới trong lượt này."
+    },
+    {
+      "id": "MB-0005",
+      "title": "Directory listing absent on probed Magento paths",
+      "decision": "KEEP",
+      "priority": "P1",
+      "current_checks": [
+        {
+          "name": "http_no_directory_listing",
+          "args": {
+            "paths": [
+              "/media/",
+              "/static/",
+              "/errors/",
+              "/var/"
+            ],
+            "timeout_ms": 8000,
+            "strict_scope": true
+          }
+        }
+      ],
+      "remote_variant": {
+        "obligations": [
+          {
+            "id": "O001",
+            "op": "all",
+            "role": "mandatory",
+            "proof": "verified_predicate",
+            "checks": [
+              {
+                "name": "http_no_directory_listing",
+                "args": {
+                  "paths": [
+                    "/media/",
+                    "/static/",
+                    "/errors/",
+                    "/var/"
+                  ],
+                  "timeout_ms": 8000,
+                  "strict_scope": true
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "implementation_refs": [
+        "src/Engine/Checks/HttpCheck.php:507"
+      ],
+      "actual_claim": "Nhận diện markup listing trong 8KB đầu của bốn đường dẫn, không kiểm mọi URL.",
+      "proposed_scope_and_evidence": "Giữ bounded listing; evidence URL/status/redirect; không tuyên bố server tắt autoindex toàn cục.",
+      "customer_risk": "Khách hàng có thể hiểu rộng hơn bằng chứng của predicate; kết quả phải giới hạn đúng deployment/URL/config đã quan sát.",
+      "fixtures": {
+        "safe": "403/404 hoặc normal 200 PASS trong scope",
+        "unsafe": "200 title Index of FAIL",
+        "missing": "429/timeout/off-host redirect UNKNOWN"
+      },
+      "verification": "Đã đọc implementation và catalog; fixture đề xuất, chưa chạy mới trong lượt này."
+    },
+    {
+      "id": "MB-0006",
+      "title": "Declared backend route differs from admin",
+      "decision": "OPTIONAL",
+      "priority": "P2",
+      "current_checks": [
+        {
+          "name": "magento_admin_frontname_declared",
+          "args": {}
+        }
+      ],
+      "remote_variant": null,
+      "implementation_refs": [
+        "src/Engine/Checks/MagentoCheck.php:22"
+      ],
+      "actual_claim": "frontName hợp lệ khác admin; không chứng minh auth, entropy hay exposure.",
+      "proposed_scope_and_evidence": "Giữ defense-in-depth advisory; giảm vai trò security gate và ưu tiên MFA/lockout.",
+      "customer_risk": "Khách hàng có thể hiểu rộng hơn bằng chứng của predicate; kết quả phải giới hạn đúng deployment/URL/config đã quan sát.",
+      "fixtures": {
+        "safe": "Declared custom route PASS",
+        "unsafe": "admin FAIL policy",
+        "missing": "Missing/malformed config UNKNOWN"
+      },
+      "verification": "Đã đọc implementation và catalog; fixture đề xuất, chưa chạy mới trong lượt này."
+    },
+    {
+      "id": "MB-0007",
+      "title": "Admin 2FA core and provider modules declared enabled",
+      "decision": "REVISE",
+      "priority": "P1",
+      "current_checks": [
+        {
+          "name": "magento_admin_2fa_enabled",
+          "args": {
+            "file": "app/etc/config.php",
+            "core_module": "Magento_TwoFactorAuth",
+            "provider_modules": [
+              "Magento_GoogleAuthenticator",
+              "Magento_DuoSecurity",
+              "Magento_U2fKey",
+              "Magento_AdminAdobeImsTwoFactorAuth"
+            ],
+            "declared_scope_only": true
+          }
+        }
+      ],
+      "remote_variant": null,
+      "implementation_refs": [
+        "src/Engine/Checks/MagentoCheck.php:374"
+      ],
+      "actual_claim": "Core module và ít nhất một fixed provider MODULE được bật; chưa chứng minh provider/service/enrollment.",
+      "proposed_scope_and_evidence": "Đối chiếu fixture config thật của từng Magento hỗ trợ; resolve provider config thực và IMS/custom MFA alternative; không coi provider thiếu tên module là tắt MFA.",
+      "customer_risk": "Khách hàng có thể hiểu rộng hơn bằng chứng của predicate; kết quả phải giới hạn đúng deployment/URL/config đã quan sát.",
+      "fixtures": {
+        "safe": "Authentic supported Magento MFA config + provider active được nhận",
+        "unsafe": "Core MFA disabled và không approved alternative FAIL",
+        "missing": "Provider/service mapping chưa hiểu UNKNOWN, không false FAIL"
+      },
+      "verification": "Đã đọc implementation và catalog; fixture đề xuất, chưa chạy mới trong lượt này."
+    },
+    {
+      "id": "MB-0728",
+      "title": "Configured admin password minimum is at least eight",
+      "decision": "REVISE",
+      "priority": "P1",
+      "current_checks": [
+        {
+          "name": "magento_admin_password_minimum_configured",
+          "args": {
+            "min_length": 8
+          }
+        }
+      ],
+      "remote_variant": null,
+      "implementation_refs": [
+        "src/Engine/Checks/MagentoCheck.php:113"
+      ],
+      "actual_claim": "Minimum >=8 từ locked/default DB/module validator source regex, không kiểm password thực.",
+      "proposed_scope_and_evidence": "Giữ observed minimum như policy có threshold; validate đúng Magento versions/custom validator; không gọi >=8 là strong password.",
+      "customer_risk": "Khách hàng có thể hiểu rộng hơn bằng chứng của predicate; kết quả phải giới hạn đúng deployment/URL/config đã quan sát.",
+      "fixtures": {
+        "safe": "Resolved >= configured threshold PASS",
+        "unsafe": "Resolved below threshold FAIL",
+        "missing": "Custom validator không resolve/DB lỗi UNKNOWN"
+      },
+      "verification": "Đã đọc implementation và catalog; fixture đề xuất, chưa chạy mới trong lượt này."
+    },
+    {
+      "id": "MB-0011",
+      "title": "Configured admin login CAPTCHA or bounded lockout",
+      "decision": "REVISE",
+      "priority": "P1",
+      "current_checks": [
+        {
+          "name": "magento_admin_login_protection_configured",
+          "args": {
+            "max_lockout_failures": 10
+          }
+        }
+      ],
+      "remote_variant": null,
+      "implementation_refs": [
+        "src/Engine/Checks/MagentoCheck.php:173"
+      ],
+      "actual_claim": "CAPTCHA backend_login hoặc lockout failures 1..10 và threshold>0 hoặc recognized reCAPTCHA type.",
+      "proposed_scope_and_evidence": "Giữ configured signal; verify supported providers và key/config completeness; CAPTCHA-only không chứng minh throttling; separate runtime test opt-in.",
+      "customer_risk": "Khách hàng có thể hiểu rộng hơn bằng chứng của predicate; kết quả phải giới hạn đúng deployment/URL/config đã quan sát.",
+      "fixtures": {
+        "safe": "Valid bounded lockout hoặc authentic CAPTCHA config PASS scoped",
+        "unsafe": "Known all mechanisms off FAIL",
+        "missing": "Partial/malformed config UNKNOWN"
+      },
+      "verification": "Đã đọc implementation và catalog; fixture đề xuất, chưa chạy mới trong lượt này."
+    },
+    {
+      "id": "MB-0026",
+      "title": "Force HTTPS in admin and storefront",
+      "decision": "REVISE",
+      "priority": "P1",
+      "current_checks": [
+        {
+          "name": "http_force_https_redirect",
+          "args": {
+            "strict_scope": true,
+            "include_admin": true
+          }
+        }
+      ],
+      "remote_variant": {
+        "obligations": [
+          {
+            "id": "O001",
+            "op": "all",
+            "role": "mandatory",
+            "proof": "verified_predicate",
+            "checks": [
+              {
+                "name": "http_force_https_redirect",
+                "args": {
+                  "strict_scope": true,
+                  "include_admin": true
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "implementation_refs": [
+        "src/Engine/Checks/HttpCheck.php:169"
+      ],
+      "actual_claim": "HTTP root và backend.frontName phải redirect trực tiếp same-host HTTPS; remote-only không có env.php nên UNKNOWN.",
+      "proposed_scope_and_evidence": "Tách root HTTPS và admin HTTPS obligations; nhận explicit admin URL/context; 403/HTTP-port-blocked là policy/exposure context không tự suy ra plaintext login.",
+      "customer_risk": "Khách hàng có thể hiểu rộng hơn bằng chứng của predicate; kết quả phải giới hạn đúng deployment/URL/config đã quan sát.",
+      "fixtures": {
+        "safe": "Root/admin direct HTTPS redirect PASS",
+        "unsafe": "HTTP login 200 hoặc downgrade FAIL",
+        "missing": "Remote không admin context: root có kết quả, admin UNKNOWN"
+      },
+      "verification": "Đã đọc implementation và catalog; fixture đề xuất, chưa chạy mới trong lượt này."
+    },
+    {
+      "id": "MB-0028",
+      "title": "Runtime endpoint rejects legacy TLS",
+      "decision": "KEEP",
+      "priority": "P1",
+      "current_checks": [
+        {
+          "name": "http_tls_min_version",
+          "args": {
+            "timeout_ms": 8000,
+            "strict_scope": true
+          }
+        }
+      ],
+      "remote_variant": {
+        "obligations": [
+          {
+            "id": "O001",
+            "op": "all",
+            "role": "mandatory",
+            "proof": "verified_predicate",
+            "checks": [
+              {
+                "name": "http_tls_min_version",
+                "args": {
+                  "timeout_ms": 8000,
+                  "strict_scope": true
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "implementation_refs": [
+        "src/Engine/Checks/HttpCheck.php:1052",
+        "src/Engine/Checks/HttpCheck.php:1554"
+      ],
+      "actual_claim": "Host/port chấp nhận modern TLS và từ chối 1.0/1.1 bằng evidence có ý nghĩa.",
+      "proposed_scope_and_evidence": "Giữ protocol evidence; client không hỗ trợ TLS cũ không được coi server reject.",
+      "customer_risk": "Khách hàng có thể hiểu rộng hơn bằng chứng của predicate; kết quả phải giới hạn đúng deployment/URL/config đã quan sát.",
+      "fixtures": {
+        "safe": "Modern success + legacy peer rejection PASS",
+        "unsafe": "TLS1.0/1.1 accepted FAIL",
+        "missing": "Client protocol disabled/network outage UNKNOWN"
+      },
+      "verification": "Đã đọc implementation và catalog; fixture đề xuất, chưa chạy mới trong lượt này."
+    },
+    {
+      "id": "MB-0029",
+      "title": "Literal HTTP asset references absent in assessed markup/CSS",
+      "decision": "KEEP",
+      "priority": "P1",
+      "current_checks": [
+        {
+          "name": "code_no_mixed_content",
+          "args": {
+            "paths": [
+              "app"
+            ],
+            "include_ext": [
+              "phtml",
+              "html",
+              "xml",
+              "css",
+              "less"
+            ],
+            "max_results": 50,
+            "strict_scope": true
+          }
+        }
+      ],
+      "remote_variant": {
+        "obligations": [
+          {
+            "id": "O001",
+            "op": "all",
+            "role": "mandatory",
+            "proof": "verified_predicate",
+            "checks": [
+              {
+                "name": "http_no_mixed_content",
+                "args": {
+                  "paths": [
+                    "/"
+                  ],
+                  "timeout_ms": 8000,
+                  "strict_scope": true
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "implementation_refs": [
+        "src/Engine/Checks/CodeSearchCheck.php:209",
+        "src/Engine/Checks/HttpCheck.php:254",
+        "src/Engine/Checks/Families/CodeQueryChecks.php:105"
+      ],
+      "actual_claim": "Literal HTTP subresource/form trong app markup/CSS; remote homepage thôi.",
+      "proposed_scope_and_evidence": "Giữ bounded mixed-content signal; evidence file/line hoặc URL; JS generated/authenticated paths gap.",
+      "customer_risk": "Khách hàng có thể hiểu rộng hơn bằng chứng của predicate; kết quả phải giới hạn đúng deployment/URL/config đã quan sát.",
+      "fixtures": {
+        "safe": "HTTPS resource/form references PASS",
+        "unsafe": "Literal HTTP script/form FAIL",
+        "missing": "Unreadable local roots hoặc remote failed UNKNOWN"
+      },
+      "verification": "Đã đọc implementation và catalog; fixture đề xuất, chưa chạy mới trong lượt này."
+    },
+    {
+      "id": "MB-0030",
+      "title": "Sensitive cookies use Secure, HttpOnly, and SameSite",
+      "decision": "REVISE",
+      "priority": "P1",
+      "current_checks": [
+        {
+          "name": "http_cookie_flags",
+          "args": {
+            "strict_scope": true,
+            "paths": [
+              "/",
+              "/customer/account/login",
+              "/checkout/cart"
+            ]
+          }
+        }
+      ],
+      "remote_variant": {
+        "obligations": [
+          {
+            "id": "O001",
+            "op": "all",
+            "role": "mandatory",
+            "proof": "verified_predicate",
+            "checks": [
+              {
+                "name": "http_cookie_flags",
+                "args": {
+                  "strict_scope": true,
+                  "paths": [
+                    "/",
+                    "/customer/account/login",
+                    "/checkout/cart"
+                  ]
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "implementation_refs": [
+        "src/Engine/Checks/HttpCheck.php:351",
+        "src/Engine/Checks/HttpCheck.php:401"
+      ],
+      "actual_claim": "Flags chỉ cho sensitive cookie names phát ra tại ba anonymous URLs; không chứng minh admin session.",
+      "proposed_scope_and_evidence": "Giữ anonymous cookie checks; thêm observed configured/custom session names; explicit authenticated/admin workflow; SameSite=None+Secure hợp lệ cross-site cần exception theo integration.",
+      "customer_risk": "Khách hàng có thể hiểu rộng hơn bằng chứng của predicate; kết quả phải giới hạn đúng deployment/URL/config đã quan sát.",
+      "fixtures": {
+        "safe": "Observed sensitive Secure/HttpOnly/Lax PASS",
+        "unsafe": "Sensitive thiếu Secure hoặc HttpOnly FAIL",
+        "missing": "Không Set-Cookie hoặc auth chưa quan sát UNKNOWN"
+      },
+      "verification": "Đã đọc implementation và catalog; fixture đề xuất, chưa chạy mới trong lượt này."
+    },
+    {
+      "id": "MB-0031",
+      "title": "Declared Magento deployment mode is production",
+      "decision": "KEEP",
+      "priority": "P1",
+      "current_checks": [
+        {
+          "name": "magento_production_mode",
+          "args": {
+            "file": "app/etc/env.php",
+            "path": "MAGE_MODE",
+            "equals": "production"
+          }
+        }
+      ],
+      "remote_variant": null,
+      "implementation_refs": [
+        "src/Engine/Checks/MagentoCheck.php:536"
+      ],
+      "actual_claim": "env.php MAGE_MODE production; không quan sát web-worker override.",
+      "proposed_scope_and_evidence": "Giữ declared production security posture; evidence source; thêm runtime declaration riêng khi có.",
+      "customer_risk": "Khách hàng có thể hiểu rộng hơn bằng chứng của predicate; kết quả phải giới hạn đúng deployment/URL/config đã quan sát.",
+      "fixtures": {
+        "safe": "MAGE_MODE production PASS",
+        "unsafe": "developer/default FAIL policy",
+        "missing": "Missing/malformed config UNKNOWN"
+      },
+      "verification": "Đã đọc implementation và catalog; fixture đề xuất, chưa chạy mới trong lượt này."
+    },
+    {
+      "id": "MB-0729",
+      "title": "Declared project debug settings are disabled",
+      "decision": "REVISE",
+      "priority": "P1",
+      "current_checks": [
+        {
+          "name": "magento_deployment_debug_flags_disabled",
+          "args": {}
+        }
+      ],
+      "remote_variant": null,
+      "implementation_refs": [
+        "src/Engine/Checks/MagentoCheck.php:137"
+      ],
+      "actual_claim": "Default-scope debug declarations và bốn project ini files; absence là không explicitly enabled.",
+      "proposed_scope_and_evidence": "Giữ declared-scope claim; thêm website/store overrides và web-worker evidence riêng; không gọi live debug disabled.",
+      "customer_risk": "Khách hàng có thể hiểu rộng hơn bằng chứng của predicate; kết quả phải giới hạn đúng deployment/URL/config đã quan sát.",
+      "fixtures": {
+        "safe": "Explicit flags off PASS scoped",
+        "unsafe": "Enabled template hint/display_errors/Xdebug FAIL",
+        "missing": "Malformed/DB inaccessible UNKNOWN; site-scope chưa quan sát là gap"
+      },
+      "verification": "Đã đọc implementation và catalog; fixture đề xuất, chưa chạy mới trong lượt này."
+    },
+    {
+      "id": "MB-0035",
+      "title": "Published static artifacts present in assessed deployment",
+      "decision": "OPTIONAL",
+      "priority": "P2",
+      "current_checks": [
+        {
+          "name": "fs_static_content_deployed",
+          "args": {
+            "static_path": "pub/static",
+            "preprocessed_path": "var/view_preprocessed",
+            "min_static_files": 1,
+            "min_preprocessed_files": 1,
+            "strict_scope": true
+          }
+        }
+      ],
+      "remote_variant": {
+        "obligations": [
+          {
+            "id": "O001",
+            "op": "all",
+            "role": "mandatory",
+            "proof": "verified_predicate",
+            "checks": [
+              {
+                "name": "http_static_assets_deployed",
+                "args": {
+                  "timeout_ms": 8000,
+                  "strict_scope": true
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "implementation_refs": [
+        "src/Engine/Checks/FilesystemCheck.php:710",
+        "src/Engine/Checks/HttpCheck.php:1270"
+      ],
+      "actual_claim": "Có ít nhất một published static artifact hoặc homepage assets hoạt động.",
+      "proposed_scope_and_evidence": "Chuyển readiness optional; không tính vào security coverage; không ép deployment đầy đủ mọi theme/locale.",
+      "customer_risk": "Khách hàng có thể hiểu rộng hơn bằng chứng của predicate; kết quả phải giới hạn đúng deployment/URL/config đã quan sát.",
+      "fixtures": {
+        "safe": "One nonempty real artifact PASS readiness",
+        "unsafe": "No published artifact FAIL readiness",
+        "missing": "Unreadable/static request failed UNKNOWN"
+      },
+      "verification": "Đã đọc implementation và catalog; fixture đề xuất, chưa chạy mới trong lượt này."
+    },
+    {
+      "id": "MB-0037",
+      "title": "Declared Full Page Cache type enabled",
+      "decision": "OPTIONAL",
+      "priority": "P2",
+      "current_checks": [
+        {
+          "name": "cache_type_enabled",
+          "args": {
+            "file": "app/etc/env.php",
+            "type": "full_page"
+          }
+        }
+      ],
+      "remote_variant": {
+        "obligations": [
+          {
+            "id": "O001",
+            "op": "all",
+            "role": "mandatory",
+            "proof": "heuristic",
+            "checks": [
+              {
+                "name": "http_cache_signals",
+                "args": {
+                  "timeout_ms": 8000
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "implementation_refs": [
+        "src/Engine/Checks/DeploymentStateCheck.php:32",
+        "src/Engine/Checks/HttpCheck.php:1308"
+      ],
+      "actual_claim": "Local full_page declaration; remote Age/X-Cache/Via cache heuristic khác claim.",
+      "proposed_scope_and_evidence": "Chuyển readiness optional; bỏ remote variant khỏi declaration requirement hoặc tạo signal cache riêng supporting.",
+      "customer_risk": "Khách hàng có thể hiểu rộng hơn bằng chứng của predicate; kết quả phải giới hạn đúng deployment/URL/config đã quan sát.",
+      "fixtures": {
+        "safe": "Local full_page=1 PASS declaration",
+        "unsafe": "Local full_page=0 FAIL readiness",
+        "missing": "Absent state UNKNOWN; CDN hit không PASS Magento FPC"
+      },
+      "verification": "Đã đọc implementation và catalog; fixture đề xuất, chưa chạy mới trong lượt này."
+    },
+    {
+      "id": "MB-0046",
+      "title": "Installed Magento cron entry present",
+      "decision": "OPTIONAL",
+      "priority": "P2",
+      "current_checks": [
+        {
+          "name": "installed_magento_cron",
+          "args": {
+            "users": [
+              "www-data",
+              "nginx",
+              "apache",
+              "http",
+              "www",
+              "magento",
+              "deploy"
+            ],
+            "timeout_ms": 2500
+          }
+        }
+      ],
+      "remote_variant": null,
+      "implementation_refs": [
+        "src/Engine/Checks/InstalledCronCheck.php:10"
+      ],
+      "actual_claim": "Có installed syntactically-valid cron:run cho đúng project; không chứng minh job chạy.",
+      "proposed_scope_and_evidence": "Readiness advisory với accepted external scheduler; security relevance patch/task delivery giải thích riêng.",
+      "customer_risk": "Khách hàng có thể hiểu rộng hơn bằng chứng của predicate; kết quả phải giới hạn đúng deployment/URL/config đã quan sát.",
+      "fixtures": {
+        "safe": "Installed correct-project cron PASS",
+        "unsafe": "Complete sources không entry FAIL readiness",
+        "missing": "Unreadable sources UNKNOWN; approved orchestrator N/A"
+      },
+      "verification": "Đã đọc implementation và catalog; fixture đề xuất, chưa chạy mới trong lượt này."
+    },
+    {
+      "id": "MB-0049",
+      "title": "Composer dependency OSV advisory matches",
+      "decision": "KEEP",
+      "priority": "P1",
+      "current_checks": [
+        {
+          "name": "composer_audit_api",
+          "args": {
+            "lock_file": "composer.lock",
+            "endpoint": "https://api.magebean.com/v1/osv/advisories",
+            "timeout_ms": 10000,
+            "batch_size": 500,
+            "allow_private_http_fallback": true,
+            "strict_scope": true
+          }
+        }
+      ],
+      "remote_variant": null,
+      "implementation_refs": [
+        "src/Engine/Checks/Families/ComposerAdvisoryChecks.php:40"
+      ],
+      "actual_claim": "OSV matches locked versions và local advisory-specific hotfix evidence, không proof runtime dependency set.",
+      "proposed_scope_and_evidence": "Giữ core security; show freshness/packages queried/hotfix validation; thiếu advisory coverage UNKNOWN, secret API token không log.",
+      "customer_risk": "Khách hàng có thể hiểu rộng hơn bằng chứng của predicate; kết quả phải giới hạn đúng deployment/URL/config đã quan sát.",
+      "fixtures": {
+        "safe": "Patched version với complete dataset PASS",
+        "unsafe": "Applicable unfixed advisory FAIL",
+        "missing": "API failure/malformed lock/partial dataset UNKNOWN"
+      },
+      "verification": "Đã đọc implementation và catalog; fixture đề xuất, chưa chạy mới trong lượt này."
+    },
+    {
+      "id": "MB-0050",
+      "title": "Adobe security release patch assessment",
+      "decision": "KEEP",
+      "priority": "P1",
+      "current_checks": [
+        {
+          "name": "composer_adobe_security_patches_api",
+          "args": {
+            "lock_file": "composer.lock",
+            "endpoint": "https://api.magebean.com/v1/adobe/security-patches",
+            "timeout_ms": 10000,
+            "allow_private_http_fallback": true,
+            "strict_scope": true
+          }
+        }
+      ],
+      "remote_variant": null,
+      "implementation_refs": [
+        "src/Engine/Checks/Families/ComposerAdvisoryChecks.php:255"
+      ],
+      "actual_claim": "Magento security-release branch current hoặc verified alternative patch; không runtime attestation.",
+      "proposed_scope_and_evidence": "Giữ core patch assessment; fixture edition/version/security branch, unsupported branch, patch integrity; không latest-major policy.",
+      "customer_risk": "Khách hàng có thể hiểu rộng hơn bằng chứng của predicate; kết quả phải giới hạn đúng deployment/URL/config đã quan sát.",
+      "fixtures": {
+        "safe": "Supported patched branch/verified patch PASS",
+        "unsafe": "Required patch missing/unsupported branch FAIL",
+        "missing": "Unknown version/dataset unavailable/unverified patch UNKNOWN"
+      },
+      "verification": "Đã đọc implementation và catalog; fixture đề xuất, chưa chạy mới trong lượt này."
+    },
+    {
+      "id": "MB-0730",
+      "title": "No configured secret patterns in deployed application files",
+      "decision": "REVISE",
+      "priority": "P1",
+      "current_checks": [
+        {
+          "name": "working_tree_secret_scan",
+          "args": {
+            "paths": [
+              "."
+            ],
+            "exclude_dirs": [
+              ".git",
+              "vendor",
+              "var",
+              "generated",
+              "node_modules",
+              "pub/media",
+              "pub/static",
+              "pub/cache",
+              "setup",
+              "dev/tests",
+              "dev/tools",
+              "app/etc/env.php"
+            ],
+            "patterns": [
+              "AKIA[0-9A-Z]{16}",
+              "ASIA[0-9A-Z]{16}",
+              "AIza[0-9A-Za-z\\-_]{35}",
+              "-----BEGIN [A-Z0-9 ]*PRIVATE KEY-----",
+              "xox[baprs]-[0-9A-Za-z\\-]{10,48}",
+              "sk_live_[0-9a-zA-Z]{24,}",
+              "gh[pousr]_[0-9A-Za-z]{36,255}",
+              "(api[_-]?key|client[_-]?secret|access[_-]?token|password)[[:space:]]*[\"']?[[:space:]]*(=>|=|:)[[:space:]]*[\"'][A-Za-z0-9_./+=-]{16,}[\"']"
+            ],
+            "max_results": 200,
+            "max_file_bytes": 16777216
+          }
+        }
+      ],
+      "remote_variant": null,
+      "implementation_refs": [
+        "src/Engine/Checks/GitHistoryCheck.php:23",
+        "src/Engine/Checks/GitHistoryCheck.php:28"
+      ],
+      "actual_claim": "Regex secret scan deployed nonbinary files; excludes env.php, vendor,var,pub/media/static; redacts matches.",
+      "proposed_scope_and_evidence": "Giữ suspected secret triage; inventory exclusions rõ; thêm scoped public/static exposure scan vì current excludes; không dump matched values.",
+      "customer_risk": "Khách hàng có thể hiểu rộng hơn bằng chứng của predicate; kết quả phải giới hạn đúng deployment/URL/config đã quan sát.",
+      "fixtures": {
+        "safe": "Eligible clean files PASS scoped",
+        "unsafe": "Known secret match FAIL suspected finding, redacted",
+        "missing": "Oversize/unreadable/invalid pattern UNKNOWN"
+      },
+      "verification": "Đã đọc implementation và catalog; fixture đề xuất, chưa chạy mới trong lượt này."
+    }
+  ],
+  "shared_acceptance": [
+    "Basic technical signals are included by Hardening",
+    "Human obligations do not suppress technical observations",
+    "Missing/partial evidence never implies safe deployment",
+    "Report scope, evidence source, remediation and rerun command; redact secrets"
+  ],
+  "proposed_additions": [
+    {
+      "decision": "ADD",
+      "missing": "TLS error/off-host/429 UNKNOWN",
+      "id": "MB-0027",
+      "safe": "One valid HSTS max-age>=31536000",
+      "check": "http_has_hsts",
+      "scope": "HSTS trên successful same-host HTTPS response; threshold một năm là policy rõ ràng; không yêu cầu preload/includeSubDomains mặc định.",
+      "implementation": "src/Engine/Checks/HttpCheck.php:199",
+      "unsafe": "Missing/malformed/duplicate/max-age=0"
+    },
+    {
+      "decision": "ADD",
+      "missing": "DB/config missing or malformed UNKNOWN",
+      "id": "MB-0009",
+      "safe": "900 resolved",
+      "check": "magento_admin_session_timeout",
+      "scope": "Default configured session lifetime 1..900 seconds; customer exception có giải trình; không tuyên bố runtime idle termination.",
+      "implementation": "src/Engine/Checks/MagentoCheck.php:567",
+      "unsafe": "0 or excessive lifetime"
+    },
+    {
+      "decision": "ADD_AFTER_REVISE",
+      "missing": "Missing required root/unreadable/oversize UNKNOWN, hiện chưa bảo đảm",
+      "id": "NEW-SCOPED-MEDIA",
+      "safe": "Readable complete image-only tree",
+      "check": "code_media_executable_code",
+      "scope": "Tách scoped technical finding cho script/executable handler trong pub/media/import; không auto-PASS toàn bộ secure upload requirement. Hiện detector skips unreadable/large rồi trả PASS; cần gap inventory UNKNOWN trước khi promote.",
+      "implementation": "src/Engine/Checks/Families/AuthorizationSourceChecks.php:195",
+      "unsafe": "PHP payload in jpg/.phtml or script-enabling .htaccess"
+    },
+    {
+      "decision": "ADD_AFTER_REVISE",
+      "missing": "Timeout/off-host/incomplete UNKNOWN",
+      "id": "NEW-PUBLIC-ARTIFACT-OBSERVATION",
+      "safe": "403/404 or HTML fallback recognized",
+      "check": "http_no_public_artifacts",
+      "scope": "Bổ sung probe HTTP read-only known sensitive paths, actual leak signature/status/content-type; 200 HTML fallback không coi leak; không tải toàn secret/report. Cần review sâu implementation và capability trước enable.",
+      "implementation": "src/Engine/Checks/HttpCheck.php:591",
+      "unsafe": "Known env/backup/git artifact actual content"
+    }
+  ]
+}

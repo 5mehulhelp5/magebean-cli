@@ -41,6 +41,7 @@ final class ScanReportAssembler
         $result['meta']['manual_rules_included'] = $includeManualReview || $hasExplicitRuleSelection;
         if (($plan->metadata['assessment_model'] ?? $plan->pack['assessment_model'] ?? '') === 'internal-requirement-v1') {
             $result['meta']['assessment_model'] = 'internal-requirement-v1';
+            if(isset($activeProfile['family']))$result['meta']['requirement_family']=$activeProfile['family'];
             $result['meta']['capabilities'] = $plan->metadata['capabilities'] ?? [];
             $selector = (string)($plan->metadata['profileSelector'] ?? $plan->metadata['profile_selector'] ?? $plan->request->options['profile'] ?? '');
             $result['meta']['profile_selector'] = $selector !== '' ? $selector : (string)($activeProfile['id'] ?? 'basic');

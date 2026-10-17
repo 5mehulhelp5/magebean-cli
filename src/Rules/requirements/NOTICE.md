@@ -1,6 +1,6 @@
 # Third-party criterion content
 
-The ASVS criterion descriptions in `criterion-definitions.json`, and copies of those descriptions in `internal-catalog.json`, reproduce the OWASP Application Security Verification Standard 5.0.0 requirement descriptions unchanged.
+The ASVS criterion descriptions in `criterion-definitions.json`, and copies of those descriptions in `asvs-catalog.json` and the compatibility aggregate `internal-catalog.json`, reproduce the OWASP Application Security Verification Standard 5.0.0 requirement descriptions unchanged.
 
 Attribution: OWASP Foundation / Application Security Verification Standard Project contributors, Application Security Verification Standard 5.0.0.
 

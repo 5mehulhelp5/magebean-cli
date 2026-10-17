@@ -9,7 +9,7 @@ function workflowAssert(bool $ok,string $message):void{global $assertions;$asser
 $root=sys_get_temp_dir().'/mb-internal-workflow-'.bin2hex(random_bytes(6));mkdir($root.'/app/etc',0700,true);
 try{
  $catalog=RequirementCatalog::loadAll()['rules'];$production=null;$human=null;
- foreach($catalog as$r){if(($r['checks'][0]['name']??'')==='magento_production_mode'&&($r['review_state']??'')==='accepted_scoped_criterion')$production=$r; if($human===null&&$r['checks']===[]&&$r['human_evidence']['required'])$human=$r;}
+ foreach($catalog as$r){if(($r['checks'][0]['name']??'')==='magento_production_mode'&&($r['review_state']??'')==='accepted_scoped_criterion')$production=$r; if($human===null&&$r['family']==='magebean'&&$r['human_evidence']['required'])$human=$r;}
  workflowAssert($production!==null&&$human!==null,'Reviewed scoped and human criteria exist');
  $manifest=['schema_version'=>'1.0','manifest_hash'=>'sha256:internal-workflow','rules'=>[['assessment_item_id'=>'production-item','rule_key'=>$production['id']],['assessment_item_id'=>'human-item','rule_key'=>$human['id']],['assessment_item_id'=>'legacy-item','rule_key'=>'MB-R037']]];
  $scanner=new AgentScanner();

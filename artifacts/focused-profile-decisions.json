@@ -1,0 +1,39 @@
+{
+    "date": "2026-10-17",
+    "scope": "Review proposals, not applied catalog/runtime changes. KEEP retains membership/scoped intent; common collector/predicate fixes still apply to every profile sharing the check. Fixtures are proposed acceptance cases unless explicitly recorded as executed in source-scope observations.",
+    "membership_rows": 171,
+    "unique_requirements": 85,
+    "profiles": {
+        "basic": {
+            "membership_count": 20,
+            "decision_counts": {
+                "KEEP": 8,
+                "REVISE": 8,
+                "OPTIONAL": 4
+            },
+            "detail_file": "focused-basic-review.json"
+        },
+        "hardening": {
+            "membership_count": 82,
+            "decision_counts": {
+                "KEEP": 13,
+                "REVISE": 16,
+                "OPTIONAL": 19,
+                "SUPPORT": 30,
+                "REPLACE": 4
+            },
+            "detail_file": "focused-hardening-review.json"
+        },
+        "owasp-top-10-2025": {
+            "membership_count": 69,
+            "decision_counts": {
+                "KEEP": 23,
+                "SUPPORT": 14,
+                "REPLACE": 3,
+                "REVISE": 22,
+                "OPTIONAL": 7
+            },
+            "detail_file": "focused-owasp-review.json"
+        }
+    }
+}

@@ -21,12 +21,16 @@ assertPciWorkflow(($report['summary']['human_actions_listed']??0)>0,'Manual flag
 assertPciWorkflow(!in_array('PASS',array_column($report['requirements'],'assessment_status'),true),'PCI report must never emit a compliance PASS');
 assertPciWorkflow(str_contains($tester->getDisplay(),'PCI DSS 4.0.1 EVIDENCE READINESS'),'PCI console summary is missing');
 assertPciWorkflow(str_contains($tester->getDisplay(),'Registry requirements requiring human confirmation: 280'),'Mandatory human-verification declaration is missing');
-assertPciWorkflow(str_contains($tester->getDisplay(),'Rules         8 / 8 selected'),'Included-manual scan count is missing');
-assertPciWorkflow(str_contains($tester->getDisplay(),'Manual rules  1 included'),'Included human-rule count is missing');
+$expected=array_values(array_filter(\Magebean\Engine\RequirementCatalog::forProfile('pci')['rules'],fn($r)=>\Magebean\Engine\RequirementCatalog::matchesControls($r,['MB-C02'])));
+assertPciWorkflow(count($expected)>0,'PCI own catalog contains selected control scope');
+foreach($expected as $definition)assertPciWorkflow($definition['family']==='pci'&&$definition['human_evidence']['required'],'Control filtering cannot fall back to Magebean or legacy automated criteria');
+$known=array_column(\Magebean\Engine\RequirementCatalog::loadAll()['rules'],null,'id');
+$evaluated=0;foreach($report['requirements'] as $row){foreach($row['magebean_findings']??[] as $finding){$id=$finding['rule'];assertPciWorkflow(isset($known[$id])&&$known[$id]['family']==='pci','Readiness technical evidence uses PCI-owned assessment identities');++$evaluated;}}
+assertPciWorkflow($evaluated>0,'PCI own scoped assessments supply readiness evidence');
+assertPciWorkflow(count($report['requirements'])===280,'Readiness report retains every independent PCI clause');
 $hiddenTester=new CommandTester((new Application())->find('scan'));
 $hiddenTester->execute(['--path'=>$tmp,'--profile'=>'pci','--controls'=>'MB-C02','--no-ansi'=>true]);
-assertPciWorkflow(str_contains($hiddenTester->getDisplay(),'Rules         7 / 8 selected'),'Default scan must show selected and complete profile counts');
-assertPciWorkflow(str_contains($hiddenTester->getDisplay(),'Manual rules  1 not evaluated'),'Default scan manual-rule guidance is missing');
+assertPciWorkflow(str_contains($hiddenTester->getDisplay(),'No requirements matched'),'Default PCI control filter cannot invent automated Magebean coverage');
 assertPciWorkflow(!str_contains($tester->getDisplay(),'Human-required: 0'),'Misleading zero human-required count must never be rendered');
 assertPciWorkflow(in_array($exit,[0,1],true),'Unexpected CLI exit code');
 $it=new RecursiveIteratorIterator(new RecursiveDirectoryIterator($tmp,FilesystemIterator::SKIP_DOTS),RecursiveIteratorIterator::CHILD_FIRST);foreach($it as $node){$node->isDir()?rmdir($node->getPathname()):unlink($node->getPathname());}rmdir($tmp);

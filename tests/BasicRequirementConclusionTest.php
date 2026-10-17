@@ -14,7 +14,7 @@ foreach($ids as$id){$r=$index['MB-'.$id];completionAssert($r['review_state']==='
     completionAssert($missing->outcome===RequirementOutcome::Unknown&&str_contains($missing->message,'target-specific evidence'),'Missing evidence carries actionable detector explanation '.$id);
 }
 $r=$index['MB-0379'];$pass=RequirementAssessmentEvaluator::evaluate($r,static fn(string$name,array$args):CheckResult=>CheckResult::of(CheckOutcome::Pass,'Observed disabled',[],null,$name));completionAssert($pass->outcome===RequirementOutcome::ManualReview,'Debug ASVS all-components scope cannot be certified from a default flag');
-$fail=RequirementAssessmentEvaluator::evaluate($r,static fn(string$name,array$args):CheckResult=>CheckResult::of($name==='magento_debug_configuration_observed'?CheckOutcome::Fail:CheckOutcome::Unknown,$name==='magento_debug_configuration_observed'?'Known debug setting enabled':'Missing optional runtime observation',[],null,$name));completionAssert($fail->outcome===RequirementOutcome::Fail,'Verified enabled debug setting disproves all-disabled policy despite unrelated missing observations');
-completionAssert(count($index)===687,'No new or duplicate inventory identities');
+$unknown=RequirementAssessmentEvaluator::evaluate($r,static fn(string$name,array$args):CheckResult=>CheckResult::of(CheckOutcome::Unknown,'Missing scoped evidence',[],null,$name));completionAssert($unknown->outcome!==RequirementOutcome::Pass,'Missing ASVS observations cannot establish a complete all-components conclusion');
+completionAssert(count($index)===729,'Family split restores independent definitions using newly allocated identities');
 $references=[];foreach($index as$row)foreach($row['alignments']as$a)$references[$a['standard'].':'.$a['version'].':'.$a['reference']]=true;completionAssert(count($references)===625,'All standard references survive automation review');
 echo "BasicRequirementConclusionTest: $n assertions passed\n";

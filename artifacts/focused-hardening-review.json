@@ -1,0 +1,1590 @@
+{
+  "profile": "hardening",
+  "review_date": "2026-10-17",
+  "scope": "82 memberships hiện tại; static binding review và implementation families, không scan Magento thực; không sửa behavior.",
+  "items": [
+    {
+      "id": "MB-0001",
+      "profile": "hardening",
+      "title": "No world-writable files or directories",
+      "decision": "KEEP",
+      "checks": [
+        "fs_no_world_writable"
+      ],
+      "human_required": false,
+      "current_criterion": "No world-writable files or directories; assess only the collected Magento deployment scope.",
+      "assessment_and_action": "Giữ lỗi world-writable; fixture mount/symlink/unreadable, code writable và vùng runtime hợp lệ.",
+      "evidence_boundary": "Kết luận chỉ đúng phạm vi predicate đã thu thập; thiếu dữ liệu hoặc không áp dụng phải tách khỏi PASS/FAIL.",
+      "fixture_gap": "fixture mount/symlink/unreadable, code writable và vùng runtime hợp lệ. (Đề xuất nghiệm thu; chưa kiểm kê toàn bộ test hiện có.)",
+      "references": [
+        "src/Engine/Checks/CheckRegistry.php:123 (fs_no_world_writable)",
+        "src/Rules/requirements/internal-catalog.json:6"
+      ]
+    },
+    {
+      "id": "MB-0002",
+      "profile": "hardening",
+      "title": "env.php satisfies configured mode and ownership policy",
+      "decision": "REVISE",
+      "checks": [
+        "file_mode_max",
+        "file_owner_group_matches"
+      ],
+      "human_required": false,
+      "current_criterion": "The collected app/etc/env.php Unix permission bits are a subset of configured mode 0640, and its owner and group match the configured reference paths (the project root by default). This is an explicit deployment ownership policy, not proof of effective ACL or web-process access restrictions.",
+      "assessment_and_action": "Giữ bảo vệ env.php là security; cấu hình owner/mode theo deployment, không cố định root. Fixture ACL mở rộng và group web-process đọc/ghi.",
+      "evidence_boundary": "Kết luận chỉ đúng phạm vi predicate đã thu thập; thiếu dữ liệu hoặc không áp dụng phải tách khỏi PASS/FAIL.",
+      "fixture_gap": "Fixture ACL mở rộng và group web-process đọc/ghi. (Đề xuất nghiệm thu; chưa kiểm kê toàn bộ test hiện có.)",
+      "references": [
+        "src/Engine/Checks/CheckRegistry.php:124 (file_mode_max)",
+        "src/Engine/Checks/CheckRegistry.php:125 (file_owner_group_matches)",
+        "src/Rules/requirements/internal-catalog.json:58"
+      ]
+    },
+    {
+      "id": "MB-0003",
+      "profile": "hardening",
+      "title": "Webroot hygiene (no .git/.env/backups in pub/)",
+      "decision": "KEEP",
+      "checks": [
+        "fs_webroot_artifact_policy"
+      ],
+      "human_required": false,
+      "current_criterion": "Webroot hygiene (no .git/.env/backups in pub/); assess only the collected Magento deployment scope.",
+      "assessment_and_action": "Giữ artifact leakage; fixture backup đổi đuôi, dotfiles, docroot tùy chỉnh và alias HTTP.",
+      "evidence_boundary": "Kết luận chỉ đúng phạm vi predicate đã thu thập; thiếu dữ liệu hoặc không áp dụng phải tách khỏi PASS/FAIL.",
+      "fixture_gap": "fixture backup đổi đuôi, dotfiles, docroot tùy chỉnh và alias HTTP. (Đề xuất nghiệm thu; chưa kiểm kê toàn bộ test hiện có.)",
+      "references": [
+        "src/Engine/Checks/CheckRegistry.php:46 (fs_webroot_artifact_policy)",
+        "src/Rules/requirements/internal-catalog.json:135"
+      ]
+    },
+    {
+      "id": "MB-0004",
+      "profile": "hardening",
+      "title": "Code directories are read-only",
+      "decision": "REVISE",
+      "checks": [
+        "code_dirs_readonly"
+      ],
+      "human_required": true,
+      "current_criterion": "Code directories are read-only for the application runtime in the collected Magento deployment; assess effective runtime identity, permissions, ACLs and read-only mounts.",
+      "assessment_and_action": "Xác minh code không writable bởi web process; Unix bits không đủ ACL. Fixture deploy owner khác PHP user và immutable container.",
+      "evidence_boundary": "Chạy observation phù hợp mặc định; không suy ra requirement PASS từ không có pattern. Báo coverage/files unreadable/limits và evidence còn thiếu.",
+      "fixture_gap": "Fixture deploy owner khác PHP user và immutable container. (Đề xuất nghiệm thu; chưa kiểm kê toàn bộ test hiện có.)",
+      "references": [
+        "src/Engine/Checks/CheckRegistry.php:127 (code_dirs_readonly)",
+        "src/Rules/requirements/internal-catalog.json:208",
+        "src/Engine/Checks/CodeSearchCheck.php:16"
+      ]
+    },
+    {
+      "id": "MB-0005",
+      "profile": "hardening",
+      "title": "Directory listing absent on probed Magento paths",
+      "decision": "KEEP",
+      "checks": [
+        "http_no_directory_listing"
+      ],
+      "human_required": false,
+      "current_criterion": "Successful responses from the configured runtime endpoint on /media/, /static/, /errors/ and /var/ must not expose recognizable directory-index markup. Scope is these paths at scan time; transport or unsupported responses are inconclusive.",
+      "assessment_and_action": "Probe directory index theo URL rõ ràng; fixture 403/404/timeout/custom index và reverse proxy.",
+      "evidence_boundary": "Kết luận chỉ đúng phạm vi predicate đã thu thập; thiếu dữ liệu hoặc không áp dụng phải tách khỏi PASS/FAIL.",
+      "fixture_gap": "fixture 403/404/timeout/custom index và reverse proxy. (Đề xuất nghiệm thu; chưa kiểm kê toàn bộ test hiện có.)",
+      "references": [
+        "src/Rules/requirements/internal-catalog.json:271",
+        "src/Engine/Checks/HttpCheck.php:1"
+      ]
+    },
+    {
+      "id": "MB-0200",
+      "profile": "hardening",
+      "title": "Uploaded and generated files cannot execute code",
+      "decision": "REVISE",
+      "checks": [
+        "code_upload_safety",
+        "code_media_executable_code"
+      ],
+      "human_required": true,
+      "current_criterion": "Verify that files uploaded or generated by untrusted input and stored in a public folder, are not executed as server-side program code when accessed directly with an HTTP request. Additional mandatory Magento deployment conditions: No executable code in media or upload paths; assess only the collected Magento deployment scope.",
+      "assessment_and_action": "Tách file PHP trong media khỏi khả năng thực thi; dedup media detector; fixture nginx deny và nguy hiểm được allow, không upload thật vào production.",
+      "evidence_boundary": "Chạy observation phù hợp mặc định; không suy ra requirement PASS từ không có pattern. Báo coverage/files unreadable/limits và evidence còn thiếu.",
+      "fixture_gap": "fixture nginx deny và nguy hiểm được allow, không upload thật vào production. (Đề xuất nghiệm thu; chưa kiểm kê toàn bộ test hiện có.)",
+      "references": [
+        "src/Engine/Checks/CheckRegistry.php:93 (code_upload_safety)",
+        "src/Engine/Checks/CheckRegistry.php:118 (code_media_executable_code)",
+        "src/Rules/requirements/internal-catalog.json:13110",
+        "src/Engine/Checks/CodeSearchCheck.php:16"
+      ]
+    },
+    {
+      "id": "MB-0006",
+      "profile": "hardening",
+      "title": "Declared backend route differs from admin",
+      "decision": "OPTIONAL",
+      "checks": [
+        "magento_admin_frontname_declared"
+      ],
+      "human_required": false,
+      "current_criterion": "The collected app/etc/env.php backend.frontName declaration is a valid non-empty route and differs case-insensitively from admin. This assesses the configured backend route; route entropy and actual public reachability require separate evidence.",
+      "assessment_and_action": "Route khác admin là defense-in-depth, không chứng minh access control; fixture route tùy biến vẫn public và WAF bảo vệ.",
+      "evidence_boundary": "Kết luận chỉ đúng phạm vi predicate đã thu thập; thiếu dữ liệu hoặc không áp dụng phải tách khỏi PASS/FAIL.",
+      "fixture_gap": "fixture route tùy biến vẫn public và WAF bảo vệ. (Đề xuất nghiệm thu; chưa kiểm kê toàn bộ test hiện có.)",
+      "references": [
+        "src/Engine/Checks/CheckRegistry.php:158 (magento_admin_frontname_declared)",
+        "src/Rules/requirements/internal-catalog.json:362",
+        "src/Engine/Checks/MagentoCheck.php:22"
+      ]
+    },
+    {
+      "id": "MB-0007",
+      "profile": "hardening",
+      "title": "Admin 2FA core and provider modules declared enabled",
+      "decision": "REVISE",
+      "checks": [
+        "magento_admin_2fa_enabled"
+      ],
+      "human_required": false,
+      "current_criterion": "In app/etc/config.php, the Magento_TwoFactorAuth module and at least one configured Magento admin 2FA provider module are declared enabled; this predicate assesses declared module state only.",
+      "assessment_and_action": "Module declaration cần bổ sung enrollment/bypass/provider; fixture Magento 2FA enabled nhưng user chưa enroll, SSO hợp lệ.",
+      "evidence_boundary": "Kết luận chỉ đúng phạm vi predicate đã thu thập; thiếu dữ liệu hoặc không áp dụng phải tách khỏi PASS/FAIL.",
+      "fixture_gap": "fixture Magento 2FA enabled nhưng user chưa enroll, SSO hợp lệ. (Đề xuất nghiệm thu; chưa kiểm kê toàn bộ test hiện có.)",
+      "references": [
+        "src/Engine/Checks/CheckRegistry.php:163 (magento_admin_2fa_enabled)",
+        "src/Rules/requirements/internal-catalog.json:412",
+        "src/Engine/Checks/MagentoCheck.php:22"
+      ]
+    },
+    {
+      "id": "MB-0209",
+      "profile": "hardening",
+      "title": "Password minimum length for user and administrator accounts",
+      "decision": "REVISE",
+      "checks": [
+        "magento_admin_password_policy_strong"
+      ],
+      "human_required": true,
+      "current_criterion": "Verify that user set passwords are at least 8 characters in length although a minimum of 15 characters is strongly recommended. Additional mandatory Magento deployment conditions: Admin passwords require at least 8 characters; assess only the collected Magento deployment scope.",
+      "assessment_and_action": "Check admin lặp lại không chứng minh customer password; giữ MB-0728, tách admin/customer scope và inherited defaults. Fixture hai policy khác nhau.",
+      "evidence_boundary": "Chạy observation phù hợp mặc định; không suy ra requirement PASS từ không có pattern. Báo coverage/files unreadable/limits và evidence còn thiếu.",
+      "fixture_gap": "Fixture hai policy khác nhau. (Đề xuất nghiệm thu; chưa kiểm kê toàn bộ test hiện có.)",
+      "references": [
+        "src/Engine/Checks/CheckRegistry.php:164 (magento_admin_password_policy_strong)",
+        "src/Rules/requirements/internal-catalog.json:13902",
+        "src/Engine/Checks/MagentoCheck.php:22"
+      ]
+    },
+    {
+      "id": "MB-0009",
+      "profile": "hardening",
+      "title": "Configured admin session lifetime is at most 900 seconds",
+      "decision": "KEEP",
+      "checks": [
+        "magento_admin_session_timeout"
+      ],
+      "human_required": false,
+      "current_criterion": "The effective default-scope Magento admin/security/session_lifetime setting resolved from env.php, config.php, core_config_data or actual installed module defaults is a positive integer not exceeding 900 seconds.",
+      "assessment_and_action": "Giữ threshold session đã khai báo; fixture override DB/config và missing values; chưa chứng minh session thực sự hết hạn.",
+      "evidence_boundary": "Kết luận chỉ đúng phạm vi predicate đã thu thập; thiếu dữ liệu hoặc không áp dụng phải tách khỏi PASS/FAIL.",
+      "fixture_gap": "fixture override DB/config và missing values; chưa chứng minh session thực sự hết hạn. (Đề xuất nghiệm thu; chưa kiểm kê toàn bộ test hiện có.)",
+      "references": [
+        "src/Engine/Checks/CheckRegistry.php:165 (magento_admin_session_timeout)",
+        "src/Rules/requirements/internal-catalog.json:476",
+        "src/Engine/Checks/MagentoCheck.php:22"
+      ]
+    },
+    {
+      "id": "MB-0010",
+      "profile": "hardening",
+      "title": "Admin URL exposure restricted",
+      "decision": "SUPPORT",
+      "checks": [
+        "magento_admin_exposure_restricted"
+      ],
+      "human_required": true,
+      "current_criterion": "Admin URL exposure restricted; assess only the collected Magento deployment scope.",
+      "assessment_and_action": "Allowlist hint không chứng minh effective Admin restriction; fixture CDN/WAF, location sai và alternative route; cần runtime trusted vantage.",
+      "evidence_boundary": "Chạy observation phù hợp mặc định; không suy ra requirement PASS từ không có pattern. Báo coverage/files unreadable/limits và evidence còn thiếu.",
+      "fixture_gap": "fixture CDN/WAF, location sai và alternative route; cần runtime trusted vantage. (Đề xuất nghiệm thu; chưa kiểm kê toàn bộ test hiện có.)",
+      "references": [
+        "src/Engine/Checks/CheckRegistry.php:166 (magento_admin_exposure_restricted)",
+        "src/Rules/requirements/internal-catalog.json:528",
+        "src/Engine/Checks/MagentoCheck.php:22"
+      ]
+    },
+    {
+      "id": "MB-0011",
+      "profile": "hardening",
+      "title": "Configured admin login CAPTCHA or bounded lockout",
+      "decision": "KEEP",
+      "checks": [
+        "magento_admin_login_protection_configured"
+      ],
+      "human_required": false,
+      "current_criterion": "Default-scope Magento admin login configuration enables native CAPTCHA for backend_login, recognized backend_login reCAPTCHA, or a positive lockout failure limit at most 10 with a positive lockout threshold. Locked env.php/config.php settings precede core_config_data. Custom authentication enforcement and runtime effectiveness require separate evidence.",
+      "assessment_and_action": "Giữ lockout/CAPTCHA cấu hình; fixture scope inheritance, disabled CAPTCHA và threshold vô hiệu; kiểm thử login riêng có kiểm soát.",
+      "evidence_boundary": "Kết luận chỉ đúng phạm vi predicate đã thu thập; thiếu dữ liệu hoặc không áp dụng phải tách khỏi PASS/FAIL.",
+      "fixture_gap": "fixture scope inheritance, disabled CAPTCHA và threshold vô hiệu; kiểm thử login riêng có kiểm soát. (Đề xuất nghiệm thu; chưa kiểm kê toàn bộ test hiện có.)",
+      "references": [
+        "src/Engine/Checks/CheckRegistry.php:159 (magento_admin_login_protection_configured)",
+        "src/Rules/requirements/internal-catalog.json:605",
+        "src/Engine/Checks/MagentoCheck.php:22"
+      ]
+    },
+    {
+      "id": "MB-0100",
+      "profile": "hardening",
+      "title": "Recorded Admin role assignments have relational integrity",
+      "decision": "KEEP",
+      "checks": [
+        "magento_admin_role_assignments_valid"
+      ],
+      "human_required": false,
+      "current_criterion": "Collected admin_user, authorization_role and authorization_rule rows have valid user/group parent relationships, no cyclic group ancestry or orphan rules, and each active admin has one assigned group with ACL rules. This checks relational assignment integrity, not business approval, least privilege or effective authorization policy.",
+      "assessment_and_action": "Kiểm quan hệ admin_user/role/rule là bounded integrity; fixture orphan/cycle/disabled user/incomplete DB; không gọi đây là least privilege.",
+      "evidence_boundary": "Kết luận chỉ đúng phạm vi predicate đã thu thập; thiếu dữ liệu hoặc không áp dụng phải tách khỏi PASS/FAIL.",
+      "fixture_gap": "fixture orphan/cycle/disabled user/incomplete DB; không gọi đây là least privilege. (Đề xuất nghiệm thu; chưa kiểm kê toàn bộ test hiện có.)",
+      "references": [
+        "src/Engine/Checks/CheckRegistry.php:168 (magento_admin_role_assignments_valid)",
+        "src/Rules/requirements/internal-catalog.json:5686",
+        "src/Engine/Checks/AdminAclCheck.php:22"
+      ]
+    },
+    {
+      "id": "MB-0101",
+      "profile": "hardening",
+      "title": "Global Admin ACL limited to approved roles",
+      "decision": "REVISE",
+      "checks": [
+        "magento_admin_global_acl_restricted"
+      ],
+      "human_required": true,
+      "current_criterion": "Global Admin ACL limited to approved roles; assess only the collected Magento deployment scope.",
+      "assessment_and_action": "Danh sách role global phải do khách duyệt; fixture quyền thừa kế/custom ACL/wildcard và role rỗng; không chỉ đếm số superadmin.",
+      "evidence_boundary": "Chạy observation phù hợp mặc định; không suy ra requirement PASS từ không có pattern. Báo coverage/files unreadable/limits và evidence còn thiếu.",
+      "fixture_gap": "fixture quyền thừa kế/custom ACL/wildcard và role rỗng; không chỉ đếm số superadmin. (Đề xuất nghiệm thu; chưa kiểm kê toàn bộ test hiện có.)",
+      "references": [
+        "src/Engine/Checks/CheckRegistry.php:169 (magento_admin_global_acl_restricted)",
+        "src/Rules/requirements/internal-catalog.json:5738",
+        "src/Engine/Checks/AdminAclCheck.php:22"
+      ]
+    },
+    {
+      "id": "MB-0102",
+      "profile": "hardening",
+      "title": "PCI vendor default account evidence assessment",
+      "decision": "OPTIONAL",
+      "checks": [
+        "pci_vendor_default_accounts_evidence"
+      ],
+      "human_required": true,
+      "current_criterion": "PCI vendor default account evidence assessment; assess only the collected Magento deployment scope.",
+      "assessment_and_action": "Chuyển evidence vendor defaults vào audit readiness; JSON tài liệu không chứng minh account bị vô hiệu. Fixture stale evidence và scope thiếu.",
+      "evidence_boundary": "Chạy observation phù hợp mặc định; không suy ra requirement PASS từ không có pattern. Báo coverage/files unreadable/limits và evidence còn thiếu.",
+      "fixture_gap": "Fixture stale evidence và scope thiếu. (Đề xuất nghiệm thu; chưa kiểm kê toàn bộ test hiện có.)",
+      "references": [
+        "src/Engine/Checks/CheckRegistry.php:132 (pci_vendor_default_accounts_evidence)",
+        "src/Rules/requirements/internal-catalog.json:5812"
+      ]
+    },
+    {
+      "id": "MB-0108",
+      "profile": "hardening",
+      "title": "Database queries use safe construction and abstraction",
+      "decision": "SUPPORT",
+      "checks": [
+        "code_raw_sql"
+      ],
+      "human_required": true,
+      "current_criterion": "Verify that data selection or database queries (e.g., SQL, HQL, NoSQL, Cypher) use parameterized queries, ORMs, entity frameworks, or are otherwise protected from SQL Injection and other database injection attacks. This is also relevant when writing stored procedures. No raw SQL without abstraction; assess only the collected Magento deployment scope.",
+      "assessment_and_action": "Raw SQL marker chỉ triage; fixture bind params an toàn so với concat untrusted, wrapper Magento; cần dataflow trước kết luận injection.",
+      "evidence_boundary": "Chạy observation phù hợp mặc định; không suy ra requirement PASS từ không có pattern. Báo coverage/files unreadable/limits và evidence còn thiếu.",
+      "fixture_gap": "fixture bind params an toàn so với concat untrusted, wrapper Magento; cần dataflow trước kết luận injection. (Đề xuất nghiệm thu; chưa kiểm kê toàn bộ test hiện có.)",
+      "references": [
+        "src/Engine/Checks/CheckRegistry.php:85 (code_raw_sql)",
+        "src/Rules/requirements/internal-catalog.json:6337",
+        "src/Engine/Checks/CodeSearchCheck.php:16"
+      ]
+    },
+    {
+      "id": "MB-0105",
+      "profile": "hardening",
+      "title": "Context-specific output encoding and escaping",
+      "decision": "SUPPORT",
+      "checks": [
+        "code_phtml_escaped_output",
+        "code_js_context_escaping"
+      ],
+      "human_required": true,
+      "current_criterion": "Verify that output encoding for an HTTP response, HTML document, or XML document is relevant for the context required, such as encoding the relevant characters for HTML elements, HTML attributes, HTML comments, CSS, or HTTP header fields, to avoid changing the message or document structure. Verify that output encoding or escaping is used when dynamically building JavaScript content (including JSON), to avoid changing the message or document structure (to avoid JavaScript and JSON injection). Template output is escaped; assess only the collected Magento deployment scope. Escaping for JS context; assess only the collected Magento deployment scope.",
+      "assessment_and_action": "Escaping phụ thuộc HTML/JS/URL context; dedup obligations; fixture escapeHtml trong JS và safe framework renderer.",
+      "evidence_boundary": "Chạy observation phù hợp mặc định; không suy ra requirement PASS từ không có pattern. Báo coverage/files unreadable/limits và evidence còn thiếu.",
+      "fixture_gap": "fixture escapeHtml trong JS và safe framework renderer. (Đề xuất nghiệm thu; chưa kiểm kê toàn bộ test hiện có.)",
+      "references": [
+        "src/Engine/Checks/CheckRegistry.php:86 (code_phtml_escaped_output)",
+        "src/Engine/Checks/CheckRegistry.php:94 (code_js_context_escaping)",
+        "src/Rules/requirements/internal-catalog.json:5980",
+        "src/Engine/Checks/CodeSearchCheck.php:16"
+      ]
+    },
+    {
+      "id": "MB-0014",
+      "profile": "hardening",
+      "title": "No direct PHP superglobal references in inspected application files",
+      "decision": "REPLACE",
+      "checks": [
+        "code_grep"
+      ],
+      "human_required": false,
+      "current_criterion": "Valid PHP files in the configured app subtree contain no T_VARIABLE references to $_GET, $_POST, $_REQUEST, $_COOKIE, $_FILES or $_SERVER. Comments and literal strings are ignored. This is a source coding policy, not proof of input validation.",
+      "assessment_and_action": "Không cấm mọi superglobal ở severity cao; thay bằng untrusted input đến sensitive sink. Fixture $_SERVER dùng hợp lệ và tainted request sink.",
+      "evidence_boundary": "Chạy observation phù hợp mặc định; không suy ra requirement PASS từ không có pattern. Báo coverage/files unreadable/limits và evidence còn thiếu.",
+      "fixture_gap": "Fixture $_SERVER dùng hợp lệ và tainted request sink. (Đề xuất nghiệm thu; chưa kiểm kê toàn bộ test hiện có.)",
+      "references": [
+        "src/Engine/Checks/CheckRegistry.php:82 (code_grep)",
+        "src/Rules/requirements/internal-catalog.json:659",
+        "src/Engine/Checks/CodeSearchCheck.php:16"
+      ]
+    },
+    {
+      "id": "MB-0015",
+      "profile": "hardening",
+      "title": "Forms include CSRF tokens (form_key)",
+      "decision": "SUPPORT",
+      "checks": [
+        "code_csrf_form_key"
+      ],
+      "human_required": true,
+      "current_criterion": "Forms include CSRF tokens (form_key); assess only the collected Magento deployment scope.",
+      "assessment_and_action": "Form_key presence không chứng minh server CSRF validation; fixture GET mutation, JSON API, framework CSRF interface và token không validate.",
+      "evidence_boundary": "Chạy observation phù hợp mặc định; không suy ra requirement PASS từ không có pattern. Báo coverage/files unreadable/limits và evidence còn thiếu.",
+      "fixture_gap": "fixture GET mutation, JSON API, framework CSRF interface và token không validate. (Đề xuất nghiệm thu; chưa kiểm kê toàn bộ test hiện có.)",
+      "references": [
+        "src/Engine/Checks/CheckRegistry.php:87 (code_csrf_form_key)",
+        "src/Rules/requirements/internal-catalog.json:725",
+        "src/Engine/Checks/CodeSearchCheck.php:16"
+      ]
+    },
+    {
+      "id": "MB-0016",
+      "profile": "hardening",
+      "title": "SSRF protections present",
+      "decision": "SUPPORT",
+      "checks": [
+        "code_ssrf_safeguards"
+      ],
+      "human_required": true,
+      "current_criterion": "SSRF protections present; assess only the collected Magento deployment scope.",
+      "assessment_and_action": "SSRF phải xét redirect/DNS/private IP/protocol; fixture allowlist substring bypass và URL encode; static presence chưa đủ.",
+      "evidence_boundary": "Chạy observation phù hợp mặc định; không suy ra requirement PASS từ không có pattern. Báo coverage/files unreadable/limits và evidence còn thiếu.",
+      "fixture_gap": "fixture allowlist substring bypass và URL encode; static presence chưa đủ. (Đề xuất nghiệm thu; chưa kiểm kê toàn bộ test hiện có.)",
+      "references": [
+        "src/Engine/Checks/CheckRegistry.php:88 (code_ssrf_safeguards)",
+        "src/Rules/requirements/internal-catalog.json:784",
+        "src/Engine/Checks/CodeSearchCheck.php:16"
+      ]
+    },
+    {
+      "id": "MB-0131",
+      "profile": "hardening",
+      "title": "Safe deserialization of untrusted data",
+      "decision": "SUPPORT",
+      "checks": [
+        "code_unserialize_safety"
+      ],
+      "human_required": true,
+      "current_criterion": "Verify that deserialization of untrusted data enforces safe input handling, such as using an allowlist of object types or restricting client-defined object types, to prevent deserialization attacks. Deserialization mechanisms that are explicitly defined as insecure must not be used with untrusted input. Additional mandatory Magento deployment conditions: No unsafe deserialization; assess only the collected Magento deployment scope.",
+      "assessment_and_action": "Unserialize phải xét nguồn dữ liệu/allowed_classes; fixture safe serialization, user-controlled object và wrapper Magento; dedup.",
+      "evidence_boundary": "Chạy observation phù hợp mặc định; không suy ra requirement PASS từ không có pattern. Báo coverage/files unreadable/limits và evidence còn thiếu.",
+      "fixture_gap": "fixture safe serialization, user-controlled object và wrapper Magento; dedup. (Đề xuất nghiệm thu; chưa kiểm kê toàn bộ test hiện có.)",
+      "references": [
+        "src/Engine/Checks/CheckRegistry.php:89 (code_unserialize_safety)",
+        "src/Rules/requirements/internal-catalog.json:7899",
+        "src/Engine/Checks/CodeSearchCheck.php:16"
+      ]
+    },
+    {
+      "id": "MB-0109",
+      "profile": "hardening",
+      "title": "OS commands use approved, injection-safe execution",
+      "decision": "SUPPORT",
+      "checks": [
+        "code_command_execution_safety"
+      ],
+      "human_required": true,
+      "current_criterion": "Verify that the application protects against OS command injection and that operating system calls use parameterized OS queries or use contextual command line output encoding. Command execution is guarded; assess only the collected Magento deployment scope.",
+      "assessment_and_action": "Command APIs không tự là injection; fixture escaped arg, executable path taint và shell concatenation; dedup.",
+      "evidence_boundary": "Chạy observation phù hợp mặc định; không suy ra requirement PASS từ không có pattern. Báo coverage/files unreadable/limits và evidence còn thiếu.",
+      "fixture_gap": "fixture escaped arg, executable path taint và shell concatenation; dedup. (Đề xuất nghiệm thu; chưa kiểm kê toàn bộ test hiện có.)",
+      "references": [
+        "src/Engine/Checks/CheckRegistry.php:90 (code_command_execution_safety)",
+        "src/Rules/requirements/internal-catalog.json:6478",
+        "src/Engine/Checks/CodeSearchCheck.php:16"
+      ]
+    },
+    {
+      "id": "MB-0019",
+      "profile": "hardening",
+      "title": "No eval/assert/dynamic execution",
+      "decision": "SUPPORT",
+      "checks": [
+        "code_dynamic_execution_safety"
+      ],
+      "human_required": true,
+      "current_criterion": "No eval/assert/dynamic execution; assess only the collected Magento deployment scope.",
+      "assessment_and_action": "Phân biệt eval động với literal và assert phiên bản PHP; fixture user-controlled code, comments và generated code.",
+      "evidence_boundary": "Chạy observation phù hợp mặc định; không suy ra requirement PASS từ không có pattern. Báo coverage/files unreadable/limits và evidence còn thiếu.",
+      "fixture_gap": "fixture user-controlled code, comments và generated code. (Đề xuất nghiệm thu; chưa kiểm kê toàn bộ test hiện có.)",
+      "references": [
+        "src/Engine/Checks/CheckRegistry.php:91 (code_dynamic_execution_safety)",
+        "src/Rules/requirements/internal-catalog.json:849",
+        "src/Engine/Checks/CodeSearchCheck.php:16"
+      ]
+    },
+    {
+      "id": "MB-0020",
+      "profile": "hardening",
+      "title": "Path traversal protections",
+      "decision": "SUPPORT",
+      "checks": [
+        "code_path_traversal_safety"
+      ],
+      "human_required": true,
+      "current_criterion": "Path traversal protections; assess only the collected Magento deployment scope.",
+      "assessment_and_action": "Traversal cần canonical containment; fixture ../, symlink escape, double encoding và safe file API.",
+      "evidence_boundary": "Chạy observation phù hợp mặc định; không suy ra requirement PASS từ không có pattern. Báo coverage/files unreadable/limits và evidence còn thiếu.",
+      "fixture_gap": "fixture ../, symlink escape, double encoding và safe file API. (Đề xuất nghiệm thu; chưa kiểm kê toàn bộ test hiện có.)",
+      "references": [
+        "src/Engine/Checks/CheckRegistry.php:92 (code_path_traversal_safety)",
+        "src/Rules/requirements/internal-catalog.json:914",
+        "src/Engine/Checks/CodeSearchCheck.php:16"
+      ]
+    },
+    {
+      "id": "MB-0021",
+      "profile": "hardening",
+      "title": "Secure file upload handling",
+      "decision": "SUPPORT",
+      "checks": [
+        "code_upload_safety"
+      ],
+      "human_required": true,
+      "current_criterion": "Secure file upload handling; assess only the collected Magento deployment scope.",
+      "assessment_and_action": "Upload cần extension/MIME/content/storage/execution policy; fixture double extension và image polyglot; dùng chung evidence MB-0200.",
+      "evidence_boundary": "Chạy observation phù hợp mặc định; không suy ra requirement PASS từ không có pattern. Báo coverage/files unreadable/limits và evidence còn thiếu.",
+      "fixture_gap": "fixture double extension và image polyglot; dùng chung evidence MB-0200. (Đề xuất nghiệm thu; chưa kiểm kê toàn bộ test hiện có.)",
+      "references": [
+        "src/Engine/Checks/CheckRegistry.php:93 (code_upload_safety)",
+        "src/Rules/requirements/internal-catalog.json:979",
+        "src/Engine/Checks/CodeSearchCheck.php:16"
+      ]
+    },
+    {
+      "id": "MB-0023",
+      "profile": "hardening",
+      "title": "Use CSPRNG; avoid weak PRNG",
+      "decision": "SUPPORT",
+      "checks": [
+        "code_csprng_safety"
+      ],
+      "human_required": true,
+      "current_criterion": "Use CSPRNG; avoid weak PRNG; assess only the collected Magento deployment scope.",
+      "assessment_and_action": "Weak PRNG chỉ security khi dùng token/secret; fixture rand cho UI so với reset token, random_bytes wrapper.",
+      "evidence_boundary": "Chạy observation phù hợp mặc định; không suy ra requirement PASS từ không có pattern. Báo coverage/files unreadable/limits và evidence còn thiếu.",
+      "fixture_gap": "fixture rand cho UI so với reset token, random_bytes wrapper. (Đề xuất nghiệm thu; chưa kiểm kê toàn bộ test hiện có.)",
+      "references": [
+        "src/Engine/Checks/CheckRegistry.php:95 (code_csprng_safety)",
+        "src/Rules/requirements/internal-catalog.json:1044",
+        "src/Engine/Checks/CodeSearchCheck.php:16"
+      ]
+    },
+    {
+      "id": "MB-0424",
+      "profile": "hardening",
+      "title": "Sensitive-data logging restrictions and redaction",
+      "decision": "SUPPORT",
+      "checks": [
+        "code_sensitive_logging",
+        "code_third_party_logging_sanitized",
+        "code_cardholder_data_logs"
+      ],
+      "human_required": true,
+      "current_criterion": "Verify that when logging sensitive data, the application enforces logging based on the data's protection level. For example, it may not be allowed to log certain data, such as credentials or payment details. Other data, such as session tokens, may only be logged by being hashed or masked, either in full or partially. Additional mandatory Magento deployment conditions: Sensitive data not logged; assess only the collected Magento deployment scope. PII not logged in application logs; assess only the collected Magento deployment scope. Third-party logging sanitized (mask/redact); assess only the collected Magento deployment scope. No cardholder data in application logs; assess only the collected Magento deployment scope.",
+      "assessment_and_action": "Redaction phải theo data và sink; fixture PAN/token/PII đã mask và logger wrapper; không lộ secret trong finding; dedup.",
+      "evidence_boundary": "Chạy observation phù hợp mặc định; không suy ra requirement PASS từ không có pattern. Báo coverage/files unreadable/limits và evidence còn thiếu.",
+      "fixture_gap": "fixture PAN/token/PII đã mask và logger wrapper; không lộ secret trong finding; dedup. (Đề xuất nghiệm thu; chưa kiểm kê toàn bộ test hiện có.)",
+      "references": [
+        "src/Engine/Checks/CheckRegistry.php:96 (code_sensitive_logging)",
+        "src/Engine/Checks/CheckRegistry.php:106 (code_third_party_logging_sanitized)",
+        "src/Engine/Checks/CheckRegistry.php:110 (code_cardholder_data_logs)",
+        "src/Rules/requirements/internal-catalog.json:28626",
+        "src/Engine/Checks/CodeSearchCheck.php:16"
+      ]
+    },
+    {
+      "id": "MB-0025",
+      "profile": "hardening",
+      "title": "No unsafe raw crypto or session APIs in custom code",
+      "decision": "SUPPORT",
+      "checks": [
+        "code_magento_api_crypto_session"
+      ],
+      "human_required": true,
+      "current_criterion": "No unsafe raw crypto or session APIs in custom code; assess only the collected Magento deployment scope.",
+      "assessment_and_action": "Raw crypto/session API là review signal; fixture authenticated encryption và native session legitimate; không gọi mọi usage là vulnerability.",
+      "evidence_boundary": "Chạy observation phù hợp mặc định; không suy ra requirement PASS từ không có pattern. Báo coverage/files unreadable/limits và evidence còn thiếu.",
+      "fixture_gap": "fixture authenticated encryption và native session legitimate; không gọi mọi usage là vulnerability. (Đề xuất nghiệm thu; chưa kiểm kê toàn bộ test hiện có.)",
+      "references": [
+        "src/Engine/Checks/CheckRegistry.php:97 (code_magento_api_crypto_session)",
+        "src/Rules/requirements/internal-catalog.json:1109",
+        "src/Engine/Checks/CodeSearchCheck.php:16"
+      ]
+    },
+    {
+      "id": "MB-0094",
+      "profile": "hardening",
+      "title": "Custom controllers and APIs include function-level authorization",
+      "decision": "SUPPORT",
+      "checks": [
+        "code_custom_authorization_checks"
+      ],
+      "human_required": true,
+      "current_criterion": "Custom controllers and APIs include function-level authorization; assess only the collected Magento deployment scope.",
+      "assessment_and_action": "Authorization cần runtime role/resource/object ownership; fixture inherited _isAllowed, anonymous webapi và cross-customer access.",
+      "evidence_boundary": "Chạy observation phù hợp mặc định; không suy ra requirement PASS từ không có pattern. Báo coverage/files unreadable/limits và evidence còn thiếu.",
+      "fixture_gap": "fixture inherited _isAllowed, anonymous webapi và cross-customer access. (Đề xuất nghiệm thu; chưa kiểm kê toàn bộ test hiện có.)",
+      "references": [
+        "src/Engine/Checks/CheckRegistry.php:119 (code_custom_authorization_checks)",
+        "src/Rules/requirements/internal-catalog.json:5215",
+        "src/Engine/Checks/CodeSearchCheck.php:16"
+      ]
+    },
+    {
+      "id": "MB-0095",
+      "profile": "hardening",
+      "title": "GraphQL and API exposure minimized",
+      "decision": "SUPPORT",
+      "checks": [
+        "code_api_exposure_minimized"
+      ],
+      "human_required": true,
+      "current_criterion": "GraphQL and API exposure minimized; assess only the collected Magento deployment scope.",
+      "assessment_and_action": "Anonymous GraphQL/API có trường hợp đúng; fixture public catalog so với customer PII, schema exposure có auth; không cấm mặc định.",
+      "evidence_boundary": "Chạy observation phù hợp mặc định; không suy ra requirement PASS từ không có pattern. Báo coverage/files unreadable/limits và evidence còn thiếu.",
+      "fixture_gap": "fixture public catalog so với customer PII, schema exposure có auth; không cấm mặc định. (Đề xuất nghiệm thu; chưa kiểm kê toàn bộ test hiện có.)",
+      "references": [
+        "src/Engine/Checks/CheckRegistry.php:121 (code_api_exposure_minimized)",
+        "src/Rules/requirements/internal-catalog.json:5289",
+        "src/Engine/Checks/CodeSearchCheck.php:16"
+      ]
+    },
+    {
+      "id": "MB-0097",
+      "profile": "hardening",
+      "title": "Secrets are not hardcoded in custom code",
+      "decision": "SUPPORT",
+      "checks": [
+        "code_hardcoded_secrets"
+      ],
+      "human_required": true,
+      "current_criterion": "Secrets are not hardcoded in custom code; assess only the collected Magento deployment scope.",
+      "assessment_and_action": "Secret heuristics có false positive; fixture dummy key, multiline key, indirect vault và deployed secret; giữ thêm MB-0730.",
+      "evidence_boundary": "Chạy observation phù hợp mặc định; không suy ra requirement PASS từ không có pattern. Báo coverage/files unreadable/limits và evidence còn thiếu.",
+      "fixture_gap": "fixture dummy key, multiline key, indirect vault và deployed secret; giữ thêm MB-0730. (Đề xuất nghiệm thu; chưa kiểm kê toàn bộ test hiện có.)",
+      "references": [
+        "src/Engine/Checks/CheckRegistry.php:104 (code_hardcoded_secrets)",
+        "src/Rules/requirements/internal-catalog.json:5450",
+        "src/Engine/Checks/CodeSearchCheck.php:16"
+      ]
+    },
+    {
+      "id": "MB-0098",
+      "profile": "hardening",
+      "title": "Unsafe XML parsing disabled",
+      "decision": "SUPPORT",
+      "checks": [
+        "code_unsafe_xml_parsing"
+      ],
+      "human_required": true,
+      "current_criterion": "Unsafe XML parsing disabled; assess only the collected Magento deployment scope.",
+      "assessment_and_action": "XXE phụ thuộc parser options/runtime; fixture LIBXML_NONET chưa đủ, external entity enabled và harmless XML.",
+      "evidence_boundary": "Chạy observation phù hợp mặc định; không suy ra requirement PASS từ không có pattern. Báo coverage/files unreadable/limits và evidence còn thiếu.",
+      "fixture_gap": "fixture LIBXML_NONET chưa đủ, external entity enabled và harmless XML. (Đề xuất nghiệm thu; chưa kiểm kê toàn bộ test hiện có.)",
+      "references": [
+        "src/Engine/Checks/CheckRegistry.php:105 (code_unsafe_xml_parsing)",
+        "src/Rules/requirements/internal-catalog.json:5547",
+        "src/Engine/Checks/CodeSearchCheck.php:16"
+      ]
+    },
+    {
+      "id": "MB-0099",
+      "profile": "hardening",
+      "title": "File download and export endpoints require authorization",
+      "decision": "SUPPORT",
+      "checks": [
+        "code_download_export_authorization"
+      ],
+      "human_required": true,
+      "current_criterion": "File download and export endpoints require authorization; assess only the collected Magento deployment scope.",
+      "assessment_and_action": "Export/download cần ownership và path containment; fixture logged-in cross-customer export và protected inherited middleware.",
+      "evidence_boundary": "Chạy observation phù hợp mặc định; không suy ra requirement PASS từ không có pattern. Báo coverage/files unreadable/limits và evidence còn thiếu.",
+      "fixture_gap": "fixture logged-in cross-customer export và protected inherited middleware. (Đề xuất nghiệm thu; chưa kiểm kê toàn bộ test hiện có.)",
+      "references": [
+        "src/Engine/Checks/CheckRegistry.php:120 (code_download_export_authorization)",
+        "src/Rules/requirements/internal-catalog.json:5614",
+        "src/Engine/Checks/CodeSearchCheck.php:16"
+      ]
+    },
+    {
+      "id": "MB-0026",
+      "profile": "hardening",
+      "title": "Force HTTPS in admin and storefront",
+      "decision": "REVISE",
+      "checks": [
+        "http_force_https_redirect"
+      ],
+      "human_required": false,
+      "current_criterion": "The observed HTTP storefront root and declared backend.frontName entrypoint redirect directly with 301/302/303/307/308 to same-host HTTPS. This is an entrypoint probe, not a universal guarantee for every deployment route.",
+      "assessment_and_action": "Test storefront/admin endpoints và trusted proxy redirects; fixture TLS terminator, redirect loop và HTTP credential post.",
+      "evidence_boundary": "Kết luận chỉ đúng phạm vi predicate đã thu thập; thiếu dữ liệu hoặc không áp dụng phải tách khỏi PASS/FAIL.",
+      "fixture_gap": "fixture TLS terminator, redirect loop và HTTP credential post. (Đề xuất nghiệm thu; chưa kiểm kê toàn bộ test hiện có.)",
+      "references": [
+        "src/Rules/requirements/internal-catalog.json:1174",
+        "src/Engine/Checks/HttpCheck.php:1"
+      ]
+    },
+    {
+      "id": "MB-0027",
+      "profile": "hardening",
+      "title": "Observed HTTPS response has HSTS max-age of at least one year",
+      "decision": "KEEP",
+      "checks": [
+        "http_has_hsts"
+      ],
+      "human_required": false,
+      "current_criterion": "A successful same-host HTTPS response at the configured runtime URL emits one unambiguous Strict-Transport-Security header with an exact integer max-age directive of at least 31536000 seconds. Repository web-server declarations are not runtime proof.",
+      "assessment_and_action": "Giữ HSTS max-age predicate đúng response đã test; fixture repeated headers/subdomains/CDN; không tự áp preload.",
+      "evidence_boundary": "Kết luận chỉ đúng phạm vi predicate đã thu thập; thiếu dữ liệu hoặc không áp dụng phải tách khỏi PASS/FAIL.",
+      "fixture_gap": "fixture repeated headers/subdomains/CDN; không tự áp preload. (Đề xuất nghiệm thu; chưa kiểm kê toàn bộ test hiện có.)",
+      "references": [
+        "src/Rules/requirements/internal-catalog.json:1251",
+        "src/Engine/Checks/HttpCheck.php:1"
+      ]
+    },
+    {
+      "id": "MB-0028",
+      "profile": "hardening",
+      "title": "Runtime endpoint rejects legacy TLS",
+      "decision": "REVISE",
+      "checks": [
+        "http_tls_min_version"
+      ],
+      "human_required": false,
+      "current_criterion": "The assessed runtime host and port must accept TLS 1.2 or 1.3 and reject TLS 1.0 and 1.1. Rejection requires peer protocol-version alerts or successful active protocol enumeration; client-side protocol restrictions and connection failures are not proof.",
+      "assessment_and_action": "Probe endpoint TLS với timeout và unavailable cipher support; fixture TLS1.0/1.1 enabled, tool thiếu protocol và CDN termination.",
+      "evidence_boundary": "Kết luận chỉ đúng phạm vi predicate đã thu thập; thiếu dữ liệu hoặc không áp dụng phải tách khỏi PASS/FAIL.",
+      "fixture_gap": "fixture TLS1.0/1.1 enabled, tool thiếu protocol và CDN termination. (Đề xuất nghiệm thu; chưa kiểm kê toàn bộ test hiện có.)",
+      "references": [
+        "src/Rules/requirements/internal-catalog.json:1325",
+        "src/Engine/Checks/HttpCheck.php:1"
+      ]
+    },
+    {
+      "id": "MB-0029",
+      "profile": "hardening",
+      "title": "Literal HTTP asset references absent in assessed markup/CSS",
+      "decision": "SUPPORT",
+      "checks": [
+        "code_no_mixed_content"
+      ],
+      "human_required": false,
+      "current_criterion": "In LOCAL mode, readable markup/CSS files under app must contain no literal HTTP subresource or form-action references. In REMOTE mode, successful HTTPS pages at configured paths must contain no literal HTTP subresource/form references. Dynamic code-generated URLs, external stylesheets and unvisited routes require separate assessment.",
+      "assessment_and_action": "Literal HTTP scan không bắt DOM dynamic resource; fixture CSS url, protocol-relative và JS-generated mixed content.",
+      "evidence_boundary": "Chạy observation phù hợp mặc định; không suy ra requirement PASS từ không có pattern. Báo coverage/files unreadable/limits và evidence còn thiếu.",
+      "fixture_gap": "fixture CSS url, protocol-relative và JS-generated mixed content. (Đề xuất nghiệm thu; chưa kiểm kê toàn bộ test hiện có.)",
+      "references": [
+        "src/Engine/Checks/CheckRegistry.php:98 (code_no_mixed_content)",
+        "src/Rules/requirements/internal-catalog.json:1398",
+        "src/Engine/Checks/CodeSearchCheck.php:16"
+      ]
+    },
+    {
+      "id": "MB-0030",
+      "profile": "hardening",
+      "title": "Sensitive cookies use Secure, HttpOnly, and SameSite",
+      "decision": "REVISE",
+      "checks": [
+        "http_cookie_flags"
+      ],
+      "human_required": false,
+      "current_criterion": "Sensitive session/admin cookies actually emitted by successful same-host HTTPS responses on the configured probe paths have exact Secure and HttpOnly attributes and SameSite=Lax or Strict. This assesses observed cookie emissions, not unobserved authenticated sessions.",
+      "assessment_and_action": "Cookie probe anonymous không chứng minh admin/auth sessions; fixture cookie deletion, login cookies, SameSite=None thiếu Secure và path/domain.",
+      "evidence_boundary": "Kết luận chỉ đúng phạm vi predicate đã thu thập; thiếu dữ liệu hoặc không áp dụng phải tách khỏi PASS/FAIL.",
+      "fixture_gap": "fixture cookie deletion, login cookies, SameSite=None thiếu Secure và path/domain. (Đề xuất nghiệm thu; chưa kiểm kê toàn bộ test hiện có.)",
+      "references": [
+        "src/Rules/requirements/internal-catalog.json:1494",
+        "src/Engine/Checks/HttpCheck.php:1"
+      ]
+    },
+    {
+      "id": "MB-0089",
+      "profile": "hardening",
+      "title": "Checkout Content Security Policy enforced",
+      "decision": "SUPPORT",
+      "checks": [
+        "code_checkout_csp_enforced"
+      ],
+      "human_required": true,
+      "current_criterion": "Checkout Content Security Policy enforced; assess only the collected Magento deployment scope.",
+      "assessment_and_action": "CSP phải enforced trên checkout thực, không chỉ config marker; fixture report-only, unsafe-inline nonce và Magento version-dependent behavior.",
+      "evidence_boundary": "Chạy observation phù hợp mặc định; không suy ra requirement PASS từ không có pattern. Báo coverage/files unreadable/limits và evidence còn thiếu.",
+      "fixture_gap": "fixture report-only, unsafe-inline nonce và Magento version-dependent behavior. (Đề xuất nghiệm thu; chưa kiểm kê toàn bộ test hiện có.)",
+      "references": [
+        "src/Engine/Checks/CheckRegistry.php:115 (code_checkout_csp_enforced)",
+        "src/Rules/requirements/internal-catalog.json:4850",
+        "src/Engine/Checks/CodeSearchCheck.php:16"
+      ]
+    },
+    {
+      "id": "MB-0096",
+      "profile": "hardening",
+      "title": "Security headers baseline enforced",
+      "decision": "SUPPORT",
+      "checks": [
+        "code_security_headers_baseline"
+      ],
+      "human_required": true,
+      "current_criterion": "Security headers baseline enforced; assess only the collected Magento deployment scope.",
+      "assessment_and_action": "Security headers theo endpoint/architecture; fixture duplicated permissive headers, API content type và proxy overrides.",
+      "evidence_boundary": "Chạy observation phù hợp mặc định; không suy ra requirement PASS từ không có pattern. Báo coverage/files unreadable/limits và evidence còn thiếu.",
+      "fixture_gap": "fixture duplicated permissive headers, API content type và proxy overrides. (Đề xuất nghiệm thu; chưa kiểm kê toàn bộ test hiện có.)",
+      "references": [
+        "src/Engine/Checks/CheckRegistry.php:116 (code_security_headers_baseline)",
+        "src/Rules/requirements/internal-catalog.json:5365",
+        "src/Engine/Checks/CodeSearchCheck.php:16"
+      ]
+    },
+    {
+      "id": "MB-0031",
+      "profile": "hardening",
+      "title": "Declared Magento deployment mode is production",
+      "decision": "KEEP",
+      "checks": [
+        "magento_production_mode"
+      ],
+      "human_required": false,
+      "current_criterion": "The collected app/etc/env.php MAGE_MODE declaration equals production. Runtime environment overrides and actual web process state require separate evidence.",
+      "assessment_and_action": "Production declaration useful; fixture deployment env override; production mode không thay debug checks MB-0729/0379.",
+      "evidence_boundary": "Kết luận chỉ đúng phạm vi predicate đã thu thập; thiếu dữ liệu hoặc không áp dụng phải tách khỏi PASS/FAIL.",
+      "fixture_gap": "fixture deployment env override; production mode không thay debug checks MB-0729/0379. (Đề xuất nghiệm thu; chưa kiểm kê toàn bộ test hiện có.)",
+      "references": [
+        "src/Engine/Checks/CheckRegistry.php:170 (magento_production_mode)",
+        "src/Rules/requirements/internal-catalog.json:1583",
+        "src/Engine/Checks/MagentoCheck.php:22"
+      ]
+    },
+    {
+      "id": "MB-0379",
+      "profile": "hardening",
+      "title": "Production debug and error-display policy",
+      "decision": "REVISE",
+      "checks": [
+        "magento_production_mode",
+        "php_xdebug_disabled",
+        "http_no_xdebug_headers",
+        "php_template_hints_disabled",
+        "php_dev_debug_config_disabled",
+        "php_third_party_debug_disabled",
+        "php_display_errors_disabled",
+        "http_no_stacktrace",
+        "magento_debug_configuration_observed"
+      ],
+      "human_required": true,
+      "current_criterion": "Verify that debug modes are disabled for all components in production environments to prevent exposure of debugging features and information leakage. Xdebug disabled in production; assess only the collected Magento deployment scope. display_errors is Off; assess only the collected Magento deployment scope. No dev debug configs on production (template hints off); assess only the collected Magento deployment scope. Debug template hints disabled in production; assess only the collected Magento deployment scope. Debug/verbose off for third-party integrations; assess only the collected Magento deployment scope.",
+      "assessment_and_action": "Tách persisted flags, HTTP disclosure, PHP-FPM effective config; CLI ini không đại diện FPM; dedup và giữ MB-0729. Fixture prod mode+xdebug/error display.",
+      "evidence_boundary": "Chạy observation phù hợp mặc định; không suy ra requirement PASS từ không có pattern. Báo coverage/files unreadable/limits và evidence còn thiếu.",
+      "fixture_gap": "Fixture prod mode+xdebug/error display. (Đề xuất nghiệm thu; chưa kiểm kê toàn bộ test hiện có.)",
+      "references": [
+        "src/Engine/Checks/CheckRegistry.php:170 (magento_production_mode)",
+        "src/Engine/Checks/CheckRegistry.php:146 (php_xdebug_disabled)",
+        "src/Engine/Checks/CheckRegistry.php:148 (php_template_hints_disabled)",
+        "src/Engine/Checks/CheckRegistry.php:149 (php_dev_debug_config_disabled)",
+        "src/Engine/Checks/CheckRegistry.php:150 (php_third_party_debug_disabled)",
+        "src/Engine/Checks/CheckRegistry.php:147 (php_display_errors_disabled)",
+        "src/Engine/Checks/CheckRegistry.php:162 (magento_debug_configuration_observed)",
+        "src/Rules/requirements/internal-catalog.json:24988",
+        "src/Engine/Checks/HttpCheck.php:1"
+      ]
+    },
+    {
+      "id": "MB-0034",
+      "profile": "hardening",
+      "title": "Generated DI PHP artifacts are present",
+      "decision": "OPTIONAL",
+      "checks": [
+        "fs_di_compiled"
+      ],
+      "human_required": false,
+      "current_criterion": "At least one readable PHP artifact exists in each configured generated/metadata and generated/code directory. This assesses artifact presence, not DI compilation correctness or freshness.",
+      "assessment_and_action": "DI artifact presence là readiness; fixture generated/code symlink/read-only build và irrelevant empty artifacts.",
+      "evidence_boundary": "Kết luận chỉ đúng phạm vi predicate đã thu thập; thiếu dữ liệu hoặc không áp dụng phải tách khỏi PASS/FAIL.",
+      "fixture_gap": "fixture generated/code symlink/read-only build và irrelevant empty artifacts. (Đề xuất nghiệm thu; chưa kiểm kê toàn bộ test hiện có.)",
+      "references": [
+        "src/Engine/Checks/CheckRegistry.php:133 (fs_di_compiled)",
+        "src/Rules/requirements/internal-catalog.json:1635"
+      ]
+    },
+    {
+      "id": "MB-0035",
+      "profile": "hardening",
+      "title": "Published static artifacts present in assessed deployment",
+      "decision": "OPTIONAL",
+      "checks": [
+        "fs_static_content_deployed"
+      ],
+      "human_required": false,
+      "current_criterion": "In LOCAL mode, pub/static/frontend or pub/static/adminhtml must contain at least one readable, nonempty published CSS/JS/font/image artifact. In REMOTE mode, same-origin Magento static CSS/JS assets referenced by the retrieved storefront must return nonempty non-HTML content with HTTP 200. This verifies observed deployment artifacts, not completeness of every theme, locale or route.",
+      "assessment_and_action": "Static artifacts là readiness; fixture CDN assets/deployment strategy và stale files.",
+      "evidence_boundary": "Kết luận chỉ đúng phạm vi predicate đã thu thập; thiếu dữ liệu hoặc không áp dụng phải tách khỏi PASS/FAIL.",
+      "fixture_gap": "fixture CDN assets/deployment strategy và stale files. (Đề xuất nghiệm thu; chưa kiểm kê toàn bộ test hiện có.)",
+      "references": [
+        "src/Engine/Checks/CheckRegistry.php:134 (fs_static_content_deployed)",
+        "src/Rules/requirements/internal-catalog.json:1689"
+      ]
+    },
+    {
+      "id": "MB-0037",
+      "profile": "hardening",
+      "title": "Declared Full Page Cache type enabled",
+      "decision": "REVISE",
+      "checks": [
+        "cache_type_enabled"
+      ],
+      "human_required": false,
+      "current_criterion": "The collected deployment app/etc/env.php declares cache_types.full_page enabled. This verifies the persisted Magento cache type state; Varnish selection and actual cache hit rates are separate observations.",
+      "assessment_and_action": "Giữ readiness declaration riêng; remote Age/X-Cache không chứng minh env.php FPC. Fixture CDN cache trong khi Magento FPC tắt.",
+      "evidence_boundary": "Kết luận chỉ đúng phạm vi predicate đã thu thập; thiếu dữ liệu hoặc không áp dụng phải tách khỏi PASS/FAIL.",
+      "fixture_gap": "Fixture CDN cache trong khi Magento FPC tắt. (Đề xuất nghiệm thu; chưa kiểm kê toàn bộ test hiện có.)",
+      "references": [
+        "src/Engine/Checks/CheckRegistry.php:47 (cache_type_enabled)",
+        "src/Rules/requirements/internal-catalog.json:1768"
+      ]
+    },
+    {
+      "id": "MB-0038",
+      "profile": "hardening",
+      "title": "Declared cache backends use Redis or Varnish",
+      "decision": "OPTIONAL",
+      "checks": [
+        "php_cache_backend_configured",
+        "php_no_file_cache_backend"
+      ],
+      "human_required": false,
+      "current_criterion": "Declared default and page-cache frontend backends use supported Redis configuration; an explicit Varnish page-cache setting may replace an absent page-cache backend declaration. No assessed declared backend is file-based. This checks deployed configuration declarations, not live cache service health.",
+      "assessment_and_action": "Redis/Varnish là kiến trúc/performance, không bắt buộc security. Fixture safe file cache và managed cache; không fail vì khác vendor.",
+      "evidence_boundary": "Kết luận chỉ đúng phạm vi predicate đã thu thập; thiếu dữ liệu hoặc không áp dụng phải tách khỏi PASS/FAIL.",
+      "fixture_gap": "Fixture safe file cache và managed cache; không fail vì khác vendor. (Đề xuất nghiệm thu; chưa kiểm kê toàn bộ test hiện có.)",
+      "references": [
+        "src/Engine/Checks/CheckRegistry.php:152 (php_cache_backend_configured)",
+        "src/Engine/Checks/CheckRegistry.php:154 (php_no_file_cache_backend)",
+        "src/Rules/requirements/internal-catalog.json:1846",
+        "src/Engine/Checks/PhpConfigCheck.php:22"
+      ]
+    },
+    {
+      "id": "MB-0039",
+      "profile": "hardening",
+      "title": "Recorded Magento indexers have valid state",
+      "decision": "OPTIONAL",
+      "checks": [
+        "deployment_indexers_database_ready"
+      ],
+      "human_required": false,
+      "current_criterion": "Every recorded row in the deployed Magento indexer_state table has status valid. Working or invalid indexers fail this readiness policy; empty, malformed or unreadable table evidence is a collection error. This does not assert mview queue state or coverage of unregistered indexers.",
+      "assessment_and_action": "Indexer valid snapshot là vận hành; fixture legitimate processing/reindex và stale DB; không security high.",
+      "evidence_boundary": "Kết luận chỉ đúng phạm vi predicate đã thu thập; thiếu dữ liệu hoặc không áp dụng phải tách khỏi PASS/FAIL.",
+      "fixture_gap": "fixture legitimate processing/reindex và stale DB; không security high. (Đề xuất nghiệm thu; chưa kiểm kê toàn bộ test hiện có.)",
+      "references": [
+        "src/Engine/Checks/CheckRegistry.php:48 (deployment_indexers_database_ready)",
+        "src/Rules/requirements/internal-catalog.json:1943"
+      ]
+    },
+    {
+      "id": "MB-0040",
+      "profile": "hardening",
+      "title": "Declared Redis session storage has authentication configured",
+      "decision": "REVISE",
+      "checks": [
+        "php_session_storage_hardened"
+      ],
+      "human_required": false,
+      "current_criterion": "The deployed configuration declares session.save as redis and session.redis.password as a nonempty string. This checks the configured authentication declaration; it does not prove server ACL, network isolation or credential validity.",
+      "assessment_and_action": "Không ép Redis: auth/TLS/isolation theo backend; hiện non-Redis FAIL. Fixture Unix socket Redis, external vault ACL, secure files sessions và public Redis.",
+      "evidence_boundary": "Kết luận chỉ đúng phạm vi predicate đã thu thập; thiếu dữ liệu hoặc không áp dụng phải tách khỏi PASS/FAIL.",
+      "fixture_gap": "Fixture Unix socket Redis, external vault ACL, secure files sessions và public Redis. (Đề xuất nghiệm thu; chưa kiểm kê toàn bộ test hiện có.)",
+      "references": [
+        "src/Engine/Checks/CheckRegistry.php:153 (php_session_storage_hardened)",
+        "src/Rules/requirements/internal-catalog.json:1995",
+        "src/Engine/Checks/PhpConfigCheck.php:22"
+      ]
+    },
+    {
+      "id": "MB-0042",
+      "profile": "hardening",
+      "title": "Log/report paths are absent from the collected webroot",
+      "decision": "KEEP",
+      "checks": [
+        "fs_logs_reports_not_in_webroot"
+      ],
+      "human_required": false,
+      "current_criterion": "Within the collected pub tree, no configured var/log or var/report relative path, nor symlink to the corresponding project target, is present. This is filesystem placement, not a live HTTP exposure assertion.",
+      "assessment_and_action": "Log/report ngoài docroot useful leakage predicate; fixture symlink alias, custom docroot và HTTP deny; absence local không chứng minh không public.",
+      "evidence_boundary": "Kết luận chỉ đúng phạm vi predicate đã thu thập; thiếu dữ liệu hoặc không áp dụng phải tách khỏi PASS/FAIL.",
+      "fixture_gap": "fixture symlink alias, custom docroot và HTTP deny; absence local không chứng minh không public. (Đề xuất nghiệm thu; chưa kiểm kê toàn bộ test hiện có.)",
+      "references": [
+        "src/Engine/Checks/CheckRegistry.php:137 (fs_logs_reports_not_in_webroot)",
+        "src/Rules/requirements/internal-catalog.json:2051"
+      ]
+    },
+    {
+      "id": "MB-0043",
+      "profile": "hardening",
+      "title": "Log rotation configured",
+      "decision": "OPTIONAL",
+      "checks": [
+        "fs_log_rotation_configured"
+      ],
+      "human_required": true,
+      "current_criterion": "Log rotation configured; assess only the collected Magento deployment scope.",
+      "assessment_and_action": "Rotation cần hiệu lực/freshness/central logging; fixture journald/container stdout và file config stale.",
+      "evidence_boundary": "Chạy observation phù hợp mặc định; không suy ra requirement PASS từ không có pattern. Báo coverage/files unreadable/limits và evidence còn thiếu.",
+      "fixture_gap": "fixture journald/container stdout và file config stale. (Đề xuất nghiệm thu; chưa kiểm kê toàn bộ test hiện có.)",
+      "references": [
+        "src/Engine/Checks/CheckRegistry.php:138 (fs_log_rotation_configured)",
+        "src/Rules/requirements/internal-catalog.json:2109"
+      ]
+    },
+    {
+      "id": "MB-0046",
+      "profile": "hardening",
+      "title": "Installed Magento cron entry present",
+      "decision": "OPTIONAL",
+      "checks": [
+        "installed_magento_cron"
+      ],
+      "human_required": false,
+      "current_criterion": "At least one installed, syntactically valid cron entry invokes bin/magento cron:run for the collected deployment path. Sources include deployment-owner/current-user and configured-user crontabs plus /etc/crontab and /etc/cron.d. This verifies entry presence, not successful execution or an external orchestrator.",
+      "assessment_and_action": "Cron có thể do orchestrator thay crontab; fixture Kubernetes scheduler/systemd và duplicate entries.",
+      "evidence_boundary": "Kết luận chỉ đúng phạm vi predicate đã thu thập; thiếu dữ liệu hoặc không áp dụng phải tách khỏi PASS/FAIL.",
+      "fixture_gap": "fixture Kubernetes scheduler/systemd và duplicate entries. (Đề xuất nghiệm thu; chưa kiểm kê toàn bộ test hiện có.)",
+      "references": [
+        "src/Engine/Checks/CheckRegistry.php:49 (installed_magento_cron)",
+        "src/Rules/requirements/internal-catalog.json:2164",
+        "src/Engine/Checks/MagentoCheck.php:22"
+      ]
+    },
+    {
+      "id": "MB-0047",
+      "profile": "hardening",
+      "title": "Recorded cron execution is recent (<= 900s)",
+      "decision": "OPTIONAL",
+      "checks": [
+        "cron_heartbeat_recent"
+      ],
+      "human_required": false,
+      "current_criterion": "The latest recorded cron_schedule.executed_at among success, running or error jobs in the deployment database is no older than 900 seconds. No execution or a stale execution fails this policy; unreadable or malformed table evidence and future timestamps indicating clock skew are collection errors. Job success and scheduler retention are outside this criterion.",
+      "assessment_and_action": "900s tùy schedule; fixture timezone/clock skew/quiet cron và DB thiếu; report timestamp rõ.",
+      "evidence_boundary": "Kết luận chỉ đúng phạm vi predicate đã thu thập; thiếu dữ liệu hoặc không áp dụng phải tách khỏi PASS/FAIL.",
+      "fixture_gap": "fixture timezone/clock skew/quiet cron và DB thiếu; report timestamp rõ. (Đề xuất nghiệm thu; chưa kiểm kê toàn bộ test hiện có.)",
+      "references": [
+        "src/Engine/Checks/CheckRegistry.php:215 (cron_heartbeat_recent)",
+        "src/Rules/requirements/internal-catalog.json:2237"
+      ]
+    },
+    {
+      "id": "MB-0048",
+      "profile": "hardening",
+      "title": "Due pending cron backlog is below 1000",
+      "decision": "OPTIONAL",
+      "checks": [
+        "cron_backlog_below_threshold"
+      ],
+      "human_required": false,
+      "current_criterion": "The deployment cron_schedule table contains fewer than 1000 pending jobs whose scheduled_at is at or before scanner UTC time. Future scheduled jobs are excluded. This counts due pending scheduler jobs, not arbitrary application queues.",
+      "assessment_and_action": "1000 backlog tùy workload; fixture long-running legitimate jobs, retry storm và per-group thresholds.",
+      "evidence_boundary": "Kết luận chỉ đúng phạm vi predicate đã thu thập; thiếu dữ liệu hoặc không áp dụng phải tách khỏi PASS/FAIL.",
+      "fixture_gap": "fixture long-running legitimate jobs, retry storm và per-group thresholds. (Đề xuất nghiệm thu; chưa kiểm kê toàn bộ test hiện có.)",
+      "references": [
+        "src/Engine/Checks/CheckRegistry.php:216 (cron_backlog_below_threshold)",
+        "src/Rules/requirements/internal-catalog.json:2301"
+      ]
+    },
+    {
+      "id": "MB-0049",
+      "profile": "hardening",
+      "title": "Composer dependency OSV advisory matches",
+      "decision": "KEEP",
+      "checks": [
+        "composer_audit_api"
+      ],
+      "human_required": false,
+      "current_criterion": "Collected versioned Composer lock dependencies have no applicable OSV advisory matches in the successfully queried dataset, accounting for locally verified advisory-specific hotfix evidence. This does not certify absence of unknown vulnerabilities or uncollected runtime dependencies.",
+      "assessment_and_action": "Known advisory matching cần version/range/source freshness; fixture alias/dev version, timeout và partial API không PASS.",
+      "evidence_boundary": "Kết luận chỉ đúng phạm vi predicate đã thu thập; thiếu dữ liệu hoặc không áp dụng phải tách khỏi PASS/FAIL.",
+      "fixture_gap": "fixture alias/dev version, timeout và partial API không PASS. (Đề xuất nghiệm thu; chưa kiểm kê toàn bộ test hiện có.)",
+      "references": [
+        "src/Engine/Checks/CheckRegistry.php:178 (composer_audit_api)",
+        "src/Rules/requirements/internal-catalog.json:2365",
+        "src/Engine/Checks/ComposerCheck.php:1 (facade; registry resolves exact method)"
+      ]
+    },
+    {
+      "id": "MB-0050",
+      "profile": "hardening",
+      "title": "Adobe security release patch assessment",
+      "decision": "KEEP",
+      "checks": [
+        "composer_adobe_security_patches_api"
+      ],
+      "human_required": false,
+      "current_criterion": "The collected Composer-locked Magento product version is current for its Adobe security release branch according to the successfully queried patch dataset, or each required advisory patch is satisfied by verified local alternative evidence. Unsupported branches and missing required patches fail; this does not certify runtime patch deployment outside collected files.",
+      "assessment_and_action": "Adobe patch applicability cần edition/product/hotfix; fixture supported security patch/backport và unsupported product không gán false FAIL.",
+      "evidence_boundary": "Kết luận chỉ đúng phạm vi predicate đã thu thập; thiếu dữ liệu hoặc không áp dụng phải tách khỏi PASS/FAIL.",
+      "fixture_gap": "fixture supported security patch/backport và unsupported product không gán false FAIL. (Đề xuất nghiệm thu; chưa kiểm kê toàn bộ test hiện có.)",
+      "references": [
+        "src/Engine/Checks/CheckRegistry.php:179 (composer_adobe_security_patches_api)",
+        "src/Rules/requirements/internal-catalog.json:2422",
+        "src/Engine/Checks/ComposerCheck.php:1 (facade; registry resolves exact method)"
+      ]
+    },
+    {
+      "id": "MB-0051",
+      "profile": "hardening",
+      "title": "Dependency vulnerability remediation plan identifies an actionable resolution",
+      "decision": "SUPPORT",
+      "checks": [
+        "composer_fix_version_api"
+      ],
+      "human_required": true,
+      "current_criterion": "For each detected dependency vulnerability in the assessed lockfile, an actionable remediation plan must identify an available fixed package release or an explicitly reviewed alternative mitigation.",
+      "assessment_and_action": "Fixed version không chứng minh upgrade deployable; fixture conflict Magento/PHP, no fix và backport. Đưa remediation action theo advisory.",
+      "evidence_boundary": "Chạy observation phù hợp mặc định; không suy ra requirement PASS từ không có pattern. Báo coverage/files unreadable/limits và evidence còn thiếu.",
+      "fixture_gap": "fixture conflict Magento/PHP, no fix và backport. Đưa remediation action theo advisory. (Đề xuất nghiệm thu; chưa kiểm kê toàn bộ test hiện có.)",
+      "references": [
+        "src/Engine/Checks/CheckRegistry.php:181 (composer_fix_version_api)",
+        "src/Rules/requirements/internal-catalog.json:2477",
+        "src/Engine/Checks/ComposerCheck.php:1 (facade; registry resolves exact method)"
+      ]
+    },
+    {
+      "id": "MB-0052",
+      "profile": "hardening",
+      "title": "Enabled high-risk modules are maintained",
+      "decision": "SUPPORT",
+      "checks": [
+        "composer_risk_surface_tag"
+      ],
+      "human_required": true,
+      "current_criterion": "Enabled high-risk modules are maintained; assess only the collected Magento deployment scope.",
+      "assessment_and_action": "Risk tags+maintenance metadata không chứng minh enabled module an toàn; fixture disabled extension, app/code module ngoài Composer và source unavailable.",
+      "evidence_boundary": "Chạy observation phù hợp mặc định; không suy ra requirement PASS từ không có pattern. Báo coverage/files unreadable/limits và evidence còn thiếu.",
+      "fixture_gap": "fixture disabled extension, app/code module ngoài Composer và source unavailable. (Đề xuất nghiệm thu; chưa kiểm kê toàn bộ test hiện có.)",
+      "references": [
+        "src/Engine/Checks/CheckRegistry.php:197 (composer_risk_surface_tag)",
+        "src/Rules/requirements/internal-catalog.json:2543",
+        "src/Engine/Checks/ComposerCheck.php:1 (facade; registry resolves exact method)"
+      ]
+    },
+    {
+      "id": "MB-0053",
+      "profile": "hardening",
+      "title": "Temporary mitigations documented",
+      "decision": "OPTIONAL",
+      "checks": [
+        "security_mitigations_documented"
+      ],
+      "human_required": true,
+      "current_criterion": "Temporary mitigations documented; assess only the collected Magento deployment scope.",
+      "assessment_and_action": "Mitigation documentation là evidence workflow; fixture expired WAF exception và scope advisory mismatch; không thay finding CVE.",
+      "evidence_boundary": "Chạy observation phù hợp mặc định; không suy ra requirement PASS từ không có pattern. Báo coverage/files unreadable/limits và evidence còn thiếu.",
+      "fixture_gap": "fixture expired WAF exception và scope advisory mismatch; không thay finding CVE. (Đề xuất nghiệm thu; chưa kiểm kê toàn bộ test hiện có.)",
+      "references": [
+        "src/Engine/Checks/CheckRegistry.php:130 (security_mitigations_documented)",
+        "src/Rules/requirements/internal-catalog.json:2609"
+      ]
+    },
+    {
+      "id": "MB-0054",
+      "profile": "hardening",
+      "title": "Known-exploited packages prioritized (CISA KEV)",
+      "decision": "SUPPORT",
+      "checks": [
+        "composer_kev_advisories_api"
+      ],
+      "human_required": true,
+      "current_criterion": "Known-exploited packages prioritized (CISA KEV); assess only the collected Magento deployment scope.",
+      "assessment_and_action": "KEV match tăng ưu tiên, không chứng minh exploitation; fixture CVE mapping package ambiguous và partial metadata.",
+      "evidence_boundary": "Chạy observation phù hợp mặc định; không suy ra requirement PASS từ không có pattern. Báo coverage/files unreadable/limits và evidence còn thiếu.",
+      "fixture_gap": "fixture CVE mapping package ambiguous và partial metadata. (Đề xuất nghiệm thu; chưa kiểm kê toàn bộ test hiện có.)",
+      "references": [
+        "src/Engine/Checks/CheckRegistry.php:182 (composer_kev_advisories_api)",
+        "src/Rules/requirements/internal-catalog.json:2667",
+        "src/Engine/Checks/ComposerCheck.php:1 (facade; registry resolves exact method)"
+      ]
+    },
+    {
+      "id": "MB-0055",
+      "profile": "hardening",
+      "title": "Collected transitive versions have no returned applicable advisories",
+      "decision": "KEEP",
+      "checks": [
+        "composer_transitive_audit_api"
+      ],
+      "human_required": false,
+      "current_criterion": "No transitive package version in the complete collected Composer lock inventory is identified as affected by applicable advisories returned by the configured OSV service. Coverage is limited to the queried inventory and service data.",
+      "assessment_and_action": "Giữ transitive advisories, dùng chung observation MB-0049; fixture dev-only prod relevance và transitive package missing version.",
+      "evidence_boundary": "Kết luận chỉ đúng phạm vi predicate đã thu thập; thiếu dữ liệu hoặc không áp dụng phải tách khỏi PASS/FAIL.",
+      "fixture_gap": "fixture dev-only prod relevance và transitive package missing version. (Đề xuất nghiệm thu; chưa kiểm kê toàn bộ test hiện có.)",
+      "references": [
+        "src/Engine/Checks/CheckRegistry.php:183 (composer_transitive_audit_api)",
+        "src/Rules/requirements/internal-catalog.json:2733",
+        "src/Engine/Checks/ComposerCheck.php:1 (facade; registry resolves exact method)"
+      ]
+    },
+    {
+      "id": "MB-0056",
+      "profile": "hardening",
+      "title": "Declared constraints permit returned advisory fixed versions",
+      "decision": "SUPPORT",
+      "checks": [
+        "composer_constraints_conflict_api"
+      ],
+      "human_required": false,
+      "current_criterion": "For returned applicable advisory findings with published fixed versions, the combined declared dependency constraints intersect versions at or above the published fixed version. This does not establish complete Composer solver feasibility, platform compatibility or every fixed branch.",
+      "assessment_and_action": "Constraint cho phép fix không nghĩa resolver cài được; fixture transitive conflicts và platform constraints; dùng dry-run controlled environment.",
+      "evidence_boundary": "Kết luận chỉ đúng phạm vi predicate đã thu thập; thiếu dữ liệu hoặc không áp dụng phải tách khỏi PASS/FAIL.",
+      "fixture_gap": "fixture transitive conflicts và platform constraints; dùng dry-run controlled environment. (Đề xuất nghiệm thu; chưa kiểm kê toàn bộ test hiện có.)",
+      "references": [
+        "src/Engine/Checks/CheckRegistry.php:184 (composer_constraints_conflict_api)",
+        "src/Rules/requirements/internal-catalog.json:2793",
+        "src/Engine/Checks/ComposerCheck.php:1 (facade; registry resolves exact method)"
+      ]
+    },
+    {
+      "id": "MB-0057",
+      "profile": "hardening",
+      "title": "Collected package versions are not reported withdrawn",
+      "decision": "REVISE",
+      "checks": [
+        "composer_yanked_api"
+      ],
+      "human_required": false,
+      "current_criterion": "Every package version in the complete collected Composer lock inventory has an explicit non-yanked status from the configured package-status source. Missing per-package status cannot establish a clean result.",
+      "assessment_and_action": "Withdrawn package không đồng nghĩa vulnerable; trả lifecycle warning kèm lý do; fixture yanked vì packaging so với security và unknown status.",
+      "evidence_boundary": "Kết luận chỉ đúng phạm vi predicate đã thu thập; thiếu dữ liệu hoặc không áp dụng phải tách khỏi PASS/FAIL.",
+      "fixture_gap": "fixture yanked vì packaging so với security và unknown status. (Đề xuất nghiệm thu; chưa kiểm kê toàn bộ test hiện có.)",
+      "references": [
+        "src/Engine/Checks/CheckRegistry.php:185 (composer_yanked_api)",
+        "src/Rules/requirements/internal-catalog.json:2853",
+        "src/Engine/Checks/ComposerCheck.php:1 (facade; registry resolves exact method)"
+      ]
+    },
+    {
+      "id": "MB-0058",
+      "profile": "hardening",
+      "title": "Marketplace extensions are current and maintained",
+      "decision": "OPTIONAL",
+      "checks": [
+        "composer_marketplace_outdated_api"
+      ],
+      "human_required": true,
+      "current_criterion": "Marketplace extensions are current and maintained; assess only the collected Magento deployment scope.",
+      "assessment_and_action": "Marketplace current/maintained phải xét entitlement và compatible release; fixture private extension/latest incompatible/metadata missing.",
+      "evidence_boundary": "Chạy observation phù hợp mặc định; không suy ra requirement PASS từ không có pattern. Báo coverage/files unreadable/limits và evidence còn thiếu.",
+      "fixture_gap": "fixture private extension/latest incompatible/metadata missing. (Đề xuất nghiệm thu; chưa kiểm kê toàn bộ test hiện có.)",
+      "references": [
+        "src/Engine/Checks/CheckRegistry.php:186 (composer_marketplace_outdated_api)",
+        "src/Rules/requirements/internal-catalog.json:2911",
+        "src/Engine/Checks/ComposerCheck.php:1 (facade; registry resolves exact method)"
+      ]
+    },
+    {
+      "id": "MB-0059",
+      "profile": "hardening",
+      "title": "Affected advisory publication age is within 30 days",
+      "decision": "REPLACE",
+      "checks": [
+        "composer_advisory_latency_api"
+      ],
+      "human_required": false,
+      "current_criterion": "No returned advisory affecting an installed Composer package version has a publication age greater than the configured 30-day threshold. This is publication age, not organizational discovery time or a measured remediation SLA.",
+      "assessment_and_action": "Ngày advisory xuất bản không phải thời gian khách bị exposed hay SLA; thay patch deadline theo severity/KEV và installed affected version. Fixture old fixed/new critical.",
+      "evidence_boundary": "Kết luận chỉ đúng phạm vi predicate đã thu thập; thiếu dữ liệu hoặc không áp dụng phải tách khỏi PASS/FAIL.",
+      "fixture_gap": "Fixture old fixed/new critical. (Đề xuất nghiệm thu; chưa kiểm kê toàn bộ test hiện có.)",
+      "references": [
+        "src/Engine/Checks/CheckRegistry.php:188 (composer_advisory_latency_api)",
+        "src/Rules/requirements/internal-catalog.json:2979",
+        "src/Engine/Checks/ComposerCheck.php:1 (facade; registry resolves exact method)"
+      ]
+    },
+    {
+      "id": "MB-0060",
+      "profile": "hardening",
+      "title": "Marketplace extensions have vendor support evidence",
+      "decision": "OPTIONAL",
+      "checks": [
+        "composer_vendor_support_api"
+      ],
+      "human_required": true,
+      "current_criterion": "Marketplace extensions have vendor support evidence; assess only the collected Magento deployment scope.",
+      "assessment_and_action": "Vendor support là procurement evidence; fixture valid paid support dù package public ít update, expired contract.",
+      "evidence_boundary": "Chạy observation phù hợp mặc định; không suy ra requirement PASS từ không có pattern. Báo coverage/files unreadable/limits và evidence còn thiếu.",
+      "fixture_gap": "fixture valid paid support dù package public ít update, expired contract. (Đề xuất nghiệm thu; chưa kiểm kê toàn bộ test hiện có.)",
+      "references": [
+        "src/Engine/Checks/CheckRegistry.php:189 (composer_vendor_support_api)",
+        "src/Rules/requirements/internal-catalog.json:3039",
+        "src/Engine/Checks/ComposerCheck.php:1 (facade; registry resolves exact method)"
+      ]
+    },
+    {
+      "id": "MB-0061",
+      "profile": "hardening",
+      "title": "Collected dependencies are not reported abandoned",
+      "decision": "REVISE",
+      "checks": [
+        "composer_abandoned_api"
+      ],
+      "human_required": false,
+      "current_criterion": "No dependency package in the complete assessed Composer inventory is marked abandoned by the configured package-maintenance source; a clean conclusion requires explicit known status for every assessed package.",
+      "assessment_and_action": "Abandoned lifecycle risk cần replacement/reachability; dedup check; fixture official replacement/private fork và unsupported API metadata.",
+      "evidence_boundary": "Kết luận chỉ đúng phạm vi predicate đã thu thập; thiếu dữ liệu hoặc không áp dụng phải tách khỏi PASS/FAIL.",
+      "fixture_gap": "fixture official replacement/private fork và unsupported API metadata. (Đề xuất nghiệm thu; chưa kiểm kê toàn bộ test hiện có.)",
+      "references": [
+        "src/Engine/Checks/CheckRegistry.php:190 (composer_abandoned_api)",
+        "src/Rules/requirements/internal-catalog.json:3105",
+        "src/Engine/Checks/ComposerCheck.php:1 (facade; registry resolves exact method)"
+      ]
+    },
+    {
+      "id": "MB-0062",
+      "profile": "hardening",
+      "title": "Reported latest package releases are within 24 months",
+      "decision": "OPTIONAL",
+      "checks": [
+        "composer_release_recency_api"
+      ],
+      "human_required": false,
+      "current_criterion": "For every versioned package in the complete collected Composer lock inventory, the configured package-status source reports known latest release history with a valid nonfuture latest release timestamp within the configured 24 calendar-month threshold. This is a maintenance policy, not proof of exploitability; unknown release history cannot establish a clean conclusion.",
+      "assessment_and_action": "24 tháng release age không chứng minh unmaintained; fixture mature stable library và vendor-supported long-term release.",
+      "evidence_boundary": "Kết luận chỉ đúng phạm vi predicate đã thu thập; thiếu dữ liệu hoặc không áp dụng phải tách khỏi PASS/FAIL.",
+      "fixture_gap": "fixture mature stable library và vendor-supported long-term release. (Đề xuất nghiệm thu; chưa kiểm kê toàn bộ test hiện có.)",
+      "references": [
+        "src/Engine/Checks/CheckRegistry.php:191 (composer_release_recency_api)",
+        "src/Rules/requirements/internal-catalog.json:3201",
+        "src/Engine/Checks/ComposerCheck.php:1 (facade; registry resolves exact method)"
+      ]
+    },
+    {
+      "id": "MB-0063",
+      "profile": "hardening",
+      "title": "Reported source repositories remain available and active",
+      "decision": "OPTIONAL",
+      "checks": [
+        "composer_repo_archived_api"
+      ],
+      "human_required": false,
+      "current_criterion": "For every applicable source repository reported for packages in the complete collected Composer lock inventory, the configured package-status source explicitly reports that the repository is neither archived, disabled nor missing. Explicit repository-not-applicable classifications are outside scope; unsupported or unassessed providers cannot establish a clean conclusion. This is a maintenance policy, not proof of exploitability.",
+      "assessment_and_action": "Repo activity/archive là tín hiệu maintenance; fixture mirrored/private repo, archived upstream với supported fork và rate limit.",
+      "evidence_boundary": "Kết luận chỉ đúng phạm vi predicate đã thu thập; thiếu dữ liệu hoặc không áp dụng phải tách khỏi PASS/FAIL.",
+      "fixture_gap": "fixture mirrored/private repo, archived upstream với supported fork và rate limit. (Đề xuất nghiệm thu; chưa kiểm kê toàn bộ test hiện có.)",
+      "references": [
+        "src/Engine/Checks/CheckRegistry.php:192 (composer_repo_archived_api)",
+        "src/Rules/requirements/internal-catalog.json:3266",
+        "src/Engine/Checks/ComposerCheck.php:1 (facade; registry resolves exact method)"
+      ]
+    },
+    {
+      "id": "MB-0064",
+      "profile": "hardening",
+      "title": "No risky forks replacing upstream libs",
+      "decision": "SUPPORT",
+      "checks": [
+        "composer_risky_fork_api"
+      ],
+      "human_required": true,
+      "current_criterion": "No risky forks replacing upstream libs; assess only the collected Magento deployment scope.",
+      "assessment_and_action": "Fork provenance cần reason/patch evidence; fixture approved security backport fork, unknown fork và malicious replacement; không coi mọi fork lỗi.",
+      "evidence_boundary": "Chạy observation phù hợp mặc định; không suy ra requirement PASS từ không có pattern. Báo coverage/files unreadable/limits và evidence còn thiếu.",
+      "fixture_gap": "fixture approved security backport fork, unknown fork và malicious replacement; không coi mọi fork lỗi. (Đề xuất nghiệm thu; chưa kiểm kê toàn bộ test hiện có.)",
+      "references": [
+        "src/Engine/Checks/CheckRegistry.php:193 (composer_risky_fork_api)",
+        "src/Rules/requirements/internal-catalog.json:3329",
+        "src/Engine/Checks/ComposerCheck.php:1 (facade; registry resolves exact method)"
+      ]
+    },
+    {
+      "id": "MB-0065",
+      "profile": "hardening",
+      "title": "No wildcard constraints in composer.json",
+      "decision": "OPTIONAL",
+      "checks": [
+        "composer_json_constraints"
+      ],
+      "human_required": false,
+      "current_criterion": "No wildcard constraints in composer.json; assess only the collected Magento deployment scope.",
+      "assessment_and_action": "Wildcard là reproducibility policy khi có lock; fixture locked wildcard, unlocked prod và require-dev scope.",
+      "evidence_boundary": "Kết luận chỉ đúng phạm vi predicate đã thu thập; thiếu dữ liệu hoặc không áp dụng phải tách khỏi PASS/FAIL.",
+      "fixture_gap": "fixture locked wildcard, unlocked prod và require-dev scope. (Đề xuất nghiệm thu; chưa kiểm kê toàn bộ test hiện có.)",
+      "references": [
+        "src/Engine/Checks/CheckRegistry.php:208 (composer_json_constraints)",
+        "src/Rules/requirements/internal-catalog.json:3393",
+        "src/Engine/Checks/ComposerCheck.php:1 (facade; registry resolves exact method)"
+      ]
+    },
+    {
+      "id": "MB-0066",
+      "profile": "hardening",
+      "title": "No dev branches in composer.json",
+      "decision": "OPTIONAL",
+      "checks": [
+        "composer_json_constraints"
+      ],
+      "human_required": false,
+      "current_criterion": "No dev branches in composer.json; assess only the collected Magento deployment scope.",
+      "assessment_and_action": "Dev branch cần pin commit/provenance; fixture pinned supported fork, dev-only tooling và floating production branch.",
+      "evidence_boundary": "Kết luận chỉ đúng phạm vi predicate đã thu thập; thiếu dữ liệu hoặc không áp dụng phải tách khỏi PASS/FAIL.",
+      "fixture_gap": "fixture pinned supported fork, dev-only tooling và floating production branch. (Đề xuất nghiệm thu; chưa kiểm kê toàn bộ test hiện có.)",
+      "references": [
+        "src/Engine/Checks/CheckRegistry.php:208 (composer_json_constraints)",
+        "src/Rules/requirements/internal-catalog.json:3455",
+        "src/Engine/Checks/ComposerCheck.php:1 (facade; registry resolves exact method)"
+      ]
+    },
+    {
+      "id": "MB-0067",
+      "profile": "hardening",
+      "title": "prefer-stable=true in composer.json",
+      "decision": "OPTIONAL",
+      "checks": [
+        "composer_json_kv"
+      ],
+      "human_required": false,
+      "current_criterion": "prefer-stable=true in composer.json; assess only the collected Magento deployment scope.",
+      "assessment_and_action": "prefer-stable không phải vulnerability; fixture minimum-stability stable không khai báo prefer-stable và deliberate prerelease.",
+      "evidence_boundary": "Kết luận chỉ đúng phạm vi predicate đã thu thập; thiếu dữ liệu hoặc không áp dụng phải tách khỏi PASS/FAIL.",
+      "fixture_gap": "fixture minimum-stability stable không khai báo prefer-stable và deliberate prerelease. (Đề xuất nghiệm thu; chưa kiểm kê toàn bộ test hiện có.)",
+      "references": [
+        "src/Engine/Checks/CheckRegistry.php:209 (composer_json_kv)",
+        "src/Rules/requirements/internal-catalog.json:3517",
+        "src/Engine/Checks/ComposerCheck.php:1 (facade; registry resolves exact method)"
+      ]
+    },
+    {
+      "id": "MB-0069",
+      "profile": "hardening",
+      "title": "Direct locked versions match the reported latest stable release",
+      "decision": "OPTIONAL",
+      "checks": [
+        "composer_direct_outdated_api"
+      ],
+      "human_required": false,
+      "current_criterion": "Collected direct Composer package versions are not older than the latest stable release reported by the configured package-status source. This is a maintenance policy, not proof of an exploitable vulnerability.",
+      "assessment_and_action": "Latest stable không nhất thiết Magento compatible; fixture latest major breaks PHP và supported patched older line; dev deps riêng.",
+      "evidence_boundary": "Kết luận chỉ đúng phạm vi predicate đã thu thập; thiếu dữ liệu hoặc không áp dụng phải tách khỏi PASS/FAIL.",
+      "fixture_gap": "fixture latest major breaks PHP và supported patched older line; dev deps riêng. (Đề xuất nghiệm thu; chưa kiểm kê toàn bộ test hiện có.)",
+      "references": [
+        "src/Engine/Checks/CheckRegistry.php:187 (composer_direct_outdated_api)",
+        "src/Rules/requirements/internal-catalog.json:3575",
+        "src/Engine/Checks/ComposerCheck.php:1 (facade; registry resolves exact method)"
+      ]
+    },
+    {
+      "id": "MB-0070",
+      "profile": "hardening",
+      "title": "Composer lock hash and dependency identities are consistent",
+      "decision": "KEEP",
+      "checks": [
+        "composer_lock_integrity"
+      ],
+      "human_required": false,
+      "current_criterion": "composer.lock has a matching Composer content-hash, no duplicate or malformed package identities, and contains or provides/replaces each declared root package dependency. This does not prove the full dependency solver result or installed vendor file integrity.",
+      "assessment_and_action": "Lock identity/hash consistency là supply-chain integrity bounded; fixture edited json/hash mismatch, aliases/path repo và installed vendor differs lock.",
+      "evidence_boundary": "Kết luận chỉ đúng phạm vi predicate đã thu thập; thiếu dữ liệu hoặc không áp dụng phải tách khỏi PASS/FAIL.",
+      "fixture_gap": "fixture edited json/hash mismatch, aliases/path repo và installed vendor differs lock. (Đề xuất nghiệm thu; chưa kiểm kê toàn bộ test hiện có.)",
+      "references": [
+        "src/Engine/Checks/CheckRegistry.php:210 (composer_lock_integrity)",
+        "src/Rules/requirements/internal-catalog.json:3637",
+        "src/Engine/Checks/ComposerCheck.php:1 (facade; registry resolves exact method)"
+      ]
+    },
+    {
+      "id": "MB-0072",
+      "profile": "hardening",
+      "title": "No configured secret-pattern matches in collected VCS scope",
+      "decision": "REVISE",
+      "checks": [
+        "git_history_scan"
+      ],
+      "human_required": false,
+      "current_criterion": "No configured PCRE secret-pattern matches occur in eligible nonbinary working-tree files up to max_file_bytes and in individual file lines across available local Git ref history, within configured paths and exclusions. Git metadata and Git PCRE support are required for a clean history conclusion. This does not certify absence of every secret format, multiline historical matches, excluded files, remote refs or unavailable history.",
+      "assessment_and_action": "Production thường không có .git; UNKNOWN phải có deployed scan MB-0730 bù; fixture no git, old revoked secret, PCRE tool unavailable và redact output.",
+      "evidence_boundary": "Kết luận chỉ đúng phạm vi predicate đã thu thập; thiếu dữ liệu hoặc không áp dụng phải tách khỏi PASS/FAIL.",
+      "fixture_gap": "fixture no git, old revoked secret, PCRE tool unavailable và redact output. (Đề xuất nghiệm thu; chưa kiểm kê toàn bộ test hiện có.)",
+      "references": [
+        "src/Engine/Checks/CheckRegistry.php:212 (git_history_scan)",
+        "src/Rules/requirements/internal-catalog.json:3687"
+      ]
+    },
+    {
+      "id": "MB-0073",
+      "profile": "hardening",
+      "title": "HTTPS-only endpoints configured",
+      "decision": "SUPPORT",
+      "checks": [
+        "code_https_endpoints"
+      ],
+      "human_required": true,
+      "current_criterion": "HTTPS-only endpoints configured; assess only the collected Magento deployment scope.",
+      "assessment_and_action": "Literal endpoints bỏ sót dynamic URL, HTTP internal hợp lệ; fixture secret-bearing HTTP gateway so với private healthcheck và proxy TLS.",
+      "evidence_boundary": "Chạy observation phù hợp mặc định; không suy ra requirement PASS từ không có pattern. Báo coverage/files unreadable/limits và evidence còn thiếu.",
+      "fixture_gap": "fixture secret-bearing HTTP gateway so với private healthcheck và proxy TLS. (Đề xuất nghiệm thu; chưa kiểm kê toàn bộ test hiện có.)",
+      "references": [
+        "src/Engine/Checks/CheckRegistry.php:99 (code_https_endpoints)",
+        "src/Rules/requirements/internal-catalog.json:3795",
+        "src/Engine/Checks/CodeSearchCheck.php:16"
+      ]
+    },
+    {
+      "id": "MB-0075",
+      "profile": "hardening",
+      "title": "Webhook signature validation present",
+      "decision": "SUPPORT",
+      "checks": [
+        "code_webhook_signature_validation"
+      ],
+      "human_required": true,
+      "current_criterion": "Webhook signature validation present; assess only the collected Magento deployment scope.",
+      "assessment_and_action": "HMAC marker không chứng minh signed raw body, constant-time và replay; fixture reused nonce/old timestamp/signature wrong secret.",
+      "evidence_boundary": "Chạy observation phù hợp mặc định; không suy ra requirement PASS từ không có pattern. Báo coverage/files unreadable/limits và evidence còn thiếu.",
+      "fixture_gap": "fixture reused nonce/old timestamp/signature wrong secret. (Đề xuất nghiệm thu; chưa kiểm kê toàn bộ test hiện có.)",
+      "references": [
+        "src/Engine/Checks/CheckRegistry.php:100 (code_webhook_signature_validation)",
+        "src/Rules/requirements/internal-catalog.json:3890",
+        "src/Engine/Checks/CodeSearchCheck.php:16"
+      ]
+    },
+    {
+      "id": "MB-0076",
+      "profile": "hardening",
+      "title": "Outbound connections restricted by allow-list",
+      "decision": "REVISE",
+      "checks": [
+        "system_egress_restricted",
+        "code_outbound_egress_controls"
+      ],
+      "human_required": true,
+      "current_criterion": "Outbound connections restricted by allow-list; assess only the collected Magento deployment scope.",
+      "assessment_and_action": "Host OUTPUT default deny không chứng minh effective cloud/container/network allowlist; iptables fallback bỏ qua ACCEPT rules. Fixture DROP+ACCEPT, IPv6/nftables/cloud ACL.",
+      "evidence_boundary": "Chạy observation phù hợp mặc định; không suy ra requirement PASS từ không có pattern. Báo coverage/files unreadable/limits và evidence còn thiếu.",
+      "fixture_gap": "Fixture DROP+ACCEPT, IPv6/nftables/cloud ACL. (Đề xuất nghiệm thu; chưa kiểm kê toàn bộ test hiện có.)",
+      "references": [
+        "src/Engine/Checks/CheckRegistry.php:140 (system_egress_restricted)",
+        "src/Engine/Checks/CheckRegistry.php:101 (code_outbound_egress_controls)",
+        "src/Rules/requirements/internal-catalog.json:3966",
+        "src/Engine/Checks/CodeSearchCheck.php:16"
+      ]
+    },
+    {
+      "id": "MB-0077",
+      "profile": "hardening",
+      "title": "PII minimization for third-party flows",
+      "decision": "SUPPORT",
+      "checks": [
+        "code_pii_minimization"
+      ],
+      "human_required": true,
+      "current_criterion": "PII minimization for third-party flows; assess only the collected Magento deployment scope.",
+      "assessment_and_action": "PII minimization phụ thuộc nghiệp vụ và consent; fixture hashed identifier re-identifiable, approved required payload và unknown schema.",
+      "evidence_boundary": "Chạy observation phù hợp mặc định; không suy ra requirement PASS từ không có pattern. Báo coverage/files unreadable/limits và evidence còn thiếu.",
+      "fixture_gap": "fixture hashed identifier re-identifiable, approved required payload và unknown schema. (Đề xuất nghiệm thu; chưa kiểm kê toàn bộ test hiện có.)",
+      "references": [
+        "src/Engine/Checks/CheckRegistry.php:102 (code_pii_minimization)",
+        "src/Rules/requirements/internal-catalog.json:4046",
+        "src/Engine/Checks/CodeSearchCheck.php:16"
+      ]
+    },
+    {
+      "id": "MB-0078",
+      "profile": "hardening",
+      "title": "Strong TLS ciphers on upstream gateways",
+      "decision": "REPLACE",
+      "checks": [
+        "webserver_tls_ciphers"
+      ],
+      "human_required": true,
+      "current_criterion": "Strong TLS ciphers on upstream gateways; assess only the collected Magento deployment scope.",
+      "assessment_and_action": "Tên upstream gateways nhưng đọc local nginx/apache. Một file strong trả PASS dù endpoint khác weak; config không tìm thấy FAIL sai managed TLS. Probe actual upstream/TLS evidence theo scope.",
+      "evidence_boundary": "Chạy observation phù hợp mặc định; không suy ra requirement PASS từ không có pattern. Báo coverage/files unreadable/limits và evidence còn thiếu.",
+      "fixture_gap": "Các fixture mô tả trong assessment_and_action là tiêu chí nghiệm thu đề xuất; chưa xác nhận toàn bộ tồn tại hay chạy trong lượt review này.",
+      "references": [
+        "src/Engine/Checks/CheckRegistry.php:176 (webserver_tls_ciphers)",
+        "src/Rules/requirements/internal-catalog.json:4116",
+        "src/Engine/Checks/WebServerConfigCheck.php:57"
+      ]
+    },
+    {
+      "id": "MB-0079",
+      "profile": "hardening",
+      "title": "API keys stored in env.php (not in DB/plain code)",
+      "decision": "REPLACE",
+      "checks": [
+        "code_api_key_storage"
+      ],
+      "human_required": true,
+      "current_criterion": "API keys stored in env.php (not in DB/plain code); assess only the collected Magento deployment scope.",
+      "assessment_and_action": "Thay bắt key nằm env.php bằng bảo vệ secret backend; cho vault/env injection/encrypted external storage. Fixture secure vault và env.php public-readable.",
+      "evidence_boundary": "Chạy observation phù hợp mặc định; không suy ra requirement PASS từ không có pattern. Báo coverage/files unreadable/limits và evidence còn thiếu.",
+      "fixture_gap": "Fixture secure vault và env.php public-readable. (Đề xuất nghiệm thu; chưa kiểm kê toàn bộ test hiện có.)",
+      "references": [
+        "src/Engine/Checks/CheckRegistry.php:103 (code_api_key_storage)",
+        "src/Rules/requirements/internal-catalog.json:4185",
+        "src/Engine/Checks/CodeSearchCheck.php:16"
+      ]
+    },
+    {
+      "id": "MB-0081",
+      "profile": "hardening",
+      "title": "SaaS integrations scoped by ACL (least privilege/IP allowlist)",
+      "decision": "SUPPORT",
+      "checks": [
+        "code_saas_integration_scoped"
+      ],
+      "human_required": true,
+      "current_criterion": "SaaS integrations scoped by ACL (least privilege/IP allowlist); assess only the collected Magento deployment scope.",
+      "assessment_and_action": "ACL/IP markers không chứng minh least privilege token; fixture scoped token nhưng endpoint thiếu ACL, unrestricted OAuth và revoked integration.",
+      "evidence_boundary": "Chạy observation phù hợp mặc định; không suy ra requirement PASS từ không có pattern. Báo coverage/files unreadable/limits và evidence còn thiếu.",
+      "fixture_gap": "fixture scoped token nhưng endpoint thiếu ACL, unrestricted OAuth và revoked integration. (Đề xuất nghiệm thu; chưa kiểm kê toàn bộ test hiện có.)",
+      "references": [
+        "src/Engine/Checks/CheckRegistry.php:107 (code_saas_integration_scoped)",
+        "src/Rules/requirements/internal-catalog.json:4266",
+        "src/Engine/Checks/CodeSearchCheck.php:16"
+      ]
+    }
+  ],
+  "required_membership_additions": [
+    "MB-0728",
+    "MB-0729",
+    "MB-0730"
+  ],
+  "cross_cutting": [
+    "Hardening giữ toàn bộ technical observations của Basic; source heuristics cần fail-closed coverage.",
+    "Root probe xác minh 8 source methods trả PASS khi source thiếu/rỗng/quá lớn, xem focused-source-scope-observations.json; không mở rộng kết luận động sang mọi method.",
+    "Giữ human gate cho requirement conclusion nhưng không bỏ technical observations mặc định."
+  ],
+  "implementation_findings": [
+    "PhpConfigCheck.php:541 non-Redis session bị FAIL dù criterion nói declared Redis; scope/applicability lệch.",
+    "SystemCheck.php:80 fallback iptables -L OUTPUT trả PASS khi DROP mà không xét exceptions; UFW default deny cũng chưa chứng minh allowlist effective.",
+    "WebServerConfigCheck.php:93 trả PASS ngay khi một local file strong, không chứng minh upstream và mọi vhost; :123 missing config FAIL gây nhiễu managed TLS.",
+    "ComposerVersionChecks.php:454 include_dev mặc định true; latest stable comparison không kiểm Magento/PHP compatibility."
+  ]
+}

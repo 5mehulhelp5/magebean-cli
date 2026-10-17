@@ -1,0 +1,4685 @@
+{
+  "profile": "owasp-top-10-2025",
+  "date": "2026-10-17",
+  "scope": "69 persisted members, source inspection and synthetic scope probes; not target scan, not external standards certification.",
+  "items": [
+    {
+      "id": "MB-0001",
+      "title": "No world-writable files or directories",
+      "decision": "KEEP",
+      "proposed_claim": "No world-writable files or directories; assess only the collected Magento deployment scope.",
+      "checks": [
+        {
+          "name": "fs_no_world_writable",
+          "args": {
+            "path": ".",
+            "max_results": 50,
+            "strict_observation": true
+          }
+        }
+      ],
+      "obligations": [
+        {
+          "id": "O001",
+          "op": "all",
+          "role": "mandatory",
+          "proof": "verified_predicate",
+          "checks": [
+            {
+              "name": "fs_no_world_writable",
+              "args": {
+                "path": ".",
+                "max_results": 50,
+                "strict_observation": true
+              }
+            }
+          ]
+        }
+      ],
+      "target_modes": [
+        "LOCAL"
+      ],
+      "human_required_now": false,
+      "execution_proposal": "Chạy technical observations mặc định; human requirement giữ MANUAL_REVIEW; independent finding lane không nâng heuristic thành normative conclusion.",
+      "human_boundary": "Chỉ kết luận scoped criterion đã khai báo, không suy ra toàn ứng dụng an toàn.",
+      "fixture_acceptance": "Đạt/vi phạm scoped criterion, absent/unreadable evidence UNKNOWN; shared deployment/dependency fixture Basic/Hardening. No world-writable files or directories",
+      "collection_acceptance": "Missing/unreadable/oversized/truncated scope báo explicit UNKNOWN/incomplete; giữ finding đã đọc; no-sink hợp lệ chỉ scoped observation, không application-wide PASS.",
+      "source_refs": [
+        "src/Rules/requirements/internal-catalog.json#MB-0001 CheckRegistry.php (deployment/dependency shared Basic/Hardening) src/Engine/Collectors/CodeInventoryCollector.php:16 src/Engine/RequirementAssessmentEvaluator.php:31"
+      ],
+      "priority": "P2"
+    },
+    {
+      "id": "MB-0002",
+      "title": "env.php satisfies configured mode and ownership policy",
+      "decision": "KEEP",
+      "proposed_claim": "The collected app/etc/env.php Unix permission bits are a subset of configured mode 0640, and its owner and group match the configured reference paths (the project root by default). This is an explicit deployment ownership policy, not proof of effective ACL or web-process access restrictions.",
+      "checks": [
+        {
+          "name": "file_mode_max",
+          "args": {
+            "file": "app/etc/env.php",
+            "max_octal": "0640",
+            "strict_observation": true
+          }
+        },
+        {
+          "name": "file_owner_group_matches",
+          "args": {
+            "file": "app/etc/env.php",
+            "owner_reference": ".",
+            "group_reference": ".",
+            "strict_observation": true
+          }
+        }
+      ],
+      "obligations": [
+        {
+          "id": "O001",
+          "op": "all",
+          "role": "mandatory",
+          "proof": "verified_predicate",
+          "checks": [
+            {
+              "name": "file_mode_max",
+              "args": {
+                "file": "app/etc/env.php",
+                "max_octal": "0640",
+                "strict_observation": true
+              }
+            },
+            {
+              "name": "file_owner_group_matches",
+              "args": {
+                "file": "app/etc/env.php",
+                "owner_reference": ".",
+                "group_reference": ".",
+                "strict_observation": true
+              }
+            }
+          ]
+        }
+      ],
+      "target_modes": [
+        "LOCAL"
+      ],
+      "human_required_now": false,
+      "execution_proposal": "Chạy technical observations mặc định; human requirement giữ MANUAL_REVIEW; independent finding lane không nâng heuristic thành normative conclusion.",
+      "human_boundary": "Chỉ kết luận scoped criterion đã khai báo, không suy ra toàn ứng dụng an toàn.",
+      "fixture_acceptance": "Đạt/vi phạm scoped criterion, absent/unreadable evidence UNKNOWN; shared deployment/dependency fixture Basic/Hardening. env.php satisfies configured mode and ownership policy",
+      "collection_acceptance": "Missing/unreadable/oversized/truncated scope báo explicit UNKNOWN/incomplete; giữ finding đã đọc; no-sink hợp lệ chỉ scoped observation, không application-wide PASS.",
+      "source_refs": [
+        "src/Rules/requirements/internal-catalog.json#MB-0002 CheckRegistry.php (deployment/dependency shared Basic/Hardening) src/Engine/Collectors/CodeInventoryCollector.php:16 src/Engine/RequirementAssessmentEvaluator.php:31"
+      ],
+      "priority": "P2"
+    },
+    {
+      "id": "MB-0003",
+      "title": "Webroot hygiene (no .git/.env/backups in pub/)",
+      "decision": "KEEP",
+      "proposed_claim": "Webroot hygiene (no .git/.env/backups in pub/); assess only the collected Magento deployment scope.",
+      "checks": [
+        {
+          "name": "fs_webroot_artifact_policy",
+          "args": {
+            "webroot": "pub",
+            "forbidden": [
+              ".git",
+              ".env",
+              ".env.local",
+              ".env.*",
+              "*.bak",
+              "*.old",
+              "*~"
+            ]
+          }
+        }
+      ],
+      "obligations": [
+        {
+          "id": "O001",
+          "role": "mandatory",
+          "proof": "verified_predicate",
+          "op": "all",
+          "checks": [
+            {
+              "name": "fs_webroot_artifact_policy",
+              "args": {
+                "webroot": "pub",
+                "forbidden": [
+                  ".git",
+                  ".env",
+                  ".env.local",
+                  ".env.*",
+                  "*.bak",
+                  "*.old",
+                  "*~"
+                ]
+              }
+            }
+          ]
+        }
+      ],
+      "target_modes": [
+        "LOCAL"
+      ],
+      "human_required_now": false,
+      "execution_proposal": "Chạy technical observations mặc định; human requirement giữ MANUAL_REVIEW; independent finding lane không nâng heuristic thành normative conclusion.",
+      "human_boundary": "Chỉ kết luận scoped criterion đã khai báo, không suy ra toàn ứng dụng an toàn.",
+      "fixture_acceptance": "Đạt/vi phạm scoped criterion, absent/unreadable evidence UNKNOWN; shared deployment/dependency fixture Basic/Hardening. Webroot hygiene (no .git/.env/backups in pub/)",
+      "collection_acceptance": "Missing/unreadable/oversized/truncated scope báo explicit UNKNOWN/incomplete; giữ finding đã đọc; no-sink hợp lệ chỉ scoped observation, không application-wide PASS.",
+      "source_refs": [
+        "src/Rules/requirements/internal-catalog.json#MB-0003 CheckRegistry.php (deployment/dependency shared Basic/Hardening) src/Engine/Collectors/CodeInventoryCollector.php:16 src/Engine/RequirementAssessmentEvaluator.php:31"
+      ],
+      "priority": "P2"
+    },
+    {
+      "id": "MB-0004",
+      "title": "Code directories are read-only",
+      "decision": "SUPPORT",
+      "proposed_claim": "Code directories are read-only for the application runtime in the collected Magento deployment; assess effective runtime identity, permissions, ACLs and read-only mounts.",
+      "checks": [
+        {
+          "name": "code_dirs_readonly",
+          "args": {
+            "dirs": [
+              "app",
+              "vendor",
+              "lib"
+            ],
+            "max_results": 50,
+            "strict_scope": true
+          }
+        }
+      ],
+      "obligations": [
+        {
+          "id": "O001",
+          "op": "all",
+          "role": "supporting",
+          "proof": "heuristic",
+          "checks": [
+            {
+              "name": "code_dirs_readonly",
+              "args": {
+                "dirs": [
+                  "app",
+                  "vendor",
+                  "lib"
+                ],
+                "max_results": 50,
+                "strict_scope": true
+              }
+            }
+          ]
+        }
+      ],
+      "target_modes": [
+        "LOCAL"
+      ],
+      "human_required_now": true,
+      "execution_proposal": "Chạy technical observations mặc định; human requirement giữ MANUAL_REVIEW; independent finding lane không nâng heuristic thành normative conclusion.",
+      "human_boundary": "Verify code is not writable by the actual PHP/web-server process, including ACLs and mount policy. Deploy-owner write bits alone do not establish runtime write access; do not chmod a deployment recursively from this observation.",
+      "fixture_acceptance": "Đạt/vi phạm scoped criterion, absent/unreadable evidence UNKNOWN; shared deployment/dependency fixture Basic/Hardening. Code directories are read-only",
+      "collection_acceptance": "Missing/unreadable/oversized/truncated scope báo explicit UNKNOWN/incomplete; giữ finding đã đọc; no-sink hợp lệ chỉ scoped observation, không application-wide PASS.",
+      "source_refs": [
+        "src/Rules/requirements/internal-catalog.json#MB-0004 CheckRegistry.php (deployment/dependency shared Basic/Hardening) src/Engine/Collectors/CodeInventoryCollector.php:16 src/Engine/RequirementAssessmentEvaluator.php:31"
+      ],
+      "priority": "P2"
+    },
+    {
+      "id": "MB-0005",
+      "title": "Directory listing absent on probed Magento paths",
+      "decision": "KEEP",
+      "proposed_claim": "Successful responses from the configured runtime endpoint on /media/, /static/, /errors/ and /var/ must not expose recognizable directory-index markup. Scope is these paths at scan time; transport or unsupported responses are inconclusive.",
+      "checks": [
+        {
+          "name": "http_no_directory_listing",
+          "args": {
+            "paths": [
+              "/media/",
+              "/static/",
+              "/errors/",
+              "/var/"
+            ],
+            "timeout_ms": 8000,
+            "strict_scope": true
+          }
+        }
+      ],
+      "obligations": [
+        {
+          "id": "O001",
+          "op": "all",
+          "role": "mandatory",
+          "proof": "verified_predicate",
+          "checks": [
+            {
+              "name": "http_no_directory_listing",
+              "args": {
+                "paths": [
+                  "/media/",
+                  "/static/",
+                  "/errors/",
+                  "/var/"
+                ],
+                "timeout_ms": 8000,
+                "strict_scope": true
+              }
+            }
+          ]
+        }
+      ],
+      "target_modes": [
+        "LOCAL",
+        "REMOTE"
+      ],
+      "human_required_now": false,
+      "execution_proposal": "Chạy technical observations mặc định; human requirement giữ MANUAL_REVIEW; independent finding lane không nâng heuristic thành normative conclusion.",
+      "human_boundary": "Chỉ kết luận scoped criterion đã khai báo, không suy ra toàn ứng dụng an toàn.",
+      "fixture_acceptance": "Đạt/vi phạm scoped criterion, absent/unreadable evidence UNKNOWN; shared deployment/dependency fixture Basic/Hardening. Directory listing absent on probed Magento paths",
+      "collection_acceptance": "Missing/unreadable/oversized/truncated scope báo explicit UNKNOWN/incomplete; giữ finding đã đọc; no-sink hợp lệ chỉ scoped observation, không application-wide PASS.",
+      "source_refs": [
+        "src/Rules/requirements/internal-catalog.json#MB-0005 CheckRegistry.php (deployment/dependency shared Basic/Hardening) src/Engine/Collectors/CodeInventoryCollector.php:16 src/Engine/RequirementAssessmentEvaluator.php:31"
+      ],
+      "priority": "P2"
+    },
+    {
+      "id": "MB-0006",
+      "title": "Declared backend route differs from admin",
+      "decision": "KEEP",
+      "proposed_claim": "The collected app/etc/env.php backend.frontName declaration is a valid non-empty route and differs case-insensitively from admin. This assesses the configured backend route; route entropy and actual public reachability require separate evidence.",
+      "checks": [
+        {
+          "name": "magento_admin_frontname_declared",
+          "args": {}
+        }
+      ],
+      "obligations": [
+        {
+          "id": "O001",
+          "op": "all",
+          "role": "mandatory",
+          "proof": "verified_predicate",
+          "checks": [
+            {
+              "name": "magento_admin_frontname_declared",
+              "args": {}
+            }
+          ]
+        }
+      ],
+      "target_modes": [
+        "LOCAL"
+      ],
+      "human_required_now": false,
+      "execution_proposal": "Chạy technical observations mặc định; human requirement giữ MANUAL_REVIEW; independent finding lane không nâng heuristic thành normative conclusion.",
+      "human_boundary": "Chỉ kết luận scoped criterion đã khai báo, không suy ra toàn ứng dụng an toàn.",
+      "fixture_acceptance": "Đạt/vi phạm scoped criterion, absent/unreadable evidence UNKNOWN; shared deployment/dependency fixture Basic/Hardening. Declared backend route differs from admin",
+      "collection_acceptance": "Missing/unreadable/oversized/truncated scope báo explicit UNKNOWN/incomplete; giữ finding đã đọc; no-sink hợp lệ chỉ scoped observation, không application-wide PASS.",
+      "source_refs": [
+        "src/Rules/requirements/internal-catalog.json#MB-0006 CheckRegistry.php (deployment/dependency shared Basic/Hardening) src/Engine/Collectors/CodeInventoryCollector.php:16 src/Engine/RequirementAssessmentEvaluator.php:31"
+      ],
+      "priority": "P2"
+    },
+    {
+      "id": "MB-0007",
+      "title": "Admin 2FA core and provider modules declared enabled",
+      "decision": "KEEP",
+      "proposed_claim": "In app/etc/config.php, the Magento_TwoFactorAuth module and at least one configured Magento admin 2FA provider module are declared enabled; this predicate assesses declared module state only.",
+      "checks": [
+        {
+          "name": "magento_admin_2fa_enabled",
+          "args": {
+            "file": "app/etc/config.php",
+            "core_module": "Magento_TwoFactorAuth",
+            "provider_modules": [
+              "Magento_GoogleAuthenticator",
+              "Magento_DuoSecurity",
+              "Magento_U2fKey",
+              "Magento_AdminAdobeImsTwoFactorAuth"
+            ],
+            "declared_scope_only": true
+          }
+        }
+      ],
+      "obligations": [
+        {
+          "id": "O001",
+          "op": "all",
+          "role": "mandatory",
+          "proof": "verified_predicate",
+          "checks": [
+            {
+              "name": "magento_admin_2fa_enabled",
+              "args": {
+                "file": "app/etc/config.php",
+                "core_module": "Magento_TwoFactorAuth",
+                "provider_modules": [
+                  "Magento_GoogleAuthenticator",
+                  "Magento_DuoSecurity",
+                  "Magento_U2fKey",
+                  "Magento_AdminAdobeImsTwoFactorAuth"
+                ],
+                "declared_scope_only": true
+              }
+            }
+          ]
+        }
+      ],
+      "target_modes": [
+        "LOCAL"
+      ],
+      "human_required_now": false,
+      "execution_proposal": "Chạy technical observations mặc định; human requirement giữ MANUAL_REVIEW; independent finding lane không nâng heuristic thành normative conclusion.",
+      "human_boundary": "Chỉ kết luận scoped criterion đã khai báo, không suy ra toàn ứng dụng an toàn.",
+      "fixture_acceptance": "Đạt/vi phạm scoped criterion, absent/unreadable evidence UNKNOWN; shared deployment/dependency fixture Basic/Hardening. Admin 2FA core and provider modules declared enabled",
+      "collection_acceptance": "Missing/unreadable/oversized/truncated scope báo explicit UNKNOWN/incomplete; giữ finding đã đọc; no-sink hợp lệ chỉ scoped observation, không application-wide PASS.",
+      "source_refs": [
+        "src/Rules/requirements/internal-catalog.json#MB-0007 CheckRegistry.php (deployment/dependency shared Basic/Hardening) src/Engine/Collectors/CodeInventoryCollector.php:16 src/Engine/RequirementAssessmentEvaluator.php:31"
+      ],
+      "priority": "P2"
+    },
+    {
+      "id": "MB-0009",
+      "title": "Configured admin session lifetime is at most 900 seconds",
+      "decision": "KEEP",
+      "proposed_claim": "The effective default-scope Magento admin/security/session_lifetime setting resolved from env.php, config.php, core_config_data or actual installed module defaults is a positive integer not exceeding 900 seconds.",
+      "checks": [
+        {
+          "name": "magento_admin_session_timeout",
+          "args": {
+            "file": "app/etc/config.php",
+            "base_path": "system.default.admin.security",
+            "max_seconds": 900
+          }
+        }
+      ],
+      "obligations": [
+        {
+          "id": "O001",
+          "op": "all",
+          "role": "mandatory",
+          "proof": "verified_predicate",
+          "checks": [
+            {
+              "name": "magento_admin_session_timeout",
+              "args": {
+                "file": "app/etc/config.php",
+                "base_path": "system.default.admin.security",
+                "max_seconds": 900
+              }
+            }
+          ]
+        }
+      ],
+      "target_modes": [
+        "LOCAL"
+      ],
+      "human_required_now": false,
+      "execution_proposal": "Chạy technical observations mặc định; human requirement giữ MANUAL_REVIEW; independent finding lane không nâng heuristic thành normative conclusion.",
+      "human_boundary": "Chỉ kết luận scoped criterion đã khai báo, không suy ra toàn ứng dụng an toàn.",
+      "fixture_acceptance": "Đạt/vi phạm scoped criterion, absent/unreadable evidence UNKNOWN; shared deployment/dependency fixture Basic/Hardening. Configured admin session lifetime is at most 900 seconds",
+      "collection_acceptance": "Missing/unreadable/oversized/truncated scope báo explicit UNKNOWN/incomplete; giữ finding đã đọc; no-sink hợp lệ chỉ scoped observation, không application-wide PASS.",
+      "source_refs": [
+        "src/Rules/requirements/internal-catalog.json#MB-0009 CheckRegistry.php (deployment/dependency shared Basic/Hardening) src/Engine/Collectors/CodeInventoryCollector.php:16 src/Engine/RequirementAssessmentEvaluator.php:31"
+      ],
+      "priority": "P2"
+    },
+    {
+      "id": "MB-0010",
+      "title": "Admin URL exposure restricted",
+      "decision": "SUPPORT",
+      "proposed_claim": "Admin URL exposure restricted; assess only the collected Magento deployment scope.",
+      "checks": [
+        {
+          "name": "magento_admin_exposure_restricted",
+          "args": {
+            "env_file": "app/etc/env.php",
+            "paths": [
+              "/admin/",
+              "/index.php/admin/",
+              "/backend/"
+            ],
+            "acl_files": [
+              "nginx.conf",
+              "pub/.htaccess",
+              ".htaccess"
+            ],
+            "timeout_ms": 8000
+          }
+        }
+      ],
+      "obligations": [
+        {
+          "id": "O001",
+          "op": "all",
+          "role": "supporting",
+          "proof": "heuristic",
+          "checks": [
+            {
+              "name": "magento_admin_exposure_restricted",
+              "args": {
+                "env_file": "app/etc/env.php",
+                "paths": [
+                  "/admin/",
+                  "/index.php/admin/",
+                  "/backend/"
+                ],
+                "acl_files": [
+                  "nginx.conf",
+                  "pub/.htaccess",
+                  ".htaccess"
+                ],
+                "timeout_ms": 8000
+              }
+            }
+          ]
+        }
+      ],
+      "target_modes": [
+        "LOCAL"
+      ],
+      "human_required_now": true,
+      "execution_proposal": "Chạy technical observations mặc định; human requirement giữ MANUAL_REVIEW; independent finding lane không nâng heuristic thành normative conclusion.",
+      "human_boundary": "Verify the effective admin route and active reverse-proxy/firewall allowlist; repository ACL hints do not prove access restriction.",
+      "fixture_acceptance": "Đạt/vi phạm scoped criterion, absent/unreadable evidence UNKNOWN; shared deployment/dependency fixture Basic/Hardening. Admin URL exposure restricted",
+      "collection_acceptance": "Missing/unreadable/oversized/truncated scope báo explicit UNKNOWN/incomplete; giữ finding đã đọc; no-sink hợp lệ chỉ scoped observation, không application-wide PASS.",
+      "source_refs": [
+        "src/Rules/requirements/internal-catalog.json#MB-0010 CheckRegistry.php (deployment/dependency shared Basic/Hardening) src/Engine/Collectors/CodeInventoryCollector.php:16 src/Engine/RequirementAssessmentEvaluator.php:31"
+      ],
+      "priority": "P2"
+    },
+    {
+      "id": "MB-0011",
+      "title": "Configured admin login CAPTCHA or bounded lockout",
+      "decision": "KEEP",
+      "proposed_claim": "Default-scope Magento admin login configuration enables native CAPTCHA for backend_login, recognized backend_login reCAPTCHA, or a positive lockout failure limit at most 10 with a positive lockout threshold. Locked env.php/config.php settings precede core_config_data. Custom authentication enforcement and runtime effectiveness require separate evidence.",
+      "checks": [
+        {
+          "name": "magento_admin_login_protection_configured",
+          "args": {
+            "max_lockout_failures": 10
+          }
+        }
+      ],
+      "obligations": [
+        {
+          "id": "O001",
+          "op": "all",
+          "role": "mandatory",
+          "proof": "verified_predicate",
+          "checks": [
+            {
+              "name": "magento_admin_login_protection_configured",
+              "args": {
+                "max_lockout_failures": 10
+              }
+            }
+          ]
+        }
+      ],
+      "target_modes": [
+        "LOCAL"
+      ],
+      "human_required_now": false,
+      "execution_proposal": "Chạy technical observations mặc định; human requirement giữ MANUAL_REVIEW; independent finding lane không nâng heuristic thành normative conclusion.",
+      "human_boundary": "Chỉ kết luận scoped criterion đã khai báo, không suy ra toàn ứng dụng an toàn.",
+      "fixture_acceptance": "Đạt/vi phạm scoped criterion, absent/unreadable evidence UNKNOWN; shared deployment/dependency fixture Basic/Hardening. Configured admin login CAPTCHA or bounded lockout",
+      "collection_acceptance": "Missing/unreadable/oversized/truncated scope báo explicit UNKNOWN/incomplete; giữ finding đã đọc; no-sink hợp lệ chỉ scoped observation, không application-wide PASS.",
+      "source_refs": [
+        "src/Rules/requirements/internal-catalog.json#MB-0011 CheckRegistry.php (deployment/dependency shared Basic/Hardening) src/Engine/Collectors/CodeInventoryCollector.php:16 src/Engine/RequirementAssessmentEvaluator.php:31"
+      ],
+      "priority": "P2"
+    },
+    {
+      "id": "MB-0014",
+      "title": "No direct PHP superglobal references in inspected application files",
+      "decision": "REPLACE",
+      "proposed_claim": "Direct superglobal references là input-handling review signal, không tự động là vulnerability.",
+      "checks": [
+        {
+          "name": "code_grep",
+          "args": {
+            "paths": [
+              "app"
+            ],
+            "include_ext": [
+              "php"
+            ],
+            "must_not_match": [
+              "\\$_(?:GET|POST|REQUEST|COOKIE|FILES|SERVER)\\b"
+            ],
+            "strict_scope": true
+          }
+        }
+      ],
+      "obligations": [
+        {
+          "id": "O001",
+          "op": "all",
+          "role": "mandatory",
+          "proof": "verified_predicate",
+          "checks": [
+            {
+              "name": "code_grep",
+              "args": {
+                "paths": [
+                  "app"
+                ],
+                "include_ext": [
+                  "php"
+                ],
+                "must_not_match": [
+                  "\\$_(?:GET|POST|REQUEST|COOKIE|FILES|SERVER)\\b"
+                ],
+                "strict_scope": true
+              }
+            }
+          ]
+        }
+      ],
+      "target_modes": [
+        "LOCAL"
+      ],
+      "human_required_now": false,
+      "execution_proposal": "Chạy technical observations mặc định; human requirement giữ MANUAL_REVIEW; independent finding lane không nâng heuristic thành normative conclusion.",
+      "human_boundary": "Chỉ kết luận scoped criterion đã khai báo, không suy ra toàn ứng dụng an toàn.",
+      "fixture_acceptance": "Validated harmless input vs raw input vào sink; comment/string không finding.",
+      "collection_acceptance": "Missing/unreadable/oversized/truncated scope báo explicit UNKNOWN/incomplete; giữ finding đã đọc; no-sink hợp lệ chỉ scoped observation, không application-wide PASS.",
+      "source_refs": [
+        "src/Rules/requirements/internal-catalog.json#MB-0014 CheckRegistry.php (deployment/dependency shared Basic/Hardening) src/Engine/Collectors/CodeInventoryCollector.php:16 src/Engine/RequirementAssessmentEvaluator.php:31"
+      ],
+      "priority": "P1"
+    },
+    {
+      "id": "MB-0015",
+      "title": "Forms include CSRF tokens (form_key)",
+      "decision": "REVISE",
+      "proposed_claim": "Form/CSRF validation signals không chứng minh server từ chối missing/invalid token.",
+      "checks": [
+        {
+          "name": "code_csrf_form_key",
+          "args": {
+            "paths": [
+              "app"
+            ]
+          }
+        }
+      ],
+      "obligations": [
+        {
+          "id": "O001",
+          "op": "all",
+          "role": "supporting",
+          "proof": "heuristic",
+          "checks": [
+            {
+              "name": "code_csrf_form_key",
+              "args": {
+                "paths": [
+                  "app"
+                ]
+              }
+            }
+          ]
+        }
+      ],
+      "target_modes": [
+        "LOCAL"
+      ],
+      "human_required_now": true,
+      "execution_proposal": "Chạy technical observations mặc định; human requirement giữ MANUAL_REVIEW; independent finding lane không nâng heuristic thành normative conclusion.",
+      "human_boundary": "Verify server-side CSRF validation and exemptions for each state-changing route; token markup alone does not prove CSRF protection.",
+      "fixture_acceptance": "Token trong HTML nhưng thiếu server validation; JSON/AJAX routes; cross-user token.",
+      "collection_acceptance": "Missing/unreadable/oversized/truncated scope báo explicit UNKNOWN/incomplete; giữ finding đã đọc; no-sink hợp lệ chỉ scoped observation, không application-wide PASS.",
+      "source_refs": [
+        "src/Rules/requirements/internal-catalog.json#MB-0015 TemplateRequestSourceChecks.php src/Engine/Collectors/CodeInventoryCollector.php:16 src/Engine/RequirementAssessmentEvaluator.php:31"
+      ],
+      "priority": "P1"
+    },
+    {
+      "id": "MB-0016",
+      "title": "SSRF protections present",
+      "decision": "REVISE",
+      "proposed_claim": "Outbound URL sinks thiếu SSRF safeguards signals; không khẳng định an toàn bằng keyword.",
+      "checks": [
+        {
+          "name": "code_ssrf_safeguards",
+          "args": {
+            "paths": [
+              "app"
+            ],
+            "include_ext": [
+              "php"
+            ]
+          }
+        }
+      ],
+      "obligations": [
+        {
+          "id": "O001",
+          "op": "all",
+          "role": "supporting",
+          "proof": "heuristic",
+          "checks": [
+            {
+              "name": "code_ssrf_safeguards",
+              "args": {
+                "paths": [
+                  "app"
+                ],
+                "include_ext": [
+                  "php"
+                ]
+              }
+            }
+          ]
+        }
+      ],
+      "target_modes": [
+        "LOCAL"
+      ],
+      "human_required_now": true,
+      "execution_proposal": "Chạy technical observations mặc định; human requirement giữ MANUAL_REVIEW; independent finding lane không nâng heuristic thành normative conclusion.",
+      "human_boundary": "Trace attacker-controlled URLs to outbound requests and verify scheme, destination and redirect validation; nearby keywords do not prove SSRF prevention.",
+      "fixture_acceptance": "Unrelated allowlist gần sink, redirect metadata, DNS rebinding, helper ngoài window.",
+      "collection_acceptance": "Missing/unreadable/oversized/truncated scope báo explicit UNKNOWN/incomplete; giữ finding đã đọc; no-sink hợp lệ chỉ scoped observation, không application-wide PASS.",
+      "source_refs": [
+        "src/Rules/requirements/internal-catalog.json#MB-0016 InputSafetySourceChecks.php src/Engine/Collectors/CodeInventoryCollector.php:16 src/Engine/RequirementAssessmentEvaluator.php:31"
+      ],
+      "priority": "P1"
+    },
+    {
+      "id": "MB-0019",
+      "title": "No eval/assert/dynamic execution",
+      "decision": "REVISE",
+      "proposed_claim": "Dynamic execution sinks và input context cần triage.",
+      "checks": [
+        {
+          "name": "code_dynamic_execution_safety",
+          "args": {
+            "paths": [
+              "app"
+            ],
+            "include_ext": [
+              "php"
+            ]
+          }
+        }
+      ],
+      "obligations": [
+        {
+          "id": "O001",
+          "op": "all",
+          "role": "supporting",
+          "proof": "heuristic",
+          "checks": [
+            {
+              "name": "code_dynamic_execution_safety",
+              "args": {
+                "paths": [
+                  "app"
+                ],
+                "include_ext": [
+                  "php"
+                ]
+              }
+            }
+          ]
+        }
+      ],
+      "target_modes": [
+        "LOCAL"
+      ],
+      "human_required_now": true,
+      "execution_proposal": "Chạy technical observations mặc định; human requirement giữ MANUAL_REVIEW; independent finding lane không nâng heuristic thành normative conclusion.",
+      "human_boundary": "Review dynamic execution arguments and runtime PHP semantics; boolean assert and nearby request tokens do not prove code injection.",
+      "fixture_acceptance": "Comment/string eval; request-derived arg vs safe literal; wrapper/variable function.",
+      "collection_acceptance": "Missing/unreadable/oversized/truncated scope báo explicit UNKNOWN/incomplete; giữ finding đã đọc; no-sink hợp lệ chỉ scoped observation, không application-wide PASS.",
+      "source_refs": [
+        "src/Rules/requirements/internal-catalog.json#MB-0019 InputSafetySourceChecks.php src/Engine/Collectors/CodeInventoryCollector.php:16 src/Engine/RequirementAssessmentEvaluator.php:31"
+      ],
+      "priority": "P1"
+    },
+    {
+      "id": "MB-0020",
+      "title": "Path traversal protections",
+      "decision": "REVISE",
+      "proposed_claim": "Filesystem sinks thiếu dấu hiệu path confinement.",
+      "checks": [
+        {
+          "name": "code_path_traversal_safety",
+          "args": {
+            "paths": [
+              "app"
+            ],
+            "include_ext": [
+              "php"
+            ]
+          }
+        }
+      ],
+      "obligations": [
+        {
+          "id": "O001",
+          "op": "all",
+          "role": "supporting",
+          "proof": "heuristic",
+          "checks": [
+            {
+              "name": "code_path_traversal_safety",
+              "args": {
+                "paths": [
+                  "app"
+                ],
+                "include_ext": [
+                  "php"
+                ]
+              }
+            }
+          ]
+        }
+      ],
+      "target_modes": [
+        "LOCAL"
+      ],
+      "human_required_now": true,
+      "execution_proposal": "Chạy technical observations mặc định; human requirement giữ MANUAL_REVIEW; independent finding lane không nâng heuristic thành normative conclusion.",
+      "human_boundary": "Trace untrusted file paths and verify canonicalization and containment at the actual filesystem sink.",
+      "fixture_acceptance": "realpath không boundary check; /safe2 prefix bypass; symlink escape; safe helper.",
+      "collection_acceptance": "Missing/unreadable/oversized/truncated scope báo explicit UNKNOWN/incomplete; giữ finding đã đọc; no-sink hợp lệ chỉ scoped observation, không application-wide PASS.",
+      "source_refs": [
+        "src/Rules/requirements/internal-catalog.json#MB-0020 InputSafetySourceChecks.php src/Engine/Collectors/CodeInventoryCollector.php:16 src/Engine/RequirementAssessmentEvaluator.php:31"
+      ],
+      "priority": "P1"
+    },
+    {
+      "id": "MB-0021",
+      "title": "Secure file upload handling",
+      "decision": "REVISE",
+      "proposed_claim": "Upload sinks thiếu MIME/extension/size/storage validation signals.",
+      "checks": [
+        {
+          "name": "code_upload_safety",
+          "args": {
+            "paths": [
+              "app"
+            ],
+            "include_ext": [
+              "php"
+            ]
+          }
+        }
+      ],
+      "obligations": [
+        {
+          "id": "O001",
+          "op": "all",
+          "role": "supporting",
+          "proof": "heuristic",
+          "checks": [
+            {
+              "name": "code_upload_safety",
+              "args": {
+                "paths": [
+                  "app"
+                ],
+                "include_ext": [
+                  "php"
+                ]
+              }
+            }
+          ]
+        }
+      ],
+      "target_modes": [
+        "LOCAL"
+      ],
+      "human_required_now": true,
+      "execution_proposal": "Chạy technical observations mặc định; human requirement giữ MANUAL_REVIEW; independent finding lane không nâng heuristic thành normative conclusion.",
+      "human_boundary": "Review effective upload validation, storage and execution restrictions including delegated framework validators.",
+      "fixture_acceptance": "Client-provided MIME không trusted; double extension; unrelated size/allowed keyword.",
+      "collection_acceptance": "Missing/unreadable/oversized/truncated scope báo explicit UNKNOWN/incomplete; giữ finding đã đọc; no-sink hợp lệ chỉ scoped observation, không application-wide PASS.",
+      "source_refs": [
+        "src/Rules/requirements/internal-catalog.json#MB-0021 InputSafetySourceChecks.php src/Engine/Collectors/CodeInventoryCollector.php:16 src/Engine/RequirementAssessmentEvaluator.php:31"
+      ],
+      "priority": "P1"
+    },
+    {
+      "id": "MB-0023",
+      "title": "Use CSPRNG; avoid weak PRNG",
+      "decision": "REVISE",
+      "proposed_claim": "Weak PRNG trong security-sensitive contexts được nhận diện.",
+      "checks": [
+        {
+          "name": "code_csprng_safety",
+          "args": {
+            "paths": [
+              "app"
+            ],
+            "include_ext": [
+              "php"
+            ]
+          }
+        }
+      ],
+      "obligations": [
+        {
+          "id": "O001",
+          "op": "all",
+          "role": "supporting",
+          "proof": "heuristic",
+          "checks": [
+            {
+              "name": "code_csprng_safety",
+              "args": {
+                "paths": [
+                  "app"
+                ],
+                "include_ext": [
+                  "php"
+                ]
+              }
+            }
+          ]
+        }
+      ],
+      "target_modes": [
+        "LOCAL"
+      ],
+      "human_required_now": true,
+      "execution_proposal": "Chạy technical observations mặc định; human requirement giữ MANUAL_REVIEW; independent finding lane không nâng heuristic thành normative conclusion.",
+      "human_boundary": "Determine which generated values are security-sensitive and verify their entropy source; ordinary rand usage is not a cryptographic vulnerability.",
+      "fixture_acceptance": "rand UI không vulnerability; reset token dùng rand; helper/alias bypass.",
+      "collection_acceptance": "Missing/unreadable/oversized/truncated scope báo explicit UNKNOWN/incomplete; giữ finding đã đọc; no-sink hợp lệ chỉ scoped observation, không application-wide PASS.",
+      "source_refs": [
+        "src/Rules/requirements/internal-catalog.json#MB-0023 InputSafetySourceChecks.php src/Engine/Collectors/CodeInventoryCollector.php:16 src/Engine/RequirementAssessmentEvaluator.php:31"
+      ],
+      "priority": "P1"
+    },
+    {
+      "id": "MB-0025",
+      "title": "No unsafe raw crypto or session APIs in custom code",
+      "decision": "REVISE",
+      "proposed_claim": "Native crypto/session API usage cần review; Magento wrapper không bảo đảm safe.",
+      "checks": [
+        {
+          "name": "code_magento_api_crypto_session",
+          "args": {
+            "paths": [
+              "app"
+            ],
+            "include_ext": [
+              "php"
+            ]
+          }
+        }
+      ],
+      "obligations": [
+        {
+          "id": "O001",
+          "op": "all",
+          "role": "supporting",
+          "proof": "heuristic",
+          "checks": [
+            {
+              "name": "code_magento_api_crypto_session",
+              "args": {
+                "paths": [
+                  "app"
+                ],
+                "include_ext": [
+                  "php"
+                ]
+              }
+            }
+          ]
+        }
+      ],
+      "target_modes": [
+        "LOCAL"
+      ],
+      "human_required_now": true,
+      "execution_proposal": "Chạy technical observations mặc định; human requirement giữ MANUAL_REVIEW; independent finding lane không nâng heuristic thành normative conclusion.",
+      "human_boundary": "Review cryptographic algorithms, parameters and session configuration; raw OpenSSL or sodium use is not automatically unsafe.",
+      "fixture_acceptance": "Safe vetted library; wrong algorithm/key in wrapper; native code unreachable.",
+      "collection_acceptance": "Missing/unreadable/oversized/truncated scope báo explicit UNKNOWN/incomplete; giữ finding đã đọc; no-sink hợp lệ chỉ scoped observation, không application-wide PASS.",
+      "source_refs": [
+        "src/Rules/requirements/internal-catalog.json#MB-0025 DataProtectionSourceChecks.php src/Engine/Collectors/CodeInventoryCollector.php:16 src/Engine/RequirementAssessmentEvaluator.php:31"
+      ],
+      "priority": "P1"
+    },
+    {
+      "id": "MB-0026",
+      "title": "Force HTTPS in admin and storefront",
+      "decision": "KEEP",
+      "proposed_claim": "The observed HTTP storefront root and declared backend.frontName entrypoint redirect directly with 301/302/303/307/308 to same-host HTTPS. This is an entrypoint probe, not a universal guarantee for every deployment route.",
+      "checks": [
+        {
+          "name": "http_force_https_redirect",
+          "args": {
+            "strict_scope": true,
+            "include_admin": true
+          }
+        }
+      ],
+      "obligations": [
+        {
+          "id": "O001",
+          "op": "all",
+          "role": "mandatory",
+          "proof": "verified_predicate",
+          "checks": [
+            {
+              "name": "http_force_https_redirect",
+              "args": {
+                "strict_scope": true,
+                "include_admin": true
+              }
+            }
+          ]
+        }
+      ],
+      "target_modes": [
+        "LOCAL",
+        "REMOTE"
+      ],
+      "human_required_now": false,
+      "execution_proposal": "Chạy technical observations mặc định; human requirement giữ MANUAL_REVIEW; independent finding lane không nâng heuristic thành normative conclusion.",
+      "human_boundary": "Chỉ kết luận scoped criterion đã khai báo, không suy ra toàn ứng dụng an toàn.",
+      "fixture_acceptance": "Đạt/vi phạm scoped criterion, absent/unreadable evidence UNKNOWN; shared deployment/dependency fixture Basic/Hardening. Force HTTPS in admin and storefront",
+      "collection_acceptance": "Missing/unreadable/oversized/truncated scope báo explicit UNKNOWN/incomplete; giữ finding đã đọc; no-sink hợp lệ chỉ scoped observation, không application-wide PASS.",
+      "source_refs": [
+        "src/Rules/requirements/internal-catalog.json#MB-0026 CheckRegistry.php (deployment/dependency shared Basic/Hardening) src/Engine/Collectors/CodeInventoryCollector.php:16 src/Engine/RequirementAssessmentEvaluator.php:31"
+      ],
+      "priority": "P2"
+    },
+    {
+      "id": "MB-0027",
+      "title": "Observed HTTPS response has HSTS max-age of at least one year",
+      "decision": "KEEP",
+      "proposed_claim": "A successful same-host HTTPS response at the configured runtime URL emits one unambiguous Strict-Transport-Security header with an exact integer max-age directive of at least 31536000 seconds. Repository web-server declarations are not runtime proof.",
+      "checks": [
+        {
+          "name": "http_has_hsts",
+          "args": {
+            "min_max_age": 31536000,
+            "timeout_ms": 8000,
+            "strict_scope": true
+          }
+        }
+      ],
+      "obligations": [
+        {
+          "id": "O001",
+          "op": "all",
+          "role": "mandatory",
+          "proof": "verified_predicate",
+          "checks": [
+            {
+              "name": "http_has_hsts",
+              "args": {
+                "min_max_age": 31536000,
+                "timeout_ms": 8000,
+                "strict_scope": true
+              }
+            }
+          ]
+        }
+      ],
+      "target_modes": [
+        "LOCAL",
+        "REMOTE"
+      ],
+      "human_required_now": false,
+      "execution_proposal": "Chạy technical observations mặc định; human requirement giữ MANUAL_REVIEW; independent finding lane không nâng heuristic thành normative conclusion.",
+      "human_boundary": "Chỉ kết luận scoped criterion đã khai báo, không suy ra toàn ứng dụng an toàn.",
+      "fixture_acceptance": "Đạt/vi phạm scoped criterion, absent/unreadable evidence UNKNOWN; shared deployment/dependency fixture Basic/Hardening. Observed HTTPS response has HSTS max-age of at least one year",
+      "collection_acceptance": "Missing/unreadable/oversized/truncated scope báo explicit UNKNOWN/incomplete; giữ finding đã đọc; no-sink hợp lệ chỉ scoped observation, không application-wide PASS.",
+      "source_refs": [
+        "src/Rules/requirements/internal-catalog.json#MB-0027 CheckRegistry.php (deployment/dependency shared Basic/Hardening) src/Engine/Collectors/CodeInventoryCollector.php:16 src/Engine/RequirementAssessmentEvaluator.php:31"
+      ],
+      "priority": "P2"
+    },
+    {
+      "id": "MB-0028",
+      "title": "Runtime endpoint rejects legacy TLS",
+      "decision": "KEEP",
+      "proposed_claim": "The assessed runtime host and port must accept TLS 1.2 or 1.3 and reject TLS 1.0 and 1.1. Rejection requires peer protocol-version alerts or successful active protocol enumeration; client-side protocol restrictions and connection failures are not proof.",
+      "checks": [
+        {
+          "name": "http_tls_min_version",
+          "args": {
+            "timeout_ms": 8000,
+            "strict_scope": true
+          }
+        }
+      ],
+      "obligations": [
+        {
+          "id": "O001",
+          "op": "any",
+          "role": "mandatory",
+          "proof": "verified_predicate",
+          "checks": [
+            {
+              "name": "http_tls_min_version",
+              "args": {
+                "timeout_ms": 8000,
+                "strict_scope": true
+              }
+            }
+          ]
+        }
+      ],
+      "target_modes": [
+        "LOCAL",
+        "REMOTE"
+      ],
+      "human_required_now": false,
+      "execution_proposal": "Chạy technical observations mặc định; human requirement giữ MANUAL_REVIEW; independent finding lane không nâng heuristic thành normative conclusion.",
+      "human_boundary": "Chỉ kết luận scoped criterion đã khai báo, không suy ra toàn ứng dụng an toàn.",
+      "fixture_acceptance": "Đạt/vi phạm scoped criterion, absent/unreadable evidence UNKNOWN; shared deployment/dependency fixture Basic/Hardening. Runtime endpoint rejects legacy TLS",
+      "collection_acceptance": "Missing/unreadable/oversized/truncated scope báo explicit UNKNOWN/incomplete; giữ finding đã đọc; no-sink hợp lệ chỉ scoped observation, không application-wide PASS.",
+      "source_refs": [
+        "src/Rules/requirements/internal-catalog.json#MB-0028 CheckRegistry.php (deployment/dependency shared Basic/Hardening) src/Engine/Collectors/CodeInventoryCollector.php:16 src/Engine/RequirementAssessmentEvaluator.php:31"
+      ],
+      "priority": "P2"
+    },
+    {
+      "id": "MB-0029",
+      "title": "Literal HTTP asset references absent in assessed markup/CSS",
+      "decision": "KEEP",
+      "proposed_claim": "In LOCAL mode, readable markup/CSS files under app must contain no literal HTTP subresource or form-action references. In REMOTE mode, successful HTTPS pages at configured paths must contain no literal HTTP subresource/form references. Dynamic code-generated URLs, external stylesheets and unvisited routes require separate assessment.",
+      "checks": [
+        {
+          "name": "code_no_mixed_content",
+          "args": {
+            "paths": [
+              "app"
+            ],
+            "include_ext": [
+              "phtml",
+              "html",
+              "xml",
+              "css",
+              "less"
+            ],
+            "max_results": 50,
+            "strict_scope": true
+          }
+        }
+      ],
+      "obligations": [
+        {
+          "id": "O001",
+          "op": "all",
+          "role": "mandatory",
+          "proof": "verified_predicate",
+          "checks": [
+            {
+              "name": "code_no_mixed_content",
+              "args": {
+                "paths": [
+                  "app"
+                ],
+                "include_ext": [
+                  "phtml",
+                  "html",
+                  "xml",
+                  "css",
+                  "less"
+                ],
+                "max_results": 50,
+                "strict_scope": true
+              }
+            }
+          ]
+        }
+      ],
+      "target_modes": [
+        "LOCAL",
+        "REMOTE"
+      ],
+      "human_required_now": false,
+      "execution_proposal": "Chạy technical observations mặc định; human requirement giữ MANUAL_REVIEW; independent finding lane không nâng heuristic thành normative conclusion.",
+      "human_boundary": "Chỉ kết luận scoped criterion đã khai báo, không suy ra toàn ứng dụng an toàn.",
+      "fixture_acceptance": "Đạt/vi phạm scoped criterion, absent/unreadable evidence UNKNOWN; shared deployment/dependency fixture Basic/Hardening. Literal HTTP asset references absent in assessed markup/CSS",
+      "collection_acceptance": "Missing/unreadable/oversized/truncated scope báo explicit UNKNOWN/incomplete; giữ finding đã đọc; no-sink hợp lệ chỉ scoped observation, không application-wide PASS.",
+      "source_refs": [
+        "src/Rules/requirements/internal-catalog.json#MB-0029 TemplateRequestSourceChecks.php src/Engine/Collectors/CodeInventoryCollector.php:16 src/Engine/RequirementAssessmentEvaluator.php:31"
+      ],
+      "priority": "P2"
+    },
+    {
+      "id": "MB-0030",
+      "title": "Sensitive cookies use Secure, HttpOnly, and SameSite",
+      "decision": "KEEP",
+      "proposed_claim": "Sensitive session/admin cookies actually emitted by successful same-host HTTPS responses on the configured probe paths have exact Secure and HttpOnly attributes and SameSite=Lax or Strict. This assesses observed cookie emissions, not unobserved authenticated sessions.",
+      "checks": [
+        {
+          "name": "http_cookie_flags",
+          "args": {
+            "strict_scope": true,
+            "paths": [
+              "/",
+              "/customer/account/login",
+              "/checkout/cart"
+            ]
+          }
+        }
+      ],
+      "obligations": [
+        {
+          "id": "O001",
+          "op": "all",
+          "role": "mandatory",
+          "proof": "verified_predicate",
+          "checks": [
+            {
+              "name": "http_cookie_flags",
+              "args": {
+                "strict_scope": true,
+                "paths": [
+                  "/",
+                  "/customer/account/login",
+                  "/checkout/cart"
+                ]
+              }
+            }
+          ]
+        }
+      ],
+      "target_modes": [
+        "LOCAL",
+        "REMOTE"
+      ],
+      "human_required_now": false,
+      "execution_proposal": "Chạy technical observations mặc định; human requirement giữ MANUAL_REVIEW; independent finding lane không nâng heuristic thành normative conclusion.",
+      "human_boundary": "Chỉ kết luận scoped criterion đã khai báo, không suy ra toàn ứng dụng an toàn.",
+      "fixture_acceptance": "Đạt/vi phạm scoped criterion, absent/unreadable evidence UNKNOWN; shared deployment/dependency fixture Basic/Hardening. Sensitive cookies use Secure, HttpOnly, and SameSite",
+      "collection_acceptance": "Missing/unreadable/oversized/truncated scope báo explicit UNKNOWN/incomplete; giữ finding đã đọc; no-sink hợp lệ chỉ scoped observation, không application-wide PASS.",
+      "source_refs": [
+        "src/Rules/requirements/internal-catalog.json#MB-0030 CheckRegistry.php (deployment/dependency shared Basic/Hardening) src/Engine/Collectors/CodeInventoryCollector.php:16 src/Engine/RequirementAssessmentEvaluator.php:31"
+      ],
+      "priority": "P2"
+    },
+    {
+      "id": "MB-0031",
+      "title": "Declared Magento deployment mode is production",
+      "decision": "KEEP",
+      "proposed_claim": "The collected app/etc/env.php MAGE_MODE declaration equals production. Runtime environment overrides and actual web process state require separate evidence.",
+      "checks": [
+        {
+          "name": "magento_production_mode",
+          "args": {
+            "file": "app/etc/env.php",
+            "path": "MAGE_MODE",
+            "equals": "production"
+          }
+        }
+      ],
+      "obligations": [
+        {
+          "id": "O001",
+          "op": "all",
+          "role": "mandatory",
+          "proof": "verified_predicate",
+          "checks": [
+            {
+              "name": "magento_production_mode",
+              "args": {
+                "file": "app/etc/env.php",
+                "path": "MAGE_MODE",
+                "equals": "production"
+              }
+            }
+          ]
+        }
+      ],
+      "target_modes": [
+        "LOCAL"
+      ],
+      "human_required_now": false,
+      "execution_proposal": "Chạy technical observations mặc định; human requirement giữ MANUAL_REVIEW; independent finding lane không nâng heuristic thành normative conclusion.",
+      "human_boundary": "Chỉ kết luận scoped criterion đã khai báo, không suy ra toàn ứng dụng an toàn.",
+      "fixture_acceptance": "Đạt/vi phạm scoped criterion, absent/unreadable evidence UNKNOWN; shared deployment/dependency fixture Basic/Hardening. Declared Magento deployment mode is production",
+      "collection_acceptance": "Missing/unreadable/oversized/truncated scope báo explicit UNKNOWN/incomplete; giữ finding đã đọc; no-sink hợp lệ chỉ scoped observation, không application-wide PASS.",
+      "source_refs": [
+        "src/Rules/requirements/internal-catalog.json#MB-0031 CheckRegistry.php (deployment/dependency shared Basic/Hardening) src/Engine/Collectors/CodeInventoryCollector.php:16 src/Engine/RequirementAssessmentEvaluator.php:31"
+      ],
+      "priority": "P2"
+    },
+    {
+      "id": "MB-0034",
+      "title": "Generated DI PHP artifacts are present",
+      "decision": "OPTIONAL",
+      "proposed_claim": "Generated DI artifacts là production readiness signal.",
+      "checks": [
+        {
+          "name": "fs_di_compiled",
+          "args": {
+            "metadata_path": "generated/metadata",
+            "code_path": "generated/code",
+            "min_metadata_php_files": 1,
+            "min_code_php_files": 1
+          }
+        }
+      ],
+      "obligations": [
+        {
+          "id": "O001",
+          "op": "all",
+          "role": "mandatory",
+          "proof": "verified_predicate",
+          "checks": [
+            {
+              "name": "fs_di_compiled",
+              "args": {
+                "metadata_path": "generated/metadata",
+                "code_path": "generated/code",
+                "min_metadata_php_files": 1,
+                "min_code_php_files": 1
+              }
+            }
+          ]
+        }
+      ],
+      "target_modes": [
+        "LOCAL"
+      ],
+      "human_required_now": false,
+      "execution_proposal": "Chạy technical observations mặc định; human requirement giữ MANUAL_REVIEW; independent finding lane không nâng heuristic thành normative conclusion.",
+      "human_boundary": "Chỉ kết luận scoped criterion đã khai báo, không suy ra toàn ứng dụng an toàn.",
+      "fixture_acceptance": "Runtime/build layout hợp lệ thiếu generated không security vulnerability.",
+      "collection_acceptance": "Missing/unreadable/oversized/truncated scope báo explicit UNKNOWN/incomplete; giữ finding đã đọc; no-sink hợp lệ chỉ scoped observation, không application-wide PASS.",
+      "source_refs": [
+        "src/Rules/requirements/internal-catalog.json#MB-0034 CheckRegistry.php (deployment/dependency shared Basic/Hardening) src/Engine/Collectors/CodeInventoryCollector.php:16 src/Engine/RequirementAssessmentEvaluator.php:31"
+      ],
+      "priority": "P2"
+    },
+    {
+      "id": "MB-0035",
+      "title": "Published static artifacts present in assessed deployment",
+      "decision": "OPTIONAL",
+      "proposed_claim": "Static artifacts là deployment readiness signal.",
+      "checks": [
+        {
+          "name": "fs_static_content_deployed",
+          "args": {
+            "static_path": "pub/static",
+            "preprocessed_path": "var/view_preprocessed",
+            "min_static_files": 1,
+            "min_preprocessed_files": 1,
+            "strict_scope": true
+          }
+        }
+      ],
+      "obligations": [
+        {
+          "id": "O001",
+          "op": "all",
+          "role": "mandatory",
+          "proof": "verified_predicate",
+          "checks": [
+            {
+              "name": "fs_static_content_deployed",
+              "args": {
+                "static_path": "pub/static",
+                "preprocessed_path": "var/view_preprocessed",
+                "min_static_files": 1,
+                "min_preprocessed_files": 1,
+                "strict_scope": true
+              }
+            }
+          ]
+        }
+      ],
+      "target_modes": [
+        "LOCAL",
+        "REMOTE"
+      ],
+      "human_required_now": false,
+      "execution_proposal": "Chạy technical observations mặc định; human requirement giữ MANUAL_REVIEW; independent finding lane không nâng heuristic thành normative conclusion.",
+      "human_boundary": "Chỉ kết luận scoped criterion đã khai báo, không suy ra toàn ứng dụng an toàn.",
+      "fixture_acceptance": "CDN/remote assets/build pipeline; chuyển readiness lane.",
+      "collection_acceptance": "Missing/unreadable/oversized/truncated scope báo explicit UNKNOWN/incomplete; giữ finding đã đọc; no-sink hợp lệ chỉ scoped observation, không application-wide PASS.",
+      "source_refs": [
+        "src/Rules/requirements/internal-catalog.json#MB-0035 CheckRegistry.php (deployment/dependency shared Basic/Hardening) src/Engine/Collectors/CodeInventoryCollector.php:16 src/Engine/RequirementAssessmentEvaluator.php:31"
+      ],
+      "priority": "P2"
+    },
+    {
+      "id": "MB-0042",
+      "title": "Log/report paths are absent from the collected webroot",
+      "decision": "KEEP",
+      "proposed_claim": "Within the collected pub tree, no configured var/log or var/report relative path, nor symlink to the corresponding project target, is present. This is filesystem placement, not a live HTTP exposure assertion.",
+      "checks": [
+        {
+          "name": "fs_logs_reports_not_in_webroot",
+          "args": {
+            "webroot": "pub",
+            "forbidden_paths": [
+              "var/log",
+              "var/report"
+            ],
+            "strict_scope": true
+          }
+        }
+      ],
+      "obligations": [
+        {
+          "id": "O001",
+          "op": "all",
+          "role": "mandatory",
+          "proof": "verified_predicate",
+          "checks": [
+            {
+              "name": "fs_logs_reports_not_in_webroot",
+              "args": {
+                "webroot": "pub",
+                "forbidden_paths": [
+                  "var/log",
+                  "var/report"
+                ],
+                "strict_scope": true
+              }
+            }
+          ]
+        }
+      ],
+      "target_modes": [
+        "LOCAL"
+      ],
+      "human_required_now": false,
+      "execution_proposal": "Chạy technical observations mặc định; human requirement giữ MANUAL_REVIEW; independent finding lane không nâng heuristic thành normative conclusion.",
+      "human_boundary": "Chỉ kết luận scoped criterion đã khai báo, không suy ra toàn ứng dụng an toàn.",
+      "fixture_acceptance": "Đạt/vi phạm scoped criterion, absent/unreadable evidence UNKNOWN; shared deployment/dependency fixture Basic/Hardening. Log/report paths are absent from the collected webroot",
+      "collection_acceptance": "Missing/unreadable/oversized/truncated scope báo explicit UNKNOWN/incomplete; giữ finding đã đọc; no-sink hợp lệ chỉ scoped observation, không application-wide PASS.",
+      "source_refs": [
+        "src/Rules/requirements/internal-catalog.json#MB-0042 CheckRegistry.php (deployment/dependency shared Basic/Hardening) src/Engine/Collectors/CodeInventoryCollector.php:16 src/Engine/RequirementAssessmentEvaluator.php:31"
+      ],
+      "priority": "P2"
+    },
+    {
+      "id": "MB-0043",
+      "title": "Log rotation configured",
+      "decision": "OPTIONAL",
+      "proposed_claim": "Local rotation config tồn tại; không chứng minh retention/central logging.",
+      "checks": [
+        {
+          "name": "fs_log_rotation_configured",
+          "args": {
+            "file": "devops/logrotate.conf"
+          }
+        }
+      ],
+      "obligations": [
+        {
+          "id": "O001",
+          "op": "all",
+          "role": "supporting",
+          "proof": "heuristic",
+          "checks": [
+            {
+              "name": "fs_log_rotation_configured",
+              "args": {
+                "file": "devops/logrotate.conf"
+              }
+            }
+          ]
+        }
+      ],
+      "target_modes": [
+        "LOCAL"
+      ],
+      "human_required_now": true,
+      "execution_proposal": "Chạy technical observations mặc định; human requirement giữ MANUAL_REVIEW; independent finding lane không nâng heuristic thành normative conclusion.",
+      "human_boundary": "Verify effective installed logrotate, journald or managed logging retention and activation; a project logrotate file is optional evidence, not the entire logging policy.",
+      "fixture_acceptance": "External log service hợp lệ; stale local config; Hardening readiness.",
+      "collection_acceptance": "Missing/unreadable/oversized/truncated scope báo explicit UNKNOWN/incomplete; giữ finding đã đọc; no-sink hợp lệ chỉ scoped observation, không application-wide PASS.",
+      "source_refs": [
+        "src/Rules/requirements/internal-catalog.json#MB-0043 CheckRegistry.php (deployment/dependency shared Basic/Hardening) src/Engine/Collectors/CodeInventoryCollector.php:16 src/Engine/RequirementAssessmentEvaluator.php:31"
+      ],
+      "priority": "P2"
+    },
+    {
+      "id": "MB-0049",
+      "title": "Composer dependency OSV advisory matches",
+      "decision": "KEEP",
+      "proposed_claim": "Collected versioned Composer lock dependencies have no applicable OSV advisory matches in the successfully queried dataset, accounting for locally verified advisory-specific hotfix evidence. This does not certify absence of unknown vulnerabilities or uncollected runtime dependencies.",
+      "checks": [
+        {
+          "name": "composer_audit_api",
+          "args": {
+            "lock_file": "composer.lock",
+            "endpoint": "https://api.magebean.com/v1/osv/advisories",
+            "timeout_ms": 10000,
+            "batch_size": 500,
+            "allow_private_http_fallback": true,
+            "strict_scope": true
+          }
+        }
+      ],
+      "obligations": [
+        {
+          "id": "O001",
+          "op": "all",
+          "role": "mandatory",
+          "proof": "verified_predicate",
+          "checks": [
+            {
+              "name": "composer_audit_api",
+              "args": {
+                "lock_file": "composer.lock",
+                "endpoint": "https://api.magebean.com/v1/osv/advisories",
+                "timeout_ms": 10000,
+                "batch_size": 500,
+                "allow_private_http_fallback": true,
+                "strict_scope": true
+              }
+            }
+          ]
+        }
+      ],
+      "target_modes": [
+        "LOCAL"
+      ],
+      "human_required_now": false,
+      "execution_proposal": "Chạy technical observations mặc định; human requirement giữ MANUAL_REVIEW; independent finding lane không nâng heuristic thành normative conclusion.",
+      "human_boundary": "Chỉ kết luận scoped criterion đã khai báo, không suy ra toàn ứng dụng an toàn.",
+      "fixture_acceptance": "Đạt/vi phạm scoped criterion, absent/unreadable evidence UNKNOWN; shared deployment/dependency fixture Basic/Hardening. Composer dependency OSV advisory matches",
+      "collection_acceptance": "Missing/unreadable/oversized/truncated scope báo explicit UNKNOWN/incomplete; giữ finding đã đọc; no-sink hợp lệ chỉ scoped observation, không application-wide PASS.",
+      "source_refs": [
+        "src/Rules/requirements/internal-catalog.json#MB-0049 CheckRegistry.php (deployment/dependency shared Basic/Hardening) src/Engine/Collectors/CodeInventoryCollector.php:16 src/Engine/RequirementAssessmentEvaluator.php:31"
+      ],
+      "priority": "P2"
+    },
+    {
+      "id": "MB-0050",
+      "title": "Adobe security release patch assessment",
+      "decision": "KEEP",
+      "proposed_claim": "The collected Composer-locked Magento product version is current for its Adobe security release branch according to the successfully queried patch dataset, or each required advisory patch is satisfied by verified local alternative evidence. Unsupported branches and missing required patches fail; this does not certify runtime patch deployment outside collected files.",
+      "checks": [
+        {
+          "name": "composer_adobe_security_patches_api",
+          "args": {
+            "lock_file": "composer.lock",
+            "endpoint": "https://api.magebean.com/v1/adobe/security-patches",
+            "timeout_ms": 10000,
+            "allow_private_http_fallback": true,
+            "strict_scope": true
+          }
+        }
+      ],
+      "obligations": [
+        {
+          "id": "O001",
+          "op": "all",
+          "role": "mandatory",
+          "proof": "verified_predicate",
+          "checks": [
+            {
+              "name": "composer_adobe_security_patches_api",
+              "args": {
+                "lock_file": "composer.lock",
+                "endpoint": "https://api.magebean.com/v1/adobe/security-patches",
+                "timeout_ms": 10000,
+                "allow_private_http_fallback": true,
+                "strict_scope": true
+              }
+            }
+          ]
+        }
+      ],
+      "target_modes": [
+        "LOCAL"
+      ],
+      "human_required_now": false,
+      "execution_proposal": "Chạy technical observations mặc định; human requirement giữ MANUAL_REVIEW; independent finding lane không nâng heuristic thành normative conclusion.",
+      "human_boundary": "Chỉ kết luận scoped criterion đã khai báo, không suy ra toàn ứng dụng an toàn.",
+      "fixture_acceptance": "Đạt/vi phạm scoped criterion, absent/unreadable evidence UNKNOWN; shared deployment/dependency fixture Basic/Hardening. Adobe security release patch assessment",
+      "collection_acceptance": "Missing/unreadable/oversized/truncated scope báo explicit UNKNOWN/incomplete; giữ finding đã đọc; no-sink hợp lệ chỉ scoped observation, không application-wide PASS.",
+      "source_refs": [
+        "src/Rules/requirements/internal-catalog.json#MB-0050 CheckRegistry.php (deployment/dependency shared Basic/Hardening) src/Engine/Collectors/CodeInventoryCollector.php:16 src/Engine/RequirementAssessmentEvaluator.php:31"
+      ],
+      "priority": "P2"
+    },
+    {
+      "id": "MB-0051",
+      "title": "Dependency vulnerability remediation plan identifies an actionable resolution",
+      "decision": "SUPPORT",
+      "proposed_claim": "For each detected dependency vulnerability in the assessed lockfile, an actionable remediation plan must identify an available fixed package release or an explicitly reviewed alternative mitigation.",
+      "checks": [
+        {
+          "name": "composer_fix_version_api",
+          "args": {
+            "lock_file": "composer.lock",
+            "endpoint": "https://api.magebean.com/v1/osv/advisories",
+            "timeout_ms": 10000,
+            "batch_size": 500,
+            "allow_private_http_fallback": true
+          }
+        }
+      ],
+      "obligations": [
+        {
+          "id": "O001",
+          "op": "all",
+          "role": "supporting",
+          "proof": "heuristic",
+          "checks": [
+            {
+              "name": "composer_fix_version_api",
+              "args": {
+                "lock_file": "composer.lock",
+                "endpoint": "https://api.magebean.com/v1/osv/advisories",
+                "timeout_ms": 10000,
+                "batch_size": 500,
+                "allow_private_http_fallback": true
+              }
+            }
+          ]
+        }
+      ],
+      "target_modes": [
+        "LOCAL"
+      ],
+      "human_required_now": true,
+      "execution_proposal": "Chạy technical observations mặc định; human requirement giữ MANUAL_REVIEW; independent finding lane không nâng heuristic thành normative conclusion.",
+      "human_boundary": "For each reported affected package/advisory, collect the available fixed release, a tested upgrade plan and its owner/date. When an upgrade is deferred, record the exact alternative mitigation, validation result and approved expiry. Advisory metadata alone does not prove a deployable fix or accepted risk.",
+      "fixture_acceptance": "Đạt/vi phạm scoped criterion, absent/unreadable evidence UNKNOWN; shared deployment/dependency fixture Basic/Hardening. Dependency vulnerability remediation plan identifies an actionable resolution",
+      "collection_acceptance": "Missing/unreadable/oversized/truncated scope báo explicit UNKNOWN/incomplete; giữ finding đã đọc; no-sink hợp lệ chỉ scoped observation, không application-wide PASS.",
+      "source_refs": [
+        "src/Rules/requirements/internal-catalog.json#MB-0051 CheckRegistry.php (deployment/dependency shared Basic/Hardening) src/Engine/Collectors/CodeInventoryCollector.php:16 src/Engine/RequirementAssessmentEvaluator.php:31"
+      ],
+      "priority": "P2"
+    },
+    {
+      "id": "MB-0052",
+      "title": "Enabled high-risk modules are maintained",
+      "decision": "SUPPORT",
+      "proposed_claim": "Enabled high-risk modules are maintained; assess only the collected Magento deployment scope.",
+      "checks": [
+        {
+          "name": "composer_risk_surface_tag",
+          "args": {
+            "lock_file": "composer.lock",
+            "status_endpoint": "https://api.magebean.com/v1/packages/status",
+            "timeout_ms": 10000,
+            "batch_size": 500,
+            "allow_private_http_fallback": true
+          }
+        }
+      ],
+      "obligations": [
+        {
+          "id": "O001",
+          "op": "all",
+          "role": "supporting",
+          "proof": "heuristic",
+          "checks": [
+            {
+              "name": "composer_risk_surface_tag",
+              "args": {
+                "lock_file": "composer.lock",
+                "status_endpoint": "https://api.magebean.com/v1/packages/status",
+                "timeout_ms": 10000,
+                "batch_size": 500,
+                "allow_private_http_fallback": true
+              }
+            }
+          ]
+        }
+      ],
+      "target_modes": [
+        "LOCAL"
+      ],
+      "human_required_now": true,
+      "execution_proposal": "Chạy technical observations mặc định; human requirement giữ MANUAL_REVIEW; independent finding lane không nâng heuristic thành normative conclusion.",
+      "human_boundary": "Inventory actually enabled high-risk Magento modules and their production use. For each module, collect owner, maintained release/support evidence and the reason it is still enabled. Review deactivation or maintained alternatives against business use; dependency presence or a risk tag alone is not proof of exploitation.",
+      "fixture_acceptance": "Đạt/vi phạm scoped criterion, absent/unreadable evidence UNKNOWN; shared deployment/dependency fixture Basic/Hardening. Enabled high-risk modules are maintained",
+      "collection_acceptance": "Missing/unreadable/oversized/truncated scope báo explicit UNKNOWN/incomplete; giữ finding đã đọc; no-sink hợp lệ chỉ scoped observation, không application-wide PASS.",
+      "source_refs": [
+        "src/Rules/requirements/internal-catalog.json#MB-0052 CheckRegistry.php (deployment/dependency shared Basic/Hardening) src/Engine/Collectors/CodeInventoryCollector.php:16 src/Engine/RequirementAssessmentEvaluator.php:31"
+      ],
+      "priority": "P2"
+    },
+    {
+      "id": "MB-0053",
+      "title": "Temporary mitigations documented",
+      "decision": "SUPPORT",
+      "proposed_claim": "Temporary mitigations documented; assess only the collected Magento deployment scope.",
+      "checks": [
+        {
+          "name": "security_mitigations_documented",
+          "args": {
+            "path": "SECURITY.md"
+          }
+        }
+      ],
+      "obligations": [
+        {
+          "id": "O001",
+          "op": "all",
+          "role": "supporting",
+          "proof": "heuristic",
+          "checks": [
+            {
+              "name": "security_mitigations_documented",
+              "args": {
+                "path": "SECURITY.md"
+              }
+            }
+          ]
+        }
+      ],
+      "target_modes": [
+        "LOCAL"
+      ],
+      "human_required_now": true,
+      "execution_proposal": "Chạy technical observations mặc định; human requirement giữ MANUAL_REVIEW; independent finding lane không nâng heuristic thành normative conclusion.",
+      "human_boundary": "For every temporary mitigation, retain the affected vulnerability/control, implemented configuration, verification result, approving owner, expiry and permanent remediation plan. Inspect the deployed behavior; a documentation file or mitigation keyword alone does not prove effective protection.",
+      "fixture_acceptance": "Đạt/vi phạm scoped criterion, absent/unreadable evidence UNKNOWN; shared deployment/dependency fixture Basic/Hardening. Temporary mitigations documented",
+      "collection_acceptance": "Missing/unreadable/oversized/truncated scope báo explicit UNKNOWN/incomplete; giữ finding đã đọc; no-sink hợp lệ chỉ scoped observation, không application-wide PASS.",
+      "source_refs": [
+        "src/Rules/requirements/internal-catalog.json#MB-0053 CheckRegistry.php (deployment/dependency shared Basic/Hardening) src/Engine/Collectors/CodeInventoryCollector.php:16 src/Engine/RequirementAssessmentEvaluator.php:31"
+      ],
+      "priority": "P2"
+    },
+    {
+      "id": "MB-0054",
+      "title": "Known-exploited packages prioritized (CISA KEV)",
+      "decision": "SUPPORT",
+      "proposed_claim": "Known-exploited packages prioritized (CISA KEV); assess only the collected Magento deployment scope.",
+      "checks": [
+        {
+          "name": "composer_kev_advisories_api",
+          "args": {
+            "lock_file": "composer.lock",
+            "endpoint": "https://api.magebean.com/v1/osv/advisories",
+            "timeout_ms": 10000,
+            "batch_size": 500,
+            "allow_private_http_fallback": true
+          }
+        }
+      ],
+      "obligations": [
+        {
+          "id": "O001",
+          "op": "all",
+          "role": "supporting",
+          "proof": "heuristic",
+          "checks": [
+            {
+              "name": "composer_kev_advisories_api",
+              "args": {
+                "lock_file": "composer.lock",
+                "endpoint": "https://api.magebean.com/v1/osv/advisories",
+                "timeout_ms": 10000,
+                "batch_size": 500,
+                "allow_private_http_fallback": true
+              }
+            }
+          ]
+        }
+      ],
+      "target_modes": [
+        "LOCAL"
+      ],
+      "human_required_now": true,
+      "execution_proposal": "Chạy technical observations mặc định; human requirement giữ MANUAL_REVIEW; independent finding lane không nâng heuristic thành normative conclusion.",
+      "human_boundary": "Match applicable installed dependency advisories to the current known-exploited list, then collect triage priority, responsible owner, remediation deadline and tested patch/mitigation evidence. An advisory match does not establish that prioritization or remediation actually occurred.",
+      "fixture_acceptance": "Đạt/vi phạm scoped criterion, absent/unreadable evidence UNKNOWN; shared deployment/dependency fixture Basic/Hardening. Known-exploited packages prioritized (CISA KEV)",
+      "collection_acceptance": "Missing/unreadable/oversized/truncated scope báo explicit UNKNOWN/incomplete; giữ finding đã đọc; no-sink hợp lệ chỉ scoped observation, không application-wide PASS.",
+      "source_refs": [
+        "src/Rules/requirements/internal-catalog.json#MB-0054 CheckRegistry.php (deployment/dependency shared Basic/Hardening) src/Engine/Collectors/CodeInventoryCollector.php:16 src/Engine/RequirementAssessmentEvaluator.php:31"
+      ],
+      "priority": "P2"
+    },
+    {
+      "id": "MB-0055",
+      "title": "Collected transitive versions have no returned applicable advisories",
+      "decision": "KEEP",
+      "proposed_claim": "No transitive package version in the complete collected Composer lock inventory is identified as affected by applicable advisories returned by the configured OSV service. Coverage is limited to the queried inventory and service data.",
+      "checks": [
+        {
+          "name": "composer_transitive_audit_api",
+          "args": {
+            "lock_file": "composer.lock",
+            "composer_file": "composer.json",
+            "endpoint": "https://api.magebean.com/v1/osv/advisories",
+            "timeout_ms": 10000,
+            "batch_size": 500,
+            "allow_private_http_fallback": true,
+            "strict_scope": true
+          }
+        }
+      ],
+      "obligations": [
+        {
+          "id": "O001",
+          "op": "all",
+          "role": "mandatory",
+          "proof": "verified_predicate",
+          "checks": [
+            {
+              "name": "composer_transitive_audit_api",
+              "args": {
+                "lock_file": "composer.lock",
+                "composer_file": "composer.json",
+                "endpoint": "https://api.magebean.com/v1/osv/advisories",
+                "timeout_ms": 10000,
+                "batch_size": 500,
+                "allow_private_http_fallback": true,
+                "strict_scope": true
+              }
+            }
+          ]
+        }
+      ],
+      "target_modes": [
+        "LOCAL"
+      ],
+      "human_required_now": false,
+      "execution_proposal": "Chạy technical observations mặc định; human requirement giữ MANUAL_REVIEW; independent finding lane không nâng heuristic thành normative conclusion.",
+      "human_boundary": "Chỉ kết luận scoped criterion đã khai báo, không suy ra toàn ứng dụng an toàn.",
+      "fixture_acceptance": "Đạt/vi phạm scoped criterion, absent/unreadable evidence UNKNOWN; shared deployment/dependency fixture Basic/Hardening. Collected transitive versions have no returned applicable advisories",
+      "collection_acceptance": "Missing/unreadable/oversized/truncated scope báo explicit UNKNOWN/incomplete; giữ finding đã đọc; no-sink hợp lệ chỉ scoped observation, không application-wide PASS.",
+      "source_refs": [
+        "src/Rules/requirements/internal-catalog.json#MB-0055 CheckRegistry.php (deployment/dependency shared Basic/Hardening) src/Engine/Collectors/CodeInventoryCollector.php:16 src/Engine/RequirementAssessmentEvaluator.php:31"
+      ],
+      "priority": "P2"
+    },
+    {
+      "id": "MB-0056",
+      "title": "Declared constraints permit returned advisory fixed versions",
+      "decision": "KEEP",
+      "proposed_claim": "For returned applicable advisory findings with published fixed versions, the combined declared dependency constraints intersect versions at or above the published fixed version. This does not establish complete Composer solver feasibility, platform compatibility or every fixed branch.",
+      "checks": [
+        {
+          "name": "composer_constraints_conflict_api",
+          "args": {
+            "json_file": "composer.json",
+            "lock_file": "composer.lock",
+            "endpoint": "https://api.magebean.com/v1/osv/advisories",
+            "timeout_ms": 10000,
+            "batch_size": 500,
+            "allow_private_http_fallback": true,
+            "strict_scope": true
+          }
+        }
+      ],
+      "obligations": [
+        {
+          "id": "O001",
+          "op": "all",
+          "role": "mandatory",
+          "proof": "verified_predicate",
+          "checks": [
+            {
+              "name": "composer_constraints_conflict_api",
+              "args": {
+                "json_file": "composer.json",
+                "lock_file": "composer.lock",
+                "endpoint": "https://api.magebean.com/v1/osv/advisories",
+                "timeout_ms": 10000,
+                "batch_size": 500,
+                "allow_private_http_fallback": true,
+                "strict_scope": true
+              }
+            }
+          ]
+        }
+      ],
+      "target_modes": [
+        "LOCAL"
+      ],
+      "human_required_now": false,
+      "execution_proposal": "Chạy technical observations mặc định; human requirement giữ MANUAL_REVIEW; independent finding lane không nâng heuristic thành normative conclusion.",
+      "human_boundary": "Chỉ kết luận scoped criterion đã khai báo, không suy ra toàn ứng dụng an toàn.",
+      "fixture_acceptance": "Đạt/vi phạm scoped criterion, absent/unreadable evidence UNKNOWN; shared deployment/dependency fixture Basic/Hardening. Declared constraints permit returned advisory fixed versions",
+      "collection_acceptance": "Missing/unreadable/oversized/truncated scope báo explicit UNKNOWN/incomplete; giữ finding đã đọc; no-sink hợp lệ chỉ scoped observation, không application-wide PASS.",
+      "source_refs": [
+        "src/Rules/requirements/internal-catalog.json#MB-0056 CheckRegistry.php (deployment/dependency shared Basic/Hardening) src/Engine/Collectors/CodeInventoryCollector.php:16 src/Engine/RequirementAssessmentEvaluator.php:31"
+      ],
+      "priority": "P2"
+    },
+    {
+      "id": "MB-0057",
+      "title": "Collected package versions are not reported withdrawn",
+      "decision": "KEEP",
+      "proposed_claim": "Every package version in the complete collected Composer lock inventory has an explicit non-yanked status from the configured package-status source. Missing per-package status cannot establish a clean result.",
+      "checks": [
+        {
+          "name": "composer_yanked_api",
+          "args": {
+            "lock_file": "composer.lock",
+            "status_endpoint": "https://api.magebean.com/v1/packages/status",
+            "timeout_ms": 10000,
+            "batch_size": 500,
+            "allow_private_http_fallback": true,
+            "strict_scope": true
+          }
+        }
+      ],
+      "obligations": [
+        {
+          "id": "O001",
+          "op": "all",
+          "role": "mandatory",
+          "proof": "verified_predicate",
+          "checks": [
+            {
+              "name": "composer_yanked_api",
+              "args": {
+                "lock_file": "composer.lock",
+                "status_endpoint": "https://api.magebean.com/v1/packages/status",
+                "timeout_ms": 10000,
+                "batch_size": 500,
+                "allow_private_http_fallback": true,
+                "strict_scope": true
+              }
+            }
+          ]
+        }
+      ],
+      "target_modes": [
+        "LOCAL"
+      ],
+      "human_required_now": false,
+      "execution_proposal": "Chạy technical observations mặc định; human requirement giữ MANUAL_REVIEW; independent finding lane không nâng heuristic thành normative conclusion.",
+      "human_boundary": "Chỉ kết luận scoped criterion đã khai báo, không suy ra toàn ứng dụng an toàn.",
+      "fixture_acceptance": "Đạt/vi phạm scoped criterion, absent/unreadable evidence UNKNOWN; shared deployment/dependency fixture Basic/Hardening. Collected package versions are not reported withdrawn",
+      "collection_acceptance": "Missing/unreadable/oversized/truncated scope báo explicit UNKNOWN/incomplete; giữ finding đã đọc; no-sink hợp lệ chỉ scoped observation, không application-wide PASS.",
+      "source_refs": [
+        "src/Rules/requirements/internal-catalog.json#MB-0057 CheckRegistry.php (deployment/dependency shared Basic/Hardening) src/Engine/Collectors/CodeInventoryCollector.php:16 src/Engine/RequirementAssessmentEvaluator.php:31"
+      ],
+      "priority": "P2"
+    },
+    {
+      "id": "MB-0058",
+      "title": "Marketplace extensions are current and maintained",
+      "decision": "SUPPORT",
+      "proposed_claim": "Marketplace extensions are current and maintained; assess only the collected Magento deployment scope.",
+      "checks": [
+        {
+          "name": "composer_marketplace_outdated_api",
+          "args": {
+            "lock_file": "composer.lock",
+            "status_endpoint": "https://api.magebean.com/v1/packages/status",
+            "timeout_ms": 10000,
+            "batch_size": 500,
+            "allow_private_http_fallback": true,
+            "max_age_days": 365
+          }
+        }
+      ],
+      "obligations": [
+        {
+          "id": "O001",
+          "op": "all",
+          "role": "supporting",
+          "proof": "heuristic",
+          "checks": [
+            {
+              "name": "composer_marketplace_outdated_api",
+              "args": {
+                "lock_file": "composer.lock",
+                "status_endpoint": "https://api.magebean.com/v1/packages/status",
+                "timeout_ms": 10000,
+                "batch_size": 500,
+                "allow_private_http_fallback": true,
+                "max_age_days": 365
+              }
+            }
+          ]
+        }
+      ],
+      "target_modes": [
+        "LOCAL"
+      ],
+      "human_required_now": true,
+      "execution_proposal": "Chạy technical observations mặc định; human requirement giữ MANUAL_REVIEW; independent finding lane không nâng heuristic thành normative conclusion.",
+      "human_boundary": "Inventory enabled third-party Marketplace extensions, their exact deployed versions, release/support status and compatibility constraints. Verify each vendor maintenance claim and justified version exception; do not upgrade blindly to a reported latest version.",
+      "fixture_acceptance": "Đạt/vi phạm scoped criterion, absent/unreadable evidence UNKNOWN; shared deployment/dependency fixture Basic/Hardening. Marketplace extensions are current and maintained",
+      "collection_acceptance": "Missing/unreadable/oversized/truncated scope báo explicit UNKNOWN/incomplete; giữ finding đã đọc; no-sink hợp lệ chỉ scoped observation, không application-wide PASS.",
+      "source_refs": [
+        "src/Rules/requirements/internal-catalog.json#MB-0058 CheckRegistry.php (deployment/dependency shared Basic/Hardening) src/Engine/Collectors/CodeInventoryCollector.php:16 src/Engine/RequirementAssessmentEvaluator.php:31"
+      ],
+      "priority": "P2"
+    },
+    {
+      "id": "MB-0059",
+      "title": "Affected advisory publication age is within 30 days",
+      "decision": "OPTIONAL",
+      "proposed_claim": "Advisory age so SLA cấu hình, tách policy khỏi actual vulnerability.",
+      "checks": [
+        {
+          "name": "composer_advisory_latency_api",
+          "args": {
+            "lock_file": "composer.lock",
+            "endpoint": "https://api.magebean.com/v1/osv/advisories",
+            "timeout_ms": 10000,
+            "batch_size": 500,
+            "allow_private_http_fallback": true,
+            "latency_days": 30,
+            "strict_scope": true
+          }
+        }
+      ],
+      "obligations": [
+        {
+          "id": "O001",
+          "op": "all",
+          "role": "mandatory",
+          "proof": "verified_predicate",
+          "checks": [
+            {
+              "name": "composer_advisory_latency_api",
+              "args": {
+                "lock_file": "composer.lock",
+                "endpoint": "https://api.magebean.com/v1/osv/advisories",
+                "timeout_ms": 10000,
+                "batch_size": 500,
+                "allow_private_http_fallback": true,
+                "latency_days": 30,
+                "strict_scope": true
+              }
+            }
+          ]
+        }
+      ],
+      "target_modes": [
+        "LOCAL"
+      ],
+      "human_required_now": false,
+      "execution_proposal": "Chạy technical observations mặc định; human requirement giữ MANUAL_REVIEW; independent finding lane không nâng heuristic thành normative conclusion.",
+      "human_boundary": "Chỉ kết luận scoped criterion đã khai báo, không suy ra toàn ứng dụng an toàn.",
+      "fixture_acceptance": "29/30/31 ngày, severity SLA, exception hợp lệ.",
+      "collection_acceptance": "Missing/unreadable/oversized/truncated scope báo explicit UNKNOWN/incomplete; giữ finding đã đọc; no-sink hợp lệ chỉ scoped observation, không application-wide PASS.",
+      "source_refs": [
+        "src/Rules/requirements/internal-catalog.json#MB-0059 CheckRegistry.php (deployment/dependency shared Basic/Hardening) src/Engine/Collectors/CodeInventoryCollector.php:16 src/Engine/RequirementAssessmentEvaluator.php:31"
+      ],
+      "priority": "P2"
+    },
+    {
+      "id": "MB-0060",
+      "title": "Marketplace extensions have vendor support evidence",
+      "decision": "SUPPORT",
+      "proposed_claim": "Marketplace extensions have vendor support evidence; assess only the collected Magento deployment scope.",
+      "checks": [
+        {
+          "name": "composer_vendor_support_api",
+          "args": {
+            "lock_file": "composer.lock",
+            "status_endpoint": "https://api.magebean.com/v1/packages/status",
+            "timeout_ms": 10000,
+            "batch_size": 500,
+            "allow_private_http_fallback": true
+          }
+        }
+      ],
+      "obligations": [
+        {
+          "id": "O001",
+          "op": "all",
+          "role": "supporting",
+          "proof": "heuristic",
+          "checks": [
+            {
+              "name": "composer_vendor_support_api",
+              "args": {
+                "lock_file": "composer.lock",
+                "status_endpoint": "https://api.magebean.com/v1/packages/status",
+                "timeout_ms": 10000,
+                "batch_size": 500,
+                "allow_private_http_fallback": true
+              }
+            }
+          ]
+        }
+      ],
+      "target_modes": [
+        "LOCAL"
+      ],
+      "human_required_now": true,
+      "execution_proposal": "Chạy technical observations mặc định; human requirement giữ MANUAL_REVIEW; independent finding lane không nâng heuristic thành normative conclusion.",
+      "human_boundary": "For each enabled Marketplace extension, retain the vendor support lifecycle statement or contract, support contact, covered release and relevant support dates. Verify coverage actually applies to this deployed release; missing public API metadata is not proof that a contract is absent.",
+      "fixture_acceptance": "Đạt/vi phạm scoped criterion, absent/unreadable evidence UNKNOWN; shared deployment/dependency fixture Basic/Hardening. Marketplace extensions have vendor support evidence",
+      "collection_acceptance": "Missing/unreadable/oversized/truncated scope báo explicit UNKNOWN/incomplete; giữ finding đã đọc; no-sink hợp lệ chỉ scoped observation, không application-wide PASS.",
+      "source_refs": [
+        "src/Rules/requirements/internal-catalog.json#MB-0060 CheckRegistry.php (deployment/dependency shared Basic/Hardening) src/Engine/Collectors/CodeInventoryCollector.php:16 src/Engine/RequirementAssessmentEvaluator.php:31"
+      ],
+      "priority": "P2"
+    },
+    {
+      "id": "MB-0061",
+      "title": "Collected dependencies are not reported abandoned",
+      "decision": "KEEP",
+      "proposed_claim": "No dependency package in the complete assessed Composer inventory is marked abandoned by the configured package-maintenance source; a clean conclusion requires explicit known status for every assessed package.",
+      "checks": [
+        {
+          "name": "composer_abandoned_api",
+          "args": {
+            "lock_file": "composer.lock",
+            "status_endpoint": "https://api.magebean.com/v1/packages/status",
+            "timeout_ms": 10000,
+            "allow_private_http_fallback": true,
+            "strict_scope": true
+          }
+        },
+        {
+          "name": "composer_abandoned_api",
+          "args": {
+            "lock_file": "composer.lock",
+            "status_endpoint": "https://api.magebean.com/v1/packages/status",
+            "timeout_ms": 10000,
+            "status_batch_size": 500,
+            "allow_private_http_fallback": true,
+            "package_types": [
+              "library"
+            ],
+            "strict_scope": true
+          }
+        }
+      ],
+      "obligations": [
+        {
+          "id": "O001",
+          "op": "all",
+          "role": "mandatory",
+          "proof": "verified_predicate",
+          "checks": [
+            {
+              "name": "composer_abandoned_api",
+              "args": {
+                "lock_file": "composer.lock",
+                "status_endpoint": "https://api.magebean.com/v1/packages/status",
+                "timeout_ms": 10000,
+                "allow_private_http_fallback": true,
+                "strict_scope": true
+              }
+            }
+          ]
+        },
+        {
+          "id": "O002",
+          "op": "all",
+          "role": "mandatory",
+          "proof": "verified_predicate",
+          "checks": [
+            {
+              "name": "composer_abandoned_api",
+              "args": {
+                "lock_file": "composer.lock",
+                "status_endpoint": "https://api.magebean.com/v1/packages/status",
+                "timeout_ms": 10000,
+                "status_batch_size": 500,
+                "allow_private_http_fallback": true,
+                "package_types": [
+                  "library"
+                ],
+                "strict_scope": true
+              }
+            }
+          ]
+        }
+      ],
+      "target_modes": [
+        "LOCAL"
+      ],
+      "human_required_now": false,
+      "execution_proposal": "Chạy technical observations mặc định; human requirement giữ MANUAL_REVIEW; independent finding lane không nâng heuristic thành normative conclusion.",
+      "human_boundary": "Chỉ kết luận scoped criterion đã khai báo, không suy ra toàn ứng dụng an toàn.",
+      "fixture_acceptance": "Đạt/vi phạm scoped criterion, absent/unreadable evidence UNKNOWN; shared deployment/dependency fixture Basic/Hardening. Collected dependencies are not reported abandoned",
+      "collection_acceptance": "Missing/unreadable/oversized/truncated scope báo explicit UNKNOWN/incomplete; giữ finding đã đọc; no-sink hợp lệ chỉ scoped observation, không application-wide PASS.",
+      "source_refs": [
+        "src/Rules/requirements/internal-catalog.json#MB-0061 CheckRegistry.php (deployment/dependency shared Basic/Hardening) src/Engine/Collectors/CodeInventoryCollector.php:16 src/Engine/RequirementAssessmentEvaluator.php:31"
+      ],
+      "priority": "P2"
+    },
+    {
+      "id": "MB-0065",
+      "title": "No wildcard constraints in composer.json",
+      "decision": "OPTIONAL",
+      "proposed_claim": "Wildcard dependency constraints là hygiene signal.",
+      "checks": [
+        {
+          "name": "composer_json_constraints",
+          "args": {
+            "json_file": "composer.json",
+            "sections": [
+              "require",
+              "require-dev"
+            ],
+            "deny_wildcard": true,
+            "finding_message": "Wildcard Composer constraints detected",
+            "project_local_only": true
+          }
+        }
+      ],
+      "obligations": [
+        {
+          "id": "O001",
+          "op": "all",
+          "role": "mandatory",
+          "proof": "verified_predicate",
+          "checks": [
+            {
+              "name": "composer_json_constraints",
+              "args": {
+                "json_file": "composer.json",
+                "sections": [
+                  "require",
+                  "require-dev"
+                ],
+                "deny_wildcard": true,
+                "finding_message": "Wildcard Composer constraints detected",
+                "project_local_only": true
+              }
+            }
+          ]
+        }
+      ],
+      "target_modes": [
+        "LOCAL"
+      ],
+      "human_required_now": false,
+      "execution_proposal": "Chạy technical observations mặc định; human requirement giữ MANUAL_REVIEW; independent finding lane không nâng heuristic thành normative conclusion.",
+      "human_boundary": "Chỉ kết luận scoped criterion đã khai báo, không suy ra toàn ứng dụng an toàn.",
+      "fixture_acceptance": "Locked supported patched version; dev-only wildcard; không coi là CVE.",
+      "collection_acceptance": "Missing/unreadable/oversized/truncated scope báo explicit UNKNOWN/incomplete; giữ finding đã đọc; no-sink hợp lệ chỉ scoped observation, không application-wide PASS.",
+      "source_refs": [
+        "src/Rules/requirements/internal-catalog.json#MB-0065 CheckRegistry.php (deployment/dependency shared Basic/Hardening) src/Engine/Collectors/CodeInventoryCollector.php:16 src/Engine/RequirementAssessmentEvaluator.php:31"
+      ],
+      "priority": "P2"
+    },
+    {
+      "id": "MB-0066",
+      "title": "No dev branches in composer.json",
+      "decision": "OPTIONAL",
+      "proposed_claim": "Dev-branch constraint là reproducibility signal.",
+      "checks": [
+        {
+          "name": "composer_json_constraints",
+          "args": {
+            "json_file": "composer.json",
+            "sections": [
+              "require",
+              "require-dev"
+            ],
+            "deny_dev_constraints": true,
+            "finding_message": "Development Composer constraints detected",
+            "project_local_only": true
+          }
+        }
+      ],
+      "obligations": [
+        {
+          "id": "O001",
+          "op": "all",
+          "role": "mandatory",
+          "proof": "verified_predicate",
+          "checks": [
+            {
+              "name": "composer_json_constraints",
+              "args": {
+                "json_file": "composer.json",
+                "sections": [
+                  "require",
+                  "require-dev"
+                ],
+                "deny_dev_constraints": true,
+                "finding_message": "Development Composer constraints detected",
+                "project_local_only": true
+              }
+            }
+          ]
+        }
+      ],
+      "target_modes": [
+        "LOCAL"
+      ],
+      "human_required_now": false,
+      "execution_proposal": "Chạy technical observations mặc định; human requirement giữ MANUAL_REVIEW; independent finding lane không nâng heuristic thành normative conclusion.",
+      "human_boundary": "Chỉ kết luận scoped criterion đã khai báo, không suy ra toàn ứng dụng an toàn.",
+      "fixture_acceptance": "Pinned commit/private maintained branch; informational.",
+      "collection_acceptance": "Missing/unreadable/oversized/truncated scope báo explicit UNKNOWN/incomplete; giữ finding đã đọc; no-sink hợp lệ chỉ scoped observation, không application-wide PASS.",
+      "source_refs": [
+        "src/Rules/requirements/internal-catalog.json#MB-0066 CheckRegistry.php (deployment/dependency shared Basic/Hardening) src/Engine/Collectors/CodeInventoryCollector.php:16 src/Engine/RequirementAssessmentEvaluator.php:31"
+      ],
+      "priority": "P2"
+    },
+    {
+      "id": "MB-0067",
+      "title": "prefer-stable=true in composer.json",
+      "decision": "OPTIONAL",
+      "proposed_claim": "prefer-stable là dependency policy.",
+      "checks": [
+        {
+          "name": "composer_json_kv",
+          "args": {
+            "json_file": "composer.json",
+            "key": "prefer-stable",
+            "op": "eq",
+            "expect": true,
+            "strict": true,
+            "project_local_only": true
+          }
+        }
+      ],
+      "obligations": [
+        {
+          "id": "O001",
+          "op": "all",
+          "role": "mandatory",
+          "proof": "verified_predicate",
+          "checks": [
+            {
+              "name": "composer_json_kv",
+              "args": {
+                "json_file": "composer.json",
+                "key": "prefer-stable",
+                "op": "eq",
+                "expect": true,
+                "strict": true,
+                "project_local_only": true
+              }
+            }
+          ]
+        }
+      ],
+      "target_modes": [
+        "LOCAL"
+      ],
+      "human_required_now": false,
+      "execution_proposal": "Chạy technical observations mặc định; human requirement giữ MANUAL_REVIEW; independent finding lane không nâng heuristic thành normative conclusion.",
+      "human_boundary": "Chỉ kết luận scoped criterion đã khai báo, không suy ra toàn ứng dụng an toàn.",
+      "fixture_acceptance": "Explicit stable constraints không prefer-stable vẫn hợp lệ.",
+      "collection_acceptance": "Missing/unreadable/oversized/truncated scope báo explicit UNKNOWN/incomplete; giữ finding đã đọc; no-sink hợp lệ chỉ scoped observation, không application-wide PASS.",
+      "source_refs": [
+        "src/Rules/requirements/internal-catalog.json#MB-0067 CheckRegistry.php (deployment/dependency shared Basic/Hardening) src/Engine/Collectors/CodeInventoryCollector.php:16 src/Engine/RequirementAssessmentEvaluator.php:31"
+      ],
+      "priority": "P2"
+    },
+    {
+      "id": "MB-0069",
+      "title": "Direct locked versions match the reported latest stable release",
+      "decision": "REPLACE",
+      "proposed_claim": "Outdated dependency là update signal; security finding dựa applicable advisories.",
+      "checks": [
+        {
+          "name": "composer_direct_outdated_api",
+          "args": {
+            "lock_file": "composer.lock",
+            "json_file": "composer.json",
+            "status_endpoint": "https://api.magebean.com/v1/packages/status",
+            "timeout_ms": 10000,
+            "status_batch_size": 500,
+            "allow_private_http_fallback": true,
+            "include_dev": true,
+            "strict_scope": true
+          }
+        }
+      ],
+      "obligations": [
+        {
+          "id": "O001",
+          "op": "all",
+          "role": "mandatory",
+          "proof": "verified_predicate",
+          "checks": [
+            {
+              "name": "composer_direct_outdated_api",
+              "args": {
+                "lock_file": "composer.lock",
+                "json_file": "composer.json",
+                "status_endpoint": "https://api.magebean.com/v1/packages/status",
+                "timeout_ms": 10000,
+                "status_batch_size": 500,
+                "allow_private_http_fallback": true,
+                "include_dev": true,
+                "strict_scope": true
+              }
+            }
+          ]
+        }
+      ],
+      "target_modes": [
+        "LOCAL"
+      ],
+      "human_required_now": false,
+      "execution_proposal": "Chạy technical observations mặc định; human requirement giữ MANUAL_REVIEW; independent finding lane không nâng heuristic thành normative conclusion.",
+      "human_boundary": "Chỉ kết luận scoped criterion đã khai báo, không suy ra toàn ứng dụng an toàn.",
+      "fixture_acceptance": "Latest major breaking vs current supported+patched; latest không security requirement.",
+      "collection_acceptance": "Missing/unreadable/oversized/truncated scope báo explicit UNKNOWN/incomplete; giữ finding đã đọc; no-sink hợp lệ chỉ scoped observation, không application-wide PASS.",
+      "source_refs": [
+        "src/Rules/requirements/internal-catalog.json#MB-0069 CheckRegistry.php (deployment/dependency shared Basic/Hardening) src/Engine/Collectors/CodeInventoryCollector.php:16 src/Engine/RequirementAssessmentEvaluator.php:31"
+      ],
+      "priority": "P1"
+    },
+    {
+      "id": "MB-0070",
+      "title": "Composer lock hash and dependency identities are consistent",
+      "decision": "KEEP",
+      "proposed_claim": "composer.lock has a matching Composer content-hash, no duplicate or malformed package identities, and contains or provides/replaces each declared root package dependency. This does not prove the full dependency solver result or installed vendor file integrity.",
+      "checks": [
+        {
+          "name": "composer_lock_integrity",
+          "args": {
+            "json_file": "composer.json",
+            "lock_file": "composer.lock"
+          }
+        }
+      ],
+      "obligations": [
+        {
+          "id": "O001",
+          "op": "all",
+          "role": "mandatory",
+          "proof": "verified_predicate",
+          "checks": [
+            {
+              "name": "composer_lock_integrity",
+              "args": {
+                "json_file": "composer.json",
+                "lock_file": "composer.lock"
+              }
+            }
+          ]
+        }
+      ],
+      "target_modes": [
+        "LOCAL"
+      ],
+      "human_required_now": false,
+      "execution_proposal": "Chạy technical observations mặc định; human requirement giữ MANUAL_REVIEW; independent finding lane không nâng heuristic thành normative conclusion.",
+      "human_boundary": "Chỉ kết luận scoped criterion đã khai báo, không suy ra toàn ứng dụng an toàn.",
+      "fixture_acceptance": "Đạt/vi phạm scoped criterion, absent/unreadable evidence UNKNOWN; shared deployment/dependency fixture Basic/Hardening. Composer lock hash and dependency identities are consistent",
+      "collection_acceptance": "Missing/unreadable/oversized/truncated scope báo explicit UNKNOWN/incomplete; giữ finding đã đọc; no-sink hợp lệ chỉ scoped observation, không application-wide PASS.",
+      "source_refs": [
+        "src/Rules/requirements/internal-catalog.json#MB-0070 CheckRegistry.php (deployment/dependency shared Basic/Hardening) src/Engine/Collectors/CodeInventoryCollector.php:16 src/Engine/RequirementAssessmentEvaluator.php:31"
+      ],
+      "priority": "P2"
+    },
+    {
+      "id": "MB-0073",
+      "title": "HTTPS-only endpoints configured",
+      "decision": "REVISE",
+      "proposed_claim": "Literal HTTP integration endpoint candidates trong bounded source scope.",
+      "checks": [
+        {
+          "name": "code_https_endpoints",
+          "args": {
+            "paths": [
+              "app/etc",
+              "app/code",
+              "app/design"
+            ],
+            "include_ext": [
+              "php",
+              "phtml",
+              "xml",
+              "json",
+              "yaml",
+              "yml",
+              "ini",
+              "js",
+              "html",
+              "css"
+            ],
+            "required_files": [
+              "app/etc/env.php"
+            ],
+            "max_results": 200
+          }
+        }
+      ],
+      "obligations": [
+        {
+          "id": "O001",
+          "op": "all",
+          "role": "supporting",
+          "proof": "heuristic",
+          "checks": [
+            {
+              "name": "code_https_endpoints",
+              "args": {
+                "paths": [
+                  "app/etc",
+                  "app/code",
+                  "app/design"
+                ],
+                "include_ext": [
+                  "php",
+                  "phtml",
+                  "xml",
+                  "json",
+                  "yaml",
+                  "yml",
+                  "ini",
+                  "js",
+                  "html",
+                  "css"
+                ],
+                "required_files": [
+                  "app/etc/env.php"
+                ],
+                "max_results": 200
+              }
+            }
+          ]
+        }
+      ],
+      "target_modes": [
+        "LOCAL"
+      ],
+      "human_required_now": true,
+      "execution_proposal": "Chạy technical observations mặc định; human requirement giữ MANUAL_REVIEW; independent finding lane không nâng heuristic thành normative conclusion.",
+      "human_boundary": "Review actual runtime outbound endpoint configuration including dynamic URLs; literal source URL observations alone do not establish HTTPS-only communication.",
+      "fixture_acceptance": "Local loopback hợp lệ; dynamic URLs missed; comments không finding.",
+      "collection_acceptance": "Missing/unreadable/oversized/truncated scope báo explicit UNKNOWN/incomplete; giữ finding đã đọc; no-sink hợp lệ chỉ scoped observation, không application-wide PASS.",
+      "source_refs": [
+        "src/Rules/requirements/internal-catalog.json#MB-0073 CheckRegistry.php (deployment/dependency shared Basic/Hardening) src/Engine/Collectors/CodeInventoryCollector.php:16 src/Engine/RequirementAssessmentEvaluator.php:31"
+      ],
+      "priority": "P1"
+    },
+    {
+      "id": "MB-0075",
+      "title": "Webhook signature validation present",
+      "decision": "REVISE",
+      "proposed_claim": "Signature verification evidence phải bind từng route/handler.",
+      "checks": [
+        {
+          "name": "code_webhook_signature_validation",
+          "args": {
+            "paths": [
+              "app/code",
+              "app/etc",
+              "routes"
+            ],
+            "include_ext": [
+              "php",
+              "xml"
+            ],
+            "max_results": 100
+          }
+        }
+      ],
+      "obligations": [
+        {
+          "id": "O001",
+          "op": "all",
+          "role": "supporting",
+          "proof": "heuristic",
+          "checks": [
+            {
+              "name": "code_webhook_signature_validation",
+              "args": {
+                "paths": [
+                  "app/code",
+                  "app/etc",
+                  "routes"
+                ],
+                "include_ext": [
+                  "php",
+                  "xml"
+                ],
+                "max_results": 100
+              }
+            }
+          ]
+        }
+      ],
+      "target_modes": [
+        "LOCAL"
+      ],
+      "human_required_now": true,
+      "execution_proposal": "Chạy technical observations mặc định; human requirement giữ MANUAL_REVIEW; independent finding lane không nâng heuristic thành normative conclusion.",
+      "human_boundary": "Trace each deployed webhook route to the actual signature verifier. Retain the signature algorithm/key source, exact signed payload construction, rejection tests for invalid signatures and replay/freshness controls. Nearby hash/HMAC keywords do not establish successful authentication.",
+      "fixture_acceptance": "Unsigned route B vẫn finding khi route A có HMAC; replay/wrong secret/raw-body test.",
+      "collection_acceptance": "Missing/unreadable/oversized/truncated scope báo explicit UNKNOWN/incomplete; giữ finding đã đọc; no-sink hợp lệ chỉ scoped observation, không application-wide PASS.",
+      "source_refs": [
+        "src/Rules/requirements/internal-catalog.json#MB-0075 TemplateRequestSourceChecks.php src/Engine/Collectors/CodeInventoryCollector.php:16 src/Engine/RequirementAssessmentEvaluator.php:31"
+      ],
+      "priority": "P1"
+    },
+    {
+      "id": "MB-0076",
+      "title": "Outbound connections restricted by allow-list",
+      "decision": "SUPPORT",
+      "proposed_claim": "App allowlist/timeout và system egress evidence tách riêng.",
+      "checks": [
+        {
+          "name": "system_egress_restricted",
+          "args": []
+        },
+        {
+          "name": "code_outbound_egress_controls",
+          "args": {
+            "paths": [
+              "app/code",
+              "app/etc"
+            ],
+            "include_ext": [
+              "php"
+            ],
+            "max_results": 100
+          }
+        }
+      ],
+      "obligations": [
+        {
+          "id": "O001",
+          "op": "any",
+          "role": "supporting",
+          "proof": "heuristic",
+          "checks": [
+            {
+              "name": "system_egress_restricted",
+              "args": []
+            },
+            {
+              "name": "code_outbound_egress_controls",
+              "args": {
+                "paths": [
+                  "app/code",
+                  "app/etc"
+                ],
+                "include_ext": [
+                  "php"
+                ],
+                "max_results": 100
+              }
+            }
+          ]
+        }
+      ],
+      "target_modes": [
+        "LOCAL"
+      ],
+      "human_required_now": true,
+      "execution_proposal": "Chạy technical observations mặc định; human requirement giữ MANUAL_REVIEW; independent finding lane không nâng heuristic thành normative conclusion.",
+      "human_boundary": "Inventory required outbound destinations and inspect the active firewall/proxy/network policy plus application destination validation. Test allowed and prohibited destinations using approved non-destructive probes, including redirect destinations. Repository allowlist tokens are supporting evidence only.",
+      "fixture_acceptance": "App config không firewall proof; proxy/DNS/redirect bypass; controlled traffic test.",
+      "collection_acceptance": "Missing/unreadable/oversized/truncated scope báo explicit UNKNOWN/incomplete; giữ finding đã đọc; no-sink hợp lệ chỉ scoped observation, không application-wide PASS.",
+      "source_refs": [
+        "src/Rules/requirements/internal-catalog.json#MB-0076 InputSafetySourceChecks.php src/Engine/Collectors/CodeInventoryCollector.php:16 src/Engine/RequirementAssessmentEvaluator.php:31"
+      ],
+      "priority": "P2"
+    },
+    {
+      "id": "MB-0077",
+      "title": "PII minimization for third-party flows",
+      "decision": "SUPPORT",
+      "proposed_claim": "Raw PII candidates trong third-party outbound flows.",
+      "checks": [
+        {
+          "name": "code_pii_minimization",
+          "args": {
+            "paths": [
+              "app/code"
+            ],
+            "include_ext": [
+              "php"
+            ],
+            "max_results": 100
+          }
+        }
+      ],
+      "obligations": [
+        {
+          "id": "O001",
+          "op": "all",
+          "role": "supporting",
+          "proof": "heuristic",
+          "checks": [
+            {
+              "name": "code_pii_minimization",
+              "args": {
+                "paths": [
+                  "app/code"
+                ],
+                "include_ext": [
+                  "php"
+                ],
+                "max_results": 100
+              }
+            }
+          ]
+        }
+      ],
+      "target_modes": [
+        "LOCAL"
+      ],
+      "human_required_now": true,
+      "execution_proposal": "Chạy technical observations mặc định; human requirement giữ MANUAL_REVIEW; independent finding lane không nâng heuristic thành normative conclusion.",
+      "human_boundary": "Inventory personal-data fields sent to each third party, purpose and retention. Compare actual masked outbound payloads and deployed mapping/filtering against approved minimum fields. A source keyword match or its absence does not establish minimized runtime data flows.",
+      "fixture_acceptance": "Unrelated mask keyword; hashed data vẫn identifiable; review purpose/schema.",
+      "collection_acceptance": "Missing/unreadable/oversized/truncated scope báo explicit UNKNOWN/incomplete; giữ finding đã đọc; no-sink hợp lệ chỉ scoped observation, không application-wide PASS.",
+      "source_refs": [
+        "src/Rules/requirements/internal-catalog.json#MB-0077 DataProtectionSourceChecks.php src/Engine/Collectors/CodeInventoryCollector.php:16 src/Engine/RequirementAssessmentEvaluator.php:31"
+      ],
+      "priority": "P2"
+    },
+    {
+      "id": "MB-0078",
+      "title": "Strong TLS ciphers on upstream gateways",
+      "decision": "SUPPORT",
+      "proposed_claim": "Configured upstream cipher policy; runtime negotiation riêng.",
+      "checks": [
+        {
+          "name": "webserver_tls_ciphers",
+          "args": {
+            "files": [
+              "nginx.conf",
+              "pub/.htaccess",
+              ".htaccess",
+              "apache.conf"
+            ],
+            "require_protocols": true,
+            "require_ciphers": true
+          }
+        }
+      ],
+      "obligations": [
+        {
+          "id": "O001",
+          "op": "all",
+          "role": "supporting",
+          "proof": "heuristic",
+          "checks": [
+            {
+              "name": "webserver_tls_ciphers",
+              "args": {
+                "files": [
+                  "nginx.conf",
+                  "pub/.htaccess",
+                  ".htaccess",
+                  "apache.conf"
+                ],
+                "require_protocols": true,
+                "require_ciphers": true
+              }
+            }
+          ]
+        }
+      ],
+      "target_modes": [
+        "LOCAL"
+      ],
+      "human_required_now": true,
+      "execution_proposal": "Chạy technical observations mặc định; human requirement giữ MANUAL_REVIEW; independent finding lane không nâng heuristic thành normative conclusion.",
+      "human_boundary": "Verify active gateway TLS protocols and cipher negotiation; inactive repository web-server configuration is supporting evidence only.",
+      "fixture_acceptance": "Inactive config, CDN/load balancer overrides; route-specific handshake.",
+      "collection_acceptance": "Missing/unreadable/oversized/truncated scope báo explicit UNKNOWN/incomplete; giữ finding đã đọc; no-sink hợp lệ chỉ scoped observation, không application-wide PASS.",
+      "source_refs": [
+        "src/Rules/requirements/internal-catalog.json#MB-0078 CheckRegistry.php (deployment/dependency shared Basic/Hardening) src/Engine/Collectors/CodeInventoryCollector.php:16 src/Engine/RequirementAssessmentEvaluator.php:31"
+      ],
+      "priority": "P2"
+    },
+    {
+      "id": "MB-0079",
+      "title": "API keys stored in env.php (not in DB/plain code)",
+      "decision": "REPLACE",
+      "proposed_claim": "Secret không hardcode, dùng approved protected storage; không bắt env.php.",
+      "checks": [
+        {
+          "name": "code_api_key_storage",
+          "args": {
+            "env_file": "app/etc/env.php",
+            "paths": [
+              "app/code",
+              "app/etc",
+              "app/design",
+              "setup"
+            ],
+            "include_ext": [
+              "php",
+              "phtml",
+              "xml",
+              "sql"
+            ],
+            "max_results": 100
+          }
+        }
+      ],
+      "obligations": [
+        {
+          "id": "O001",
+          "op": "all",
+          "role": "supporting",
+          "proof": "heuristic",
+          "checks": [
+            {
+              "name": "code_api_key_storage",
+              "args": {
+                "env_file": "app/etc/env.php",
+                "paths": [
+                  "app/code",
+                  "app/etc",
+                  "app/design",
+                  "setup"
+                ],
+                "include_ext": [
+                  "php",
+                  "phtml",
+                  "xml",
+                  "sql"
+                ],
+                "max_results": 100
+              }
+            }
+          ]
+        }
+      ],
+      "target_modes": [
+        "LOCAL"
+      ],
+      "human_required_now": true,
+      "execution_proposal": "Chạy technical observations mặc định; human requirement giữ MANUAL_REVIEW; independent finding lane không nâng heuristic thành normative conclusion.",
+      "human_boundary": "Review secret storage and database configuration with redacted evidence; static source scanning cannot establish absence of API keys in the database.",
+      "fixture_acceptance": "Vault/env injection/encrypted DB hợp lệ; plain source secret finding và redact.",
+      "collection_acceptance": "Missing/unreadable/oversized/truncated scope báo explicit UNKNOWN/incomplete; giữ finding đã đọc; no-sink hợp lệ chỉ scoped observation, không application-wide PASS.",
+      "source_refs": [
+        "src/Rules/requirements/internal-catalog.json#MB-0079 DataProtectionSourceChecks.php src/Engine/Collectors/CodeInventoryCollector.php:16 src/Engine/RequirementAssessmentEvaluator.php:31"
+      ],
+      "priority": "P1"
+    },
+    {
+      "id": "MB-0081",
+      "title": "SaaS integrations scoped by ACL (least privilege/IP allowlist)",
+      "decision": "SUPPORT",
+      "proposed_claim": "SaaS entry-point ACL/IP scope signals chưa proof least privilege.",
+      "checks": [
+        {
+          "name": "code_saas_integration_scoped",
+          "args": {
+            "paths": [
+              "app/code",
+              "app/etc"
+            ],
+            "include_ext": [
+              "php",
+              "xml"
+            ],
+            "max_results": 100
+          }
+        }
+      ],
+      "obligations": [
+        {
+          "id": "O001",
+          "op": "all",
+          "role": "supporting",
+          "proof": "heuristic",
+          "checks": [
+            {
+              "name": "code_saas_integration_scoped",
+              "args": {
+                "paths": [
+                  "app/code",
+                  "app/etc"
+                ],
+                "include_ext": [
+                  "php",
+                  "xml"
+                ],
+                "max_results": 100
+              }
+            }
+          ]
+        }
+      ],
+      "target_modes": [
+        "LOCAL"
+      ],
+      "human_required_now": true,
+      "execution_proposal": "Chạy technical observations mặc định; human requirement giữ MANUAL_REVIEW; independent finding lane không nâng heuristic thành normative conclusion.",
+      "human_boundary": "Inventory each deployed SaaS credential and integration account, with masked identifiers. Verify effective provider-side permissions, application authorization and any actual IP/network restrictions against required operations. Source ACL/IP keywords do not prove least privilege.",
+      "fixture_acceptance": "Broad admin ACL; isLoggedIn không ownership; external OAuth scope.",
+      "collection_acceptance": "Missing/unreadable/oversized/truncated scope báo explicit UNKNOWN/incomplete; giữ finding đã đọc; no-sink hợp lệ chỉ scoped observation, không application-wide PASS.",
+      "source_refs": [
+        "src/Rules/requirements/internal-catalog.json#MB-0081 DataProtectionSourceChecks.php src/Engine/Collectors/CodeInventoryCollector.php:16 src/Engine/RequirementAssessmentEvaluator.php:31"
+      ],
+      "priority": "P2"
+    },
+    {
+      "id": "MB-0089",
+      "title": "Checkout Content Security Policy enforced",
+      "decision": "SUPPORT",
+      "proposed_claim": "Checkout CSP declarations/runtime headers theo route.",
+      "checks": [
+        {
+          "name": "code_checkout_csp_enforced",
+          "args": {
+            "paths": [
+              "app/code",
+              "app/etc",
+              "app/design",
+              "pub/.htaccess",
+              ".htaccess",
+              "nginx.conf"
+            ],
+            "include_ext": [
+              "xml",
+              "php",
+              "phtml",
+              "html",
+              "conf",
+              "htaccess"
+            ],
+            "required_directives": [
+              "script-src",
+              "connect-src",
+              "frame-src",
+              "form-action",
+              "object-src",
+              "base-uri"
+            ],
+            "require_reporting": true
+          }
+        }
+      ],
+      "obligations": [
+        {
+          "id": "O001",
+          "op": "all",
+          "role": "supporting",
+          "proof": "heuristic",
+          "checks": [
+            {
+              "name": "code_checkout_csp_enforced",
+              "args": {
+                "paths": [
+                  "app/code",
+                  "app/etc",
+                  "app/design",
+                  "pub/.htaccess",
+                  ".htaccess",
+                  "nginx.conf"
+                ],
+                "include_ext": [
+                  "xml",
+                  "php",
+                  "phtml",
+                  "html",
+                  "conf",
+                  "htaccess"
+                ],
+                "required_directives": [
+                  "script-src",
+                  "connect-src",
+                  "frame-src",
+                  "form-action",
+                  "object-src",
+                  "base-uri"
+                ],
+                "require_reporting": true
+              }
+            }
+          ]
+        }
+      ],
+      "target_modes": [
+        "LOCAL"
+      ],
+      "human_required_now": true,
+      "execution_proposal": "Chạy technical observations mặc định; human requirement giữ MANUAL_REVIEW; independent finding lane không nâng heuristic thành normative conclusion.",
+      "human_boundary": "Verify enforcing CSP headers on actual checkout responses and the effective Magento CSP mode; source declarations alone do not prove enforcement.",
+      "fixture_acceptance": "Report-only != enforced; nonce misuse; actual third-party inventory.",
+      "collection_acceptance": "Missing/unreadable/oversized/truncated scope báo explicit UNKNOWN/incomplete; giữ finding đã đọc; no-sink hợp lệ chỉ scoped observation, không application-wide PASS.",
+      "source_refs": [
+        "src/Rules/requirements/internal-catalog.json#MB-0089 CheckRegistry.php (deployment/dependency shared Basic/Hardening) src/Engine/Collectors/CodeInventoryCollector.php:16 src/Engine/RequirementAssessmentEvaluator.php:31"
+      ],
+      "priority": "P2"
+    },
+    {
+      "id": "MB-0094",
+      "title": "Custom controllers and APIs include function-level authorization",
+      "decision": "REVISE",
+      "proposed_claim": "Custom controller/API thiếu authorization signals; không proof IDOR prevention.",
+      "checks": [
+        {
+          "name": "code_custom_authorization_checks",
+          "args": {
+            "paths": [
+              "app/code",
+              "app/etc"
+            ],
+            "include_ext": [
+              "php",
+              "xml"
+            ],
+            "max_results": 100
+          }
+        }
+      ],
+      "obligations": [
+        {
+          "id": "O001",
+          "op": "all",
+          "role": "supporting",
+          "proof": "heuristic",
+          "checks": [
+            {
+              "name": "code_custom_authorization_checks",
+              "args": {
+                "paths": [
+                  "app/code",
+                  "app/etc"
+                ],
+                "include_ext": [
+                  "php",
+                  "xml"
+                ],
+                "max_results": 100
+              }
+            }
+          ]
+        }
+      ],
+      "target_modes": [
+        "LOCAL"
+      ],
+      "human_required_now": true,
+      "execution_proposal": "Chạy technical observations mặc định; human requirement giữ MANUAL_REVIEW; independent finding lane không nâng heuristic thành normative conclusion.",
+      "human_boundary": "Inventory custom controller/API actions and intended roles. Trace server-side function authorization at each action and retain approved negative tests for unauthorized roles and alternate routes. A nearby ACL or authorization class name does not prove all actions are protected.",
+      "fixture_acceptance": "getCustomerId có mặt nhưng không compare owner; two-user cross-object test; helper guard.",
+      "collection_acceptance": "Missing/unreadable/oversized/truncated scope báo explicit UNKNOWN/incomplete; giữ finding đã đọc; no-sink hợp lệ chỉ scoped observation, không application-wide PASS.",
+      "source_refs": [
+        "src/Rules/requirements/internal-catalog.json#MB-0094 AuthorizationSourceChecks.php src/Engine/Collectors/CodeInventoryCollector.php:16 src/Engine/RequirementAssessmentEvaluator.php:31"
+      ],
+      "priority": "P1"
+    },
+    {
+      "id": "MB-0095",
+      "title": "GraphQL and API exposure minimized",
+      "decision": "REVISE",
+      "proposed_claim": "Anonymous webapi/GraphQL exposure inventory và sensitivity triage.",
+      "checks": [
+        {
+          "name": "code_api_exposure_minimized",
+          "args": {
+            "paths": [
+              "app/code",
+              "app/etc"
+            ],
+            "include_ext": [
+              "xml",
+              "graphqls",
+              "php"
+            ],
+            "max_results": 100
+          }
+        }
+      ],
+      "obligations": [
+        {
+          "id": "O001",
+          "op": "all",
+          "role": "supporting",
+          "proof": "heuristic",
+          "checks": [
+            {
+              "name": "code_api_exposure_minimized",
+              "args": {
+                "paths": [
+                  "app/code",
+                  "app/etc"
+                ],
+                "include_ext": [
+                  "xml",
+                  "graphqls",
+                  "php"
+                ],
+                "max_results": 100
+              }
+            }
+          ]
+        }
+      ],
+      "target_modes": [
+        "LOCAL"
+      ],
+      "human_required_now": true,
+      "execution_proposal": "Chạy technical observations mặc định; human requirement giữ MANUAL_REVIEW; independent finding lane không nâng heuristic thành normative conclusion.",
+      "human_boundary": "Inventory deployed GraphQL/API operations, enabled features and intended consumers. Verify effective schema/route exposure, authentication, authorization and unnecessary endpoints through approved requests; source declarations do not prove runtime exposure is minimized.",
+      "fixture_acceptance": "Public catalog hợp lệ; private order resolver; indirect resolver/helper.",
+      "collection_acceptance": "Missing/unreadable/oversized/truncated scope báo explicit UNKNOWN/incomplete; giữ finding đã đọc; no-sink hợp lệ chỉ scoped observation, không application-wide PASS.",
+      "source_refs": [
+        "src/Rules/requirements/internal-catalog.json#MB-0095 AuthorizationSourceChecks.php src/Engine/Collectors/CodeInventoryCollector.php:16 src/Engine/RequirementAssessmentEvaluator.php:31"
+      ],
+      "priority": "P1"
+    },
+    {
+      "id": "MB-0096",
+      "title": "Security headers baseline enforced",
+      "decision": "SUPPORT",
+      "proposed_claim": "Security-header evidence theo route/origin/status đã probe.",
+      "checks": [
+        {
+          "name": "code_security_headers_baseline",
+          "args": {
+            "paths": [
+              "app/etc",
+              "app/code",
+              "app/design",
+              "pub/.htaccess",
+              ".htaccess",
+              "nginx.conf"
+            ],
+            "include_ext": [
+              "xml",
+              "php",
+              "phtml",
+              "html",
+              "conf",
+              "htaccess"
+            ]
+          }
+        }
+      ],
+      "obligations": [
+        {
+          "id": "O001",
+          "op": "all",
+          "role": "supporting",
+          "proof": "heuristic",
+          "checks": [
+            {
+              "name": "code_security_headers_baseline",
+              "args": {
+                "paths": [
+                  "app/etc",
+                  "app/code",
+                  "app/design",
+                  "pub/.htaccess",
+                  ".htaccess",
+                  "nginx.conf"
+                ],
+                "include_ext": [
+                  "xml",
+                  "php",
+                  "phtml",
+                  "html",
+                  "conf",
+                  "htaccess"
+                ]
+              }
+            }
+          ]
+        }
+      ],
+      "target_modes": [
+        "LOCAL"
+      ],
+      "human_required_now": true,
+      "execution_proposal": "Chạy technical observations mặc định; human requirement giữ MANUAL_REVIEW; independent finding lane không nâng heuristic thành normative conclusion.",
+      "human_boundary": "Verify security headers emitted by successful application responses; source declarations alone do not prove runtime policy.",
+      "fixture_acceptance": "Config chưa active; redirect/error/checkout differences.",
+      "collection_acceptance": "Missing/unreadable/oversized/truncated scope báo explicit UNKNOWN/incomplete; giữ finding đã đọc; no-sink hợp lệ chỉ scoped observation, không application-wide PASS.",
+      "source_refs": [
+        "src/Rules/requirements/internal-catalog.json#MB-0096 CheckRegistry.php (deployment/dependency shared Basic/Hardening) src/Engine/Collectors/CodeInventoryCollector.php:16 src/Engine/RequirementAssessmentEvaluator.php:31"
+      ],
+      "priority": "P2"
+    },
+    {
+      "id": "MB-0097",
+      "title": "Secrets are not hardcoded in custom code",
+      "decision": "REVISE",
+      "proposed_claim": "Hardcoded credential candidates ngoài approved storage, redacted evidence.",
+      "checks": [
+        {
+          "name": "code_hardcoded_secrets",
+          "args": {
+            "paths": [
+              "app",
+              "app/design"
+            ],
+            "include_ext": [
+              "php",
+              "phtml",
+              "js",
+              "xml",
+              "json",
+              "env",
+              "dist",
+              "txt",
+              "pem",
+              "key",
+              "yml",
+              "yaml"
+            ],
+            "allowed_files": [
+              "app/etc/env.php"
+            ],
+            "max_results": 100
+          }
+        }
+      ],
+      "obligations": [
+        {
+          "id": "O001",
+          "op": "all",
+          "role": "supporting",
+          "proof": "heuristic",
+          "checks": [
+            {
+              "name": "code_hardcoded_secrets",
+              "args": {
+                "paths": [
+                  "app",
+                  "app/design"
+                ],
+                "include_ext": [
+                  "php",
+                  "phtml",
+                  "js",
+                  "xml",
+                  "json",
+                  "env",
+                  "dist",
+                  "txt",
+                  "pem",
+                  "key",
+                  "yml",
+                  "yaml"
+                ],
+                "allowed_files": [
+                  "app/etc/env.php"
+                ],
+                "max_results": 100
+              }
+            }
+          ]
+        }
+      ],
+      "target_modes": [
+        "LOCAL"
+      ],
+      "human_required_now": true,
+      "execution_proposal": "Chạy technical observations mặc định; human requirement giữ MANUAL_REVIEW; independent finding lane không nâng heuristic thành normative conclusion.",
+      "human_boundary": "Confirm whether flagged literals are actual credentials and inspect dynamic secret sources; secret-like constant names alone do not prove hardcoded secrets.",
+      "fixture_acceptance": "Real secret vs example/test; env injection; JSON/HTML/log không plaintext secret.",
+      "collection_acceptance": "Missing/unreadable/oversized/truncated scope báo explicit UNKNOWN/incomplete; giữ finding đã đọc; no-sink hợp lệ chỉ scoped observation, không application-wide PASS.",
+      "source_refs": [
+        "src/Rules/requirements/internal-catalog.json#MB-0097 DataProtectionSourceChecks.php src/Engine/Collectors/CodeInventoryCollector.php:16 src/Engine/RequirementAssessmentEvaluator.php:31"
+      ],
+      "priority": "P1"
+    },
+    {
+      "id": "MB-0098",
+      "title": "Unsafe XML parsing disabled",
+      "decision": "REVISE",
+      "proposed_claim": "Unsafe XML parsing/entity expansion signals.",
+      "checks": [
+        {
+          "name": "code_unsafe_xml_parsing",
+          "args": {
+            "paths": [
+              "app"
+            ],
+            "include_ext": [
+              "php"
+            ],
+            "max_results": 100
+          }
+        }
+      ],
+      "obligations": [
+        {
+          "id": "O001",
+          "op": "all",
+          "role": "supporting",
+          "proof": "heuristic",
+          "checks": [
+            {
+              "name": "code_unsafe_xml_parsing",
+              "args": {
+                "paths": [
+                  "app"
+                ],
+                "include_ext": [
+                  "php"
+                ],
+                "max_results": 100
+              }
+            }
+          ]
+        }
+      ],
+      "target_modes": [
+        "LOCAL"
+      ],
+      "human_required_now": true,
+      "execution_proposal": "Chạy technical observations mặc định; human requirement giữ MANUAL_REVIEW; independent finding lane không nâng heuristic thành normative conclusion.",
+      "human_boundary": "Review XML parser version, entity options and actual untrusted input; a nearby LIBXML flag alone does not prove exploitable XXE.",
+      "fixture_acceptance": "NONET với file entity; version/defaults; safe local XML; empty UNKNOWN.",
+      "collection_acceptance": "Missing/unreadable/oversized/truncated scope báo explicit UNKNOWN/incomplete; giữ finding đã đọc; no-sink hợp lệ chỉ scoped observation, không application-wide PASS.",
+      "source_refs": [
+        "src/Rules/requirements/internal-catalog.json#MB-0098 DataProtectionSourceChecks.php src/Engine/Collectors/CodeInventoryCollector.php:16 src/Engine/RequirementAssessmentEvaluator.php:31"
+      ],
+      "priority": "P1"
+    },
+    {
+      "id": "MB-0099",
+      "title": "File download and export endpoints require authorization",
+      "decision": "REVISE",
+      "proposed_claim": "Download/export thiếu authorization/ownership signals.",
+      "checks": [
+        {
+          "name": "code_download_export_authorization",
+          "args": {
+            "paths": [
+              "app/code"
+            ],
+            "include_ext": [
+              "php",
+              "xml"
+            ],
+            "max_results": 100
+          }
+        }
+      ],
+      "obligations": [
+        {
+          "id": "O001",
+          "op": "all",
+          "role": "supporting",
+          "proof": "heuristic",
+          "checks": [
+            {
+              "name": "code_download_export_authorization",
+              "args": {
+                "paths": [
+                  "app/code"
+                ],
+                "include_ext": [
+                  "php",
+                  "xml"
+                ],
+                "max_results": 100
+              }
+            }
+          ]
+        }
+      ],
+      "target_modes": [
+        "LOCAL"
+      ],
+      "human_required_now": true,
+      "execution_proposal": "Chạy technical observations mặc định; human requirement giữ MANUAL_REVIEW; independent finding lane không nâng heuristic thành normative conclusion.",
+      "human_boundary": "Trace each deployed file-download/export endpoint through identity, role and object/tenant authorization before file retrieval. Retain negative tests using approved accounts and benign files. A generic authorization keyword does not establish checks for each requested object.",
+      "fixture_acceptance": "Logged-in user tải invoice người khác; signed link expiry; safe public export.",
+      "collection_acceptance": "Missing/unreadable/oversized/truncated scope báo explicit UNKNOWN/incomplete; giữ finding đã đọc; no-sink hợp lệ chỉ scoped observation, không application-wide PASS.",
+      "source_refs": [
+        "src/Rules/requirements/internal-catalog.json#MB-0099 AuthorizationSourceChecks.php src/Engine/Collectors/CodeInventoryCollector.php:16 src/Engine/RequirementAssessmentEvaluator.php:31"
+      ],
+      "priority": "P1"
+    },
+    {
+      "id": "MB-0105",
+      "title": "Context-specific output encoding and escaping",
+      "decision": "REVISE",
+      "proposed_claim": "Output expressions thiếu context-appropriate escaping signals.",
+      "checks": [
+        {
+          "name": "code_phtml_escaped_output",
+          "args": {
+            "paths": [
+              "app"
+            ],
+            "escape_functions": [
+              "escapeHtml",
+              "escapeHtmlAttr",
+              "escapeUrl",
+              "escapeJs",
+              "escapeCss"
+            ]
+          }
+        },
+        {
+          "name": "code_js_context_escaping",
+          "args": {
+            "paths": [
+              "app"
+            ],
+            "include_ext": [
+              "phtml",
+              "html"
+            ]
+          }
+        },
+        {
+          "name": "code_phtml_escaped_output",
+          "args": {
+            "paths": [
+              "app"
+            ],
+            "escape_functions": [
+              "escapeHtml",
+              "escapeHtmlAttr",
+              "escapeUrl",
+              "escapeJs",
+              "escapeCss"
+            ]
+          }
+        },
+        {
+          "name": "code_js_context_escaping",
+          "args": {
+            "paths": [
+              "app"
+            ],
+            "include_ext": [
+              "phtml",
+              "html"
+            ]
+          }
+        }
+      ],
+      "obligations": [
+        {
+          "op": "all",
+          "role": "supporting",
+          "proof": "heuristic",
+          "checks": [
+            {
+              "name": "code_phtml_escaped_output",
+              "args": {
+                "paths": [
+                  "app"
+                ],
+                "escape_functions": [
+                  "escapeHtml",
+                  "escapeHtmlAttr",
+                  "escapeUrl",
+                  "escapeJs",
+                  "escapeCss"
+                ]
+              }
+            }
+          ],
+          "id": "O001"
+        },
+        {
+          "op": "all",
+          "role": "supporting",
+          "proof": "heuristic",
+          "checks": [
+            {
+              "name": "code_js_context_escaping",
+              "args": {
+                "paths": [
+                  "app"
+                ],
+                "include_ext": [
+                  "phtml",
+                  "html"
+                ]
+              }
+            }
+          ],
+          "id": "O002"
+        },
+        {
+          "op": "all",
+          "role": "supporting",
+          "proof": "heuristic",
+          "checks": [
+            {
+              "name": "code_phtml_escaped_output",
+              "args": {
+                "paths": [
+                  "app"
+                ],
+                "escape_functions": [
+                  "escapeHtml",
+                  "escapeHtmlAttr",
+                  "escapeUrl",
+                  "escapeJs",
+                  "escapeCss"
+                ]
+              }
+            }
+          ],
+          "id": "O003"
+        },
+        {
+          "op": "all",
+          "role": "supporting",
+          "proof": "heuristic",
+          "checks": [
+            {
+              "name": "code_js_context_escaping",
+              "args": {
+                "paths": [
+                  "app"
+                ],
+                "include_ext": [
+                  "phtml",
+                  "html"
+                ]
+              }
+            }
+          ],
+          "id": "O004"
+        }
+      ],
+      "target_modes": [
+        "LOCAL",
+        "REMOTE"
+      ],
+      "human_required_now": true,
+      "execution_proposal": "Chạy technical observations mặc định; human requirement giữ MANUAL_REVIEW; independent finding lane không nâng heuristic thành normative conclusion.",
+      "human_boundary": "Verify that output encoding for an HTTP response, HTML document, or XML document is relevant for the context required, such as encoding the relevant characters for HTML elements, HTML attributes, HTML comments, CSS, or HTTP header fields, to avoid changing the message or document structure. Verify that output encoding or escaping is used when dynamically building JavaScript content (including JSON), to avoid changing the message or document structure (to avoid JavaScript and JSON injection). Template output is escaped; assess only the collected Magento deployment scope. Escaping for JS context; assess only the collected Magento deployment scope. Human assessment must confirm all conditions across the declared contexts; scoped observations do not prove the other conditions. Evidence scope notes: PHTML output escaping is checked; header and CSS contexts still need review. JavaScript-context escaping patterns are checked. Template output is escaped; assess only the collected Magento deployment scope. Escaping for JS context; assess only the collected Magento deployment scope. Trace the relevant untrusted input to each interpreter/output context in implementation code; inspect canonicalization, encoding or sanitizer calls and run context-specific bypass tests in an authorized test environment. Apply the exact criterion for ASVS 1.2.1, 1.2.3 shown on this requirement. Record expected versus observed behavior, applicability, coverage gaps and the reviewer conclusion. Supporting check errors are evidence gaps for this review; do not treat a pattern match or missing collector response as verified conformance. Do not attach credentials, tokens, keys or raw personal/payment data.",
+      "fixture_acceptance": "escapeHtml trong JS không safe; closing-script JSON; trusted literal; dedupe obligations.",
+      "collection_acceptance": "Missing/unreadable/oversized/truncated scope báo explicit UNKNOWN/incomplete; giữ finding đã đọc; no-sink hợp lệ chỉ scoped observation, không application-wide PASS.",
+      "source_refs": [
+        "src/Rules/requirements/internal-catalog.json#MB-0105 TemplateRequestSourceChecks.php src/Engine/Collectors/CodeInventoryCollector.php:16 src/Engine/RequirementAssessmentEvaluator.php:31"
+      ],
+      "priority": "P1"
+    },
+    {
+      "id": "MB-0108",
+      "title": "Database queries use safe construction and abstraction",
+      "decision": "REVISE",
+      "proposed_claim": "Raw/direct DB APIs và unsafe construction candidates, không proof SQLi.",
+      "checks": [
+        {
+          "name": "code_raw_sql",
+          "args": {
+            "paths": [
+              "app"
+            ],
+            "include_ext": [
+              "php",
+              "phtml"
+            ]
+          }
+        },
+        {
+          "name": "code_raw_sql",
+          "args": {
+            "paths": [
+              "app"
+            ],
+            "include_ext": [
+              "php",
+              "phtml"
+            ]
+          }
+        }
+      ],
+      "obligations": [
+        {
+          "op": "all",
+          "role": "supporting",
+          "proof": "heuristic",
+          "checks": [
+            {
+              "name": "code_raw_sql",
+              "args": {
+                "paths": [
+                  "app"
+                ],
+                "include_ext": [
+                  "php",
+                  "phtml"
+                ]
+              }
+            }
+          ],
+          "id": "O001"
+        },
+        {
+          "op": "all",
+          "role": "supporting",
+          "proof": "heuristic",
+          "checks": [
+            {
+              "name": "code_raw_sql",
+              "args": {
+                "paths": [
+                  "app"
+                ],
+                "include_ext": [
+                  "php",
+                  "phtml"
+                ]
+              }
+            }
+          ],
+          "id": "O002"
+        }
+      ],
+      "target_modes": [
+        "LOCAL",
+        "REMOTE"
+      ],
+      "human_required_now": true,
+      "execution_proposal": "Chạy technical observations mặc định; human requirement giữ MANUAL_REVIEW; independent finding lane không nâng heuristic thành normative conclusion.",
+      "human_boundary": "Verify that data selection or database queries (e.g., SQL, HQL, NoSQL, Cypher) use parameterized queries, ORMs, entity frameworks, or are otherwise protected from SQL Injection and other database injection attacks. This is also relevant when writing stored procedures. No raw SQL without abstraction; assess only the collected Magento deployment scope. Human assessment must confirm all conditions across the declared contexts; scoped observations do not prove the other conditions. Evidence scope notes: Unsafe raw SQL patterns are checked; runtime query behavior is not exhaustively proven. No raw SQL without abstraction; assess only the collected Magento deployment scope. Trace the relevant untrusted input to each interpreter/output context in implementation code; inspect canonicalization, encoding or sanitizer calls and run context-specific bypass tests in an authorized test environment. Apply the exact criterion for ASVS 1.2.4 shown on this requirement. Record expected versus observed behavior, applicability, coverage gaps and the reviewer conclusion. Supporting check errors are evidence gaps for this review; do not treat a pattern match or missing collector response as verified conformance. Do not attach credentials, tokens, keys or raw personal/payment data.",
+      "fixture_acceptance": "Prepared PDO/bound query không SQLi; query variable/wrapper missed; comments.",
+      "collection_acceptance": "Missing/unreadable/oversized/truncated scope báo explicit UNKNOWN/incomplete; giữ finding đã đọc; no-sink hợp lệ chỉ scoped observation, không application-wide PASS.",
+      "source_refs": [
+        "src/Rules/requirements/internal-catalog.json#MB-0108 InputSafetySourceChecks.php src/Engine/Collectors/CodeInventoryCollector.php:16 src/Engine/RequirementAssessmentEvaluator.php:31"
+      ],
+      "priority": "P1"
+    },
+    {
+      "id": "MB-0109",
+      "title": "OS commands use approved, injection-safe execution",
+      "decision": "REVISE",
+      "proposed_claim": "Command execution sinks và guard signals để triage.",
+      "checks": [
+        {
+          "name": "code_command_execution_safety",
+          "args": {
+            "paths": [
+              "app"
+            ],
+            "include_ext": [
+              "php"
+            ]
+          }
+        },
+        {
+          "name": "code_command_execution_safety",
+          "args": {
+            "paths": [
+              "app"
+            ],
+            "include_ext": [
+              "php"
+            ]
+          }
+        }
+      ],
+      "obligations": [
+        {
+          "op": "all",
+          "role": "supporting",
+          "proof": "heuristic",
+          "checks": [
+            {
+              "name": "code_command_execution_safety",
+              "args": {
+                "paths": [
+                  "app"
+                ],
+                "include_ext": [
+                  "php"
+                ]
+              }
+            }
+          ],
+          "id": "O001"
+        },
+        {
+          "op": "all",
+          "role": "supporting",
+          "proof": "heuristic",
+          "checks": [
+            {
+              "name": "code_command_execution_safety",
+              "args": {
+                "paths": [
+                  "app"
+                ],
+                "include_ext": [
+                  "php"
+                ]
+              }
+            }
+          ],
+          "id": "O002"
+        }
+      ],
+      "target_modes": [
+        "LOCAL",
+        "REMOTE"
+      ],
+      "human_required_now": true,
+      "execution_proposal": "Chạy technical observations mặc định; human requirement giữ MANUAL_REVIEW; independent finding lane không nâng heuristic thành normative conclusion.",
+      "human_boundary": "Verify that the application protects against OS command injection and that operating system calls use parameterized OS queries or use contextual command line output encoding. Command execution is guarded; assess only the collected Magento deployment scope. Human assessment must confirm all conditions across the declared contexts; scoped observations do not prove the other conditions. Evidence scope notes: Command execution sinks and guards are checked statically. Command execution is guarded; assess only the collected Magento deployment scope. Trace the relevant untrusted input to each interpreter/output context in implementation code; inspect canonicalization, encoding or sanitizer calls and run context-specific bypass tests in an authorized test environment. Apply the exact criterion for ASVS 1.2.5 shown on this requirement. Record expected versus observed behavior, applicability, coverage gaps and the reviewer conclusion. Supporting check errors are evidence gaps for this review; do not treat a pattern match or missing collector response as verified conformance. Do not attach credentials, tokens, keys or raw personal/payment data.",
+      "fixture_acceptance": "escapeshellcmd full untrusted command không đủ; unrelated guard keyword; Process argv safe.",
+      "collection_acceptance": "Missing/unreadable/oversized/truncated scope báo explicit UNKNOWN/incomplete; giữ finding đã đọc; no-sink hợp lệ chỉ scoped observation, không application-wide PASS.",
+      "source_refs": [
+        "src/Rules/requirements/internal-catalog.json#MB-0109 InputSafetySourceChecks.php src/Engine/Collectors/CodeInventoryCollector.php:16 src/Engine/RequirementAssessmentEvaluator.php:31"
+      ],
+      "priority": "P1"
+    },
+    {
+      "id": "MB-0131",
+      "title": "Safe deserialization of untrusted data",
+      "decision": "REVISE",
+      "proposed_claim": "Native deserialization sinks cần review trust boundary.",
+      "checks": [
+        {
+          "name": "code_unserialize_safety",
+          "args": {
+            "paths": [
+              "app"
+            ],
+            "include_ext": [
+              "php"
+            ]
+          }
+        },
+        {
+          "name": "code_unserialize_safety",
+          "args": {
+            "paths": [
+              "app"
+            ],
+            "include_ext": [
+              "php"
+            ]
+          }
+        }
+      ],
+      "obligations": [
+        {
+          "op": "all",
+          "role": "supporting",
+          "proof": "heuristic",
+          "checks": [
+            {
+              "name": "code_unserialize_safety",
+              "args": {
+                "paths": [
+                  "app"
+                ],
+                "include_ext": [
+                  "php"
+                ]
+              }
+            }
+          ],
+          "id": "O001"
+        },
+        {
+          "op": "all",
+          "role": "supporting",
+          "proof": "heuristic",
+          "checks": [
+            {
+              "name": "code_unserialize_safety",
+              "args": {
+                "paths": [
+                  "app"
+                ],
+                "include_ext": [
+                  "php"
+                ]
+              }
+            }
+          ],
+          "id": "O002"
+        }
+      ],
+      "target_modes": [
+        "LOCAL",
+        "REMOTE"
+      ],
+      "human_required_now": true,
+      "execution_proposal": "Chạy technical observations mặc định; human requirement giữ MANUAL_REVIEW; independent finding lane không nâng heuristic thành normative conclusion.",
+      "human_boundary": "Verify that deserialization of untrusted data enforces safe input handling, such as using an allowlist of object types or restricting client-defined object types, to prevent deserialization attacks. Deserialization mechanisms that are explicitly defined as insecure must not be used with untrusted input. Additional mandatory Magento deployment conditions: No unsafe deserialization; assess only the collected Magento deployment scope. Human assessment must confirm all conditions across the declared contexts; scoped observations do not prove the other conditions. Evidence scope notes: Existing Magebean rules provide useful evidence but do not prove the full ASVS requirement. No unsafe deserialization; assess only the collected Magento deployment scope. Trace the relevant untrusted input to each interpreter/output context in implementation code; inspect canonicalization, encoding or sanitizer calls and run context-specific bypass tests in an authorized test environment. Apply the exact criterion for ASVS 1.5.2 shown on this requirement. Record expected versus observed behavior, applicability, coverage gaps and the reviewer conclusion. Supporting check errors are evidence gaps for this review; do not treat a pattern match or missing collector response as verified conformance. Do not attach credentials, tokens, keys or raw personal/payment data.",
+      "fixture_acceptance": "allowed_classes=false không toàn bộ workflow; safe JSON; trusted local serialized data.",
+      "collection_acceptance": "Missing/unreadable/oversized/truncated scope báo explicit UNKNOWN/incomplete; giữ finding đã đọc; no-sink hợp lệ chỉ scoped observation, không application-wide PASS.",
+      "source_refs": [
+        "src/Rules/requirements/internal-catalog.json#MB-0131 InputSafetySourceChecks.php src/Engine/Collectors/CodeInventoryCollector.php:16 src/Engine/RequirementAssessmentEvaluator.php:31"
+      ],
+      "priority": "P1"
+    },
+    {
+      "id": "MB-0200",
+      "title": "Uploaded and generated files cannot execute code",
+      "decision": "REVISE",
+      "proposed_claim": "Executable signatures/handlers trong upload paths, chưa proof execution policy.",
+      "checks": [
+        {
+          "name": "code_upload_safety",
+          "args": {
+            "paths": [
+              "app"
+            ],
+            "include_ext": [
+              "php"
+            ]
+          }
+        },
+        {
+          "name": "code_media_executable_code",
+          "args": {
+            "paths": [
+              "pub/media",
+              "pub/import",
+              "var/import",
+              "var/export"
+            ],
+            "max_results": 100,
+            "max_file_bytes": 1048576
+          }
+        },
+        {
+          "name": "code_media_executable_code",
+          "args": {
+            "paths": [
+              "pub/media",
+              "pub/import",
+              "var/import",
+              "var/export"
+            ],
+            "max_results": 100,
+            "max_file_bytes": 1048576
+          }
+        }
+      ],
+      "obligations": [
+        {
+          "op": "all",
+          "role": "supporting",
+          "proof": "heuristic",
+          "checks": [
+            {
+              "name": "code_upload_safety",
+              "args": {
+                "paths": [
+                  "app"
+                ],
+                "include_ext": [
+                  "php"
+                ]
+              }
+            }
+          ],
+          "id": "O001"
+        },
+        {
+          "op": "all",
+          "role": "supporting",
+          "proof": "heuristic",
+          "checks": [
+            {
+              "name": "code_media_executable_code",
+              "args": {
+                "paths": [
+                  "pub/media",
+                  "pub/import",
+                  "var/import",
+                  "var/export"
+                ],
+                "max_results": 100,
+                "max_file_bytes": 1048576
+              }
+            }
+          ],
+          "id": "O002"
+        },
+        {
+          "op": "all",
+          "role": "supporting",
+          "proof": "heuristic",
+          "checks": [
+            {
+              "name": "code_media_executable_code",
+              "args": {
+                "paths": [
+                  "pub/media",
+                  "pub/import",
+                  "var/import",
+                  "var/export"
+                ],
+                "max_results": 100,
+                "max_file_bytes": 1048576
+              }
+            }
+          ],
+          "id": "O003"
+        }
+      ],
+      "target_modes": [
+        "LOCAL",
+        "REMOTE"
+      ],
+      "human_required_now": true,
+      "execution_proposal": "Chạy technical observations mặc định; human requirement giữ MANUAL_REVIEW; independent finding lane không nâng heuristic thành normative conclusion.",
+      "human_boundary": "Verify that files uploaded or generated by untrusted input and stored in a public folder, are not executed as server-side program code when accessed directly with an HTTP request. Additional mandatory Magento deployment conditions: No executable code in media or upload paths; assess only the collected Magento deployment scope. Human assessment must confirm all conditions across the declared contexts; scoped observations do not prove the other conditions. Evidence scope notes: Upload storage safeguards and executable files in upload paths are checked. No executable code in media or upload paths; assess only the collected Magento deployment scope. Trace the relevant upload/download/storage path and permissions; inspect validation, processing and serving behavior, then test the specified file boundary in an authorized environment. Apply the exact criterion for ASVS 5.3.1 shown on this requirement. Record expected versus observed behavior, applicability, coverage gaps and the reviewer conclusion. Supporting check errors are evidence gaps for this review; do not treat a pattern match or missing collector response as verified conformance. Do not attach credentials, tokens, keys or raw personal/payment data.",
+      "fixture_acceptance": "phtml/phar/double extension/handler overrides; benign SVG; controlled execution test riêng.",
+      "collection_acceptance": "Missing/unreadable/oversized/truncated scope báo explicit UNKNOWN/incomplete; giữ finding đã đọc; no-sink hợp lệ chỉ scoped observation, không application-wide PASS.",
+      "source_refs": [
+        "src/Rules/requirements/internal-catalog.json#MB-0200 InputSafetySourceChecks.php src/Engine/Collectors/CodeInventoryCollector.php:16 src/Engine/RequirementAssessmentEvaluator.php:31"
+      ],
+      "priority": "P1"
+    },
+    {
+      "id": "MB-0209",
+      "title": "Password minimum length for user and administrator accounts",
+      "decision": "REVISE",
+      "proposed_claim": "Declared Admin password policy riêng, chưa customer-account policy.",
+      "checks": [
+        {
+          "name": "magento_admin_password_policy_strong",
+          "args": {
+            "file": "app/etc/config.php",
+            "base_path": "system.default.admin.security",
+            "min_password_length": 8
+          }
+        },
+        {
+          "name": "magento_admin_password_policy_strong",
+          "args": {
+            "file": "app/etc/config.php",
+            "base_path": "system.default.admin.security",
+            "min_password_length": 8
+          }
+        }
+      ],
+      "obligations": [
+        {
+          "op": "all",
+          "role": "supporting",
+          "proof": "heuristic",
+          "checks": [
+            {
+              "name": "magento_admin_password_policy_strong",
+              "args": {
+                "file": "app/etc/config.php",
+                "base_path": "system.default.admin.security",
+                "min_password_length": 8
+              }
+            }
+          ],
+          "id": "O001"
+        },
+        {
+          "op": "all",
+          "role": "supporting",
+          "proof": "heuristic",
+          "checks": [
+            {
+              "name": "magento_admin_password_policy_strong",
+              "args": {
+                "file": "app/etc/config.php",
+                "base_path": "system.default.admin.security",
+                "min_password_length": 8
+              }
+            }
+          ],
+          "id": "O002"
+        }
+      ],
+      "target_modes": [
+        "LOCAL",
+        "REMOTE"
+      ],
+      "human_required_now": true,
+      "execution_proposal": "Chạy technical observations mặc định; human requirement giữ MANUAL_REVIEW; independent finding lane không nâng heuristic thành normative conclusion.",
+      "human_boundary": "Verify that user set passwords are at least 8 characters in length although a minimum of 15 characters is strongly recommended. Additional mandatory Magento deployment conditions: Admin passwords require at least 8 characters; assess only the collected Magento deployment scope. Human assessment must confirm all conditions across the declared contexts; scoped observations do not prove the other conditions. Evidence scope notes: Admin password minimum length of eight is checked. Admin passwords require at least 8 characters; assess only the collected Magento deployment scope. Inspect the relevant account/authentication policy and server-side enforcement; collect configuration or implementation evidence plus authorized negative tests for the specified authentication condition. Apply the exact criterion for ASVS 6.2.1 shown on this requirement. Record expected versus observed behavior, applicability, coverage gaps and the reviewer conclusion. Supporting check errors are evidence gaps for this review; do not treat a pattern match or missing collector response as verified conformance. Do not attach credentials, tokens, keys or raw personal/payment data.",
+      "fixture_acceptance": "Admin mạnh/customer yếu; config override; reuse Basic evidence.",
+      "collection_acceptance": "Missing/unreadable/oversized/truncated scope báo explicit UNKNOWN/incomplete; giữ finding đã đọc; no-sink hợp lệ chỉ scoped observation, không application-wide PASS.",
+      "source_refs": [
+        "src/Rules/requirements/internal-catalog.json#MB-0209 CheckRegistry.php (deployment/dependency shared Basic/Hardening) src/Engine/Collectors/CodeInventoryCollector.php:16 src/Engine/RequirementAssessmentEvaluator.php:31"
+      ],
+      "priority": "P1"
+    },
+    {
+      "id": "MB-0379",
+      "title": "Production debug and error-display policy",
+      "decision": "REVISE",
+      "proposed_claim": "Debug/error config và runtime leak observations từng scope.",
+      "checks": [
+        {
+          "name": "magento_production_mode",
+          "args": {
+            "file": "app/etc/env.php",
+            "path": "MAGE_MODE",
+            "equals": "production"
+          }
+        },
+        {
+          "name": "php_xdebug_disabled",
+          "args": {
+            "files": [
+              "php.ini",
+              ".user.ini"
+            ]
+          }
+        },
+        {
+          "name": "http_no_xdebug_headers",
+          "args": {
+            "timeout_ms": 8000
+          }
+        },
+        {
+          "name": "php_template_hints_disabled",
+          "args": {
+            "file": "app/etc/env.php",
+            "paths": [
+              "system.default.dev/debug/template_hints"
+            ]
+          }
+        },
+        {
+          "name": "php_dev_debug_config_disabled",
+          "args": {
+            "file": "app/etc/env.php",
+            "paths": [
+              "system.default.dev/translate_inline/active",
+              "system.default.dev/debug/template_hints_storefront"
+            ]
+          }
+        },
+        {
+          "name": "php_third_party_debug_disabled",
+          "args": {
+            "files": [
+              "app/etc/env.php",
+              "app/etc/config.php"
+            ]
+          }
+        },
+        {
+          "name": "php_xdebug_disabled",
+          "args": {
+            "files": [
+              "php.ini",
+              ".user.ini"
+            ]
+          }
+        },
+        {
+          "name": "http_no_xdebug_headers",
+          "args": {
+            "timeout_ms": 8000
+          }
+        },
+        {
+          "name": "php_display_errors_disabled",
+          "args": {
+            "files": [
+              "php.ini",
+              ".user.ini"
+            ]
+          }
+        },
+        {
+          "name": "http_no_stacktrace",
+          "args": {
+            "timeout_ms": 8000
+          }
+        },
+        {
+          "name": "php_template_hints_disabled",
+          "args": {
+            "file": "app/etc/env.php",
+            "paths": [
+              "system.default.dev/debug/template_hints"
+            ]
+          }
+        },
+        {
+          "name": "php_dev_debug_config_disabled",
+          "args": {
+            "file": "app/etc/env.php",
+            "paths": [
+              "system.default.dev/translate_inline/active",
+              "system.default.dev/debug/template_hints_storefront"
+            ]
+          }
+        },
+        {
+          "name": "php_third_party_debug_disabled",
+          "args": {
+            "files": [
+              "app/etc/env.php",
+              "app/etc/config.php"
+            ]
+          }
+        },
+        {
+          "name": "magento_debug_configuration_observed",
+          "args": {
+            "paths": [
+              "dev/debug/template_hints",
+              "dev/debug/template_hints_storefront",
+              "dev/translate_inline/active"
+            ]
+          }
+        }
+      ],
+      "obligations": [
+        {
+          "op": "all",
+          "role": "supporting",
+          "proof": "heuristic",
+          "checks": [
+            {
+              "name": "magento_production_mode",
+              "args": {
+                "file": "app/etc/env.php",
+                "path": "MAGE_MODE",
+                "equals": "production"
+              }
+            }
+          ],
+          "id": "O001"
+        },
+        {
+          "op": "all",
+          "role": "supporting",
+          "proof": "heuristic",
+          "checks": [
+            {
+              "name": "php_xdebug_disabled",
+              "args": {
+                "files": [
+                  "php.ini",
+                  ".user.ini"
+                ]
+              }
+            },
+            {
+              "name": "http_no_xdebug_headers",
+              "args": {
+                "timeout_ms": 8000
+              }
+            }
+          ],
+          "id": "O002"
+        },
+        {
+          "op": "any",
+          "role": "supporting",
+          "proof": "heuristic",
+          "checks": [
+            {
+              "name": "php_template_hints_disabled",
+              "args": {
+                "file": "app/etc/env.php",
+                "paths": [
+                  "system.default.dev/debug/template_hints"
+                ]
+              }
+            }
+          ],
+          "id": "O003"
+        },
+        {
+          "op": "all",
+          "role": "supporting",
+          "proof": "heuristic",
+          "checks": [
+            {
+              "name": "php_dev_debug_config_disabled",
+              "args": {
+                "file": "app/etc/env.php",
+                "paths": [
+                  "system.default.dev/translate_inline/active",
+                  "system.default.dev/debug/template_hints_storefront"
+                ]
+              }
+            }
+          ],
+          "id": "O004"
+        },
+        {
+          "op": "all",
+          "role": "supporting",
+          "proof": "heuristic",
+          "checks": [
+            {
+              "name": "php_third_party_debug_disabled",
+              "args": {
+                "files": [
+                  "app/etc/env.php",
+                  "app/etc/config.php"
+                ]
+              }
+            }
+          ],
+          "id": "O005"
+        },
+        {
+          "op": "all",
+          "role": "supporting",
+          "proof": "heuristic",
+          "checks": [
+            {
+              "name": "php_xdebug_disabled",
+              "args": {
+                "files": [
+                  "php.ini",
+                  ".user.ini"
+                ]
+              }
+            },
+            {
+              "name": "http_no_xdebug_headers",
+              "args": {
+                "timeout_ms": 8000
+              }
+            }
+          ],
+          "id": "O006"
+        },
+        {
+          "op": "all",
+          "role": "supporting",
+          "proof": "heuristic",
+          "checks": [
+            {
+              "name": "php_display_errors_disabled",
+              "args": {
+                "files": [
+                  "php.ini",
+                  ".user.ini"
+                ]
+              }
+            },
+            {
+              "name": "http_no_stacktrace",
+              "args": {
+                "timeout_ms": 8000
+              }
+            }
+          ],
+          "id": "O007"
+        },
+        {
+          "op": "any",
+          "role": "supporting",
+          "proof": "heuristic",
+          "checks": [
+            {
+              "name": "php_template_hints_disabled",
+              "args": {
+                "file": "app/etc/env.php",
+                "paths": [
+                  "system.default.dev/debug/template_hints"
+                ]
+              }
+            }
+          ],
+          "id": "O008"
+        },
+        {
+          "op": "all",
+          "role": "supporting",
+          "proof": "heuristic",
+          "checks": [
+            {
+              "name": "php_dev_debug_config_disabled",
+              "args": {
+                "file": "app/etc/env.php",
+                "paths": [
+                  "system.default.dev/translate_inline/active",
+                  "system.default.dev/debug/template_hints_storefront"
+                ]
+              }
+            }
+          ],
+          "id": "O009"
+        },
+        {
+          "op": "all",
+          "role": "supporting",
+          "proof": "heuristic",
+          "checks": [
+            {
+              "name": "php_third_party_debug_disabled",
+              "args": {
+                "files": [
+                  "app/etc/env.php",
+                  "app/etc/config.php"
+                ]
+              }
+            }
+          ],
+          "id": "O010"
+        },
+        {
+          "id": "O011",
+          "role": "mandatory",
+          "proof": "verified_predicate",
+          "op": "all",
+          "checks": [
+            {
+              "name": "magento_debug_configuration_observed",
+              "args": {
+                "paths": [
+                  "dev/debug/template_hints",
+                  "dev/debug/template_hints_storefront",
+                  "dev/translate_inline/active"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "id": "O012",
+          "role": "mandatory",
+          "proof": "human",
+          "op": "all",
+          "checks": []
+        }
+      ],
+      "target_modes": [
+        "LOCAL",
+        "REMOTE"
+      ],
+      "human_required_now": true,
+      "execution_proposal": "Chạy technical observations mặc định; human requirement giữ MANUAL_REVIEW; independent finding lane không nâng heuristic thành normative conclusion.",
+      "human_boundary": "Verify that debug modes are disabled for all components in production environments to prevent exposure of debugging features and information leakage. Xdebug disabled in production; assess only the collected Magento deployment scope. display_errors is Off; assess only the collected Magento deployment scope. No dev debug configs on production (template hints off); assess only the collected Magento deployment scope. Debug template hints disabled in production; assess only the collected Magento deployment scope. Debug/verbose off for third-party integrations; assess only the collected Magento deployment scope. Human assessment must confirm all conditions across the declared contexts; scoped observations do not prove the other conditions. Evidence scope notes: Existing Magebean rules provide useful evidence but do not prove the full ASVS requirement. Xdebug disabled in production; assess only the collected Magento deployment scope. display_errors is Off; assess only the collected Magento deployment scope. No dev debug configs on production (template hints off); assess only the collected Magento deployment scope. Debug template hints disabled in production; assess only the collected Magento deployment scope. Debug/verbose off for third-party integrations; assess only the collected Magento deployment scope. Inspect deployed configuration, runtime component settings and exposed responses for the stated condition; verify implementation defaults and actual runtime evidence across the declared deployment scope. Apply the exact criterion for ASVS 13.4.2 shown on this requirement. Record expected versus observed behavior, applicability, coverage gaps and the reviewer conclusion. Supporting check errors are evidence gaps for this review; do not treat a pattern match or missing collector response as verified conformance. Do not attach credentials, tokens, keys or raw personal/payment data.",
+      "fixture_acceptance": "CLI PHP khác FPM; proxy stacktrace; benign debug text; dedupe.",
+      "collection_acceptance": "Missing/unreadable/oversized/truncated scope báo explicit UNKNOWN/incomplete; giữ finding đã đọc; no-sink hợp lệ chỉ scoped observation, không application-wide PASS.",
+      "source_refs": [
+        "src/Rules/requirements/internal-catalog.json#MB-0379 CheckRegistry.php (deployment/dependency shared Basic/Hardening) src/Engine/Collectors/CodeInventoryCollector.php:16 src/Engine/RequirementAssessmentEvaluator.php:31"
+      ],
+      "priority": "P1"
+    },
+    {
+      "id": "MB-0424",
+      "title": "Sensitive-data logging restrictions and redaction",
+      "decision": "REVISE",
+      "proposed_claim": "Sensitive logging/sanitization signals, chưa proof toàn bộ logs sạch.",
+      "checks": [
+        {
+          "name": "code_sensitive_logging",
+          "args": {
+            "paths": [
+              "app"
+            ],
+            "include_ext": [
+              "php"
+            ]
+          }
+        },
+        {
+          "name": "code_sensitive_logging",
+          "args": {
+            "paths": [
+              "app"
+            ],
+            "include_ext": [
+              "php"
+            ],
+            "max_results": 50
+          }
+        },
+        {
+          "name": "code_third_party_logging_sanitized",
+          "args": {
+            "paths": [
+              "app/code"
+            ],
+            "include_ext": [
+              "php"
+            ],
+            "max_results": 100
+          }
+        },
+        {
+          "name": "code_cardholder_data_logs",
+          "args": {
+            "paths": [
+              "var/log",
+              "var/report",
+              "pub/media/log",
+              "pub/media/report"
+            ],
+            "include_ext": [
+              "log",
+              "txt",
+              "json",
+              "xml"
+            ],
+            "max_results": 100
+          }
+        },
+        {
+          "name": "code_sensitive_logging",
+          "args": {
+            "paths": [
+              "app"
+            ],
+            "include_ext": [
+              "php"
+            ]
+          }
+        },
+        {
+          "name": "code_sensitive_logging",
+          "args": {
+            "paths": [
+              "app"
+            ],
+            "include_ext": [
+              "php"
+            ],
+            "max_results": 50
+          }
+        },
+        {
+          "name": "code_third_party_logging_sanitized",
+          "args": {
+            "paths": [
+              "app/code"
+            ],
+            "include_ext": [
+              "php"
+            ],
+            "max_results": 100
+          }
+        },
+        {
+          "name": "code_cardholder_data_logs",
+          "args": {
+            "paths": [
+              "var/log",
+              "var/report",
+              "pub/media/log",
+              "pub/media/report"
+            ],
+            "include_ext": [
+              "log",
+              "txt",
+              "json",
+              "xml"
+            ],
+            "max_results": 100
+          }
+        }
+      ],
+      "obligations": [
+        {
+          "op": "all",
+          "role": "supporting",
+          "proof": "heuristic",
+          "checks": [
+            {
+              "name": "code_sensitive_logging",
+              "args": {
+                "paths": [
+                  "app"
+                ],
+                "include_ext": [
+                  "php"
+                ]
+              }
+            }
+          ],
+          "id": "O001"
+        },
+        {
+          "op": "all",
+          "role": "supporting",
+          "proof": "heuristic",
+          "checks": [
+            {
+              "name": "code_sensitive_logging",
+              "args": {
+                "paths": [
+                  "app"
+                ],
+                "include_ext": [
+                  "php"
+                ],
+                "max_results": 50
+              }
+            }
+          ],
+          "id": "O002"
+        },
+        {
+          "op": "all",
+          "role": "supporting",
+          "proof": "heuristic",
+          "checks": [
+            {
+              "name": "code_third_party_logging_sanitized",
+              "args": {
+                "paths": [
+                  "app/code"
+                ],
+                "include_ext": [
+                  "php"
+                ],
+                "max_results": 100
+              }
+            }
+          ],
+          "id": "O003"
+        },
+        {
+          "op": "all",
+          "role": "supporting",
+          "proof": "heuristic",
+          "checks": [
+            {
+              "name": "code_cardholder_data_logs",
+              "args": {
+                "paths": [
+                  "var/log",
+                  "var/report",
+                  "pub/media/log",
+                  "pub/media/report"
+                ],
+                "include_ext": [
+                  "log",
+                  "txt",
+                  "json",
+                  "xml"
+                ],
+                "max_results": 100
+              }
+            }
+          ],
+          "id": "O004"
+        },
+        {
+          "op": "all",
+          "role": "supporting",
+          "proof": "heuristic",
+          "checks": [
+            {
+              "name": "code_sensitive_logging",
+              "args": {
+                "paths": [
+                  "app"
+                ],
+                "include_ext": [
+                  "php"
+                ]
+              }
+            }
+          ],
+          "id": "O005"
+        },
+        {
+          "op": "all",
+          "role": "supporting",
+          "proof": "heuristic",
+          "checks": [
+            {
+              "name": "code_sensitive_logging",
+              "args": {
+                "paths": [
+                  "app"
+                ],
+                "include_ext": [
+                  "php"
+                ],
+                "max_results": 50
+              }
+            }
+          ],
+          "id": "O006"
+        },
+        {
+          "op": "all",
+          "role": "supporting",
+          "proof": "heuristic",
+          "checks": [
+            {
+              "name": "code_third_party_logging_sanitized",
+              "args": {
+                "paths": [
+                  "app/code"
+                ],
+                "include_ext": [
+                  "php"
+                ],
+                "max_results": 100
+              }
+            }
+          ],
+          "id": "O007"
+        },
+        {
+          "op": "all",
+          "role": "supporting",
+          "proof": "heuristic",
+          "checks": [
+            {
+              "name": "code_cardholder_data_logs",
+              "args": {
+                "paths": [
+                  "var/log",
+                  "var/report",
+                  "pub/media/log",
+                  "pub/media/report"
+                ],
+                "include_ext": [
+                  "log",
+                  "txt",
+                  "json",
+                  "xml"
+                ],
+                "max_results": 100
+              }
+            }
+          ],
+          "id": "O008"
+        }
+      ],
+      "target_modes": [
+        "LOCAL",
+        "REMOTE"
+      ],
+      "human_required_now": true,
+      "execution_proposal": "Chạy technical observations mặc định; human requirement giữ MANUAL_REVIEW; independent finding lane không nâng heuristic thành normative conclusion.",
+      "human_boundary": "Verify that when logging sensitive data, the application enforces logging based on the data's protection level. For example, it may not be allowed to log certain data, such as credentials or payment details. Other data, such as session tokens, may only be logged by being hashed or masked, either in full or partially. Additional mandatory Magento deployment conditions: Sensitive data not logged; assess only the collected Magento deployment scope. PII not logged in application logs; assess only the collected Magento deployment scope. Third-party logging sanitized (mask/redact); assess only the collected Magento deployment scope. No cardholder data in application logs; assess only the collected Magento deployment scope. Human assessment must confirm all conditions across the declared contexts; scoped observations do not prove the other conditions. Evidence scope notes: Existing Magebean rules provide useful evidence but do not prove the full ASVS requirement. Sensitive data not logged; assess only the collected Magento deployment scope. PII not logged in application logs; assess only the collected Magento deployment scope. Third-party logging sanitized (mask/redact); assess only the collected Magento deployment scope. No cardholder data in application logs; assess only the collected Magento deployment scope. Trigger the relevant event or error safely in an authorized environment; inspect logging/error-handling call paths and masked output for the specified recording, protection or disclosure condition. Apply the exact criterion for ASVS 16.2.5 shown on this requirement. Record expected versus observed behavior, applicability, coverage gaps and the reviewer conclusion. Supporting check errors are evidence gaps for this review; do not treat a pattern match or missing collector response as verified conformance. Do not attach credentials, tokens, keys or raw personal/payment data.",
+      "fixture_acceptance": "Redaction helper vs unrelated sanitizer; PAN/token structured log; redact findings.",
+      "collection_acceptance": "Missing/unreadable/oversized/truncated scope báo explicit UNKNOWN/incomplete; giữ finding đã đọc; no-sink hợp lệ chỉ scoped observation, không application-wide PASS.",
+      "source_refs": [
+        "src/Rules/requirements/internal-catalog.json#MB-0424 DataProtectionSourceChecks.php src/Engine/Collectors/CodeInventoryCollector.php:16 src/Engine/RequirementAssessmentEvaluator.php:31"
+      ],
+      "priority": "P1"
+    },
+    {
+      "id": "MB-0730",
+      "title": "No configured secret patterns in deployed application files",
+      "decision": "KEEP",
+      "proposed_claim": "Configured secret patterns absent trong deployed files đã đọc, không proof không secret.",
+      "checks": [
+        {
+          "name": "working_tree_secret_scan",
+          "args": {
+            "paths": [
+              "."
+            ],
+            "exclude_dirs": [
+              ".git",
+              "vendor",
+              "var",
+              "generated",
+              "node_modules",
+              "pub/media",
+              "pub/static",
+              "pub/cache",
+              "setup",
+              "dev/tests",
+              "dev/tools",
+              "app/etc/env.php"
+            ],
+            "patterns": [
+              "AKIA[0-9A-Z]{16}",
+              "ASIA[0-9A-Z]{16}",
+              "AIza[0-9A-Za-z\\-_]{35}",
+              "-----BEGIN [A-Z0-9 ]*PRIVATE KEY-----",
+              "xox[baprs]-[0-9A-Za-z\\-]{10,48}",
+              "sk_live_[0-9a-zA-Z]{24,}",
+              "gh[pousr]_[0-9A-Za-z]{36,255}",
+              "(api[_-]?key|client[_-]?secret|access[_-]?token|password)[[:space:]]*[\"']?[[:space:]]*(=>|=|:)[[:space:]]*[\"'][A-Za-z0-9_./+=-]{16,}[\"']"
+            ],
+            "max_results": 200,
+            "max_file_bytes": 16777216
+          }
+        }
+      ],
+      "obligations": [
+        {
+          "id": "O001",
+          "role": "mandatory",
+          "proof": "verified_predicate",
+          "op": "all",
+          "checks": [
+            {
+              "name": "working_tree_secret_scan",
+              "args": {
+                "paths": [
+                  "."
+                ],
+                "exclude_dirs": [
+                  ".git",
+                  "vendor",
+                  "var",
+                  "generated",
+                  "node_modules",
+                  "pub/media",
+                  "pub/static",
+                  "pub/cache",
+                  "setup",
+                  "dev/tests",
+                  "dev/tools",
+                  "app/etc/env.php"
+                ],
+                "patterns": [
+                  "AKIA[0-9A-Z]{16}",
+                  "ASIA[0-9A-Z]{16}",
+                  "AIza[0-9A-Za-z\\-_]{35}",
+                  "-----BEGIN [A-Z0-9 ]*PRIVATE KEY-----",
+                  "xox[baprs]-[0-9A-Za-z\\-]{10,48}",
+                  "sk_live_[0-9a-zA-Z]{24,}",
+                  "gh[pousr]_[0-9A-Za-z]{36,255}",
+                  "(api[_-]?key|client[_-]?secret|access[_-]?token|password)[[:space:]]*[\"']?[[:space:]]*(=>|=|:)[[:space:]]*[\"'][A-Za-z0-9_./+=-]{16,}[\"']"
+                ],
+                "max_results": 200,
+                "max_file_bytes": 16777216
+              }
+            }
+          ]
+        }
+      ],
+      "target_modes": [
+        "LOCAL"
+      ],
+      "human_required_now": false,
+      "execution_proposal": "Chạy technical observations mặc định; human requirement giữ MANUAL_REVIEW; independent finding lane không nâng heuristic thành normative conclusion.",
+      "human_boundary": "Chỉ kết luận scoped criterion đã khai báo, không suy ra toàn ứng dụng an toàn.",
+      "fixture_acceptance": "Known secret/benign token/unreadable/oversized/missing root; completeness và redaction.",
+      "collection_acceptance": "Missing/unreadable/oversized/truncated scope báo explicit UNKNOWN/incomplete; giữ finding đã đọc; no-sink hợp lệ chỉ scoped observation, không application-wide PASS.",
+      "source_refs": [
+        "src/Rules/requirements/internal-catalog.json#MB-0730 CheckRegistry.php (deployment/dependency shared Basic/Hardening) src/Engine/Collectors/CodeInventoryCollector.php:16 src/Engine/RequirementAssessmentEvaluator.php:31"
+      ],
+      "priority": "P2"
+    }
+  ]
+}

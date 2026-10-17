@@ -1,0 +1,229 @@
+{
+    "scope": "Synthetic local source fixtures; never executed; detector outputs only, not requirement or application conclusions. Oversized files exceed current inventory 1MiB filter.",
+    "observations": [
+        {
+            "scenario": "missing_scope",
+            "check": "code_raw_sql",
+            "outcome": "PASS",
+            "message": "No unsafe raw SQL patterns detected",
+            "evidence_entries": 0
+        },
+        {
+            "scenario": "missing_scope",
+            "check": "code_phtml_escaped_output",
+            "outcome": "PASS",
+            "message": "PHTML output uses approved escaping helpers",
+            "evidence_entries": 0
+        },
+        {
+            "scenario": "missing_scope",
+            "check": "code_csrf_form_key",
+            "outcome": "PASS",
+            "message": "POST forms and handlers include form_key protection signals",
+            "evidence_entries": 0
+        },
+        {
+            "scenario": "missing_scope",
+            "check": "code_ssrf_safeguards",
+            "outcome": "PASS",
+            "message": "Outbound HTTP sinks include SSRF safeguard signals",
+            "evidence_entries": 0
+        },
+        {
+            "scenario": "missing_scope",
+            "check": "code_unserialize_safety",
+            "outcome": "PASS",
+            "message": "No unsafe native unserialize() usage detected",
+            "evidence_entries": 0
+        },
+        {
+            "scenario": "missing_scope",
+            "check": "code_command_execution_safety",
+            "outcome": "PASS",
+            "message": "Command execution sinks are absent or guarded",
+            "evidence_entries": 0
+        },
+        {
+            "scenario": "missing_scope",
+            "check": "code_upload_safety",
+            "outcome": "PASS",
+            "message": "Upload flows are absent or include validation and storage safeguards",
+            "evidence_entries": 0
+        },
+        {
+            "scenario": "missing_scope",
+            "check": "code_js_context_escaping",
+            "outcome": "PASS",
+            "message": "JavaScript-context PHP output is escaped or encoded",
+            "evidence_entries": 0
+        },
+        {
+            "scenario": "empty_scope",
+            "check": "code_raw_sql",
+            "outcome": "PASS",
+            "message": "No unsafe raw SQL patterns detected",
+            "evidence_entries": 0
+        },
+        {
+            "scenario": "empty_scope",
+            "check": "code_phtml_escaped_output",
+            "outcome": "PASS",
+            "message": "PHTML output uses approved escaping helpers",
+            "evidence_entries": 0
+        },
+        {
+            "scenario": "empty_scope",
+            "check": "code_csrf_form_key",
+            "outcome": "PASS",
+            "message": "POST forms and handlers include form_key protection signals",
+            "evidence_entries": 0
+        },
+        {
+            "scenario": "empty_scope",
+            "check": "code_ssrf_safeguards",
+            "outcome": "PASS",
+            "message": "Outbound HTTP sinks include SSRF safeguard signals",
+            "evidence_entries": 0
+        },
+        {
+            "scenario": "empty_scope",
+            "check": "code_unserialize_safety",
+            "outcome": "PASS",
+            "message": "No unsafe native unserialize() usage detected",
+            "evidence_entries": 0
+        },
+        {
+            "scenario": "empty_scope",
+            "check": "code_command_execution_safety",
+            "outcome": "PASS",
+            "message": "Command execution sinks are absent or guarded",
+            "evidence_entries": 0
+        },
+        {
+            "scenario": "empty_scope",
+            "check": "code_upload_safety",
+            "outcome": "PASS",
+            "message": "Upload flows are absent or include validation and storage safeguards",
+            "evidence_entries": 0
+        },
+        {
+            "scenario": "empty_scope",
+            "check": "code_js_context_escaping",
+            "outcome": "PASS",
+            "message": "JavaScript-context PHP output is escaped or encoded",
+            "evidence_entries": 0
+        },
+        {
+            "scenario": "oversized_source",
+            "check": "code_raw_sql",
+            "outcome": "PASS",
+            "message": "No unsafe raw SQL patterns detected",
+            "evidence_entries": 0
+        },
+        {
+            "scenario": "oversized_source",
+            "check": "code_phtml_escaped_output",
+            "outcome": "PASS",
+            "message": "PHTML output uses approved escaping helpers",
+            "evidence_entries": 0
+        },
+        {
+            "scenario": "oversized_source",
+            "check": "code_csrf_form_key",
+            "outcome": "PASS",
+            "message": "POST forms and handlers include form_key protection signals",
+            "evidence_entries": 0
+        },
+        {
+            "scenario": "oversized_source",
+            "check": "code_ssrf_safeguards",
+            "outcome": "PASS",
+            "message": "Outbound HTTP sinks include SSRF safeguard signals",
+            "evidence_entries": 0
+        },
+        {
+            "scenario": "oversized_source",
+            "check": "code_unserialize_safety",
+            "outcome": "PASS",
+            "message": "No unsafe native unserialize() usage detected",
+            "evidence_entries": 0
+        },
+        {
+            "scenario": "oversized_source",
+            "check": "code_command_execution_safety",
+            "outcome": "PASS",
+            "message": "Command execution sinks are absent or guarded",
+            "evidence_entries": 0
+        },
+        {
+            "scenario": "oversized_source",
+            "check": "code_upload_safety",
+            "outcome": "PASS",
+            "message": "Upload flows are absent or include validation and storage safeguards",
+            "evidence_entries": 0
+        },
+        {
+            "scenario": "oversized_source",
+            "check": "code_js_context_escaping",
+            "outcome": "PASS",
+            "message": "JavaScript-context PHP output is escaped or encoded",
+            "evidence_entries": 0
+        },
+        {
+            "scenario": "readable_source",
+            "check": "code_raw_sql",
+            "outcome": "FAIL",
+            "message": "Potential unsafe raw SQL found in: <FIXTURE>/app/fixture.php:5 [adapter_sql_method], <FIXTURE>/app/fixture.phtml:5 [adapter_sql_method]",
+            "evidence_entries": 2
+        },
+        {
+            "scenario": "readable_source",
+            "check": "code_phtml_escaped_output",
+            "outcome": "FAIL",
+            "message": "Unescaped template output found in: <FIXTURE>/app/fixture.phtml:10, <FIXTURE>/app/fixture.phtml:1",
+            "evidence_entries": 2
+        },
+        {
+            "scenario": "readable_source",
+            "check": "code_csrf_form_key",
+            "outcome": "FAIL",
+            "message": "Potential CSRF/form_key gaps found in: <FIXTURE>/app/fixture.phtml:9 [post_form_without_form_key]",
+            "evidence_entries": 1
+        },
+        {
+            "scenario": "readable_source",
+            "check": "code_ssrf_safeguards",
+            "outcome": "FAIL",
+            "message": "Outbound HTTP sinks missing SSRF safeguards in: <FIXTURE>/app/fixture.php:6 [php_stream]",
+            "evidence_entries": 1
+        },
+        {
+            "scenario": "readable_source",
+            "check": "code_unserialize_safety",
+            "outcome": "FAIL",
+            "message": "Unsafe unserialize usage found in: <FIXTURE>/app/fixture.php:4 [high]",
+            "evidence_entries": 1
+        },
+        {
+            "scenario": "readable_source",
+            "check": "code_command_execution_safety",
+            "outcome": "FAIL",
+            "message": "Unsafe command execution found in: <FIXTURE>/app/fixture.php:3 [command_function/high]",
+            "evidence_entries": 1
+        },
+        {
+            "scenario": "readable_source",
+            "check": "code_upload_safety",
+            "outcome": "FAIL",
+            "message": "Potential unsafe upload flows found in: <FIXTURE>/app/fixture.php:7 [move_uploaded_file/high]",
+            "evidence_entries": 1
+        },
+        {
+            "scenario": "readable_source",
+            "check": "code_js_context_escaping",
+            "outcome": "FAIL",
+            "message": "Unescaped JavaScript-context output found in: <FIXTURE>/app/fixture.phtml:10 [script_php_output]",
+            "evidence_entries": 1
+        }
+    ]
+}

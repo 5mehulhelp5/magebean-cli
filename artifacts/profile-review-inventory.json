@@ -1,0 +1,3563 @@
+{
+    "date": "2026-10-17",
+    "scope": "Read-only structural coverage and synthetic evaluator/planner probes; not real detector outcomes or external standard certification.",
+    "catalog_count": 687,
+    "distinct_profile_members": 678,
+    "profiles": {
+        "asvs-l1": {
+            "inventory": 69,
+            "no_human": 0,
+            "human": 69,
+            "with_technical_checks": 41,
+            "supporting_only": 41,
+            "check_occurrences": 61,
+            "distinct_check_functions": 35,
+            "plans": {
+                "LOCAL": {
+                    "default": {
+                        "selected": 0,
+                        "plan_created": false,
+                        "diagnostics": [
+                            "Loaded profile: asvs-l1",
+                            "No requirements matched the selection."
+                        ],
+                        "omitted": []
+                    },
+                    "with_human": {
+                        "selected": 69,
+                        "plan_created": true,
+                        "diagnostics": [
+                            "Loaded profile: asvs-l1"
+                        ],
+                        "omitted": [],
+                        "synthetic_all_pass_outcomes": {
+                            "MANUAL_REVIEW": 69
+                        }
+                    },
+                    "all_capabilities_with_human": {
+                        "selected": 69,
+                        "plan_created": true,
+                        "diagnostics": [
+                            "Loaded profile: asvs-l1"
+                        ],
+                        "omitted": [],
+                        "synthetic_all_pass_outcomes": {
+                            "MANUAL_REVIEW": 69
+                        }
+                    }
+                },
+                "REMOTE": {
+                    "default": {
+                        "selected": 0,
+                        "plan_created": false,
+                        "diagnostics": [
+                            "Loaded profile: asvs-l1",
+                            "No requirements matched the selection."
+                        ],
+                        "omitted": []
+                    },
+                    "with_human": {
+                        "selected": 69,
+                        "plan_created": true,
+                        "diagnostics": [
+                            "Loaded profile: asvs-l1"
+                        ],
+                        "omitted": [],
+                        "synthetic_all_pass_outcomes": {
+                            "MANUAL_REVIEW": 69
+                        }
+                    },
+                    "all_capabilities_with_human": {
+                        "selected": 69,
+                        "plan_created": true,
+                        "diagnostics": [
+                            "Loaded profile: asvs-l1"
+                        ],
+                        "omitted": [],
+                        "synthetic_all_pass_outcomes": {
+                            "MANUAL_REVIEW": 69
+                        }
+                    }
+                }
+            }
+        },
+        "asvs-l2": {
+            "inventory": 252,
+            "no_human": 0,
+            "human": 252,
+            "with_technical_checks": 89,
+            "supporting_only": 88,
+            "check_occurrences": 167,
+            "distinct_check_functions": 80,
+            "plans": {
+                "LOCAL": {
+                    "default": {
+                        "selected": 0,
+                        "plan_created": false,
+                        "diagnostics": [
+                            "Loaded profile: asvs-l2",
+                            "No requirements matched the selection."
+                        ],
+                        "omitted": []
+                    },
+                    "with_human": {
+                        "selected": 197,
+                        "plan_created": true,
+                        "diagnostics": [
+                            "Loaded profile: asvs-l2"
+                        ],
+                        "omitted": [
+                            {
+                                "id": "MB-0110",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "ldap"
+                            },
+                            {
+                                "id": "MB-0111",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "xpath"
+                            },
+                            {
+                                "id": "MB-0112",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "latex_processing"
+                            },
+                            {
+                                "id": "MB-0118",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "user_supplied_svg"
+                            },
+                            {
+                                "id": "MB-0119",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "scriptable_user_content"
+                            },
+                            {
+                                "id": "MB-0122",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "jndi"
+                            },
+                            {
+                                "id": "MB-0123",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "memcache"
+                            },
+                            {
+                                "id": "MB-0127",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "native_code"
+                            },
+                            {
+                                "id": "MB-0128",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "native_code"
+                            },
+                            {
+                                "id": "MB-0129",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "native_code"
+                            },
+                            {
+                                "id": "MB-0191",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "websocket"
+                            },
+                            {
+                                "id": "MB-0192",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "websocket"
+                            },
+                            {
+                                "id": "MB-0193",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "file_handling"
+                            },
+                            {
+                                "id": "MB-0205",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "file_handling"
+                            },
+                            {
+                                "id": "MB-0249",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "federated_identity"
+                            },
+                            {
+                                "id": "MB-0250",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "federated_identity"
+                            },
+                            {
+                                "id": "MB-0251",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "federated_identity"
+                            },
+                            {
+                                "id": "MB-0252",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "federated_identity"
+                            },
+                            {
+                                "id": "MB-0255",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "federated_identity"
+                            },
+                            {
+                                "id": "MB-0270",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "federated_identity"
+                            },
+                            {
+                                "id": "MB-0283",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "multi_tenant"
+                            },
+                            {
+                                "id": "MB-0289",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "self_contained_tokens"
+                            },
+                            {
+                                "id": "MB-0290",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "self_contained_tokens"
+                            },
+                            {
+                                "id": "MB-0291",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "self_contained_tokens"
+                            },
+                            {
+                                "id": "MB-0292",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "oauth_oidc"
+                            },
+                            {
+                                "id": "MB-0293",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "oauth_oidc"
+                            },
+                            {
+                                "id": "MB-0294",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "oauth_oidc"
+                            },
+                            {
+                                "id": "MB-0295",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "oauth_oidc"
+                            },
+                            {
+                                "id": "MB-0297",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "oauth_oidc"
+                            },
+                            {
+                                "id": "MB-0298",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "oauth_oidc"
+                            },
+                            {
+                                "id": "MB-0299",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "oauth_oidc"
+                            },
+                            {
+                                "id": "MB-0300",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "oauth_oidc"
+                            },
+                            {
+                                "id": "MB-0307",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "oauth_oidc"
+                            },
+                            {
+                                "id": "MB-0308",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "oauth_oidc"
+                            },
+                            {
+                                "id": "MB-0309",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "oauth_oidc"
+                            },
+                            {
+                                "id": "MB-0310",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "oauth_oidc"
+                            },
+                            {
+                                "id": "MB-0311",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "oauth_oidc"
+                            },
+                            {
+                                "id": "MB-0312",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "oauth_oidc"
+                            },
+                            {
+                                "id": "MB-0318",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "oauth_oidc"
+                            },
+                            {
+                                "id": "MB-0319",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "oauth_oidc"
+                            },
+                            {
+                                "id": "MB-0320",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "oauth_oidc"
+                            },
+                            {
+                                "id": "MB-0321",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "oauth_oidc"
+                            },
+                            {
+                                "id": "MB-0322",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "oauth_oidc"
+                            },
+                            {
+                                "id": "MB-0323",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "oauth_oidc"
+                            },
+                            {
+                                "id": "MB-0324",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "oauth_oidc"
+                            },
+                            {
+                                "id": "MB-0325",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "oauth_oidc"
+                            },
+                            {
+                                "id": "MB-0326",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "oauth_oidc"
+                            },
+                            {
+                                "id": "MB-0327",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "oauth_oidc"
+                            },
+                            {
+                                "id": "MB-0436",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "webrtc"
+                            },
+                            {
+                                "id": "MB-0438",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "webrtc"
+                            },
+                            {
+                                "id": "MB-0439",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "webrtc"
+                            },
+                            {
+                                "id": "MB-0440",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "webrtc"
+                            },
+                            {
+                                "id": "MB-0441",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "webrtc"
+                            },
+                            {
+                                "id": "MB-0446",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "webrtc"
+                            },
+                            {
+                                "id": "MB-0447",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "webrtc"
+                            }
+                        ],
+                        "synthetic_all_pass_outcomes": {
+                            "MANUAL_REVIEW": 197
+                        }
+                    },
+                    "all_capabilities_with_human": {
+                        "selected": 252,
+                        "plan_created": true,
+                        "diagnostics": [
+                            "Loaded profile: asvs-l2"
+                        ],
+                        "omitted": [],
+                        "synthetic_all_pass_outcomes": {
+                            "MANUAL_REVIEW": 252
+                        }
+                    }
+                },
+                "REMOTE": {
+                    "default": {
+                        "selected": 0,
+                        "plan_created": false,
+                        "diagnostics": [
+                            "Loaded profile: asvs-l2",
+                            "No requirements matched the selection."
+                        ],
+                        "omitted": []
+                    },
+                    "with_human": {
+                        "selected": 197,
+                        "plan_created": true,
+                        "diagnostics": [
+                            "Loaded profile: asvs-l2"
+                        ],
+                        "omitted": [
+                            {
+                                "id": "MB-0110",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "ldap"
+                            },
+                            {
+                                "id": "MB-0111",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "xpath"
+                            },
+                            {
+                                "id": "MB-0112",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "latex_processing"
+                            },
+                            {
+                                "id": "MB-0118",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "user_supplied_svg"
+                            },
+                            {
+                                "id": "MB-0119",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "scriptable_user_content"
+                            },
+                            {
+                                "id": "MB-0122",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "jndi"
+                            },
+                            {
+                                "id": "MB-0123",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "memcache"
+                            },
+                            {
+                                "id": "MB-0127",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "native_code"
+                            },
+                            {
+                                "id": "MB-0128",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "native_code"
+                            },
+                            {
+                                "id": "MB-0129",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "native_code"
+                            },
+                            {
+                                "id": "MB-0191",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "websocket"
+                            },
+                            {
+                                "id": "MB-0192",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "websocket"
+                            },
+                            {
+                                "id": "MB-0193",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "file_handling"
+                            },
+                            {
+                                "id": "MB-0205",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "file_handling"
+                            },
+                            {
+                                "id": "MB-0249",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "federated_identity"
+                            },
+                            {
+                                "id": "MB-0250",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "federated_identity"
+                            },
+                            {
+                                "id": "MB-0251",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "federated_identity"
+                            },
+                            {
+                                "id": "MB-0252",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "federated_identity"
+                            },
+                            {
+                                "id": "MB-0255",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "federated_identity"
+                            },
+                            {
+                                "id": "MB-0270",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "federated_identity"
+                            },
+                            {
+                                "id": "MB-0283",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "multi_tenant"
+                            },
+                            {
+                                "id": "MB-0289",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "self_contained_tokens"
+                            },
+                            {
+                                "id": "MB-0290",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "self_contained_tokens"
+                            },
+                            {
+                                "id": "MB-0291",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "self_contained_tokens"
+                            },
+                            {
+                                "id": "MB-0292",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "oauth_oidc"
+                            },
+                            {
+                                "id": "MB-0293",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "oauth_oidc"
+                            },
+                            {
+                                "id": "MB-0294",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "oauth_oidc"
+                            },
+                            {
+                                "id": "MB-0295",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "oauth_oidc"
+                            },
+                            {
+                                "id": "MB-0297",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "oauth_oidc"
+                            },
+                            {
+                                "id": "MB-0298",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "oauth_oidc"
+                            },
+                            {
+                                "id": "MB-0299",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "oauth_oidc"
+                            },
+                            {
+                                "id": "MB-0300",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "oauth_oidc"
+                            },
+                            {
+                                "id": "MB-0307",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "oauth_oidc"
+                            },
+                            {
+                                "id": "MB-0308",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "oauth_oidc"
+                            },
+                            {
+                                "id": "MB-0309",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "oauth_oidc"
+                            },
+                            {
+                                "id": "MB-0310",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "oauth_oidc"
+                            },
+                            {
+                                "id": "MB-0311",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "oauth_oidc"
+                            },
+                            {
+                                "id": "MB-0312",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "oauth_oidc"
+                            },
+                            {
+                                "id": "MB-0318",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "oauth_oidc"
+                            },
+                            {
+                                "id": "MB-0319",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "oauth_oidc"
+                            },
+                            {
+                                "id": "MB-0320",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "oauth_oidc"
+                            },
+                            {
+                                "id": "MB-0321",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "oauth_oidc"
+                            },
+                            {
+                                "id": "MB-0322",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "oauth_oidc"
+                            },
+                            {
+                                "id": "MB-0323",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "oauth_oidc"
+                            },
+                            {
+                                "id": "MB-0324",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "oauth_oidc"
+                            },
+                            {
+                                "id": "MB-0325",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "oauth_oidc"
+                            },
+                            {
+                                "id": "MB-0326",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "oauth_oidc"
+                            },
+                            {
+                                "id": "MB-0327",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "oauth_oidc"
+                            },
+                            {
+                                "id": "MB-0436",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "webrtc"
+                            },
+                            {
+                                "id": "MB-0438",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "webrtc"
+                            },
+                            {
+                                "id": "MB-0439",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "webrtc"
+                            },
+                            {
+                                "id": "MB-0440",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "webrtc"
+                            },
+                            {
+                                "id": "MB-0441",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "webrtc"
+                            },
+                            {
+                                "id": "MB-0446",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "webrtc"
+                            },
+                            {
+                                "id": "MB-0447",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "webrtc"
+                            }
+                        ],
+                        "synthetic_all_pass_outcomes": {
+                            "MANUAL_REVIEW": 197
+                        }
+                    },
+                    "all_capabilities_with_human": {
+                        "selected": 252,
+                        "plan_created": true,
+                        "diagnostics": [
+                            "Loaded profile: asvs-l2"
+                        ],
+                        "omitted": [],
+                        "synthetic_all_pass_outcomes": {
+                            "MANUAL_REVIEW": 252
+                        }
+                    }
+                }
+            }
+        },
+        "asvs-l3": {
+            "inventory": 344,
+            "no_human": 0,
+            "human": 344,
+            "with_technical_checks": 97,
+            "supporting_only": 96,
+            "check_occurrences": 180,
+            "distinct_check_functions": 87,
+            "plans": {
+                "LOCAL": {
+                    "default": {
+                        "selected": 0,
+                        "plan_created": false,
+                        "diagnostics": [
+                            "Loaded profile: asvs-l3",
+                            "No requirements matched the selection."
+                        ],
+                        "omitted": []
+                    },
+                    "with_human": {
+                        "selected": 267,
+                        "plan_created": true,
+                        "diagnostics": [
+                            "Loaded profile: asvs-l3"
+                        ],
+                        "omitted": [
+                            {
+                                "id": "MB-0110",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "ldap"
+                            },
+                            {
+                                "id": "MB-0111",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "xpath"
+                            },
+                            {
+                                "id": "MB-0112",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "latex_processing"
+                            },
+                            {
+                                "id": "MB-0118",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "user_supplied_svg"
+                            },
+                            {
+                                "id": "MB-0119",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "scriptable_user_content"
+                            },
+                            {
+                                "id": "MB-0122",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "jndi"
+                            },
+                            {
+                                "id": "MB-0123",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "memcache"
+                            },
+                            {
+                                "id": "MB-0127",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "native_code"
+                            },
+                            {
+                                "id": "MB-0128",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "native_code"
+                            },
+                            {
+                                "id": "MB-0129",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "native_code"
+                            },
+                            {
+                                "id": "MB-0191",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "websocket"
+                            },
+                            {
+                                "id": "MB-0192",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "websocket"
+                            },
+                            {
+                                "id": "MB-0193",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "file_handling"
+                            },
+                            {
+                                "id": "MB-0205",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "file_handling"
+                            },
+                            {
+                                "id": "MB-0249",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "federated_identity"
+                            },
+                            {
+                                "id": "MB-0250",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "federated_identity"
+                            },
+                            {
+                                "id": "MB-0251",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "federated_identity"
+                            },
+                            {
+                                "id": "MB-0252",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "federated_identity"
+                            },
+                            {
+                                "id": "MB-0255",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "federated_identity"
+                            },
+                            {
+                                "id": "MB-0270",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "federated_identity"
+                            },
+                            {
+                                "id": "MB-0283",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "multi_tenant"
+                            },
+                            {
+                                "id": "MB-0289",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "self_contained_tokens"
+                            },
+                            {
+                                "id": "MB-0290",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "self_contained_tokens"
+                            },
+                            {
+                                "id": "MB-0291",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "self_contained_tokens"
+                            },
+                            {
+                                "id": "MB-0292",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "oauth_oidc"
+                            },
+                            {
+                                "id": "MB-0293",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "oauth_oidc"
+                            },
+                            {
+                                "id": "MB-0294",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "oauth_oidc"
+                            },
+                            {
+                                "id": "MB-0295",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "oauth_oidc"
+                            },
+                            {
+                                "id": "MB-0297",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "oauth_oidc"
+                            },
+                            {
+                                "id": "MB-0298",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "oauth_oidc"
+                            },
+                            {
+                                "id": "MB-0299",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "oauth_oidc"
+                            },
+                            {
+                                "id": "MB-0300",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "oauth_oidc"
+                            },
+                            {
+                                "id": "MB-0307",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "oauth_oidc"
+                            },
+                            {
+                                "id": "MB-0308",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "oauth_oidc"
+                            },
+                            {
+                                "id": "MB-0309",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "oauth_oidc"
+                            },
+                            {
+                                "id": "MB-0310",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "oauth_oidc"
+                            },
+                            {
+                                "id": "MB-0311",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "oauth_oidc"
+                            },
+                            {
+                                "id": "MB-0312",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "oauth_oidc"
+                            },
+                            {
+                                "id": "MB-0318",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "oauth_oidc"
+                            },
+                            {
+                                "id": "MB-0319",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "oauth_oidc"
+                            },
+                            {
+                                "id": "MB-0320",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "oauth_oidc"
+                            },
+                            {
+                                "id": "MB-0321",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "oauth_oidc"
+                            },
+                            {
+                                "id": "MB-0322",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "oauth_oidc"
+                            },
+                            {
+                                "id": "MB-0323",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "oauth_oidc"
+                            },
+                            {
+                                "id": "MB-0324",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "oauth_oidc"
+                            },
+                            {
+                                "id": "MB-0325",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "oauth_oidc"
+                            },
+                            {
+                                "id": "MB-0326",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "oauth_oidc"
+                            },
+                            {
+                                "id": "MB-0327",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "oauth_oidc"
+                            },
+                            {
+                                "id": "MB-0436",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "webrtc"
+                            },
+                            {
+                                "id": "MB-0438",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "webrtc"
+                            },
+                            {
+                                "id": "MB-0439",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "webrtc"
+                            },
+                            {
+                                "id": "MB-0440",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "webrtc"
+                            },
+                            {
+                                "id": "MB-0441",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "webrtc"
+                            },
+                            {
+                                "id": "MB-0446",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "webrtc"
+                            },
+                            {
+                                "id": "MB-0447",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "webrtc"
+                            },
+                            {
+                                "id": "MB-0143",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "high_value_operations"
+                            },
+                            {
+                                "id": "MB-0145",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "high_value_operations"
+                            },
+                            {
+                                "id": "MB-0197",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "file_handling"
+                            },
+                            {
+                                "id": "MB-0198",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "file_handling"
+                            },
+                            {
+                                "id": "MB-0199",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "file_handling"
+                            },
+                            {
+                                "id": "MB-0202",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "file_handling"
+                            },
+                            {
+                                "id": "MB-0241",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "biometric_authentication"
+                            },
+                            {
+                                "id": "MB-0247",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "cryptographic_authentication"
+                            },
+                            {
+                                "id": "MB-0248",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "cryptographic_authentication"
+                            },
+                            {
+                                "id": "MB-0269",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "high_value_operations"
+                            },
+                            {
+                                "id": "MB-0296",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "oauth_oidc"
+                            },
+                            {
+                                "id": "MB-0301",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "oauth_oidc"
+                            },
+                            {
+                                "id": "MB-0313",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "oauth_oidc"
+                            },
+                            {
+                                "id": "MB-0314",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "oauth_oidc"
+                            },
+                            {
+                                "id": "MB-0315",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "oauth_oidc"
+                            },
+                            {
+                                "id": "MB-0316",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "oauth_oidc"
+                            },
+                            {
+                                "id": "MB-0317",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "oauth_oidc"
+                            },
+                            {
+                                "id": "MB-0437",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "webrtc"
+                            },
+                            {
+                                "id": "MB-0442",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "webrtc"
+                            },
+                            {
+                                "id": "MB-0443",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "webrtc"
+                            },
+                            {
+                                "id": "MB-0444",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "webrtc"
+                            },
+                            {
+                                "id": "MB-0445",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "webrtc"
+                            }
+                        ],
+                        "synthetic_all_pass_outcomes": {
+                            "MANUAL_REVIEW": 267
+                        }
+                    },
+                    "all_capabilities_with_human": {
+                        "selected": 344,
+                        "plan_created": true,
+                        "diagnostics": [
+                            "Loaded profile: asvs-l3"
+                        ],
+                        "omitted": [],
+                        "synthetic_all_pass_outcomes": {
+                            "MANUAL_REVIEW": 344
+                        }
+                    }
+                },
+                "REMOTE": {
+                    "default": {
+                        "selected": 0,
+                        "plan_created": false,
+                        "diagnostics": [
+                            "Loaded profile: asvs-l3",
+                            "No requirements matched the selection."
+                        ],
+                        "omitted": []
+                    },
+                    "with_human": {
+                        "selected": 267,
+                        "plan_created": true,
+                        "diagnostics": [
+                            "Loaded profile: asvs-l3"
+                        ],
+                        "omitted": [
+                            {
+                                "id": "MB-0110",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "ldap"
+                            },
+                            {
+                                "id": "MB-0111",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "xpath"
+                            },
+                            {
+                                "id": "MB-0112",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "latex_processing"
+                            },
+                            {
+                                "id": "MB-0118",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "user_supplied_svg"
+                            },
+                            {
+                                "id": "MB-0119",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "scriptable_user_content"
+                            },
+                            {
+                                "id": "MB-0122",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "jndi"
+                            },
+                            {
+                                "id": "MB-0123",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "memcache"
+                            },
+                            {
+                                "id": "MB-0127",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "native_code"
+                            },
+                            {
+                                "id": "MB-0128",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "native_code"
+                            },
+                            {
+                                "id": "MB-0129",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "native_code"
+                            },
+                            {
+                                "id": "MB-0191",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "websocket"
+                            },
+                            {
+                                "id": "MB-0192",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "websocket"
+                            },
+                            {
+                                "id": "MB-0193",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "file_handling"
+                            },
+                            {
+                                "id": "MB-0205",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "file_handling"
+                            },
+                            {
+                                "id": "MB-0249",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "federated_identity"
+                            },
+                            {
+                                "id": "MB-0250",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "federated_identity"
+                            },
+                            {
+                                "id": "MB-0251",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "federated_identity"
+                            },
+                            {
+                                "id": "MB-0252",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "federated_identity"
+                            },
+                            {
+                                "id": "MB-0255",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "federated_identity"
+                            },
+                            {
+                                "id": "MB-0270",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "federated_identity"
+                            },
+                            {
+                                "id": "MB-0283",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "multi_tenant"
+                            },
+                            {
+                                "id": "MB-0289",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "self_contained_tokens"
+                            },
+                            {
+                                "id": "MB-0290",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "self_contained_tokens"
+                            },
+                            {
+                                "id": "MB-0291",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "self_contained_tokens"
+                            },
+                            {
+                                "id": "MB-0292",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "oauth_oidc"
+                            },
+                            {
+                                "id": "MB-0293",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "oauth_oidc"
+                            },
+                            {
+                                "id": "MB-0294",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "oauth_oidc"
+                            },
+                            {
+                                "id": "MB-0295",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "oauth_oidc"
+                            },
+                            {
+                                "id": "MB-0297",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "oauth_oidc"
+                            },
+                            {
+                                "id": "MB-0298",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "oauth_oidc"
+                            },
+                            {
+                                "id": "MB-0299",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "oauth_oidc"
+                            },
+                            {
+                                "id": "MB-0300",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "oauth_oidc"
+                            },
+                            {
+                                "id": "MB-0307",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "oauth_oidc"
+                            },
+                            {
+                                "id": "MB-0308",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "oauth_oidc"
+                            },
+                            {
+                                "id": "MB-0309",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "oauth_oidc"
+                            },
+                            {
+                                "id": "MB-0310",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "oauth_oidc"
+                            },
+                            {
+                                "id": "MB-0311",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "oauth_oidc"
+                            },
+                            {
+                                "id": "MB-0312",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "oauth_oidc"
+                            },
+                            {
+                                "id": "MB-0318",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "oauth_oidc"
+                            },
+                            {
+                                "id": "MB-0319",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "oauth_oidc"
+                            },
+                            {
+                                "id": "MB-0320",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "oauth_oidc"
+                            },
+                            {
+                                "id": "MB-0321",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "oauth_oidc"
+                            },
+                            {
+                                "id": "MB-0322",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "oauth_oidc"
+                            },
+                            {
+                                "id": "MB-0323",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "oauth_oidc"
+                            },
+                            {
+                                "id": "MB-0324",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "oauth_oidc"
+                            },
+                            {
+                                "id": "MB-0325",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "oauth_oidc"
+                            },
+                            {
+                                "id": "MB-0326",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "oauth_oidc"
+                            },
+                            {
+                                "id": "MB-0327",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "oauth_oidc"
+                            },
+                            {
+                                "id": "MB-0436",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "webrtc"
+                            },
+                            {
+                                "id": "MB-0438",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "webrtc"
+                            },
+                            {
+                                "id": "MB-0439",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "webrtc"
+                            },
+                            {
+                                "id": "MB-0440",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "webrtc"
+                            },
+                            {
+                                "id": "MB-0441",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "webrtc"
+                            },
+                            {
+                                "id": "MB-0446",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "webrtc"
+                            },
+                            {
+                                "id": "MB-0447",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "webrtc"
+                            },
+                            {
+                                "id": "MB-0143",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "high_value_operations"
+                            },
+                            {
+                                "id": "MB-0145",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "high_value_operations"
+                            },
+                            {
+                                "id": "MB-0197",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "file_handling"
+                            },
+                            {
+                                "id": "MB-0198",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "file_handling"
+                            },
+                            {
+                                "id": "MB-0199",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "file_handling"
+                            },
+                            {
+                                "id": "MB-0202",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "file_handling"
+                            },
+                            {
+                                "id": "MB-0241",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "biometric_authentication"
+                            },
+                            {
+                                "id": "MB-0247",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "cryptographic_authentication"
+                            },
+                            {
+                                "id": "MB-0248",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "cryptographic_authentication"
+                            },
+                            {
+                                "id": "MB-0269",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "high_value_operations"
+                            },
+                            {
+                                "id": "MB-0296",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "oauth_oidc"
+                            },
+                            {
+                                "id": "MB-0301",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "oauth_oidc"
+                            },
+                            {
+                                "id": "MB-0313",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "oauth_oidc"
+                            },
+                            {
+                                "id": "MB-0314",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "oauth_oidc"
+                            },
+                            {
+                                "id": "MB-0315",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "oauth_oidc"
+                            },
+                            {
+                                "id": "MB-0316",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "oauth_oidc"
+                            },
+                            {
+                                "id": "MB-0317",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "oauth_oidc"
+                            },
+                            {
+                                "id": "MB-0437",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "webrtc"
+                            },
+                            {
+                                "id": "MB-0442",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "webrtc"
+                            },
+                            {
+                                "id": "MB-0443",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "webrtc"
+                            },
+                            {
+                                "id": "MB-0444",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "webrtc"
+                            },
+                            {
+                                "id": "MB-0445",
+                                "reason_code": "CAPABILITY_CONTEXT_MISSING",
+                                "capability": "webrtc"
+                            }
+                        ],
+                        "synthetic_all_pass_outcomes": {
+                            "MANUAL_REVIEW": 267
+                        }
+                    },
+                    "all_capabilities_with_human": {
+                        "selected": 344,
+                        "plan_created": true,
+                        "diagnostics": [
+                            "Loaded profile: asvs-l3"
+                        ],
+                        "omitted": [],
+                        "synthetic_all_pass_outcomes": {
+                            "MANUAL_REVIEW": 344
+                        }
+                    }
+                }
+            }
+        },
+        "basic": {
+            "inventory": 20,
+            "no_human": 20,
+            "human": 0,
+            "with_technical_checks": 20,
+            "supporting_only": 0,
+            "check_occurrences": 21,
+            "distinct_check_functions": 21,
+            "plans": {
+                "LOCAL": {
+                    "default": {
+                        "selected": 20,
+                        "plan_created": true,
+                        "diagnostics": [
+                            "Loaded profile: basic"
+                        ],
+                        "omitted": [],
+                        "synthetic_all_pass_outcomes": {
+                            "PASS": 20
+                        }
+                    },
+                    "with_human": {
+                        "selected": 20,
+                        "plan_created": true,
+                        "diagnostics": [
+                            "Loaded profile: basic"
+                        ],
+                        "omitted": [],
+                        "synthetic_all_pass_outcomes": {
+                            "PASS": 20
+                        }
+                    },
+                    "all_capabilities_with_human": {
+                        "selected": 20,
+                        "plan_created": true,
+                        "diagnostics": [
+                            "Loaded profile: basic"
+                        ],
+                        "omitted": [],
+                        "synthetic_all_pass_outcomes": {
+                            "PASS": 20
+                        }
+                    }
+                },
+                "REMOTE": {
+                    "default": {
+                        "selected": 7,
+                        "plan_created": true,
+                        "diagnostics": [
+                            "Loaded profile: basic"
+                        ],
+                        "omitted": [
+                            {
+                                "id": "MB-0001",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0002",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0003",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0006",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0007",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0728",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0011",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0031",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0729",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0046",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0049",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0050",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0730",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            }
+                        ],
+                        "synthetic_all_pass_outcomes": {
+                            "PASS": 6,
+                            "UNKNOWN": 1
+                        }
+                    },
+                    "with_human": {
+                        "selected": 7,
+                        "plan_created": true,
+                        "diagnostics": [
+                            "Loaded profile: basic"
+                        ],
+                        "omitted": [
+                            {
+                                "id": "MB-0001",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0002",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0003",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0006",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0007",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0728",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0011",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0031",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0729",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0046",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0049",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0050",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0730",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            }
+                        ],
+                        "synthetic_all_pass_outcomes": {
+                            "PASS": 6,
+                            "UNKNOWN": 1
+                        }
+                    },
+                    "all_capabilities_with_human": {
+                        "selected": 7,
+                        "plan_created": true,
+                        "diagnostics": [
+                            "Loaded profile: basic"
+                        ],
+                        "omitted": [
+                            {
+                                "id": "MB-0001",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0002",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0003",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0006",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0007",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0728",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0011",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0031",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0729",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0046",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0049",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0050",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0730",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            }
+                        ],
+                        "synthetic_all_pass_outcomes": {
+                            "PASS": 6,
+                            "UNKNOWN": 1
+                        }
+                    }
+                }
+            }
+        },
+        "hardening": {
+            "inventory": 82,
+            "no_human": 41,
+            "human": 41,
+            "with_technical_checks": 82,
+            "supporting_only": 40,
+            "check_occurrences": 115,
+            "distinct_check_functions": 94,
+            "plans": {
+                "LOCAL": {
+                    "default": {
+                        "selected": 41,
+                        "plan_created": true,
+                        "diagnostics": [
+                            "Loaded profile: hardening"
+                        ],
+                        "omitted": [],
+                        "synthetic_all_pass_outcomes": {
+                            "PASS": 41
+                        }
+                    },
+                    "with_human": {
+                        "selected": 82,
+                        "plan_created": true,
+                        "diagnostics": [
+                            "Loaded profile: hardening"
+                        ],
+                        "omitted": [],
+                        "synthetic_all_pass_outcomes": {
+                            "PASS": 41,
+                            "MANUAL_REVIEW": 41
+                        }
+                    },
+                    "all_capabilities_with_human": {
+                        "selected": 82,
+                        "plan_created": true,
+                        "diagnostics": [
+                            "Loaded profile: hardening"
+                        ],
+                        "omitted": [],
+                        "synthetic_all_pass_outcomes": {
+                            "PASS": 41,
+                            "MANUAL_REVIEW": 41
+                        }
+                    }
+                },
+                "REMOTE": {
+                    "default": {
+                        "selected": 8,
+                        "plan_created": true,
+                        "diagnostics": [
+                            "Loaded profile: hardening"
+                        ],
+                        "omitted": [
+                            {
+                                "id": "MB-0001",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0002",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0003",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0004",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0006",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0007",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0009",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0010",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0011",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0100",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0101",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0102",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0014",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0015",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0016",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0019",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0020",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0021",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0023",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0025",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0094",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0095",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0097",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0098",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0099",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0089",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0096",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0031",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0034",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0038",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0039",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0040",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0042",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0043",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0046",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0047",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0048",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0049",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0050",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0051",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0052",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0053",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0054",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0055",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0056",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0057",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0058",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0059",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0060",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0061",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0062",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0063",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0064",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0065",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0066",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0067",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0069",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0070",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0072",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0073",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0075",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0076",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0077",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0078",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0079",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0081",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            }
+                        ],
+                        "synthetic_all_pass_outcomes": {
+                            "PASS": 6,
+                            "UNKNOWN": 2
+                        }
+                    },
+                    "with_human": {
+                        "selected": 16,
+                        "plan_created": true,
+                        "diagnostics": [
+                            "Loaded profile: hardening"
+                        ],
+                        "omitted": [
+                            {
+                                "id": "MB-0001",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0002",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0003",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0004",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0006",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0007",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0009",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0010",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0011",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0100",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0101",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0102",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0014",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0015",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0016",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0019",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0020",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0021",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0023",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0025",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0094",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0095",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0097",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0098",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0099",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0089",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0096",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0031",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0034",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0038",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0039",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0040",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0042",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0043",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0046",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0047",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0048",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0049",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0050",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0051",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0052",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0053",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0054",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0055",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0056",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0057",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0058",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0059",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0060",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0061",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0062",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0063",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0064",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0065",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0066",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0067",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0069",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0070",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0072",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0073",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0075",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0076",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0077",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0078",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0079",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0081",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            }
+                        ],
+                        "synthetic_all_pass_outcomes": {
+                            "PASS": 6,
+                            "MANUAL_REVIEW": 8,
+                            "UNKNOWN": 2
+                        }
+                    },
+                    "all_capabilities_with_human": {
+                        "selected": 16,
+                        "plan_created": true,
+                        "diagnostics": [
+                            "Loaded profile: hardening"
+                        ],
+                        "omitted": [
+                            {
+                                "id": "MB-0001",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0002",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0003",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0004",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0006",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0007",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0009",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0010",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0011",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0100",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0101",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0102",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0014",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0015",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0016",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0019",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0020",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0021",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0023",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0025",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0094",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0095",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0097",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0098",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0099",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0089",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0096",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0031",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0034",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0038",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0039",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0040",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0042",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0043",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0046",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0047",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0048",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0049",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0050",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0051",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0052",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0053",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0054",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0055",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0056",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0057",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0058",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0059",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0060",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0061",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0062",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0063",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0064",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0065",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0066",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0067",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0069",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0070",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0072",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0073",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0075",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0076",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0077",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0078",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0079",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0081",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            }
+                        ],
+                        "synthetic_all_pass_outcomes": {
+                            "PASS": 6,
+                            "MANUAL_REVIEW": 8,
+                            "UNKNOWN": 2
+                        }
+                    }
+                }
+            }
+        },
+        "owasp-top-10-2025": {
+            "inventory": 69,
+            "no_human": 31,
+            "human": 38,
+            "with_technical_checks": 69,
+            "supporting_only": 37,
+            "check_occurrences": 101,
+            "distinct_check_functions": 80,
+            "plans": {
+                "LOCAL": {
+                    "default": {
+                        "selected": 31,
+                        "plan_created": true,
+                        "diagnostics": [
+                            "Loaded profile: owasp-top-10-2025"
+                        ],
+                        "omitted": [],
+                        "synthetic_all_pass_outcomes": {
+                            "PASS": 31
+                        }
+                    },
+                    "with_human": {
+                        "selected": 69,
+                        "plan_created": true,
+                        "diagnostics": [
+                            "Loaded profile: owasp-top-10-2025"
+                        ],
+                        "omitted": [],
+                        "synthetic_all_pass_outcomes": {
+                            "PASS": 31,
+                            "MANUAL_REVIEW": 38
+                        }
+                    },
+                    "all_capabilities_with_human": {
+                        "selected": 69,
+                        "plan_created": true,
+                        "diagnostics": [
+                            "Loaded profile: owasp-top-10-2025"
+                        ],
+                        "omitted": [],
+                        "synthetic_all_pass_outcomes": {
+                            "PASS": 31,
+                            "MANUAL_REVIEW": 38
+                        }
+                    }
+                },
+                "REMOTE": {
+                    "default": {
+                        "selected": 7,
+                        "plan_created": true,
+                        "diagnostics": [
+                            "Loaded profile: owasp-top-10-2025"
+                        ],
+                        "omitted": [
+                            {
+                                "id": "MB-0001",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0002",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0003",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0004",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0006",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0007",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0009",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0010",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0011",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0014",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0015",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0016",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0019",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0020",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0021",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0023",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0025",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0031",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0034",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0042",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0043",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0049",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0050",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0051",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0052",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0053",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0054",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0055",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0056",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0057",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0058",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0059",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0060",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0065",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0066",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0067",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0069",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0070",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0061",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0730",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0073",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0075",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0076",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0077",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0078",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0079",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0081",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0089",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0094",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0095",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0096",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0097",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0098",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0099",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            }
+                        ],
+                        "synthetic_all_pass_outcomes": {
+                            "PASS": 6,
+                            "UNKNOWN": 1
+                        }
+                    },
+                    "with_human": {
+                        "selected": 15,
+                        "plan_created": true,
+                        "diagnostics": [
+                            "Loaded profile: owasp-top-10-2025"
+                        ],
+                        "omitted": [
+                            {
+                                "id": "MB-0001",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0002",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0003",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0004",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0006",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0007",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0009",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0010",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0011",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0014",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0015",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0016",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0019",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0020",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0021",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0023",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0025",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0031",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0034",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0042",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0043",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0049",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0050",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0051",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0052",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0053",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0054",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0055",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0056",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0057",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0058",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0059",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0060",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0065",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0066",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0067",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0069",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0070",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0061",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0730",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0073",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0075",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0076",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0077",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0078",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0079",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0081",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0089",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0094",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0095",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0096",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0097",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0098",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0099",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            }
+                        ],
+                        "synthetic_all_pass_outcomes": {
+                            "PASS": 6,
+                            "MANUAL_REVIEW": 8,
+                            "UNKNOWN": 1
+                        }
+                    },
+                    "all_capabilities_with_human": {
+                        "selected": 15,
+                        "plan_created": true,
+                        "diagnostics": [
+                            "Loaded profile: owasp-top-10-2025"
+                        ],
+                        "omitted": [
+                            {
+                                "id": "MB-0001",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0002",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0003",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0004",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0006",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0007",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0009",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0010",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0011",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0014",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0015",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0016",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0019",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0020",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0021",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0023",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0025",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0031",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0034",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0042",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0043",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0049",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0050",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0051",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0052",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0053",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0054",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0055",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0056",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0057",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0058",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0059",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0060",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0065",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0066",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0067",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0069",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0070",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0061",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0730",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0073",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0075",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0076",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0077",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0078",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0079",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0081",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0089",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0094",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0095",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0096",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0097",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0098",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            },
+                            {
+                                "id": "MB-0099",
+                                "reason_code": "TARGET_MODE_UNSUPPORTED"
+                            }
+                        ],
+                        "synthetic_all_pass_outcomes": {
+                            "PASS": 6,
+                            "MANUAL_REVIEW": 8,
+                            "UNKNOWN": 1
+                        }
+                    }
+                }
+            }
+        },
+        "pci-dss-v4.0.1": {
+            "inventory": 257,
+            "no_human": 0,
+            "human": 257,
+            "with_technical_checks": 32,
+            "supporting_only": 32,
+            "check_occurrences": 96,
+            "distinct_check_functions": 71,
+            "plans": {
+                "LOCAL": {
+                    "default": {
+                        "selected": 0,
+                        "plan_created": false,
+                        "diagnostics": [
+                            "Loaded profile: pci-dss-v4.0.1",
+                            "No requirements matched the selection."
+                        ],
+                        "omitted": []
+                    },
+                    "with_human": {
+                        "selected": 257,
+                        "plan_created": true,
+                        "diagnostics": [
+                            "Loaded profile: pci-dss-v4.0.1"
+                        ],
+                        "omitted": [],
+                        "synthetic_all_pass_outcomes": {
+                            "MANUAL_REVIEW": 257
+                        }
+                    },
+                    "all_capabilities_with_human": {
+                        "selected": 257,
+                        "plan_created": true,
+                        "diagnostics": [
+                            "Loaded profile: pci-dss-v4.0.1"
+                        ],
+                        "omitted": [],
+                        "synthetic_all_pass_outcomes": {
+                            "MANUAL_REVIEW": 257
+                        }
+                    }
+                },
+                "REMOTE": {
+                    "default": {
+                        "selected": 0,
+                        "plan_created": false,
+                        "diagnostics": [
+                            "Loaded profile: pci-dss-v4.0.1",
+                            "No requirements matched the selection."
+                        ],
+                        "omitted": []
+                    },
+                    "with_human": {
+                        "selected": 257,
+                        "plan_created": true,
+                        "diagnostics": [
+                            "Loaded profile: pci-dss-v4.0.1"
+                        ],
+                        "omitted": [],
+                        "synthetic_all_pass_outcomes": {
+                            "MANUAL_REVIEW": 257
+                        }
+                    },
+                    "all_capabilities_with_human": {
+                        "selected": 257,
+                        "plan_created": true,
+                        "diagnostics": [
+                            "Loaded profile: pci-dss-v4.0.1"
+                        ],
+                        "omitted": [],
+                        "synthetic_all_pass_outcomes": {
+                            "MANUAL_REVIEW": 257
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "overlap": {
+        "asvs-l1": {
+            "asvs-l2": 69,
+            "asvs-l3": 69,
+            "basic": 0,
+            "hardening": 5,
+            "owasp-top-10-2025": 5,
+            "pci-dss-v4.0.1": 0
+        },
+        "asvs-l2": {
+            "asvs-l1": 69,
+            "asvs-l3": 252,
+            "basic": 0,
+            "hardening": 8,
+            "owasp-top-10-2025": 8,
+            "pci-dss-v4.0.1": 0
+        },
+        "asvs-l3": {
+            "asvs-l1": 69,
+            "asvs-l2": 252,
+            "basic": 0,
+            "hardening": 8,
+            "owasp-top-10-2025": 8,
+            "pci-dss-v4.0.1": 0
+        },
+        "basic": {
+            "asvs-l1": 0,
+            "asvs-l2": 0,
+            "asvs-l3": 0,
+            "hardening": 17,
+            "owasp-top-10-2025": 16,
+            "pci-dss-v4.0.1": 0
+        },
+        "hardening": {
+            "asvs-l1": 5,
+            "asvs-l2": 8,
+            "asvs-l3": 8,
+            "basic": 17,
+            "owasp-top-10-2025": 68,
+            "pci-dss-v4.0.1": 0
+        },
+        "owasp-top-10-2025": {
+            "asvs-l1": 5,
+            "asvs-l2": 8,
+            "asvs-l3": 8,
+            "basic": 16,
+            "hardening": 68,
+            "pci-dss-v4.0.1": 0
+        },
+        "pci-dss-v4.0.1": {
+            "asvs-l1": 0,
+            "asvs-l2": 0,
+            "asvs-l3": 0,
+            "basic": 0,
+            "hardening": 0,
+            "owasp-top-10-2025": 0
+        }
+    }
+}

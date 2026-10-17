@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "next_id": 731,
+  "next_id": 773,
   "allocations": [
     {
       "id": "MB-0001",
@@ -247,8 +247,8 @@
     {
       "id": "MB-0038",
       "allocation_key": "baseline/MB-R038",
-      "revision": 3,
-      "verdict": "pending_security_review"
+      "revision": 5,
+      "verdict": "family_separated_source_restoration"
     },
     {
       "id": "MB-0039",
@@ -393,8 +393,8 @@
     {
       "id": "MB-0061",
       "allocation_key": "baseline/MB-R061",
-      "revision": 3,
-      "verdict": "pending_security_review"
+      "revision": 5,
+      "verdict": "family_separated_source_restoration"
     },
     {
       "id": "MB-0062",
@@ -672,8 +672,8 @@
     {
       "id": "MB-0105",
       "allocation_key": "asvs/1.2.1",
-      "revision": 2,
-      "verdict": "pending_security_review"
+      "revision": 4,
+      "verdict": "family_separated_source_restoration"
     },
     {
       "id": "MB-0106",
@@ -692,14 +692,14 @@
     {
       "id": "MB-0108",
       "allocation_key": "asvs/1.2.4",
-      "revision": 2,
-      "verdict": "pending_security_review"
+      "revision": 4,
+      "verdict": "family_separated_source_restoration"
     },
     {
       "id": "MB-0109",
       "allocation_key": "asvs/1.2.5",
-      "revision": 2,
-      "verdict": "pending_security_review"
+      "revision": 4,
+      "verdict": "family_separated_source_restoration"
     },
     {
       "id": "MB-0110",
@@ -830,8 +830,8 @@
     {
       "id": "MB-0131",
       "allocation_key": "asvs/1.5.2",
-      "revision": 2,
-      "verdict": "pending_security_review"
+      "revision": 4,
+      "verdict": "family_separated_source_restoration"
     },
     {
       "id": "MB-0132",
@@ -1244,8 +1244,8 @@
     {
       "id": "MB-0200",
       "allocation_key": "asvs/5.3.1",
-      "revision": 2,
-      "verdict": "pending_security_review"
+      "revision": 4,
+      "verdict": "family_separated_source_restoration"
     },
     {
       "id": "MB-0201",
@@ -1298,8 +1298,8 @@
     {
       "id": "MB-0209",
       "allocation_key": "asvs/6.2.1",
-      "revision": 2,
-      "verdict": "pending_security_review"
+      "revision": 4,
+      "verdict": "family_separated_source_restoration"
     },
     {
       "id": "MB-0210",
@@ -2318,8 +2318,8 @@
     {
       "id": "MB-0379",
       "allocation_key": "asvs/13.4.2",
-      "revision": 3,
-      "verdict": "security_reviewed"
+      "revision": 4,
+      "verdict": "family_separated_source_restoration"
     },
     {
       "id": "MB-0380",
@@ -2588,8 +2588,8 @@
     {
       "id": "MB-0424",
       "allocation_key": "asvs/16.2.5",
-      "revision": 2,
-      "verdict": "pending_security_review"
+      "revision": 4,
+      "verdict": "family_separated_source_restoration"
     },
     {
       "id": "MB-0425",
@@ -2732,14 +2732,14 @@
     {
       "id": "MB-0448",
       "allocation_key": "pci/1.1.1",
-      "revision": 2,
-      "verdict": "pending_security_review"
+      "revision": 3,
+      "verdict": "family_separated_source_restoration"
     },
     {
       "id": "MB-0449",
       "allocation_key": "pci/1.1.2",
-      "revision": 2,
-      "verdict": "pending_security_review"
+      "revision": 3,
+      "verdict": "family_separated_source_restoration"
     },
     {
       "id": "MB-0450",
@@ -2938,8 +2938,8 @@
     {
       "id": "MB-0481",
       "allocation_key": "pci/3.3.1",
-      "revision": 2,
-      "verdict": "pending_security_review"
+      "revision": 3,
+      "verdict": "family_separated_source_restoration"
     },
     {
       "id": "MB-0482",
@@ -4472,6 +4472,342 @@
       "allocation_key": "basic-deployment/working_tree_secret_scan",
       "revision": 1,
       "verdict": "accepted_scoped_criterion"
+    },
+    {
+      "id": "MB-0731",
+      "allocation_key": "family-separation/baseline/MB-R008",
+      "revision": 1,
+      "verdict": "family_separated_source_restoration",
+      "status": "active",
+      "restored_from": "MB-0008"
+    },
+    {
+      "id": "MB-0732",
+      "allocation_key": "family-separation/baseline/MB-R012",
+      "revision": 1,
+      "verdict": "family_separated_source_restoration",
+      "status": "active",
+      "restored_from": "MB-0012"
+    },
+    {
+      "id": "MB-0733",
+      "allocation_key": "family-separation/baseline/MB-R013",
+      "revision": 1,
+      "verdict": "family_separated_source_restoration",
+      "status": "active",
+      "restored_from": "MB-0013"
+    },
+    {
+      "id": "MB-0734",
+      "allocation_key": "family-separation/baseline/MB-R017",
+      "revision": 1,
+      "verdict": "family_separated_source_restoration",
+      "status": "active",
+      "restored_from": "MB-0017"
+    },
+    {
+      "id": "MB-0735",
+      "allocation_key": "family-separation/baseline/MB-R018",
+      "revision": 1,
+      "verdict": "family_separated_source_restoration",
+      "status": "active",
+      "restored_from": "MB-0018"
+    },
+    {
+      "id": "MB-0736",
+      "allocation_key": "family-separation/baseline/MB-R022",
+      "revision": 1,
+      "verdict": "family_separated_source_restoration",
+      "status": "active",
+      "restored_from": "MB-0022"
+    },
+    {
+      "id": "MB-0737",
+      "allocation_key": "family-separation/baseline/MB-R024",
+      "revision": 1,
+      "verdict": "family_separated_source_restoration",
+      "status": "active",
+      "restored_from": "MB-0024"
+    },
+    {
+      "id": "MB-0738",
+      "allocation_key": "family-separation/baseline/MB-R032",
+      "revision": 1,
+      "verdict": "family_separated_source_restoration",
+      "status": "active",
+      "restored_from": "MB-0032"
+    },
+    {
+      "id": "MB-0739",
+      "allocation_key": "family-separation/baseline/MB-R033",
+      "revision": 1,
+      "verdict": "family_separated_source_restoration",
+      "status": "active",
+      "restored_from": "MB-0033"
+    },
+    {
+      "id": "MB-0740",
+      "allocation_key": "family-separation/baseline/MB-R036",
+      "revision": 1,
+      "verdict": "family_separated_source_restoration",
+      "status": "active",
+      "restored_from": "MB-0036"
+    },
+    {
+      "id": "MB-0741",
+      "allocation_key": "family-separation/baseline/MB-R041",
+      "revision": 1,
+      "verdict": "family_separated_source_restoration",
+      "status": "active",
+      "restored_from": "MB-0041"
+    },
+    {
+      "id": "MB-0742",
+      "allocation_key": "family-separation/baseline/MB-R044",
+      "revision": 1,
+      "verdict": "family_separated_source_restoration",
+      "status": "active",
+      "restored_from": "MB-0044"
+    },
+    {
+      "id": "MB-0743",
+      "allocation_key": "family-separation/baseline/MB-R045",
+      "revision": 1,
+      "verdict": "family_separated_source_restoration",
+      "status": "active",
+      "restored_from": "MB-0045"
+    },
+    {
+      "id": "MB-0744",
+      "allocation_key": "family-separation/baseline/MB-R071",
+      "revision": 1,
+      "verdict": "family_separated_source_restoration",
+      "status": "active",
+      "restored_from": "MB-0071"
+    },
+    {
+      "id": "MB-0745",
+      "allocation_key": "family-separation/baseline/MB-R074",
+      "revision": 1,
+      "verdict": "family_separated_source_restoration",
+      "status": "active",
+      "restored_from": "MB-0074"
+    },
+    {
+      "id": "MB-0746",
+      "allocation_key": "family-separation/baseline/MB-R080",
+      "revision": 1,
+      "verdict": "family_separated_source_restoration",
+      "status": "active",
+      "restored_from": "MB-0080"
+    },
+    {
+      "id": "MB-0747",
+      "allocation_key": "family-separation/baseline/MB-R084",
+      "revision": 1,
+      "verdict": "family_separated_source_restoration",
+      "status": "active",
+      "restored_from": "MB-0084"
+    },
+    {
+      "id": "MB-0748",
+      "allocation_key": "family-separation/baseline/MB-R091",
+      "revision": 1,
+      "verdict": "family_separated_source_restoration",
+      "status": "active",
+      "restored_from": "MB-0091"
+    },
+    {
+      "id": "MB-0749",
+      "allocation_key": "family-separation/asvs/1.2.3",
+      "revision": 1,
+      "verdict": "family_separated_source_restoration",
+      "status": "active",
+      "restored_from": "MB-0107"
+    },
+    {
+      "id": "MB-0750",
+      "allocation_key": "family-separation/pci/2.1.1",
+      "revision": 1,
+      "verdict": "family_separated_source_restoration",
+      "status": "active",
+      "restored_from": "MB-0467"
+    },
+    {
+      "id": "MB-0751",
+      "allocation_key": "family-separation/pci/2.1.2",
+      "revision": 1,
+      "verdict": "family_separated_source_restoration",
+      "status": "active",
+      "restored_from": "MB-0468"
+    },
+    {
+      "id": "MB-0752",
+      "allocation_key": "family-separation/pci/3.1.1",
+      "revision": 1,
+      "verdict": "family_separated_source_restoration",
+      "status": "active",
+      "restored_from": "MB-0478"
+    },
+    {
+      "id": "MB-0753",
+      "allocation_key": "family-separation/pci/3.1.2",
+      "revision": 1,
+      "verdict": "family_separated_source_restoration",
+      "status": "active",
+      "restored_from": "MB-0479"
+    },
+    {
+      "id": "MB-0754",
+      "allocation_key": "family-separation/pci/3.3.1.1",
+      "revision": 1,
+      "verdict": "family_separated_source_restoration",
+      "status": "active",
+      "restored_from": "MB-0482"
+    },
+    {
+      "id": "MB-0755",
+      "allocation_key": "family-separation/pci/3.3.1.2",
+      "revision": 1,
+      "verdict": "family_separated_source_restoration",
+      "status": "active",
+      "restored_from": "MB-0483"
+    },
+    {
+      "id": "MB-0756",
+      "allocation_key": "family-separation/pci/3.3.1.3",
+      "revision": 1,
+      "verdict": "family_separated_source_restoration",
+      "status": "active",
+      "restored_from": "MB-0484"
+    },
+    {
+      "id": "MB-0757",
+      "allocation_key": "family-separation/pci/4.1.1",
+      "revision": 1,
+      "verdict": "family_separated_source_restoration",
+      "status": "active",
+      "restored_from": "MB-0507"
+    },
+    {
+      "id": "MB-0758",
+      "allocation_key": "family-separation/pci/4.1.2",
+      "revision": 1,
+      "verdict": "family_separated_source_restoration",
+      "status": "active",
+      "restored_from": "MB-0508"
+    },
+    {
+      "id": "MB-0759",
+      "allocation_key": "family-separation/pci/5.1.1",
+      "revision": 1,
+      "verdict": "family_separated_source_restoration",
+      "status": "active",
+      "restored_from": "MB-0513"
+    },
+    {
+      "id": "MB-0760",
+      "allocation_key": "family-separation/pci/5.1.2",
+      "revision": 1,
+      "verdict": "family_separated_source_restoration",
+      "status": "active",
+      "restored_from": "MB-0514"
+    },
+    {
+      "id": "MB-0761",
+      "allocation_key": "family-separation/pci/6.1.1",
+      "revision": 1,
+      "verdict": "family_separated_source_restoration",
+      "status": "active",
+      "restored_from": "MB-0526"
+    },
+    {
+      "id": "MB-0762",
+      "allocation_key": "family-separation/pci/6.1.2",
+      "revision": 1,
+      "verdict": "family_separated_source_restoration",
+      "status": "active",
+      "restored_from": "MB-0527"
+    },
+    {
+      "id": "MB-0763",
+      "allocation_key": "family-separation/pci/7.1.1",
+      "revision": 1,
+      "verdict": "family_separated_source_restoration",
+      "status": "active",
+      "restored_from": "MB-0545"
+    },
+    {
+      "id": "MB-0764",
+      "allocation_key": "family-separation/pci/7.1.2",
+      "revision": 1,
+      "verdict": "family_separated_source_restoration",
+      "status": "active",
+      "restored_from": "MB-0546"
+    },
+    {
+      "id": "MB-0765",
+      "allocation_key": "family-separation/pci/8.1.1",
+      "revision": 1,
+      "verdict": "family_separated_source_restoration",
+      "status": "active",
+      "restored_from": "MB-0557"
+    },
+    {
+      "id": "MB-0766",
+      "allocation_key": "family-separation/pci/8.1.2",
+      "revision": 1,
+      "verdict": "family_separated_source_restoration",
+      "status": "active",
+      "restored_from": "MB-0558"
+    },
+    {
+      "id": "MB-0767",
+      "allocation_key": "family-separation/pci/9.1.1",
+      "revision": 1,
+      "verdict": "family_separated_source_restoration",
+      "status": "active",
+      "restored_from": "MB-0586"
+    },
+    {
+      "id": "MB-0768",
+      "allocation_key": "family-separation/pci/9.1.2",
+      "revision": 1,
+      "verdict": "family_separated_source_restoration",
+      "status": "active",
+      "restored_from": "MB-0587"
+    },
+    {
+      "id": "MB-0769",
+      "allocation_key": "family-separation/pci/10.1.1",
+      "revision": 1,
+      "verdict": "family_separated_source_restoration",
+      "status": "active",
+      "restored_from": "MB-0613"
+    },
+    {
+      "id": "MB-0770",
+      "allocation_key": "family-separation/pci/10.1.2",
+      "revision": 1,
+      "verdict": "family_separated_source_restoration",
+      "status": "active",
+      "restored_from": "MB-0614"
+    },
+    {
+      "id": "MB-0771",
+      "allocation_key": "family-separation/pci/11.1.1",
+      "revision": 1,
+      "verdict": "family_separated_source_restoration",
+      "status": "active",
+      "restored_from": "MB-0641"
+    },
+    {
+      "id": "MB-0772",
+      "allocation_key": "family-separation/pci/11.1.2",
+      "revision": 1,
+      "verdict": "family_separated_source_restoration",
+      "status": "active",
+      "restored_from": "MB-0642"
     }
   ],
   "identity_policy": {

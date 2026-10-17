@@ -38,16 +38,18 @@ final class ScanPlanner
         $caps = is_array($config['capabilities'] ?? null) ? $config['capabilities'] : [];
         foreach (self::ids($options['capabilities'] ?? '') as $cap) $caps[strtolower($cap)] = true;
         $profile = trim((string)($options['profile'] ?? ''));
-        if ($profile === '') $profile = $requested !== [] ? 'basic' : (in_array(strtolower((string)($options['standard'] ?? '')), ['owasp','pci'], true) ? strtolower($options['standard']) : 'basic');
+        $requestedFamilies=[];
+        if($requested!==[]){
+            $catalogIndex=array_column(RequirementCatalog::loadAll()['rules'],null,'id');
+            foreach($requested as$id)foreach(isset($catalogIndex[$id])?[$id]:RequirementCatalog::resolveAlias($id)as$resolved)if(isset($catalogIndex[$resolved]))$requestedFamilies[$catalogIndex[$resolved]['family']]=true;
+            if(count($requestedFamilies)>1)throw new \RuntimeException('Select Magebean, ASVS and PCI requirements in separate scans.');
+        }
+        if ($profile === '') $profile = $requested !== [] ? match(array_key_first($requestedFamilies)){'asvs'=>'asvs-l3','pci'=>'pci',default=>'basic'} : (in_array(strtolower((string)($options['standard'] ?? '')), ['owasp','pci'], true) ? strtolower($options['standard']) : 'basic');
         if (is_file(ProjectPath::resolve($profile, $base))) $profile = ProjectPath::resolve($profile, $base);
         if(is_file($profile)){$custom=json_decode((string)file_get_contents($profile),true,512,JSON_THROW_ON_ERROR);if(!isset($custom['requirement_ids'])){if($internal!==[])throw new \RuntimeException('Internal selections require a primary requirement_ids profile.');$diagnostic(new ScanDiagnostic('comment','Using the deprecated custom-profile compatibility adapter.'));return (new LegacyScanPlanner())->planCli($request,$registry,$diagnostic);}}
-        if (in_array(strtolower($profile),['pci','pci-dss','pci-dss-v4.0.1'],true) && (!empty($options['controls']) || !empty($config['include_controls']))) {
-            if($internal!==[])throw new \RuntimeException('Legacy PCI control filtering cannot select internal requirement IDs.');
-            $diagnostic(new ScanDiagnostic('comment','Using the deprecated PCI control-filter compatibility adapter.'));
-            return (new LegacyScanPlanner())->planCli($request,$registry,$diagnostic);
-        }
         $pack = RequirementCatalog::forProfile($profile, $caps, $mode);
         $activeProfile = $pack['profile'];
+        if($requestedFamilies!==[]&&!isset($requestedFamilies[$activeProfile['family']]))throw new \RuntimeException('Selected requirements do not belong to the profile family; choose a profile from the same source.');
         if($configFile!==null)$diagnostic(new ScanDiagnostic('info','Loaded Magebean project config:',' '.$configFile));
         $diagnostic(new ScanDiagnostic('info','Loaded profile:',' '.(string)($activeProfile['id']??$profile)));
         $profileInventoryCount=$pack['inventory_count'];$omittedRequirements=$pack['omitted_requirements']??[];
@@ -139,6 +141,13 @@ final class ScanPlanner
         if (isset($manifest['assessment_level']) && !in_array($manifest['assessment_level'], [1,2,3], true)) throw new \RuntimeException('Invalid manifest assessment level.');
         $index = []; $selected = []; $unsupported = []; $bindings=[]; $executedIds=[];
         $all = array_column(RequirementCatalog::loadAll()['rules'], null, 'id');
+        $manifestFamilies=[];
+        foreach($entries as$entry){
+            $key=strtoupper((string)($entry['rule_key']??''));
+            foreach(isset($all[$key])?[$key]:RequirementCatalog::resolveAlias($key)as$resolved)if(isset($all[$resolved]))$manifestFamilies[$all[$resolved]['family']]=true;
+        }
+        if(count($manifestFamilies)>1)throw new \RuntimeException('Agent assessments cannot mix Magebean, ASVS and PCI requirement families.');
+        if(isset($manifest['requirement_family'])&&(!in_array($manifest['requirement_family'],['magebean','asvs','pci'],true)||($manifestFamilies!==[]&&!isset($manifestFamilies[$manifest['requirement_family']]))))throw new \RuntimeException('Manifest requirement family does not match its requirements.');
         $legacyEntries = array_values(array_filter($entries, static fn(array $e): bool => !(preg_match('/^MB-[0-9]{4,}$/D', strtoupper((string)($e['rule_key'] ?? ''))) === 1)));
         $legacyRules = [];
         if ($legacyEntries !== []) {

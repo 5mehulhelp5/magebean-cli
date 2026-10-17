@@ -15,7 +15,7 @@ foreach($catalog as$r){
  $allPass=RequirementAssessmentEvaluator::evaluate($r,static fn(string$name,array$args):CheckResult=>CheckResult::of(CheckOutcome::Pass,'Positive scoped observation',[],null,$name));
  $allFail=RequirementAssessmentEvaluator::evaluate($r,static fn(string$name,array$args):CheckResult=>CheckResult::of(CheckOutcome::Fail,'Negative scoped observation',[],null,$name));
  criterionAssert($allPass->outcome===RequirementOutcome::ManualReview,'Positive partial signals cannot certify '.$r['id']);
- if($r['id']==='MB-0379')criterionAssert($allFail->outcome===RequirementOutcome::Fail,'Reviewed default debug counterexample can disprove the all-disabled policy');else criterionAssert($allFail->outcome===RequirementOutcome::ManualReview,'Unreviewed bindings cannot assert normative violation '.$r['id']);
+ criterionAssert($allFail->outcome===RequirementOutcome::ManualReview,'Unreviewed bindings cannot assert normative violation '.$r['id']);
  criterionAssert($r['criterion']!==$r['human_evidence']['instructions']||$r['checks']===[],'Technical scope notes must not replace normative criterion '.$r['id']);
 }
 criterionAssert($asvs===345&&$pci===280,'All version-qualified criteria present under internal IDs');

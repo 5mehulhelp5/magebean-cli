@@ -4,11 +4,13 @@ One rule is one internal requirement. A requirement owns its identity, criterion
 
 ## Identity and catalog authority
 
-The primary identity is `MB-…`. It is independent of ASVS, PCI DSS and OWASP taxonomy numbering. Standard references are **alignment metadata**; identical numeric citations across standards are not identity equality. A shared detector or standard citation does not establish semantic equivalence between requirements.
+The primary identity is `MB-…`. It is independent of ASVS, PCI DSS and OWASP taxonomy numbering. Every definition has an owning `family`: `magebean`, `asvs` or `pci`. Magebean criteria belong to Magebean; ASVS and PCI criteria belong to their version-pinned source documents, with one independent identity per document clause. Identical numeric citations across standards are not identity equality. A shared detector or standard citation does not establish semantic equivalence between requirements.
 
-`RequirementCatalog::loadAll()` reads the persisted primary catalog. `RequirementCatalog::forProfile(name, capabilities, mode)` selects the same definitions through profile membership and context. Profiles must not define assessment logic, duplicate criteria, attach a legacy mapping to create a requirement, or silently strengthen or weaken an obligation. ASVS introduced level and the selected assessment level remain distinct metadata.
+`RequirementCatalog::loadAll()` reads the three authoritative physical catalogs: `magebean-catalog.json`, `asvs-catalog.json` and `pci-catalog.json`. The aggregate `internal-catalog.json` mirrors them for compatibility. `RequirementCatalog::forProfile(name, capabilities, mode)` selects the same definitions through profile membership and context. Profiles must not define assessment logic, duplicate criteria, attach a legacy mapping to create a requirement, or silently strengthen or weaken an obligation. ASVS introduced level and the selected assessment level remain distinct metadata.
 
-Definitions use `id`, `revision`, `criterion`, `alignments`, `coverage`, `applicability` and requirement-owned `obligations`. Each obligation names registered check functions and explicit arguments. `checks` is a flattened validation/inspection view, not a second source of assessment logic. Primary definitions do not have `requirements[]`, `legacy_rule_ids`, or a dependency on the MB-R catalog. Legacy aliases and historical mappings belong to a compatibility adapter.
+Basic, Hardening and OWASP use only the Magebean family. ASVS profiles use only ASVS, and PCI uses only PCI. Custom profiles must also stay within one family. Checks may share observations but cannot share assessment conclusions across these families.
+
+Definitions use `family`, `source`, `id`, `revision`, `criterion`, `alignments`, `coverage`, `applicability` and requirement-owned `obligations`. Each obligation names registered check functions and explicit arguments. `checks` is a flattened validation/inspection view, not a second source of assessment logic. Primary definitions do not have `requirements[]`, `legacy_rule_ids`, or a dependency on the MB-R catalog. Legacy aliases and historical mappings belong to a compatibility adapter.
 
 ```mermaid
 flowchart LR
@@ -55,7 +57,9 @@ The security team ledger provides per-entry metadata triage, not signed-off crit
 
 Historical phase and QA reports remain records of their original interfaces and counts. See [migration contract](requirement-migration.md), [native evidence scope](asvs-native-evidence.md) and [PCI workflow](pci-dss-v4.0.1-workflow.md).
 
-## Semantic consolidation and redirects
+## Historical semantic consolidation and redirects
+
+The cross-family consolidation described below is historical and superseded by [source-family separation](requirement-source-families.md). Current ASVS and PCI clauses have independent document-bound identities; no combined cross-family criterion is permitted. The historical allocation ledger is immutable, while active retired selectors resolve source-bound replacements recorded in `family-separation-manifest.json`.
 
 Requirements may be consolidated only after criterion-level review establishes equivalent scope or approves an explicit combined criterion that retains every necessary clause. Shared check functions, matching observations, standard references or similar titles are insufficient evidence for a merge. The combined definition preserves original standard-scoped criteria, applicability restrictions, exceptions, assessment levels and provenance in its alignment metadata. Combining criteria does not approve the associated detectors or promote heuristic evidence to verified proof.
 
@@ -67,6 +71,6 @@ Observation reuse stays within one scan invocation and the same target, function
 
 ## Basic deployment automation profile
 
-Basic now selects twenty reviewed automated deployment predicates with no human obligations. It uses MB-0728/0729/0730 for observed admin-password policy, declared project debug flags, and deployed working-tree pattern scanning. Broad ASVS MB-0209/0379 and Git-history MB-0072 remain unchanged outside basic. Use a named assessment profile or explicit `--rules` selection; the former full-inventory profile and its `all`/`magebean` aliases are no longer available. The global inventory is 687 identities; historical allocations730, next ID731, all625 standard references preserved.
+Basic now selects twenty reviewed automated deployment predicates with no human obligations. It uses MB-0728/0729/0730 for observed admin-password policy, declared project debug flags, and deployed working-tree pattern scanning. Broad ASVS MB-0209/0379 and Git-history MB-0072 remain unchanged outside basic. Use a named assessment profile or explicit `--rules` selection; the former full-inventory profile and its `all`/`magebean` aliases are no longer available. The global inventory is 729 identities: 104 Magebean, 345 ASVS and 280 PCI. Historical allocations total 772, next ID is 773, and retired IDs are not reused.
 
 Basic marks missing/invalid collection as execution errors, scan_complete=false and exit3; its console has no INCONCLUSIVE or human-review section. Internal UNKNOWN remains compatible with existing transport; classification=execution_error and execution_status=ERROR explicitly distinguish incomplete execution from policy violations. Existing security exit codes0/1/2 remain unchanged for completed scans. This policy does not convert missing evidence to PASS or security FAIL.
