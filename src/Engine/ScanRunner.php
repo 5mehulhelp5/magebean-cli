@@ -154,7 +154,7 @@ final class ScanRunner
                 ];
                 if(isset($rule['family']))$finding['requirement']['family']=$rule['family'];
                 if(isset($rule['source']))$finding['requirement']['source']=$rule['source'];
-                foreach (['policy_source', 'guidance_sources', 'lane'] as $field) {
+                foreach (['policy_source', 'guidance_sources', 'lane', 'finding_guidance'] as $field) {
                     if (isset($rule[$field])) $finding['requirement'][$field] = $rule[$field];
                 }
                 // Optional technical collection gaps still need an action even when human

@@ -363,6 +363,15 @@ final class HtmlReporter
     private function renderDetails(array $f): string
     {
         $out = '';
+        $guide = $f['requirement']['finding_guidance'] ?? [];
+        if (!empty($guide['interpretation'])) $out .= '<h4>Security interpretation</h4><p>' . htmlspecialchars($guide['interpretation'], ENT_QUOTES, 'UTF-8') . '</p>';
+        if (!empty($guide['risk'])) $out .= '<h4>Why this matters</h4><p>' . htmlspecialchars($guide['risk'], ENT_QUOTES, 'UTF-8') . '</p>';
+        foreach (['Remediation guidance' => $f['remediation'] ?? [], 'Verification after remediation' => $guide['verification'] ?? []] as $label => $steps) {
+            if (!is_array($steps) || $steps === []) continue;
+            $out .= '<h4>' . $label . '</h4><ol>';
+            foreach ($steps as $step) if (is_string($step)) $out .= '<li>' . htmlspecialchars($step, ENT_QUOTES, 'UTF-8') . '</li>';
+            $out .= '</ol>';
+        }
         $details = $f['details'] ?? [];
         if (is_array($details) && !empty($details)) {
             foreach ($details as $d) {

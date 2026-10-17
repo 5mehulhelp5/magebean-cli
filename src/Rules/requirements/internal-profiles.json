@@ -4,6 +4,7 @@
     "asvs-l1": {
       "id": "asvs-l1",
       "title": "OWASP ASVS Level 1",
+      "description": "Foundational application security assessment using the OWASP ASVS 5.0.0 Level 1 requirements. Combines technical observations with required human evidence; enable manual review to assess this profile. Results do not certify ASVS compliance.",
       "requirement_ids": [
         "MB-0105",
         "MB-0106",
@@ -84,6 +85,7 @@
     "asvs-l2": {
       "id": "asvs-l2",
       "title": "OWASP ASVS Level 2",
+      "description": "Broader application security assessment using the cumulative OWASP ASVS 5.0.0 Level 1 and Level 2 requirements. Includes technical observations and required human verification of design and runtime behavior; enable manual review to assess this profile. Results do not certify ASVS compliance.",
       "requirement_ids": [
         "MB-0103",
         "MB-0104",
@@ -347,6 +349,7 @@
     "asvs-l3": {
       "id": "asvs-l3",
       "title": "OWASP ASVS Level 3",
+      "description": "Detailed application security assessment using the cumulative OWASP ASVS 5.0.0 Level 1, Level 2 and Level 3 requirements. Requires substantial independent design, implementation and runtime evidence; enable manual review to assess this profile. Results do not certify ASVS compliance.",
       "requirement_ids": [
         "MB-0103",
         "MB-0104",
@@ -813,6 +816,7 @@
     "hardening": {
       "id": "hardening",
       "title": "Magento Production Hardening",
+      "description": "An in-depth review of Magento production configuration, application code, access controls, dependencies and operations using Magebean requirements. Automated checks provide scoped observations; include manual review for controls requiring runtime or operational evidence. This profile is separate from ASVS and PCI assessments.",
       "requirement_ids": [
         "MB-0001",
         "MB-0002",
@@ -916,6 +920,7 @@
     "owasp-top-10-2025": {
       "id": "owasp-top-10-2025",
       "title": "OWASP Top 10 2025",
+      "description": "Magebean application security checks organized around OWASP Top 10 2025 risk categories for Magento. Reviews relevant code, configuration and runtime observations; include manual review for requirements needing additional evidence. This profile is not an ASVS assessment or a complete penetration test.",
       "requirement_ids": [
         "MB-0001",
         "MB-0002",
@@ -1005,6 +1010,7 @@
     "pci-dss-v4.0.1": {
       "id": "pci-dss-v4.0.1",
       "title": "PCI DSS v4.0.1 Readiness",
+      "description": "A readiness assessment using the separate PCI DSS v4.0.1 requirement catalog. Requires confirmed payment scope, applicability decisions and technical and human evidence; enable manual review to assess this profile. Results support readiness review and do not certify PCI DSS compliance.",
       "requirement_ids": [
         "MB-0448",
         "MB-0449",

@@ -2,7 +2,7 @@
   "id": "owasp-top-10-2025",
   "aliases": ["owasp", "owasp-top-10"],
   "title": "OWASP Top 10 2025",
-  "description": "Curated Magebean application security rules mapped to OWASP Top 10 categories.",
+  "description": "Magebean application security checks organized around OWASP Top 10 2025 risk categories for Magento. Reviews relevant code, configuration and runtime observations; include manual review for requirements needing additional evidence. This profile is not an ASVS assessment or a complete penetration test.",
   "report_template": "owasp",
   "rules": [
     { "id": "MB-R001", "categories": ["A05"] },

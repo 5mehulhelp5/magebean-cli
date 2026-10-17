@@ -97,8 +97,9 @@ final class CodeQueryChecks extends CodeSearchSupport
                 if (is_array($token) && $token[0] === T_VARIABLE && in_array($token[1], $forbidden, true)) $matches[] = ['file' => $this->relativeFile($file), 'line' => $token[2], 'variable' => $token[1]];
             }
         }
-        $evidence = ['files_scanned' => $count, 'scope' => $roots, 'coverage_gaps' => array_values(array_unique($gaps)), 'matches' => array_slice($matches, 0, max(1, (int)($args['max_results'] ?? 50)))];
-        if ($matches !== []) return [false, 'Direct PHP superglobal references found in inspected application source', $evidence];
+        $maxMatches = max(1, min(50, (int)($args['max_results'] ?? 50)));
+        $evidence = ['files_scanned' => $count, 'scope' => $roots, 'coverage_gaps' => array_values(array_unique($gaps)), 'match_count' => count($matches), 'matches_truncated' => count($matches) > $maxMatches, 'matches' => array_slice($matches, 0, $maxMatches)];
+        if ($matches !== []) return [false, 'Direct PHP superglobal references found in inspected application source (' . count($matches) . ' matches). Review file:line evidence; this policy observation alone does not establish exploitability.', $evidence];
         if ($gaps !== []) return [null, '[UNKNOWN] Cannot read and parse the complete configured PHP source scope', $evidence];
         return [true, 'No direct PHP superglobal tokens in the inspected application source', $evidence];
     }

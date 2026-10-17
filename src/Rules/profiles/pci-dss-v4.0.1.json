@@ -6,7 +6,7 @@
         "pci-dss-v4"
     ],
     "title": "PCI DSS v4.0.1 Readiness",
-    "description": "Magento readiness checks mapped to PCI DSS v4.0.1 requirements. Results provide scoped evidence and do not certify PCI DSS compliance.",
+    "description": "A readiness assessment using the separate PCI DSS v4.0.1 requirement catalog. Requires confirmed payment scope, applicability decisions and technical and human evidence; enable manual review to assess this profile. Results support readiness review and do not certify PCI DSS compliance.",
     "report_template": "pci",
     "standard": {
         "id": "pci-dss",

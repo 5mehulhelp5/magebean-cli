@@ -1,7 +1,7 @@
 {
     "id": "asvs-l2",
     "title": "OWASP ASVS Level 2",
-    "description": "OWASP ASVS 5.0 Level 2 cumulative mapping. Inherits Level 1 and provides conservative partial coverage; this is not an OWASP certification or compliance claim.",
+    "description": "Broader application security assessment using the cumulative OWASP ASVS 5.0.0 Level 1 and Level 2 requirements. Includes technical observations and required human verification of design and runtime behavior; enable manual review to assess this profile. Results do not certify ASVS compliance.",
     "inherits": [
         "asvs-l1"
     ],

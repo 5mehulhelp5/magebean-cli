@@ -299,6 +299,9 @@ final class ScanConsoleRenderer
                     if (!empty($policy['note'])) $out->writeln('    ' . \Symfony\Component\Console\Formatter\OutputFormatter::escape((string)$policy['note']));
                 }
                 $this->renderCheckDetails($out, $f);
+                if (!empty($f['requirement']['finding_guidance']['interpretation'])) {
+                    $out->writeln('    Security interpretation: ' . \Symfony\Component\Console\Formatter\OutputFormatter::escape($f['requirement']['finding_guidance']['interpretation']));
+                }
             }
 
             if ($showRuleDetails && in_array($status, ['FAIL', 'UNKNOWN', 'ERROR'], true)) {
@@ -308,7 +311,7 @@ final class ScanConsoleRenderer
                     ? $this->inconclusiveResolutionSteps($f)
                     : $this->failureResolutionSteps($f);
                 foreach ($resolutionSteps as $step) {
-                    $out->writeln('    - ' . $step);
+                    $out->writeln('    - ' . \Symfony\Component\Console\Formatter\OutputFormatter::escape($step));
                 }
                 if ($id !== '' && !($id === 'MB-R072' && in_array($status, ['UNKNOWN', 'ERROR'], true))) {
                     $out->writeln(in_array($status, ['UNKNOWN', 'ERROR'], true)
