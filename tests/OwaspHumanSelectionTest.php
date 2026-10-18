@@ -10,7 +10,7 @@ foreach([false,true] as $include){
  if($plan===null)throw new RuntimeException('Expected OWASP plan');
  $human=array_filter($plan->pack['rules'],[RequirementPolicy::class,'requiresHuman']);
  if(!$include&&count($human)!==0)throw new RuntimeException('Human requirements leaked into default scan');
- if($include&&count($human)===0)throw new RuntimeException('Flag must restore human requirements');
+ if($include&&count($human)!==0)throw new RuntimeException('Manual flag cannot inject human requirements into Magebean OWASP');
  $test=new CommandTester((new \Magebean\Application())->find('rules:list'));$test->execute(['--profile'=>'owasp-top-10','--include-manual-review'=>$include,'--no-ansi'=>true]);
  preg_match_all('/^(MB-\d+) \[/m',$test->getDisplay(),$ids);
  if($ids[1]!==array_column($plan->pack['rules'],'id'))throw new RuntimeException('Listing/scan selection differs');

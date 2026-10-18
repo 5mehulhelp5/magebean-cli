@@ -1,0 +1,119 @@
+{
+  "date": "2026-10-17",
+  "scope": "Assigned10 dependency/privacy backlog items",
+  "new_check_class": "src/Engine/Checks/DependencyPolicyCheck.php",
+  "tests": "tests/DependencyPolicyCheckTest.php:26 offline assertions passed",
+  "new_predicates_ready": 2,
+  "rows": [
+    {
+      "id": "MB-0051",
+      "ready": false,
+      "reuse_active_ids": [
+        "MB-0049",
+        "MB-0056"
+      ],
+      "limitations": "Original historical criterion is not silently reactivated or weakened.",
+      "reason": "Fixed candidate/advisory-constraint observations already active; actionability or reviewed alternative remains unproved."
+    },
+    {
+      "id": "MB-0052",
+      "ready": false,
+      "reuse_active_ids": [
+        "MB-0061",
+        "MB-0062",
+        "MB-0063"
+      ],
+      "limitations": "Original historical criterion is not silently reactivated or weakened.",
+      "reason": "Maintained/high-risk semantics require a complete enabled-module mapping plus explicit risk/maintenance policy; existing maintenance predicates already report package status."
+    },
+    {
+      "id": "MB-0053",
+      "ready": true,
+      "reuse_active_ids": [],
+      "limitations": "Original historical criterion is not silently reactivated or weakened.",
+      "new_title": "Declared mitigation records satisfy structure and expiry policy",
+      "new_criterion": "The bounded readable schema-version-1 mitigation record inventory has a valid generated_at timestamp within configured max_age_days and covers each identity in the supplied nonempty expected_ids policy with a unique record containing nonempty advisory, package, version, owner, action, rollback and a valid future expires_at. This checks declared record structure and expiry only, not whether all deployed mitigations are declared, effective or approved.",
+      "check": "dependency_mitigation_records",
+      "method": "mitigationRecords",
+      "checkargs": {
+        "inventory_file": ".magebean/mitigations.json",
+        "expected_ids": [],
+        "max_age_days": 30
+      },
+      "reason": "Caller must supply a nonempty expected_ids technical policy; absent or empty policy remains UNKNOWN. Declared schema coverage never implies all real deployed mitigations are enumerated.",
+      "new_id": "MB-0806",
+      "new_id_required": true,
+      "original_criterion_ready": false
+    },
+    {
+      "id": "MB-0054",
+      "ready": false,
+      "reuse_active_ids": [
+        "MB-0049"
+      ],
+      "limitations": "Original historical criterion is not silently reactivated or weakened.",
+      "reason": "Existing known_exploited flag lacks dated complete KEV membership provenance. Adding a passing KEV predicate without an actual authoritative source contract would fabricate assurance; no new binding."
+    },
+    {
+      "id": "MB-0058",
+      "ready": false,
+      "reuse_active_ids": [
+        "MB-0061",
+        "MB-0062",
+        "MB-0063"
+      ],
+      "limitations": "Original historical criterion is not silently reactivated or weakened.",
+      "reason": "Backend Marketplace mapping/version policy completeness not established; reuse existing explicit maintenance checks instead of duplicate generic maintained result."
+    },
+    {
+      "id": "MB-0060",
+      "ready": false,
+      "reuse_active_ids": [],
+      "limitations": "Original historical criterion is not silently reactivated or weakened.",
+      "reason": "No verified authoritative exact-version lifecycle/entitlement provider contract found in repository. Current generic active status is insufficient; no invented vendor API."
+    },
+    {
+      "id": "MB-0744",
+      "ready": false,
+      "reuse_active_ids": [
+        "MB-0061"
+      ],
+      "limitations": "Original historical criterion is not silently reactivated or weakened.",
+      "reason": "All-Composer abandonment policy already active including libraries; non-Composer libraries require actual inventory/provider adapter. No duplicate."
+    },
+    {
+      "id": "MB-0064",
+      "ready": true,
+      "reuse_active_ids": [],
+      "limitations": "Original historical criterion is not silently reactivated or weakened.",
+      "new_title": "Collected Composer dependency sources match explicit policy",
+      "new_criterion": "Every package in the readable bounded collected composer.lock inventory has source and/or dist URL and nonempty reference matching the supplied exact per-package source policy; replacement declarations and root composer.json repository declarations also match the supplied policy. Explicit metadata-only metapackages may have no source/dist. Missing package policies or incomplete source identity are unresolved. This compares collected declarations and does not verify installed bytes, canonical upstream truth or absence of malicious approved revisions.",
+      "check": "dependency_source_policy",
+      "method": "sourcePolicy",
+      "checkargs": {
+        "lock_file": "composer.lock",
+        "composer_file": "composer.json",
+        "policy_file": ".magebean/dependency-source-policy.json"
+      },
+      "reason": "Source/revision allowlist is technical configuration, not human workflow. Supports private/non-Git exact identity; no backend repository_trusted inference.",
+      "identity_policy": "New scoped requirement ID required; historical FULL feasibility was conditional on complete fork-risk policy and is not a claim this declarative subset meets the entire old criterion.",
+      "new_id": "MB-0805",
+      "new_id_required": true,
+      "original_criterion_ready": false
+    },
+    {
+      "id": "MB-0077",
+      "ready": false,
+      "reuse_active_ids": [],
+      "limitations": "Original historical criterion is not silently reactivated or weakened.",
+      "reason": "Business data minimization cannot be concluded from source patterns. Existing detector remains investigative signal, not new PASS-capable requirement."
+    },
+    {
+      "id": "MB-0081",
+      "ready": false,
+      "reuse_active_ids": [],
+      "limitations": "Original historical criterion is not silently reactivated or weakened.",
+      "reason": "No implemented complete integration policy/merged ACL plus network policy adapter in this owned new class. Source keywords are not effective access proof."
+    }
+  ]
+}

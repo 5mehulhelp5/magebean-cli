@@ -45,6 +45,28 @@ final class CheckRegistry
         $installedCron = new InstalledCronCheck($ctx);
         $basicPractice = new BasicPracticeCheck($ctx);
         $basicExposure = new BasicExposureCheck($ctx);
+        $automatedSource = new AutomatedSourcePolicyCheck($ctx, new \Magebean\Engine\Collectors\BoundedSourceInventory($collectors->session));
+        $dependencyPolicy = new DependencyPolicyCheck($ctx);
+        $productionRuntime = new ProductionRuntimeCheck($ctx);
+        $providerWebhook = new ProviderWebhookSourceCheck($ctx);
+        $registry->register('provider_webhook_source_diagnostics', fn(array $args): CheckResult => $providerWebhook->run($args));
+        $productionPolicy = new ProductionCheckPolicy($ctx);
+        $workerObservation = new LinuxWorkerObservationCheck($ctx);
+        $registry->register('automated_source_policy', static function(array $args) use ($automatedSource): array|CheckResult {
+            if (!isset($args['kind']) || !is_string($args['kind']) || $args['kind'] === '') return [null, '[UNKNOWN] Explicit automated source policy kind is required', []];
+            try { return $automatedSource->run($args); }
+            catch (\InvalidArgumentException) { return [null, '[UNKNOWN] Unsupported automated source policy configuration', []]; }
+        });
+        $registry->register('dependency_source_policy', fn(array $args): array => $dependencyPolicy->sourcePolicy($args));
+        $registry->register('dependency_mitigation_records', fn(array $args): array => $productionPolicy->run('dependency_mitigation_records', $args, fn(array $resolved): array => $dependencyPolicy->mitigationRecords($resolved)));
+        $registry->register('production_bound_worker_code_readonly', fn(array $args): array => $productionPolicy->run('production_bound_worker_code_readonly', $args, fn(array $resolved): array => $productionRuntime->boundWorkerCodeReadonly($resolved)));
+        $registry->register('production_upload_signatures_absent', fn(array $args): array => $productionRuntime->uploadSignaturesAbsent($args));
+        $registry->register('production_direct_global_roles_approved', fn(array $args): array => $productionPolicy->run('production_direct_global_roles_approved', $args, fn(array $resolved): array => $productionRuntime->directGlobalRolesApproved($resolved)));
+        $registry->register('production_checkout_csp_response', fn(array $args): array => $productionRuntime->checkoutCspResponse($args));
+        $registry->register('production_runtime_nosniff', fn(array $args): array => $productionRuntime->runtimeNosniff($args));
+        $registry->register('production_native_debug_defaults_disabled', fn(array $args): array => $productionRuntime->nativeDebugDefaultsDisabled($args));
+        $registry->register('production_integration_debug_defaults_disabled', fn(array $args): array => $productionPolicy->run('production_integration_debug_defaults_disabled', $args, fn(array $resolved): array => $productionRuntime->integrationDebugDefaultsDisabled($resolved)));
+        $registry->register('production_worker_xdebug_absent', fn(array $args): array => $workerObservation->xdebugModulesAbsent($args));
         $registry->register('magento_admin_security_flag', fn(array $args): array => $mage->adminSecurityFlagConfigured($args));
         $registry->register('magento_admin_password_reset_protection', fn(array $args): array => $mage->adminPasswordResetProtectionConfigured($args));
         $registry->register('installed_cron_cadence', fn(array $args): array => $installedCron->cadence($args));

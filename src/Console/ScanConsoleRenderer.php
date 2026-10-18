@@ -7,6 +7,10 @@ use Symfony\Component\Console\Helper\ProgressBar;
 use Symfony\Component\Console\Output\OutputInterface;
 final class ScanConsoleRenderer
 {
+    private function renderRiskSummary(OutputInterface $out, array $result, string $path): void
+    {
+        (new FindingsConsoleRenderer())->render($out, $result, $path);
+    }
     public function diagnostic(OutputInterface $out, ScanDiagnostic $diagnostic): void
     {
         $label = $diagnostic->level === 'plain' ? $diagnostic->label
@@ -54,6 +58,7 @@ final class ScanConsoleRenderer
 
     public function renderPrettySummary(OutputInterface $out, array $result, string $path): void
     {
+        if (!empty($result['meta']['findings_first'])) { $this->renderRiskSummary($out, $result, $path); return; }
         $sum    = $result['summary'] ?? [];
         $total  = (int)($sum['total']  ?? 0);
         $passed = (int)($sum['passed'] ?? 0);
@@ -102,6 +107,12 @@ final class ScanConsoleRenderer
         $manualRulesHidden = (int)($result['meta']['manual_rules_hidden'] ?? 0);
         $manualRulesIncluded = (bool)($result['meta']['manual_rules_included'] ?? false);
         $out->writeln(sprintf('Rules         <info>%d</info> / <info>%d</info> selected', $total, $profileRulesTotal));
+        if (!empty($result['coverage_summary'])) {
+            $coverage=$result['coverage_summary'];
+            $out->writeln(sprintf('Coverage      %d inventoried · %d executed · %d not evaluated · %d unresolved', $coverage['inventory'],$coverage['executed'],$coverage['not_evaluated'],$coverage['unresolved']));
+            if (!$coverage['assessment_complete']) $out->writeln('<comment>Assessment coverage incomplete: resolve missing collection context, omitted checks and UNKNOWN results before interpreting coverage.</comment>');
+            if (!empty($result['not_evaluated_requirements'])) $out->writeln('Not evaluated '.implode(', ',array_column($result['not_evaluated_requirements'],'id')));
+        }
         foreach ($sum['lanes'] ?? [] as $lane => $counts) {
             $out->writeln(sprintf('%-14s%d passed · %d failed · %d unresolved', ucfirst($lane), $counts['passed'], $counts['failed'], $counts['unresolved']));
         }
@@ -121,7 +132,7 @@ final class ScanConsoleRenderer
             $out->writeln(sprintf('Manual rules  <fg=cyan;options=bold>%d not evaluated</> (use <info>--include-manual-review</info> to include)', $manualRulesHidden));
         } elseif ($manualRulesIncluded && $profileManualRulesTotal > 0) {
             $out->writeln(sprintf('Manual rules  <fg=cyan;options=bold>%d included</>', $profileManualRulesTotal));
-        } else {
+        } elseif (empty($profile['automation_only'])) {
             $out->writeln('Manual rules  <comment>None in the current profile selection</comment>');
         }
         $out->writeln(sprintf('Environment   PHP <info>%s</info> · %s · <comment>%s</comment>', $phpShort, $envTag($env), date('Y-m-d H:i')));

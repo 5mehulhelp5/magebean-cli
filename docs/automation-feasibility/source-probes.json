@@ -1,0 +1,70 @@
+[
+    {
+        "case": "command_unguarded",
+        "outcome": "FAIL",
+        "message": "Unsafe command execution found in: /tmp/mb-source-feasibility-5d9ce4637e6e/app/probe.phtml:1 [command_function/medium]"
+    },
+    {
+        "case": "command_unrelated_guard",
+        "outcome": "PASS",
+        "message": "Command execution sinks are absent or guarded"
+    },
+    {
+        "case": "command_comment_only",
+        "outcome": "PASS",
+        "message": "Command execution sinks are absent or guarded"
+    },
+    {
+        "case": "eval_unguarded",
+        "outcome": "FAIL",
+        "message": "Unsafe dynamic execution found in: /tmp/mb-source-feasibility-5d9ce4637e6e/app/probe.phtml:1 [dynamic_code_function/medium]"
+    },
+    {
+        "case": "eval_comment_only",
+        "outcome": "PASS",
+        "message": "No unsafe dynamic execution patterns detected"
+    },
+    {
+        "case": "unserialize_untrusted_allowed_classes_false",
+        "outcome": "PASS",
+        "message": "No unsafe native unserialize() usage detected"
+    },
+    {
+        "case": "csrf_empty_token",
+        "outcome": "PASS",
+        "message": "POST forms and handlers include form_key protection signals"
+    },
+    {
+        "case": "csrf_missing_token",
+        "outcome": "FAIL",
+        "message": "Potential CSRF/form_key gaps found in: /tmp/mb-source-feasibility-5d9ce4637e6e/app/probe.phtml:1 [post_form_without_form_key]"
+    },
+    {
+        "case": "xml_unsafe",
+        "outcome": "FAIL",
+        "message": "Unsafe XML parsing patterns detected:\n    - /tmp/mb-source-feasibility-5d9ce4637e6e/app/probe.phtml:1 [dangerous_libxml_flags] <?php simplexml_load_string($x, null, LIBXML_NOENT);"
+    },
+    {
+        "case": "xml_unsafe_unrelated_blocked_word",
+        "outcome": "FAIL",
+        "message": "Unsafe XML parsing patterns detected:\n    - /tmp/mb-source-feasibility-5d9ce4637e6e/app/probe.phtml:1 [simplexml_load_with_unsafe_flags] <?php $blocked = true; simplexml_load_string($x, null, LIBXML_NOENT);"
+    },
+    {
+        "case": "command_missing",
+        "outcome": "PASS",
+        "message": "Command execution sinks are absent or guarded",
+        "effective_uid": 1000
+    },
+    {
+        "case": "command_oversized",
+        "outcome": "PASS",
+        "message": "Command execution sinks are absent or guarded",
+        "effective_uid": 1000
+    },
+    {
+        "case": "command_unreadable",
+        "outcome": "PASS",
+        "message": "Command execution sinks are absent or guarded",
+        "effective_uid": 1000
+    }
+]

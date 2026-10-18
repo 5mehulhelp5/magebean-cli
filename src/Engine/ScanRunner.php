@@ -180,6 +180,24 @@ final class ScanRunner
                     $finding['evidence']['collection_guidance'] = $finding['collection_guidance'];
                 }
                 foreach(['profile','remediation','assessment_level'] as $field) if(isset($rule[$field]))$finding[$field]=$rule[$field];
+                if (($rule['family'] ?? '') === 'magebean' && !RequirementPolicy::requiresHuman($rule)) {
+                    $risk = MagebeanRiskObservation::fromAssessment($rule, $assessment);
+                    foreach ($risk['findings'] as &$observation) {
+                        if (($observation['kind'] ?? '') !== 'collection_issue') continue;
+                        if (!empty($observation['evidence']['collection_guidance']['action'])) continue;
+                        foreach ($finding['detail'] as $item) {
+                            if (($item['check'] ?? '') === $observation['check'] && !empty($item['collection_guidance'])) {
+                                $observation['evidence']['collection_guidance'] = $item['collection_guidance'];
+                                break;
+                            }
+                        }
+                        $observation['evidence']['collection_guidance'] ??= $finding['collection_guidance'] ?? RequirementDiagnostics::forFinding($finding, $rule);
+                    }
+                    unset($observation);
+                    $finding['risk_observation'] = $risk;
+                    $finding['evidence']['risk_observation'] = $risk;
+                    $finding['needs_attention'] = $risk['needs_attention'];
+                }
                 $findings[]=$finding; $checkResults[]=$observations;
                 if($status==='PASS')$passed++;
                 if($status==='FAIL')$failed++;

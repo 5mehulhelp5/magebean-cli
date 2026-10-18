@@ -1,3 +1,5 @@
+Current profile contract supersedes the external checklist described below: [automated-only Magebean profiles](../magebean-automated-only-profiles.md).
+
 # Basic Adobe review implementation
 
 Basic revision 2 selects **37 Magebean technical requirements: 30 security and 7 readiness**, with **six external evidence task groups**. The previous review files describe the original 20-member profile and remain historical evidence.

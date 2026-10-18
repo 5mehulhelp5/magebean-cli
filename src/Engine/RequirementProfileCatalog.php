@@ -15,6 +15,19 @@ final class RequirementProfileCatalog
         if(!is_array($p['requirement_ids']??null))throw new \RuntimeException('Profile requires requirement_ids.');$known=array_column(RequirementCatalog::loadAll()['rules'],null,'id');$seen=[];
         foreach($p['requirement_ids'] as $id){if(!is_string($id)||preg_match('/^MB-[0-9]+$/D',$id)!==1)throw new \RuntimeException('Unknown internal requirement identity in profile.');$resolved=isset($known[$id])?[$id]:LegacyRequirementAliases::resolve($id);if(count($resolved)!==1||!isset($known[$resolved[0]]))throw new \RuntimeException('Unknown internal requirement identity in profile.');$seen[$resolved[0]]=true;}
         $p['requirement_ids']=array_keys($seen);
+        if (in_array($p['id']??'', ['basic','hardening','owasp-top-10-2025'],true)) {
+            if (($p['automation_only']??false)!==true || !empty($p['evidence_tasks'])) throw new \RuntimeException('Magebean profiles must be automated-only without manual evidence tasks.');
+            foreach ($p['requirement_ids'] as $id) if (RequirementPolicy::requiresHuman($known[$id])) throw new \RuntimeException('Magebean profiles cannot include human-evidence requirements: '.$id);
+        }
+        if (($p['id']??'')==='hardening') {
+            $profiles=RequirementCatalog::read('internal-profiles')['profiles'];
+            foreach (['basic','owasp-top-10-2025'] as $included) {
+                if (array_diff($profiles[$included]['requirement_ids'],$p['requirement_ids'])!==[]) throw new \RuntimeException('Hardening must include all requirements from '.$included.'.');
+            }
+            foreach ($profiles['basic']['evidence_tasks']??[] as $task) {
+                if (!in_array($task,$p['evidence_tasks']??[],true)) throw new \RuntimeException('Hardening must retain Basic external evidence tasks.');
+            }
+        }
         $families=[];foreach($p['requirement_ids'] as $id)$families[$known[$id]['family']]=true;
         if(count($families)>1)throw new \RuntimeException('A requirement profile cannot mix Magebean, ASVS and PCI families.');
         $family=$p['family']??array_key_first($families);

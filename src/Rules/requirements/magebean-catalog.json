@@ -405,7 +405,8 @@
         "references": [
           "https://developer.adobe.com/commerce/php/development/security/"
         ]
-      }
+      },
+      "lane": "security"
     },
     {
       "id": "MB-0005",
@@ -912,7 +913,8 @@
         "references": [
           "https://experienceleague.adobe.com/en/docs/commerce-operations/implementation-playbook/best-practices/launch/security-best-practices"
         ]
-      }
+      },
+      "lane": "security"
     },
     {
       "id": "MB-0011",
@@ -1100,7 +1102,8 @@
           "https://developer.adobe.com/commerce/php/coding-standards/technical-guidelines",
           "https://developer.adobe.com/commerce/php/best-practices/extensions/security"
         ]
-      }
+      },
+      "lane": "security"
     },
     {
       "id": "MB-0015",
@@ -1187,7 +1190,8 @@
         "references": [
           "https://developer.adobe.com/commerce/php/development/security/"
         ]
-      }
+      },
+      "lane": "security"
     },
     {
       "id": "MB-0016",
@@ -1280,7 +1284,8 @@
         "references": [
           "https://developer.adobe.com/commerce/php/development/security/"
         ]
-      }
+      },
+      "lane": "security"
     },
     {
       "id": "MB-0019",
@@ -1373,7 +1378,8 @@
         "references": [
           "https://developer.adobe.com/commerce/php/development/security/"
         ]
-      }
+      },
+      "lane": "security"
     },
     {
       "id": "MB-0020",
@@ -1466,7 +1472,8 @@
         "references": [
           "https://developer.adobe.com/commerce/php/development/security/"
         ]
-      }
+      },
+      "lane": "security"
     },
     {
       "id": "MB-0021",
@@ -1559,7 +1566,8 @@
         "references": [
           "https://developer.adobe.com/commerce/php/development/security/"
         ]
-      }
+      },
+      "lane": "security"
     },
     {
       "id": "MB-0023",
@@ -1652,7 +1660,8 @@
         "references": [
           "https://developer.adobe.com/commerce/php/development/security/"
         ]
-      }
+      },
+      "lane": "security"
     },
     {
       "id": "MB-0025",
@@ -1745,7 +1754,8 @@
         "references": [
           "https://developer.adobe.com/commerce/php/development/security/"
         ]
-      }
+      },
+      "lane": "security"
     },
     {
       "id": "MB-0026",
@@ -2525,7 +2535,8 @@
         "references": [
           "https://experienceleague.adobe.com/en/docs/commerce-operations/implementation-playbook/best-practices/launch/security-best-practices"
         ]
-      }
+      },
+      "lane": "readiness"
     },
     {
       "id": "MB-0035",
@@ -2868,7 +2879,8 @@
         "references": [
           "https://experienceleague.adobe.com/en/docs/commerce-operations/implementation-playbook/best-practices/launch/security-best-practices"
         ]
-      }
+      },
+      "lane": "readiness"
     },
     {
       "id": "MB-0039",
@@ -2953,7 +2965,8 @@
         "references": [
           "https://experienceleague.adobe.com/en/docs/commerce-operations/implementation-playbook/best-practices/launch/security-best-practices"
         ]
-      }
+      },
+      "lane": "readiness"
     },
     {
       "id": "MB-0040",
@@ -3042,7 +3055,8 @@
         "references": [
           "https://experienceleague.adobe.com/en/docs/commerce-operations/implementation-playbook/best-practices/launch/security-best-practices"
         ]
-      }
+      },
+      "lane": "security"
     },
     {
       "id": "MB-0042",
@@ -3220,7 +3234,8 @@
         "references": [
           "https://experienceleague.adobe.com/en/docs/commerce-operations/implementation-playbook/best-practices/launch/security-best-practices"
         ]
-      }
+      },
+      "lane": "readiness"
     },
     {
       "id": "MB-0046",
@@ -3414,7 +3429,8 @@
         "references": [
           "https://experienceleague.adobe.com/en/docs/commerce-operations/implementation-playbook/best-practices/launch/security-best-practices"
         ]
-      }
+      },
+      "lane": "readiness"
     },
     {
       "id": "MB-0048",
@@ -3511,7 +3527,8 @@
         "references": [
           "https://experienceleague.adobe.com/en/docs/commerce-operations/implementation-playbook/best-practices/launch/security-best-practices"
         ]
-      }
+      },
+      "lane": "readiness"
     },
     {
       "id": "MB-0049",
@@ -3796,7 +3813,8 @@
         "references": [
           "https://experienceleague.adobe.com/en/docs/commerce-operations/implementation-playbook/best-practices/launch/security-best-practices"
         ]
-      }
+      },
+      "lane": "security"
     },
     {
       "id": "MB-0052",
@@ -3895,7 +3913,8 @@
         "references": [
           "https://experienceleague.adobe.com/en/docs/commerce-operations/implementation-playbook/best-practices/launch/security-best-practices"
         ]
-      }
+      },
+      "lane": "security"
     },
     {
       "id": "MB-0053",
@@ -3986,7 +4005,8 @@
         "references": [
           "https://experienceleague.adobe.com/en/docs/commerce-operations/implementation-playbook/best-practices/launch/security-best-practices"
         ]
-      }
+      },
+      "lane": "security"
     },
     {
       "id": "MB-0054",
@@ -4085,7 +4105,8 @@
         "references": [
           "https://experienceleague.adobe.com/en/docs/commerce-operations/implementation-playbook/best-practices/launch/security-best-practices"
         ]
-      }
+      },
+      "lane": "security"
     },
     {
       "id": "MB-0055",
@@ -4173,7 +4194,8 @@
         "references": [
           "https://experienceleague.adobe.com/en/docs/commerce-operations/implementation-playbook/best-practices/launch/security-best-practices"
         ]
-      }
+      },
+      "lane": "security"
     },
     {
       "id": "MB-0056",
@@ -4261,7 +4283,8 @@
         "references": [
           "https://experienceleague.adobe.com/en/docs/commerce-operations/implementation-playbook/best-practices/launch/security-best-practices"
         ]
-      }
+      },
+      "lane": "security"
     },
     {
       "id": "MB-0057",
@@ -4347,7 +4370,8 @@
         "references": [
           "https://experienceleague.adobe.com/en/docs/commerce-operations/implementation-playbook/best-practices/launch/security-best-practices"
         ]
-      }
+      },
+      "lane": "security"
     },
     {
       "id": "MB-0058",
@@ -4448,7 +4472,8 @@
         "references": [
           "https://experienceleague.adobe.com/en/docs/commerce-operations/implementation-playbook/best-practices/launch/security-best-practices"
         ]
-      }
+      },
+      "lane": "security"
     },
     {
       "id": "MB-0059",
@@ -4536,7 +4561,8 @@
         "references": [
           "https://experienceleague.adobe.com/en/docs/commerce-operations/implementation-playbook/best-practices/launch/security-best-practices"
         ]
-      }
+      },
+      "lane": "security"
     },
     {
       "id": "MB-0060",
@@ -4635,7 +4661,8 @@
         "references": [
           "https://experienceleague.adobe.com/en/docs/commerce-operations/implementation-playbook/best-practices/launch/security-best-practices"
         ]
-      }
+      },
+      "lane": "security"
     },
     {
       "id": "MB-0061",
@@ -4755,7 +4782,8 @@
         "references": [
           "https://experienceleague.adobe.com/en/docs/commerce-operations/implementation-playbook/best-practices/launch/security-best-practices"
         ]
-      }
+      },
+      "lane": "security"
     },
     {
       "id": "MB-0062",
@@ -4848,7 +4876,8 @@
         "references": [
           "https://experienceleague.adobe.com/en/docs/commerce-operations/implementation-playbook/best-practices/launch/security-best-practices"
         ]
-      }
+      },
+      "lane": "security"
     },
     {
       "id": "MB-0063",
@@ -4939,7 +4968,8 @@
         "references": [
           "https://experienceleague.adobe.com/en/docs/commerce-operations/implementation-playbook/best-practices/launch/security-best-practices"
         ]
-      }
+      },
+      "lane": "security"
     },
     {
       "id": "MB-0064",
@@ -5036,7 +5066,8 @@
         "references": [
           "https://experienceleague.adobe.com/en/docs/commerce-operations/implementation-playbook/best-practices/launch/security-best-practices"
         ]
-      }
+      },
+      "lane": "security"
     },
     {
       "id": "MB-0065",
@@ -5126,7 +5157,8 @@
         "references": [
           "https://experienceleague.adobe.com/en/docs/commerce-operations/implementation-playbook/best-practices/launch/security-best-practices"
         ]
-      }
+      },
+      "lane": "security"
     },
     {
       "id": "MB-0066",
@@ -5216,7 +5248,8 @@
         "references": [
           "https://experienceleague.adobe.com/en/docs/commerce-operations/implementation-playbook/best-practices/launch/security-best-practices"
         ]
-      }
+      },
+      "lane": "security"
     },
     {
       "id": "MB-0067",
@@ -5302,7 +5335,8 @@
         "references": [
           "https://experienceleague.adobe.com/en/docs/commerce-operations/implementation-playbook/best-practices/launch/security-best-practices"
         ]
-      }
+      },
+      "lane": "security"
     },
     {
       "id": "MB-0069",
@@ -5392,7 +5426,8 @@
         "references": [
           "https://experienceleague.adobe.com/en/docs/commerce-operations/implementation-playbook/best-practices/launch/security-best-practices"
         ]
-      }
+      },
+      "lane": "security"
     },
     {
       "id": "MB-0070",
@@ -5470,7 +5505,8 @@
         "references": [
           "https://experienceleague.adobe.com/en/docs/commerce-operations/implementation-playbook/best-practices/launch/security-best-practices"
         ]
-      }
+      },
+      "lane": "security"
     },
     {
       "id": "MB-0072",
@@ -5606,7 +5642,8 @@
         "references": [
           "https://experienceleague.adobe.com/en/docs/commerce-operations/implementation-playbook/best-practices/launch/security-best-practices"
         ]
-      }
+      },
+      "lane": "security"
     },
     {
       "id": "MB-0073",
@@ -5729,7 +5766,8 @@
         "references": [
           "https://developer.adobe.com/commerce/php/development/security/"
         ]
-      }
+      },
+      "lane": "security"
     },
     {
       "id": "MB-0075",
@@ -5838,7 +5876,8 @@
         "references": [
           "https://developer.adobe.com/commerce/php/development/security/"
         ]
-      }
+      },
+      "lane": "security"
     },
     {
       "id": "MB-0076",
@@ -5951,7 +5990,8 @@
         "references": [
           "https://developer.adobe.com/commerce/php/development/security/"
         ]
-      }
+      },
+      "lane": "security"
     },
     {
       "id": "MB-0077",
@@ -6054,7 +6094,8 @@
         "references": [
           "https://developer.adobe.com/commerce/php/development/security/"
         ]
-      }
+      },
+      "lane": "security"
     },
     {
       "id": "MB-0078",
@@ -6151,7 +6192,8 @@
         "references": [
           "https://experienceleague.adobe.com/en/docs/commerce-operations/implementation-playbook/best-practices/launch/security-best-practices"
         ]
-      }
+      },
+      "lane": "security"
     },
     {
       "id": "MB-0079",
@@ -6260,7 +6302,8 @@
         "references": [
           "https://developer.adobe.com/commerce/php/development/security/"
         ]
-      }
+      },
+      "lane": "security"
     },
     {
       "id": "MB-0081",
@@ -6367,7 +6410,8 @@
         "references": [
           "https://developer.adobe.com/commerce/php/development/security/"
         ]
-      }
+      },
+      "lane": "security"
     },
     {
       "id": "MB-0082",
@@ -7206,7 +7250,8 @@
         "references": [
           "https://developer.adobe.com/commerce/php/development/security/"
         ]
-      }
+      },
+      "lane": "security"
     },
     {
       "id": "MB-0090",
@@ -7674,7 +7719,8 @@
         "references": [
           "https://developer.adobe.com/commerce/php/development/security/"
         ]
-      }
+      },
+      "lane": "security"
     },
     {
       "id": "MB-0095",
@@ -7783,7 +7829,8 @@
         "references": [
           "https://developer.adobe.com/commerce/php/development/security/"
         ]
-      }
+      },
+      "lane": "security"
     },
     {
       "id": "MB-0096",
@@ -7896,7 +7943,8 @@
         "references": [
           "https://developer.adobe.com/commerce/php/development/security/"
         ]
-      }
+      },
+      "lane": "security"
     },
     {
       "id": "MB-0097",
@@ -8021,7 +8069,8 @@
         "references": [
           "https://developer.adobe.com/commerce/php/development/security/"
         ]
-      }
+      },
+      "lane": "security"
     },
     {
       "id": "MB-0098",
@@ -8116,7 +8165,8 @@
         "references": [
           "https://developer.adobe.com/commerce/php/development/security/"
         ]
-      }
+      },
+      "lane": "security"
     },
     {
       "id": "MB-0099",
@@ -8221,7 +8271,8 @@
         "references": [
           "https://developer.adobe.com/commerce/php/development/security/"
         ]
-      }
+      },
+      "lane": "security"
     },
     {
       "id": "MB-0100",
@@ -8422,7 +8473,8 @@
         "references": [
           "https://experienceleague.adobe.com/en/docs/commerce-operations/implementation-playbook/best-practices/launch/security-best-practices"
         ]
-      }
+      },
+      "lane": "security"
     },
     {
       "id": "MB-0102",
@@ -8519,7 +8571,8 @@
         "references": [
           "https://experienceleague.adobe.com/en/docs/commerce-operations/implementation-playbook/best-practices/launch/security-best-practices"
         ]
-      }
+      },
+      "lane": "security"
     },
     {
       "id": "MB-0728",
@@ -8904,7 +8957,8 @@
         "references": [
           "https://experienceleague.adobe.com/en/docs/commerce-operations/implementation-playbook/best-practices/launch/security-best-practices"
         ]
-      }
+      },
+      "lane": "security"
     },
     {
       "id": "MB-0732",
@@ -8993,7 +9047,8 @@
         "references": [
           "https://developer.adobe.com/commerce/php/development/security/"
         ]
-      }
+      },
+      "lane": "security"
     },
     {
       "id": "MB-0733",
@@ -9088,7 +9143,8 @@
         "references": [
           "https://developer.adobe.com/commerce/php/development/security/"
         ]
-      }
+      },
+      "lane": "security"
     },
     {
       "id": "MB-0734",
@@ -9175,7 +9231,8 @@
         "references": [
           "https://developer.adobe.com/commerce/php/development/security/"
         ]
-      }
+      },
+      "lane": "security"
     },
     {
       "id": "MB-0735",
@@ -9262,7 +9319,8 @@
         "references": [
           "https://developer.adobe.com/commerce/php/development/security/"
         ]
-      }
+      },
+      "lane": "security"
     },
     {
       "id": "MB-0736",
@@ -9351,7 +9409,8 @@
         "references": [
           "https://developer.adobe.com/commerce/php/development/security/"
         ]
-      }
+      },
+      "lane": "security"
     },
     {
       "id": "MB-0737",
@@ -9438,7 +9497,8 @@
         "references": [
           "https://developer.adobe.com/commerce/php/development/security/"
         ]
-      }
+      },
+      "lane": "security"
     },
     {
       "id": "MB-0738",
@@ -9554,7 +9614,8 @@
         "references": [
           "https://experienceleague.adobe.com/en/docs/commerce-operations/implementation-playbook/best-practices/launch/security-best-practices"
         ]
-      }
+      },
+      "lane": "security"
     },
     {
       "id": "MB-0739",
@@ -9670,7 +9731,8 @@
         "references": [
           "https://experienceleague.adobe.com/en/docs/commerce-operations/implementation-playbook/best-practices/launch/security-best-practices"
         ]
-      }
+      },
+      "lane": "security"
     },
     {
       "id": "MB-0740",
@@ -9753,7 +9815,8 @@
         "references": [
           "https://experienceleague.adobe.com/en/docs/commerce-operations/implementation-playbook/best-practices/launch/security-best-practices"
         ]
-      }
+      },
+      "lane": "security"
     },
     {
       "id": "MB-0741",
@@ -9840,7 +9903,8 @@
         "references": [
           "https://experienceleague.adobe.com/en/docs/commerce-operations/implementation-playbook/best-practices/launch/security-best-practices"
         ]
-      }
+      },
+      "lane": "security"
     },
     {
       "id": "MB-0742",
@@ -9925,7 +9989,8 @@
         "references": [
           "https://experienceleague.adobe.com/en/docs/commerce-operations/implementation-playbook/best-practices/launch/security-best-practices"
         ]
-      }
+      },
+      "lane": "security"
     },
     {
       "id": "MB-0743",
@@ -10014,7 +10079,8 @@
         "references": [
           "https://developer.adobe.com/commerce/php/development/security/"
         ]
-      }
+      },
+      "lane": "security"
     },
     {
       "id": "MB-0744",
@@ -10105,7 +10171,8 @@
         "references": [
           "https://experienceleague.adobe.com/en/docs/commerce-operations/implementation-playbook/best-practices/launch/security-best-practices"
         ]
-      }
+      },
+      "lane": "security"
     },
     {
       "id": "MB-0745",
@@ -10188,7 +10255,8 @@
         "references": [
           "https://experienceleague.adobe.com/en/docs/commerce-operations/implementation-playbook/best-practices/launch/security-best-practices"
         ]
-      }
+      },
+      "lane": "security"
     },
     {
       "id": "MB-0746",
@@ -10277,7 +10345,8 @@
         "references": [
           "https://developer.adobe.com/commerce/php/development/security/"
         ]
-      }
+      },
+      "lane": "security"
     },
     {
       "id": "MB-0747",
@@ -10469,7 +10538,8 @@
         "references": [
           "https://developer.adobe.com/commerce/php/development/security/"
         ]
-      }
+      },
+      "lane": "security"
     },
     {
       "id": "MB-0773",
@@ -11570,6 +11640,2056 @@
           "https://experienceleague.adobe.com/en/docs/commerce-operations/configuration-guide/cli/configure-cron-jobs",
           "https://experienceleague.adobe.com/en/docs/commerce-operations/implementation-playbook/best-practices/launch/security-best-practices"
         ]
+      }
+    },
+    {
+      "id": "MB-0786",
+      "revision": 1,
+      "title": "Direct named query methods use a literal first argument",
+      "criterion": "Every syntactically named query/rawQuery/exec/executeQuery method call in collected custom PHP/PHTML uses one static string first argument, without direct concatenation or interpolation. Unresolved variables yield UNKNOWN. This does not prove parameter binding or SQL injection safety. Scope is completely collected app/code PHP/PHTML; missing, unreadable, oversized, linked, malformed or truncated eligible input prevents a clean PASS.",
+      "control": "MB-C03",
+      "severity": "low",
+      "alignments": [],
+      "obligations": [
+        {
+          "id": "O001",
+          "op": "all",
+          "role": "mandatory",
+          "proof": "verified_predicate",
+          "checks": [
+            {
+              "name": "automated_source_policy",
+              "args": {
+                "kind": "sql_literal_query",
+                "paths": [
+                  "app/code"
+                ],
+                "include_ext": [
+                  "php",
+                  "phtml"
+                ]
+              }
+            }
+          ]
+        }
+      ],
+      "coverage": "AUTOMATED",
+      "verification": "automated",
+      "review_state": "accepted_scoped_criterion",
+      "human_evidence": {
+        "required": false,
+        "instructions": "",
+        "evidence_types": [
+          "scoped_observation"
+        ]
+      },
+      "target_modes": [
+        "LOCAL"
+      ],
+      "checks": [
+        {
+          "name": "automated_source_policy",
+          "args": {
+            "kind": "sql_literal_query",
+            "paths": [
+              "app/code"
+            ],
+            "include_ext": [
+              "php",
+              "phtml"
+            ]
+          }
+        }
+      ],
+      "op": "all",
+      "family": "magebean",
+      "source": {
+        "document": "Magebean security requirements",
+        "version": "1",
+        "reference": "magebean/source-policy-v1/sql_literal_query"
+      },
+      "lane": "security",
+      "policy_source": {
+        "owner": "Magebean",
+        "version": "source-policy-1",
+        "note": "Explicit syntactic coding restriction; no original backlog criterion is promoted or rewritten."
+      },
+      "automation_backlog_ids": [
+        "MB-0732"
+      ],
+      "remediation": [
+        "At the reported named query method, use a static query string with separately bound values through the installed Magento adapter, or move query composition to the approved query builder. Do not replace interpolation with manual escaping or interpolate request data into identifiers. Resolve variable-built queries when the checker returns UNKNOWN.",
+        "Test special characters and identifier choices through the real adapter in isolation; confirm query results and bindings remain correct and no first-argument concatenation/interpolation remains.",
+        "Rerun MB-0786 against the same release and complete source scope; retain file/line evidence and investigate collection gaps rather than treating UNKNOWN as satisfied."
+      ],
+      "finding_guidance": {
+        "version": 1,
+        "interpretation": "Every syntactically named query/rawQuery/exec/executeQuery method call in collected custom PHP/PHTML uses one static string first argument, without direct concatenation or interpolation. Unresolved variables yield UNKNOWN. This does not prove parameter binding or SQL injection safety. Scope is completely collected app/code PHP/PHTML; missing, unreadable, oversized, linked, malformed or truncated eligible input prevents a clean PASS.",
+        "risk": "The observed construct violates the configured Magebean coding policy. Determine actual data flow, reachability and runtime exposure before assigning incident or exploit severity.",
+        "triage": [
+          "Locate the reported file and line in the assessed release; evidence intentionally omits source snippets and secrets.",
+          "Determine whether this exact policy is enabled and applicable to the implementation; identify framework adapters and dependencies outside its scope."
+        ],
+        "verification": [
+          "Test special characters and identifier choices through the real adapter in isolation; confirm query results and bindings remain correct and no first-argument concatenation/interpolation remains.",
+          "Rerun MB-0786; a ticket or source edit alone does not establish a new passing observation."
+        ],
+        "limitations": "Exact opt-in coding policy, not a finding of confirmed exploitability or proof of the broader historical requirement. Runtime adapters, dependencies, generated code and files outside app/code remain outside this predicate.",
+        "references": []
+      },
+      "applicability": {
+        "capability": "strict_native_api_policy"
+      }
+    },
+    {
+      "id": "MB-0787",
+      "revision": 1,
+      "title": "No unconditional validateForCsrf acceptance override",
+      "criterion": "Collected custom PHP/PHTML contains no validateForCsrf method whose complete body is an unconditional return true. This exact bypass ban does not establish form tokens or server-side CSRF effectiveness. Scope is completely collected app/code PHP/PHTML; missing, unreadable, oversized, linked, malformed or truncated eligible input prevents a clean PASS.",
+      "control": "MB-C03",
+      "severity": "medium",
+      "alignments": [],
+      "obligations": [
+        {
+          "id": "O001",
+          "op": "all",
+          "role": "mandatory",
+          "proof": "verified_predicate",
+          "checks": [
+            {
+              "name": "automated_source_policy",
+              "args": {
+                "kind": "csrf_unconditional_bypass",
+                "paths": [
+                  "app/code"
+                ],
+                "include_ext": [
+                  "php",
+                  "phtml"
+                ]
+              }
+            }
+          ]
+        }
+      ],
+      "coverage": "AUTOMATED",
+      "verification": "automated",
+      "review_state": "accepted_scoped_criterion",
+      "human_evidence": {
+        "required": false,
+        "instructions": "",
+        "evidence_types": [
+          "scoped_observation"
+        ]
+      },
+      "target_modes": [
+        "LOCAL"
+      ],
+      "checks": [
+        {
+          "name": "automated_source_policy",
+          "args": {
+            "kind": "csrf_unconditional_bypass",
+            "paths": [
+              "app/code"
+            ],
+            "include_ext": [
+              "php",
+              "phtml"
+            ]
+          }
+        }
+      ],
+      "op": "all",
+      "family": "magebean",
+      "source": {
+        "document": "Magebean security requirements",
+        "version": "1",
+        "reference": "magebean/source-policy-v1/csrf_unconditional_bypass"
+      },
+      "lane": "security",
+      "policy_source": {
+        "owner": "Magebean",
+        "version": "source-policy-1",
+        "note": "Explicit syntactic coding restriction; no original backlog criterion is promoted or rewritten."
+      },
+      "automation_backlog_ids": [
+        "MB-0015"
+      ],
+      "remediation": [
+        "Remove the unconditional true validateForCsrf override. Delegate to Magento validation where appropriate, or implement and test the provider-specific alternate request authentication before accepting a deliberately exempt callback. Do not merely rename the method or add an unused form-key helper.",
+        "In isolation, verify missing, invalid and foreign-session tokens cannot perform the protected state change; check valid requests and any authenticated webhook exception still work.",
+        "Rerun MB-0787 against the same release and complete source scope; retain file/line evidence and investigate collection gaps rather than treating UNKNOWN as satisfied."
+      ],
+      "finding_guidance": {
+        "version": 1,
+        "interpretation": "Collected custom PHP/PHTML contains no validateForCsrf method whose complete body is an unconditional return true. This exact bypass ban does not establish form tokens or server-side CSRF effectiveness. Scope is completely collected app/code PHP/PHTML; missing, unreadable, oversized, linked, malformed or truncated eligible input prevents a clean PASS.",
+        "risk": "The observed construct violates the configured Magebean coding policy. Determine actual data flow, reachability and runtime exposure before assigning incident or exploit severity.",
+        "triage": [
+          "Locate the reported file and line in the assessed release; evidence intentionally omits source snippets and secrets.",
+          "Determine whether this exact policy is enabled and applicable to the implementation; identify framework adapters and dependencies outside its scope."
+        ],
+        "verification": [
+          "In isolation, verify missing, invalid and foreign-session tokens cannot perform the protected state change; check valid requests and any authenticated webhook exception still work.",
+          "Rerun MB-0787; a ticket or source edit alone does not establish a new passing observation."
+        ],
+        "limitations": "Exact opt-in coding policy, not a finding of confirmed exploitability or proof of the broader historical requirement. Runtime adapters, dependencies, generated code and files outside app/code remain outside this predicate.",
+        "references": []
+      }
+    },
+    {
+      "id": "MB-0788",
+      "revision": 1,
+      "title": "Custom source avoids enumerated native network primitives",
+      "criterion": "Collected custom PHP/PHTML has no direct global calls to curl_exec, curl_multi_exec, fsockopen, pfsockopen, stream_socket_client or file_get_contents. Dynamic callable/alias ambiguity yields UNKNOWN. This explicit API restriction does not establish SSRF safety of framework adapters. Scope is completely collected app/code PHP/PHTML; missing, unreadable, oversized, linked, malformed or truncated eligible input prevents a clean PASS.",
+      "control": "MB-C03",
+      "severity": "low",
+      "alignments": [],
+      "obligations": [
+        {
+          "id": "O001",
+          "op": "all",
+          "role": "mandatory",
+          "proof": "verified_predicate",
+          "checks": [
+            {
+              "name": "automated_source_policy",
+              "args": {
+                "kind": "native_network",
+                "paths": [
+                  "app/code"
+                ],
+                "include_ext": [
+                  "php",
+                  "phtml"
+                ]
+              }
+            }
+          ]
+        }
+      ],
+      "coverage": "AUTOMATED",
+      "verification": "automated",
+      "review_state": "accepted_scoped_criterion",
+      "human_evidence": {
+        "required": false,
+        "instructions": "",
+        "evidence_types": [
+          "scoped_observation"
+        ]
+      },
+      "target_modes": [
+        "LOCAL"
+      ],
+      "checks": [
+        {
+          "name": "automated_source_policy",
+          "args": {
+            "kind": "native_network",
+            "paths": [
+              "app/code"
+            ],
+            "include_ext": [
+              "php",
+              "phtml"
+            ]
+          }
+        }
+      ],
+      "op": "all",
+      "family": "magebean",
+      "source": {
+        "document": "Magebean security requirements",
+        "version": "1",
+        "reference": "magebean/source-policy-v1/native_network"
+      },
+      "lane": "security",
+      "policy_source": {
+        "owner": "Magebean",
+        "version": "source-policy-1",
+        "note": "Explicit syntactic coding restriction; no original backlog criterion is promoted or rewritten."
+      },
+      "automation_backlog_ids": [
+        "MB-0016"
+      ],
+      "remediation": [
+        "Move native outbound network calls to the approved HTTP client adapter; this strict policy also bans file_get_contents for local reads, so use the approved filesystem abstraction for local files. Configure allowed destinations, timeouts, TLS validation and redirect behavior in the actual adapter.",
+        "Run the adapter integration tests against approved and forbidden controlled destinations, then rerun the native API ban; passing this ban alone does not prove SSRF prevention.",
+        "Rerun MB-0788 against the same release and complete source scope; retain file/line evidence and investigate collection gaps rather than treating UNKNOWN as satisfied."
+      ],
+      "finding_guidance": {
+        "version": 1,
+        "interpretation": "Collected custom PHP/PHTML has no direct global calls to curl_exec, curl_multi_exec, fsockopen, pfsockopen, stream_socket_client or file_get_contents. Dynamic callable/alias ambiguity yields UNKNOWN. This explicit API restriction does not establish SSRF safety of framework adapters. Scope is completely collected app/code PHP/PHTML; missing, unreadable, oversized, linked, malformed or truncated eligible input prevents a clean PASS.",
+        "risk": "The observed construct violates the configured Magebean coding policy. Determine actual data flow, reachability and runtime exposure before assigning incident or exploit severity.",
+        "triage": [
+          "Locate the reported file and line in the assessed release; evidence intentionally omits source snippets and secrets.",
+          "Determine whether this exact policy is enabled and applicable to the implementation; identify framework adapters and dependencies outside its scope."
+        ],
+        "verification": [
+          "Run the adapter integration tests against approved and forbidden controlled destinations, then rerun the native API ban; passing this ban alone does not prove SSRF prevention.",
+          "Rerun MB-0788; a ticket or source edit alone does not establish a new passing observation."
+        ],
+        "limitations": "Exact opt-in coding policy, not a finding of confirmed exploitability or proof of the broader historical requirement. Runtime adapters, dependencies, generated code and files outside app/code remain outside this predicate.",
+        "references": []
+      },
+      "applicability": {
+        "capability": "strict_native_api_policy"
+      }
+    },
+    {
+      "id": "MB-0789",
+      "revision": 1,
+      "title": "Custom source avoids native unserialize calls",
+      "criterion": "Collected custom PHP/PHTML contains no direct unqualified or fully-qualified global unserialize call, irrespective of allowed_classes options. Indirect calls and function aliases yield UNKNOWN. Other serializers remain outside this syntax policy. Scope is completely collected app/code PHP/PHTML; missing, unreadable, oversized, linked, malformed or truncated eligible input prevents a clean PASS.",
+      "control": "MB-C03",
+      "severity": "medium",
+      "alignments": [],
+      "obligations": [
+        {
+          "id": "O001",
+          "op": "all",
+          "role": "mandatory",
+          "proof": "verified_predicate",
+          "checks": [
+            {
+              "name": "automated_source_policy",
+              "args": {
+                "kind": "native_unserialize",
+                "paths": [
+                  "app/code"
+                ],
+                "include_ext": [
+                  "php",
+                  "phtml"
+                ]
+              }
+            }
+          ]
+        }
+      ],
+      "coverage": "AUTOMATED",
+      "verification": "automated",
+      "review_state": "accepted_scoped_criterion",
+      "human_evidence": {
+        "required": false,
+        "instructions": "",
+        "evidence_types": [
+          "scoped_observation"
+        ]
+      },
+      "target_modes": [
+        "LOCAL"
+      ],
+      "checks": [
+        {
+          "name": "automated_source_policy",
+          "args": {
+            "kind": "native_unserialize",
+            "paths": [
+              "app/code"
+            ],
+            "include_ext": [
+              "php",
+              "phtml"
+            ]
+          }
+        }
+      ],
+      "op": "all",
+      "family": "magebean",
+      "source": {
+        "document": "Magebean security requirements",
+        "version": "1",
+        "reference": "magebean/source-policy-v1/native_unserialize"
+      },
+      "lane": "security",
+      "policy_source": {
+        "owner": "Magebean",
+        "version": "source-policy-1",
+        "note": "Explicit syntactic coding restriction; no original backlog criterion is promoted or rewritten."
+      },
+      "automation_backlog_ids": [
+        "MB-0734"
+      ],
+      "remediation": [
+        "Replace native unserialize at the reported location with a supported JSON or typed serializer whose input contract is explicit. Do not treat allowed_classes=false as permission to deserialize untrusted input; migrate stored values through a tested compatibility path.",
+        "Verify old stored records and malformed JSON handling in isolated integration tests; confirm the forbidden native call is removed.",
+        "Rerun MB-0789 against the same release and complete source scope; retain file/line evidence and investigate collection gaps rather than treating UNKNOWN as satisfied."
+      ],
+      "finding_guidance": {
+        "version": 1,
+        "interpretation": "Collected custom PHP/PHTML contains no direct unqualified or fully-qualified global unserialize call, irrespective of allowed_classes options. Indirect calls and function aliases yield UNKNOWN. Other serializers remain outside this syntax policy. Scope is completely collected app/code PHP/PHTML; missing, unreadable, oversized, linked, malformed or truncated eligible input prevents a clean PASS.",
+        "risk": "The observed construct violates the configured Magebean coding policy. Determine actual data flow, reachability and runtime exposure before assigning incident or exploit severity.",
+        "triage": [
+          "Locate the reported file and line in the assessed release; evidence intentionally omits source snippets and secrets.",
+          "Determine whether this exact policy is enabled and applicable to the implementation; identify framework adapters and dependencies outside its scope."
+        ],
+        "verification": [
+          "Verify old stored records and malformed JSON handling in isolated integration tests; confirm the forbidden native call is removed.",
+          "Rerun MB-0789; a ticket or source edit alone does not establish a new passing observation."
+        ],
+        "limitations": "Exact opt-in coding policy, not a finding of confirmed exploitability or proof of the broader historical requirement. Runtime adapters, dependencies, generated code and files outside app/code remain outside this predicate.",
+        "references": [
+          "https://www.php.net/manual/en/function.unserialize.php"
+        ]
+      }
+    },
+    {
+      "id": "MB-0790",
+      "revision": 1,
+      "title": "Custom source avoids enumerated shell/process primitives",
+      "criterion": "Collected custom PHP/PHTML contains no direct global exec/system/passthru/shell_exec/popen/proc_open/pcntl_exec invocation or shell backtick expression. Indirect calls and function aliases yield UNKNOWN; framework process adapters are outside this API ban. Scope is completely collected app/code PHP/PHTML; missing, unreadable, oversized, linked, malformed or truncated eligible input prevents a clean PASS.",
+      "control": "MB-C03",
+      "severity": "medium",
+      "alignments": [],
+      "obligations": [
+        {
+          "id": "O001",
+          "op": "all",
+          "role": "mandatory",
+          "proof": "verified_predicate",
+          "checks": [
+            {
+              "name": "automated_source_policy",
+              "args": {
+                "kind": "shell_execution",
+                "paths": [
+                  "app/code"
+                ],
+                "include_ext": [
+                  "php",
+                  "phtml"
+                ]
+              }
+            }
+          ]
+        }
+      ],
+      "coverage": "AUTOMATED",
+      "verification": "automated",
+      "review_state": "accepted_scoped_criterion",
+      "human_evidence": {
+        "required": false,
+        "instructions": "",
+        "evidence_types": [
+          "scoped_observation"
+        ]
+      },
+      "target_modes": [
+        "LOCAL"
+      ],
+      "checks": [
+        {
+          "name": "automated_source_policy",
+          "args": {
+            "kind": "shell_execution",
+            "paths": [
+              "app/code"
+            ],
+            "include_ext": [
+              "php",
+              "phtml"
+            ]
+          }
+        }
+      ],
+      "op": "all",
+      "family": "magebean",
+      "source": {
+        "document": "Magebean security requirements",
+        "version": "1",
+        "reference": "magebean/source-policy-v1/shell_execution"
+      },
+      "lane": "security",
+      "policy_source": {
+        "owner": "Magebean",
+        "version": "source-policy-1",
+        "note": "Explicit syntactic coding restriction; no original backlog criterion is promoted or rewritten."
+      },
+      "automation_backlog_ids": [
+        "MB-0735"
+      ],
+      "remediation": [
+        "Remove direct shell/process invocation and backticks. Where a subprocess is required, use an approved process adapter with a fixed executable and separate argument vector; review option injection and least-privilege execution independently. An unrelated escapeshellarg call does not satisfy this policy.",
+        "Test paths with spaces, shell metacharacters and argument-like values against the approved adapter in isolation; ensure ordinary workflows still work.",
+        "Rerun MB-0790 against the same release and complete source scope; retain file/line evidence and investigate collection gaps rather than treating UNKNOWN as satisfied."
+      ],
+      "finding_guidance": {
+        "version": 1,
+        "interpretation": "Collected custom PHP/PHTML contains no direct global exec/system/passthru/shell_exec/popen/proc_open/pcntl_exec invocation or shell backtick expression. Indirect calls and function aliases yield UNKNOWN; framework process adapters are outside this API ban. Scope is completely collected app/code PHP/PHTML; missing, unreadable, oversized, linked, malformed or truncated eligible input prevents a clean PASS.",
+        "risk": "The observed construct violates the configured Magebean coding policy. Determine actual data flow, reachability and runtime exposure before assigning incident or exploit severity.",
+        "triage": [
+          "Locate the reported file and line in the assessed release; evidence intentionally omits source snippets and secrets.",
+          "Determine whether this exact policy is enabled and applicable to the implementation; identify framework adapters and dependencies outside its scope."
+        ],
+        "verification": [
+          "Test paths with spaces, shell metacharacters and argument-like values against the approved adapter in isolation; ensure ordinary workflows still work.",
+          "Rerun MB-0790; a ticket or source edit alone does not establish a new passing observation."
+        ],
+        "limitations": "Exact opt-in coding policy, not a finding of confirmed exploitability or proof of the broader historical requirement. Runtime adapters, dependencies, generated code and files outside app/code remain outside this predicate.",
+        "references": []
+      }
+    },
+    {
+      "id": "MB-0791",
+      "revision": 1,
+      "title": "Custom source avoids eval and create_function constructs",
+      "criterion": "Collected custom PHP/PHTML contains no eval construct or direct global create_function call. Dynamic include targets, indirect calls, function aliases and unresolved assertion semantics yield UNKNOWN. This is a construct policy, not general runtime execution assurance. Scope is completely collected app/code PHP/PHTML; missing, unreadable, oversized, linked, malformed or truncated eligible input prevents a clean PASS.",
+      "control": "MB-C03",
+      "severity": "medium",
+      "alignments": [],
+      "obligations": [
+        {
+          "id": "O001",
+          "op": "all",
+          "role": "mandatory",
+          "proof": "verified_predicate",
+          "checks": [
+            {
+              "name": "automated_source_policy",
+              "args": {
+                "kind": "dynamic_execution",
+                "paths": [
+                  "app/code"
+                ],
+                "include_ext": [
+                  "php",
+                  "phtml"
+                ]
+              }
+            }
+          ]
+        }
+      ],
+      "coverage": "AUTOMATED",
+      "verification": "automated",
+      "review_state": "accepted_scoped_criterion",
+      "human_evidence": {
+        "required": false,
+        "instructions": "",
+        "evidence_types": [
+          "scoped_observation"
+        ]
+      },
+      "target_modes": [
+        "LOCAL"
+      ],
+      "checks": [
+        {
+          "name": "automated_source_policy",
+          "args": {
+            "kind": "dynamic_execution",
+            "paths": [
+              "app/code"
+            ],
+            "include_ext": [
+              "php",
+              "phtml"
+            ]
+          }
+        }
+      ],
+      "op": "all",
+      "family": "magebean",
+      "source": {
+        "document": "Magebean security requirements",
+        "version": "1",
+        "reference": "magebean/source-policy-v1/dynamic_execution"
+      },
+      "lane": "security",
+      "policy_source": {
+        "owner": "Magebean",
+        "version": "source-policy-1",
+        "note": "Explicit syntactic coding restriction; no original backlog criterion is promoted or rewritten."
+      },
+      "automation_backlog_ids": [
+        "MB-0019"
+      ],
+      "remediation": [
+        "Replace eval/create_function with ordinary callable objects, closures or an explicit action map. Resolve dynamic include targets through a fixed installed-file map; do not execute data as PHP. Resolve function aliases and indirect calls when they prevent complete analysis.",
+        "Exercise each supported action and include target, verify unexpected targets are rejected, and rerun the syntax policy.",
+        "Rerun MB-0791 against the same release and complete source scope; retain file/line evidence and investigate collection gaps rather than treating UNKNOWN as satisfied."
+      ],
+      "finding_guidance": {
+        "version": 1,
+        "interpretation": "Collected custom PHP/PHTML contains no eval construct or direct global create_function call. Dynamic include targets, indirect calls, function aliases and unresolved assertion semantics yield UNKNOWN. This is a construct policy, not general runtime execution assurance. Scope is completely collected app/code PHP/PHTML; missing, unreadable, oversized, linked, malformed or truncated eligible input prevents a clean PASS.",
+        "risk": "The observed construct violates the configured Magebean coding policy. Determine actual data flow, reachability and runtime exposure before assigning incident or exploit severity.",
+        "triage": [
+          "Locate the reported file and line in the assessed release; evidence intentionally omits source snippets and secrets.",
+          "Determine whether this exact policy is enabled and applicable to the implementation; identify framework adapters and dependencies outside its scope."
+        ],
+        "verification": [
+          "Exercise each supported action and include target, verify unexpected targets are rejected, and rerun the syntax policy.",
+          "Rerun MB-0791; a ticket or source edit alone does not establish a new passing observation."
+        ],
+        "limitations": "Exact opt-in coding policy, not a finding of confirmed exploitability or proof of the broader historical requirement. Runtime adapters, dependencies, generated code and files outside app/code remain outside this predicate.",
+        "references": []
+      }
+    },
+    {
+      "id": "MB-0792",
+      "revision": 1,
+      "title": "Custom source avoids enumerated raw filesystem primitives",
+      "criterion": "Collected custom PHP/PHTML contains no direct global file_get_contents/file_put_contents/fopen/readfile/unlink/rename/copy/scandir/glob call. Indirect calls and aliases yield UNKNOWN. This explicit API restriction does not establish path safety of framework adapters. Scope is completely collected app/code PHP/PHTML; missing, unreadable, oversized, linked, malformed or truncated eligible input prevents a clean PASS.",
+      "control": "MB-C03",
+      "severity": "low",
+      "alignments": [],
+      "obligations": [
+        {
+          "id": "O001",
+          "op": "all",
+          "role": "mandatory",
+          "proof": "verified_predicate",
+          "checks": [
+            {
+              "name": "automated_source_policy",
+              "args": {
+                "kind": "native_filesystem",
+                "paths": [
+                  "app/code"
+                ],
+                "include_ext": [
+                  "php",
+                  "phtml"
+                ]
+              }
+            }
+          ]
+        }
+      ],
+      "coverage": "AUTOMATED",
+      "verification": "automated",
+      "review_state": "accepted_scoped_criterion",
+      "human_evidence": {
+        "required": false,
+        "instructions": "",
+        "evidence_types": [
+          "scoped_observation"
+        ]
+      },
+      "target_modes": [
+        "LOCAL"
+      ],
+      "checks": [
+        {
+          "name": "automated_source_policy",
+          "args": {
+            "kind": "native_filesystem",
+            "paths": [
+              "app/code"
+            ],
+            "include_ext": [
+              "php",
+              "phtml"
+            ]
+          }
+        }
+      ],
+      "op": "all",
+      "family": "magebean",
+      "source": {
+        "document": "Magebean security requirements",
+        "version": "1",
+        "reference": "magebean/source-policy-v1/native_filesystem"
+      },
+      "lane": "security",
+      "policy_source": {
+        "owner": "Magebean",
+        "version": "source-policy-1",
+        "note": "Explicit syntactic coding restriction; no original backlog criterion is promoted or rewritten."
+      },
+      "automation_backlog_ids": [
+        "MB-0020"
+      ],
+      "remediation": [
+        "Move direct native file operations to an approved filesystem service with an explicit root and operation contract. Preserve required encoding and atomicity; independently enforce canonical path containment and symlink handling where paths can be influenced externally.",
+        "Test ordinary files, missing files, encoded traversal and symlink escapes in isolated fixtures; rerun the API ban without claiming that adapter path safety follows automatically.",
+        "Rerun MB-0792 against the same release and complete source scope; retain file/line evidence and investigate collection gaps rather than treating UNKNOWN as satisfied."
+      ],
+      "finding_guidance": {
+        "version": 1,
+        "interpretation": "Collected custom PHP/PHTML contains no direct global file_get_contents/file_put_contents/fopen/readfile/unlink/rename/copy/scandir/glob call. Indirect calls and aliases yield UNKNOWN. This explicit API restriction does not establish path safety of framework adapters. Scope is completely collected app/code PHP/PHTML; missing, unreadable, oversized, linked, malformed or truncated eligible input prevents a clean PASS.",
+        "risk": "The observed construct violates the configured Magebean coding policy. Determine actual data flow, reachability and runtime exposure before assigning incident or exploit severity.",
+        "triage": [
+          "Locate the reported file and line in the assessed release; evidence intentionally omits source snippets and secrets.",
+          "Determine whether this exact policy is enabled and applicable to the implementation; identify framework adapters and dependencies outside its scope."
+        ],
+        "verification": [
+          "Test ordinary files, missing files, encoded traversal and symlink escapes in isolated fixtures; rerun the API ban without claiming that adapter path safety follows automatically.",
+          "Rerun MB-0792; a ticket or source edit alone does not establish a new passing observation."
+        ],
+        "limitations": "Exact opt-in coding policy, not a finding of confirmed exploitability or proof of the broader historical requirement. Runtime adapters, dependencies, generated code and files outside app/code remain outside this predicate.",
+        "references": []
+      },
+      "applicability": {
+        "capability": "strict_native_api_policy"
+      }
+    },
+    {
+      "id": "MB-0793",
+      "revision": 1,
+      "title": "Custom source avoids native upload move calls",
+      "criterion": "Collected custom PHP/PHTML contains no direct global move_uploaded_file invocation. Indirect calls and aliases yield UNKNOWN. This is an explicit native API restriction, not proof that other upload handlers validate content or authorization. Scope is completely collected app/code PHP/PHTML; missing, unreadable, oversized, linked, malformed or truncated eligible input prevents a clean PASS.",
+      "control": "MB-C03",
+      "severity": "medium",
+      "alignments": [],
+      "obligations": [
+        {
+          "id": "O001",
+          "op": "all",
+          "role": "mandatory",
+          "proof": "verified_predicate",
+          "checks": [
+            {
+              "name": "automated_source_policy",
+              "args": {
+                "kind": "native_upload",
+                "paths": [
+                  "app/code"
+                ],
+                "include_ext": [
+                  "php",
+                  "phtml"
+                ]
+              }
+            }
+          ]
+        }
+      ],
+      "coverage": "AUTOMATED",
+      "verification": "automated",
+      "review_state": "accepted_scoped_criterion",
+      "human_evidence": {
+        "required": false,
+        "instructions": "",
+        "evidence_types": [
+          "scoped_observation"
+        ]
+      },
+      "target_modes": [
+        "LOCAL"
+      ],
+      "checks": [
+        {
+          "name": "automated_source_policy",
+          "args": {
+            "kind": "native_upload",
+            "paths": [
+              "app/code"
+            ],
+            "include_ext": [
+              "php",
+              "phtml"
+            ]
+          }
+        }
+      ],
+      "op": "all",
+      "family": "magebean",
+      "source": {
+        "document": "Magebean security requirements",
+        "version": "1",
+        "reference": "magebean/source-policy-v1/native_upload"
+      },
+      "lane": "security",
+      "policy_source": {
+        "owner": "Magebean",
+        "version": "source-policy-1",
+        "note": "Explicit syntactic coding restriction; no original backlog criterion is promoted or rewritten."
+      },
+      "automation_backlog_ids": [
+        "MB-0021"
+      ],
+      "remediation": [
+        "Replace direct move_uploaded_file with the approved upload pipeline and preserve its ownership/error behavior. Configure extension and server-derived MIME allowlists, size limits, generated names, authorization and non-executable delivery in the real pipeline.",
+        "Test approved content and harmless rejected extension/MIME/size cases plus unauthorized upload in isolation; rerun this native-call restriction separately from upload-security tests.",
+        "Rerun MB-0793 against the same release and complete source scope; retain file/line evidence and investigate collection gaps rather than treating UNKNOWN as satisfied."
+      ],
+      "finding_guidance": {
+        "version": 1,
+        "interpretation": "Collected custom PHP/PHTML contains no direct global move_uploaded_file invocation. Indirect calls and aliases yield UNKNOWN. This is an explicit native API restriction, not proof that other upload handlers validate content or authorization. Scope is completely collected app/code PHP/PHTML; missing, unreadable, oversized, linked, malformed or truncated eligible input prevents a clean PASS.",
+        "risk": "The observed construct violates the configured Magebean coding policy. Determine actual data flow, reachability and runtime exposure before assigning incident or exploit severity.",
+        "triage": [
+          "Locate the reported file and line in the assessed release; evidence intentionally omits source snippets and secrets.",
+          "Determine whether this exact policy is enabled and applicable to the implementation; identify framework adapters and dependencies outside its scope."
+        ],
+        "verification": [
+          "Test approved content and harmless rejected extension/MIME/size cases plus unauthorized upload in isolation; rerun this native-call restriction separately from upload-security tests.",
+          "Rerun MB-0793; a ticket or source edit alone does not establish a new passing observation."
+        ],
+        "limitations": "Exact opt-in coding policy, not a finding of confirmed exploitability or proof of the broader historical requirement. Runtime adapters, dependencies, generated code and files outside app/code remain outside this predicate.",
+        "references": []
+      }
+    },
+    {
+      "id": "MB-0794",
+      "revision": 1,
+      "title": "Custom source avoids enumerated weak randomness APIs",
+      "criterion": "Collected custom PHP/PHTML contains no direct global rand/mt_rand/lcg_value/uniqid/srand/mt_srand call. Indirect calls and aliases yield UNKNOWN. This deliberately strict coding policy includes non-security uses; it does not establish entropy or token lifetime. Scope is completely collected app/code PHP/PHTML; missing, unreadable, oversized, linked, malformed or truncated eligible input prevents a clean PASS.",
+      "control": "MB-C03",
+      "severity": "low",
+      "alignments": [],
+      "obligations": [
+        {
+          "id": "O001",
+          "op": "all",
+          "role": "mandatory",
+          "proof": "verified_predicate",
+          "checks": [
+            {
+              "name": "automated_source_policy",
+              "args": {
+                "kind": "weak_prng",
+                "paths": [
+                  "app/code"
+                ],
+                "include_ext": [
+                  "php",
+                  "phtml"
+                ]
+              }
+            }
+          ]
+        }
+      ],
+      "coverage": "AUTOMATED",
+      "verification": "automated",
+      "review_state": "accepted_scoped_criterion",
+      "human_evidence": {
+        "required": false,
+        "instructions": "",
+        "evidence_types": [
+          "scoped_observation"
+        ]
+      },
+      "target_modes": [
+        "LOCAL"
+      ],
+      "checks": [
+        {
+          "name": "automated_source_policy",
+          "args": {
+            "kind": "weak_prng",
+            "paths": [
+              "app/code"
+            ],
+            "include_ext": [
+              "php",
+              "phtml"
+            ]
+          }
+        }
+      ],
+      "op": "all",
+      "family": "magebean",
+      "source": {
+        "document": "Magebean security requirements",
+        "version": "1",
+        "reference": "magebean/source-policy-v1/weak_prng"
+      },
+      "lane": "security",
+      "policy_source": {
+        "owner": "Magebean",
+        "version": "source-policy-1",
+        "note": "Explicit syntactic coding restriction; no original backlog criterion is promoted or rewritten."
+      },
+      "automation_backlog_ids": [
+        "MB-0023"
+      ],
+      "remediation": [
+        "Replace security-token randomness with random_bytes or random_int at the required entropy and preserve hard failure on entropy-source errors. For non-security random selection or identifiers, determine whether this deliberately strict API policy should apply before changing behavior; do not label every mt_rand call exploitable.",
+        "Test token length/encoding, uniqueness expectations and entropy-source failure; confirm weak generators and fallbacks are absent from the opted-in source scope.",
+        "Rerun MB-0794 against the same release and complete source scope; retain file/line evidence and investigate collection gaps rather than treating UNKNOWN as satisfied."
+      ],
+      "finding_guidance": {
+        "version": 1,
+        "interpretation": "Collected custom PHP/PHTML contains no direct global rand/mt_rand/lcg_value/uniqid/srand/mt_srand call. Indirect calls and aliases yield UNKNOWN. This deliberately strict coding policy includes non-security uses; it does not establish entropy or token lifetime. Scope is completely collected app/code PHP/PHTML; missing, unreadable, oversized, linked, malformed or truncated eligible input prevents a clean PASS.",
+        "risk": "The observed construct violates the configured Magebean coding policy. Determine actual data flow, reachability and runtime exposure before assigning incident or exploit severity.",
+        "triage": [
+          "Locate the reported file and line in the assessed release; evidence intentionally omits source snippets and secrets.",
+          "Determine whether this exact policy is enabled and applicable to the implementation; identify framework adapters and dependencies outside its scope."
+        ],
+        "verification": [
+          "Test token length/encoding, uniqueness expectations and entropy-source failure; confirm weak generators and fallbacks are absent from the opted-in source scope.",
+          "Rerun MB-0794; a ticket or source edit alone does not establish a new passing observation."
+        ],
+        "limitations": "Exact opt-in coding policy, not a finding of confirmed exploitability or proof of the broader historical requirement. Runtime adapters, dependencies, generated code and files outside app/code remain outside this predicate.",
+        "references": []
+      },
+      "applicability": {
+        "capability": "strict_native_api_policy"
+      }
+    },
+    {
+      "id": "MB-0795",
+      "revision": 1,
+      "title": "No direct request superglobals in named log method arguments",
+      "criterion": "Collected custom PHP/PHTML contains no $_GET/$_POST/$_REQUEST/$_COOKIE/$_SERVER/$_FILES token inside arguments of syntactically named log/debug/info/notice/warning/error/critical/alert/emergency method calls. This exact syntax rule does not prove absence of sensitive data in arbitrary logs. Scope is completely collected app/code PHP/PHTML; missing, unreadable, oversized, linked, malformed or truncated eligible input prevents a clean PASS.",
+      "control": "MB-C03",
+      "severity": "medium",
+      "alignments": [],
+      "obligations": [
+        {
+          "id": "O001",
+          "op": "all",
+          "role": "mandatory",
+          "proof": "verified_predicate",
+          "checks": [
+            {
+              "name": "automated_source_policy",
+              "args": {
+                "kind": "direct_request_logging",
+                "paths": [
+                  "app/code"
+                ],
+                "include_ext": [
+                  "php",
+                  "phtml"
+                ]
+              }
+            }
+          ]
+        }
+      ],
+      "coverage": "AUTOMATED",
+      "verification": "automated",
+      "review_state": "accepted_scoped_criterion",
+      "human_evidence": {
+        "required": false,
+        "instructions": "",
+        "evidence_types": [
+          "scoped_observation"
+        ]
+      },
+      "target_modes": [
+        "LOCAL"
+      ],
+      "checks": [
+        {
+          "name": "automated_source_policy",
+          "args": {
+            "kind": "direct_request_logging",
+            "paths": [
+              "app/code"
+            ],
+            "include_ext": [
+              "php",
+              "phtml"
+            ]
+          }
+        }
+      ],
+      "op": "all",
+      "family": "magebean",
+      "source": {
+        "document": "Magebean security requirements",
+        "version": "1",
+        "reference": "magebean/source-policy-v1/direct_request_logging"
+      },
+      "lane": "security",
+      "policy_source": {
+        "owner": "Magebean",
+        "version": "source-policy-1",
+        "note": "Explicit syntactic coding restriction; no original backlog criterion is promoted or rewritten."
+      },
+      "automation_backlog_ids": [
+        "MB-0737",
+        "MB-0743",
+        "MB-0746"
+      ],
+      "remediation": [
+        "Replace direct request-superglobal logging with an explicit allowlist of necessary non-sensitive fields and supported redaction before every configured sink. Avoid dumping complete request/cookie/server arrays; if a secret was logged, assess sink access/retention and rotate the affected credential as appropriate.",
+        "Send synthetic nested secret/PII canaries through the real logging pipeline and check every configured sink; rerun this syntax rule while retaining separate tests for data logged through variables or SDKs.",
+        "Rerun MB-0795 against the same release and complete source scope; retain file/line evidence and investigate collection gaps rather than treating UNKNOWN as satisfied."
+      ],
+      "finding_guidance": {
+        "version": 1,
+        "interpretation": "Collected custom PHP/PHTML contains no $_GET/$_POST/$_REQUEST/$_COOKIE/$_SERVER/$_FILES token inside arguments of syntactically named log/debug/info/notice/warning/error/critical/alert/emergency method calls. This exact syntax rule does not prove absence of sensitive data in arbitrary logs. Scope is completely collected app/code PHP/PHTML; missing, unreadable, oversized, linked, malformed or truncated eligible input prevents a clean PASS.",
+        "risk": "The observed construct violates the configured Magebean coding policy. Determine actual data flow, reachability and runtime exposure before assigning incident or exploit severity.",
+        "triage": [
+          "Locate the reported file and line in the assessed release; evidence intentionally omits source snippets and secrets.",
+          "Determine whether this exact policy is enabled and applicable to the implementation; identify framework adapters and dependencies outside its scope."
+        ],
+        "verification": [
+          "Send synthetic nested secret/PII canaries through the real logging pipeline and check every configured sink; rerun this syntax rule while retaining separate tests for data logged through variables or SDKs.",
+          "Rerun MB-0795; a ticket or source edit alone does not establish a new passing observation."
+        ],
+        "limitations": "Exact opt-in coding policy, not a finding of confirmed exploitability or proof of the broader historical requirement. Runtime adapters, dependencies, generated code and files outside app/code remain outside this predicate.",
+        "references": []
+      }
+    },
+    {
+      "id": "MB-0796",
+      "revision": 1,
+      "title": "Custom source avoids enumerated raw crypto and session APIs",
+      "criterion": "Collected custom PHP/PHTML contains no direct global session_start/session_id/session_regenerate_id/session_set_save_handler/mcrypt_encrypt/mcrypt_decrypt/md5/sha1/crypt/openssl_encrypt/openssl_decrypt call. This explicit coding restriction also bans legitimate non-security hash uses; it does not prove framework cryptography/session semantics. Scope is completely collected app/code PHP/PHTML; missing, unreadable, oversized, linked, malformed or truncated eligible input prevents a clean PASS.",
+      "control": "MB-C03",
+      "severity": "low",
+      "alignments": [],
+      "obligations": [
+        {
+          "id": "O001",
+          "op": "all",
+          "role": "mandatory",
+          "proof": "verified_predicate",
+          "checks": [
+            {
+              "name": "automated_source_policy",
+              "args": {
+                "kind": "raw_crypto_session",
+                "paths": [
+                  "app/code"
+                ],
+                "include_ext": [
+                  "php",
+                  "phtml"
+                ]
+              }
+            }
+          ]
+        }
+      ],
+      "coverage": "AUTOMATED",
+      "verification": "automated",
+      "review_state": "accepted_scoped_criterion",
+      "human_evidence": {
+        "required": false,
+        "instructions": "",
+        "evidence_types": [
+          "scoped_observation"
+        ]
+      },
+      "target_modes": [
+        "LOCAL"
+      ],
+      "checks": [
+        {
+          "name": "automated_source_policy",
+          "args": {
+            "kind": "raw_crypto_session",
+            "paths": [
+              "app/code"
+            ],
+            "include_ext": [
+              "php",
+              "phtml"
+            ]
+          }
+        }
+      ],
+      "op": "all",
+      "family": "magebean",
+      "source": {
+        "document": "Magebean security requirements",
+        "version": "1",
+        "reference": "magebean/source-policy-v1/raw_crypto_session"
+      },
+      "lane": "security",
+      "policy_source": {
+        "owner": "Magebean",
+        "version": "source-policy-1",
+        "note": "Explicit syntactic coding restriction; no original backlog criterion is promoted or rewritten."
+      },
+      "automation_backlog_ids": [
+        "MB-0025"
+      ],
+      "remediation": [
+        "Move session operations into the installed Magento session services. Use an approved Magento encryption or password-hashing service for its intended purpose. Review md5/sha1 checksum uses separately: this strict policy also prohibits legitimate non-security hashes, so preserve compatibility and verify policy applicability.",
+        "Test session continuity and login/logout plus encryption round trips or password verification in isolation; verify existing persisted data remains readable before deployment.",
+        "Rerun MB-0796 against the same release and complete source scope; retain file/line evidence and investigate collection gaps rather than treating UNKNOWN as satisfied."
+      ],
+      "finding_guidance": {
+        "version": 1,
+        "interpretation": "Collected custom PHP/PHTML contains no direct global session_start/session_id/session_regenerate_id/session_set_save_handler/mcrypt_encrypt/mcrypt_decrypt/md5/sha1/crypt/openssl_encrypt/openssl_decrypt call. This explicit coding restriction also bans legitimate non-security hash uses; it does not prove framework cryptography/session semantics. Scope is completely collected app/code PHP/PHTML; missing, unreadable, oversized, linked, malformed or truncated eligible input prevents a clean PASS.",
+        "risk": "The observed construct violates the configured Magebean coding policy. Determine actual data flow, reachability and runtime exposure before assigning incident or exploit severity.",
+        "triage": [
+          "Locate the reported file and line in the assessed release; evidence intentionally omits source snippets and secrets.",
+          "Determine whether this exact policy is enabled and applicable to the implementation; identify framework adapters and dependencies outside its scope."
+        ],
+        "verification": [
+          "Test session continuity and login/logout plus encryption round trips or password verification in isolation; verify existing persisted data remains readable before deployment.",
+          "Rerun MB-0796; a ticket or source edit alone does not establish a new passing observation."
+        ],
+        "limitations": "Exact opt-in coding policy, not a finding of confirmed exploitability or proof of the broader historical requirement. Runtime adapters, dependencies, generated code and files outside app/code remain outside this predicate.",
+        "references": []
+      },
+      "applicability": {
+        "capability": "strict_native_api_policy"
+      }
+    },
+    {
+      "id": "MB-0797",
+      "revision": 1,
+      "title": "No enumerated XML external feature constructs in custom source",
+      "criterion": "Collected custom PHP/PHTML contains no token reference to LIBXML_NOENT/LIBXML_DTDLOAD/LIBXML_DTDATTR, no resolveExternals/substituteEntities/validateOnParse assignment except literal false, and no syntactically named xinclude or xml_set_external_entity_ref_handler invocation. This exact construct ban does not establish every parser default or runtime configuration. Scope is completely collected app/code PHP/PHTML; missing, unreadable, oversized, linked, malformed or truncated eligible input prevents a clean PASS.",
+      "control": "MB-C03",
+      "severity": "medium",
+      "alignments": [],
+      "obligations": [
+        {
+          "id": "O001",
+          "op": "all",
+          "role": "mandatory",
+          "proof": "verified_predicate",
+          "checks": [
+            {
+              "name": "automated_source_policy",
+              "args": {
+                "kind": "xml_external_features",
+                "paths": [
+                  "app/code"
+                ],
+                "include_ext": [
+                  "php",
+                  "phtml"
+                ]
+              }
+            }
+          ]
+        }
+      ],
+      "coverage": "AUTOMATED",
+      "verification": "automated",
+      "review_state": "accepted_scoped_criterion",
+      "human_evidence": {
+        "required": false,
+        "instructions": "",
+        "evidence_types": [
+          "scoped_observation"
+        ]
+      },
+      "target_modes": [
+        "LOCAL"
+      ],
+      "checks": [
+        {
+          "name": "automated_source_policy",
+          "args": {
+            "kind": "xml_external_features",
+            "paths": [
+              "app/code"
+            ],
+            "include_ext": [
+              "php",
+              "phtml"
+            ]
+          }
+        }
+      ],
+      "op": "all",
+      "family": "magebean",
+      "source": {
+        "document": "Magebean security requirements",
+        "version": "1",
+        "reference": "magebean/source-policy-v1/xml_external_features"
+      },
+      "lane": "security",
+      "policy_source": {
+        "owner": "Magebean",
+        "version": "source-policy-1",
+        "note": "Explicit syntactic coding restriction; no original backlog criterion is promoted or rewritten."
+      },
+      "automation_backlog_ids": [
+        "MB-0098"
+      ],
+      "remediation": [
+        "Remove prohibited entity/DTD constants, external entity callbacks and XInclude calls, and set external resolution/substitution properties explicitly false where supported. Use the approved parser wrapper for the installed PHP/libxml version; migrating parser flags requires compatibility tests.",
+        "Use harmless isolated external-entity and DTD fixtures with a controlled destination, verify no external fetch or expansion, and retest legitimate XML documents; the syntax ban alone does not establish parser defaults.",
+        "Rerun MB-0797 against the same release and complete source scope; retain file/line evidence and investigate collection gaps rather than treating UNKNOWN as satisfied."
+      ],
+      "finding_guidance": {
+        "version": 1,
+        "interpretation": "Collected custom PHP/PHTML contains no token reference to LIBXML_NOENT/LIBXML_DTDLOAD/LIBXML_DTDATTR, no resolveExternals/substituteEntities/validateOnParse assignment except literal false, and no syntactically named xinclude or xml_set_external_entity_ref_handler invocation. This exact construct ban does not establish every parser default or runtime configuration. Scope is completely collected app/code PHP/PHTML; missing, unreadable, oversized, linked, malformed or truncated eligible input prevents a clean PASS.",
+        "risk": "The observed construct violates the configured Magebean coding policy. Determine actual data flow, reachability and runtime exposure before assigning incident or exploit severity.",
+        "triage": [
+          "Locate the reported file and line in the assessed release; evidence intentionally omits source snippets and secrets.",
+          "Determine whether this exact policy is enabled and applicable to the implementation; identify framework adapters and dependencies outside its scope."
+        ],
+        "verification": [
+          "Use harmless isolated external-entity and DTD fixtures with a controlled destination, verify no external fetch or expansion, and retest legitimate XML documents; the syntax ban alone does not establish parser defaults.",
+          "Rerun MB-0797; a ticket or source edit alone does not establish a new passing observation."
+        ],
+        "limitations": "Exact opt-in coding policy, not a finding of confirmed exploitability or proof of the broader historical requirement. Runtime adapters, dependencies, generated code and files outside app/code remain outside this predicate.",
+        "references": []
+      }
+    },
+    {
+      "id": "MB-0798",
+      "revision": 1,
+      "title": "No plain HTTP standalone PHP string literals in custom source",
+      "criterion": "Collected custom PHP/PHTML contains no standalone constant string literal beginning http://. Comments are excluded. This deliberately strict literal policy includes non-endpoint examples and does not establish effective endpoint inventory, TLS verification or runtime interpolation. Scope is completely collected app/code PHP/PHTML; missing, unreadable, oversized, linked, malformed or truncated eligible input prevents a clean PASS.",
+      "control": "MB-C12",
+      "severity": "low",
+      "alignments": [],
+      "obligations": [
+        {
+          "id": "O001",
+          "op": "all",
+          "role": "mandatory",
+          "proof": "verified_predicate",
+          "checks": [
+            {
+              "name": "automated_source_policy",
+              "args": {
+                "kind": "literal_https",
+                "paths": [
+                  "app/code"
+                ],
+                "include_ext": [
+                  "php",
+                  "phtml"
+                ]
+              }
+            }
+          ]
+        }
+      ],
+      "coverage": "AUTOMATED",
+      "verification": "automated",
+      "review_state": "accepted_scoped_criterion",
+      "human_evidence": {
+        "required": false,
+        "instructions": "",
+        "evidence_types": [
+          "scoped_observation"
+        ]
+      },
+      "target_modes": [
+        "LOCAL"
+      ],
+      "checks": [
+        {
+          "name": "automated_source_policy",
+          "args": {
+            "kind": "literal_https",
+            "paths": [
+              "app/code"
+            ],
+            "include_ext": [
+              "php",
+              "phtml"
+            ]
+          }
+        }
+      ],
+      "op": "all",
+      "family": "magebean",
+      "source": {
+        "document": "Magebean security requirements",
+        "version": "1",
+        "reference": "magebean/source-policy-v1/literal_https"
+      },
+      "lane": "security",
+      "policy_source": {
+        "owner": "Magebean",
+        "version": "source-policy-1",
+        "note": "Explicit syntactic coding restriction; no original backlog criterion is promoted or rewritten."
+      },
+      "automation_backlog_ids": [
+        "MB-0073"
+      ],
+      "remediation": [
+        "Identify whether the literal is an actual production endpoint, a local development address, an XML namespace or documentation. For actual endpoints, configure HTTPS and verified peer/hostname behavior through the client. For intentional non-endpoint HTTP strings, review the strict policy scope instead of blindly replacing namespace identifiers.",
+        "Test real endpoint TLS peer/hostname checks and normal integration behavior; rerun the literal rule only in the agreed strict source scope.",
+        "Rerun MB-0798 against the same release and complete source scope; retain file/line evidence and investigate collection gaps rather than treating UNKNOWN as satisfied."
+      ],
+      "finding_guidance": {
+        "version": 1,
+        "interpretation": "Collected custom PHP/PHTML contains no standalone constant string literal beginning http://. Comments are excluded. This deliberately strict literal policy includes non-endpoint examples and does not establish effective endpoint inventory, TLS verification or runtime interpolation. Scope is completely collected app/code PHP/PHTML; missing, unreadable, oversized, linked, malformed or truncated eligible input prevents a clean PASS.",
+        "risk": "The observed construct violates the configured Magebean coding policy. Determine actual data flow, reachability and runtime exposure before assigning incident or exploit severity.",
+        "triage": [
+          "Locate the reported file and line in the assessed release; evidence intentionally omits source snippets and secrets.",
+          "Determine whether this exact policy is enabled and applicable to the implementation; identify framework adapters and dependencies outside its scope."
+        ],
+        "verification": [
+          "Test real endpoint TLS peer/hostname checks and normal integration behavior; rerun the literal rule only in the agreed strict source scope.",
+          "Rerun MB-0798; a ticket or source edit alone does not establish a new passing observation."
+        ],
+        "limitations": "Exact opt-in coding policy, not a finding of confirmed exploitability or proof of the broader historical requirement. Runtime adapters, dependencies, generated code and files outside app/code remain outside this predicate.",
+        "references": []
+      },
+      "applicability": {
+        "capability": "strict_native_api_policy"
+      }
+    },
+    {
+      "id": "MB-0799",
+      "revision": 1,
+      "title": "Application worker code paths are read-only",
+      "criterion": "For every explicitly supplied PHP-FPM worker PID, the scanner and worker have identical effective UID/GID/groups, zero effective/permitted/ambient capabilities, matching project tree, mount namespace and Linux security context. Kernel access observations find no writable object or replaceable code root in the complete bounded configured app/vendor/lib inventory. Unsupported identity, seccomp, links or inventory gaps remain UNKNOWN.",
+      "control": "MB-C01",
+      "severity": "medium",
+      "alignments": [],
+      "obligations": [
+        {
+          "id": "O001",
+          "op": "all",
+          "role": "mandatory",
+          "proof": "verified_predicate",
+          "checks": [
+            {
+              "name": "production_bound_worker_code_readonly",
+              "args": {
+                "dirs": [
+                  "app",
+                  "vendor",
+                  "lib"
+                ],
+                "max_entries": 50000
+              }
+            }
+          ]
+        }
+      ],
+      "coverage": "AUTOMATED",
+      "verification": "automated",
+      "review_state": "accepted_scoped_criterion",
+      "human_evidence": {
+        "required": false,
+        "instructions": "",
+        "evidence_types": [
+          "scoped_observation"
+        ]
+      },
+      "target_modes": [
+        "LOCAL"
+      ],
+      "checks": [
+        {
+          "name": "production_bound_worker_code_readonly",
+          "args": {
+            "dirs": [
+              "app",
+              "vendor",
+              "lib"
+            ],
+            "max_entries": 50000
+          }
+        }
+      ],
+      "op": "all",
+      "family": "magebean",
+      "source": {
+        "document": "Magebean security requirements",
+        "version": "1",
+        "reference": "magebean/production-observation-v1/production_bound_worker_code_readonly"
+      },
+      "lane": "security",
+      "policy_source": {
+        "owner": "Magebean",
+        "version": "production-observation-1",
+        "note": "Exact automated predicate with explicit runtime or typed machine-policy scope; not certification of the broader historical criterion."
+      },
+      "automation_backlog_ids": [
+        "MB-0004"
+      ],
+      "remediation": [
+        "Identify the exact reported writable code path and whether access comes from file ownership, runtime group, ACL or writable parent. Separate deployment ownership from the PHP-FPM runtime identity; restrict that runtime identity from writing app/vendor/lib and their replaceable parents while preserving required writable var/generated/pub paths for the deployment architecture. Do not recursively remove write permissions from every Magento path.",
+        "Configure current worker_pids in .magebean/production-checks.json, run the scanner as their exact unprivileged identity and namespace, and rerun the kernel access check. Confirm deployment/upgrade procedures still work under their separate deployment identity.",
+        "Rerun MB-0799 on the same deployment and release; retain the new observation and resolve collection gaps before treating the predicate as satisfied."
+      ],
+      "finding_guidance": {
+        "version": 1,
+        "interpretation": "For every explicitly supplied PHP-FPM worker PID, the scanner and worker have identical effective UID/GID/groups, zero effective/permitted/ambient capabilities, matching project tree, mount namespace and Linux security context. Kernel access observations find no writable object or replaceable code root in the complete bounded configured app/vendor/lib inventory. Unsupported identity, seccomp, links or inventory gaps remain UNKNOWN.",
+        "risk": "The observed state violates this explicit Magebean scoped production policy. Assess actual exposure and business impact using the concrete evidence; a clean observation does not establish the broader historical control.",
+        "triage": [
+          "Confirm the reported target identity, response path or collected artifact belongs to the assessed release.",
+          "Distinguish an observed violation from missing policy or unavailable collection; do not convert UNKNOWN to satisfied."
+        ],
+        "verification": [
+          "Configure current worker_pids in .magebean/production-checks.json, run the scanner as their exact unprivileged identity and namespace, and rerun the kernel access check. Confirm deployment/upgrade procedures still work under their separate deployment identity.",
+          "Rerun MB-0799; configuration edits or ticket closure alone do not establish a new passing result."
+        ],
+        "limitations": "Run scanner as the actual unprivileged worker identity; root or differing identity is unsupported rather than a violation. All worker PIDs to be assessed must be explicitly supplied; no discovery-completeness claim. Unsupported worker mode, nonzero seccomp filters, sticky parent rules, external links or missing /proc permissions yield UNKNOWN. No code writes or privilege changes are performed. Original historical criterion and ID remain in the engineering backlog; this new ID records only its exact supported observation.",
+        "references": []
+      },
+      "applicability": {
+        "capability": "runtime_worker_access"
+      }
+    },
+    {
+      "id": "MB-0800",
+      "revision": 1,
+      "title": "Upload inventory has no configured PHP or handler signatures",
+      "criterion": "Within the complete bounded configured upload path inventory, readable files contain no explicit long PHP opening tags or configured htaccess script-handler signatures and no PHP-like executable filename extension. Missing/unreadable/oversized eligible files, unfollowed links and traversal-budget gaps remain UNKNOWN. This is a signature policy, not absence of arbitrary executable content or prevention of server execution.",
+      "control": "MB-C01",
+      "severity": "medium",
+      "alignments": [],
+      "obligations": [
+        {
+          "id": "O001",
+          "op": "all",
+          "role": "mandatory",
+          "proof": "verified_predicate",
+          "checks": [
+            {
+              "name": "production_upload_signatures_absent",
+              "args": {
+                "paths": [
+                  "pub/media"
+                ],
+                "max_entries": 10000,
+                "max_file_bytes": 1048576
+              }
+            }
+          ]
+        }
+      ],
+      "coverage": "AUTOMATED",
+      "verification": "automated",
+      "review_state": "accepted_scoped_criterion",
+      "human_evidence": {
+        "required": false,
+        "instructions": "",
+        "evidence_types": [
+          "scoped_observation"
+        ]
+      },
+      "target_modes": [
+        "LOCAL"
+      ],
+      "checks": [
+        {
+          "name": "production_upload_signatures_absent",
+          "args": {
+            "paths": [
+              "pub/media"
+            ],
+            "max_entries": 10000,
+            "max_file_bytes": 1048576
+          }
+        }
+      ],
+      "op": "all",
+      "family": "magebean",
+      "source": {
+        "document": "Magebean security requirements",
+        "version": "1",
+        "reference": "magebean/production-observation-v1/production_upload_signatures_absent"
+      },
+      "lane": "security",
+      "policy_source": {
+        "owner": "Magebean",
+        "version": "production-observation-1",
+        "note": "Exact automated predicate with explicit runtime or typed machine-policy scope; not certification of the broader historical criterion."
+      },
+      "automation_backlog_ids": [
+        "MB-0748"
+      ],
+      "remediation": [
+        "Quarantine the reported upload object outside the served tree for investigation; do not execute it. Determine how the PHP tag, PHP-like filename or script-handler override entered the upload path. Fix the real upload pipeline using server-derived type/extension policy, generated names, size limits and authorization; configure the delivery server so media cannot execute scripts.",
+        "Test harmless accepted and rejected upload fixtures in isolation, verify no unintended handler overrides, and rerun the complete configured upload inventory. Resolve symlinks, unreadable or oversized eligible files before interpreting a clean result.",
+        "Rerun MB-0800 on the same deployment and release; retain the new observation and resolve collection gaps before treating the predicate as satisfied."
+      ],
+      "finding_guidance": {
+        "version": 1,
+        "interpretation": "Within the complete bounded configured upload path inventory, readable files contain no explicit long PHP opening tags or configured htaccess script-handler signatures and no PHP-like executable filename extension. Missing/unreadable/oversized eligible files, unfollowed links and traversal-budget gaps remain UNKNOWN. This is a signature policy, not absence of arbitrary executable content or prevention of server execution.",
+        "risk": "The observed state violates this explicit Magebean scoped production policy. Assess actual exposure and business impact using the concrete evidence; a clean observation does not establish the broader historical control.",
+        "triage": [
+          "Confirm the reported target identity, response path or collected artifact belongs to the assessed release.",
+          "Distinguish an observed violation from missing policy or unavailable collection; do not convert UNKNOWN to satisfied."
+        ],
+        "verification": [
+          "Test harmless accepted and rejected upload fixtures in isolation, verify no unintended handler overrides, and rerun the complete configured upload inventory. Resolve symlinks, unreadable or oversized eligible files before interpreting a clean result.",
+          "Rerun MB-0800; configuration edits or ticket closure alone do not establish a new passing result."
+        ],
+        "limitations": "Default pub/media inventory is applicable without demanding absent optional import/export paths; explicitly add relevant roots. Payload bytes and response bodies are never emitted; path/line/signature label only. XML opening tags are not treated as PHP. Original historical criterion and ID remain in the engineering backlog; this new ID records only its exact supported observation.",
+        "references": []
+      }
+    },
+    {
+      "id": "MB-0801",
+      "revision": 1,
+      "title": "Direct global Admin ACL grants match the approved role policy",
+      "criterion": "In a nonempty bounded deployed authorization_role inventory and complete bounded authorization_rule inventory, every direct allow rule for Magento_Backend::all or Magento_Adminhtml::all assigned to a group role has a role ID in the explicitly configured approved_role_ids policy. Missing policy, malformed/orphan rows, direct user grants or incomplete tables remain UNKNOWN. This checks direct stored grants, not inherited effective privileges or business least privilege.",
+      "control": "MB-C02",
+      "severity": "medium",
+      "alignments": [],
+      "obligations": [
+        {
+          "id": "O001",
+          "op": "all",
+          "role": "mandatory",
+          "proof": "verified_predicate",
+          "checks": [
+            {
+              "name": "production_direct_global_roles_approved",
+              "args": {}
+            }
+          ]
+        }
+      ],
+      "coverage": "AUTOMATED",
+      "verification": "automated",
+      "review_state": "accepted_scoped_criterion",
+      "human_evidence": {
+        "required": false,
+        "instructions": "",
+        "evidence_types": [
+          "scoped_observation"
+        ]
+      },
+      "target_modes": [
+        "LOCAL"
+      ],
+      "checks": [
+        {
+          "name": "production_direct_global_roles_approved",
+          "args": {}
+        }
+      ],
+      "op": "all",
+      "family": "magebean",
+      "source": {
+        "document": "Magebean security requirements",
+        "version": "1",
+        "reference": "magebean/production-observation-v1/production_direct_global_roles_approved"
+      },
+      "lane": "security",
+      "policy_source": {
+        "owner": "Magebean",
+        "version": "production-observation-1",
+        "note": "Exact automated predicate with explicit runtime or typed machine-policy scope; not certification of the broader historical criterion."
+      },
+      "automation_backlog_ids": [
+        "MB-0101"
+      ],
+      "remediation": [
+        "Compare reported group role IDs with the intended administrator policy in the same deployed database. Remove the unnecessary direct All resource grant or replace it with the specific resources the role needs through Magento Admin role management; do not remove the last required administrative recovery path without testing access.",
+        "Maintain approved_role_ids in .magebean/production-checks.json as explicit deployment policy, then re-query real authorization tables through this check. Verify ordinary and restricted Admin functions separately because direct-row policy does not prove effective least privilege.",
+        "Rerun MB-0801 on the same deployment and release; retain the new observation and resolve collection gaps before treating the predicate as satisfied."
+      ],
+      "finding_guidance": {
+        "version": 1,
+        "interpretation": "In a nonempty bounded deployed authorization_role inventory and complete bounded authorization_rule inventory, every direct allow rule for Magento_Backend::all or Magento_Adminhtml::all assigned to a group role has a role ID in the explicitly configured approved_role_ids policy. Missing policy, malformed/orphan rows, direct user grants or incomplete tables remain UNKNOWN. This checks direct stored grants, not inherited effective privileges or business least privilege.",
+        "risk": "The observed state violates this explicit Magebean scoped production policy. Assess actual exposure and business impact using the concrete evidence; a clean observation does not establish the broader historical control.",
+        "triage": [
+          "Confirm the reported target identity, response path or collected artifact belongs to the assessed release.",
+          "Distinguish an observed violation from missing policy or unavailable collection; do not convert UNKNOWN to satisfied."
+        ],
+        "verification": [
+          "Maintain approved_role_ids in .magebean/production-checks.json as explicit deployment policy, then re-query real authorization tables through this check. Verify ordinary and restricted Admin functions separately because direct-row policy does not prove effective least privilege.",
+          "Rerun MB-0801; configuration edits or ticket closure alone do not establish a new passing result."
+        ],
+        "limitations": "Reads actual database tables through env.php connection; test PDO injects a real in-memory database, not assertion rows. No default approval list is invented; deployment owner must supply normal versioned policy configuration. Native global-group predicate deliberately does not claim full effective ACL/plugin authorization. Original historical criterion and ID remain in the engineering backlog; this new ID records only its exact supported observation.",
+        "references": []
+      },
+      "applicability": {
+        "capability": "admin_role_policy"
+      }
+    },
+    {
+      "id": "MB-0802",
+      "revision": 1,
+      "title": "Named checkout response emits the explicit enforced CSP baseline",
+      "criterion": "The supplied checkout path returns a successful same-origin no-redirect HTTPS GET with one unambiguous enforced Content-Security-Policy. The emitted policy explicitly defines script-src, connect-src, frame-src, form-action, object-src and base-uri; assessed sources contain no wildcard, unsafe-inline, unsafe-eval or broad scheme-only source. object-src is exactly none, base-uri is exactly none or self, and reporting is present when configured. Report-only alone fails; redirect/inaccessible checkout, multiple policies, unsupported syntax or incomplete collection remain UNKNOWN.",
+      "control": "MB-C04",
+      "severity": "medium",
+      "alignments": [],
+      "obligations": [
+        {
+          "id": "O001",
+          "op": "all",
+          "role": "mandatory",
+          "proof": "verified_predicate",
+          "checks": [
+            {
+              "name": "production_checkout_csp_response",
+              "args": {
+                "path": "/checkout/",
+                "require_reporting": true,
+                "timeout_ms": 5000
+              }
+            }
+          ]
+        }
+      ],
+      "coverage": "AUTOMATED",
+      "verification": "automated",
+      "review_state": "accepted_scoped_criterion",
+      "human_evidence": {
+        "required": false,
+        "instructions": "",
+        "evidence_types": [
+          "scoped_observation"
+        ]
+      },
+      "target_modes": [
+        "LOCAL",
+        "REMOTE"
+      ],
+      "checks": [
+        {
+          "name": "production_checkout_csp_response",
+          "args": {
+            "path": "/checkout/",
+            "require_reporting": true,
+            "timeout_ms": 5000
+          }
+        }
+      ],
+      "op": "all",
+      "family": "magebean",
+      "source": {
+        "document": "Magebean security requirements",
+        "version": "1",
+        "reference": "magebean/production-observation-v1/production_checkout_csp_response"
+      },
+      "lane": "security",
+      "policy_source": {
+        "owner": "Magebean",
+        "version": "production-observation-1",
+        "note": "Exact automated predicate with explicit runtime or typed machine-policy scope; not certification of the broader historical criterion."
+      },
+      "automation_backlog_ids": [
+        "MB-0089"
+      ],
+      "remediation": [
+        "Inspect the actual enforced CSP response on the named checkout URL. Configure the installed Magento CSP modules and applicable edge/server response rules to emit the stated explicit directive baseline; replace broad script origins and inline/eval dependencies with supported nonce/hash or external script integration after compatibility testing. Report-only does not satisfy this rule.",
+        "Exercise each applicable payment provider and checkout flow in staging before enforcement. Retrieve the same named checkout page without a login/cart redirect and rerun. Multiple policies or unavailable checkout context must be resolved rather than merged optimistically.",
+        "Rerun MB-0802 on the same deployment and release; retain the new observation and resolve collection gaps before treating the predicate as satisfied."
+      ],
+      "finding_guidance": {
+        "version": 1,
+        "interpretation": "The supplied checkout path returns a successful same-origin no-redirect HTTPS GET with one unambiguous enforced Content-Security-Policy. The emitted policy explicitly defines script-src, connect-src, frame-src, form-action, object-src and base-uri; assessed sources contain no wildcard, unsafe-inline, unsafe-eval or broad scheme-only source. object-src is exactly none, base-uri is exactly none or self, and reporting is present when configured. Report-only alone fails; redirect/inaccessible checkout, multiple policies, unsupported syntax or incomplete collection remain UNKNOWN.",
+        "risk": "The observed state violates this explicit Magebean scoped production policy. Assess actual exposure and business impact using the concrete evidence; a clean observation does not establish the broader historical control.",
+        "triage": [
+          "Confirm the reported target identity, response path or collected artifact belongs to the assessed release.",
+          "Distinguish an observed violation from missing policy or unavailable collection; do not convert UNKNOWN to satisfied."
+        ],
+        "verification": [
+          "Exercise each applicable payment provider and checkout flow in staging before enforcement. Retrieve the same named checkout page without a login/cart redirect and rerun. Multiple policies or unavailable checkout context must be resolved rather than merged optimistically.",
+          "Rerun MB-0802; configuration edits or ticket closure alone do not establish a new passing result."
+        ],
+        "limitations": "A redirect because no cart/session exists is UNKNOWN, not missing-CSP FAIL. Only named response is assessed; no checkout-wide or full browser execution guarantee. No state-changing requests, login, purchase or retained cookie/body content. Conservative explicit baseline can flag supported nonce plus unsafe-inline compatibility policy; title/criterion state exact Magebean policy, not universal CSP security judgment. Original historical criterion and ID remain in the engineering backlog; this new ID records only its exact supported observation.",
+        "references": []
+      }
+    },
+    {
+      "id": "MB-0803",
+      "revision": 1,
+      "title": "Observed application response emits nosniff",
+      "criterion": "One successful same-origin no-redirect HTTPS GET at the configured path emits exactly one X-Content-Type-Options header whose trimmed value is nosniff. Missing or invalid header on an observed successful response fails; duplicate headers, redirects, transport failures and incomplete collection remain UNKNOWN. HSTS and frame protection are assessed separately.",
+      "control": "MB-C04",
+      "severity": "medium",
+      "alignments": [],
+      "obligations": [
+        {
+          "id": "O001",
+          "op": "all",
+          "role": "mandatory",
+          "proof": "verified_predicate",
+          "checks": [
+            {
+              "name": "production_runtime_nosniff",
+              "args": {
+                "path": "/",
+                "timeout_ms": 5000
+              }
+            }
+          ]
+        }
+      ],
+      "coverage": "AUTOMATED",
+      "verification": "automated",
+      "review_state": "accepted_scoped_criterion",
+      "human_evidence": {
+        "required": false,
+        "instructions": "",
+        "evidence_types": [
+          "scoped_observation"
+        ]
+      },
+      "target_modes": [
+        "LOCAL",
+        "REMOTE"
+      ],
+      "checks": [
+        {
+          "name": "production_runtime_nosniff",
+          "args": {
+            "path": "/",
+            "timeout_ms": 5000
+          }
+        }
+      ],
+      "op": "all",
+      "family": "magebean",
+      "source": {
+        "document": "Magebean security requirements",
+        "version": "1",
+        "reference": "magebean/production-observation-v1/production_runtime_nosniff"
+      },
+      "lane": "security",
+      "policy_source": {
+        "owner": "Magebean",
+        "version": "production-observation-1",
+        "note": "Exact automated predicate with explicit runtime or typed machine-policy scope; not certification of the broader historical criterion."
+      },
+      "automation_backlog_ids": [
+        "MB-0096"
+      ],
+      "remediation": [
+        "Set X-Content-Type-Options: nosniff in the response-producing Magento/web-server/edge layer that serves the reported application path. Remove conflicting duplicate declarations and ensure JavaScript, CSS and downloads use correct Content-Type values; avoid applying changes only to an unused sample configuration.",
+        "Retrieve the same successful HTTPS application page through the actual production ingress and rerun. Test asset loading and intended downloads in staging; assess HSTS and frame protection using their separate checks.",
+        "Rerun MB-0803 on the same deployment and release; retain the new observation and resolve collection gaps before treating the predicate as satisfied."
+      ],
+      "finding_guidance": {
+        "version": 1,
+        "interpretation": "One successful same-origin no-redirect HTTPS GET at the configured path emits exactly one X-Content-Type-Options header whose trimmed value is nosniff. Missing or invalid header on an observed successful response fails; duplicate headers, redirects, transport failures and incomplete collection remain UNKNOWN. HSTS and frame protection are assessed separately.",
+        "risk": "The observed state violates this explicit Magebean scoped production policy. Assess actual exposure and business impact using the concrete evidence; a clean observation does not establish the broader historical control.",
+        "triage": [
+          "Confirm the reported target identity, response path or collected artifact belongs to the assessed release.",
+          "Distinguish an observed violation from missing policy or unavailable collection; do not convert UNKNOWN to satisfied."
+        ],
+        "verification": [
+          "Retrieve the same successful HTTPS application page through the actual production ingress and rerun. Test asset loading and intended downloads in staging; assess HSTS and frame protection using their separate checks.",
+          "Rerun MB-0803; configuration edits or ticket closure alone do not establish a new passing result."
+        ],
+        "limitations": "Nosniff plus existing HSTS/frame controls is not a claim of every security header on every route. No source-file union is used; runtime headers are collected directly with peer verification and bounded memory. Original historical criterion and ID remain in the engineering backlog; this new ID records only its exact supported observation.",
+        "references": []
+      }
+    },
+    {
+      "id": "MB-0804",
+      "revision": 1,
+      "title": "Named integration debug settings resolve disabled in default scope",
+      "criterion": "Every explicitly configured integration debug/verbose setting path resolves through deployed env.php/config.php/default core_config_data or supported installed-module defaults to a recognized disabled value in default scope. Any recognized enabled value fails; omitted paths, missing values or unsupported flag representations remain UNKNOWN. This verifies named settings, not every third-party integration or store scope.",
+      "control": "MB-C12",
+      "severity": "medium",
+      "alignments": [],
+      "obligations": [
+        {
+          "id": "O001",
+          "op": "all",
+          "role": "mandatory",
+          "proof": "verified_predicate",
+          "checks": [
+            {
+              "name": "production_integration_debug_defaults_disabled",
+              "args": {}
+            }
+          ]
+        }
+      ],
+      "coverage": "AUTOMATED",
+      "verification": "automated",
+      "review_state": "accepted_scoped_criterion",
+      "human_evidence": {
+        "required": false,
+        "instructions": "",
+        "evidence_types": [
+          "scoped_observation"
+        ]
+      },
+      "target_modes": [
+        "LOCAL"
+      ],
+      "checks": [
+        {
+          "name": "production_integration_debug_defaults_disabled",
+          "args": {}
+        }
+      ],
+      "op": "all",
+      "family": "magebean",
+      "source": {
+        "document": "Magebean security requirements",
+        "version": "1",
+        "reference": "magebean/production-observation-v1/production_integration_debug_defaults_disabled"
+      },
+      "lane": "security",
+      "policy_source": {
+        "owner": "Magebean",
+        "version": "production-observation-1",
+        "note": "Exact automated predicate with explicit runtime or typed machine-policy scope; not certification of the broader historical criterion."
+      },
+      "automation_backlog_ids": [
+        "MB-0745"
+      ],
+      "remediation": [
+        "For each reported named integration setting, confirm its path and semantics against the installed integration version, then disable debug/verbose output through its supported configuration mechanism in the assessed default scope. Preserve ordinary audit logging and never assume every logging setting is debug. If sensitive data was emitted, review sink exposure and rotate affected credentials as appropriate.",
+        "List the applicable explicit configuration paths in .magebean/production-checks.json, rerun resolved-value collection and test integration behavior in isolation. Assess store-specific overrides and custom runtime logging separately; an absent/unresolved path is not disabled.",
+        "Rerun MB-0804 on the same deployment and release; retain the new observation and resolve collection gaps before treating the predicate as satisfied."
+      ],
+      "finding_guidance": {
+        "version": 1,
+        "interpretation": "Every explicitly configured integration debug/verbose setting path resolves through deployed env.php/config.php/default core_config_data or supported installed-module defaults to a recognized disabled value in default scope. Any recognized enabled value fails; omitted paths, missing values or unsupported flag representations remain UNKNOWN. This verifies named settings, not every third-party integration or store scope.",
+        "risk": "The observed state violates this explicit Magebean scoped production policy. Assess actual exposure and business impact using the concrete evidence; a clean observation does not establish the broader historical control.",
+        "triage": [
+          "Confirm the reported target identity, response path or collected artifact belongs to the assessed release.",
+          "Distinguish an observed violation from missing policy or unavailable collection; do not convert UNKNOWN to satisfied."
+        ],
+        "verification": [
+          "List the applicable explicit configuration paths in .magebean/production-checks.json, rerun resolved-value collection and test integration behavior in isolation. Assess store-specific overrides and custom runtime logging separately; an absent/unresolved path is not disabled.",
+          "Rerun MB-0804; configuration edits or ticket closure alone do not establish a new passing result."
+        ],
+        "limitations": "No heuristic debug/logging key regex and no inference that ordinary enabled audit logging is insecure. Vendor path/version applicability must be provided as normal policy configuration; no invented universal vendor schema. No default vendor list is shipped because repository does not contain authoritative installed integration schemas. Original historical criterion and ID remain in the engineering backlog; this new ID records only its exact supported observation.",
+        "references": []
+      },
+      "applicability": {
+        "capability": "integration_debug_policy"
+      }
+    },
+    {
+      "id": "MB-0805",
+      "revision": 1,
+      "title": "Collected Composer dependency sources match explicit policy",
+      "criterion": "Every package in the readable bounded collected composer.lock inventory has source and/or dist URL and nonempty reference matching the supplied exact per-package source policy; replacement declarations and root composer.json repository declarations also match the supplied policy. Explicit metadata-only metapackages may have no source/dist. Missing package policies or incomplete source identity are unresolved. This compares collected declarations and does not verify installed bytes, canonical upstream truth or absence of malicious approved revisions.",
+      "control": "MB-C10",
+      "severity": "medium",
+      "alignments": [],
+      "obligations": [
+        {
+          "id": "O001",
+          "op": "all",
+          "role": "mandatory",
+          "proof": "verified_predicate",
+          "checks": [
+            {
+              "name": "dependency_source_policy",
+              "args": {
+                "lock_file": "composer.lock",
+                "composer_file": "composer.json",
+                "policy_file": ".magebean/dependency-source-policy.json"
+              }
+            }
+          ]
+        }
+      ],
+      "coverage": "AUTOMATED",
+      "verification": "automated",
+      "review_state": "accepted_scoped_criterion",
+      "human_evidence": {
+        "required": false,
+        "instructions": "",
+        "evidence_types": [
+          "scoped_observation"
+        ]
+      },
+      "target_modes": [
+        "LOCAL"
+      ],
+      "checks": [
+        {
+          "name": "dependency_source_policy",
+          "args": {
+            "lock_file": "composer.lock",
+            "composer_file": "composer.json",
+            "policy_file": ".magebean/dependency-source-policy.json"
+          }
+        }
+      ],
+      "op": "all",
+      "family": "magebean",
+      "source": {
+        "document": "Magebean security requirements",
+        "version": "1",
+        "reference": "magebean/production-observation-v1/dependency_source_policy"
+      },
+      "lane": "security",
+      "policy_source": {
+        "owner": "Magebean",
+        "version": "production-observation-1",
+        "note": "Exact automated predicate with explicit runtime or typed machine-policy scope; not certification of the broader historical criterion."
+      },
+      "automation_backlog_ids": [
+        "MB-0064"
+      ],
+      "remediation": [
+        "Compare the reported package, source/dist URL, revision, replacement and root repository declarations against the approved exact source policy. Investigate unexpected forks/replacements before updating either lockfile or allow-list; restore the intended package/revision through normal Composer dependency resolution and deploy a reviewed build.",
+        "Maintain .magebean/dependency-source-policy.json for the complete collected package inventory and rerun against composer.lock plus composer.json. Independently verify installed artifact integrity and trusted upstream provenance; merely approving the observed source does not perform that verification.",
+        "Rerun MB-0805 on the same deployment and release; retain the new observation and resolve collection gaps before treating the predicate as satisfied."
+      ],
+      "finding_guidance": {
+        "version": 1,
+        "interpretation": "Every package in the readable bounded collected composer.lock inventory has source and/or dist URL and nonempty reference matching the supplied exact per-package source policy; replacement declarations and root composer.json repository declarations also match the supplied policy. Explicit metadata-only metapackages may have no source/dist. Missing package policies or incomplete source identity are unresolved. This compares collected declarations and does not verify installed bytes, canonical upstream truth or absence of malicious approved revisions.",
+        "risk": "The observed state violates this explicit Magebean scoped production policy. Assess actual exposure and business impact using the concrete evidence; a clean observation does not establish the broader historical control.",
+        "triage": [
+          "Confirm the reported target identity, response path or collected artifact belongs to the assessed release.",
+          "Distinguish an observed violation from missing policy or unavailable collection; do not convert UNKNOWN to satisfied."
+        ],
+        "verification": [
+          "Maintain .magebean/dependency-source-policy.json for the complete collected package inventory and rerun against composer.lock plus composer.json. Independently verify installed artifact integrity and trusted upstream provenance; merely approving the observed source does not perform that verification.",
+          "Rerun MB-0805; configuration edits or ticket closure alone do not establish a new passing result."
+        ],
+        "limitations": "Original historical criterion is not silently reactivated or weakened. Original historical criterion and ID remain in the engineering backlog; this new ID records only its exact supported observation.",
+        "references": []
+      },
+      "applicability": {
+        "capability": "dependency_source_policy"
+      }
+    },
+    {
+      "id": "MB-0806",
+      "revision": 1,
+      "title": "Declared mitigation records satisfy structure and expiry policy",
+      "criterion": "The bounded readable schema-version-1 mitigation record inventory has a valid generated_at timestamp within configured max_age_days and covers each identity in the supplied nonempty expected_ids policy with a unique record containing nonempty advisory, package, version, owner, action, rollback and a valid future expires_at. This checks declared record structure and expiry only, not whether all deployed mitigations are declared, effective or approved.",
+      "control": "MB-C09",
+      "severity": "low",
+      "alignments": [],
+      "obligations": [
+        {
+          "id": "O001",
+          "op": "all",
+          "role": "mandatory",
+          "proof": "verified_predicate",
+          "checks": [
+            {
+              "name": "dependency_mitigation_records",
+              "args": {
+                "inventory_file": ".magebean/mitigations.json",
+                "max_age_days": 30
+              }
+            }
+          ]
+        }
+      ],
+      "coverage": "AUTOMATED",
+      "verification": "automated",
+      "review_state": "accepted_scoped_criterion",
+      "human_evidence": {
+        "required": false,
+        "instructions": "",
+        "evidence_types": [
+          "scoped_observation"
+        ]
+      },
+      "target_modes": [
+        "LOCAL"
+      ],
+      "checks": [
+        {
+          "name": "dependency_mitigation_records",
+          "args": {
+            "inventory_file": ".magebean/mitigations.json",
+            "max_age_days": 30
+          }
+        }
+      ],
+      "op": "all",
+      "family": "magebean",
+      "source": {
+        "document": "Magebean security requirements",
+        "version": "1",
+        "reference": "magebean/production-observation-v1/dependency_mitigation_records"
+      },
+      "lane": "readiness",
+      "policy_source": {
+        "owner": "Magebean",
+        "version": "production-observation-1",
+        "note": "Exact automated predicate with explicit runtime or typed machine-policy scope; not certification of the broader historical criterion."
+      },
+      "automation_backlog_ids": [
+        "MB-0053"
+      ],
+      "remediation": [
+        "Update the declared mitigation record inventory for the expected IDs with the real advisory/package/version, accountable owner, concrete action, rollback and future expiry. Replace or remove expired temporary measures through the normal release process; never fabricate a record to make the check pass.",
+        "Configure the authoritative expected_ids list in .magebean/production-checks.json and rerun record structure/expiry validation against .magebean/mitigations.json. Independently test mitigation effectiveness and completeness; this finding is about declared record hygiene only.",
+        "Rerun MB-0806 on the same deployment and release; retain the new observation and resolve collection gaps before treating the predicate as satisfied."
+      ],
+      "finding_guidance": {
+        "version": 1,
+        "interpretation": "The bounded readable schema-version-1 mitigation record inventory has a valid generated_at timestamp within configured max_age_days and covers each identity in the supplied nonempty expected_ids policy with a unique record containing nonempty advisory, package, version, owner, action, rollback and a valid future expires_at. This checks declared record structure and expiry only, not whether all deployed mitigations are declared, effective or approved.",
+        "risk": "The observed state violates this explicit Magebean scoped production policy. Assess actual exposure and business impact using the concrete evidence; a clean observation does not establish the broader historical control.",
+        "triage": [
+          "Confirm the reported target identity, response path or collected artifact belongs to the assessed release.",
+          "Distinguish an observed violation from missing policy or unavailable collection; do not convert UNKNOWN to satisfied."
+        ],
+        "verification": [
+          "Configure the authoritative expected_ids list in .magebean/production-checks.json and rerun record structure/expiry validation against .magebean/mitigations.json. Independently test mitigation effectiveness and completeness; this finding is about declared record hygiene only.",
+          "Rerun MB-0806; configuration edits or ticket closure alone do not establish a new passing result."
+        ],
+        "limitations": "Original historical criterion is not silently reactivated or weakened. Original historical criterion and ID remain in the engineering backlog; this new ID records only its exact supported observation.",
+        "references": []
+      },
+      "applicability": {
+        "capability": "dependency_mitigation_policy"
+      }
+    },
+    {
+      "id": "MB-0807",
+      "revision": 1,
+      "title": "Configured PHP-FPM workers have no mapped Xdebug binary module",
+      "criterion": "Every explicitly inventoried Linux PHP-FPM worker is bound to its pool, executable identity and exact process start_ticks before and after a complete bounded nonempty /proc process-map observation. No Xdebug-named shared module is mapped in these verified workers. Missing or changed identity, empty/unreadable/truncated maps or malformed inventory remain UNKNOWN. This observes configured process mappings at scan time, not every deployment worker, Xdebug feature mode, statically linked code or complete PHP runtime settings.",
+      "control": "MB-C05",
+      "severity": "medium",
+      "alignments": [],
+      "obligations": [
+        {
+          "id": "O001",
+          "op": "all",
+          "role": "mandatory",
+          "proof": "verified_predicate",
+          "checks": [
+            {
+              "name": "production_worker_xdebug_absent",
+              "args": {
+                "policy_file": ".magebean/php-fpm-workers.json"
+              }
+            }
+          ]
+        }
+      ],
+      "coverage": "AUTOMATED",
+      "verification": "automated",
+      "review_state": "accepted_scoped_criterion",
+      "human_evidence": {
+        "required": false,
+        "instructions": "",
+        "evidence_types": [
+          "scoped_observation"
+        ]
+      },
+      "target_modes": [
+        "LOCAL"
+      ],
+      "checks": [
+        {
+          "name": "production_worker_xdebug_absent",
+          "args": {
+            "policy_file": ".magebean/php-fpm-workers.json"
+          }
+        }
+      ],
+      "op": "all",
+      "family": "magebean",
+      "source": {
+        "document": "Magebean security requirements",
+        "version": "1",
+        "reference": "magebean/production-observation-v1/production_worker_xdebug_absent"
+      },
+      "lane": "security",
+      "policy_source": {
+        "owner": "Magebean",
+        "version": "production-observation-1",
+        "note": "Exact automated predicate with explicit runtime or typed machine-policy scope; not certification of the broader historical criterion."
+      },
+      "automation_backlog_ids": [
+        "MB-0738"
+      ],
+      "remediation": [
+        "Identify the PHP-FPM pool and mapped Xdebug module reported by the verified worker observation. Remove the production pool extension-loading declaration through its real deployment configuration and restart/reload the applicable pool through normal operations after staging verification. Do not expose phpinfo or a public diagnostic endpoint.",
+        "Refresh .magebean/php-fpm-workers.json with current actual pool names, PIDs and start_ticks after restart, then rerun direct process-map collection. Verify every intended worker is inventoried separately; a clean CLI extension list does not establish a clean web-worker result.",
+        "Rerun MB-0807 on the same deployment and release; retain the new observation and resolve collection gaps before treating the predicate as satisfied."
+      ],
+      "finding_guidance": {
+        "version": 1,
+        "interpretation": "Every explicitly inventoried Linux PHP-FPM worker is bound to its pool, executable identity and exact process start_ticks before and after a complete bounded nonempty /proc process-map observation. No Xdebug-named shared module is mapped in these verified workers. Missing or changed identity, empty/unreadable/truncated maps or malformed inventory remain UNKNOWN. This observes configured process mappings at scan time, not every deployment worker, Xdebug feature mode, statically linked code or complete PHP runtime settings.",
+        "risk": "The observed state violates this explicit Magebean scoped production policy. Assess actual exposure and business impact using the concrete evidence; a clean observation does not establish the broader historical control.",
+        "triage": [
+          "Confirm the reported target identity, response path or collected artifact belongs to the assessed release.",
+          "Distinguish an observed violation from missing policy or unavailable collection; do not convert UNKNOWN to satisfied."
+        ],
+        "verification": [
+          "Refresh .magebean/php-fpm-workers.json with current actual pool names, PIDs and start_ticks after restart, then rerun direct process-map collection. Verify every intended worker is inventoried separately; a clean CLI extension list does not establish a clean web-worker result.",
+          "Rerun MB-0807; configuration edits or ticket closure alone do not establish a new passing result."
+        ],
+        "limitations": "Explicit process inventory is machine targeting configuration; it cannot assert a clean result. Process mappings are collected directly without reading environ or executing target PHP. Original historical criterion and ID remain in the engineering backlog; this new ID records only its exact supported observation.",
+        "references": []
+      },
+      "applicability": {
+        "capability": "runtime_worker_inventory"
       }
     }
   ]

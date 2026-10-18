@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "checks": {
+    "production_bound_worker_code_readonly": {
+      "worker_pids": [12345, 12346]
+    },
+    "production_direct_global_roles_approved": {
+      "approved_role_ids": [1]
+    },
+    "production_integration_debug_defaults_disabled": {
+      "paths": ["payment/stripe/debug"]
+    },
+    "dependency_mitigation_records": {
+      "expected_ids": ["CVE-2026-1234"]
+    }
+  }
+}

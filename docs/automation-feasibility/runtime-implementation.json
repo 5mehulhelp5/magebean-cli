@@ -1,0 +1,368 @@
+[
+  {
+    "id": "MB-0004",
+    "ready": true,
+    "original_criterion_ready": false,
+    "check": "production_bound_worker_code_readonly",
+    "method": "ProductionRuntimeCheck::boundWorkerCodeReadonly",
+    "args": {
+      "dirs": [
+        "app",
+        "vendor",
+        "lib"
+      ],
+      "max_entries": 50000
+    },
+    "required_configuration": [
+      "worker_pids: nonempty explicit set of actual PHP-FPM pool worker PIDs"
+    ],
+    "new_title": "Application worker code paths are read-only",
+    "criterion": "For every explicitly supplied PHP-FPM worker PID, the scanner and worker have identical effective UID/GID/groups, zero effective/permitted/ambient capabilities, matching project tree, mount namespace and Linux security context. Kernel access observations find no writable object or replaceable code root in the complete bounded configured app/vendor/lib inventory. Unsupported identity, seccomp, links or inventory gaps remain UNKNOWN.",
+    "new_id_required": true,
+    "reuse_active_ids": [],
+    "limitations": [
+      "Run scanner as the actual unprivileged worker identity; root or differing identity is unsupported rather than a violation.",
+      "All worker PIDs to be assessed must be explicitly supplied; no discovery-completeness claim.",
+      "Unsupported worker mode, nonzero seccomp filters, sticky parent rules, external links or missing /proc permissions yield UNKNOWN.",
+      "No code writes or privilege changes are performed."
+    ],
+    "tests": "tests/ProductionRuntimeCheckTest.php: kernel matched-identity readonly/writable/mismatched-UID cases",
+    "new_id": "MB-0799"
+  },
+  {
+    "id": "MB-0748",
+    "ready": true,
+    "original_criterion_ready": false,
+    "check": "production_upload_signatures_absent",
+    "method": "ProductionRuntimeCheck::uploadSignaturesAbsent",
+    "args": {
+      "paths": [
+        "pub/media"
+      ],
+      "max_entries": 10000,
+      "max_file_bytes": 1048576
+    },
+    "new_title": "Upload inventory has no configured PHP or handler signatures",
+    "criterion": "Within the complete bounded configured upload path inventory, readable files contain no explicit long PHP opening tags or configured htaccess script-handler signatures and no PHP-like executable filename extension. Missing/unreadable/oversized eligible files, unfollowed links and traversal-budget gaps remain UNKNOWN. This is a signature policy, not absence of arbitrary executable content or prevention of server execution.",
+    "new_id_required": true,
+    "reuse_active_ids": [
+      "MB-0780"
+    ],
+    "limitations": [
+      "Default pub/media inventory is applicable without demanding absent optional import/export paths; explicitly add relevant roots.",
+      "Payload bytes and response bodies are never emitted; path/line/signature label only.",
+      "XML opening tags are not treated as PHP."
+    ],
+    "tests": "tests/ProductionRuntimeCheckTest.php: benign XML, disguised PHP, oversized file, symlink, traversal budget and htaccess handler",
+    "new_id": "MB-0800"
+  },
+  {
+    "id": "MB-0731",
+    "ready": false,
+    "original_criterion_ready": false,
+    "check": null,
+    "method": null,
+    "args": {},
+    "new_title": null,
+    "criterion": null,
+    "new_id_required": false,
+    "reuse_active_ids": [
+      "MB-0728"
+    ],
+    "limitations": [
+      "Existing MB-0728 already resolves observed Admin password minimum declaration/installed validator minimum. Reuse it without adding duplicate coverage.",
+      "No new installed-validator acceptance adapter or support for arbitrary DI/plugins/IMS password policy was implemented in this unit."
+    ],
+    "tests": "Existing MagentoConfigurationCompletionTest.php covers the active observed configuration predicate."
+  },
+  {
+    "id": "MB-0010",
+    "ready": false,
+    "original_criterion_ready": false,
+    "check": null,
+    "method": null,
+    "args": {},
+    "new_title": null,
+    "criterion": null,
+    "new_id_required": true,
+    "reuse_active_ids": [
+      "MB-0006",
+      "MB-0777"
+    ],
+    "limitations": [
+      "No bound denied-origin versus allowed-origin gateway adapter was implemented.",
+      "Repository ACL hints, route obscurity, HTTP 404 or lack of recognizable login markup are not accepted as restriction proof."
+    ],
+    "tests": null
+  },
+  {
+    "id": "MB-0101",
+    "ready": true,
+    "original_criterion_ready": false,
+    "check": "production_direct_global_roles_approved",
+    "method": "ProductionRuntimeCheck::directGlobalRolesApproved",
+    "args": {},
+    "required_configuration": [
+      "approved_role_ids: explicit positive integer role-ID array; [] explicitly means deny-all"
+    ],
+    "new_title": "Direct global Admin ACL grants match the approved role policy",
+    "criterion": "In a nonempty bounded deployed authorization_role inventory and complete bounded authorization_rule inventory, every direct allow rule for Magento_Backend::all or Magento_Adminhtml::all assigned to a group role has a role ID in the explicitly configured approved_role_ids policy. Missing policy, malformed/orphan rows, direct user grants or incomplete tables remain UNKNOWN. This checks direct stored grants, not inherited effective privileges or business least privilege.",
+    "new_id_required": true,
+    "reuse_active_ids": [
+      "MB-0100"
+    ],
+    "limitations": [
+      "Reads actual database tables through env.php connection; test PDO injects a real in-memory database, not assertion rows.",
+      "No default approval list is invented; deployment owner must supply normal versioned policy configuration.",
+      "Native global-group predicate deliberately does not claim full effective ACL/plugin authorization."
+    ],
+    "tests": "tests/ProductionRuntimeCheckTest.php: approved/unapproved real SELECT rows, absent versus explicit empty policy, orphan rows, no direct grants",
+    "new_id": "MB-0801"
+  },
+  {
+    "id": "MB-0102",
+    "ready": false,
+    "original_criterion_ready": false,
+    "check": null,
+    "method": null,
+    "args": {},
+    "new_title": null,
+    "criterion": null,
+    "new_id_required": false,
+    "reuse_active_ids": [],
+    "limitations": [
+      "Original PCI vendor-default-account evidence assessment is excluded from Magebean automation; no self-attestation file is accepted as protection proof."
+    ],
+    "tests": null
+  },
+  {
+    "id": "MB-0089",
+    "ready": true,
+    "original_criterion_ready": false,
+    "check": "production_checkout_csp_response",
+    "method": "ProductionRuntimeCheck::checkoutCspResponse",
+    "args": {
+      "path": "/checkout/",
+      "require_reporting": true,
+      "timeout_ms": 5000
+    },
+    "new_title": "Named checkout response emits the explicit enforced CSP baseline",
+    "criterion": "The supplied checkout path returns a successful same-origin no-redirect HTTPS GET with one unambiguous enforced Content-Security-Policy. The emitted policy explicitly defines script-src, connect-src, frame-src, form-action, object-src and base-uri; assessed sources contain no wildcard, unsafe-inline, unsafe-eval or broad scheme-only source. object-src is exactly none, base-uri is exactly none or self, and reporting is present when configured. Report-only alone fails; redirect/inaccessible checkout, multiple policies, unsupported syntax or incomplete collection remain UNKNOWN.",
+    "new_id_required": true,
+    "reuse_active_ids": [
+      "MB-0779"
+    ],
+    "limitations": [
+      "A redirect because no cart/session exists is UNKNOWN, not missing-CSP FAIL.",
+      "Only named response is assessed; no checkout-wide or full browser execution guarantee.",
+      "No state-changing requests, login, purchase or retained cookie/body content.",
+      "Conservative explicit baseline can flag supported nonce plus unsafe-inline compatibility policy; title/criterion state exact Magebean policy, not universal CSP security judgment."
+    ],
+    "tests": "tests/ProductionRuntimeCheckTest.php: exact policy, absent path, report-only, wildcard/unsafe-inline, duplicates, unsupported source syntax and off-origin response",
+    "new_id": "MB-0802"
+  },
+  {
+    "id": "MB-0096",
+    "ready": true,
+    "original_criterion_ready": false,
+    "check": "production_runtime_nosniff",
+    "method": "ProductionRuntimeCheck::runtimeNosniff",
+    "args": {
+      "path": "/",
+      "timeout_ms": 5000
+    },
+    "new_title": "Observed application response emits nosniff",
+    "criterion": "One successful same-origin no-redirect HTTPS GET at the configured path emits exactly one X-Content-Type-Options header whose trimmed value is nosniff. Missing or invalid header on an observed successful response fails; duplicate headers, redirects, transport failures and incomplete collection remain UNKNOWN. HSTS and frame protection are assessed separately.",
+    "new_id_required": true,
+    "reuse_active_ids": [
+      "MB-0027",
+      "MB-0779"
+    ],
+    "limitations": [
+      "Nosniff plus existing HSTS/frame controls is not a claim of every security header on every route.",
+      "No source-file union is used; runtime headers are collected directly with peer verification and bounded memory."
+    ],
+    "tests": "tests/ProductionRuntimeCheckTest.php: observed header, missing header, duplicates, redirect and malformed network path",
+    "new_id": "MB-0803"
+  },
+  {
+    "id": "MB-0738",
+    "ready": true,
+    "original_criterion_ready": false,
+    "check": "production_worker_xdebug_absent",
+    "method": "LinuxWorkerObservationCheck::xdebugModulesAbsent",
+    "args": {
+      "policy_file": ".magebean/php-fpm-workers.json"
+    },
+    "new_title": "Configured PHP-FPM workers have no mapped Xdebug binary module",
+    "criterion": "Every explicitly inventoried Linux PHP-FPM worker is bound to its pool, executable identity and exact process start_ticks before and after a complete bounded nonempty /proc process-map observation. No Xdebug-named shared module is mapped in these verified workers. Missing or changed identity, empty/unreadable/truncated maps or malformed inventory remain UNKNOWN. This observes configured process mappings at scan time, not every deployment worker, Xdebug feature mode, statically linked code or complete PHP runtime settings.",
+    "new_id_required": true,
+    "reuse_active_ids": [
+      "MB-0729"
+    ],
+    "limitations": [
+      "Explicit process inventory is machine targeting configuration; it cannot assert a clean result. Process mappings are collected directly without reading environ or executing target PHP. Original historical criterion and ID remain in the engineering backlog; this new ID records only its exact supported observation."
+    ],
+    "tests": null,
+    "new_id": "MB-0807"
+  },
+  {
+    "id": "MB-0739",
+    "ready": false,
+    "original_criterion_ready": false,
+    "check": null,
+    "method": null,
+    "args": {},
+    "new_title": null,
+    "criterion": null,
+    "new_id_required": false,
+    "reuse_active_ids": [
+      "MB-0729"
+    ],
+    "limitations": [
+      "No trusted web-worker effective display_errors telemetry adapter was implemented. Repository ini and a clean HTTP page remain insufficient."
+    ],
+    "tests": null
+  },
+  {
+    "id": "MB-0740",
+    "ready": true,
+    "original_criterion_ready": false,
+    "check": "production_native_debug_defaults_disabled",
+    "method": "ProductionRuntimeCheck::nativeDebugDefaultsDisabled",
+    "args": {
+      "paths": [
+        "dev/debug/template_hints",
+        "dev/debug/template_hints_storefront",
+        "dev/translate_inline/active"
+      ]
+    },
+    "new_title": "Resolved native default-scope debug settings are disabled",
+    "criterion": "Each explicitly named native debug configuration setting resolves through deployed env.php/config.php/default core_config_data or installed enabled-module defaults to a recognized disabled value in default scope. Any recognized enabled value fails; unavailable or malformed values remain UNKNOWN. Store-specific overrides, runtime environment and custom debug behavior are outside this predicate.",
+    "new_id_required": false,
+    "reuse_active_ids": [
+      "MB-0729"
+    ],
+    "limitations": [
+      "Reuse active MB-0729 rather than create a second default-debug requirement.",
+      "New method is an optional stricter resolved-value helper, not completed store-scope automation for original criterion."
+    ],
+    "tests": "tests/ProductionRuntimeCheckTest.php: disabled, enabled with other unavailable paths and missing defaults"
+  },
+  {
+    "id": "MB-0742",
+    "ready": true,
+    "original_criterion_ready": false,
+    "check": "production_native_debug_defaults_disabled",
+    "method": "ProductionRuntimeCheck::nativeDebugDefaultsDisabled",
+    "args": {
+      "paths": [
+        "dev/debug/template_hints",
+        "dev/debug/template_hints_storefront",
+        "dev/translate_inline/active"
+      ]
+    },
+    "new_title": "Resolved native default-scope debug settings are disabled",
+    "criterion": "Same supported resolved default-scope predicate as MB-0740 implementation; reuse one observation and existing active MB-0729 rather than counting duplicate template-hint capabilities.",
+    "new_id_required": false,
+    "reuse_active_ids": [
+      "MB-0729"
+    ],
+    "limitations": [
+      "Complete active-store scope resolver and custom runtime override detection remain unimplemented."
+    ],
+    "tests": "tests/ProductionRuntimeCheckTest.php: shared native debug helper fixtures"
+  },
+  {
+    "id": "MB-0745",
+    "ready": true,
+    "original_criterion_ready": false,
+    "check": "production_integration_debug_defaults_disabled",
+    "method": "ProductionRuntimeCheck::integrationDebugDefaultsDisabled",
+    "args": {},
+    "required_configuration": [
+      "paths: explicit vendor-supported debug/verbose configuration paths for the installed integration versions"
+    ],
+    "new_title": "Named integration debug settings resolve disabled in default scope",
+    "criterion": "Every explicitly configured integration debug/verbose setting path resolves through deployed env.php/config.php/default core_config_data or supported installed-module defaults to a recognized disabled value in default scope. Any recognized enabled value fails; omitted paths, missing values or unsupported flag representations remain UNKNOWN. This verifies named settings, not every third-party integration or store scope.",
+    "new_id_required": true,
+    "reuse_active_ids": [],
+    "limitations": [
+      "No heuristic debug/logging key regex and no inference that ordinary enabled audit logging is insecure.",
+      "Vendor path/version applicability must be provided as normal policy configuration; no invented universal vendor schema.",
+      "No default vendor list is shipped because repository does not contain authoritative installed integration schemas."
+    ],
+    "tests": "tests/ProductionRuntimeCheckTest.php: mandatory path policy, debug off with ordinary logging on and malformed value",
+    "new_id": "MB-0804"
+  },
+  {
+    "id": "MB-0741",
+    "ready": false,
+    "original_criterion_ready": false,
+    "check": null,
+    "method": null,
+    "args": {},
+    "new_title": null,
+    "criterion": null,
+    "new_id_required": false,
+    "reuse_active_ids": [
+      "MB-0038"
+    ],
+    "limitations": [
+      "Existing MB-0038 already covers supported declared Redis/Varnish frontend configuration. Reuse it without restoring a duplicate original ID.",
+      "No new effective runtime backend object/DI resolver was implemented."
+    ],
+    "tests": "Existing AutomationConfigRuntimeAuditTest.php covers declaration fallback and unsupported backend behavior."
+  },
+  {
+    "id": "MB-0043",
+    "ready": false,
+    "original_criterion_ready": false,
+    "check": null,
+    "method": null,
+    "args": {},
+    "new_title": null,
+    "criterion": null,
+    "new_id_required": true,
+    "reuse_active_ids": [],
+    "limitations": [
+      "Existing project-file parser does not establish installed effective host config, scheduler, all sink coverage or cloud/container applicability. No complete logging-architecture adapter was implemented; do not publish it as restored production protection."
+    ],
+    "tests": null
+  },
+  {
+    "id": "MB-0076",
+    "ready": false,
+    "original_criterion_ready": false,
+    "check": null,
+    "method": null,
+    "args": {},
+    "new_title": null,
+    "criterion": null,
+    "new_id_required": true,
+    "reuse_active_ids": [],
+    "limitations": [
+      "No complete network namespace IPv4/IPv6 firewall/CNI/gateway evaluator and deployment binding was implemented. Default DROP and source hints are not promoted to allow-list enforcement proof."
+    ],
+    "tests": null
+  },
+  {
+    "id": "MB-0078",
+    "ready": false,
+    "original_criterion_ready": false,
+    "check": null,
+    "method": null,
+    "args": {},
+    "new_title": null,
+    "criterion": null,
+    "new_id_required": true,
+    "reuse_active_ids": [
+      "MB-0028",
+      "MB-0778"
+    ],
+    "limitations": [
+      "No active complete cipher enumerator with client capability and endpoint binding was implemented. Protocol/certificate checks remain partial coverage, and first strong repository TLS declaration cannot establish gateway suite safety."
+    ],
+    "tests": null
+  }
+]

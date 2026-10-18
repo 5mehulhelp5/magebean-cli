@@ -1,0 +1,14 @@
+{
+    "verified_predicate": {
+        "outcome": "FAIL",
+        "reason_code": "REQUIREMENT_CONFIRMED_VIOLATION",
+        "message": "Synthetic source candidate found; exploitability unverified.",
+        "nested_observation_status": "FAIL"
+    },
+    "heuristic": {
+        "outcome": "UNKNOWN",
+        "reason_code": "REQUIREMENT_AUTOMATION_INSUFFICIENT",
+        "message": "Available heuristic observations do not establish all mandatory requirement conditions.",
+        "nested_observation_status": "FAIL"
+    }
+}

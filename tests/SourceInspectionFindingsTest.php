@@ -1,0 +1,41 @@
+<?php
+declare(strict_types=1);
+require __DIR__.'/../vendor/autoload.php';
+use Magebean\Engine\{ScanContext,ScanRequest,ScanPlanner,ScanService,ScanReportAssembler,CheckResult,CheckOutcome,RequirementCatalog,RequirementAssessmentEvaluator,MagebeanRiskObservation};
+use Magebean\Engine\Checks\CheckRegistry;
+use Magebean\Console\ScanConsoleRenderer;
+use Symfony\Component\Console\Output\BufferedOutput;
+$root=sys_get_temp_dir().'/magebean-specific-source-'.bin2hex(random_bytes(5));mkdir($root.'/app/code/Example',0777,true);
+$n=0;$assert=static function(bool$ok,string$message)use(&$n):void{++$n;if(!$ok)throw new RuntimeException($message);};
+try{
+ file_put_contents($root.'/app/code/Example/Broken.php',"<?php\nfunction broken(\n");
+ $context=new ScanContext($root,'');$registry=CheckRegistry::fromContext($context->toLegacy());
+ $plan=(new ScanPlanner())->planCli(new ScanRequest($context,['profile'=>'hardening','rules'=>'MB-0789,MB-0790']),$registry);
+ $scan=static fn()=> (new ScanReportAssembler())->assemble((new ScanService())->run($plan,null,$registry),$plan)->toLegacy();
+ $result=$scan();
+ $assert(count($result['risk_findings'])===1,'The same parser issue across two checks is one displayed finding');
+ $finding=$result['risk_findings'][0];
+ $assert($finding['related_requirement_ids']===['MB-0789','MB-0790'],'Grouped finding preserves every affected requirement');
+ $specific=$finding['risk_observation']['findings'][0];
+ $assert(str_contains($specific['message'],'app/code/Example/Broken.php'),'Finding states the actual affected file');
+ $assert(isset($specific['evidence']['inspection_issue']['line']),'Actual parser line is available');
+ $assert(!str_contains($specific['message'],'Source policy could not be evaluated completely'),'No generic placeholder finding');
+ $assert(!empty($specific['evidence']['collection_guidance']['action']),'Precise issue carries a concrete action');
+ $out=new BufferedOutput();(new ScanConsoleRenderer())->renderPrettySummary($out,$result,$root);$text=$out->fetch();
+ $assert($finding['severity']==='info'&&str_contains($text,'INFO'),'Unified output retains informational severity');
+ $assert(str_contains($text,'Affected checks: MB-0789, MB-0790'),'Output explains why multiple checks are affected');
+ $assert(!str_contains($text,'Scan collection issues'),'The grouped issue is not repeated in another section');
+ file_put_contents($root.'/app/code/Example/Second.php',"<?php\nfunction second(\n");
+ $result=$scan();$assert(count($result['risk_findings'])===2,'Different source files remain distinct issues');
+ unlink($root.'/app/code/Example/Second.php');
+ file_put_contents($root.'/app/code/Example/Unsafe.php',"<?php unserialize(\$payload);\n");
+ $result=$scan();
+ $assert(count($result['risk_findings'])===2,'A real source observation and shared parser issue both remain visible');
+ $assert(!$result['meta']['scan_complete'],'A confirmed source issue does not hide independent incomplete inspection');
+ $assert(count(array_filter($result['risk_findings'],static fn(array $f):bool=>$f['severity']==='info'))===1,'Only the shared inspection issue is informational');
+ $definition=array_column(RequirementCatalog::loadAll()['rules'],null,'id')['MB-0789'];
+ $assessment=RequirementAssessmentEvaluator::evaluate($definition,static fn()=>CheckResult::of(CheckOutcome::Unknown,'[UNKNOWN] Source policy could not be evaluated completely.',[],'SOURCE_POLICY_INCOMPLETE','automated_source_policy'));
+ $risk=MagebeanRiskObservation::fromAssessment($definition,$assessment);
+ $assert(!$risk['needs_attention']&&$risk['findings']===[]&&!$risk['collection_complete'],'A generic message without specific evidence remains technical metadata, not a finding');
+ echo "SourceInspectionFindingsTest: $n assertions passed\n";
+}finally{foreach(glob($root.'/app/code/Example/*')?:[]as$file)unlink($file);rmdir($root.'/app/code/Example');rmdir($root.'/app/code');rmdir($root.'/app');rmdir($root);}

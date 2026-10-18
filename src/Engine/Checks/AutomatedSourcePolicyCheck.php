@@ -1,0 +1,114 @@
+<?php
+declare(strict_types=1);
+namespace Magebean\Engine\Checks;
+
+use Magebean\Engine\{Context,CheckOutcome,CheckResult,SourceInspectionIssue};
+use Magebean\Engine\Collectors\BoundedSourceInventory;
+
+/** Exact syntactic policies, not evidence of global exploitability or absence of vulnerabilities. */
+final class AutomatedSourcePolicyCheck
+{
+    private const BANS=[
+        'native_unserialize'=>['unserialize'],
+        'shell_execution'=>['exec','system','passthru','shell_exec','popen','proc_open','pcntl_exec'],
+        'dynamic_execution'=>['eval','create_function'],
+        'weak_prng'=>['rand','mt_rand','lcg_value','uniqid','srand','mt_srand'],
+        'raw_crypto_session'=>['session_start','session_id','session_regenerate_id','session_set_save_handler','mcrypt_encrypt','mcrypt_decrypt','md5','sha1','crypt','openssl_encrypt','openssl_decrypt'],
+        'native_network'=>['curl_exec','curl_multi_exec','fsockopen','pfsockopen','stream_socket_client','file_get_contents'],
+        'native_filesystem'=>['file_get_contents','file_put_contents','fopen','readfile','unlink','rename','copy','scandir','glob'],
+        'native_upload'=>['move_uploaded_file'],
+    ];
+    public function __construct(private readonly Context $ctx,private readonly ?BoundedSourceInventory $inventory=null){}
+    public function run(array $args):CheckResult
+    {
+        $deadline=microtime(true)+max(0.001,min(30,(float)($args['timeout_seconds']??5)));
+        $kind=(string)($args['kind']??'');
+        if(!isset(self::BANS[$kind])&&!in_array($kind,['sql_literal_query','xml_external_features','literal_https','csrf_unconditional_bypass','direct_request_logging'],true))throw new \InvalidArgumentException('Unsupported automated source policy kind.');
+        $inventory=($this->inventory??new BoundedSourceInventory())->collect($this->ctx,$args);
+        $evidence=$inventory;unset($evidence['files']);$evidence['policy']=$kind;$evidence['violations']=[];
+        $evidence['limitations']=['Exact syntactic policy only; excludes dependencies, generated code and files outside the declared scope.','No dataflow, business authorization or runtime exploitability conclusion.'];
+        $gaps=[];
+        foreach($inventory['files'] as $file){
+            if(microtime(true)>$deadline){$gaps[]=['file'=>$file['file'],'reason'=>'analysis_deadline_exceeded'];break;}
+            if(!in_array($file['extension'],['php','phtml'],true)){$gaps[]=['file'=>$file['file'],'reason'=>'unsupported_parser'];continue;}
+            try{$raw=token_get_all($file['content'],TOKEN_PARSE);}catch(\ParseError $error){$gap=['file'=>$file['file'],'reason'=>'malformed_php'];if($error->getLine()>0)$gap['line']=$error->getLine();$gaps[]=$gap;continue;}
+            $tokens=[];$line=1;
+            foreach($raw as $token){$value=is_array($token)?$token[1]:$token;$start=is_array($token)?$token[2]:$line;$line+=substr_count($value,"\n");if(is_array($token)&&in_array($token[0],[T_WHITESPACE,T_COMMENT,T_DOC_COMMENT,T_OPEN_TAG,T_CLOSE_TAG],true))continue;$tokens[]=['id'=>is_array($token)?$token[0]:null,'text'=>$value,'line'=>$start];}
+            $violate=function(int $line,string $construct)use(&$evidence,$file):void{if(count($evidence['violations'])<100)$evidence['violations'][]=['file'=>$file['file'],'line'=>$line,'construct'=>$construct];else $evidence['violations_truncated']=true;};
+            $uncertain=function(int $line,string $reason)use(&$gaps,$file):void{if(count($gaps)<100)$gaps[]=['file'=>$file['file'],'line'=>$line,'reason'=>$reason];};
+            foreach($tokens as $i=>$token){
+                if(($i&255)===0&&microtime(true)>$deadline){$gaps[]=['file'=>$file['file'],'reason'=>'analysis_deadline_exceeded'];break 2;}
+                $text=strtolower($token['text']);$prev=$tokens[$i-1]['text']??'';$next=$tokens[$i+1]['text']??'';
+                if($kind==='csrf_unconditional_bypass'){
+                    if($token['id']===T_FUNCTION&&strtolower($tokens[$i+1]['text']??'')==='validateforcsrf'){
+                        $open=null;
+                        for($j=$i+2;$j<count($tokens);$j++){if($tokens[$j]['text']==='{'){$open=$j;break;}if($tokens[$j]['text']===';')break;}
+                        if($open!==null&&strtolower($tokens[$open+1]['text']??'')==='return'&&strtolower($tokens[$open+2]['text']??'')==='true'&&($tokens[$open+3]['text']??'')===';'&&($tokens[$open+4]['text']??'')==='}')$violate($token['line'],'unconditional_csrf_acceptance');
+                    }
+                    continue;
+                }
+                if($kind==='direct_request_logging'){
+                    if($next==='('&&in_array($prev,['->','?->','::'],true)&&in_array($text,['log','debug','info','notice','warning','error','critical','alert','emergency'],true)){
+                        $depth=1;
+                        for($j=$i+2;$j<count($tokens)&&$depth>0;$j++){
+                            if($tokens[$j]['text']==='(')$depth++;elseif($tokens[$j]['text']===')')$depth--;
+                            if($depth>0&&$tokens[$j]['id']===T_VARIABLE&&in_array($tokens[$j]['text'],['$_GET','$_POST','$_REQUEST','$_COOKIE','$_SERVER','$_FILES'],true))$violate($tokens[$j]['line'],'request_superglobal_in_log_arguments');
+                        }
+                    }
+                    continue;
+                }
+                if($kind==='literal_https'){
+                    if($token['id']===T_CONSTANT_ENCAPSED_STRING){$literal=substr($token['text'],1,-1);if(preg_match('~^http://~i',$literal))$violate($token['line'],'plain_http_literal');}
+                    continue;
+                }
+                if($kind==='xml_external_features'){
+                    if(in_array(ltrim($text,'\\'),['libxml_noent','libxml_dtdload','libxml_dtdattr'],true)&&in_array($token['id'],[T_STRING,T_NAME_FULLY_QUALIFIED],true))$violate($token['line'],'prohibited_xml_constant');
+                    if(in_array($text,['resolveexternals','substituteentities','validateonparse'],true)&&$prev==='->'&&$next==='='){
+                        $value=strtolower($tokens[$i+2]['text']??'');if($value!=='false')$violate($token['line'],'prohibited_xml_property_assignment');
+                    }
+                    if($next==='('&&in_array($text,['xinclude','xml_set_external_entity_ref_handler'],true))$violate($token['line'],'prohibited_xml_call');
+                    continue;
+                }
+                if($kind==='sql_literal_query'){
+                    if($next!=='('||!in_array($text,['query','rawquery','exec','executequery'],true)||!in_array($prev,['->','?->','::'],true))continue;
+                    $arg=$tokens[$i+2]??null;
+                    if($arg===null)continue;
+                    if($arg['text']==='"'){$violate($token['line'],'sql_first_argument_interpolated');continue;}
+                    if($arg['id']!==T_CONSTANT_ENCAPSED_STRING){$uncertain($token['line'],'sql_first_argument_not_static_literal');continue;}
+                    $after=$tokens[$i+3]['text']??'';
+                    if($after==='.')$violate($token['line'],'sql_first_argument_concatenated');
+                    elseif(!in_array($after,[',',')'],true))$uncertain($token['line'],'sql_first_argument_expression_unresolved');
+                    continue;
+                }
+                if($kind==='shell_execution'&&$token['text']==='`'){$violate($token['line'],'shell_backtick');continue;}
+                if($kind==='dynamic_execution'&&$token['id']===T_EVAL){$violate($token['line'],'eval');continue;}
+                if($kind==='dynamic_execution'&&in_array($token['id'],[T_INCLUDE,T_INCLUDE_ONCE,T_REQUIRE,T_REQUIRE_ONCE],true)){
+                    $offset=($tokens[$i+1]['text']??'')==='('?2:1;
+                    if(($tokens[$i+$offset]['id']??null)!==T_CONSTANT_ENCAPSED_STRING)$uncertain($token['line'],'dynamic_include_target');
+                }
+                // Function aliases and indirect call targets cannot be certified by a lexical name ban.
+                if($token['id']===T_USE&&strtolower($tokens[$i+1]['text']??'')==='function')$uncertain($token['line'],'function_alias_requires_resolution');
+                if($next==='('&&($token['id']===T_VARIABLE||$prev===')'))$uncertain($token['line'],'indirect_callable');
+                if($next!=='('||in_array($prev,['->','?->','::','function','new'],true))continue;
+                if(!in_array($token['id'],[T_STRING,T_NAME_FULLY_QUALIFIED,T_NAME_QUALIFIED],true))continue;
+                $name=ltrim($text,'\\');
+                if(str_contains($name,'\\'))continue;
+                if(in_array($name,self::BANS[$kind],true))$violate($token['line'],$name);
+                if(in_array($name,['call_user_func','call_user_func_array','forward_static_call','forward_static_call_array'],true))$uncertain($token['line'],'indirect_dispatch');
+                if($kind==='dynamic_execution'&&$name==='assert'&&($tokens[$i+2]['id']??null)!==T_VARIABLE)$uncertain($token['line'],'assertion_expression_requires_version_resolution');
+            }
+        }
+        $evidence['analysis_gaps']=$gaps;
+        $evidence['inspection_issues']=SourceInspectionIssue::fromGaps($inventory['gaps'],$gaps,$inventory['scope']);
+        // A proven syntactic violation remains actionable even if other files could not be collected.
+        if($evidence['violations']!==[])return CheckResult::of(CheckOutcome::Fail,'Source violates the declared '.$kind.' policy; see file and line evidence.',$evidence,'SOURCE_POLICY_VIOLATION');
+        if(!$inventory['complete']||$gaps!==[]){
+            $first=$evidence['inspection_issues'][0]??null;
+            $message=$first!==null?$first['message'].' '.$first['action']:'No complete supported source observation is available; verify the configured local source scope and scanner compatibility.';
+            $remaining=count($evidence['inspection_issues'])-1;
+            if($remaining>0)$message.=' '.$remaining.' additional inspection issue'.($remaining===1?'':'s').' listed in evidence.';
+            return CheckResult::of(CheckOutcome::Unknown,'[UNKNOWN] '.$message,$evidence,'SOURCE_POLICY_INCOMPLETE');
+        }
+        return CheckResult::of(CheckOutcome::Pass,'Every collected eligible source file satisfies the declared '.$kind.' syntax policy.',$evidence,'SOURCE_POLICY_SATISFIED');
+    }
+}

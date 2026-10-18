@@ -1,0 +1,672 @@
+{
+  "schema_version": 1,
+  "purpose": "Internal automation engineering backlog; not an executable assessment profile. Original criteria, identities and historical results are preserved.",
+  "requirements": [
+    {
+      "id": "MB-0004",
+      "title": "Code directories are read-only",
+      "criterion": "Code directories are read-only for the application runtime in the collected Magento deployment; assess effective runtime identity, permissions, ACLs and read-only mounts.",
+      "previous_profiles": [
+        "hardening",
+        "owasp-top-10-2025"
+      ],
+      "status": "AUTOMATION_DESIGN_REQUIRED",
+      "reason": "Independent evidence or heuristic supporting checks cannot establish the current criterion automatically."
+    },
+    {
+      "id": "MB-0748",
+      "title": "No executable code in media or upload paths",
+      "criterion": "No executable code in media or upload paths; assess only the collected Magento deployment scope.",
+      "previous_profiles": [
+        "hardening",
+        "owasp-top-10-2025"
+      ],
+      "status": "AUTOMATION_DESIGN_REQUIRED",
+      "reason": "Independent evidence or heuristic supporting checks cannot establish the current criterion automatically."
+    },
+    {
+      "id": "MB-0731",
+      "title": "Admin passwords require at least 8 characters",
+      "criterion": "Admin passwords require at least 8 characters; assess only the collected Magento deployment scope.",
+      "previous_profiles": [
+        "hardening",
+        "owasp-top-10-2025"
+      ],
+      "status": "AUTOMATION_DESIGN_REQUIRED",
+      "reason": "Independent evidence or heuristic supporting checks cannot establish the current criterion automatically."
+    },
+    {
+      "id": "MB-0010",
+      "title": "Admin URL exposure restricted",
+      "criterion": "Admin URL exposure restricted; assess only the collected Magento deployment scope.",
+      "previous_profiles": [
+        "hardening",
+        "owasp-top-10-2025"
+      ],
+      "status": "AUTOMATION_DESIGN_REQUIRED",
+      "reason": "Independent evidence or heuristic supporting checks cannot establish the current criterion automatically."
+    },
+    {
+      "id": "MB-0101",
+      "title": "Global Admin ACL limited to approved roles",
+      "criterion": "Global Admin ACL limited to approved roles; assess only the collected Magento deployment scope.",
+      "previous_profiles": [
+        "hardening"
+      ],
+      "status": "AUTOMATION_DESIGN_REQUIRED",
+      "reason": "Independent evidence or heuristic supporting checks cannot establish the current criterion automatically."
+    },
+    {
+      "id": "MB-0102",
+      "title": "PCI vendor default account evidence assessment",
+      "criterion": "PCI vendor default account evidence assessment; assess only the collected Magento deployment scope.",
+      "previous_profiles": [
+        "hardening"
+      ],
+      "status": "AUTOMATION_DESIGN_REQUIRED",
+      "reason": "Independent evidence or heuristic supporting checks cannot establish the current criterion automatically."
+    },
+    {
+      "id": "MB-0732",
+      "title": "No raw SQL without abstraction",
+      "criterion": "No raw SQL without abstraction; assess only the collected Magento deployment scope.",
+      "previous_profiles": [
+        "hardening",
+        "owasp-top-10-2025"
+      ],
+      "status": "AUTOMATION_DESIGN_REQUIRED",
+      "reason": "Independent evidence or heuristic supporting checks cannot establish the current criterion automatically."
+    },
+    {
+      "id": "MB-0733",
+      "title": "Template output is escaped",
+      "criterion": "Template output is escaped; assess only the collected Magento deployment scope.",
+      "previous_profiles": [
+        "hardening",
+        "owasp-top-10-2025"
+      ],
+      "status": "AUTOMATION_DESIGN_REQUIRED",
+      "reason": "Independent evidence or heuristic supporting checks cannot establish the current criterion automatically."
+    },
+    {
+      "id": "MB-0736",
+      "title": "Escaping for JS context",
+      "criterion": "Escaping for JS context; assess only the collected Magento deployment scope.",
+      "previous_profiles": [
+        "hardening",
+        "owasp-top-10-2025"
+      ],
+      "status": "AUTOMATION_DESIGN_REQUIRED",
+      "reason": "Independent evidence or heuristic supporting checks cannot establish the current criterion automatically."
+    },
+    {
+      "id": "MB-0015",
+      "title": "Forms include CSRF tokens (form_key)",
+      "criterion": "Forms include CSRF tokens (form_key); assess only the collected Magento deployment scope.",
+      "previous_profiles": [
+        "hardening",
+        "owasp-top-10-2025"
+      ],
+      "status": "AUTOMATION_DESIGN_REQUIRED",
+      "reason": "Independent evidence or heuristic supporting checks cannot establish the current criterion automatically."
+    },
+    {
+      "id": "MB-0016",
+      "title": "SSRF protections present",
+      "criterion": "SSRF protections present; assess only the collected Magento deployment scope.",
+      "previous_profiles": [
+        "hardening",
+        "owasp-top-10-2025"
+      ],
+      "status": "AUTOMATION_DESIGN_REQUIRED",
+      "reason": "Independent evidence or heuristic supporting checks cannot establish the current criterion automatically."
+    },
+    {
+      "id": "MB-0734",
+      "title": "No unsafe deserialization",
+      "criterion": "No unsafe deserialization; assess only the collected Magento deployment scope.",
+      "previous_profiles": [
+        "hardening",
+        "owasp-top-10-2025"
+      ],
+      "status": "AUTOMATION_DESIGN_REQUIRED",
+      "reason": "Independent evidence or heuristic supporting checks cannot establish the current criterion automatically."
+    },
+    {
+      "id": "MB-0735",
+      "title": "Command execution is guarded",
+      "criterion": "Command execution is guarded; assess only the collected Magento deployment scope.",
+      "previous_profiles": [
+        "hardening",
+        "owasp-top-10-2025"
+      ],
+      "status": "AUTOMATION_DESIGN_REQUIRED",
+      "reason": "Independent evidence or heuristic supporting checks cannot establish the current criterion automatically."
+    },
+    {
+      "id": "MB-0019",
+      "title": "No eval/assert/dynamic execution",
+      "criterion": "No eval/assert/dynamic execution; assess only the collected Magento deployment scope.",
+      "previous_profiles": [
+        "hardening",
+        "owasp-top-10-2025"
+      ],
+      "status": "AUTOMATION_DESIGN_REQUIRED",
+      "reason": "Independent evidence or heuristic supporting checks cannot establish the current criterion automatically."
+    },
+    {
+      "id": "MB-0020",
+      "title": "Path traversal protections",
+      "criterion": "Path traversal protections; assess only the collected Magento deployment scope.",
+      "previous_profiles": [
+        "hardening",
+        "owasp-top-10-2025"
+      ],
+      "status": "AUTOMATION_DESIGN_REQUIRED",
+      "reason": "Independent evidence or heuristic supporting checks cannot establish the current criterion automatically."
+    },
+    {
+      "id": "MB-0021",
+      "title": "Secure file upload handling",
+      "criterion": "Secure file upload handling; assess only the collected Magento deployment scope.",
+      "previous_profiles": [
+        "hardening",
+        "owasp-top-10-2025"
+      ],
+      "status": "AUTOMATION_DESIGN_REQUIRED",
+      "reason": "Independent evidence or heuristic supporting checks cannot establish the current criterion automatically."
+    },
+    {
+      "id": "MB-0023",
+      "title": "Use CSPRNG; avoid weak PRNG",
+      "criterion": "Use CSPRNG; avoid weak PRNG; assess only the collected Magento deployment scope.",
+      "previous_profiles": [
+        "hardening",
+        "owasp-top-10-2025"
+      ],
+      "status": "AUTOMATION_DESIGN_REQUIRED",
+      "reason": "Independent evidence or heuristic supporting checks cannot establish the current criterion automatically."
+    },
+    {
+      "id": "MB-0737",
+      "title": "Sensitive data not logged",
+      "criterion": "Sensitive data not logged; assess only the collected Magento deployment scope.",
+      "previous_profiles": [
+        "hardening",
+        "owasp-top-10-2025"
+      ],
+      "status": "AUTOMATION_DESIGN_REQUIRED",
+      "reason": "Independent evidence or heuristic supporting checks cannot establish the current criterion automatically."
+    },
+    {
+      "id": "MB-0743",
+      "title": "PII not logged in application logs",
+      "criterion": "PII not logged in application logs; assess only the collected Magento deployment scope.",
+      "previous_profiles": [
+        "hardening",
+        "owasp-top-10-2025"
+      ],
+      "status": "AUTOMATION_DESIGN_REQUIRED",
+      "reason": "Independent evidence or heuristic supporting checks cannot establish the current criterion automatically."
+    },
+    {
+      "id": "MB-0746",
+      "title": "Third-party logging sanitized (mask/redact)",
+      "criterion": "Third-party logging sanitized (mask/redact); assess only the collected Magento deployment scope.",
+      "previous_profiles": [
+        "hardening",
+        "owasp-top-10-2025"
+      ],
+      "status": "AUTOMATION_DESIGN_REQUIRED",
+      "reason": "Independent evidence or heuristic supporting checks cannot establish the current criterion automatically."
+    },
+    {
+      "id": "MB-0025",
+      "title": "No unsafe raw crypto or session APIs in custom code",
+      "criterion": "No unsafe raw crypto or session APIs in custom code; assess only the collected Magento deployment scope.",
+      "previous_profiles": [
+        "hardening",
+        "owasp-top-10-2025"
+      ],
+      "status": "AUTOMATION_DESIGN_REQUIRED",
+      "reason": "Independent evidence or heuristic supporting checks cannot establish the current criterion automatically."
+    },
+    {
+      "id": "MB-0094",
+      "title": "Custom controllers and APIs include function-level authorization",
+      "criterion": "Custom controllers and APIs include function-level authorization; assess only the collected Magento deployment scope.",
+      "previous_profiles": [
+        "hardening",
+        "owasp-top-10-2025"
+      ],
+      "status": "AUTOMATION_DESIGN_REQUIRED",
+      "reason": "Independent evidence or heuristic supporting checks cannot establish the current criterion automatically."
+    },
+    {
+      "id": "MB-0095",
+      "title": "GraphQL and API exposure minimized",
+      "criterion": "GraphQL and API exposure minimized; assess only the collected Magento deployment scope.",
+      "previous_profiles": [
+        "hardening",
+        "owasp-top-10-2025"
+      ],
+      "status": "AUTOMATION_DESIGN_REQUIRED",
+      "reason": "Independent evidence or heuristic supporting checks cannot establish the current criterion automatically."
+    },
+    {
+      "id": "MB-0097",
+      "title": "Secrets are not hardcoded in custom code",
+      "criterion": "Secrets are not hardcoded in custom code; assess only the collected Magento deployment scope.",
+      "previous_profiles": [
+        "hardening",
+        "owasp-top-10-2025"
+      ],
+      "status": "AUTOMATION_DESIGN_REQUIRED",
+      "reason": "Independent evidence or heuristic supporting checks cannot establish the current criterion automatically."
+    },
+    {
+      "id": "MB-0098",
+      "title": "Unsafe XML parsing disabled",
+      "criterion": "Unsafe XML parsing disabled; assess only the collected Magento deployment scope.",
+      "previous_profiles": [
+        "hardening",
+        "owasp-top-10-2025"
+      ],
+      "status": "AUTOMATION_DESIGN_REQUIRED",
+      "reason": "Independent evidence or heuristic supporting checks cannot establish the current criterion automatically."
+    },
+    {
+      "id": "MB-0099",
+      "title": "File download and export endpoints require authorization",
+      "criterion": "File download and export endpoints require authorization; assess only the collected Magento deployment scope.",
+      "previous_profiles": [
+        "hardening",
+        "owasp-top-10-2025"
+      ],
+      "status": "AUTOMATION_DESIGN_REQUIRED",
+      "reason": "Independent evidence or heuristic supporting checks cannot establish the current criterion automatically."
+    },
+    {
+      "id": "MB-0089",
+      "title": "Checkout Content Security Policy enforced",
+      "criterion": "Checkout Content Security Policy enforced; assess only the collected Magento deployment scope.",
+      "previous_profiles": [
+        "hardening",
+        "owasp-top-10-2025"
+      ],
+      "status": "AUTOMATION_DESIGN_REQUIRED",
+      "reason": "Independent evidence or heuristic supporting checks cannot establish the current criterion automatically."
+    },
+    {
+      "id": "MB-0096",
+      "title": "Security headers baseline enforced",
+      "criterion": "Security headers baseline enforced; assess only the collected Magento deployment scope.",
+      "previous_profiles": [
+        "hardening",
+        "owasp-top-10-2025"
+      ],
+      "status": "AUTOMATION_DESIGN_REQUIRED",
+      "reason": "Independent evidence or heuristic supporting checks cannot establish the current criterion automatically."
+    },
+    {
+      "id": "MB-0738",
+      "title": "Xdebug disabled in production",
+      "criterion": "Xdebug disabled in production; assess only the collected Magento deployment scope.",
+      "previous_profiles": [
+        "hardening",
+        "owasp-top-10-2025"
+      ],
+      "status": "AUTOMATION_DESIGN_REQUIRED",
+      "reason": "Independent evidence or heuristic supporting checks cannot establish the current criterion automatically."
+    },
+    {
+      "id": "MB-0739",
+      "title": "display_errors is Off",
+      "criterion": "display_errors is Off; assess only the collected Magento deployment scope.",
+      "previous_profiles": [
+        "hardening",
+        "owasp-top-10-2025"
+      ],
+      "status": "AUTOMATION_DESIGN_REQUIRED",
+      "reason": "Independent evidence or heuristic supporting checks cannot establish the current criterion automatically."
+    },
+    {
+      "id": "MB-0740",
+      "title": "No dev debug configs on production (template hints off)",
+      "criterion": "No dev debug configs on production (template hints off); assess only the collected Magento deployment scope.",
+      "previous_profiles": [
+        "hardening",
+        "owasp-top-10-2025"
+      ],
+      "status": "AUTOMATION_DESIGN_REQUIRED",
+      "reason": "Independent evidence or heuristic supporting checks cannot establish the current criterion automatically."
+    },
+    {
+      "id": "MB-0742",
+      "title": "Debug template hints disabled in production",
+      "criterion": "Debug template hints disabled in production; assess only the collected Magento deployment scope.",
+      "previous_profiles": [
+        "hardening",
+        "owasp-top-10-2025"
+      ],
+      "status": "AUTOMATION_DESIGN_REQUIRED",
+      "reason": "Independent evidence or heuristic supporting checks cannot establish the current criterion automatically."
+    },
+    {
+      "id": "MB-0745",
+      "title": "Debug/verbose off for third-party integrations",
+      "criterion": "Debug/verbose off for third-party integrations; assess only the collected Magento deployment scope.",
+      "previous_profiles": [
+        "hardening",
+        "owasp-top-10-2025"
+      ],
+      "status": "AUTOMATION_DESIGN_REQUIRED",
+      "reason": "Independent evidence or heuristic supporting checks cannot establish the current criterion automatically."
+    },
+    {
+      "id": "MB-0741",
+      "title": "No dev cache backends (avoid file backend)",
+      "criterion": "No dev cache backends (avoid file backend); assess only the collected Magento deployment scope.",
+      "previous_profiles": [
+        "hardening"
+      ],
+      "status": "AUTOMATION_DESIGN_REQUIRED",
+      "reason": "Independent evidence or heuristic supporting checks cannot establish the current criterion automatically."
+    },
+    {
+      "id": "MB-0043",
+      "title": "Log rotation configured",
+      "criterion": "Log rotation configured; assess only the collected Magento deployment scope.",
+      "previous_profiles": [
+        "hardening",
+        "owasp-top-10-2025"
+      ],
+      "status": "AUTOMATION_DESIGN_REQUIRED",
+      "reason": "Independent evidence or heuristic supporting checks cannot establish the current criterion automatically."
+    },
+    {
+      "id": "MB-0051",
+      "title": "Dependency vulnerability remediation plan identifies an actionable resolution",
+      "criterion": "For each detected dependency vulnerability in the assessed lockfile, an actionable remediation plan must identify an available fixed package release or an explicitly reviewed alternative mitigation.",
+      "previous_profiles": [
+        "hardening",
+        "owasp-top-10-2025"
+      ],
+      "status": "AUTOMATION_DESIGN_REQUIRED",
+      "reason": "Independent evidence or heuristic supporting checks cannot establish the current criterion automatically."
+    },
+    {
+      "id": "MB-0052",
+      "title": "Enabled high-risk modules are maintained",
+      "criterion": "Enabled high-risk modules are maintained; assess only the collected Magento deployment scope.",
+      "previous_profiles": [
+        "hardening",
+        "owasp-top-10-2025"
+      ],
+      "status": "AUTOMATION_DESIGN_REQUIRED",
+      "reason": "Independent evidence or heuristic supporting checks cannot establish the current criterion automatically."
+    },
+    {
+      "id": "MB-0053",
+      "title": "Temporary mitigations documented",
+      "criterion": "Temporary mitigations documented; assess only the collected Magento deployment scope.",
+      "previous_profiles": [
+        "hardening",
+        "owasp-top-10-2025"
+      ],
+      "status": "AUTOMATION_DESIGN_REQUIRED",
+      "reason": "Independent evidence or heuristic supporting checks cannot establish the current criterion automatically."
+    },
+    {
+      "id": "MB-0054",
+      "title": "Known-exploited packages prioritized (CISA KEV)",
+      "criterion": "Known-exploited packages prioritized (CISA KEV); assess only the collected Magento deployment scope.",
+      "previous_profiles": [
+        "hardening",
+        "owasp-top-10-2025"
+      ],
+      "status": "AUTOMATION_DESIGN_REQUIRED",
+      "reason": "Independent evidence or heuristic supporting checks cannot establish the current criterion automatically."
+    },
+    {
+      "id": "MB-0058",
+      "title": "Marketplace extensions are current and maintained",
+      "criterion": "Marketplace extensions are current and maintained; assess only the collected Magento deployment scope.",
+      "previous_profiles": [
+        "hardening",
+        "owasp-top-10-2025"
+      ],
+      "status": "AUTOMATION_DESIGN_REQUIRED",
+      "reason": "Independent evidence or heuristic supporting checks cannot establish the current criterion automatically."
+    },
+    {
+      "id": "MB-0060",
+      "title": "Marketplace extensions have vendor support evidence",
+      "criterion": "Marketplace extensions have vendor support evidence; assess only the collected Magento deployment scope.",
+      "previous_profiles": [
+        "hardening",
+        "owasp-top-10-2025"
+      ],
+      "status": "AUTOMATION_DESIGN_REQUIRED",
+      "reason": "Independent evidence or heuristic supporting checks cannot establish the current criterion automatically."
+    },
+    {
+      "id": "MB-0744",
+      "title": "No abandoned libraries allowed",
+      "criterion": "No abandoned libraries allowed; assess only the collected Magento deployment scope.",
+      "previous_profiles": [
+        "hardening",
+        "owasp-top-10-2025"
+      ],
+      "status": "AUTOMATION_DESIGN_REQUIRED",
+      "reason": "Independent evidence or heuristic supporting checks cannot establish the current criterion automatically."
+    },
+    {
+      "id": "MB-0064",
+      "title": "No risky forks replacing upstream libs",
+      "criterion": "No risky forks replacing upstream libs; assess only the collected Magento deployment scope.",
+      "previous_profiles": [
+        "hardening"
+      ],
+      "status": "AUTOMATION_DESIGN_REQUIRED",
+      "reason": "Independent evidence or heuristic supporting checks cannot establish the current criterion automatically."
+    },
+    {
+      "id": "MB-0073",
+      "title": "HTTPS-only endpoints configured",
+      "criterion": "HTTPS-only endpoints configured; assess only the collected Magento deployment scope.",
+      "previous_profiles": [
+        "hardening",
+        "owasp-top-10-2025"
+      ],
+      "status": "AUTOMATION_DESIGN_REQUIRED",
+      "reason": "Independent evidence or heuristic supporting checks cannot establish the current criterion automatically."
+    },
+    {
+      "id": "MB-0075",
+      "title": "Webhook signature validation present",
+      "criterion": "Webhook signature validation present; assess only the collected Magento deployment scope.",
+      "previous_profiles": [
+        "hardening",
+        "owasp-top-10-2025"
+      ],
+      "status": "AUTOMATION_DESIGN_REQUIRED",
+      "reason": "Independent evidence or heuristic supporting checks cannot establish the current criterion automatically."
+    },
+    {
+      "id": "MB-0076",
+      "title": "Outbound connections restricted by allow-list",
+      "criterion": "Outbound connections restricted by allow-list; assess only the collected Magento deployment scope.",
+      "previous_profiles": [
+        "hardening",
+        "owasp-top-10-2025"
+      ],
+      "status": "AUTOMATION_DESIGN_REQUIRED",
+      "reason": "Independent evidence or heuristic supporting checks cannot establish the current criterion automatically."
+    },
+    {
+      "id": "MB-0077",
+      "title": "PII minimization for third-party flows",
+      "criterion": "PII minimization for third-party flows; assess only the collected Magento deployment scope.",
+      "previous_profiles": [
+        "hardening",
+        "owasp-top-10-2025"
+      ],
+      "status": "AUTOMATION_DESIGN_REQUIRED",
+      "reason": "Independent evidence or heuristic supporting checks cannot establish the current criterion automatically."
+    },
+    {
+      "id": "MB-0078",
+      "title": "Strong TLS ciphers on upstream gateways",
+      "criterion": "Strong TLS ciphers on upstream gateways; assess only the collected Magento deployment scope.",
+      "previous_profiles": [
+        "hardening",
+        "owasp-top-10-2025"
+      ],
+      "status": "AUTOMATION_DESIGN_REQUIRED",
+      "reason": "Independent evidence or heuristic supporting checks cannot establish the current criterion automatically."
+    },
+    {
+      "id": "MB-0079",
+      "title": "API keys stored in env.php (not in DB/plain code)",
+      "criterion": "API keys stored in env.php (not in DB/plain code); assess only the collected Magento deployment scope.",
+      "previous_profiles": [
+        "hardening",
+        "owasp-top-10-2025"
+      ],
+      "status": "AUTOMATION_DESIGN_REQUIRED",
+      "reason": "Independent evidence or heuristic supporting checks cannot establish the current criterion automatically."
+    },
+    {
+      "id": "MB-0081",
+      "title": "SaaS integrations scoped by ACL (least privilege/IP allowlist)",
+      "criterion": "SaaS integrations scoped by ACL (least privilege/IP allowlist); assess only the collected Magento deployment scope.",
+      "previous_profiles": [
+        "hardening",
+        "owasp-top-10-2025"
+      ],
+      "status": "AUTOMATION_DESIGN_REQUIRED",
+      "reason": "Independent evidence or heuristic supporting checks cannot establish the current criterion automatically."
+    }
+  ],
+  "removed_external_tasks": {
+    "basic": [
+      {
+        "id": "basic-auth-enforcement",
+        "title": "Admin authentication and least privilege",
+        "evidence_needed": [
+          "Identify native authentication versus Adobe IMS and retain provider/MFA policy evidence.",
+          "Verify administrator enrollment, bypass resistance, unique accounts and approved least-privilege roles.",
+          "Confirm authenticated Admin session expiry and protections at the actual Admin origin."
+        ],
+        "applicability": "All Admin deployments; native settings may not apply to IMS."
+      },
+      {
+        "id": "basic-runtime-boundary",
+        "title": "Web runtime permissions and effective document root",
+        "evidence_needed": [
+          "Confirm the effective web document root is pub, or document an equivalent reviewed boundary.",
+          "Demonstrate that the actual PHP/web identity cannot write production code, including ACLs and mounts.",
+          "Verify media execution denial and sensitive configuration locks/precedence."
+        ],
+        "applicability": "Local or hosted Magento deployments; deployment-owner write access is not runtime access."
+      },
+      {
+        "id": "basic-edge-access",
+        "title": "WAF, Admin access restrictions and SSH MFA",
+        "evidence_needed": [
+          "Retain WAF policy and monitoring evidence for the chosen hosting architecture.",
+          "Review Admin network access controls and SSH MFA or equivalent controlled administrative access."
+        ],
+        "applicability": "Hosting/access model dependent; Fastly or Adobe Cloud is not mandatory."
+      },
+      {
+        "id": "basic-monitoring",
+        "title": "Scheduled security scanning and notification ownership",
+        "evidence_needed": [
+          "Provide an Adobe Security Scan or equivalent schedule, recent results and remediation owner.",
+          "Verify notification routing and follow-up on findings."
+        ],
+        "applicability": "Public and operational deployments; scanner access must match scope."
+      },
+      {
+        "id": "basic-recovery",
+        "title": "Backups and tested restore",
+        "evidence_needed": [
+          "Retain backup schedule, retention/access controls and a recent successful restore exercise."
+        ],
+        "applicability": "Production data and recovery architecture."
+      },
+      {
+        "id": "basic-deployment-coverage",
+        "title": "Store, cache, static and scheduler runtime coverage",
+        "evidence_needed": [
+          "Confirm all active store and Admin origins use valid TLS and secure policies.",
+          "Match active themes/locales to deployed artifacts or document headless delivery.",
+          "Verify actual cache behavior and external/cloud/container scheduler execution, job groups and old failed/missed jobs.",
+          "Review effective runtime mode, worker/store debug overrides and lock precedence."
+        ],
+        "applicability": "Production readiness; bounded CLI observations do not establish complete runtime coverage."
+      }
+    ],
+    "hardening": [
+      {
+        "id": "basic-auth-enforcement",
+        "title": "Admin authentication and least privilege",
+        "evidence_needed": [
+          "Identify native authentication versus Adobe IMS and retain provider/MFA policy evidence.",
+          "Verify administrator enrollment, bypass resistance, unique accounts and approved least-privilege roles.",
+          "Confirm authenticated Admin session expiry and protections at the actual Admin origin."
+        ],
+        "applicability": "All Admin deployments; native settings may not apply to IMS."
+      },
+      {
+        "id": "basic-runtime-boundary",
+        "title": "Web runtime permissions and effective document root",
+        "evidence_needed": [
+          "Confirm the effective web document root is pub, or document an equivalent reviewed boundary.",
+          "Demonstrate that the actual PHP/web identity cannot write production code, including ACLs and mounts.",
+          "Verify media execution denial and sensitive configuration locks/precedence."
+        ],
+        "applicability": "Local or hosted Magento deployments; deployment-owner write access is not runtime access."
+      },
+      {
+        "id": "basic-edge-access",
+        "title": "WAF, Admin access restrictions and SSH MFA",
+        "evidence_needed": [
+          "Retain WAF policy and monitoring evidence for the chosen hosting architecture.",
+          "Review Admin network access controls and SSH MFA or equivalent controlled administrative access."
+        ],
+        "applicability": "Hosting/access model dependent; Fastly or Adobe Cloud is not mandatory."
+      },
+      {
+        "id": "basic-monitoring",
+        "title": "Scheduled security scanning and notification ownership",
+        "evidence_needed": [
+          "Provide an Adobe Security Scan or equivalent schedule, recent results and remediation owner.",
+          "Verify notification routing and follow-up on findings."
+        ],
+        "applicability": "Public and operational deployments; scanner access must match scope."
+      },
+      {
+        "id": "basic-recovery",
+        "title": "Backups and tested restore",
+        "evidence_needed": [
+          "Retain backup schedule, retention/access controls and a recent successful restore exercise."
+        ],
+        "applicability": "Production data and recovery architecture."
+      },
+      {
+        "id": "basic-deployment-coverage",
+        "title": "Store, cache, static and scheduler runtime coverage",
+        "evidence_needed": [
+          "Confirm all active store and Admin origins use valid TLS and secure policies.",
+          "Match active themes/locales to deployed artifacts or document headless delivery.",
+          "Verify actual cache behavior and external/cloud/container scheduler execution, job groups and old failed/missed jobs.",
+          "Review effective runtime mode, worker/store debug overrides and lock precedence."
+        ],
+        "applicability": "Production readiness; bounded CLI observations do not establish complete runtime coverage."
+      }
+    ]
+  }
+}

@@ -12,6 +12,9 @@ final class AgentResultMapper
             $result['findings']=$mapped;
         }
         $findings=[];foreach($result['findings'] as $finding){
+            if (!empty($finding['risk_observation']['needs_attention'])) {
+                $finding['message'] = $finding['risk_observation']['findings'][0]['message'] ?? $finding['message'];
+            }
             // Keep the established wire status while identifying actual human assessment.
             // An old dashboard item may still say automated after the bundled catalog changes.
             if (($finding['status'] ?? '') === 'MANUAL_REVIEW') {
@@ -29,6 +32,10 @@ final class AgentResultMapper
             $ruleKey=strtoupper((string)$finding['id']);$entry=$manifestIndex[$ruleKey];$status=match($finding['status']??'UNKNOWN'){'PASS'=>'pass','FAIL'=>'fail',default=>'error'};$findings[]=['assessment_item_id'=>(string)$entry['assessment_item_id'],'rule_key'=>$ruleKey,'status'=>$status,'message'=>$this->redact((string)$finding['message'],$magentoPath),'detail'=>$this->sanitize($finding['detail']??$finding['details']??[],$magentoPath),'evidence'=>$this->sanitize($finding['evidence']??[],$magentoPath),'checked_at'=>gmdate(DATE_ATOM)];}
         foreach ($findings as $position => $payload) {
             $findings[$position]['title'] = $this->resultTitle($payload);
+        }
+        if (array_filter($findings, static fn(array $row):bool => isset($row['evidence']['risk_observation'])) !== []) {
+            $result['summary']['needs_attention'] = count(array_filter($findings, static fn(array $row):bool => !empty($row['evidence']['risk_observation']['needs_attention'])));
+            $result['summary']['collection_issues'] = array_sum(array_map(static fn(array $row):int => count($row['evidence']['risk_observation']['collection_gaps'] ?? []), $findings));
         }
         return ['schema_version'=>'1.0','manifest_hash'=>(string)($manifest['manifest_hash']??''),'summary'=>$result['summary'],'results'=>array_merge($findings,$unsupported)];
     }

@@ -1,0 +1,142 @@
+{
+  "added": [
+    {
+      "id": "MB-0799",
+      "source_backlog_ids": [
+        "MB-0004"
+      ],
+      "check": "production_bound_worker_code_readonly",
+      "capability": "runtime_worker_access",
+      "profiles": [
+        "hardening",
+        "owasp-top-10-2025"
+      ],
+      "criterion": "For every explicitly supplied PHP-FPM worker PID, the scanner and worker have identical effective UID/GID/groups, zero effective/permitted/ambient capabilities, matching project tree, mount namespace and Linux security context. Kernel access observations find no writable object or replaceable code root in the complete bounded configured app/vendor/lib inventory. Unsupported identity, seccomp, links or inventory gaps remain UNKNOWN."
+    },
+    {
+      "id": "MB-0800",
+      "source_backlog_ids": [
+        "MB-0748"
+      ],
+      "check": "production_upload_signatures_absent",
+      "capability": null,
+      "profiles": [
+        "hardening",
+        "owasp-top-10-2025"
+      ],
+      "criterion": "Within the complete bounded configured upload path inventory, readable files contain no explicit long PHP opening tags or configured htaccess script-handler signatures and no PHP-like executable filename extension. Missing/unreadable/oversized eligible files, unfollowed links and traversal-budget gaps remain UNKNOWN. This is a signature policy, not absence of arbitrary executable content or prevention of server execution."
+    },
+    {
+      "id": "MB-0801",
+      "source_backlog_ids": [
+        "MB-0101"
+      ],
+      "check": "production_direct_global_roles_approved",
+      "capability": "admin_role_policy",
+      "profiles": [
+        "hardening"
+      ],
+      "criterion": "In a nonempty bounded deployed authorization_role inventory and complete bounded authorization_rule inventory, every direct allow rule for Magento_Backend::all or Magento_Adminhtml::all assigned to a group role has a role ID in the explicitly configured approved_role_ids policy. Missing policy, malformed/orphan rows, direct user grants or incomplete tables remain UNKNOWN. This checks direct stored grants, not inherited effective privileges or business least privilege."
+    },
+    {
+      "id": "MB-0802",
+      "source_backlog_ids": [
+        "MB-0089"
+      ],
+      "check": "production_checkout_csp_response",
+      "capability": null,
+      "profiles": [
+        "hardening",
+        "owasp-top-10-2025"
+      ],
+      "criterion": "The supplied checkout path returns a successful same-origin no-redirect HTTPS GET with one unambiguous enforced Content-Security-Policy. The emitted policy explicitly defines script-src, connect-src, frame-src, form-action, object-src and base-uri; assessed sources contain no wildcard, unsafe-inline, unsafe-eval or broad scheme-only source. object-src is exactly none, base-uri is exactly none or self, and reporting is present when configured. Report-only alone fails; redirect/inaccessible checkout, multiple policies, unsupported syntax or incomplete collection remain UNKNOWN."
+    },
+    {
+      "id": "MB-0803",
+      "source_backlog_ids": [
+        "MB-0096"
+      ],
+      "check": "production_runtime_nosniff",
+      "capability": null,
+      "profiles": [
+        "hardening",
+        "owasp-top-10-2025"
+      ],
+      "criterion": "One successful same-origin no-redirect HTTPS GET at the configured path emits exactly one X-Content-Type-Options header whose trimmed value is nosniff. Missing or invalid header on an observed successful response fails; duplicate headers, redirects, transport failures and incomplete collection remain UNKNOWN. HSTS and frame protection are assessed separately."
+    },
+    {
+      "id": "MB-0804",
+      "source_backlog_ids": [
+        "MB-0745"
+      ],
+      "check": "production_integration_debug_defaults_disabled",
+      "capability": "integration_debug_policy",
+      "profiles": [
+        "hardening",
+        "owasp-top-10-2025"
+      ],
+      "criterion": "Every explicitly configured integration debug/verbose setting path resolves through deployed env.php/config.php/default core_config_data or supported installed-module defaults to a recognized disabled value in default scope. Any recognized enabled value fails; omitted paths, missing values or unsupported flag representations remain UNKNOWN. This verifies named settings, not every third-party integration or store scope."
+    },
+    {
+      "id": "MB-0805",
+      "source_backlog_ids": [
+        "MB-0064"
+      ],
+      "check": "dependency_source_policy",
+      "capability": "dependency_source_policy",
+      "profiles": [
+        "hardening"
+      ],
+      "criterion": "Every package in the readable bounded collected composer.lock inventory has source and/or dist URL and nonempty reference matching the supplied exact per-package source policy; replacement declarations and root composer.json repository declarations also match the supplied policy. Explicit metadata-only metapackages may have no source/dist. Missing package policies or incomplete source identity are unresolved. This compares collected declarations and does not verify installed bytes, canonical upstream truth or absence of malicious approved revisions."
+    },
+    {
+      "id": "MB-0806",
+      "source_backlog_ids": [
+        "MB-0053"
+      ],
+      "check": "dependency_mitigation_records",
+      "capability": "dependency_mitigation_policy",
+      "profiles": [
+        "hardening",
+        "owasp-top-10-2025"
+      ],
+      "criterion": "The bounded readable schema-version-1 mitigation record inventory has a valid generated_at timestamp within configured max_age_days and covers each identity in the supplied nonempty expected_ids policy with a unique record containing nonempty advisory, package, version, owner, action, rollback and a valid future expires_at. This checks declared record structure and expiry only, not whether all deployed mitigations are declared, effective or approved."
+    },
+    {
+      "id": "MB-0807",
+      "source_backlog_ids": [
+        "MB-0738"
+      ],
+      "check": "production_worker_xdebug_absent",
+      "capability": "runtime_worker_inventory",
+      "profiles": [
+        "hardening",
+        "owasp-top-10-2025"
+      ],
+      "criterion": "Every explicitly inventoried Linux PHP-FPM worker is bound to its pool, executable identity and exact process start_ticks before and after a complete bounded nonempty /proc process-map observation. No Xdebug-named shared module is mapped in these verified workers. Missing or changed identity, empty/unreadable/truncated maps or malformed inventory remain UNKNOWN. This observes configured process mappings at scan time, not every deployment worker, Xdebug feature mode, statically linked code or complete PHP runtime settings."
+    }
+  ],
+  "catalog_counts": {
+    "active_internal_requirements": 764,
+    "historical_allocations": 807,
+    "retired_identity_count": 43,
+    "families": {
+      "magebean": 139,
+      "asvs": 345,
+      "pci": 280
+    },
+    "asvs_alignment_references": 345,
+    "pci_alignment_references": 280,
+    "accepted_scoped_criteria": 79,
+    "human_evidence_required": 685
+  },
+  "profile_counts": {
+    "asvs-l1": 70,
+    "asvs-l2": 253,
+    "asvs-l3": 345,
+    "basic": 37,
+    "hardening": 79,
+    "owasp-top-10-2025": 51,
+    "pci-dss-v4.0.1": 280
+  }
+}

@@ -4,6 +4,8 @@ import json
 from pathlib import Path
 
 base = Path(__file__).resolve().parents[1] / 'src/Rules/requirements'
+if (base/'magebean-automation-backlog.json').exists():
+    raise SystemExit('Historical expansion superseded by the automated-only Magebean profile contract; edit current automated definitions/profiles instead.')
 def read(name): return json.loads((base / (name + '.json')).read_text())
 def write(name, value): (base / (name + '.json')).write_text(json.dumps(value, indent=2, ensure_ascii=False) + '\n')
 catalog = read('magebean-catalog')

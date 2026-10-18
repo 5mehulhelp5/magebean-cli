@@ -1,0 +1,297 @@
+{
+  "review_date": "2026-10-17",
+  "scope": "10 assigned Magebean automation backlog requirements; source inspection only, no network/production scans",
+  "counts": {
+    "FULL_AUTOMATION": 2,
+    "SCOPED_AUTOMATION": 7,
+    "SIGNAL_ONLY": 1,
+    "NOT_AUTOMATABLE": 0,
+    "current_ready": 0
+  },
+  "rows": [
+    {
+      "id": "MB-0051",
+      "verdict": "SCOPED_AUTOMATION",
+      "rationale": "An actionable remediation plan and explicitly reviewed alternative mitigation require a decision; OSV fixed-version metadata alone proves neither compatibility nor review.",
+      "implementation_evidence": [
+        "src/Engine/Checks/Families/ComposerAdvisoryChecks.php:453",
+        "src/Engine/Checks/Families/ComposerSupport.php:455"
+      ],
+      "existing_function": "composer_fix_version_api",
+      "required_inputs": [
+        "Complete lock inventory",
+        "Fresh OSV branches/ranges",
+        "Composer solver/platform context"
+      ],
+      "proposed_check": "Report published fixed release candidates and optional read-only solver conflicts per detected advisory; do not assert an actionable approved plan.",
+      "tests": {
+        "safe": "All explicitly inventoried candidates meet the precise proposed check with complete known statuses. Verify applicable alternatives and exclusions explicitly.",
+        "fail": "One known violation of the precise proposed predicate fails even with missing statuses for other items; preserve redacted package/path evidence.",
+        "missing": "Missing, malformed, stale, unsupported, partial or unreadable input => UNKNOWN; never PASS."
+      },
+      "effort": "M",
+      "current_ready": false,
+      "covered_by_active_ids": [
+        "MB-0049",
+        "MB-0056"
+      ],
+      "limitations": "A new narrower criterion requires a new identity; do not promote the historical requirement by dropping human flags. Package API presence is not proof of backend provenance, freshness or completeness.",
+      "criterion": "For each detected dependency vulnerability in the assessed lockfile, an actionable remediation plan must identify an available fixed package release or an explicitly reviewed alternative mitigation."
+    },
+    {
+      "id": "MB-0052",
+      "verdict": "SCOPED_AUTOMATION",
+      "rationale": "Maintained and high-risk are broader than pattern tagging and recent release/repository metadata; enabled module inventory must be mapped correctly to packages.",
+      "implementation_evidence": [
+        "src/Engine/Checks/Families/ComposerPolicyChecks.php:9",
+        "src/Engine/Checks/Families/ComposerSupport.php:455"
+      ],
+      "existing_function": "composer_risk_surface_tag",
+      "required_inputs": [
+        "Enabled module declarations",
+        "Module-to-Composer mapping including non-Composer code",
+        "Explicit risk patterns",
+        "Known repository/release statuses"
+      ],
+      "proposed_check": "Flag enabled mapped modules matching explicit risk patterns whose known maintenance statuses violate configured recency/archive/abandonment policy.",
+      "tests": {
+        "safe": "All explicitly inventoried candidates meet the precise proposed check with complete known statuses. Verify applicable alternatives and exclusions explicitly.",
+        "fail": "One known violation of the precise proposed predicate fails even with missing statuses for other items; preserve redacted package/path evidence.",
+        "missing": "Missing, malformed, stale, unsupported, partial or unreadable input => UNKNOWN; never PASS."
+      },
+      "effort": "L",
+      "current_ready": false,
+      "covered_by_active_ids": [
+        "MB-0061",
+        "MB-0062",
+        "MB-0063"
+      ],
+      "limitations": "A new narrower criterion requires a new identity; do not promote the historical requirement by dropping human flags. Package API presence is not proof of backend provenance, freshness or completeness.",
+      "criterion": "Enabled high-risk modules are maintained; assess only the collected Magento deployment scope."
+    },
+    {
+      "id": "MB-0053",
+      "verdict": "SCOPED_AUTOMATION",
+      "rationale": "Existing SECURITY.md keyword checks can pass arbitrary text containing mitigation and rollback; they cannot establish that every actual temporary mitigation is documented.",
+      "implementation_evidence": [
+        "src/Engine/Checks/FilesystemCheck.php:450"
+      ],
+      "existing_function": "security_mitigations_documented",
+      "required_inputs": [
+        "Machine-readable mitigation manifest",
+        "Advisory IDs and deployment identifiers",
+        "Owner, expiry and rollback fields"
+      ],
+      "proposed_check": "Validate mitigation manifest schema and expiry plus references to collected advisories; explicitly assess document completeness only, not mitigation effectiveness or truthful coverage.",
+      "tests": {
+        "safe": "All explicitly inventoried candidates meet the precise proposed check with complete known statuses. Verify applicable alternatives and exclusions explicitly.",
+        "fail": "SECURITY.md containing only mitigation rollback does not prove a complete mitigation register; expired or missing required fields fail schema predicate.",
+        "missing": "Missing, malformed, stale, unsupported, partial or unreadable input => UNKNOWN; never PASS."
+      },
+      "effort": "S",
+      "current_ready": false,
+      "covered_by_active_ids": [],
+      "limitations": "A new narrower criterion requires a new identity; do not promote the historical requirement by dropping human flags. Package API presence is not proof of backend provenance, freshness or completeness.",
+      "criterion": "Temporary mitigations documented; assess only the collected Magento deployment scope."
+    },
+    {
+      "id": "MB-0054",
+      "verdict": "SCOPED_AUTOMATION",
+      "rationale": "Current function detects KEV advisory matches, not organizational prioritization. Missing known_exploited fields currently look false; feed completeness/freshness is necessary.",
+      "implementation_evidence": [
+        "src/Engine/Checks/Families/ComposerAdvisoryChecks.php:579",
+        "src/Engine/Checks/Families/ComposerSupport.php:455"
+      ],
+      "existing_function": "composer_kev_advisories_api",
+      "required_inputs": [
+        "Complete advisory coverage",
+        "CVE alias mapping",
+        "Dated complete KEV source with explicit known membership"
+      ],
+      "proposed_check": "No installed collected Composer package version matches a known KEV CVE in the dated complete KEV/advisory datasets; preserve positive matches under partial coverage.",
+      "tests": {
+        "safe": "All explicitly inventoried candidates meet the precise proposed check with complete known statuses. Verify applicable alternatives and exclusions explicitly.",
+        "fail": "One known violation of the precise proposed predicate fails even with missing statuses for other items; preserve redacted package/path evidence.",
+        "missing": "Absent known_exploited flag, incomplete CVE aliases or stale KEV feed => UNKNOWN, not false."
+      },
+      "effort": "M",
+      "current_ready": false,
+      "covered_by_active_ids": [
+        "MB-0049"
+      ],
+      "limitations": "A new narrower criterion requires a new identity; do not promote the historical requirement by dropping human flags. Package API presence is not proof of backend provenance, freshness or completeness.",
+      "criterion": "Known-exploited packages prioritized (CISA KEV); assess only the collected Magento deployment scope."
+    },
+    {
+      "id": "MB-0058",
+      "verdict": "SCOPED_AUTOMATION",
+      "rationale": "Current/maintained cannot be inferred from latest-release age; Marketplace classification is backend metadata, and magento2-module excludes other extension package types and manually installed extensions.",
+      "implementation_evidence": [
+        "src/Engine/Checks/Families/ComposerVersionChecks.php:262",
+        "src/Engine/Checks/Families/ComposerSupport.php:455"
+      ],
+      "existing_function": "composer_marketplace_outdated_api",
+      "required_inputs": [
+        "Complete extension inventory and enabled/deployed scope",
+        "Verified Marketplace mapping",
+        "Version comparability/branch constraints",
+        "Explicit support/release metadata timestamps"
+      ],
+      "proposed_check": "For explicitly classified Marketplace Composer packages, report installed-versus-policy target version and latest release age; absence of metadata is UNKNOWN.",
+      "tests": {
+        "safe": "All explicitly inventoried candidates meet the precise proposed check with complete known statuses. Verify applicable alternatives and exclusions explicitly.",
+        "fail": "One known violation of the precise proposed predicate fails even with missing statuses for other items; preserve redacted package/path evidence.",
+        "missing": "Missing, malformed, stale, unsupported, partial or unreadable input => UNKNOWN; never PASS."
+      },
+      "effort": "M",
+      "current_ready": false,
+      "covered_by_active_ids": [
+        "MB-0062",
+        "MB-0063",
+        "MB-0061"
+      ],
+      "limitations": "A new narrower criterion requires a new identity; do not promote the historical requirement by dropping human flags. Package API presence is not proof of backend provenance, freshness or completeness.",
+      "criterion": "Marketplace extensions are current and maintained; assess only the collected Magento deployment scope."
+    },
+    {
+      "id": "MB-0060",
+      "verdict": "SCOPED_AUTOMATION",
+      "rationale": "Backend vendor_support_status active is evidence of a reported support status, not evidence that this customer/version has vendor support entitlement or support service.",
+      "implementation_evidence": [
+        "src/Engine/Checks/Families/ComposerRepositoryChecks.php:9",
+        "src/Engine/Checks/Families/ComposerSupport.php:455"
+      ],
+      "existing_function": "composer_vendor_support_api",
+      "required_inputs": [
+        "Authoritative vendor version lifecycle API or authenticated entitlement API",
+        "Complete extension classification",
+        "Timestamp and supported version ranges"
+      ],
+      "proposed_check": "For named mapped packages, configured authoritative vendor source explicitly declares this installed version supported until a recorded date; do not infer customer entitlement from repository activity.",
+      "tests": {
+        "safe": "All explicitly inventoried candidates meet the precise proposed check with complete known statuses. Verify applicable alternatives and exclusions explicitly.",
+        "fail": "One known violation of the precise proposed predicate fails even with missing statuses for other items; preserve redacted package/path evidence.",
+        "missing": "Missing, malformed, stale, unsupported, partial or unreadable input => UNKNOWN; never PASS."
+      },
+      "effort": "L",
+      "current_ready": false,
+      "covered_by_active_ids": [
+        "MB-0063"
+      ],
+      "limitations": "A new narrower criterion requires a new identity; do not promote the historical requirement by dropping human flags. Package API presence is not proof of backend provenance, freshness or completeness.",
+      "criterion": "Marketplace extensions have vendor support evidence; assess only the collected Magento deployment scope."
+    },
+    {
+      "id": "MB-0744",
+      "verdict": "FULL_AUTOMATION",
+      "rationale": "Abandonment is an explicit package-maintenance status and can be machine-verified for a complete collected library inventory. Existing active MB-0061 already provides this for Composer libraries. Original full criterion can be satisfied only if all collected libraries are covered, including untyped/non-Composer libraries where present.",
+      "implementation_evidence": [
+        "src/Engine/Checks/Families/ComposerRepositoryChecks.php:147",
+        "src/Engine/Checks/Families/ComposerSupport.php:455"
+      ],
+      "existing_function": "composer_abandoned_api",
+      "required_inputs": [
+        "Complete declared Composer inventory",
+        "Per-package explicit abandonment status from dated authoritative source",
+        "Non-Composer library inventory if claiming all libraries"
+      ],
+      "proposed_check": "Reuse MB-0061 for Composer libraries; inventory additional collected libraries with authoritative package identifiers and explicit known abandonment status for every item. Any unresolved identity or status prevents PASS.",
+      "tests": {
+        "safe": "All Composer and non-Composer libraries have explicit abandonment=false; missing package type must not hide a library.",
+        "fail": "One known violation of the precise proposed predicate fails even with missing statuses for other items; preserve redacted package/path evidence.",
+        "missing": "Missing, malformed, stale, unsupported, partial or unreadable input => UNKNOWN; never PASS."
+      },
+      "effort": "S",
+      "current_ready": false,
+      "covered_by_active_ids": [
+        "MB-0061"
+      ],
+      "limitations": "Conditional on complete collected library inventory and authoritative current per-library status. Merely filtering Composer type=library does not prove all libraries covered. This is overlap with an active check, not a net-new check for Composer-only deployments.",
+      "criterion": "No abandoned libraries allowed; assess only the collected Magento deployment scope."
+    },
+    {
+      "id": "MB-0064",
+      "verdict": "FULL_AUTOMATION",
+      "rationale": "Risk can be an explicit machine-evaluable source policy: a complete mapping of replacements/forks/source overrides and exact approved upstreams/revisions permits a full verdict under that supplied policy. Current repository_trusted/is_fork heuristics and excluded missing sources are insufficient.",
+      "implementation_evidence": [
+        "src/Engine/Checks/Families/ComposerRepositoryChecks.php:616",
+        "src/Engine/Checks/Families/ComposerSupport.php:455"
+      ],
+      "existing_function": "composer_risky_fork_api",
+      "required_inputs": [
+        "Complete lock plus root repository declarations",
+        "Canonical source URLs and pinned upstream revisions",
+        "Explicit exact source/revision allowlist",
+        "Known per-package fork/override status"
+      ],
+      "proposed_check": "Enumerate all collected replacement and source-override candidates from complete lock/root repository declarations; resolve canonical upstream and source revision; reject candidates violating configured exact repository/revision risk policy. Unknown identity, fork state, unsupported provider or source must prevent PASS.",
+      "tests": {
+        "safe": "All explicitly inventoried candidates meet the precise proposed check with complete known statuses. Verify applicable alternatives and exclusions explicitly.",
+        "fail": "Root repository source override or fork revision violates exact source policy; unknown no-replace package source cannot be silently excluded.",
+        "missing": "Missing, malformed, stale, unsupported, partial or unreadable input => UNKNOWN; never PASS."
+      },
+      "effort": "M",
+      "current_ready": false,
+      "covered_by_active_ids": [
+        "MB-0063"
+      ],
+      "limitations": "Conditional FULL under an explicit technical fork-risk policy; cannot infer absence of undisclosed malicious commits. Root repository overrides, non-Git providers, missing statuses and all installed custom libraries must be accounted for. No current authoritative revision allowlist adapter is claimed implemented.",
+      "criterion": "No risky forks replacing upstream libs; assess only the collected Magento deployment scope."
+    },
+    {
+      "id": "MB-0077",
+      "verdict": "SIGNAL_ONLY",
+      "rationale": "Regex detection of sensitive fields near outbound calls cannot establish business necessity, complete data flows, effective payload minimization or runtime interception; benign masked code can hide another export path.",
+      "implementation_evidence": [
+        "src/Engine/Checks/Families/DataProtectionSourceChecks.php:9",
+        "src/Engine/Checks/Families/ComposerSupport.php:455",
+        "src/Engine/Checks/Families/DataProtectionSourceChecks.php:658"
+      ],
+      "existing_function": "code_pii_minimization",
+      "required_inputs": [
+        "Complete readable source inventory",
+        "Configured sensitive field taxonomy",
+        "Optional bounded representative outbound request fixtures"
+      ],
+      "proposed_check": "Report inspected source locations with apparent raw sensitive fields in recognized outbound flows; label as suspicion requiring investigation, never proof all third-party flows minimize PII.",
+      "tests": {
+        "safe": "Masked recognized export yields no signal only; another unrecognized outbound flow cannot be asserted safe.",
+        "fail": "One known violation of the precise proposed predicate fails even with missing statuses for other items; preserve redacted package/path evidence.",
+        "missing": "Missing, malformed, stale, unsupported, partial or unreadable input => UNKNOWN; never PASS."
+      },
+      "effort": "L",
+      "current_ready": false,
+      "covered_by_active_ids": [],
+      "limitations": "A new narrower criterion requires a new identity; do not promote the historical requirement by dropping human flags. Package API presence is not proof of backend provenance, freshness or completeness.",
+      "criterion": "PII minimization for third-party flows; assess only the collected Magento deployment scope."
+    },
+    {
+      "id": "MB-0081",
+      "verdict": "SCOPED_AUTOMATION",
+      "rationale": "Source ACL/IP keywords do not prove effective integration privileges, endpoint access or least privilege. Business-required minimal permissions cannot be derived from code alone.",
+      "implementation_evidence": [
+        "src/Engine/Checks/Families/DataProtectionSourceChecks.php:311",
+        "src/Engine/Checks/Families/ComposerSupport.php:455",
+        "src/Engine/Checks/Families/DataProtectionSourceChecks.php:794"
+      ],
+      "existing_function": "code_saas_integration_scoped",
+      "required_inputs": [
+        "Explicit integration allowlist policy",
+        "Read-only integration/authorization_role/authorization_rule data",
+        "Effective merged webapi ACL mappings",
+        "Applicable network policy API and named endpoints"
+      ],
+      "proposed_check": "For explicitly named integrations, effective assigned ACL resources must be a subset of supplied allowed resources with no all-resource grant; separately verify named IP policy declarations through authoritative APIs. Do not claim optimal business least privilege.",
+      "tests": {
+        "safe": "All explicitly inventoried candidates meet the precise proposed check with complete known statuses. Verify applicable alternatives and exclusions explicitly.",
+        "fail": "Effective integration has all-resource or unauthorized grant; nearby ACL or IP keyword alone cannot PASS.",
+        "missing": "Missing, malformed, stale, unsupported, partial or unreadable input => UNKNOWN; never PASS."
+      },
+      "effort": "L",
+      "current_ready": false,
+      "covered_by_active_ids": [],
+      "limitations": "A new narrower criterion requires a new identity; do not promote the historical requirement by dropping human flags. Package API presence is not proof of backend provenance, freshness or completeness.",
+      "criterion": "SaaS integrations scoped by ACL (least privilege/IP allowlist); assess only the collected Magento deployment scope."
+    }
+  ]
+}

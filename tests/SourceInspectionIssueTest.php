@@ -1,0 +1,46 @@
+<?php
+declare(strict_types=1);
+require __DIR__.'/../vendor/autoload.php';
+use Magebean\Engine\{Context,CheckOutcome,SourceInspectionIssue};
+use Magebean\Engine\Checks\AutomatedSourcePolicyCheck;
+$count=0;$assert=static function(bool $v,string $why)use(&$count):void{$count++;if(!$v)throw new RuntimeException($why);};
+$issues=SourceInspectionIssue::fromGaps([['reason'=>'missing_source_path','file'=>'app/code'],['reason'=>'no_eligible_source_files','file'=>'']],[],['app/code']);
+$assert(count($issues)===1&&$issues[0]['reason']==='missing_source_path','Suppress redundant empty-source issue when missing path is known');
+$assert(str_contains($issues[0]['message'],'app/code')&&str_contains($issues[0]['action'],'release root'),'Missing path has precise location and next action');
+$assert(!isset($issues[0]['line']),'No invented line for directory gap');
+$empty=SourceInspectionIssue::fromGaps([['reason'=>'no_eligible_source_files','file'=>'']],[],['app/code']);
+$assert(str_contains($empty[0]['message'],'not a security defect')&&str_contains($empty[0]['message'],'app/code'),'Empty eligible scope is explicit and not a vulnerability');
+$input=[['file'=>'app\\code\\X.php','line'=>12,'reason'=>'indirect_callable'],['file'=>'app/code/X.php','line'=>12,'reason'=>'indirect_callable']];
+$dedup=SourceInspectionIssue::fromGaps([],$input);
+$assert(count($dedup)===1&&$dedup[0]['line']===12,'Normalize path separators and deduplicate by reason/file/line');
+$assert($dedup[0]['fingerprint']===SourceInspectionIssue::fromGaps([],[$input[1]])[0]['fingerprint'],'Fingerprint does not depend on policy or enumeration order');
+$assert($dedup[0]['fingerprint']!==SourceInspectionIssue::fromGaps([],[['file'=>'app/code/X.php','line'=>13,'reason'=>'indirect_callable']])[0]['fingerprint'],'Distinct source lines have distinct fingerprints');
+$assert(str_contains($dedup[0]['action'],'callable assignment'),'Indirect callable has concrete investigation guidance');
+$many=[];for($i=0;$i<105;$i++)$many[]=['file'=>'app/code/'.$i.'.php','reason'=>'oversized_source'];
+$assert(count(SourceInspectionIssue::fromGaps($many,[]))===100,'Inspection issues bounded to 100 rows');
+$root=sys_get_temp_dir().'/mb-source-issues-'.bin2hex(random_bytes(5));mkdir($root);mkdir($root.'/app');
+$run=static function(string $policy,string $code,array $args=[])use($root){file_put_contents($root.'/app/test.php',$code);return(new AutomatedSourcePolicyCheck(new Context($root,'')))->run(['kind'=>$policy,'paths'=>['app']]+$args);};
+try{
+ $r=$run('shell_execution','<?php $callback($arg);');
+ $assert($r->outcome===CheckOutcome::Unknown&&count($r->evidence['inspection_issues'])===1,'Unresolved callable produces inspection issue');
+ $assert(str_contains($r->message,'app/test.php:1')&&str_contains($r->message,'callable target'),'Unknown check message starts with useful source location and cause');
+ $assert(!str_contains($r->message,'Source policy could not be evaluated completely'),'Generic repeated unknown phrase removed');
+ $fingerprint=$r->evidence['inspection_issues'][0]['fingerprint'];
+ $r=$run('native_unserialize','<?php $callback($arg);');
+ $assert($r->evidence['inspection_issues'][0]['fingerprint']===$fingerprint,'Same limitation across policies has stable dedup identity');
+ $r=$run('shell_execution',"<?php\nreturn [;");
+ $issue=$r->evidence['inspection_issues'][0];
+ $assert($issue['reason']==='malformed_php'&&$issue['line']===2,'Parse issue uses the real tokenizer source line');
+ $assert(str_contains($issue['action'],'php -l')&&!str_contains(json_encode($issue),'return ['),'Parse action is concrete without source snippets');
+ $r=$run('shell_execution','<?php return 1;',['max_file_bytes'=>5]);
+ $assert(count($r->evidence['inspection_issues'])===1&&$r->evidence['inspection_issues'][0]['reason']==='oversized_source','Oversized source does not add redundant no-eligible issue');
+ $assert(str_contains($r->message,'max_file_bytes'),'Oversized source message explains the budget adjustment');
+ $r=$run('shell_execution',"<?php\n\$callback(\$arg);\n\$other(\$arg);");
+ $assert(count($r->evidence['inspection_issues'])===2&&str_contains($r->message,'1 additional inspection issue'),'Message gives count of other precise issues');
+ $r=$run('shell_execution','<?php shell_exec($input); $callback($arg);');
+ $assert($r->outcome===CheckOutcome::Fail&&count($r->evidence['violations'])===1&&count($r->evidence['inspection_issues'])===1,'Confirmed violation keeps independent inspection issues');
+ $assert(!str_contains(json_encode($r->evidence['inspection_issues']),'$input'),'Inspection issue metadata contains no code payload');
+ $r=$run('shell_execution','<?php return 1;');
+ $assert($r->outcome===CheckOutcome::Pass&&$r->evidence['inspection_issues']===[],'Clean syntax policy has no invented inspection issue');
+ echo "Source inspection issues: $count assertions passed\n";
+}finally{unlink($root.'/app/test.php');rmdir($root.'/app');rmdir($root);}

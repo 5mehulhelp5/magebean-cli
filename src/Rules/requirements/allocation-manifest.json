@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "next_id": 786,
+  "next_id": 808,
   "allocations": [
     {
       "id": "MB-0001",
@@ -4884,6 +4884,138 @@
     {
       "id": "MB-0785",
       "allocation_key": "magebean/basic-adobe/MB-0785",
+      "revision": 1,
+      "verdict": "accepted_scoped_criterion"
+    },
+    {
+      "id": "MB-0786",
+      "allocation_key": "magebean/source-policy-v1/sql_literal_query",
+      "revision": 1,
+      "verdict": "accepted_scoped_criterion"
+    },
+    {
+      "id": "MB-0787",
+      "allocation_key": "magebean/source-policy-v1/csrf_unconditional_bypass",
+      "revision": 1,
+      "verdict": "accepted_scoped_criterion"
+    },
+    {
+      "id": "MB-0788",
+      "allocation_key": "magebean/source-policy-v1/native_network",
+      "revision": 1,
+      "verdict": "accepted_scoped_criterion"
+    },
+    {
+      "id": "MB-0789",
+      "allocation_key": "magebean/source-policy-v1/native_unserialize",
+      "revision": 1,
+      "verdict": "accepted_scoped_criterion"
+    },
+    {
+      "id": "MB-0790",
+      "allocation_key": "magebean/source-policy-v1/shell_execution",
+      "revision": 1,
+      "verdict": "accepted_scoped_criterion"
+    },
+    {
+      "id": "MB-0791",
+      "allocation_key": "magebean/source-policy-v1/dynamic_execution",
+      "revision": 1,
+      "verdict": "accepted_scoped_criterion"
+    },
+    {
+      "id": "MB-0792",
+      "allocation_key": "magebean/source-policy-v1/native_filesystem",
+      "revision": 1,
+      "verdict": "accepted_scoped_criterion"
+    },
+    {
+      "id": "MB-0793",
+      "allocation_key": "magebean/source-policy-v1/native_upload",
+      "revision": 1,
+      "verdict": "accepted_scoped_criterion"
+    },
+    {
+      "id": "MB-0794",
+      "allocation_key": "magebean/source-policy-v1/weak_prng",
+      "revision": 1,
+      "verdict": "accepted_scoped_criterion"
+    },
+    {
+      "id": "MB-0795",
+      "allocation_key": "magebean/source-policy-v1/direct_request_logging",
+      "revision": 1,
+      "verdict": "accepted_scoped_criterion"
+    },
+    {
+      "id": "MB-0796",
+      "allocation_key": "magebean/source-policy-v1/raw_crypto_session",
+      "revision": 1,
+      "verdict": "accepted_scoped_criterion"
+    },
+    {
+      "id": "MB-0797",
+      "allocation_key": "magebean/source-policy-v1/xml_external_features",
+      "revision": 1,
+      "verdict": "accepted_scoped_criterion"
+    },
+    {
+      "id": "MB-0798",
+      "allocation_key": "magebean/source-policy-v1/literal_https",
+      "revision": 1,
+      "verdict": "accepted_scoped_criterion"
+    },
+    {
+      "id": "MB-0799",
+      "allocation_key": "magebean/production-observation-v1/production_bound_worker_code_readonly",
+      "revision": 1,
+      "verdict": "accepted_scoped_criterion"
+    },
+    {
+      "id": "MB-0800",
+      "allocation_key": "magebean/production-observation-v1/production_upload_signatures_absent",
+      "revision": 1,
+      "verdict": "accepted_scoped_criterion"
+    },
+    {
+      "id": "MB-0801",
+      "allocation_key": "magebean/production-observation-v1/production_direct_global_roles_approved",
+      "revision": 1,
+      "verdict": "accepted_scoped_criterion"
+    },
+    {
+      "id": "MB-0802",
+      "allocation_key": "magebean/production-observation-v1/production_checkout_csp_response",
+      "revision": 1,
+      "verdict": "accepted_scoped_criterion"
+    },
+    {
+      "id": "MB-0803",
+      "allocation_key": "magebean/production-observation-v1/production_runtime_nosniff",
+      "revision": 1,
+      "verdict": "accepted_scoped_criterion"
+    },
+    {
+      "id": "MB-0804",
+      "allocation_key": "magebean/production-observation-v1/production_integration_debug_defaults_disabled",
+      "revision": 1,
+      "verdict": "accepted_scoped_criterion"
+    },
+    {
+      "id": "MB-0805",
+      "allocation_key": "magebean/production-observation-v1/dependency_source_policy",
+      "revision": 1,
+      "verdict": "accepted_scoped_criterion"
+    },
+    {
+      "id": "MB-0806",
+      "allocation_key": "magebean/production-observation-v1/dependency_mitigation_records",
+      "revision": 1,
+      "verdict": "accepted_scoped_criterion"
+    },
+    {
+      "id": "MB-0807",
+      "allocation_key": "magebean/production-observation-v1/production_worker_xdebug_absent",
       "revision": 1,
       "verdict": "accepted_scoped_criterion"
     }

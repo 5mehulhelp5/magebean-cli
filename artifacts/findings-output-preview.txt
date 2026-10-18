@@ -1,0 +1,66 @@
+
+MAGEBEAN / Production scan
+CLI 1.0.0
+────────────────────────────────────────────────────────────────────────────────────────────────────
+  Profile  Magento Production Hardening
+  Target   /var/www/magento
+
+  Needs attention         4 findings
+  Scan collection issues  1
+  Critical 1  High 1  Medium 1  Low 1  
+  Coverage  67 executed / 79 inventoried; 12 not evaluated
+Scan coverage incomplete; see collection issues and omitted checks.
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+01 CRITICAL MB-791
+  Observed unsafe configuration requires investigation in the deployed application; confirm its
+  context before changing production.
+    app/code/Example/VeryLongDirectoryVeryLongDirectoryVeryLongDirectoryVeryLongDirectoryVeryLongDir
+    ectoryVeryLongDirectoryVeryLongDirectory/Input.php:42
+
+  Remediation guidance
+    - Review the reported location and use the supported Magento API without removing validation or
+      changing the expected business behavior.
+  Details: scan --profile=hardening --rules=MB-791
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+02 HIGH MB-792
+  Observed unsafe configuration requires investigation in the deployed application; confirm its
+  context before changing production.
+    app/code/Example/VeryLongDirectoryVeryLongDirectoryVeryLongDirectoryVeryLongDirectoryVeryLongDir
+    ectoryVeryLongDirectoryVeryLongDirectory/Input.php:42
+
+  Remediation guidance
+    - Review the reported location and use the supported Magento API without removing validation or
+      changing the expected business behavior.
+  Details: scan --profile=hardening --rules=MB-792
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+03 MEDIUM MB-793
+  Observed unsafe configuration requires investigation in the deployed application; confirm its
+  context before changing production.
+    app/code/Example/VeryLongDirectoryVeryLongDirectoryVeryLongDirectoryVeryLongDirectoryVeryLongDir
+    ectoryVeryLongDirectoryVeryLongDirectory/Input.php:42
+
+  Remediation guidance
+    - Review the reported location and use the supported Magento API without removing validation or
+      changing the expected business behavior.
+  Details: scan --profile=hardening --rules=MB-793
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+04 LOW MB-790
+  Observed unsafe configuration requires investigation in the deployed application; confirm its
+  context before changing production.
+    app/code/Example/VeryLongDirectoryVeryLongDirectoryVeryLongDirectoryVeryLongDirectoryVeryLongDir
+    ectoryVeryLongDirectoryVeryLongDirectory/Input.php:42
+
+  Remediation guidance
+    - Review the reported location and use the supported Magento API without removing validation or
+      changing the expected business behavior.
+  Details: scan --profile=hardening --rules=MB-790
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+Scan collection issues
+  MB-0807 Worker process could not be read.
+    How to resolve MB-0807: Grant bounded process inspection access and rerun.
+

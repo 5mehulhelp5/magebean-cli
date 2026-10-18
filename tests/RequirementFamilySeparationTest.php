@@ -7,7 +7,7 @@ function familyAssert(bool $ok,string $message):void{global $count;++$count;if(!
 $aggregate=RequirementCatalog::read('internal-catalog')['requirements'];
 $loaded=RequirementCatalog::loadAll()['rules'];
 $all=[];
-foreach(['magebean'=>117,'asvs'=>345,'pci'=>280] as $family=>$expected){
+foreach(['magebean'=>139,'asvs'=>345,'pci'=>280] as $family=>$expected){
     $catalog=RequirementCatalog::read($family.'-catalog');
     familyAssert(($catalog['family']??null)===$family,'Physical catalog declares family '.$family);
     familyAssert(count($catalog['requirements'])===$expected,'Independent family inventory '.$family);

@@ -16,6 +16,10 @@ foreach($profiles as $profile){
     if($ids!==$expectedIds)throw new RuntimeException('Profile membership differs: '.$profile->key);
     foreach($profile->rules as$rule)if(($rule->standard_mapping['family']??null)!==$source['family'])throw new RuntimeException('Imported requirement family differs: '.$rule->rule_key);
     if($profile->requirement_source_label===null)throw new RuntimeException('Profile source label missing: '.$profile->key);
+    if(in_array($profile->key,['basic','hardening','owasp-top-10-2025'],true)){
+        if($profile->external_evidence_tasks!==[])throw new RuntimeException('Magebean profile still has manual checklist: '.$profile->key);
+        foreach($profile->rules as $rule)if($rule->verification_method->value!=='automated')throw new RuntimeException('Magebean profile still has human member: '.$rule->rule_key);
+    }
     $profile->available=true;
     echo $profile->key,': ',count($ids),' requirements; source: ',$profile->requirement_source_label,PHP_EOL;
 }

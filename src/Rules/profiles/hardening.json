@@ -2,7 +2,7 @@
   "id": "hardening",
   "aliases": ["production", "production-hardening"],
   "title": "Magento Production Hardening",
-  "description": "An in-depth review of Magento production configuration, application code, access controls, dependencies and operations using Magebean requirements. Automated checks provide scoped observations; include manual review for controls requiring runtime or operational evidence. This profile is separate from ASVS and PCI assessments.",
+  "description": "Automated production hardening covering every Basic and Magebean OWASP automated requirement plus deeper technical checks. Reports security and readiness observations; unavailable data is an execution gap, never a manual task or implicit PASS. Does not claim complete production protection or ASVS/PCI compliance.",
   "report_template": "standard",
   "include": {
     "controls": [

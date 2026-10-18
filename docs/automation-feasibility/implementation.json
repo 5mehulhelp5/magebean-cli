@@ -1,0 +1,1446 @@
+{
+  "date": "2026-10-18",
+  "scope": "All 50 historical Magebean automation backlog requirements; actual implementation dispositions, not 47 completed requirements",
+  "counts": {
+    "ADAPTER_PENDING": 16,
+    "NEW_SCOPED_CHECK": 24,
+    "OUT_OF_SCOPE": 2,
+    "REUSE_ACTIVE_SUBSET": 7,
+    "SIGNAL_ONLY": 1
+  },
+  "new_distinct_scoped_requirements": 22,
+  "new_scoped_ids": [
+    "MB-0786",
+    "MB-0787",
+    "MB-0788",
+    "MB-0789",
+    "MB-0790",
+    "MB-0791",
+    "MB-0792",
+    "MB-0793",
+    "MB-0794",
+    "MB-0795",
+    "MB-0796",
+    "MB-0797",
+    "MB-0798",
+    "MB-0799",
+    "MB-0800",
+    "MB-0801",
+    "MB-0802",
+    "MB-0803",
+    "MB-0804",
+    "MB-0805",
+    "MB-0806",
+    "MB-0807"
+  ],
+  "original_requirements_reactivated": 0,
+  "human_workflow_added": 0,
+  "profile_counts": {
+    "basic": 37,
+    "hardening": 79,
+    "owasp": 51
+  },
+  "validation": {
+    "tests": [
+      "AutomatedSourcePolicyTest.php",
+      "DependencyPolicyCheckTest.php",
+      "ProductionRuntimeCheckTest.php",
+      "ProductionCheckPolicyTest.php",
+      "LinuxWorkerObservationTest.php",
+      "AutomationBacklogRegistrySmokeTest.php",
+      "AutomationBacklogCollectionRegressionTest.php",
+      "HardeningCoverageTest.php"
+    ],
+    "collection_regression": "12 assertions passed, including shared active cache/reset, global deadline and empty worker maps",
+    "note": "Use final root test run for complete suite status; named tests are relevant coverage, not a claim all adapters are implemented."
+  },
+  "remaining_adapters": [
+    "Complete Magento route/role/ownership integration fixtures and protected-byte/side-effect oracles",
+    "Provider-specific webhook HMAC/replay contracts and installed version mapping",
+    "Context-aware HTML/JavaScript escaping and serializer semantics",
+    "Effective secret-storage provenance across Magento config, database and actual secret stores",
+    "Complete enabled-module/package and Marketplace/vendor support lifecycle/entitlement providers",
+    "Dated complete KEV membership and CVE alias coverage contract",
+    "Bound complete runtime logging architecture and retention/rotation adapters",
+    "Namespace-aware effective firewall/CNI/gateway policy and complete cipher enumeration",
+    "Actual integration ACL and network policy adapter with explicit integration inventory"
+  ],
+  "requirements": [
+    {
+      "backlog_id": "MB-0004",
+      "original_title": "Code directories are read-only",
+      "original_criterion": "Code directories are read-only for the application runtime in the collected Magento deployment; assess effective runtime identity, permissions, ACLs and read-only mounts.",
+      "feasibility_verdict": "FULL_AUTOMATION",
+      "disposition": "NEW_SCOPED_CHECK",
+      "new_scoped_ids": [
+        "MB-0799"
+      ],
+      "related_active_ids": [
+        "MB-0001",
+        "MB-0002"
+      ],
+      "original_requirement_reactivated": false,
+      "full_original_criterion_claimed": false,
+      "reason": "Run scanner as the actual unprivileged worker identity; root or differing identity is unsupported rather than a violation. All worker PIDs to be assessed must be explicitly supplied; no discovery-completeness claim. Unsupported worker mode, nonzero seccomp filters, sticky parent rules, external links or missing /proc permissions yield UNKNOWN. No code writes or privilege changes are performed.",
+      "new_checks": [
+        {
+          "id": "MB-0799",
+          "title": "Application worker code paths are read-only",
+          "criterion": "For every explicitly supplied PHP-FPM worker PID, the scanner and worker have identical effective UID/GID/groups, zero effective/permitted/ambient capabilities, matching project tree, mount namespace and Linux security context. Kernel access observations find no writable object or replaceable code root in the complete bounded configured app/vendor/lib inventory. Unsupported identity, seccomp, links or inventory gaps remain UNKNOWN.",
+          "checks": [
+            {
+              "name": "production_bound_worker_code_readonly",
+              "args": {
+                "dirs": [
+                  "app",
+                  "vendor",
+                  "lib"
+                ],
+                "max_entries": 50000
+              }
+            }
+          ],
+          "capability": "runtime_worker_access",
+          "profiles": [
+            "hardening",
+            "owasp-top-10-2025"
+          ]
+        }
+      ]
+    },
+    {
+      "backlog_id": "MB-0748",
+      "original_title": "No executable code in media or upload paths",
+      "original_criterion": "No executable code in media or upload paths; assess only the collected Magento deployment scope.",
+      "feasibility_verdict": "SCOPED_AUTOMATION",
+      "disposition": "NEW_SCOPED_CHECK",
+      "new_scoped_ids": [
+        "MB-0800"
+      ],
+      "related_active_ids": [
+        "MB-0780"
+      ],
+      "original_requirement_reactivated": false,
+      "full_original_criterion_claimed": false,
+      "reason": "Default pub/media inventory is applicable without demanding absent optional import/export paths; explicitly add relevant roots. Payload bytes and response bodies are never emitted; path/line/signature label only. XML opening tags are not treated as PHP.",
+      "new_checks": [
+        {
+          "id": "MB-0800",
+          "title": "Upload inventory has no configured PHP or handler signatures",
+          "criterion": "Within the complete bounded configured upload path inventory, readable files contain no explicit long PHP opening tags or configured htaccess script-handler signatures and no PHP-like executable filename extension. Missing/unreadable/oversized eligible files, unfollowed links and traversal-budget gaps remain UNKNOWN. This is a signature policy, not absence of arbitrary executable content or prevention of server execution.",
+          "checks": [
+            {
+              "name": "production_upload_signatures_absent",
+              "args": {
+                "paths": [
+                  "pub/media"
+                ],
+                "max_entries": 10000,
+                "max_file_bytes": 1048576
+              }
+            }
+          ],
+          "capability": null,
+          "profiles": [
+            "hardening",
+            "owasp-top-10-2025"
+          ]
+        }
+      ]
+    },
+    {
+      "backlog_id": "MB-0731",
+      "original_title": "Admin passwords require at least 8 characters",
+      "original_criterion": "Admin passwords require at least 8 characters; assess only the collected Magento deployment scope.",
+      "feasibility_verdict": "FULL_AUTOMATION",
+      "disposition": "REUSE_ACTIVE_SUBSET",
+      "new_scoped_ids": [
+        null
+      ],
+      "related_active_ids": [
+        "MB-0728"
+      ],
+      "original_requirement_reactivated": false,
+      "full_original_criterion_claimed": false,
+      "reason": "Existing MB-0728 already resolves observed Admin password minimum declaration/installed validator minimum. Reuse it without adding duplicate coverage. No new installed-validator acceptance adapter or support for arbitrary DI/plugins/IMS password policy was implemented in this unit.",
+      "new_checks": []
+    },
+    {
+      "backlog_id": "MB-0010",
+      "original_title": "Admin URL exposure restricted",
+      "original_criterion": "Admin URL exposure restricted; assess only the collected Magento deployment scope.",
+      "feasibility_verdict": "SCOPED_AUTOMATION",
+      "disposition": "ADAPTER_PENDING",
+      "new_scoped_ids": [
+        null
+      ],
+      "related_active_ids": [
+        "MB-0006",
+        "MB-0777"
+      ],
+      "original_requirement_reactivated": false,
+      "full_original_criterion_claimed": false,
+      "reason": "No bound denied-origin versus allowed-origin gateway adapter was implemented. Repository ACL hints, route obscurity, HTTP 404 or lack of recognizable login markup are not accepted as restriction proof.",
+      "new_checks": []
+    },
+    {
+      "backlog_id": "MB-0101",
+      "original_title": "Global Admin ACL limited to approved roles",
+      "original_criterion": "Global Admin ACL limited to approved roles; assess only the collected Magento deployment scope.",
+      "feasibility_verdict": "FULL_AUTOMATION",
+      "disposition": "NEW_SCOPED_CHECK",
+      "new_scoped_ids": [
+        "MB-0801"
+      ],
+      "related_active_ids": [
+        "MB-0100"
+      ],
+      "original_requirement_reactivated": false,
+      "full_original_criterion_claimed": false,
+      "reason": "Reads actual database tables through env.php connection; test PDO injects a real in-memory database, not assertion rows. No default approval list is invented; deployment owner must supply normal versioned policy configuration. Native global-group predicate deliberately does not claim full effective ACL/plugin authorization.",
+      "new_checks": [
+        {
+          "id": "MB-0801",
+          "title": "Direct global Admin ACL grants match the approved role policy",
+          "criterion": "In a nonempty bounded deployed authorization_role inventory and complete bounded authorization_rule inventory, every direct allow rule for Magento_Backend::all or Magento_Adminhtml::all assigned to a group role has a role ID in the explicitly configured approved_role_ids policy. Missing policy, malformed/orphan rows, direct user grants or incomplete tables remain UNKNOWN. This checks direct stored grants, not inherited effective privileges or business least privilege.",
+          "checks": [
+            {
+              "name": "production_direct_global_roles_approved",
+              "args": {}
+            }
+          ],
+          "capability": "admin_role_policy",
+          "profiles": [
+            "hardening"
+          ]
+        }
+      ]
+    },
+    {
+      "backlog_id": "MB-0102",
+      "original_title": "PCI vendor default account evidence assessment",
+      "original_criterion": "PCI vendor default account evidence assessment; assess only the collected Magento deployment scope.",
+      "feasibility_verdict": "NOT_AUTOMATABLE",
+      "disposition": "OUT_OF_SCOPE",
+      "new_scoped_ids": [
+        null
+      ],
+      "related_active_ids": [],
+      "original_requirement_reactivated": false,
+      "full_original_criterion_claimed": false,
+      "reason": "Original PCI vendor-default-account evidence assessment is excluded from Magebean automation; no self-attestation file is accepted as protection proof.",
+      "new_checks": []
+    },
+    {
+      "backlog_id": "MB-0732",
+      "original_title": "No raw SQL without abstraction",
+      "original_criterion": "No raw SQL without abstraction; assess only the collected Magento deployment scope.",
+      "feasibility_verdict": "SCOPED_AUTOMATION",
+      "disposition": "NEW_SCOPED_CHECK",
+      "new_scoped_ids": [
+        "MB-0786"
+      ],
+      "related_active_ids": [],
+      "original_requirement_reactivated": false,
+      "full_original_criterion_claimed": false,
+      "reason": "Implemented and fixture-tested exact coding policy. Narrower than original criterion; never promote original ID or security assurance. Complete inventory and parser required.",
+      "new_checks": [
+        {
+          "id": "MB-0786",
+          "title": "Direct named query methods use a literal first argument",
+          "criterion": "Every syntactically named query/rawQuery/exec/executeQuery method call in collected custom PHP/PHTML uses one static string first argument, without direct concatenation or interpolation. Unresolved variables yield UNKNOWN. This does not prove parameter binding or SQL injection safety. Scope is completely collected app/code PHP/PHTML; missing, unreadable, oversized, linked, malformed or truncated eligible input prevents a clean PASS.",
+          "checks": [
+            {
+              "name": "automated_source_policy",
+              "args": {
+                "kind": "sql_literal_query",
+                "paths": [
+                  "app/code"
+                ],
+                "include_ext": [
+                  "php",
+                  "phtml"
+                ]
+              }
+            }
+          ],
+          "capability": "strict_native_api_policy",
+          "profiles": [
+            "hardening",
+            "owasp-top-10-2025"
+          ]
+        }
+      ]
+    },
+    {
+      "backlog_id": "MB-0733",
+      "original_title": "Template output is escaped",
+      "original_criterion": "Template output is escaped; assess only the collected Magento deployment scope.",
+      "feasibility_verdict": "SCOPED_AUTOMATION",
+      "disposition": "ADAPTER_PENDING",
+      "new_scoped_ids": [
+        null
+      ],
+      "related_active_ids": [],
+      "original_requirement_reactivated": false,
+      "full_original_criterion_claimed": false,
+      "reason": "Needs real PHP/HTML context parser and trusted-fragment contracts; generic escaping-name search cannot enforce context correctness.",
+      "new_checks": []
+    },
+    {
+      "backlog_id": "MB-0736",
+      "original_title": "Escaping for JS context",
+      "original_criterion": "Escaping for JS context; assess only the collected Magento deployment scope.",
+      "feasibility_verdict": "SCOPED_AUTOMATION",
+      "disposition": "ADAPTER_PENDING",
+      "new_scoped_ids": [
+        null
+      ],
+      "related_active_ids": [],
+      "original_requirement_reactivated": false,
+      "full_original_criterion_claimed": false,
+      "reason": "Needs nested HTML/JS context parser and installed serializer semantics; no keyword-based PASS implemented.",
+      "new_checks": []
+    },
+    {
+      "backlog_id": "MB-0015",
+      "original_title": "Forms include CSRF tokens (form_key)",
+      "original_criterion": "Forms include CSRF tokens (form_key); assess only the collected Magento deployment scope.",
+      "feasibility_verdict": "SCOPED_AUTOMATION",
+      "disposition": "NEW_SCOPED_CHECK",
+      "new_scoped_ids": [
+        "MB-0787"
+      ],
+      "related_active_ids": [],
+      "original_requirement_reactivated": false,
+      "full_original_criterion_claimed": false,
+      "reason": "Implemented and fixture-tested exact coding policy. Narrower than original criterion; never promote original ID or security assurance. Complete inventory and parser required.",
+      "new_checks": [
+        {
+          "id": "MB-0787",
+          "title": "No unconditional validateForCsrf acceptance override",
+          "criterion": "Collected custom PHP/PHTML contains no validateForCsrf method whose complete body is an unconditional return true. This exact bypass ban does not establish form tokens or server-side CSRF effectiveness. Scope is completely collected app/code PHP/PHTML; missing, unreadable, oversized, linked, malformed or truncated eligible input prevents a clean PASS.",
+          "checks": [
+            {
+              "name": "automated_source_policy",
+              "args": {
+                "kind": "csrf_unconditional_bypass",
+                "paths": [
+                  "app/code"
+                ],
+                "include_ext": [
+                  "php",
+                  "phtml"
+                ]
+              }
+            }
+          ],
+          "capability": null,
+          "profiles": [
+            "hardening",
+            "owasp-top-10-2025"
+          ]
+        }
+      ]
+    },
+    {
+      "backlog_id": "MB-0016",
+      "original_title": "SSRF protections present",
+      "original_criterion": "SSRF protections present; assess only the collected Magento deployment scope.",
+      "feasibility_verdict": "SCOPED_AUTOMATION",
+      "disposition": "NEW_SCOPED_CHECK",
+      "new_scoped_ids": [
+        "MB-0788"
+      ],
+      "related_active_ids": [],
+      "original_requirement_reactivated": false,
+      "full_original_criterion_claimed": false,
+      "reason": "Implemented and fixture-tested exact coding policy. Narrower than original criterion; never promote original ID or security assurance. Complete inventory and parser required.",
+      "new_checks": [
+        {
+          "id": "MB-0788",
+          "title": "Custom source avoids enumerated native network primitives",
+          "criterion": "Collected custom PHP/PHTML has no direct global calls to curl_exec, curl_multi_exec, fsockopen, pfsockopen, stream_socket_client or file_get_contents. Dynamic callable/alias ambiguity yields UNKNOWN. This explicit API restriction does not establish SSRF safety of framework adapters. Scope is completely collected app/code PHP/PHTML; missing, unreadable, oversized, linked, malformed or truncated eligible input prevents a clean PASS.",
+          "checks": [
+            {
+              "name": "automated_source_policy",
+              "args": {
+                "kind": "native_network",
+                "paths": [
+                  "app/code"
+                ],
+                "include_ext": [
+                  "php",
+                  "phtml"
+                ]
+              }
+            }
+          ],
+          "capability": "strict_native_api_policy",
+          "profiles": [
+            "hardening",
+            "owasp-top-10-2025"
+          ]
+        }
+      ]
+    },
+    {
+      "backlog_id": "MB-0734",
+      "original_title": "No unsafe deserialization",
+      "original_criterion": "No unsafe deserialization; assess only the collected Magento deployment scope.",
+      "feasibility_verdict": "SCOPED_AUTOMATION",
+      "disposition": "NEW_SCOPED_CHECK",
+      "new_scoped_ids": [
+        "MB-0789"
+      ],
+      "related_active_ids": [],
+      "original_requirement_reactivated": false,
+      "full_original_criterion_claimed": false,
+      "reason": "Implemented and fixture-tested exact coding policy. Narrower than original criterion; never promote original ID or security assurance. Complete inventory and parser required.",
+      "new_checks": [
+        {
+          "id": "MB-0789",
+          "title": "Custom source avoids native unserialize calls",
+          "criterion": "Collected custom PHP/PHTML contains no direct unqualified or fully-qualified global unserialize call, irrespective of allowed_classes options. Indirect calls and function aliases yield UNKNOWN. Other serializers remain outside this syntax policy. Scope is completely collected app/code PHP/PHTML; missing, unreadable, oversized, linked, malformed or truncated eligible input prevents a clean PASS.",
+          "checks": [
+            {
+              "name": "automated_source_policy",
+              "args": {
+                "kind": "native_unserialize",
+                "paths": [
+                  "app/code"
+                ],
+                "include_ext": [
+                  "php",
+                  "phtml"
+                ]
+              }
+            }
+          ],
+          "capability": null,
+          "profiles": [
+            "hardening",
+            "owasp-top-10-2025"
+          ]
+        }
+      ]
+    },
+    {
+      "backlog_id": "MB-0735",
+      "original_title": "Command execution is guarded",
+      "original_criterion": "Command execution is guarded; assess only the collected Magento deployment scope.",
+      "feasibility_verdict": "SCOPED_AUTOMATION",
+      "disposition": "NEW_SCOPED_CHECK",
+      "new_scoped_ids": [
+        "MB-0790"
+      ],
+      "related_active_ids": [],
+      "original_requirement_reactivated": false,
+      "full_original_criterion_claimed": false,
+      "reason": "Implemented and fixture-tested exact coding policy. Narrower than original criterion; never promote original ID or security assurance. Complete inventory and parser required.",
+      "new_checks": [
+        {
+          "id": "MB-0790",
+          "title": "Custom source avoids enumerated shell/process primitives",
+          "criterion": "Collected custom PHP/PHTML contains no direct global exec/system/passthru/shell_exec/popen/proc_open/pcntl_exec invocation or shell backtick expression. Indirect calls and function aliases yield UNKNOWN; framework process adapters are outside this API ban. Scope is completely collected app/code PHP/PHTML; missing, unreadable, oversized, linked, malformed or truncated eligible input prevents a clean PASS.",
+          "checks": [
+            {
+              "name": "automated_source_policy",
+              "args": {
+                "kind": "shell_execution",
+                "paths": [
+                  "app/code"
+                ],
+                "include_ext": [
+                  "php",
+                  "phtml"
+                ]
+              }
+            }
+          ],
+          "capability": null,
+          "profiles": [
+            "hardening",
+            "owasp-top-10-2025"
+          ]
+        }
+      ]
+    },
+    {
+      "backlog_id": "MB-0019",
+      "original_title": "No eval/assert/dynamic execution",
+      "original_criterion": "No eval/assert/dynamic execution; assess only the collected Magento deployment scope.",
+      "feasibility_verdict": "SCOPED_AUTOMATION",
+      "disposition": "NEW_SCOPED_CHECK",
+      "new_scoped_ids": [
+        "MB-0791"
+      ],
+      "related_active_ids": [],
+      "original_requirement_reactivated": false,
+      "full_original_criterion_claimed": false,
+      "reason": "Implemented and fixture-tested exact coding policy. Narrower than original criterion; never promote original ID or security assurance. Complete inventory and parser required.",
+      "new_checks": [
+        {
+          "id": "MB-0791",
+          "title": "Custom source avoids eval and create_function constructs",
+          "criterion": "Collected custom PHP/PHTML contains no eval construct or direct global create_function call. Dynamic include targets, indirect calls, function aliases and unresolved assertion semantics yield UNKNOWN. This is a construct policy, not general runtime execution assurance. Scope is completely collected app/code PHP/PHTML; missing, unreadable, oversized, linked, malformed or truncated eligible input prevents a clean PASS.",
+          "checks": [
+            {
+              "name": "automated_source_policy",
+              "args": {
+                "kind": "dynamic_execution",
+                "paths": [
+                  "app/code"
+                ],
+                "include_ext": [
+                  "php",
+                  "phtml"
+                ]
+              }
+            }
+          ],
+          "capability": null,
+          "profiles": [
+            "hardening",
+            "owasp-top-10-2025"
+          ]
+        }
+      ]
+    },
+    {
+      "backlog_id": "MB-0020",
+      "original_title": "Path traversal protections",
+      "original_criterion": "Path traversal protections; assess only the collected Magento deployment scope.",
+      "feasibility_verdict": "SCOPED_AUTOMATION",
+      "disposition": "NEW_SCOPED_CHECK",
+      "new_scoped_ids": [
+        "MB-0792"
+      ],
+      "related_active_ids": [],
+      "original_requirement_reactivated": false,
+      "full_original_criterion_claimed": false,
+      "reason": "Implemented and fixture-tested exact coding policy. Narrower than original criterion; never promote original ID or security assurance. Complete inventory and parser required.",
+      "new_checks": [
+        {
+          "id": "MB-0792",
+          "title": "Custom source avoids enumerated raw filesystem primitives",
+          "criterion": "Collected custom PHP/PHTML contains no direct global file_get_contents/file_put_contents/fopen/readfile/unlink/rename/copy/scandir/glob call. Indirect calls and aliases yield UNKNOWN. This explicit API restriction does not establish path safety of framework adapters. Scope is completely collected app/code PHP/PHTML; missing, unreadable, oversized, linked, malformed or truncated eligible input prevents a clean PASS.",
+          "checks": [
+            {
+              "name": "automated_source_policy",
+              "args": {
+                "kind": "native_filesystem",
+                "paths": [
+                  "app/code"
+                ],
+                "include_ext": [
+                  "php",
+                  "phtml"
+                ]
+              }
+            }
+          ],
+          "capability": "strict_native_api_policy",
+          "profiles": [
+            "hardening",
+            "owasp-top-10-2025"
+          ]
+        }
+      ]
+    },
+    {
+      "backlog_id": "MB-0021",
+      "original_title": "Secure file upload handling",
+      "original_criterion": "Secure file upload handling; assess only the collected Magento deployment scope.",
+      "feasibility_verdict": "SCOPED_AUTOMATION",
+      "disposition": "NEW_SCOPED_CHECK",
+      "new_scoped_ids": [
+        "MB-0793"
+      ],
+      "related_active_ids": [],
+      "original_requirement_reactivated": false,
+      "full_original_criterion_claimed": false,
+      "reason": "Implemented and fixture-tested exact coding policy. Narrower than original criterion; never promote original ID or security assurance. Complete inventory and parser required.",
+      "new_checks": [
+        {
+          "id": "MB-0793",
+          "title": "Custom source avoids native upload move calls",
+          "criterion": "Collected custom PHP/PHTML contains no direct global move_uploaded_file invocation. Indirect calls and aliases yield UNKNOWN. This is an explicit native API restriction, not proof that other upload handlers validate content or authorization. Scope is completely collected app/code PHP/PHTML; missing, unreadable, oversized, linked, malformed or truncated eligible input prevents a clean PASS.",
+          "checks": [
+            {
+              "name": "automated_source_policy",
+              "args": {
+                "kind": "native_upload",
+                "paths": [
+                  "app/code"
+                ],
+                "include_ext": [
+                  "php",
+                  "phtml"
+                ]
+              }
+            }
+          ],
+          "capability": null,
+          "profiles": [
+            "hardening",
+            "owasp-top-10-2025"
+          ]
+        }
+      ]
+    },
+    {
+      "backlog_id": "MB-0023",
+      "original_title": "Use CSPRNG; avoid weak PRNG",
+      "original_criterion": "Use CSPRNG; avoid weak PRNG; assess only the collected Magento deployment scope.",
+      "feasibility_verdict": "SCOPED_AUTOMATION",
+      "disposition": "NEW_SCOPED_CHECK",
+      "new_scoped_ids": [
+        "MB-0794"
+      ],
+      "related_active_ids": [],
+      "original_requirement_reactivated": false,
+      "full_original_criterion_claimed": false,
+      "reason": "Implemented and fixture-tested exact coding policy. Narrower than original criterion; never promote original ID or security assurance. Complete inventory and parser required.",
+      "new_checks": [
+        {
+          "id": "MB-0794",
+          "title": "Custom source avoids enumerated weak randomness APIs",
+          "criterion": "Collected custom PHP/PHTML contains no direct global rand/mt_rand/lcg_value/uniqid/srand/mt_srand call. Indirect calls and aliases yield UNKNOWN. This deliberately strict coding policy includes non-security uses; it does not establish entropy or token lifetime. Scope is completely collected app/code PHP/PHTML; missing, unreadable, oversized, linked, malformed or truncated eligible input prevents a clean PASS.",
+          "checks": [
+            {
+              "name": "automated_source_policy",
+              "args": {
+                "kind": "weak_prng",
+                "paths": [
+                  "app/code"
+                ],
+                "include_ext": [
+                  "php",
+                  "phtml"
+                ]
+              }
+            }
+          ],
+          "capability": "strict_native_api_policy",
+          "profiles": [
+            "hardening",
+            "owasp-top-10-2025"
+          ]
+        }
+      ]
+    },
+    {
+      "backlog_id": "MB-0737",
+      "original_title": "Sensitive data not logged",
+      "original_criterion": "Sensitive data not logged; assess only the collected Magento deployment scope.",
+      "feasibility_verdict": "SCOPED_AUTOMATION",
+      "disposition": "NEW_SCOPED_CHECK",
+      "new_scoped_ids": [
+        "MB-0795"
+      ],
+      "related_active_ids": [],
+      "original_requirement_reactivated": false,
+      "full_original_criterion_claimed": false,
+      "reason": "Implemented and fixture-tested exact coding policy. Narrower than original criterion; never promote original ID or security assurance. Complete inventory and parser required.",
+      "new_checks": [
+        {
+          "id": "MB-0795",
+          "title": "No direct request superglobals in named log method arguments",
+          "criterion": "Collected custom PHP/PHTML contains no $_GET/$_POST/$_REQUEST/$_COOKIE/$_SERVER/$_FILES token inside arguments of syntactically named log/debug/info/notice/warning/error/critical/alert/emergency method calls. This exact syntax rule does not prove absence of sensitive data in arbitrary logs. Scope is completely collected app/code PHP/PHTML; missing, unreadable, oversized, linked, malformed or truncated eligible input prevents a clean PASS.",
+          "checks": [
+            {
+              "name": "automated_source_policy",
+              "args": {
+                "kind": "direct_request_logging",
+                "paths": [
+                  "app/code"
+                ],
+                "include_ext": [
+                  "php",
+                  "phtml"
+                ]
+              }
+            }
+          ],
+          "capability": null,
+          "profiles": [
+            "hardening",
+            "owasp-top-10-2025"
+          ]
+        }
+      ]
+    },
+    {
+      "backlog_id": "MB-0743",
+      "original_title": "PII not logged in application logs",
+      "original_criterion": "PII not logged in application logs; assess only the collected Magento deployment scope.",
+      "feasibility_verdict": "SCOPED_AUTOMATION",
+      "disposition": "NEW_SCOPED_CHECK",
+      "new_scoped_ids": [
+        "MB-0795"
+      ],
+      "related_active_ids": [],
+      "original_requirement_reactivated": false,
+      "full_original_criterion_claimed": false,
+      "reason": "Implemented and fixture-tested exact coding policy. Narrower than original criterion; never promote original ID or security assurance. Complete inventory and parser required.",
+      "new_checks": [
+        {
+          "id": "MB-0795",
+          "title": "No direct request superglobals in named log method arguments",
+          "criterion": "Collected custom PHP/PHTML contains no $_GET/$_POST/$_REQUEST/$_COOKIE/$_SERVER/$_FILES token inside arguments of syntactically named log/debug/info/notice/warning/error/critical/alert/emergency method calls. This exact syntax rule does not prove absence of sensitive data in arbitrary logs. Scope is completely collected app/code PHP/PHTML; missing, unreadable, oversized, linked, malformed or truncated eligible input prevents a clean PASS.",
+          "checks": [
+            {
+              "name": "automated_source_policy",
+              "args": {
+                "kind": "direct_request_logging",
+                "paths": [
+                  "app/code"
+                ],
+                "include_ext": [
+                  "php",
+                  "phtml"
+                ]
+              }
+            }
+          ],
+          "capability": null,
+          "profiles": [
+            "hardening",
+            "owasp-top-10-2025"
+          ]
+        }
+      ]
+    },
+    {
+      "backlog_id": "MB-0746",
+      "original_title": "Third-party logging sanitized (mask/redact)",
+      "original_criterion": "Third-party logging sanitized (mask/redact); assess only the collected Magento deployment scope.",
+      "feasibility_verdict": "SCOPED_AUTOMATION",
+      "disposition": "NEW_SCOPED_CHECK",
+      "new_scoped_ids": [
+        "MB-0795"
+      ],
+      "related_active_ids": [],
+      "original_requirement_reactivated": false,
+      "full_original_criterion_claimed": false,
+      "reason": "Implemented and fixture-tested exact coding policy. Narrower than original criterion; never promote original ID or security assurance. Complete inventory and parser required.",
+      "new_checks": [
+        {
+          "id": "MB-0795",
+          "title": "No direct request superglobals in named log method arguments",
+          "criterion": "Collected custom PHP/PHTML contains no $_GET/$_POST/$_REQUEST/$_COOKIE/$_SERVER/$_FILES token inside arguments of syntactically named log/debug/info/notice/warning/error/critical/alert/emergency method calls. This exact syntax rule does not prove absence of sensitive data in arbitrary logs. Scope is completely collected app/code PHP/PHTML; missing, unreadable, oversized, linked, malformed or truncated eligible input prevents a clean PASS.",
+          "checks": [
+            {
+              "name": "automated_source_policy",
+              "args": {
+                "kind": "direct_request_logging",
+                "paths": [
+                  "app/code"
+                ],
+                "include_ext": [
+                  "php",
+                  "phtml"
+                ]
+              }
+            }
+          ],
+          "capability": null,
+          "profiles": [
+            "hardening",
+            "owasp-top-10-2025"
+          ]
+        }
+      ]
+    },
+    {
+      "backlog_id": "MB-0025",
+      "original_title": "No unsafe raw crypto or session APIs in custom code",
+      "original_criterion": "No unsafe raw crypto or session APIs in custom code; assess only the collected Magento deployment scope.",
+      "feasibility_verdict": "SCOPED_AUTOMATION",
+      "disposition": "NEW_SCOPED_CHECK",
+      "new_scoped_ids": [
+        "MB-0796"
+      ],
+      "related_active_ids": [],
+      "original_requirement_reactivated": false,
+      "full_original_criterion_claimed": false,
+      "reason": "Implemented and fixture-tested exact coding policy. Narrower than original criterion; never promote original ID or security assurance. Complete inventory and parser required.",
+      "new_checks": [
+        {
+          "id": "MB-0796",
+          "title": "Custom source avoids enumerated raw crypto and session APIs",
+          "criterion": "Collected custom PHP/PHTML contains no direct global session_start/session_id/session_regenerate_id/session_set_save_handler/mcrypt_encrypt/mcrypt_decrypt/md5/sha1/crypt/openssl_encrypt/openssl_decrypt call. This explicit coding restriction also bans legitimate non-security hash uses; it does not prove framework cryptography/session semantics. Scope is completely collected app/code PHP/PHTML; missing, unreadable, oversized, linked, malformed or truncated eligible input prevents a clean PASS.",
+          "checks": [
+            {
+              "name": "automated_source_policy",
+              "args": {
+                "kind": "raw_crypto_session",
+                "paths": [
+                  "app/code"
+                ],
+                "include_ext": [
+                  "php",
+                  "phtml"
+                ]
+              }
+            }
+          ],
+          "capability": "strict_native_api_policy",
+          "profiles": [
+            "hardening",
+            "owasp-top-10-2025"
+          ]
+        }
+      ]
+    },
+    {
+      "backlog_id": "MB-0094",
+      "original_title": "Custom controllers and APIs include function-level authorization",
+      "original_criterion": "Custom controllers and APIs include function-level authorization; assess only the collected Magento deployment scope.",
+      "feasibility_verdict": "SCOPED_AUTOMATION",
+      "disposition": "ADAPTER_PENDING",
+      "new_scoped_ids": [
+        null
+      ],
+      "related_active_ids": [],
+      "original_requirement_reactivated": false,
+      "full_original_criterion_claimed": false,
+      "reason": "Needs complete route/role manifests, real Magento isolated deployment and side-effect oracles; no source-name substitution for authorization.",
+      "new_checks": []
+    },
+    {
+      "backlog_id": "MB-0095",
+      "original_title": "GraphQL and API exposure minimized",
+      "original_criterion": "GraphQL and API exposure minimized; assess only the collected Magento deployment scope.",
+      "feasibility_verdict": "NOT_AUTOMATABLE",
+      "disposition": "OUT_OF_SCOPE",
+      "new_scoped_ids": [
+        null
+      ],
+      "related_active_ids": [],
+      "original_requirement_reactivated": false,
+      "full_original_criterion_claimed": false,
+      "reason": "Minimized exposure is a business decision about which APIs the storefront/integrations require; neither anonymous GraphQL nor public REST is inherently wrong.",
+      "new_checks": []
+    },
+    {
+      "backlog_id": "MB-0097",
+      "original_title": "Secrets are not hardcoded in custom code",
+      "original_criterion": "Secrets are not hardcoded in custom code; assess only the collected Magento deployment scope.",
+      "feasibility_verdict": "SCOPED_AUTOMATION",
+      "disposition": "REUSE_ACTIVE_SUBSET",
+      "new_scoped_ids": [
+        null
+      ],
+      "related_active_ids": [
+        "MB-0730"
+      ],
+      "original_requirement_reactivated": false,
+      "full_original_criterion_claimed": false,
+      "reason": "Already active scoped coverage; root should reuse existing catalog recipe, not add a duplicate.",
+      "new_checks": []
+    },
+    {
+      "backlog_id": "MB-0098",
+      "original_title": "Unsafe XML parsing disabled",
+      "original_criterion": "Unsafe XML parsing disabled; assess only the collected Magento deployment scope.",
+      "feasibility_verdict": "SCOPED_AUTOMATION",
+      "disposition": "NEW_SCOPED_CHECK",
+      "new_scoped_ids": [
+        "MB-0797"
+      ],
+      "related_active_ids": [],
+      "original_requirement_reactivated": false,
+      "full_original_criterion_claimed": false,
+      "reason": "Implemented and fixture-tested exact coding policy. Narrower than original criterion; never promote original ID or security assurance. Complete inventory and parser required.",
+      "new_checks": [
+        {
+          "id": "MB-0797",
+          "title": "No enumerated XML external feature constructs in custom source",
+          "criterion": "Collected custom PHP/PHTML contains no token reference to LIBXML_NOENT/LIBXML_DTDLOAD/LIBXML_DTDATTR, no resolveExternals/substituteEntities/validateOnParse assignment except literal false, and no syntactically named xinclude or xml_set_external_entity_ref_handler invocation. This exact construct ban does not establish every parser default or runtime configuration. Scope is completely collected app/code PHP/PHTML; missing, unreadable, oversized, linked, malformed or truncated eligible input prevents a clean PASS.",
+          "checks": [
+            {
+              "name": "automated_source_policy",
+              "args": {
+                "kind": "xml_external_features",
+                "paths": [
+                  "app/code"
+                ],
+                "include_ext": [
+                  "php",
+                  "phtml"
+                ]
+              }
+            }
+          ],
+          "capability": null,
+          "profiles": [
+            "hardening",
+            "owasp-top-10-2025"
+          ]
+        }
+      ]
+    },
+    {
+      "backlog_id": "MB-0099",
+      "original_title": "File download and export endpoints require authorization",
+      "original_criterion": "File download and export endpoints require authorization; assess only the collected Magento deployment scope.",
+      "feasibility_verdict": "SCOPED_AUTOMATION",
+      "disposition": "ADAPTER_PENDING",
+      "new_scoped_ids": [
+        null
+      ],
+      "related_active_ids": [],
+      "original_requirement_reactivated": false,
+      "full_original_criterion_claimed": false,
+      "reason": "Needs real route/role/ownership integration fixtures and protected-byte oracle; no fake runtime adapter.",
+      "new_checks": []
+    },
+    {
+      "backlog_id": "MB-0089",
+      "original_title": "Checkout Content Security Policy enforced",
+      "original_criterion": "Checkout Content Security Policy enforced; assess only the collected Magento deployment scope.",
+      "feasibility_verdict": "SCOPED_AUTOMATION",
+      "disposition": "NEW_SCOPED_CHECK",
+      "new_scoped_ids": [
+        "MB-0802"
+      ],
+      "related_active_ids": [
+        "MB-0779"
+      ],
+      "original_requirement_reactivated": false,
+      "full_original_criterion_claimed": false,
+      "reason": "A redirect because no cart/session exists is UNKNOWN, not missing-CSP FAIL. Only named response is assessed; no checkout-wide or full browser execution guarantee. No state-changing requests, login, purchase or retained cookie/body content. Conservative explicit baseline can flag supported nonce plus unsafe-inline compatibility policy; title/criterion state exact Magebean policy, not universal CSP security judgment.",
+      "new_checks": [
+        {
+          "id": "MB-0802",
+          "title": "Named checkout response emits the explicit enforced CSP baseline",
+          "criterion": "The supplied checkout path returns a successful same-origin no-redirect HTTPS GET with one unambiguous enforced Content-Security-Policy. The emitted policy explicitly defines script-src, connect-src, frame-src, form-action, object-src and base-uri; assessed sources contain no wildcard, unsafe-inline, unsafe-eval or broad scheme-only source. object-src is exactly none, base-uri is exactly none or self, and reporting is present when configured. Report-only alone fails; redirect/inaccessible checkout, multiple policies, unsupported syntax or incomplete collection remain UNKNOWN.",
+          "checks": [
+            {
+              "name": "production_checkout_csp_response",
+              "args": {
+                "path": "/checkout/",
+                "require_reporting": true,
+                "timeout_ms": 5000
+              }
+            }
+          ],
+          "capability": null,
+          "profiles": [
+            "hardening",
+            "owasp-top-10-2025"
+          ]
+        }
+      ]
+    },
+    {
+      "backlog_id": "MB-0096",
+      "original_title": "Security headers baseline enforced",
+      "original_criterion": "Security headers baseline enforced; assess only the collected Magento deployment scope.",
+      "feasibility_verdict": "SCOPED_AUTOMATION",
+      "disposition": "NEW_SCOPED_CHECK",
+      "new_scoped_ids": [
+        "MB-0803"
+      ],
+      "related_active_ids": [
+        "MB-0027",
+        "MB-0779"
+      ],
+      "original_requirement_reactivated": false,
+      "full_original_criterion_claimed": false,
+      "reason": "Nosniff plus existing HSTS/frame controls is not a claim of every security header on every route. No source-file union is used; runtime headers are collected directly with peer verification and bounded memory.",
+      "new_checks": [
+        {
+          "id": "MB-0803",
+          "title": "Observed application response emits nosniff",
+          "criterion": "One successful same-origin no-redirect HTTPS GET at the configured path emits exactly one X-Content-Type-Options header whose trimmed value is nosniff. Missing or invalid header on an observed successful response fails; duplicate headers, redirects, transport failures and incomplete collection remain UNKNOWN. HSTS and frame protection are assessed separately.",
+          "checks": [
+            {
+              "name": "production_runtime_nosniff",
+              "args": {
+                "path": "/",
+                "timeout_ms": 5000
+              }
+            }
+          ],
+          "capability": null,
+          "profiles": [
+            "hardening",
+            "owasp-top-10-2025"
+          ]
+        }
+      ]
+    },
+    {
+      "backlog_id": "MB-0738",
+      "original_title": "Xdebug disabled in production",
+      "original_criterion": "Xdebug disabled in production; assess only the collected Magento deployment scope.",
+      "feasibility_verdict": "FULL_AUTOMATION",
+      "disposition": "NEW_SCOPED_CHECK",
+      "new_scoped_ids": [
+        "MB-0807"
+      ],
+      "related_active_ids": [
+        "MB-0729"
+      ],
+      "original_requirement_reactivated": false,
+      "full_original_criterion_claimed": false,
+      "reason": "Explicit process inventory is machine targeting configuration; it cannot assert a clean result. Process mappings are collected directly without reading environ or executing target PHP. Original historical criterion and ID remain in the engineering backlog; this new ID records only its exact supported observation.",
+      "new_checks": [
+        {
+          "id": "MB-0807",
+          "title": "Configured PHP-FPM workers have no mapped Xdebug binary module",
+          "criterion": "Every explicitly inventoried Linux PHP-FPM worker is bound to its pool, executable identity and exact process start_ticks before and after a complete bounded nonempty /proc process-map observation. No Xdebug-named shared module is mapped in these verified workers. Missing or changed identity, empty/unreadable/truncated maps or malformed inventory remain UNKNOWN. This observes configured process mappings at scan time, not every deployment worker, Xdebug feature mode, statically linked code or complete PHP runtime settings.",
+          "checks": [
+            {
+              "name": "production_worker_xdebug_absent",
+              "args": {
+                "policy_file": ".magebean/php-fpm-workers.json"
+              }
+            }
+          ],
+          "capability": "runtime_worker_inventory",
+          "profiles": [
+            "hardening",
+            "owasp-top-10-2025"
+          ]
+        }
+      ]
+    },
+    {
+      "backlog_id": "MB-0739",
+      "original_title": "display_errors is Off",
+      "original_criterion": "display_errors is Off; assess only the collected Magento deployment scope.",
+      "feasibility_verdict": "FULL_AUTOMATION",
+      "disposition": "REUSE_ACTIVE_SUBSET",
+      "new_scoped_ids": [
+        null
+      ],
+      "related_active_ids": [
+        "MB-0729"
+      ],
+      "original_requirement_reactivated": false,
+      "full_original_criterion_claimed": false,
+      "reason": "No trusted web-worker effective display_errors telemetry adapter was implemented. Repository ini and a clean HTTP page remain insufficient.",
+      "new_checks": []
+    },
+    {
+      "backlog_id": "MB-0740",
+      "original_title": "No dev debug configs on production (template hints off)",
+      "original_criterion": "No dev debug configs on production (template hints off); assess only the collected Magento deployment scope.",
+      "feasibility_verdict": "FULL_AUTOMATION",
+      "disposition": "REUSE_ACTIVE_SUBSET",
+      "new_scoped_ids": [
+        null
+      ],
+      "related_active_ids": [
+        "MB-0729"
+      ],
+      "original_requirement_reactivated": false,
+      "full_original_criterion_claimed": false,
+      "reason": "Reuse active MB-0729 rather than create a second default-debug requirement. New method is an optional stricter resolved-value helper, not completed store-scope automation for original criterion.",
+      "new_checks": []
+    },
+    {
+      "backlog_id": "MB-0742",
+      "original_title": "Debug template hints disabled in production",
+      "original_criterion": "Debug template hints disabled in production; assess only the collected Magento deployment scope.",
+      "feasibility_verdict": "FULL_AUTOMATION",
+      "disposition": "REUSE_ACTIVE_SUBSET",
+      "new_scoped_ids": [
+        null
+      ],
+      "related_active_ids": [
+        "MB-0729"
+      ],
+      "original_requirement_reactivated": false,
+      "full_original_criterion_claimed": false,
+      "reason": "Complete active-store scope resolver and custom runtime override detection remain unimplemented.",
+      "new_checks": []
+    },
+    {
+      "backlog_id": "MB-0745",
+      "original_title": "Debug/verbose off for third-party integrations",
+      "original_criterion": "Debug/verbose off for third-party integrations; assess only the collected Magento deployment scope.",
+      "feasibility_verdict": "SCOPED_AUTOMATION",
+      "disposition": "NEW_SCOPED_CHECK",
+      "new_scoped_ids": [
+        "MB-0804"
+      ],
+      "related_active_ids": [],
+      "original_requirement_reactivated": false,
+      "full_original_criterion_claimed": false,
+      "reason": "No heuristic debug/logging key regex and no inference that ordinary enabled audit logging is insecure. Vendor path/version applicability must be provided as normal policy configuration; no invented universal vendor schema. No default vendor list is shipped because repository does not contain authoritative installed integration schemas.",
+      "new_checks": [
+        {
+          "id": "MB-0804",
+          "title": "Named integration debug settings resolve disabled in default scope",
+          "criterion": "Every explicitly configured integration debug/verbose setting path resolves through deployed env.php/config.php/default core_config_data or supported installed-module defaults to a recognized disabled value in default scope. Any recognized enabled value fails; omitted paths, missing values or unsupported flag representations remain UNKNOWN. This verifies named settings, not every third-party integration or store scope.",
+          "checks": [
+            {
+              "name": "production_integration_debug_defaults_disabled",
+              "args": {}
+            }
+          ],
+          "capability": "integration_debug_policy",
+          "profiles": [
+            "hardening",
+            "owasp-top-10-2025"
+          ]
+        }
+      ]
+    },
+    {
+      "backlog_id": "MB-0741",
+      "original_title": "No dev cache backends (avoid file backend)",
+      "original_criterion": "No dev cache backends (avoid file backend); assess only the collected Magento deployment scope.",
+      "feasibility_verdict": "FULL_AUTOMATION",
+      "disposition": "REUSE_ACTIVE_SUBSET",
+      "new_scoped_ids": [
+        null
+      ],
+      "related_active_ids": [
+        "MB-0038"
+      ],
+      "original_requirement_reactivated": false,
+      "full_original_criterion_claimed": false,
+      "reason": "Existing MB-0038 already covers supported declared Redis/Varnish frontend configuration. Reuse it without restoring a duplicate original ID. No new effective runtime backend object/DI resolver was implemented.",
+      "new_checks": []
+    },
+    {
+      "backlog_id": "MB-0043",
+      "original_title": "Log rotation configured",
+      "original_criterion": "Log rotation configured; assess only the collected Magento deployment scope.",
+      "feasibility_verdict": "FULL_AUTOMATION",
+      "disposition": "ADAPTER_PENDING",
+      "new_scoped_ids": [
+        null
+      ],
+      "related_active_ids": [],
+      "original_requirement_reactivated": false,
+      "full_original_criterion_claimed": false,
+      "reason": "Existing project-file parser does not establish installed effective host config, scheduler, all sink coverage or cloud/container applicability. No complete logging-architecture adapter was implemented; do not publish it as restored production protection.",
+      "new_checks": []
+    },
+    {
+      "backlog_id": "MB-0051",
+      "original_title": "Dependency vulnerability remediation plan identifies an actionable resolution",
+      "original_criterion": "For each detected dependency vulnerability in the assessed lockfile, an actionable remediation plan must identify an available fixed package release or an explicitly reviewed alternative mitigation.",
+      "feasibility_verdict": "SCOPED_AUTOMATION",
+      "disposition": "ADAPTER_PENDING",
+      "new_scoped_ids": [
+        null
+      ],
+      "related_active_ids": [
+        "MB-0049",
+        "MB-0056"
+      ],
+      "original_requirement_reactivated": false,
+      "full_original_criterion_claimed": false,
+      "reason": "Fixed candidate/advisory-constraint observations already active; actionability or reviewed alternative remains unproved.",
+      "new_checks": []
+    },
+    {
+      "backlog_id": "MB-0052",
+      "original_title": "Enabled high-risk modules are maintained",
+      "original_criterion": "Enabled high-risk modules are maintained; assess only the collected Magento deployment scope.",
+      "feasibility_verdict": "SCOPED_AUTOMATION",
+      "disposition": "ADAPTER_PENDING",
+      "new_scoped_ids": [
+        null
+      ],
+      "related_active_ids": [
+        "MB-0061",
+        "MB-0062",
+        "MB-0063"
+      ],
+      "original_requirement_reactivated": false,
+      "full_original_criterion_claimed": false,
+      "reason": "Maintained/high-risk semantics require a complete enabled-module mapping plus explicit risk/maintenance policy; existing maintenance predicates already report package status.",
+      "new_checks": []
+    },
+    {
+      "backlog_id": "MB-0053",
+      "original_title": "Temporary mitigations documented",
+      "original_criterion": "Temporary mitigations documented; assess only the collected Magento deployment scope.",
+      "feasibility_verdict": "SCOPED_AUTOMATION",
+      "disposition": "NEW_SCOPED_CHECK",
+      "new_scoped_ids": [
+        "MB-0806"
+      ],
+      "related_active_ids": [],
+      "original_requirement_reactivated": false,
+      "full_original_criterion_claimed": false,
+      "reason": "Caller must supply a nonempty expected_ids technical policy; absent or empty policy remains UNKNOWN. Declared schema coverage never implies all real deployed mitigations are enumerated.",
+      "new_checks": [
+        {
+          "id": "MB-0806",
+          "title": "Declared mitigation records satisfy structure and expiry policy",
+          "criterion": "The bounded readable schema-version-1 mitigation record inventory has a valid generated_at timestamp within configured max_age_days and covers each identity in the supplied nonempty expected_ids policy with a unique record containing nonempty advisory, package, version, owner, action, rollback and a valid future expires_at. This checks declared record structure and expiry only, not whether all deployed mitigations are declared, effective or approved.",
+          "checks": [
+            {
+              "name": "dependency_mitigation_records",
+              "args": {
+                "inventory_file": ".magebean/mitigations.json",
+                "max_age_days": 30
+              }
+            }
+          ],
+          "capability": "dependency_mitigation_policy",
+          "profiles": [
+            "hardening",
+            "owasp-top-10-2025"
+          ]
+        }
+      ]
+    },
+    {
+      "backlog_id": "MB-0054",
+      "original_title": "Known-exploited packages prioritized (CISA KEV)",
+      "original_criterion": "Known-exploited packages prioritized (CISA KEV); assess only the collected Magento deployment scope.",
+      "feasibility_verdict": "SCOPED_AUTOMATION",
+      "disposition": "ADAPTER_PENDING",
+      "new_scoped_ids": [
+        null
+      ],
+      "related_active_ids": [
+        "MB-0049"
+      ],
+      "original_requirement_reactivated": false,
+      "full_original_criterion_claimed": false,
+      "reason": "Existing known_exploited flag lacks dated complete KEV membership provenance. Adding a passing KEV predicate without an actual authoritative source contract would fabricate assurance; no new binding.",
+      "new_checks": []
+    },
+    {
+      "backlog_id": "MB-0058",
+      "original_title": "Marketplace extensions are current and maintained",
+      "original_criterion": "Marketplace extensions are current and maintained; assess only the collected Magento deployment scope.",
+      "feasibility_verdict": "SCOPED_AUTOMATION",
+      "disposition": "ADAPTER_PENDING",
+      "new_scoped_ids": [
+        null
+      ],
+      "related_active_ids": [
+        "MB-0061",
+        "MB-0062",
+        "MB-0063"
+      ],
+      "original_requirement_reactivated": false,
+      "full_original_criterion_claimed": false,
+      "reason": "Backend Marketplace mapping/version policy completeness not established; reuse existing explicit maintenance checks instead of duplicate generic maintained result.",
+      "new_checks": []
+    },
+    {
+      "backlog_id": "MB-0060",
+      "original_title": "Marketplace extensions have vendor support evidence",
+      "original_criterion": "Marketplace extensions have vendor support evidence; assess only the collected Magento deployment scope.",
+      "feasibility_verdict": "SCOPED_AUTOMATION",
+      "disposition": "ADAPTER_PENDING",
+      "new_scoped_ids": [
+        null
+      ],
+      "related_active_ids": [
+        "MB-0063"
+      ],
+      "original_requirement_reactivated": false,
+      "full_original_criterion_claimed": false,
+      "reason": "No verified authoritative exact-version lifecycle/entitlement provider contract found in repository. Current generic active status is insufficient; no invented vendor API.",
+      "new_checks": []
+    },
+    {
+      "backlog_id": "MB-0744",
+      "original_title": "No abandoned libraries allowed",
+      "original_criterion": "No abandoned libraries allowed; assess only the collected Magento deployment scope.",
+      "feasibility_verdict": "FULL_AUTOMATION",
+      "disposition": "REUSE_ACTIVE_SUBSET",
+      "new_scoped_ids": [
+        null
+      ],
+      "related_active_ids": [
+        "MB-0061"
+      ],
+      "original_requirement_reactivated": false,
+      "full_original_criterion_claimed": false,
+      "reason": "All-Composer abandonment policy already active including libraries; non-Composer libraries require actual inventory/provider adapter. No duplicate.",
+      "new_checks": []
+    },
+    {
+      "backlog_id": "MB-0064",
+      "original_title": "No risky forks replacing upstream libs",
+      "original_criterion": "No risky forks replacing upstream libs; assess only the collected Magento deployment scope.",
+      "feasibility_verdict": "FULL_AUTOMATION",
+      "disposition": "NEW_SCOPED_CHECK",
+      "new_scoped_ids": [
+        "MB-0805"
+      ],
+      "related_active_ids": [
+        "MB-0063"
+      ],
+      "original_requirement_reactivated": false,
+      "full_original_criterion_claimed": false,
+      "reason": "Source/revision allowlist is technical configuration, not human workflow. Supports private/non-Git exact identity; no backend repository_trusted inference.",
+      "new_checks": [
+        {
+          "id": "MB-0805",
+          "title": "Collected Composer dependency sources match explicit policy",
+          "criterion": "Every package in the readable bounded collected composer.lock inventory has source and/or dist URL and nonempty reference matching the supplied exact per-package source policy; replacement declarations and root composer.json repository declarations also match the supplied policy. Explicit metadata-only metapackages may have no source/dist. Missing package policies or incomplete source identity are unresolved. This compares collected declarations and does not verify installed bytes, canonical upstream truth or absence of malicious approved revisions.",
+          "checks": [
+            {
+              "name": "dependency_source_policy",
+              "args": {
+                "lock_file": "composer.lock",
+                "composer_file": "composer.json",
+                "policy_file": ".magebean/dependency-source-policy.json"
+              }
+            }
+          ],
+          "capability": "dependency_source_policy",
+          "profiles": [
+            "hardening"
+          ]
+        }
+      ]
+    },
+    {
+      "backlog_id": "MB-0073",
+      "original_title": "HTTPS-only endpoints configured",
+      "original_criterion": "HTTPS-only endpoints configured; assess only the collected Magento deployment scope.",
+      "feasibility_verdict": "SCOPED_AUTOMATION",
+      "disposition": "NEW_SCOPED_CHECK",
+      "new_scoped_ids": [
+        "MB-0798"
+      ],
+      "related_active_ids": [
+        "MB-0026",
+        "MB-0029"
+      ],
+      "original_requirement_reactivated": false,
+      "full_original_criterion_claimed": false,
+      "reason": "Implemented and fixture-tested exact coding policy. Narrower than original criterion; never promote original ID or security assurance. Complete inventory and parser required.",
+      "new_checks": [
+        {
+          "id": "MB-0798",
+          "title": "No plain HTTP standalone PHP string literals in custom source",
+          "criterion": "Collected custom PHP/PHTML contains no standalone constant string literal beginning http://. Comments are excluded. This deliberately strict literal policy includes non-endpoint examples and does not establish effective endpoint inventory, TLS verification or runtime interpolation. Scope is completely collected app/code PHP/PHTML; missing, unreadable, oversized, linked, malformed or truncated eligible input prevents a clean PASS.",
+          "checks": [
+            {
+              "name": "automated_source_policy",
+              "args": {
+                "kind": "literal_https",
+                "paths": [
+                  "app/code"
+                ],
+                "include_ext": [
+                  "php",
+                  "phtml"
+                ]
+              }
+            }
+          ],
+          "capability": "strict_native_api_policy",
+          "profiles": [
+            "hardening",
+            "owasp-top-10-2025"
+          ]
+        }
+      ]
+    },
+    {
+      "backlog_id": "MB-0075",
+      "original_title": "Webhook signature validation present",
+      "original_criterion": "Webhook signature validation present; assess only the collected Magento deployment scope.",
+      "feasibility_verdict": "SCOPED_AUTOMATION",
+      "disposition": "ADAPTER_PENDING",
+      "new_scoped_ids": [
+        null
+      ],
+      "related_active_ids": [],
+      "original_requirement_reactivated": false,
+      "full_original_criterion_claimed": false,
+      "reason": "Needs declared provider versions, actual adapter signature contracts and isolated side-effect/replay tests; provider-specific details pending.",
+      "new_checks": []
+    },
+    {
+      "backlog_id": "MB-0076",
+      "original_title": "Outbound connections restricted by allow-list",
+      "original_criterion": "Outbound connections restricted by allow-list; assess only the collected Magento deployment scope.",
+      "feasibility_verdict": "SCOPED_AUTOMATION",
+      "disposition": "ADAPTER_PENDING",
+      "new_scoped_ids": [
+        null
+      ],
+      "related_active_ids": [],
+      "original_requirement_reactivated": false,
+      "full_original_criterion_claimed": false,
+      "reason": "No complete network namespace IPv4/IPv6 firewall/CNI/gateway evaluator and deployment binding was implemented. Default DROP and source hints are not promoted to allow-list enforcement proof.",
+      "new_checks": []
+    },
+    {
+      "backlog_id": "MB-0077",
+      "original_title": "PII minimization for third-party flows",
+      "original_criterion": "PII minimization for third-party flows; assess only the collected Magento deployment scope.",
+      "feasibility_verdict": "SIGNAL_ONLY",
+      "disposition": "SIGNAL_ONLY",
+      "new_scoped_ids": [
+        null
+      ],
+      "related_active_ids": [],
+      "original_requirement_reactivated": false,
+      "full_original_criterion_claimed": false,
+      "reason": "Business data minimization cannot be concluded from source patterns. Existing detector remains investigative signal, not new PASS-capable requirement.",
+      "new_checks": []
+    },
+    {
+      "backlog_id": "MB-0078",
+      "original_title": "Strong TLS ciphers on upstream gateways",
+      "original_criterion": "Strong TLS ciphers on upstream gateways; assess only the collected Magento deployment scope.",
+      "feasibility_verdict": "SCOPED_AUTOMATION",
+      "disposition": "ADAPTER_PENDING",
+      "new_scoped_ids": [
+        null
+      ],
+      "related_active_ids": [
+        "MB-0028",
+        "MB-0778"
+      ],
+      "original_requirement_reactivated": false,
+      "full_original_criterion_claimed": false,
+      "reason": "No active complete cipher enumerator with client capability and endpoint binding was implemented. Protocol/certificate checks remain partial coverage, and first strong repository TLS declaration cannot establish gateway suite safety.",
+      "new_checks": []
+    },
+    {
+      "backlog_id": "MB-0079",
+      "original_title": "API keys stored in env.php (not in DB/plain code)",
+      "original_criterion": "API keys stored in env.php (not in DB/plain code); assess only the collected Magento deployment scope.",
+      "feasibility_verdict": "SCOPED_AUTOMATION",
+      "disposition": "ADAPTER_PENDING",
+      "new_scoped_ids": [
+        null
+      ],
+      "related_active_ids": [
+        "MB-0730"
+      ],
+      "original_requirement_reactivated": false,
+      "full_original_criterion_claimed": false,
+      "reason": "Needs real effective config/DB/secret-store provenance adapters and declared credential inventory; secret patterns cannot establish storage provenance.",
+      "new_checks": []
+    },
+    {
+      "backlog_id": "MB-0081",
+      "original_title": "SaaS integrations scoped by ACL (least privilege/IP allowlist)",
+      "original_criterion": "SaaS integrations scoped by ACL (least privilege/IP allowlist); assess only the collected Magento deployment scope.",
+      "feasibility_verdict": "SCOPED_AUTOMATION",
+      "disposition": "ADAPTER_PENDING",
+      "new_scoped_ids": [
+        null
+      ],
+      "related_active_ids": [],
+      "original_requirement_reactivated": false,
+      "full_original_criterion_claimed": false,
+      "reason": "No implemented complete integration policy/merged ACL plus network policy adapter in this owned new class. Source keywords are not effective access proof.",
+      "new_checks": []
+    }
+  ]
+}

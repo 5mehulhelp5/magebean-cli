@@ -1,0 +1,185 @@
+{
+  "added": [
+    {
+      "id": "MB-0786",
+      "kind": "sql_literal_query",
+      "strict_policy_gate": true,
+      "source_backlog_ids": [
+        "MB-0732"
+      ],
+      "profiles": [
+        "hardening",
+        "owasp-top-10-2025"
+      ]
+    },
+    {
+      "id": "MB-0787",
+      "kind": "csrf_unconditional_bypass",
+      "strict_policy_gate": false,
+      "source_backlog_ids": [
+        "MB-0015"
+      ],
+      "profiles": [
+        "hardening",
+        "owasp-top-10-2025"
+      ]
+    },
+    {
+      "id": "MB-0788",
+      "kind": "native_network",
+      "strict_policy_gate": true,
+      "source_backlog_ids": [
+        "MB-0016"
+      ],
+      "profiles": [
+        "hardening",
+        "owasp-top-10-2025"
+      ]
+    },
+    {
+      "id": "MB-0789",
+      "kind": "native_unserialize",
+      "strict_policy_gate": false,
+      "source_backlog_ids": [
+        "MB-0734"
+      ],
+      "profiles": [
+        "hardening",
+        "owasp-top-10-2025"
+      ]
+    },
+    {
+      "id": "MB-0790",
+      "kind": "shell_execution",
+      "strict_policy_gate": false,
+      "source_backlog_ids": [
+        "MB-0735"
+      ],
+      "profiles": [
+        "hardening",
+        "owasp-top-10-2025"
+      ]
+    },
+    {
+      "id": "MB-0791",
+      "kind": "dynamic_execution",
+      "strict_policy_gate": false,
+      "source_backlog_ids": [
+        "MB-0019"
+      ],
+      "profiles": [
+        "hardening",
+        "owasp-top-10-2025"
+      ]
+    },
+    {
+      "id": "MB-0792",
+      "kind": "native_filesystem",
+      "strict_policy_gate": true,
+      "source_backlog_ids": [
+        "MB-0020"
+      ],
+      "profiles": [
+        "hardening",
+        "owasp-top-10-2025"
+      ]
+    },
+    {
+      "id": "MB-0793",
+      "kind": "native_upload",
+      "strict_policy_gate": false,
+      "source_backlog_ids": [
+        "MB-0021"
+      ],
+      "profiles": [
+        "hardening",
+        "owasp-top-10-2025"
+      ]
+    },
+    {
+      "id": "MB-0794",
+      "kind": "weak_prng",
+      "strict_policy_gate": true,
+      "source_backlog_ids": [
+        "MB-0023"
+      ],
+      "profiles": [
+        "hardening",
+        "owasp-top-10-2025"
+      ]
+    },
+    {
+      "id": "MB-0795",
+      "kind": "direct_request_logging",
+      "strict_policy_gate": false,
+      "source_backlog_ids": [
+        "MB-0737",
+        "MB-0743",
+        "MB-0746"
+      ],
+      "profiles": [
+        "hardening",
+        "owasp-top-10-2025"
+      ]
+    },
+    {
+      "id": "MB-0796",
+      "kind": "raw_crypto_session",
+      "strict_policy_gate": true,
+      "source_backlog_ids": [
+        "MB-0025"
+      ],
+      "profiles": [
+        "hardening",
+        "owasp-top-10-2025"
+      ]
+    },
+    {
+      "id": "MB-0797",
+      "kind": "xml_external_features",
+      "strict_policy_gate": false,
+      "source_backlog_ids": [
+        "MB-0098"
+      ],
+      "profiles": [
+        "hardening",
+        "owasp-top-10-2025"
+      ]
+    },
+    {
+      "id": "MB-0798",
+      "kind": "literal_https",
+      "strict_policy_gate": true,
+      "source_backlog_ids": [
+        "MB-0073"
+      ],
+      "profiles": [
+        "hardening",
+        "owasp-top-10-2025"
+      ]
+    }
+  ],
+  "catalog_counts": {
+    "active_internal_requirements": 755,
+    "historical_allocations": 798,
+    "retired_identity_count": 43,
+    "families": {
+      "magebean": 130,
+      "asvs": 345,
+      "pci": 280
+    },
+    "asvs_alignment_references": 345,
+    "pci_alignment_references": 280,
+    "accepted_scoped_criteria": 70,
+    "human_evidence_required": 685
+  },
+  "profile_counts": {
+    "asvs-l1": 70,
+    "asvs-l2": 253,
+    "asvs-l3": 345,
+    "basic": 37,
+    "hardening": 70,
+    "owasp-top-10-2025": 44,
+    "pci-dss-v4.0.1": 280
+  }
+}

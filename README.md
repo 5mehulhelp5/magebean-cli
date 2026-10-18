@@ -20,7 +20,7 @@ Read the [requirement model](docs/requirement-model.md) and [ASVS L1/L2 migratio
 - **Target-aware scanning**: audit a Magento filesystem in LOCAL mode, a public storefront in REMOTE mode, or combine both evidence sources in HYBRID mode.
 - **Security profiles**: choose `basic`, ASVS Level 1–3, OWASP Top 10 2025, PCI DSS v4.0.1, `hardening`, or a custom profile.
 - **Automated and human checks**: selected profiles combine technical observations with structured human verification when independent evidence is required.
-- **Actionable results**: distinguish PASS, confirmed findings, and INCONCLUSIVE checks; inspect evidence, remediation guidance, and re-run commands for individual rules.
+- **Actionable results**: Basic, Hardening and Magebean OWASP prioritize findings requiring attention, including informational UNKNOWN/collection findings in the same workflow. Inspect evidence, remediation and verification guidance; standards profiles retain their assessment outcomes. See [findings-first reporting](docs/magebean-findings-first.md).
 - **PCI DSS workflow**: compile applicability context, import structured external evidence, and generate an evidence-readiness JSON report.
 - **Project policy**: customize capabilities, controls, exclusions, rule overrides, project-specific rules, and additional rule packs with `.magebean.json` or YAML.
 - **CI-friendly behavior**: use deterministic exit codes based on confirmed finding severity while keeping inconclusive checks separate.
@@ -64,9 +64,9 @@ php bin/magebean rules:list
   --path=/var/www/magento
 ```
 
-The current rule library contains **19 controls and 371 rules**: **113 automated** and **258 marked `HUMAN VERIFICATION REQUIRED`**.
+The primary catalog contains **764 requirements** in three separate families: **139 Magebean, 345 ASVS and 280 PCI**. Historical legacy rule counts describe the deprecated compatibility library, not current profile coverage.
 
-`scan` and `rules:list` use the 37-requirement `basic` profile by default. Basic includes 30 security and 7 readiness criteria plus six external evidence task groups, informed by Adobe guidance. Evidence tasks are never counted as PASS. Numeric thresholds are Magebean policy; observations do not certify Adobe compliance. Basic, Hardening and OWASP select Magebean criteria; ASVS and PCI select their own document clauses. Requirements needing human evidence are excluded by default; use `--include-manual-review` to include them. ASVS and PCI currently require that flag to produce an assessment plan. PCI supports `--pci-context`, `--pci-evidence` and `--pci-report` for applicability and readiness reporting.
+`scan` and `rules:list` use the 37-requirement `basic` profile by default. Basic includes 30 security and 7 readiness criteria informed by Adobe guidance. Basic, Hardening and Magebean OWASP are automated-only profiles, without human-evidence requirements or manual checklists. Unavailable technical evidence remains an execution error, never an implicit PASS. Numeric thresholds are Magebean policy. ASVS and PCI retain their independent document clauses and evidence workflows; use `--include-manual-review` for those assessments. PCI supports `--pci-context`, `--pci-evidence` and `--pci-report`.
 
 See [CLI Reference](docs/cli-reference.md) for all commands, options, profiles, target modes, and examples.
 
@@ -186,14 +186,16 @@ Selection order is: target pack → project policy → (`--rules` or profile) �
 | Profile | Source family | Inventory | Default LOCAL selection |
 |---|---|---:|---:|
 | `basic` | Magebean | 37 | 37 |
-| `hardening` | Magebean | 91 | 41 |
-| `owasp` | Magebean | 77 | 31 |
+| `hardening` | Magebean | 79 | 67 |
+| `owasp` | Magebean | 51 | 41 |
 | `asvs-l1` | ASVS 5.0.0 | 70 | 0 |
 | `asvs-l2` | ASVS 5.0.0 | 253 | 0 |
 | `asvs-l3` | ASVS 5.0.0 | 345 | 0 |
 | `pci` | PCI DSS 4.0.1 | 280 | 0 |
 
-Inventory includes contextual and human requirements. `--include-manual-review` enables human-required entries; capabilities and target mode can further limit execution. Zero default selection describes the current human gate, not absence of reusable technical checks. See [requirement source families](docs/requirement-source-families.md).
+ASVS/PCI inventories include contextual and human requirements. Their `--include-manual-review` flag enables human-required entries; capabilities and target mode can further limit execution. Zero default selection describes their evidence gate, not absence of reusable technical checks. Magebean native profiles contain only automated requirements. See [requirement source families](docs/requirement-source-families.md).
+Hardening includes every automated Basic and Magebean OWASP requirement plus deeper production checks. Fifty previous human-dependent members are tracked in `magebean-automation-backlog.json` outside executable profiles, preserving their original criteria for automation engineering. `--include-manual-review` does not restore them into Magebean profiles. This preserves honest coverage; it does not establish complete production protection.
+The automation review adds 22 fresh scoped requirements, MB-0786–MB-0807; it does not relabel the original 50 backlog criteria as automated. Strict native-API coding policies and checks requiring explicit machine targeting/expected-state policy are capability gated. Missing capabilities are listed as omitted requirements; enabled checks with missing or malformed machine input remain UNKNOWN. See [production machine policy](docs/automation-feasibility/production-policy.md) for typed inputs and capability names.
 Custom profile files can be passed to `--profile`, including profiles stored under `.magebean/profiles`.
 
 ### List and filter rules

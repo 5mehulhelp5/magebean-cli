@@ -19,9 +19,11 @@ try{
   basicAutoAssert(!str_contains(strtoupper($text),'INCONCLUSIVE')&&!str_contains($text,'HUMAN VERIFICATION REQUIRED'),'Basic has no inconclusive/human presentation');
   basicAutoAssert($result['summary']['total']===37,'All thirty-seven are attempted');
   basicAutoAssert(array_sum(array_column($result['summary']['lanes'],'total'))===37&&isset($result['summary']['lanes']['security'],$result['summary']['lanes']['readiness']),'Every attempted requirement has a security or readiness lane');
-  basicAutoAssert(count($result['evidence_tasks'])===6&&array_unique(array_column($result['evidence_tasks'],'status'))===['NOT_ASSESSED'],'External evidence remains explicitly unassessed outside automated requirement totals');
+  basicAutoAssert(empty($result['evidence_tasks']),'Magebean Basic has no human evidence checklist');
+  basicAutoAssert($result['coverage_summary']['inventory']===37&&$result['coverage_summary']['executed']===37,'Automated coverage counts actual profile observations');
+  basicAutoAssert($result['coverage_summary']['assessment_complete']===($case!=='ERROR'),'An unresolved collection blocks assessment coverage; a proven failure still completes assessment');
   if($case==='PASS'){basicAutoAssert($result['summary']['passed']===37&&$result['meta']['scan_complete'],'All verified basic checks pass');basicAutoAssert((new ScanExitPolicy())->code($result)===0,'Completed clean scan exits zero');}
-  if($case==='ERROR'){basicAutoAssert(count($result['execution_errors'])===1&&str_contains($text,'NEEDS ATTENTION (1)')&&!$result['meta']['scan_complete'],'Collection failure blocks scan completion');basicAutoAssert($result['summary']['failed']===0&&$result['findings'][array_search('MB-0030',$ids,true)]['status']==='UNKNOWN','Execution gap is neither vulnerability nor false PASS; wire status remains compatible');basicAutoAssert((new ScanExitPolicy())->code($result)===3,'Execution error exits three');}
+  if($case==='ERROR'){basicAutoAssert(count($result['execution_errors'])===1&&str_contains($text,'Needs attention')&&$result['summary']['needs_attention']===1&&!$result['meta']['scan_complete'],'Collection failure blocks scan completion');basicAutoAssert($result['summary']['failed']===0&&$result['findings'][array_search('MB-0030',$ids,true)]['status']==='UNKNOWN','Execution gap is neither vulnerability nor false PASS; wire status remains compatible');basicAutoAssert((new ScanExitPolicy())->code($result)===3,'Execution error exits three');}
   if($case==='FAIL')basicAutoAssert((new ScanExitPolicy())->code($result)===1&&$result['summary']['failed']===1,'Verified policy violation remains finding exitone');
  }
  basicAutoAssert((new ScanExitPolicy())->code(['findings'=>[['status'=>'UNKNOWN']]])===0,'Other profile exit policy unchanged');

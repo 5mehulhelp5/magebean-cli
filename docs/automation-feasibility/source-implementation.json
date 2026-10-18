@@ -1,0 +1,432 @@
+[
+  {
+    "backlog_id": "MB-0732",
+    "original_criterion": "No raw SQL without abstraction; assess only the collected Magento deployment scope.",
+    "ready": true,
+    "new_id_required": true,
+    "title": "Direct named query methods use a literal first argument",
+    "criterion": "Every syntactically named query/rawQuery/exec/executeQuery method call in collected custom PHP/PHTML uses one static string first argument, without direct concatenation or interpolation. Unresolved variables yield UNKNOWN. This does not prove parameter binding or SQL injection safety.",
+    "check": "automated_source_policy",
+    "check_args": {
+      "kind": "sql_literal_query",
+      "paths": [
+        "app/code"
+      ],
+      "include_ext": [
+        "php",
+        "phtml"
+      ]
+    },
+    "why": "Implemented and fixture-tested exact coding policy. Narrower than original criterion; never promote original ID or security assurance. Complete inventory and parser required.",
+    "validation": "tests/AutomatedSourcePolicyTest.php: 64 assertions",
+    "reuse_group": "sql_literal_query",
+    "new_id": "MB-0786"
+  },
+  {
+    "backlog_id": "MB-0733",
+    "original_criterion": "Template output is escaped; assess only the collected Magento deployment scope.",
+    "ready": false,
+    "new_id_required": true,
+    "title": null,
+    "criterion": null,
+    "check": null,
+    "check_args": null,
+    "why": "Needs real PHP/HTML context parser and trusted-fragment contracts; generic escaping-name search cannot enforce context correctness.",
+    "reuse_group": null
+  },
+  {
+    "backlog_id": "MB-0736",
+    "original_criterion": "Escaping for JS context; assess only the collected Magento deployment scope.",
+    "ready": false,
+    "new_id_required": true,
+    "title": null,
+    "criterion": null,
+    "check": null,
+    "check_args": null,
+    "why": "Needs nested HTML/JS context parser and installed serializer semantics; no keyword-based PASS implemented.",
+    "reuse_group": null
+  },
+  {
+    "backlog_id": "MB-0015",
+    "original_criterion": "Forms include CSRF tokens (form_key); assess only the collected Magento deployment scope.",
+    "ready": true,
+    "new_id_required": true,
+    "title": "No unconditional validateForCsrf acceptance override",
+    "criterion": "Collected custom PHP/PHTML contains no validateForCsrf method whose complete body is an unconditional return true. This exact bypass ban does not establish form tokens or server-side CSRF effectiveness.",
+    "check": "automated_source_policy",
+    "check_args": {
+      "kind": "csrf_unconditional_bypass",
+      "paths": [
+        "app/code"
+      ],
+      "include_ext": [
+        "php",
+        "phtml"
+      ]
+    },
+    "why": "Implemented and fixture-tested exact coding policy. Narrower than original criterion; never promote original ID or security assurance. Complete inventory and parser required.",
+    "validation": "tests/AutomatedSourcePolicyTest.php: 64 assertions",
+    "reuse_group": "csrf_unconditional_bypass",
+    "new_id": "MB-0787"
+  },
+  {
+    "backlog_id": "MB-0016",
+    "original_criterion": "SSRF protections present; assess only the collected Magento deployment scope.",
+    "ready": true,
+    "new_id_required": true,
+    "title": "Custom source avoids enumerated native network primitives",
+    "criterion": "Collected custom PHP/PHTML has no direct global calls to curl_exec, curl_multi_exec, fsockopen, pfsockopen, stream_socket_client or file_get_contents. Dynamic callable/alias ambiguity yields UNKNOWN. This explicit API restriction does not establish SSRF safety of framework adapters.",
+    "check": "automated_source_policy",
+    "check_args": {
+      "kind": "native_network",
+      "paths": [
+        "app/code"
+      ],
+      "include_ext": [
+        "php",
+        "phtml"
+      ]
+    },
+    "why": "Implemented and fixture-tested exact coding policy. Narrower than original criterion; never promote original ID or security assurance. Complete inventory and parser required.",
+    "validation": "tests/AutomatedSourcePolicyTest.php: 64 assertions",
+    "reuse_group": "native_network",
+    "new_id": "MB-0788"
+  },
+  {
+    "backlog_id": "MB-0734",
+    "original_criterion": "No unsafe deserialization; assess only the collected Magento deployment scope.",
+    "ready": true,
+    "new_id_required": true,
+    "title": "Custom source avoids native unserialize calls",
+    "criterion": "Collected custom PHP/PHTML contains no direct unqualified or fully-qualified global unserialize call, irrespective of allowed_classes options. Indirect calls and function aliases yield UNKNOWN. Other serializers remain outside this syntax policy.",
+    "check": "automated_source_policy",
+    "check_args": {
+      "kind": "native_unserialize",
+      "paths": [
+        "app/code"
+      ],
+      "include_ext": [
+        "php",
+        "phtml"
+      ]
+    },
+    "why": "Implemented and fixture-tested exact coding policy. Narrower than original criterion; never promote original ID or security assurance. Complete inventory and parser required.",
+    "validation": "tests/AutomatedSourcePolicyTest.php: 64 assertions",
+    "reuse_group": "native_unserialize",
+    "new_id": "MB-0789"
+  },
+  {
+    "backlog_id": "MB-0735",
+    "original_criterion": "Command execution is guarded; assess only the collected Magento deployment scope.",
+    "ready": true,
+    "new_id_required": true,
+    "title": "Custom source avoids enumerated shell/process primitives",
+    "criterion": "Collected custom PHP/PHTML contains no direct global exec/system/passthru/shell_exec/popen/proc_open/pcntl_exec invocation or shell backtick expression. Indirect calls and function aliases yield UNKNOWN; framework process adapters are outside this API ban.",
+    "check": "automated_source_policy",
+    "check_args": {
+      "kind": "shell_execution",
+      "paths": [
+        "app/code"
+      ],
+      "include_ext": [
+        "php",
+        "phtml"
+      ]
+    },
+    "why": "Implemented and fixture-tested exact coding policy. Narrower than original criterion; never promote original ID or security assurance. Complete inventory and parser required.",
+    "validation": "tests/AutomatedSourcePolicyTest.php: 64 assertions",
+    "reuse_group": "shell_execution",
+    "new_id": "MB-0790"
+  },
+  {
+    "backlog_id": "MB-0019",
+    "original_criterion": "No eval/assert/dynamic execution; assess only the collected Magento deployment scope.",
+    "ready": true,
+    "new_id_required": true,
+    "title": "Custom source avoids eval and create_function constructs",
+    "criterion": "Collected custom PHP/PHTML contains no eval construct or direct global create_function call. Dynamic include targets, indirect calls, function aliases and unresolved assertion semantics yield UNKNOWN. This is a construct policy, not general runtime execution assurance.",
+    "check": "automated_source_policy",
+    "check_args": {
+      "kind": "dynamic_execution",
+      "paths": [
+        "app/code"
+      ],
+      "include_ext": [
+        "php",
+        "phtml"
+      ]
+    },
+    "why": "Implemented and fixture-tested exact coding policy. Narrower than original criterion; never promote original ID or security assurance. Complete inventory and parser required.",
+    "validation": "tests/AutomatedSourcePolicyTest.php: 64 assertions",
+    "reuse_group": "dynamic_execution",
+    "new_id": "MB-0791"
+  },
+  {
+    "backlog_id": "MB-0020",
+    "original_criterion": "Path traversal protections; assess only the collected Magento deployment scope.",
+    "ready": true,
+    "new_id_required": true,
+    "title": "Custom source avoids enumerated raw filesystem primitives",
+    "criterion": "Collected custom PHP/PHTML contains no direct global file_get_contents/file_put_contents/fopen/readfile/unlink/rename/copy/scandir/glob call. Indirect calls and aliases yield UNKNOWN. This explicit API restriction does not establish path safety of framework adapters.",
+    "check": "automated_source_policy",
+    "check_args": {
+      "kind": "native_filesystem",
+      "paths": [
+        "app/code"
+      ],
+      "include_ext": [
+        "php",
+        "phtml"
+      ]
+    },
+    "why": "Implemented and fixture-tested exact coding policy. Narrower than original criterion; never promote original ID or security assurance. Complete inventory and parser required.",
+    "validation": "tests/AutomatedSourcePolicyTest.php: 64 assertions",
+    "reuse_group": "native_filesystem",
+    "new_id": "MB-0792"
+  },
+  {
+    "backlog_id": "MB-0021",
+    "original_criterion": "Secure file upload handling; assess only the collected Magento deployment scope.",
+    "ready": true,
+    "new_id_required": true,
+    "title": "Custom source avoids native upload move calls",
+    "criterion": "Collected custom PHP/PHTML contains no direct global move_uploaded_file invocation. Indirect calls and aliases yield UNKNOWN. This is an explicit native API restriction, not proof that other upload handlers validate content or authorization.",
+    "check": "automated_source_policy",
+    "check_args": {
+      "kind": "native_upload",
+      "paths": [
+        "app/code"
+      ],
+      "include_ext": [
+        "php",
+        "phtml"
+      ]
+    },
+    "why": "Implemented and fixture-tested exact coding policy. Narrower than original criterion; never promote original ID or security assurance. Complete inventory and parser required.",
+    "validation": "tests/AutomatedSourcePolicyTest.php: 64 assertions",
+    "reuse_group": "native_upload",
+    "new_id": "MB-0793"
+  },
+  {
+    "backlog_id": "MB-0023",
+    "original_criterion": "Use CSPRNG; avoid weak PRNG; assess only the collected Magento deployment scope.",
+    "ready": true,
+    "new_id_required": true,
+    "title": "Custom source avoids enumerated weak randomness APIs",
+    "criterion": "Collected custom PHP/PHTML contains no direct global rand/mt_rand/lcg_value/uniqid/srand/mt_srand call. Indirect calls and aliases yield UNKNOWN. This deliberately strict coding policy includes non-security uses; it does not establish entropy or token lifetime.",
+    "check": "automated_source_policy",
+    "check_args": {
+      "kind": "weak_prng",
+      "paths": [
+        "app/code"
+      ],
+      "include_ext": [
+        "php",
+        "phtml"
+      ]
+    },
+    "why": "Implemented and fixture-tested exact coding policy. Narrower than original criterion; never promote original ID or security assurance. Complete inventory and parser required.",
+    "validation": "tests/AutomatedSourcePolicyTest.php: 64 assertions",
+    "reuse_group": "weak_prng",
+    "new_id": "MB-0794"
+  },
+  {
+    "backlog_id": "MB-0737",
+    "original_criterion": "Sensitive data not logged; assess only the collected Magento deployment scope.",
+    "ready": true,
+    "new_id_required": true,
+    "title": "No direct request superglobals in named log method arguments",
+    "criterion": "Collected custom PHP/PHTML contains no $_GET/$_POST/$_REQUEST/$_COOKIE/$_SERVER/$_FILES token inside arguments of syntactically named log/debug/info/notice/warning/error/critical/alert/emergency method calls. This exact syntax rule does not prove absence of sensitive data in arbitrary logs.",
+    "check": "automated_source_policy",
+    "check_args": {
+      "kind": "direct_request_logging",
+      "paths": [
+        "app/code"
+      ],
+      "include_ext": [
+        "php",
+        "phtml"
+      ]
+    },
+    "why": "Implemented and fixture-tested exact coding policy. Narrower than original criterion; never promote original ID or security assurance. Complete inventory and parser required.",
+    "validation": "tests/AutomatedSourcePolicyTest.php: 64 assertions",
+    "reuse_group": "direct_request_logging",
+    "new_id": "MB-0795"
+  },
+  {
+    "backlog_id": "MB-0743",
+    "original_criterion": "PII not logged in application logs; assess only the collected Magento deployment scope.",
+    "ready": true,
+    "new_id_required": true,
+    "title": "No direct request superglobals in named log method arguments",
+    "criterion": "Collected custom PHP/PHTML contains no direct request-superglobal tokens inside named log method call arguments. Share one new policy with MB-0737 and MB-0746; do not claim all PII is absent.",
+    "check": "automated_source_policy",
+    "check_args": {
+      "kind": "direct_request_logging",
+      "paths": [
+        "app/code"
+      ],
+      "include_ext": [
+        "php",
+        "phtml"
+      ]
+    },
+    "why": "Implemented and fixture-tested exact coding policy. Narrower than original criterion; never promote original ID or security assurance. Complete inventory and parser required.",
+    "validation": "tests/AutomatedSourcePolicyTest.php: 64 assertions",
+    "reuse_group": "direct_request_logging",
+    "new_id": "MB-0795"
+  },
+  {
+    "backlog_id": "MB-0746",
+    "original_criterion": "Third-party logging sanitized (mask/redact); assess only the collected Magento deployment scope.",
+    "ready": true,
+    "new_id_required": true,
+    "title": "No direct request superglobals in named log method arguments",
+    "criterion": "Collected custom PHP/PHTML contains no direct request-superglobal tokens inside named log method call arguments. Share one new policy with MB-0737 and MB-0743; third-party sink sanitization remains unverified.",
+    "check": "automated_source_policy",
+    "check_args": {
+      "kind": "direct_request_logging",
+      "paths": [
+        "app/code"
+      ],
+      "include_ext": [
+        "php",
+        "phtml"
+      ]
+    },
+    "why": "Implemented and fixture-tested exact coding policy. Narrower than original criterion; never promote original ID or security assurance. Complete inventory and parser required.",
+    "validation": "tests/AutomatedSourcePolicyTest.php: 64 assertions",
+    "reuse_group": "direct_request_logging",
+    "new_id": "MB-0795"
+  },
+  {
+    "backlog_id": "MB-0025",
+    "original_criterion": "No unsafe raw crypto or session APIs in custom code; assess only the collected Magento deployment scope.",
+    "ready": true,
+    "new_id_required": true,
+    "title": "Custom source avoids enumerated raw crypto and session APIs",
+    "criterion": "Collected custom PHP/PHTML contains no direct global session_start/session_id/session_regenerate_id/session_set_save_handler/mcrypt_encrypt/mcrypt_decrypt/md5/sha1/crypt/openssl_encrypt/openssl_decrypt call. This explicit coding restriction also bans legitimate non-security hash uses; it does not prove framework cryptography/session semantics.",
+    "check": "automated_source_policy",
+    "check_args": {
+      "kind": "raw_crypto_session",
+      "paths": [
+        "app/code"
+      ],
+      "include_ext": [
+        "php",
+        "phtml"
+      ]
+    },
+    "why": "Implemented and fixture-tested exact coding policy. Narrower than original criterion; never promote original ID or security assurance. Complete inventory and parser required.",
+    "validation": "tests/AutomatedSourcePolicyTest.php: 64 assertions",
+    "reuse_group": "raw_crypto_session",
+    "new_id": "MB-0796"
+  },
+  {
+    "backlog_id": "MB-0094",
+    "original_criterion": "Custom controllers and APIs include function-level authorization; assess only the collected Magento deployment scope.",
+    "ready": false,
+    "new_id_required": true,
+    "title": null,
+    "criterion": null,
+    "check": null,
+    "check_args": null,
+    "why": "Needs complete route/role manifests, real Magento isolated deployment and side-effect oracles; no source-name substitution for authorization.",
+    "reuse_group": null
+  },
+  {
+    "backlog_id": "MB-0097",
+    "original_criterion": "Secrets are not hardcoded in custom code; assess only the collected Magento deployment scope.",
+    "ready": true,
+    "new_id_required": false,
+    "existing_active_id": "MB-0730",
+    "title": "Reuse existing supported deployment secret signature policy",
+    "criterion": "Retain the existing MB-0730 bounded supported-signature criterion; do not restore blanket no-secrets criterion.",
+    "check": "working_tree_secret_scan",
+    "check_args": null,
+    "why": "Already active scoped coverage; root should reuse existing catalog recipe, not add a duplicate.",
+    "reuse_group": "MB-0730"
+  },
+  {
+    "backlog_id": "MB-0098",
+    "original_criterion": "Unsafe XML parsing disabled; assess only the collected Magento deployment scope.",
+    "ready": true,
+    "new_id_required": true,
+    "title": "No enumerated XML external feature constructs in custom source",
+    "criterion": "Collected custom PHP/PHTML contains no token reference to LIBXML_NOENT/LIBXML_DTDLOAD/LIBXML_DTDATTR, no resolveExternals/substituteEntities/validateOnParse assignment except literal false, and no syntactically named xinclude or xml_set_external_entity_ref_handler invocation. This exact construct ban does not establish every parser default or runtime configuration.",
+    "check": "automated_source_policy",
+    "check_args": {
+      "kind": "xml_external_features",
+      "paths": [
+        "app/code"
+      ],
+      "include_ext": [
+        "php",
+        "phtml"
+      ]
+    },
+    "why": "Implemented and fixture-tested exact coding policy. Narrower than original criterion; never promote original ID or security assurance. Complete inventory and parser required.",
+    "validation": "tests/AutomatedSourcePolicyTest.php: 64 assertions",
+    "reuse_group": "xml_external_features",
+    "new_id": "MB-0797"
+  },
+  {
+    "backlog_id": "MB-0099",
+    "original_criterion": "File download and export endpoints require authorization; assess only the collected Magento deployment scope.",
+    "ready": false,
+    "new_id_required": true,
+    "title": null,
+    "criterion": null,
+    "check": null,
+    "check_args": null,
+    "why": "Needs real route/role/ownership integration fixtures and protected-byte oracle; no fake runtime adapter.",
+    "reuse_group": null
+  },
+  {
+    "backlog_id": "MB-0073",
+    "original_criterion": "HTTPS-only endpoints configured; assess only the collected Magento deployment scope.",
+    "ready": true,
+    "new_id_required": true,
+    "title": "No plain HTTP standalone PHP string literals in custom source",
+    "criterion": "Collected custom PHP/PHTML contains no standalone constant string literal beginning http://. Comments are excluded. This deliberately strict literal policy includes non-endpoint examples and does not establish effective endpoint inventory, TLS verification or runtime interpolation.",
+    "check": "automated_source_policy",
+    "check_args": {
+      "kind": "literal_https",
+      "paths": [
+        "app/code"
+      ],
+      "include_ext": [
+        "php",
+        "phtml"
+      ]
+    },
+    "why": "Implemented and fixture-tested exact coding policy. Narrower than original criterion; never promote original ID or security assurance. Complete inventory and parser required.",
+    "validation": "tests/AutomatedSourcePolicyTest.php: 64 assertions",
+    "reuse_group": "literal_https",
+    "new_id": "MB-0798"
+  },
+  {
+    "backlog_id": "MB-0075",
+    "original_criterion": "Webhook signature validation present; assess only the collected Magento deployment scope.",
+    "ready": false,
+    "new_id_required": true,
+    "title": null,
+    "criterion": null,
+    "check": null,
+    "check_args": null,
+    "why": "Needs declared provider versions, actual adapter signature contracts and isolated side-effect/replay tests; provider-specific details pending.",
+    "reuse_group": null
+  },
+  {
+    "backlog_id": "MB-0079",
+    "original_criterion": "API keys stored in env.php (not in DB/plain code); assess only the collected Magento deployment scope.",
+    "ready": false,
+    "new_id_required": true,
+    "title": null,
+    "criterion": null,
+    "check": null,
+    "check_args": null,
+    "why": "Needs real effective config/DB/secret-store provenance adapters and declared credential inventory; secret patterns cannot establish storage provenance.",
+    "reuse_group": null
+  }
+]

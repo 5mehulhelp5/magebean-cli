@@ -60,9 +60,12 @@ final class ScanReportAssembler
         if (($plan->metadata['automationOnly'] ?? $activeProfile['automation_only'] ?? false) === true && ($result['meta']['assessment_model'] ?? '') === 'internal-requirement-v1') {
             $executionErrors = [];
             foreach ($result['findings'] as &$finding) {
-                if (!in_array(strtoupper((string)($finding['status'] ?? '')), ['UNKNOWN', 'MANUAL_REVIEW'], true)) continue;
+                $risk = $finding['risk_observation'] ?? null;
+                if (is_array($risk)) {
+                    if ($risk['collection_complete']) continue;
+                } elseif (!in_array(strtoupper((string)($finding['status'] ?? '')), ['UNKNOWN', 'MANUAL_REVIEW'], true)) continue;
                 $finding['message'] = preg_replace('/^Necessary requirement evidence is missing, incomplete or indeterminate\.\s*/', '', (string)($finding['message'] ?? '')) ?: 'Automated check could not complete; inspect collection details.';
-                $finding['classification'] = 'execution_error';
+                $finding['classification'] = !empty($risk['needs_attention']) ? 'risk_observation' : 'execution_error';
                 $finding['execution_status'] = 'ERROR';
                 $executionErrors[] = ['id' => $finding['id'], 'message' => $finding['message'] ?? '', 'reason_code' => $finding['reason_code'] ?? null, 'collection_guidance' => $finding['collection_guidance'] ?? null];
             }
@@ -90,8 +93,59 @@ final class ScanReportAssembler
         }
         unset($finding);
         if ($lanes !== []) $result['summary']['lanes'] = $lanes;
+        if (($activeProfile['family'] ?? '') === 'magebean' && !empty($activeProfile['automation_only'])) {
+            $result['meta']['findings_first'] = true;
+            $result['risk_findings'] = [];
+            $result['collection_issues'] = [];
+            foreach ($result['findings'] as $finding) {
+                $risk = $finding['risk_observation'] ?? null;
+                if (!is_array($risk)) continue;
+                if ($risk['needs_attention']) {
+                    $attention = $finding;
+                    $attention['message'] = $risk['findings'][0]['message'] ?? $finding['message'];
+                    $attention['classification'] = 'risk_observation';
+                    if (array_filter($risk['findings'], static fn(array $row):bool => ($row['kind'] ?? '') !== 'collection_issue') === []) {
+                        $attention['severity'] = 'info';
+                        $attention['title'] = $attention['message'];
+                        $attention['requirement']['lane'] = 'collection';
+                        $attention['requirement']['finding_guidance'] = [];
+                        $attention['remediation'] = array_values(array_unique(array_filter(array_map(static fn(array $row):string => $row['evidence']['collection_guidance']['action'] ?? '', $risk['findings']))));
+                    }
+                    $result['risk_findings'][] = $attention;
+                }
+                foreach ($risk['collection_gaps'] as $gap) {
+                    foreach ($finding['detail'] ?? [] as $detail) {
+                        if (($detail['check'] ?? '') === ($gap['check'] ?? '') && !empty($detail['collection_guidance'])) {
+                            $gap['collection_guidance'] = $detail['collection_guidance'];
+                            break;
+                        }
+                    }
+                    $gap['collection_guidance'] ??= $finding['collection_guidance'] ?? [];
+                    $result['collection_issues'][] = ['id'=>$finding['id']] + $gap;
+                }
+            }
+            $result['risk_findings'] = SourceIssueGrouping::group($result['risk_findings']);
+            $result['summary']['needs_attention'] = count($result['risk_findings']);
+            $result['summary']['collection_issues'] = count($result['collection_issues']);
+        }
         if (!empty($activeProfile['evidence_tasks'])) {
             $result['evidence_tasks'] = array_map(static fn(array $task): array => array_merge($task, ['status' => 'NOT_ASSESSED']), $activeProfile['evidence_tasks']);
+        }
+        if (!empty($activeProfile['show_unassessed_requirements']) || !empty($activeProfile['automation_only'])) {
+            $profile=RequirementProfileCatalog::load($activeProfile['id']);
+            $catalog=array_column(RequirementCatalog::loadAll()['rules'],null,'id');
+            $executed=array_column($result['findings'],null,'id');
+            $omitted=array_column($result['meta']['omitted_requirements']??[],null,'id');
+            $notEvaluated=[];
+            foreach ($profile['requirement_ids'] as $id) {
+                if (isset($executed[$id])) continue;
+                $definition=$catalog[$id];
+                $reason=$omitted[$id]['reason_code']??(!$includeManualReview&&!$hasExplicitRuleSelection&&RequirementPolicy::requiresHuman($definition)?'HUMAN_EVIDENCE_NOT_INCLUDED':'NOT_SELECTED');
+                $notEvaluated[]=['id'=>$id,'title'=>$definition['title'],'status'=>'NOT_ASSESSED','reason_code'=>$reason];
+            }
+            $result['not_evaluated_requirements']=$notEvaluated;
+            $unresolved=count(array_filter($result['findings'],static fn(array $f):bool=>!in_array($f['status'],['PASS','FAIL'],true)));
+            $result['coverage_summary']=['inventory'=>count($profile['requirement_ids']),'executed'=>count(array_intersect(array_keys($executed),$profile['requirement_ids'])),'not_evaluated'=>count($notEvaluated),'unresolved'=>$unresolved,'external_evidence_groups'=>count($result['evidence_tasks']??[]),'assessment_complete'=>$notEvaluated===[]&&$unresolved===0&&empty($result['evidence_tasks'])];
         }
 
         if ($isPciProfile) {
