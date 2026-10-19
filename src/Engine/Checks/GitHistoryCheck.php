@@ -107,9 +107,6 @@ final class GitHistoryCheck
             if ($evidence['truncated']) {
                 $message .= "\n    Additional matches were omitted after reaching max_results.";
             }
-            if ($requireHistory && !$history['assessed']) {
-                $message .= "\n    Git history was not assessable: " . $history['error'];
-            }
             return [false, $message, $evidence];
         }
 

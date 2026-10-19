@@ -144,7 +144,7 @@ try {
     $actual['hybrid_scan'] = compatibilityCommand('scan', ['--path' => $root, '--url' => $url, '--rules' => 'MB-R032']);
     $actual['remote_scan'] = compatibilityCommand('scan', ['--url' => $url, '--rules' => 'MB-R032']);
     $actual['remote_inconclusive'] = compatibilityCommand('scan', ['--url' => $url . '/not-magento', '--rules' => 'MB-R032']);
-    foreach (['HYBRID' => $actual['hybrid_scan'], 'REMOTE' => $actual['remote_scan']] as $mode => $case) compatibilityAssert($case['exit'] === 0 && str_contains($case['output'], 'Target mode: ' . $mode), 'Mode fixture failed: ' . $mode);
+    foreach (['LOCAL' => $actual['hybrid_scan'], 'REMOTE' => $actual['remote_scan']] as $mode => $case) compatibilityAssert($case['exit'] === 0 && str_contains($case['output'], 'Target mode: ' . $mode), 'Mode fixture failed: ' . $mode);
     foreach ([['--path' => ''], ['--path' => $root, '--rules' => 'DOES-NOT-EXIST'], ['--path' => $root, '--profile' => 'basic', '--pci-context' => 'missing.json']] as $i => $input)
         $actual['invalid_inputs'][$i] = compatibilityCommand('scan', $input);
 

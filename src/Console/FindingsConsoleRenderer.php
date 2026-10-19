@@ -19,7 +19,7 @@ final class FindingsConsoleRenderer
         $risks=array_values(array_filter($result['risk_findings']??[],static fn(array $f):bool=>($f['risk_observation']['needs_attention']??false)===true));
         $issues=$result['collection_issues']??[];
         $covered=[];
-        foreach($risks as$f)foreach($f['risk_observation']['findings']??[]as$o)if(($o['kind']??'')==='collection_issue')foreach($f['related_requirement_ids']??[$f['id']??'']as$id)$covered[$id.'|'.($o['check']??'')]=true;
+        foreach($risks as$f)foreach($f['risk_observation']['findings']??[]as$o)if(($o['kind']??'')==='collection_issue')$covered[($f['id']??'').'|'.($o['check']??'')]=true;
         $issues=array_values(array_filter($issues,static fn(array $i):bool=>!isset($covered[($i['id']??'').'|'.($i['check']??'')])&&!isset($covered[($i['id']??'').'|requirement_assessment'])));
         $order=['critical'=>0,'high'=>1,'medium'=>2,'low'=>3,'info'=>4];
         usort($risks,static fn(array $a,array $b):int=>($order[strtolower($a['severity']??'low')]??4)<=>($order[strtolower($b['severity']??'low')]??4));
@@ -54,7 +54,6 @@ final class FindingsConsoleRenderer
             $out->writeln('');$this->rule($out);
             $severity=strtolower($finding['severity']??'low');
             $this->line($out,sprintf('%02d  %s  %s',$i+1,strtoupper($severity),$finding['id']??''),'',$this->severityStyle($severity).';options=bold');
-            if(count($finding['related_requirement_ids']??[])>1)$this->line($out,'Affected checks: '.implode(', ',$finding['related_requirement_ids']),'  ','fg=gray');
             foreach($finding['risk_observation']['findings']as$observation){
                 $this->line($out,$observation['message']??'Observed issue','  ','options=bold');
                 if(($observation['kind']??'')==='collection_issue'&&!empty($observation['evidence']['collection_guidance']['action']))$this->line($out,'How to resolve '.($finding['id']??'').': '.$observation['evidence']['collection_guidance']['action'],'    ','fg=gray');

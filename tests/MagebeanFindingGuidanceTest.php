@@ -10,7 +10,13 @@ guideAssert(count($catalog)===139,'Review covers entire Magebean family includin
 foreach($catalog as$r){
  guideAssert(count($r['remediation']??[])>=3,'Change, verify and rerun guidance exists '.$r['id']);
  guideAssert(!empty($r['finding_guidance']['triage'])&&!empty($r['finding_guidance']['verification']),'Investigation and validation exist '.$r['id']);
+ guideAssert(($r['finding_guidance']['version']??0)===2,'Current editorial version '.$r['id']);
+ guideAssert(($r['finding_guidance']['expected_observation']['criterion']??'')===$r['criterion'],'Guidance follows exact requirement scope '.$r['id']);
+ guideAssert(($r['finding_guidance']['expected_observation']['checks']??[])===array_values(array_unique(array_column($r['checks'],'name'))),'Guidance names actual checks '.$r['id']);
+ guideAssert(count($r['finding_guidance']['verification'])>=3,'Functional verification and rescan are distinct '.$r['id']);
 }
+$aggregate=array_column(RequirementCatalog::read('internal-catalog')['requirements'],null,'id');
+foreach($catalog as$r)guideAssert($aggregate[$r['id']]===$r,'Import aggregate and runtime catalog agree '.$r['id']);
 foreach(['asvs','pci'] as$family)foreach(RequirementCatalog::read($family.'-catalog')['requirements']as$r)guideAssert(!isset($r['finding_guidance']),'Magebean editorial guidance does not rewrite standard clauses');
 $root=sys_get_temp_dir().'/mb-guidance-'.bin2hex(random_bytes(5));mkdir($root.'/app/code/Example',0777,true);
 try{

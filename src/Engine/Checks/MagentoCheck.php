@@ -979,7 +979,14 @@ final class MagentoCheck
 
     private function baseUrl(): string
     {
+        if (strtoupper((string)($this->ctx->get('meta',[])['target_mode']??'LOCAL')) !== 'REMOTE'
+            && \Magebean\Engine\ScanTargetResolver::isMagentoRoot($this->ctx->path)) {
+            return (string)($this->configuredBaseUrl()['url']??'');
+        }
         $url = (string)$this->ctx->get('url', '');
+        if (($url === '' || $url === '.') && strtoupper((string)($this->ctx->get('meta',[])['target_mode']??'LOCAL')) !== 'REMOTE') {
+            $url = (string)($this->configuredBaseUrl()['url'] ?? '');
+        }
         if ($url === '' || !preg_match('~^https?://~i', $url)) {
             return '';
         }

@@ -41,6 +41,6 @@ ROUTER);
  runtimeHttpAssert($assess('PHPSESSID=x; Securely; HttpOnlyFake; SameSite=Lax')['ok']===false,'Attribute substrings do not prove security flags.');
  runtimeHttpAssert($assess('PHPSESSID=x; Secure; HttpOnly; SameSite=None')['ok']===false,'Disallowed SameSite fails.');
  runtimeHttpAssert($assess('form_key=x')===null,'Client-readable Magento form key is excluded.');
- $missing=new HttpCheck(new Context($root,''));runtimeHttpAssert(str_contains($missing->dispatch('http_force_https_redirect',['strict_scope'=>true])[1],'--url'),'Missing URL produces actionable UNKNOWN.');
+ $missing=new HttpCheck(new Context($root,''));runtimeHttpAssert(str_contains($missing->dispatch('http_force_https_redirect',['strict_scope'=>true])[1],'store configuration'),'Missing URL produces actionable UNKNOWN.');
  echo "HttpRuntimeCompletionTest passed\n";
 }finally{if(is_resource($server)){proc_terminate($server);proc_close($server);}foreach(new RecursiveIteratorIterator(new RecursiveDirectoryIterator($root,FilesystemIterator::SKIP_DOTS),RecursiveIteratorIterator::CHILD_FIRST)as$f){$f->isDir()?rmdir($f->getPathname()):unlink($f->getPathname());}rmdir($root);}

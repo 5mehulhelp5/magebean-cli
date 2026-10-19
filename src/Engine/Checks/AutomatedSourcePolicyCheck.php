@@ -27,6 +27,11 @@ final class AutomatedSourcePolicyCheck
         $inventory=($this->inventory??new BoundedSourceInventory())->collect($this->ctx,$args);
         $evidence=$inventory;unset($evidence['files']);$evidence['policy']=$kind;$evidence['violations']=[];
         $evidence['limitations']=['Exact syntactic policy only; excludes dependencies, generated code and files outside the declared scope.','No dataflow, business authorization or runtime exploitability conclusion.'];
+        if($this->emptyOptionalCustomScope($inventory)){
+            $evidence['scope_state']='empty_optional_custom_source';
+            $evidence['complete']=true;$evidence['gaps']=[];$evidence['analysis_gaps']=[];$evidence['inspection_issues']=[];
+            return CheckResult::of(CheckOutcome::Pass,'No custom PHP/PHTML files exist in the optional app/code scope of this Magento deployment; no source finding was produced.',$evidence,'SOURCE_SCOPE_EMPTY');
+        }
         $gaps=[];
         foreach($inventory['files'] as $file){
             if(microtime(true)>$deadline){$gaps[]=['file'=>$file['file'],'reason'=>'analysis_deadline_exceeded'];break;}
@@ -110,5 +115,15 @@ final class AutomatedSourcePolicyCheck
             return CheckResult::of(CheckOutcome::Unknown,'[UNKNOWN] '.$message,$evidence,'SOURCE_POLICY_INCOMPLETE');
         }
         return CheckResult::of(CheckOutcome::Pass,'Every collected eligible source file satisfies the declared '.$kind.' syntax policy.',$evidence,'SOURCE_POLICY_SATISFIED');
+    }
+
+    private function emptyOptionalCustomScope(array $inventory):bool
+    {
+        if(($inventory['files_read']??0)!==0||array_map(static fn(string $p):string=>trim(str_replace('\\','/',$p),'/'),$inventory['scope']??[])!==['app/code'])return false;
+        if(($this->ctx->get('meta',[])['target_mode']??'')==='REMOTE')return false;
+        foreach(['bin/magento','app/etc/config.php']as$marker)if(!is_file($this->ctx->abs($marker))||!is_readable($this->ctx->abs($marker))||is_link($this->ctx->abs($marker)))return false;
+        foreach($inventory['gaps']??[]as$gap)if(!in_array($gap['reason']??'', ['missing_source_path','no_eligible_source_files'],true))return false;
+        $source=$this->ctx->abs('app/code');
+        return !is_link($source)&&(!file_exists($source)||(is_dir($source)&&is_readable($source)));
     }
 }

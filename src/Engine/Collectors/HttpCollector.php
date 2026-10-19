@@ -90,7 +90,8 @@ final class HttpCollector
         $action = 'Verify that the resolved URL is reachable from the scanner and retry; inspect proxy/firewall routing if the site works only from your browser.';
         if (preg_match('~certificate|peer verification|self.signed~i', $error)) {
             $kind = 'HTTP_TLS_TRUST_FAILED';
-            $action = 'Check the endpoint certificate hostname and trust chain. Install the private root CA in the scanner trust store or configure curl.cainfo / openssl.cafile; keep certificate verification enabled.';
+            $steps = \Magebean\Engine\TlsCollectionGuidance::steps();
+            $action = implode(' ', $steps);
         } elseif (preg_match('~SSL|crypto|TLS~i', $error)) {
             $kind = 'HTTP_TLS_FAILED';
             $action = 'Verify that the resolved HTTPS port serves TLS and supports modern protocols/ciphers accepted by the scanner OpenSSL/cURL client; inspect the negotiation error before rerunning.';
@@ -105,7 +106,7 @@ final class HttpCollector
         $safeUrl = preg_replace('~^(https?://)[^/@]+@~i', '$1', $url) ?? $url;
         $safeUrl = preg_replace('~[?#].*$~', '', $safeUrl) ?? $safeUrl;
         $safeError = str_replace($url, $safeUrl, $error);
-        return [null, '[UNKNOWN] HTTP error: ' . $safeError, ['url' => $safeUrl, 'transport_error' => true, 'reason_code' => $kind, 'backend' => $backend, 'action' => $action]];
+        return [null, '[UNKNOWN] HTTP error: ' . $safeError, ['url' => $safeUrl, 'transport_error' => true, 'reason_code' => $kind, 'backend' => $backend, 'action' => $action] + (isset($steps) ? ['steps'=>$steps] : [])];
     }
     /** Resolve each redirect hop, including relative Location values, for stream evidence. */
     private function redirectUrl(string $base, string $location): string

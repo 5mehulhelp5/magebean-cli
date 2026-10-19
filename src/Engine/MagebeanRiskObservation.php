@@ -54,6 +54,9 @@ final class MagebeanRiskObservation
                     $out['collection_complete']=false;
                     if(count($out['collection_gaps'])<self::MAX_ROWS)$out['collection_gaps'][]=$row;
                     else $out['collection_gaps_truncated']=true;
+                    // Missing scanner input is execution metadata, never a website risk finding.
+                    if (($check['evidence']['reason_code']??$row['reason_code'])==='SCAN_INPUT_URL_MISSING'
+                        || preg_match('/^(?:\[UNKNOWN\]\s*)?(?:Runtime URL unavailable\b|Supply canonical --url\b)/i',$row['message'])) continue;
                     $inspectionIssues=$check['evidence']['inspection_issues']??null;
                     if(is_array($inspectionIssues)&&$inspectionIssues!==[]){
                         foreach($inspectionIssues as$issue){
@@ -78,8 +81,7 @@ final class MagebeanRiskObservation
         if($observedChecks===0&&$assessment->outcome===RequirementOutcome::Unknown){
             $out['collection_complete']=false;
             $out['collection_gaps'][]=['check'=>'','message'=>$assessment->message,'reason_code'=>$assessment->reasonCode];
-            $out['needs_attention']=true;
-            $out['findings'][]=['check'=>'requirement_assessment','kind'=>'collection_issue','message'=>preg_replace('/^\[UNKNOWN\]\s*/','',$assessment->message),'reason_code'=>$assessment->reasonCode,'evidence'=>[]];
+            // No check ran: applicability/binding state is execution metadata, not an observed issue.
         }
         return $out;
     }

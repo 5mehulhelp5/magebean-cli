@@ -55,6 +55,16 @@ composer install
 php bin/magebean rules:list
 ```
 
+### Build a release PHAR
+
+```bash
+php tools/build-phar.php
+# Alternate artifact path:
+php tools/build-phar.php --one-time
+```
+
+The build uses only application runtime files and production Composer packages, regenerates the production autoloader, and rejects nested PHARs, artifacts, tests/docs and dev packages. A candidate must pass manifest and runtime smoke checks before replacing the release; the previous binary is saved under ignored `build/`. Keep Composer and `box.phar` available as build tools; they are not bundled. See [release packaging](docs/release-packaging.md).
+
 ---
 
 ## 🧪 Quick Start

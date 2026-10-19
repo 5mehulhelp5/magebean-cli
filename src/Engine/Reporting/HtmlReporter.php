@@ -220,7 +220,7 @@ final class HtmlReporter
         $risks = array_values(array_filter($result['risk_findings'] ?? [], static fn(array $f): bool => ($f['risk_observation']['needs_attention'] ?? false) === true));
         $issues = array_values($result['collection_issues'] ?? []);
         $covered=[];
-        foreach($risks as$f)foreach($f['risk_observation']['findings']??[]as$o)if(($o['kind']??'')==='collection_issue')foreach($f['related_requirement_ids']??[$f['id']??'']as$id)$covered[$id.'|'.($o['check']??'')]=true;
+        foreach($risks as$f)foreach($f['risk_observation']['findings']??[]as$o)if(($o['kind']??'')==='collection_issue')$covered[($f['id']??'').'|'.($o['check']??'')]=true;
         $issues=array_values(array_filter($issues,static fn(array $i):bool=>!isset($covered[($i['id']??'').'|'.($i['check']??'')])&&!isset($covered[($i['id']??'').'|requirement_assessment'])));
         $html = '<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Magebean risk observations</title><style>body{font:16px/1.5 system-ui,sans-serif;max-width:1080px;margin:32px auto;padding:0 20px;color:#23312d;background:#faf9f7}section{background:white;border:1px solid #ddd6cf;border-radius:10px;padding:20px;margin:20px 0}h1,h2,h3{line-height:1.25}li{margin:8px 0}.badge{color:#9c3213;font-weight:600}pre{white-space:pre-wrap;overflow-wrap:anywhere}small{color:#596860}</style></head><body><h1>Magebean risk observations</h1>';
         $html .= '<p>Profile: ' . $escape($result['meta']['profile']['title'] ?? $result['meta']['standard'] ?? 'Magebean') . '</p><p>Target: ' . $escape($result['summary']['path'] ?? $result['meta']['path'] ?? '') . '</p>';
@@ -230,7 +230,6 @@ final class HtmlReporter
         $html .= '<p>Observations identify work to investigate; absence of findings does not establish complete production protection.</p></section>';
         foreach ($risks as $finding) {
             $html .= '<section><span class="badge">Needs attention</span><h2>' . $escape($finding['id'] ?? '') . ' — ' . $escape($finding['title'] ?? 'Risk observation') . '</h2><p>Severity: ' . $escape($finding['severity'] ?? 'Low') . ' · ' . $escape($finding['requirement']['lane'] ?? 'security') . '</p>';
-            if(count($finding['related_requirement_ids']??[])>1)$html.='<p>Affected checks: '.$escape(implode(', ',$finding['related_requirement_ids'])).'</p>';
             foreach ($finding['risk_observation']['findings'] ?? [] as $observation) {
                 $html .= '<h3>' . $escape($observation['check'] ?? 'Observation') . '</h3><p>' . $escape($observation['message'] ?? 'Risk indicator observed') . '</p>';
                 if(($observation['kind']??'')==='collection_issue'&&!empty($observation['evidence']['collection_guidance']['action']))$html.='<p>Collection action: '.$escape($observation['evidence']['collection_guidance']['action']).'</p>';

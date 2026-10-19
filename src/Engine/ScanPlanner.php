@@ -172,7 +172,12 @@ final class ScanPlanner
             $mode=strtoupper((string)($request->context->get('meta',[])['target_mode']??'LOCAL'));if($mode==='HYBRID')$mode='LOCAL';
             if(!in_array($mode,$r['target_modes'],true)){$unsupported[]=['assessment_item_id'=>(string)($entry['assessment_item_id']??''),'rule_key'=>$id,'status'=>'unsupported','message'=>'Requirement is unavailable in this target mode.'];continue;}
             if(isset($r['execution_variants'][$mode]['obligations'])){$r['obligations']=$r['execution_variants'][$mode]['obligations'];$r['checks']=array_merge(...array_map(static fn(array $o):array=>$o['checks'],$r['obligations']));$r['execution_scope']=$mode;}
-            if(isset($r['applicability']['capability'])){$cap=$r['applicability']['capability'];$caps=is_array($manifest['capabilities']??null)?$manifest['capabilities']:[];$enabled=array_is_list($caps)?in_array($cap,$caps,true):filter_var($caps[$cap]??false,FILTER_VALIDATE_BOOLEAN);$r['applicability']['state']=$enabled?'APPLICABLE':'UNKNOWN';}
+            if(isset($r['applicability']['capability'])){$cap=$r['applicability']['capability'];$caps=is_array($manifest['capabilities']??null)?$manifest['capabilities']:[];$enabled=array_is_list($caps)?in_array($cap,$caps,true):filter_var($caps[$cap]??false,FILTER_VALIDATE_BOOLEAN);$r['applicability']['state']=$enabled?'APPLICABLE':'UNKNOWN';
+                if(!$enabled&&($r['family']??'')==='magebean'&&!RequirementPolicy::requiresHuman($r)){
+                    $unsupported[]=['assessment_item_id'=>(string)($entry['assessment_item_id']??''),'rule_key'=>$id,'status'=>'unsupported','message'=>'Optional scan context is not enabled: '.$cap.'.'];
+                    continue;
+                }
+            }
             if (isset($manifest['assessment_level'])) $r['assessment_level']=$manifest['assessment_level'];
             $bindings[]=['requested_key'=>$id,'assessment_item_id'=>(string)($entry['assessment_item_id']??''),'canonical_id'=>$canonicalId];
             if(!isset($executedIds[$canonicalId])){$selected[]=$r;$executedIds[$canonicalId]=true;}

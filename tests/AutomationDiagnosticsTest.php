@@ -7,6 +7,18 @@ use Magebean\Console\ScanConsoleRenderer;
 use Magebean\Agent\AgentResultMapper;
 use Symfony\Component\Console\Output\BufferedOutput;
 $n=0;function diagAssert(bool $v,string $m):void{global $n;++$n;if(!$v)throw new RuntimeException($m);}
+$cronGuidance=\Magebean\Engine\RequirementDiagnostics::forFinding(['id'=>'MB-0046','message'=>'Cannot verify installed cron configuration','evidence'=>['obligations'=>[['checks'=>[['check'=>'installed_magento_cron','status'=>'UNKNOWN','evidence'=>['unavailable_sources'=>['crontab:deploy','/etc/cron.d']]]]]]]]);
+diagAssert($cronGuidance['category']==='scheduler_collection','Cron access failure is not mistaken for a Magento setting/DB failure');
+diagAssert(str_contains($cronGuidance['action'],'crontab:deploy')&&str_contains($cronGuidance['action'],'/etc/cron.d'),'Cron guidance names actual unavailable scheduler sources');
+diagAssert(!str_contains($cronGuidance['action'],'core_config_data'),'Cron access guidance does not request irrelevant database access');
+$cookieGuidance=\Magebean\Engine\RequirementDiagnostics::forFinding(['id'=>'MB-0030','message'=>'Unable to inspect cookies']);
+diagAssert(count($cookieGuidance['steps'])===4,'Cookie probe guidance has separately actionable investigation and verification steps');
+diagAssert(str_contains($cookieGuidance['steps'][1],'web/secure/base_url')&&str_contains($cookieGuidance['steps'][3],'Set-Cookie'),'Cookie probe guides correct endpoint selection and actual cookie verification');
+$tlsFailure=(new ReflectionMethod(\Magebean\Engine\Collectors\HttpCollector::class,'transportFailure'))->invoke(new \Magebean\Engine\Collectors\HttpCollector(),'https://store.example/','SSL certificate problem: self-signed certificate','curl');
+$tlsGuidance=\Magebean\Engine\RequirementDiagnostics::forFinding(['id'=>'MB-0027','evidence'=>['obligations'=>[['checks'=>[['status'=>'UNKNOWN','check'=>'http_has_hsts','evidence'=>$tlsFailure[2]]]]]]]);
+diagAssert(count($tlsGuidance['steps']??[])===4,'Typed TLS collection steps reach requirement diagnostics');
+diagAssert(str_contains($tlsGuidance['steps'][1],'public storefront')&&str_contains($tlsGuidance['steps'][2],'private CA'),'Public certificate remediation and private CA trust are distinguished');
+diagAssert(str_contains($tlsGuidance['steps'][3],'does not prove that HSTS is missing'),'TLS failure does not become a missing HSTS claim');
 $root=sys_get_temp_dir().'/mb-diagnostics-'.bin2hex(random_bytes(4));mkdir($root);
 try {
  $rules=array_values(array_filter(RequirementCatalog::loadAll()['rules'],static fn(array $r):bool=>empty($r['human_evidence']['required'])));

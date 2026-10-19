@@ -124,7 +124,6 @@ final class ScanReportAssembler
                     $result['collection_issues'][] = ['id'=>$finding['id']] + $gap;
                 }
             }
-            $result['risk_findings'] = SourceIssueGrouping::group($result['risk_findings']);
             $result['summary']['needs_attention'] = count($result['risk_findings']);
             $result['summary']['collection_issues'] = count($result['collection_issues']);
         }

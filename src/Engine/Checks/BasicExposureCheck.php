@@ -35,8 +35,8 @@ final class BasicExposureCheck
 
     public function sensitiveHttpPaths(array $args): array
     {
-        $base = trim($this->ctx->url);
-        if ($base === '' || $base === '.' || !preg_match('~^https?://~i',$base)) return [null, '[UNKNOWN] Supply canonical --url for sensitive-path probes', []];
+        $base = (new HttpCheck($this->ctx))->runtimeBaseUrl();
+        if ($base === '') return [null, 'Runtime URL unavailable for sensitive-path probes after Magento configuration discovery; check store configuration and scanner read access.', ['reason_code'=>'SCAN_INPUT_URL_MISSING']];
         $paths = ['/app/etc/env.php','/app/etc/config.php','/.git/HEAD','/composer.json','/var/log/system.log','/var/report/'];
         $checked = []; $failed = false; $unknown = false;
         foreach ($paths as $path) {

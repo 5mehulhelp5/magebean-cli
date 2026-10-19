@@ -1,0 +1,1468 @@
+{
+    "target": "magebean.phar",
+    "archive_bytes": 26982575,
+    "file_count": 3450,
+    "logical_bytes": 60211612,
+    "compressed_entry_bytes": 26698962,
+    "groups": {
+        "artifacts": {
+            "files": 52,
+            "bytes": 19094379,
+            "compressed_bytes": 15908386
+        },
+        "box.phar": {
+            "files": 1,
+            "bytes": 2947031,
+            "compressed_bytes": 2659004
+        },
+        "vendor/jetbrains/phpstorm-stubs": {
+            "files": 621,
+            "bytes": 9727726,
+            "compressed_bytes": 1679002
+        },
+        "vendor/humbug/box": {
+            "files": 180,
+            "bytes": 2195318,
+            "compressed_bytes": 1673038
+        },
+        "vendor/thecodingmachine/safe": {
+            "files": 572,
+            "bytes": 6621040,
+            "compressed_bytes": 1340420
+        },
+        "src": {
+            "files": 189,
+            "bytes": 11552801,
+            "compressed_bytes": 1169494
+        },
+        "vendor/symfony/polyfill-iconv": {
+            "files": 62,
+            "bytes": 1553306,
+            "compressed_bytes": 454566
+        },
+        "vendor/nikic/php-parser": {
+            "files": 273,
+            "bytes": 980582,
+            "compressed_bytes": 212007
+        },
+        "vendor/symfony/console": {
+            "files": 133,
+            "bytes": 587011,
+            "compressed_bytes": 167363
+        },
+        "vendor/amphp/process": {
+            "files": 24,
+            "bytes": 209072,
+            "compressed_bytes": 139797
+        },
+        "vendor/humbug/php-scoper": {
+            "files": 104,
+            "bytes": 566387,
+            "compressed_bytes": 127704
+        },
+        "vendor/symfony/var-dumper": {
+            "files": 82,
+            "bytes": 317039,
+            "compressed_bytes": 95057
+        },
+        "vendor/phpdocumentor/reflection-docblock": {
+            "files": 68,
+            "bytes": 189438,
+            "compressed_bytes": 63751
+        },
+        "vendor/justinrainbow/json-schema": {
+            "files": 61,
+            "bytes": 193502,
+            "compressed_bytes": 57883
+        },
+        "vendor/phpstan/phpdoc-parser": {
+            "files": 94,
+            "bytes": 225000,
+            "compressed_bytes": 57266
+        },
+        "vendor/fidry/console": {
+            "files": 80,
+            "bytes": 168479,
+            "compressed_bytes": 51745
+        },
+        "vendor/daverandom/libdns": {
+            "files": 61,
+            "bytes": 152219,
+            "compressed_bytes": 42468
+        },
+        "vendor/amphp/parallel": {
+            "files": 58,
+            "bytes": 123169,
+            "compressed_bytes": 41880
+        },
+        "vendor/phpdocumentor/type-resolver": {
+            "files": 69,
+            "bytes": 114765,
+            "compressed_bytes": 41680
+        },
+        "vendor/symfony/polyfill-intl-normalizer": {
+            "files": 11,
+            "bytes": 151172,
+            "compressed_bytes": 39473
+        },
+        "vendor/symfony/string": {
+            "files": 23,
+            "bytes": 159079,
+            "compressed_bytes": 39184
+        },
+        "vendor/amphp/socket": {
+            "files": 41,
+            "bytes": 124838,
+            "compressed_bytes": 37275
+        },
+        "vendor/league/uri-interfaces": {
+            "files": 36,
+            "bytes": 127473,
+            "compressed_bytes": 36461
+        },
+        "vendor/symfony/process": {
+            "files": 27,
+            "bytes": 107742,
+            "compressed_bytes": 32495
+        },
+        "vendor/revolt/event-loop": {
+            "files": 28,
+            "bytes": 117439,
+            "compressed_bytes": 29563
+        },
+        "vendor/symfony/polyfill-mbstring": {
+            "files": 10,
+            "bytes": 116559,
+            "compressed_bytes": 28177
+        },
+        "vendor/amphp/byte-stream": {
+            "files": 35,
+            "bytes": 89971,
+            "compressed_bytes": 26802
+        },
+        "vendor/league/uri": {
+            "files": 15,
+            "bytes": 106023,
+            "compressed_bytes": 26718
+        },
+        "vendor/composer/semver": {
+            "files": 16,
+            "bytes": 99220,
+            "compressed_bytes": 25123
+        },
+        "vendor/symfony/finder": {
+            "files": 27,
+            "bytes": 75439,
+            "compressed_bytes": 23900
+        },
+        "vendor/amphp/dns": {
+            "files": 26,
+            "bytes": 71682,
+            "compressed_bytes": 22621
+        },
+        "vendor/amphp/sync": {
+            "files": 32,
+            "bytes": 63748,
+            "compressed_bytes": 22494
+        },
+        "vendor/sebastian/diff": {
+            "files": 21,
+            "bytes": 64146,
+            "compressed_bytes": 20029
+        },
+        "vendor/nikic/iter": {
+            "files": 11,
+            "bytes": 89081,
+            "compressed_bytes": 19515
+        },
+        "vendor/psr/http-message": {
+            "files": 13,
+            "bytes": 65727,
+            "compressed_bytes": 18924
+        },
+        "vendor/amphp/amp": {
+            "files": 29,
+            "bytes": 55410,
+            "compressed_bytes": 18742
+        },
+        "vendor/webmozart/assert": {
+            "files": 7,
+            "bytes": 201691,
+            "compressed_bytes": 18465
+        },
+        "vendor/composer/xdebug-handler": {
+            "files": 8,
+            "bytes": 55706,
+            "compressed_bytes": 17651
+        },
+        "vendor/marc-mabe/php-enum": {
+            "files": 8,
+            "bytes": 85250,
+            "compressed_bytes": 17618
+        },
+        "vendor/composer/pcre": {
+            "files": 21,
+            "bytes": 64595,
+            "compressed_bytes": 17412
+        },
+        "vendor/symfony/filesystem": {
+            "files": 12,
+            "bytes": 64064,
+            "compressed_bytes": 16896
+        },
+        "vendor/amphp/pipeline": {
+            "files": 20,
+            "bytes": 59854,
+            "compressed_bytes": 16631
+        },
+        "vendor/seld/jsonlint": {
+            "files": 10,
+            "bytes": 46816,
+            "compressed_bytes": 13716
+        },
+        "vendor/fidry/filesystem": {
+            "files": 11,
+            "bytes": 35813,
+            "compressed_bytes": 13023
+        },
+        "vendor/symfony/service-contracts": {
+            "files": 15,
+            "bytes": 23895,
+            "compressed_bytes": 9626
+        },
+        "vendor/amphp/cache": {
+            "files": 13,
+            "bytes": 23444,
+            "compressed_bytes": 7659
+        },
+        "vendor/symfony/polyfill-php84": {
+            "files": 8,
+            "bytes": 20667,
+            "compressed_bytes": 7425
+        },
+        "vendor/symfony/polyfill-intl-grapheme": {
+            "files": 6,
+            "bytes": 19705,
+            "compressed_bytes": 6806
+        },
+        "README.md": {
+            "files": 1,
+            "bytes": 16740,
+            "compressed_bytes": 6584
+        },
+        "vendor/doctrine/deprecations": {
+            "files": 5,
+            "bytes": 20073,
+            "compressed_bytes": 6314
+        },
+        "vendor/composer/autoload_static.php": {
+            "files": 1,
+            "bytes": 41412,
+            "compressed_bytes": 4696
+        },
+        "vendor/seld/phar-utils": {
+            "files": 6,
+            "bytes": 12458,
+            "compressed_bytes": 4586
+        },
+        "vendor/psr/log": {
+            "files": 11,
+            "bytes": 10578,
+            "compressed_bytes": 4577
+        },
+        "vendor/amphp/parser": {
+            "files": 6,
+            "bytes": 10805,
+            "compressed_bytes": 4150
+        },
+        "vendor/phpdocumentor/reflection-common": {
+            "files": 9,
+            "bytes": 8358,
+            "compressed_bytes": 3919
+        },
+        "vendor/composer/autoload_classmap.php": {
+            "files": 1,
+            "bytes": 34745,
+            "compressed_bytes": 3910
+        },
+        "vendor/kelunik/certificate": {
+            "files": 8,
+            "bytes": 9310,
+            "compressed_bytes": 3742
+        },
+        "vendor/symfony/polyfill-ctype": {
+            "files": 6,
+            "bytes": 12216,
+            "compressed_bytes": 3507
+        },
+        "vendor/composer/ClassLoader.php": {
+            "files": 1,
+            "bytes": 16378,
+            "compressed_bytes": 3463
+        },
+        "vendor/amphp/serialization": {
+            "files": 9,
+            "bytes": 8737,
+            "compressed_bytes": 3427
+        },
+        "vendor/psr/http-factory": {
+            "files": 9,
+            "bytes": 7262,
+            "compressed_bytes": 3422
+        },
+        "vendor/composer/InstalledVersions.php": {
+            "files": 1,
+            "bytes": 17395,
+            "compressed_bytes": 3272
+        },
+        "vendor/composer/installed.php": {
+            "files": 1,
+            "bytes": 22935,
+            "compressed_bytes": 3230
+        },
+        "vendor/symfony/event-dispatcher-contracts": {
+            "files": 6,
+            "bytes": 5075,
+            "compressed_bytes": 2591
+        },
+        "vendor/symfony/deprecation-contracts": {
+            "files": 5,
+            "bytes": 4272,
+            "compressed_bytes": 2157
+        },
+        "vendor/psr/event-dispatcher": {
+            "files": 6,
+            "bytes": 3689,
+            "compressed_bytes": 2079
+        },
+        "vendor/psr/container": {
+            "files": 6,
+            "bytes": 3766,
+            "compressed_bytes": 1947
+        },
+        "magebean-report.html": {
+            "files": 1,
+            "bytes": 4678,
+            "compressed_bytes": 1336
+        },
+        "resources": {
+            "files": 1,
+            "bytes": 4144,
+            "compressed_bytes": 995
+        },
+        "vendor/bin/validate-json": {
+            "files": 1,
+            "bytes": 3387,
+            "compressed_bytes": 962
+        },
+        "vendor/bin/var-dump-server": {
+            "files": 1,
+            "bytes": 3402,
+            "compressed_bytes": 961
+        },
+        "vendor/bin/jsonlint": {
+            "files": 1,
+            "bytes": 3336,
+            "compressed_bytes": 944
+        },
+        "vendor/bin/php-parse": {
+            "files": 1,
+            "bytes": 3348,
+            "compressed_bytes": 941
+        },
+        "vendor/bin/php-scoper": {
+            "files": 1,
+            "bytes": 3354,
+            "compressed_bytes": 941
+        },
+        "vendor/bin/box": {
+            "files": 1,
+            "bytes": 3312,
+            "compressed_bytes": 940
+        },
+        "CONTRIBUTING.md": {
+            "files": 1,
+            "bytes": 1117,
+            "compressed_bytes": 664
+        },
+        "vendor/composer/LICENSE": {
+            "files": 1,
+            "bytes": 1070,
+            "compressed_bytes": 626
+        },
+        "LICENSE": {
+            "files": 1,
+            "bytes": 1064,
+            "compressed_bytes": 625
+        },
+        "vendor/composer/autoload_real.php": {
+            "files": 1,
+            "bytes": 1721,
+            "compressed_bytes": 572
+        },
+        "bin": {
+            "files": 1,
+            "bytes": 866,
+            "compressed_bytes": 534
+        },
+        "vendor/autoload.php": {
+            "files": 1,
+            "bytes": 748,
+            "compressed_bytes": 447
+        },
+        "vendor/composer/platform_check.php": {
+            "files": 1,
+            "bytes": 917,
+            "compressed_bytes": 429
+        },
+        "SECURITY.md": {
+            "files": 1,
+            "bytes": 739,
+            "compressed_bytes": 418
+        },
+        "vendor/composer/autoload_files.php": {
+            "files": 1,
+            "bytes": 739,
+            "compressed_bytes": 367
+        },
+        "box.json": {
+            "files": 1,
+            "bytes": 627,
+            "compressed_bytes": 345
+        },
+        "vendor/composer/autoload_psr4.php": {
+            "files": 1,
+            "bytes": 940,
+            "compressed_bytes": 310
+        },
+        "box.one-time.json": {
+            "files": 1,
+            "bytes": 385,
+            "compressed_bytes": 236
+        },
+        "vendor/bin/var-dump-server.bat": {
+            "files": 1,
+            "bytes": 142,
+            "compressed_bytes": 124
+        },
+        "vendor/bin/validate-json.bat": {
+            "files": 1,
+            "bytes": 140,
+            "compressed_bytes": 122
+        },
+        "vendor/bin/php-scoper.bat": {
+            "files": 1,
+            "bytes": 137,
+            "compressed_bytes": 118
+        },
+        "vendor/bin/jsonlint.bat": {
+            "files": 1,
+            "bytes": 135,
+            "compressed_bytes": 117
+        },
+        "vendor/bin/php-parse.bat": {
+            "files": 1,
+            "bytes": 136,
+            "compressed_bytes": 117
+        },
+        "vendor/bin/box.bat": {
+            "files": 1,
+            "bytes": 130,
+            "compressed_bytes": 112
+        },
+        "vendor/composer/autoload_namespaces.php": {
+            "files": 1,
+            "bytes": 139,
+            "compressed_bytes": 112
+        },
+        "phpstan.neon": {
+            "files": 1,
+            "bytes": 42,
+            "compressed_bytes": 39
+        }
+    },
+    "largest_files": [
+        {
+            "path": "artifacts/magebean-internal-qa.phar",
+            "bytes": 8036532,
+            "compressed_bytes": 7734256
+        },
+        {
+            "path": "artifacts/magebean-one-time.phar",
+            "bytes": 8030454,
+            "compressed_bytes": 7728186
+        },
+        {
+            "path": "box.phar",
+            "bytes": 2947031,
+            "compressed_bytes": 2659004
+        },
+        {
+            "path": "vendor/humbug/box/doc/img/box.png",
+            "bytes": 436752,
+            "compressed_bytes": 417244
+        },
+        {
+            "path": "vendor/humbug/box/doc/img/requirement-checker.png",
+            "bytes": 384046,
+            "compressed_bytes": 369430
+        },
+        {
+            "path": "vendor/humbug/box/doc/img/logo.png",
+            "bytes": 299553,
+            "compressed_bytes": 296323
+        },
+        {
+            "path": "vendor/humbug/box/doc/img/requirement-checker_1.png",
+            "bytes": 202391,
+            "compressed_bytes": 197161
+        },
+        {
+            "path": "src/Rules/requirements/internal-catalog.json",
+            "bytes": 2693458,
+            "compressed_bytes": 195676
+        },
+        {
+            "path": "vendor/humbug/box/doc/img/requirement-checker_2.png",
+            "bytes": 162249,
+            "compressed_bytes": 157391
+        },
+        {
+            "path": "artifacts/profile-review-inventory.csv",
+            "bytes": 1240807,
+            "compressed_bytes": 139729
+        },
+        {
+            "path": "vendor/symfony/polyfill-iconv/Resources/charset/from.cp936.php",
+            "bytes": 372283,
+            "compressed_bytes": 107327
+        },
+        {
+            "path": "src/Rules/requirements/reconciliation-ledger-before-family-separation.json",
+            "bytes": 1200838,
+            "compressed_bytes": 103019
+        },
+        {
+            "path": "vendor/jetbrains/phpstorm-stubs/PhpStormStubsMap.php",
+            "bytes": 724488,
+            "compressed_bytes": 92342
+        },
+        {
+            "path": "vendor/symfony/polyfill-iconv/Resources/charset/from.cp949.php",
+            "bytes": 291504,
+            "compressed_bytes": 83596
+        },
+        {
+            "path": "src/Rules/requirements/reconciliation-ledger.json",
+            "bytes": 609628,
+            "compressed_bytes": 73192
+        },
+        {
+            "path": "vendor/symfony/polyfill-iconv/Resources/charset/from.cp950.php",
+            "bytes": 231436,
+            "compressed_bytes": 70748
+        },
+        {
+            "path": "vendor/symfony/polyfill-iconv/Resources/charset/from.big5.php",
+            "bytes": 233123,
+            "compressed_bytes": 70732
+        },
+        {
+            "path": "src/Rules/requirements/asvs-catalog.json",
+            "bytes": 1197766,
+            "compressed_bytes": 68064
+        },
+        {
+            "path": "src/Rules/requirements/magebean-catalog.json",
+            "bytes": 683470,
+            "compressed_bytes": 64843
+        },
+        {
+            "path": "src/Rules/requirements/pci-catalog.json",
+            "bytes": 812491,
+            "compressed_bytes": 63788
+        },
+        {
+            "path": "vendor/amphp/process/bin/windows/ProcessWrapper64.exe",
+            "bytes": 83968,
+            "compressed_bytes": 62953
+        },
+        {
+            "path": "vendor/amphp/process/bin/windows/ProcessWrapper.exe",
+            "bytes": 78848,
+            "compressed_bytes": 61229
+        },
+        {
+            "path": "src/Rules/requirements/pci-criterion-definitions.json",
+            "bytes": 468611,
+            "compressed_bytes": 47658
+        },
+        {
+            "path": "vendor/jetbrains/phpstorm-stubs/intl/intl.php",
+            "bytes": 294197,
+            "compressed_bytes": 43443
+        },
+        {
+            "path": "vendor/symfony/polyfill-iconv/Resources/charset/from.cp932.php",
+            "bytes": 134095,
+            "compressed_bytes": 40606
+        }
+    ],
+    "flagged_files": [
+        {
+            "path": "artifacts/add-automated-source-policies.py",
+            "bytes": 13016,
+            "compressed_bytes": 5061
+        },
+        {
+            "path": "artifacts/add-production-automation-predicates.py",
+            "bytes": 15127,
+            "compressed_bytes": 5460
+        },
+        {
+            "path": "artifacts/audit-migration.ps1",
+            "bytes": 3999,
+            "compressed_bytes": 1265
+        },
+        {
+            "path": "artifacts/audit-profile-coverage.php",
+            "bytes": 6000,
+            "compressed_bytes": 2263
+        },
+        {
+            "path": "artifacts/audit-requirement-overlap.php",
+            "bytes": 4373,
+            "compressed_bytes": 1653
+        },
+        {
+            "path": "artifacts/build-focused-owasp-review.ps1",
+            "bytes": 11340,
+            "compressed_bytes": 5101
+        },
+        {
+            "path": "artifacts/consolidate-focused-review.php",
+            "bytes": 2789,
+            "compressed_bytes": 1222
+        },
+        {
+            "path": "artifacts/database-automation-target-output.txt",
+            "bytes": 4305,
+            "compressed_bytes": 1660
+        },
+        {
+            "path": "artifacts/database-automation-target-verification.json",
+            "bytes": 294,
+            "compressed_bytes": 167
+        },
+        {
+            "path": "artifacts/expand-basic-adobe.py",
+            "bytes": 15697,
+            "compressed_bytes": 5488
+        },
+        {
+            "path": "artifacts/expand-hardening-coverage.py",
+            "bytes": 2436,
+            "compressed_bytes": 1004
+        },
+        {
+            "path": "artifacts/export-focused-check-bindings.php",
+            "bytes": 2269,
+            "compressed_bytes": 1084
+        },
+        {
+            "path": "artifacts/findings-output-preview.ansi",
+            "bytes": 4941,
+            "compressed_bytes": 745
+        },
+        {
+            "path": "artifacts/findings-output-preview.txt",
+            "bytes": 4422,
+            "compressed_bytes": 639
+        },
+        {
+            "path": "artifacts/focused-basic-review.json",
+            "bytes": 35648,
+            "compressed_bytes": 7022
+        },
+        {
+            "path": "artifacts/focused-basic-review.md",
+            "bytes": 16392,
+            "compressed_bytes": 5821
+        },
+        {
+            "path": "artifacts/focused-check-bindings.json",
+            "bytes": 206271,
+            "compressed_bytes": 20894
+        },
+        {
+            "path": "artifacts/focused-hardening-review.json",
+            "bytes": 105941,
+            "compressed_bytes": 16695
+        },
+        {
+            "path": "artifacts/focused-hardening-review.md",
+            "bytes": 14883,
+            "compressed_bytes": 6185
+        },
+        {
+            "path": "artifacts/focused-owasp-review.json",
+            "bytes": 194166,
+            "compressed_bytes": 19275
+        },
+        {
+            "path": "artifacts/focused-owasp-review.md",
+            "bytes": 20954,
+            "compressed_bytes": 6832
+        },
+        {
+            "path": "artifacts/focused-profile-contract.md",
+            "bytes": 4972,
+            "compressed_bytes": 2488
+        },
+        {
+            "path": "artifacts/focused-profile-decisions.csv",
+            "bytes": 150078,
+            "compressed_bytes": 28843
+        },
+        {
+            "path": "artifacts/focused-profile-decisions.json",
+            "bytes": 1323,
+            "compressed_bytes": 467
+        },
+        {
+            "path": "artifacts/focused-profile-review.md",
+            "bytes": 8337,
+            "compressed_bytes": 3911
+        },
+        {
+            "path": "artifacts/focused-source-scope-observations.json",
+            "bytes": 8594,
+            "compressed_bytes": 923
+        },
+        {
+            "path": "artifacts/magebean-automated-profiles.py",
+            "bytes": 3440,
+            "compressed_bytes": 1454
+        },
+        {
+            "path": "artifacts/magebean-internal-qa.phar",
+            "bytes": 8036532,
+            "compressed_bytes": 7734256
+        },
+        {
+            "path": "artifacts/magebean-one-time.phar",
+            "bytes": 8030454,
+            "compressed_bytes": 7728186
+        },
+        {
+            "path": "artifacts/magebean-remediation-review.py",
+            "bytes": 55970,
+            "compressed_bytes": 18693
+        },
+        {
+            "path": "artifacts/migration-automation-audit.csv",
+            "bytes": 16235,
+            "compressed_bytes": 4740
+        },
+        {
+            "path": "artifacts/migration-automation-audit.md",
+            "bytes": 4387,
+            "compressed_bytes": 2014
+        },
+        {
+            "path": "artifacts/owasp-quality-phar-smoke.json",
+            "bytes": 465,
+            "compressed_bytes": 250
+        },
+        {
+            "path": "artifacts/owasp-real-target-verification.json",
+            "bytes": 1416,
+            "compressed_bytes": 664
+        },
+        {
+            "path": "artifacts/probe-migration-planning.php",
+            "bytes": 1066,
+            "compressed_bytes": 583
+        },
+        {
+            "path": "artifacts/probe-source-scope-review.php",
+            "bytes": 2359,
+            "compressed_bytes": 1169
+        },
+        {
+            "path": "artifacts/profile-review-asvs-members.csv",
+            "bytes": 175044,
+            "compressed_bytes": 28774
+        },
+        {
+            "path": "artifacts/profile-review-asvs.md",
+            "bytes": 6842,
+            "compressed_bytes": 3124
+        },
+        {
+            "path": "artifacts/profile-review-deployment-members.csv",
+            "bytes": 59568,
+            "compressed_bytes": 12732
+        },
+        {
+            "path": "artifacts/profile-review-deployment-members.json",
+            "bytes": 80664,
+            "compressed_bytes": 14684
+        },
+        {
+            "path": "artifacts/profile-review-deployment.md",
+            "bytes": 7937,
+            "compressed_bytes": 3604
+        },
+        {
+            "path": "artifacts/profile-review-inventory.csv",
+            "bytes": 1240807,
+            "compressed_bytes": 139729
+        },
+        {
+            "path": "artifacts/profile-review-inventory.json",
+            "bytes": 162006,
+            "compressed_bytes": 4281
+        },
+        {
+            "path": "artifacts/profile-review-owasp-pci-members.csv",
+            "bytes": 222494,
+            "compressed_bytes": 32529
+        },
+        {
+            "path": "artifacts/profile-review-owasp-pci.md",
+            "bytes": 7150,
+            "compressed_bytes": 3264
+        },
+        {
+            "path": "artifacts/profile-review-summary.md",
+            "bytes": 9976,
+            "compressed_bytes": 4179
+        },
+        {
+            "path": "artifacts/refresh-listing-baseline.py",
+            "bytes": 710,
+            "compressed_bytes": 388
+        },
+        {
+            "path": "artifacts/requirement-overlap-audit.json",
+            "bytes": 96246,
+            "compressed_bytes": 11639
+        },
+        {
+            "path": "artifacts/run-cli-regressions.sh",
+            "bytes": 357,
+            "compressed_bytes": 193
+        },
+        {
+            "path": "artifacts/separate-requirement-families.py",
+            "bytes": 9972,
+            "compressed_bytes": 3426
+        },
+        {
+            "path": "artifacts/verify-console-profile-sync.php",
+            "bytes": 2772,
+            "compressed_bytes": 1165
+        },
+        {
+            "path": "artifacts/verify-magebean-guidance.php",
+            "bytes": 943,
+            "compressed_bytes": 498
+        },
+        {
+            "path": "box.json",
+            "bytes": 627,
+            "compressed_bytes": 345
+        },
+        {
+            "path": "box.one-time.json",
+            "bytes": 385,
+            "compressed_bytes": 236
+        },
+        {
+            "path": "box.phar",
+            "bytes": 2947031,
+            "compressed_bytes": 2659004
+        },
+        {
+            "path": "magebean-report.html",
+            "bytes": 4678,
+            "compressed_bytes": 1336
+        },
+        {
+            "path": "phpstan.neon",
+            "bytes": 42,
+            "compressed_bytes": 39
+        },
+        {
+            "path": "vendor/amphp/cache/LICENSE",
+            "bytes": 1158,
+            "compressed_bytes": 692
+        },
+        {
+            "path": "vendor/amphp/cache/composer-require-check.json",
+            "bytes": 466,
+            "compressed_bytes": 181
+        },
+        {
+            "path": "vendor/amphp/cache/composer.json",
+            "bytes": 1105,
+            "compressed_bytes": 435
+        },
+        {
+            "path": "vendor/amphp/cache/psalm.xml",
+            "bytes": 1248,
+            "compressed_bytes": 366
+        },
+        {
+            "path": "vendor/amphp/cache/src/AtomicCache.php",
+            "bytes": 6393,
+            "compressed_bytes": 1288
+        },
+        {
+            "path": "vendor/amphp/cache/src/Cache.php",
+            "bytes": 1807,
+            "compressed_bytes": 641
+        },
+        {
+            "path": "vendor/amphp/cache/src/CacheException.php",
+            "bytes": 157,
+            "compressed_bytes": 130
+        },
+        {
+            "path": "vendor/amphp/cache/src/LocalCache.php",
+            "bytes": 4630,
+            "compressed_bytes": 1462
+        },
+        {
+            "path": "vendor/amphp/cache/src/NullCache.php",
+            "bytes": 623,
+            "compressed_bytes": 308
+        },
+        {
+            "path": "vendor/amphp/cache/src/PrefixCache.php",
+            "bytes": 927,
+            "compressed_bytes": 366
+        },
+        {
+            "path": "vendor/amphp/cache/src/SerializedCache.php",
+            "bytes": 2258,
+            "compressed_bytes": 774
+        },
+        {
+            "path": "vendor/amphp/cache/src/StringCache.php",
+            "bytes": 1788,
+            "compressed_bytes": 626
+        },
+        {
+            "path": "vendor/amphp/cache/src/StringCacheAdapter.php",
+            "bytes": 884,
+            "compressed_bytes": 390
+        },
+        {
+            "path": "vendor/fidry/console/src/Test/AppTester.php",
+            "bytes": 1525,
+            "compressed_bytes": 585
+        },
+        {
+            "path": "vendor/fidry/console/src/Test/CommandTester.php",
+            "bytes": 1623,
+            "compressed_bytes": 734
+        },
+        {
+            "path": "vendor/fidry/console/src/Test/OutputAssertions.php",
+            "bytes": 2423,
+            "compressed_bytes": 720
+        },
+        {
+            "path": "vendor/fidry/filesystem/src/Test/FileSystemTestCase.php",
+            "bytes": 4767,
+            "compressed_bytes": 1920
+        },
+        {
+            "path": "vendor/humbug/box/src/Test/CommandTestCase.php",
+            "bytes": 1789,
+            "compressed_bytes": 669
+        },
+        {
+            "path": "vendor/humbug/box/src/Test/FileSystemTestCase.php",
+            "bytes": 513,
+            "compressed_bytes": 327
+        },
+        {
+            "path": "vendor/humbug/box/src/Test/RequiresPharReadonlyOff.php",
+            "bytes": 739,
+            "compressed_bytes": 424
+        },
+        {
+            "path": "vendor/jetbrains/phpstorm-stubs/tests/AbstractBaseStubsTestCase.php",
+            "bytes": 10206,
+            "compressed_bytes": 2201
+        },
+        {
+            "path": "vendor/jetbrains/phpstorm-stubs/tests/BaseClassesTest.php",
+            "bytes": 13783,
+            "compressed_bytes": 1748
+        },
+        {
+            "path": "vendor/jetbrains/phpstorm-stubs/tests/BaseConstantsTest.php",
+            "bytes": 5656,
+            "compressed_bytes": 700
+        },
+        {
+            "path": "vendor/jetbrains/phpstorm-stubs/tests/BaseEnumsTest.php",
+            "bytes": 7836,
+            "compressed_bytes": 1188
+        },
+        {
+            "path": "vendor/jetbrains/phpstorm-stubs/tests/BaseFunctionsTest.php",
+            "bytes": 12967,
+            "compressed_bytes": 1815
+        },
+        {
+            "path": "vendor/jetbrains/phpstorm-stubs/tests/BaseInterfacesTest.php",
+            "bytes": 7530,
+            "compressed_bytes": 1154
+        },
+        {
+            "path": "vendor/jetbrains/phpstorm-stubs/tests/CheckStubMapTest.php",
+            "bytes": 1089,
+            "compressed_bytes": 486
+        },
+        {
+            "path": "vendor/jetbrains/phpstorm-stubs/tests/CodeStyle/BracesOneLineFixer.php",
+            "bytes": 2290,
+            "compressed_bytes": 720
+        },
+        {
+            "path": "vendor/jetbrains/phpstorm-stubs/tests/DockerImages/5.6/Dockerfile",
+            "bytes": 772,
+            "compressed_bytes": 414
+        },
+        {
+            "path": "vendor/jetbrains/phpstorm-stubs/tests/DockerImages/7.0/Dockerfile",
+            "bytes": 792,
+            "compressed_bytes": 422
+        },
+        {
+            "path": "vendor/jetbrains/phpstorm-stubs/tests/DockerImages/7.1/Dockerfile",
+            "bytes": 904,
+            "compressed_bytes": 460
+        },
+        {
+            "path": "vendor/jetbrains/phpstorm-stubs/tests/DockerImages/7.2/Dockerfile",
+            "bytes": 904,
+            "compressed_bytes": 459
+        },
+        {
+            "path": "vendor/jetbrains/phpstorm-stubs/tests/DockerImages/7.3/Dockerfile",
+            "bytes": 929,
+            "compressed_bytes": 472
+        },
+        {
+            "path": "vendor/jetbrains/phpstorm-stubs/tests/DockerImages/7.4/Dockerfile",
+            "bytes": 811,
+            "compressed_bytes": 426
+        },
+        {
+            "path": "vendor/jetbrains/phpstorm-stubs/tests/DockerImages/8.0/Dockerfile",
+            "bytes": 937,
+            "compressed_bytes": 474
+        },
+        {
+            "path": "vendor/jetbrains/phpstorm-stubs/tests/DockerImages/8.1/Dockerfile",
+            "bytes": 977,
+            "compressed_bytes": 505
+        },
+        {
+            "path": "vendor/jetbrains/phpstorm-stubs/tests/DockerImages/8.2/Dockerfile",
+            "bytes": 978,
+            "compressed_bytes": 504
+        },
+        {
+            "path": "vendor/jetbrains/phpstorm-stubs/tests/DockerImages/8.3/Dockerfile",
+            "bytes": 1470,
+            "compressed_bytes": 714
+        },
+        {
+            "path": "vendor/jetbrains/phpstorm-stubs/tests/DockerImages/8.4/Dockerfile",
+            "bytes": 943,
+            "compressed_bytes": 495
+        },
+        {
+            "path": "vendor/jetbrains/phpstorm-stubs/tests/DockerImages/peclExtensions/Dockerfile",
+            "bytes": 1707,
+            "compressed_bytes": 510
+        },
+        {
+            "path": "vendor/jetbrains/phpstorm-stubs/tests/DockerImages/testRunner/Dockerfile",
+            "bytes": 2012,
+            "compressed_bytes": 831
+        },
+        {
+            "path": "vendor/jetbrains/phpstorm-stubs/tests/Model/BasePHPClass.php",
+            "bytes": 3921,
+            "compressed_bytes": 791
+        },
+        {
+            "path": "vendor/jetbrains/phpstorm-stubs/tests/Model/BasePHPElement.php",
+            "bytes": 10427,
+            "compressed_bytes": 2277
+        },
+        {
+            "path": "vendor/jetbrains/phpstorm-stubs/tests/Model/CommonUtils.php",
+            "bytes": 694,
+            "compressed_bytes": 289
+        },
+        {
+            "path": "vendor/jetbrains/phpstorm-stubs/tests/Model/PHPClass.php",
+            "bytes": 8945,
+            "compressed_bytes": 2040
+        },
+        {
+            "path": "vendor/jetbrains/phpstorm-stubs/tests/Model/PHPClassConstant.php",
+            "bytes": 1257,
+            "compressed_bytes": 443
+        },
+        {
+            "path": "vendor/jetbrains/phpstorm-stubs/tests/Model/PHPConstant.php",
+            "bytes": 1847,
+            "compressed_bytes": 621
+        },
+        {
+            "path": "vendor/jetbrains/phpstorm-stubs/tests/Model/PHPConstantDeclaration.php",
+            "bytes": 2993,
+            "compressed_bytes": 836
+        },
+        {
+            "path": "vendor/jetbrains/phpstorm-stubs/tests/Model/PHPDefineConstant.php",
+            "bytes": 2868,
+            "compressed_bytes": 823
+        },
+        {
+            "path": "vendor/jetbrains/phpstorm-stubs/tests/Model/PHPDocElement.php",
+            "bytes": 3053,
+            "compressed_bytes": 769
+        },
+        {
+            "path": "vendor/jetbrains/phpstorm-stubs/tests/Model/PHPEnum.php",
+            "bytes": 6029,
+            "compressed_bytes": 1556
+        },
+        {
+            "path": "vendor/jetbrains/phpstorm-stubs/tests/Model/PHPEnumCase.php",
+            "bytes": 1987,
+            "compressed_bytes": 642
+        },
+        {
+            "path": "vendor/jetbrains/phpstorm-stubs/tests/Model/PHPFunction.php",
+            "bytes": 9840,
+            "compressed_bytes": 2218
+        },
+        {
+            "path": "vendor/jetbrains/phpstorm-stubs/tests/Model/PHPInterface.php",
+            "bytes": 3790,
+            "compressed_bytes": 1009
+        },
+        {
+            "path": "vendor/jetbrains/phpstorm-stubs/tests/Model/PHPMethod.php",
+            "bytes": 8937,
+            "compressed_bytes": 1861
+        },
+        {
+            "path": "vendor/jetbrains/phpstorm-stubs/tests/Model/PHPNamespacedElement.php",
+            "bytes": 126,
+            "compressed_bytes": 106
+        },
+        {
+            "path": "vendor/jetbrains/phpstorm-stubs/tests/Model/PHPParameter.php",
+            "bytes": 5136,
+            "compressed_bytes": 1185
+        },
+        {
+            "path": "vendor/jetbrains/phpstorm-stubs/tests/Model/PHPProperty.php",
+            "bytes": 3609,
+            "compressed_bytes": 996
+        },
+        {
+            "path": "vendor/jetbrains/phpstorm-stubs/tests/Model/PhpVersions.php",
+            "bytes": 1333,
+            "compressed_bytes": 441
+        },
+        {
+            "path": "vendor/jetbrains/phpstorm-stubs/tests/Model/StubProblemType.php",
+            "bytes": 1051,
+            "compressed_bytes": 404
+        },
+        {
+            "path": "vendor/jetbrains/phpstorm-stubs/tests/Model/StubsContainer.php",
+            "bytes": 14632,
+            "compressed_bytes": 1731
+        },
+        {
+            "path": "vendor/jetbrains/phpstorm-stubs/tests/Model/Tags/RemovedTag.php",
+            "bytes": 1451,
+            "compressed_bytes": 538
+        },
+        {
+            "path": "vendor/jetbrains/phpstorm-stubs/tests/Parsers/DocFactoryProvider.php",
+            "bytes": 489,
+            "compressed_bytes": 262
+        },
+        {
+            "path": "vendor/jetbrains/phpstorm-stubs/tests/Parsers/ExpectedFunctionArgumentsInfo.php",
+            "bytes": 1478,
+            "compressed_bytes": 478
+        },
+        {
+            "path": "vendor/jetbrains/phpstorm-stubs/tests/Parsers/MetaExpectedArgumentsCollector.php",
+            "bytes": 4060,
+            "compressed_bytes": 1114
+        },
+        {
+            "path": "vendor/jetbrains/phpstorm-stubs/tests/Parsers/PHPReflectionParser.php",
+            "bytes": 3207,
+            "compressed_bytes": 807
+        },
+        {
+            "path": "vendor/jetbrains/phpstorm-stubs/tests/Parsers/ParserUtils.php",
+            "bytes": 7733,
+            "compressed_bytes": 1328
+        },
+        {
+            "path": "vendor/jetbrains/phpstorm-stubs/tests/Parsers/StubParser.php",
+            "bytes": 8011,
+            "compressed_bytes": 1757
+        },
+        {
+            "path": "vendor/jetbrains/phpstorm-stubs/tests/Parsers/StubsParserErrorHandler.php",
+            "bytes": 317,
+            "compressed_bytes": 192
+        },
+        {
+            "path": "vendor/jetbrains/phpstorm-stubs/tests/Parsers/Visitors/ASTVisitor.php",
+            "bytes": 7131,
+            "compressed_bytes": 1194
+        },
+        {
+            "path": "vendor/jetbrains/phpstorm-stubs/tests/Parsers/Visitors/CoreStubASTVisitor.php",
+            "bytes": 339,
+            "compressed_bytes": 210
+        },
+        {
+            "path": "vendor/jetbrains/phpstorm-stubs/tests/Parsers/Visitors/MetaOverrideFunctionsParser.php",
+            "bytes": 1647,
+            "compressed_bytes": 661
+        },
+        {
+            "path": "vendor/jetbrains/phpstorm-stubs/tests/Parsers/Visitors/ParentConnector.php",
+            "bytes": 746,
+            "compressed_bytes": 350
+        },
+        {
+            "path": "vendor/jetbrains/phpstorm-stubs/tests/StubsCompositeMixedReturnTypeTest.php",
+            "bytes": 2127,
+            "compressed_bytes": 520
+        },
+        {
+            "path": "vendor/jetbrains/phpstorm-stubs/tests/StubsConstantsAndParametersValuesTest.php",
+            "bytes": 11436,
+            "compressed_bytes": 1211
+        },
+        {
+            "path": "vendor/jetbrains/phpstorm-stubs/tests/StubsForbiddenTypeHintsTest.php",
+            "bytes": 19243,
+            "compressed_bytes": 1404
+        },
+        {
+            "path": "vendor/jetbrains/phpstorm-stubs/tests/StubsMetaExpectedArgumentsTest.php",
+            "bytes": 11533,
+            "compressed_bytes": 2335
+        },
+        {
+            "path": "vendor/jetbrains/phpstorm-stubs/tests/StubsMetaInternalTagTest.php",
+            "bytes": 3174,
+            "compressed_bytes": 916
+        },
+        {
+            "path": "vendor/jetbrains/phpstorm-stubs/tests/StubsParameterNamesTest.php",
+            "bytes": 5550,
+            "compressed_bytes": 873
+        },
+        {
+            "path": "vendor/jetbrains/phpstorm-stubs/tests/StubsPhp81Tests.php",
+            "bytes": 14966,
+            "compressed_bytes": 1743
+        },
+        {
+            "path": "vendor/jetbrains/phpstorm-stubs/tests/StubsPhpDocTest.php",
+            "bytes": 13694,
+            "compressed_bytes": 2519
+        },
+        {
+            "path": "vendor/jetbrains/phpstorm-stubs/tests/StubsReflectionClassesTest.php",
+            "bytes": 3246,
+            "compressed_bytes": 597
+        },
+        {
+            "path": "vendor/jetbrains/phpstorm-stubs/tests/StubsStructureTest.php",
+            "bytes": 1073,
+            "compressed_bytes": 431
+        },
+        {
+            "path": "vendor/jetbrains/phpstorm-stubs/tests/StubsTypeHintsTest.php",
+            "bytes": 40875,
+            "compressed_bytes": 3543
+        },
+        {
+            "path": "vendor/jetbrains/phpstorm-stubs/tests/TestData/Providers/EntitiesFilter.php",
+            "bytes": 7275,
+            "compressed_bytes": 1231
+        },
+        {
+            "path": "vendor/jetbrains/phpstorm-stubs/tests/TestData/Providers/PhpStormStubsSingleton.php",
+            "bytes": 469,
+            "compressed_bytes": 228
+        },
+        {
+            "path": "vendor/jetbrains/phpstorm-stubs/tests/TestData/Providers/Reflection/ReflectionClassesTestDataProviders.php",
+            "bytes": 8235,
+            "compressed_bytes": 891
+        },
+        {
+            "path": "vendor/jetbrains/phpstorm-stubs/tests/TestData/Providers/Reflection/ReflectionConstantsProvider.php",
+            "bytes": 5157,
+            "compressed_bytes": 768
+        },
+        {
+            "path": "vendor/jetbrains/phpstorm-stubs/tests/TestData/Providers/Reflection/ReflectionFunctionsProvider.php",
+            "bytes": 2267,
+            "compressed_bytes": 455
+        },
+        {
+            "path": "vendor/jetbrains/phpstorm-stubs/tests/TestData/Providers/Reflection/ReflectionMethodsProvider.php",
+            "bytes": 10137,
+            "compressed_bytes": 1051
+        },
+        {
+            "path": "vendor/jetbrains/phpstorm-stubs/tests/TestData/Providers/Reflection/ReflectionParametersProvider.php",
+            "bytes": 27419,
+            "compressed_bytes": 1372
+        },
+        {
+            "path": "vendor/jetbrains/phpstorm-stubs/tests/TestData/Providers/Reflection/ReflectionPropertiesProvider.php",
+            "bytes": 1999,
+            "compressed_bytes": 582
+        },
+        {
+            "path": "vendor/jetbrains/phpstorm-stubs/tests/TestData/Providers/ReflectionStubsSingleton.php",
+            "bytes": 521,
+            "compressed_bytes": 235
+        },
+        {
+            "path": "vendor/jetbrains/phpstorm-stubs/tests/TestData/Providers/Stubs/PhpCoreStubsProvider.php",
+            "bytes": 5244,
+            "compressed_bytes": 1308
+        },
+        {
+            "path": "vendor/jetbrains/phpstorm-stubs/tests/TestData/Providers/Stubs/StubConstantsProvider.php",
+            "bytes": 2071,
+            "compressed_bytes": 479
+        },
+        {
+            "path": "vendor/jetbrains/phpstorm-stubs/tests/TestData/Providers/Stubs/StubMethodsProvider.php",
+            "bytes": 12152,
+            "compressed_bytes": 1611
+        },
+        {
+            "path": "vendor/jetbrains/phpstorm-stubs/tests/TestData/Providers/Stubs/StubsCompositeMixedProvider.php",
+            "bytes": 618,
+            "compressed_bytes": 245
+        },
+        {
+            "path": "vendor/jetbrains/phpstorm-stubs/tests/TestData/Providers/Stubs/StubsParametersProvider.php",
+            "bytes": 10474,
+            "compressed_bytes": 1281
+        },
+        {
+            "path": "vendor/jetbrains/phpstorm-stubs/tests/TestData/Providers/Stubs/StubsTestDataProviders.php",
+            "bytes": 2463,
+            "compressed_bytes": 653
+        },
+        {
+            "path": "vendor/jetbrains/phpstorm-stubs/tests/TestData/mutedProblems.json",
+            "bytes": 61509,
+            "compressed_bytes": 3672
+        },
+        {
+            "path": "vendor/jetbrains/phpstorm-stubs/tests/Tools/ModelAutoloader.php",
+            "bytes": 451,
+            "compressed_bytes": 244
+        },
+        {
+            "path": "vendor/jetbrains/phpstorm-stubs/tests/Tools/dump-pecl-to-file.php",
+            "bytes": 1520,
+            "compressed_bytes": 455
+        },
+        {
+            "path": "vendor/jetbrains/phpstorm-stubs/tests/Tools/dump-reflection-to-file.php",
+            "bytes": 379,
+            "compressed_bytes": 220
+        },
+        {
+            "path": "vendor/jetbrains/phpstorm-stubs/tests/Tools/generate-stub-map",
+            "bytes": 8568,
+            "compressed_bytes": 2161
+        },
+        {
+            "path": "vendor/nikic/iter/test/IterFnTest.php",
+            "bytes": 4911,
+            "compressed_bytes": 1244
+        },
+        {
+            "path": "vendor/nikic/iter/test/IterRewindableTest.php",
+            "bytes": 7397,
+            "compressed_bytes": 1473
+        },
+        {
+            "path": "vendor/nikic/iter/test/iterTest.php",
+            "bytes": 21206,
+            "compressed_bytes": 3768
+        },
+        {
+            "path": "vendor/phpdocumentor/type-resolver/docs/getting-started.rst",
+            "bytes": 1236,
+            "compressed_bytes": 566
+        },
+        {
+            "path": "vendor/phpdocumentor/type-resolver/docs/index.rst",
+            "bytes": 569,
+            "compressed_bytes": 320
+        },
+        {
+            "path": "vendor/psr/http-message/docs/PSR7-Interfaces.md",
+            "bytes": 9548,
+            "compressed_bytes": 2426
+        },
+        {
+            "path": "vendor/psr/http-message/docs/PSR7-Usage.md",
+            "bytes": 5492,
+            "compressed_bytes": 1926
+        },
+        {
+            "path": "vendor/symfony/service-contracts/Test/ServiceLocatorTest.php",
+            "bytes": 462,
+            "compressed_bytes": 289
+        },
+        {
+            "path": "vendor/symfony/service-contracts/Test/ServiceLocatorTestCase.php",
+            "bytes": 2922,
+            "compressed_bytes": 821
+        },
+        {
+            "path": "vendor/symfony/var-dumper/Test/VarDumperTestTrait.php",
+            "bytes": 2682,
+            "compressed_bytes": 920
+        }
+    ]
+}

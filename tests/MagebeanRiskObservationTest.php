@@ -38,10 +38,10 @@ $risk=MagebeanRiskObservation::fromAssessment($alternative,RequirementAssessment
 $assert($risk['needs_attention'],'Heuristic PASS cannot suppress a real failed observation');
 $unresolved=$base;$unresolved['applicability']=['state'=>'UNKNOWN'];
 $risk=MagebeanRiskObservation::fromAssessment($unresolved,RequirementAssessmentEvaluator::evaluate($unresolved,static function(){throw new RuntimeException('Must not observe unresolved applicability');}));
-$assert($risk['needs_attention']&&!$risk['collection_complete']&&$risk['collection_gaps'][0]['reason_code']==='REQUIREMENT_APPLICABILITY_UNRESOLVED','No-check unresolved applicability is a collection/applicability gap');
+$assert(!$risk['needs_attention']&&$risk['findings']===[]&&!$risk['collection_complete']&&$risk['collection_gaps'][0]['reason_code']==='REQUIREMENT_APPLICABILITY_UNRESOLVED','No-check unresolved applicability is a collection/applicability gap');
 $unbound=$base;$unbound['review_state']='pending_security_review';$unbound['obligations']=[];
 $risk=MagebeanRiskObservation::fromAssessment($unbound,RequirementAssessmentEvaluator::evaluate($unbound,static function(){throw new RuntimeException('No checks should run');}));
-$assert($risk['needs_attention']&&!$risk['collection_complete']&&$risk['collection_gaps'][0]['reason_code']==='REQUIREMENT_BINDING_UNVALIDATED','No-check unvalidated binding remains an explicit gap');
+$assert(!$risk['needs_attention']&&$risk['findings']===[]&&!$risk['collection_complete']&&$risk['collection_gaps'][0]['reason_code']==='REQUIREMENT_BINDING_UNVALIDATED','No-check unvalidated binding remains an explicit gap');
 $supporting=$base;$supporting['obligations'][]=['id'=>'S1','op'=>'all','role'=>'supporting','proof'=>'heuristic','checks'=>[['name'=>'signal']]];
 $risk=MagebeanRiskObservation::fromAssessment($supporting,RequirementAssessmentEvaluator::evaluate($supporting,static fn(string $name)=>$name==='signal'?$fail:$pass));
 $assert($risk['needs_attention']&&$risk['assessment_outcome']==='PASS','Supporting FAIL is visible without rewriting requirement PASS');

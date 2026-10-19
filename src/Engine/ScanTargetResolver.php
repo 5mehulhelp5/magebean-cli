@@ -5,7 +5,6 @@ final class ScanTargetResolver
 {
     private const MODE_REMOTE = 'REMOTE';
     private const MODE_LOCAL = 'LOCAL';
-    private const MODE_HYBRID = 'HYBRID';
     /** Caller owns rendering; the callback receives only the detected path. */
     public function resolve(bool $hasPath, bool $hasUrl, string $pathOpt, string $urlOpt, ?callable $detectedRoot = null): ResolvedScanTarget
     {
@@ -14,11 +13,11 @@ final class ScanTargetResolver
         if ($hasPath && $pathOpt === '') {
             throw new \RuntimeException('--path requires a non-empty value.');
         }
-        if ($hasUrl && $urlOpt === '') {
+        if ($targetMode === self::MODE_REMOTE && $urlOpt === '') {
             throw new \RuntimeException('--url requires a non-empty HTTP or HTTPS URL.');
         }
 
-        $requestedUrl = $hasUrl ? $this->normalizeRemoteUrl($urlOpt) : '';
+        $requestedUrl = $targetMode === self::MODE_REMOTE ? $this->normalizeRemoteUrl($urlOpt) : '';
 
         if ($targetMode === self::MODE_REMOTE) {
             $projectUrl = $requestedUrl;
@@ -49,9 +48,7 @@ final class ScanTargetResolver
 
             $this->assertMagento2Root($magentoRoot);
             $projectPath = (string)$magentoRoot;
-            $projectUrl = $hasUrl
-                ? $requestedUrl
-                : (string)$this->autoDetectBaseUrl($projectPath);
+            $projectUrl = (string)$this->autoDetectBaseUrl($projectPath);
         }
 
         return new ResolvedScanTarget($projectPath, $projectUrl, $targetMode);
@@ -140,9 +137,6 @@ final class ScanTargetResolver
         if ($hasUrl && !$hasPath) {
             return self::MODE_REMOTE;
         }
-        if ($hasPath && $hasUrl) {
-            return self::MODE_HYBRID;
-        }
 
         return self::MODE_LOCAL;
     }
@@ -170,10 +164,11 @@ final class ScanTargetResolver
         return rtrim($url, '/');
     }
 
-    private static function isMagentoRoot(string $dir): bool
+    public static function isMagentoRoot(string $dir): bool
     {
         // Tiêu chí an toàn: có cả env.php và bin/magento
-        return is_file($dir . '/app/etc/env.php') && is_file($dir . '/bin/magento');
+        return is_file($dir . '/bin/magento') && is_file($dir . '/composer.json')
+            && (is_file($dir . '/app/etc/config.php') || is_file($dir . '/app/etc/env.php'));
     }
 
     private static function detectMagentoRoot(string $startDir, int $maxUp = 4): ?string
@@ -192,112 +187,6 @@ final class ScanTargetResolver
 
     private function autoDetectBaseUrl(string $projectPath): string
     {
-        $root    = rtrim($projectPath, DIRECTORY_SEPARATOR);
-        $envFile = $root . '/app/etc/env.php';
-        if (!is_file($envFile)) {
-            return '';
-        }
-
-        $env = @include $envFile;
-        if (!is_array($env) || empty($env['db']['connection']['default'])) {
-            return '';
-        }
-
-        $db     = $env['db']['connection']['default'];
-        $prefix = $env['db']['table_prefix'] ?? '';
-        $table  = ($prefix ? $prefix : '') . 'core_config_data';
-
-        $host     = $db['host'] ?? 'localhost';
-        $dbname   = $db['dbname'] ?? '';
-        $username = $db['username'] ?? '';
-        $password = $db['password'] ?? '';
-        $port     = null;
-
-        if (strpos($host, ':') !== false) {
-            [$host, $port] = explode(':', $host, 2);
-        }
-        if ($dbname === '' || $username === '') {
-            return '';
-        }
-
-        $dsn = "mysql:host={$host};dbname={$dbname};charset=utf8mb4";
-        if (!empty($port)) {
-            $dsn .= ";port={$port}";
-        }
-
-        try {
-            $pdo = new \PDO($dsn, $username, $password, [
-                \PDO::ATTR_ERRMODE            => \PDO::ERRMODE_EXCEPTION,
-                \PDO::ATTR_DEFAULT_FETCH_MODE => \PDO::FETCH_ASSOC,
-            ]);
-        } catch (\PDOException $e) {
-            return '';
-        }
-
-        $paths = ['web/secure/base_url', 'web/unsecure/base_url'];
-        $in    = implode(',', array_fill(0, count($paths), '?'));
-        $sql   = "SELECT scope, scope_id, path, value FROM {$table} WHERE path IN ($in)";
-
-        try {
-            $stmt = $pdo->prepare($sql);
-            $stmt->execute($paths);
-            $rows = $stmt->fetchAll();
-        } catch (\PDOException $e) {
-            return '';
-        }
-        if (!$rows) {
-            return '';
-        }
-
-        $bucket = [
-            'web/secure/base_url'   => ['stores' => [], 'websites' => [], 'default' => []],
-            'web/unsecure/base_url' => ['stores' => [], 'websites' => [], 'default' => []],
-        ];
-        foreach ($rows as $r) {
-            $path    = (string)($r['path'] ?? '');
-            $scope   = strtolower((string)($r['scope'] ?? 'default'));
-            if (!isset($bucket[$path][$scope])) $scope = 'default';
-            $scopeId = (int)($r['scope_id'] ?? 0);
-            $val     = trim((string)($r['value'] ?? ''));
-            if ($val !== '' && isset($bucket[$path])) {
-                $bucket[$path][$scope][$scopeId] = $val;
-            }
-        }
-
-        $pick = function (array $b): ?string {
-            if (!empty($b['stores'])) {
-                $https = array_filter($b['stores'], fn($v) => stripos($v, 'https://') === 0);
-                $cand  = reset($https);
-                if ($cand) return $cand;
-                return reset($b['stores']);
-            }
-            if (!empty($b['websites'])) {
-                $https = array_filter($b['websites'], fn($v) => stripos($v, 'https://') === 0);
-                $cand  = reset($https);
-                if ($cand) return $cand;
-                return reset($b['websites']);
-            }
-            if (!empty($b['default'])) {
-                $https = array_filter($b['default'], fn($v) => stripos($v, 'https://') === 0);
-                $cand  = reset($https);
-                if ($cand) return $cand;
-                return reset($b['default']);
-            }
-            return null;
-        };
-
-        $secure = $pick($bucket['web/secure/base_url']);
-        $unsec  = $pick($bucket['web/unsecure/base_url']);
-
-        $base = $secure ?: $unsec;
-        if (!$base) return '';
-
-        // Normalize: strip trailing index.php and ensure trailing slash
-        $base = preg_replace('~/index\.php/?$~i', '/', $base);
-        if (substr($base, -1) !== '/') {
-            $base .= '/';
-        }
-
-        return $base;
+        return (string)((new \Magebean\Engine\Checks\MagentoCheck(new Context($projectPath,'')))->configuredBaseUrl()['url'] ?? '');
     }
 }

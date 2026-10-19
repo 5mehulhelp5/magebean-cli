@@ -23,6 +23,10 @@ try {
     $result = $check->workingTreeScan($args);
     $assert($result[0] === false, 'Matching working-tree secret fails');
     $assert(!str_contains(json_encode($result), $secret), 'Secret never appears in evidence');
+    $historical = $check->secretScan($args);
+    $assert($historical[0] === false && str_contains($historical[1], 'secret.php:1'), 'Secret finding remains actionable without Git metadata');
+    $assert(!str_contains($historical[1], 'Git history') && !str_contains($historical[1], '.git'), 'Unavailable Git history does not add noise to the secret finding');
+    $assert($historical[2]['git_history_assessed'] === false && $historical[2]['git_history_error'] !== null, 'History collection metadata remains honest');
     unlink($root . '/secret.php');
     $assert($check->workingTreeScan($args + ['paths' => ['missing']])[0] === null, 'Missing configured path cannot pass');
     file_put_contents($root . '/font.ttf', "\0" . str_repeat('x', 2 * 1024 * 1024));

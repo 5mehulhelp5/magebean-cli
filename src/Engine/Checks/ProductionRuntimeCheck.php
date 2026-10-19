@@ -278,7 +278,7 @@ final class ProductionRuntimeCheck
 
     private function response(array $args): array
     {
-        $base = rtrim($this->ctx->url, '/');
+        $base = (new HttpCheck($this->ctx))->runtimeBaseUrl();
         $path = $args['path'] ?? '/';
         if (!is_string($path) || !str_starts_with($path, '/') || str_starts_with($path, '//') || str_contains($path, '?') || str_contains($path, '#') || str_contains($path, "\r") || str_contains($path, "\n")) return [false, ['reason' => 'invalid_probe_path'], []];
         $parts = parse_url($base);

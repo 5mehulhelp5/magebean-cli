@@ -11,7 +11,7 @@ final class RuntimeEvidenceCheck
 
     public function contentType(array $args): CheckResult
     {
-        $url = $this->ctx->url;
+        $url = (new HttpCheck($this->ctx, $this->collectors))->runtimeBaseUrl();
         if (!preg_match('~^https?://~i', $url)) return $this->unknown('A store URL is required for response evidence.', []);
         [$ok,$message,$response] = $this->collectors->http->fetch($url, 'GET', [], 5000, false);
         if ($ok !== true) return $this->unknown('HTTP response could not be collected: ' . $message, $response + ['transport_error'=>true]);

@@ -8,13 +8,21 @@
   "directories": [
     "bin",
     "src",
-    "resources",
-    "vendor"
+    "resources"
   ],
   "files": [
     "composer.json",
     "LICENSE"
   ],
+  "finder": [
+    {
+      "in": ["vendor"],
+      "exclude": ["bin", "tests", "test", "Tests", "Test", "docs", "doc", "Docs", "Doc", ".github"],
+      "notName": ["*.phar", "*.phar.*", "phpunit.xml*", ".env*", "README*", "CHANGELOG*", "UPGRADING*"]
+    }
+  ],
+  "exclude-dev-files": true,
+  "dump-autoload": true,
   "banner": "Magebean CLI",
   "check-requirements": false
 }

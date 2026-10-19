@@ -89,11 +89,22 @@ final class HttpCheck
         ];
     }
 
+    public function runtimeBaseUrl(): string
+    {
+        return $this->baseUrl();
+    }
+
     private function baseUrl(): string
     {
+        if (strtoupper((string)($this->ctx->get('meta',[])['target_mode']??'LOCAL')) !== 'REMOTE'
+            && \Magebean\Engine\ScanTargetResolver::isMagentoRoot($this->ctx->path)) {
+            return $this->resolvedBaseUrl ??= (string)($this->magento->configuredBaseUrl()['url'] ?? '');
+        }
         $u = trim($this->ctx->url);
         if ($u === '' || $u === '.') $u = (string)$this->ctx->get('url', '');
-        if ($u === '' && $this->strictScope) {
+        // URL discovery is shared by every local HTTP check, not a policy strictness option.
+        if ($u === '.') $u = '';
+        if ($u === '' && strtoupper((string)($this->ctx->get('meta',[])['target_mode']??'LOCAL')) !== 'REMOTE') {
             $this->resolvedBaseUrl ??= (string)($this->magento->configuredBaseUrl()['url'] ?? '');
             $u = $this->resolvedBaseUrl;
         }
@@ -134,7 +145,7 @@ final class HttpCheck
     {
         if (!empty($args['strict_scope'])) return $this->strictHttpsRedirect($args);
         $base = $this->baseUrl();
-        if ($base === '') return [null, '[UNKNOWN] Runtime URL unavailable; provide --url=https://your-store or configure Magento secure base URL'];
+        if ($base === '') return [null, '[UNKNOWN] Runtime URL unavailable; no valid Magento store base URL could be read. Check store configuration and scanner read access'];
 
         // Always test HTTP entrypoint (no redirect follow)
         $http = preg_replace('~^https://~i', 'http://', $base);
@@ -169,7 +180,7 @@ final class HttpCheck
     private function strictHttpsRedirect(array $args): array
     {
         $base = $this->baseUrl();
-        if ($base === '') return [null, '[UNKNOWN] Runtime URL unavailable; provide --url=https://your-store', []];
+        if ($base === '') return [null, '[UNKNOWN] Runtime URL unavailable; no valid Magento store base URL could be read. Check store configuration and scanner read access', []];
         $paths = !empty($args['admin_only']) ? [] : ['/'];
         $unknown = false; $adminIssue = null;
         if (!empty($args['include_admin']) || !empty($args['admin_only'])) {
@@ -207,13 +218,19 @@ final class HttpCheck
     private function hasHsts(array $args): array
     {
         $base = $this->baseUrl();
-        if ($base === '') return [null, '[UNKNOWN] Runtime URL unavailable; provide --url=https://your-store or configure Magento secure base URL'];
+        if ($base === '') return [null, '[UNKNOWN] Runtime URL unavailable; no valid Magento store base URL could be read. Check store configuration and scanner read access'];
         $url = preg_replace('~^http://~i', 'https://', $base);
         [$ok, $msg, $ev] = $this->fetch((string)$url, 'GET', [], (int)($args['timeout_ms'] ?? 8000), true);
-        if ($ok !== true) return [null, '[UNKNOWN] Cannot inspect HSTS: ' . $msg . '. Verify --url, network access and the HTTPS trust chain; install the trusted CA for private certificates.', $ev];
+        if ($ok !== true) {
+            $error = trim(preg_replace('/\[UNKNOWN\]\s*/i', '', $msg) ?? $msg);
+            $message = ($ev['reason_code'] ?? '') === 'HTTP_TLS_TRUST_FAILED'
+                ? 'TLS certificate verification failed; HSTS response was not inspected: '.$error
+                : 'HSTS response was not inspected: '.$error;
+            return [null, $message, $ev];
+        }
         $final = (string)($ev['final_url'] ?? $url);
         $status = (int)($ev['status'] ?? 0);
-        if ($status < 200 || $status >= 300 || strtolower((string)parse_url($final, PHP_URL_SCHEME)) !== 'https' || strtolower((string)parse_url($final, PHP_URL_HOST)) !== strtolower((string)parse_url((string)$url, PHP_URL_HOST))) return [null, '[UNKNOWN] HSTS probe requires a successful same-host HTTPS page; received HTTP ' . $status . ' at ' . $final . '. Set --url to the canonical HTTPS storefront.', $ev];
+        if ($status < 200 || $status >= 300 || strtolower((string)parse_url($final, PHP_URL_SCHEME)) !== 'https' || strtolower((string)parse_url($final, PHP_URL_HOST)) !== strtolower((string)parse_url((string)$url, PHP_URL_HOST))) return [null, '[UNKNOWN] HSTS probe requires a successful same-host HTTPS page; received HTTP ' . $status . ' at ' . $final . '. Verify the canonical HTTPS storefront in Magento store configuration.', $ev];
 
         return $this->assessHstsPolicy((array)($ev['headers'] ?? []), (string)$url, $final, $args);
     }
@@ -262,7 +279,7 @@ final class HttpCheck
     private function noMixedContent(array $args): array
     {
         $base = $this->baseUrl();
-        if ($base === '') return [null, '[UNKNOWN] Runtime URL unavailable; provide --url=https://your-store or configure Magento secure base URL'];
+        if ($base === '') return [null, '[UNKNOWN] Runtime URL unavailable; no valid Magento store base URL could be read. Check store configuration and scanner read access'];
         $paths = $args['paths'] ?? ['/'];
         if (!is_array($paths)) {
             $paths = ['/'];
@@ -409,7 +426,7 @@ final class HttpCheck
     private function cookieFlags(array $args): array
     {
         $base = $this->baseUrl();
-        if ($base === '') return [null, '[UNKNOWN] Runtime URL unavailable; provide --url=https://your-store or configure Magento secure base URL', []];
+        if ($base === '') return [null, '[UNKNOWN] Runtime URL unavailable; no valid Magento store base URL could be read. Check store configuration and scanner read access', []];
         $paths = $args['paths'] ?? ['/', '/customer/account/login', '/checkout/cart'];
         if (!is_array($paths)) {
             $paths = ['/'];
@@ -500,7 +517,7 @@ final class HttpCheck
             'incomplete_paths' => $incomplete,
         ];
         if ($successful === 0) {
-            return [null, '[UNKNOWN] Unable to inspect cookies. Verify --url, network access and the HTTPS trust chain. Probe errors: ' . implode('; ', array_map(static fn(array $entry): string => ($entry['url'] ?? '') . ': ' . ($entry['message'] ?? $entry['reason'] ?? 'Unavailable response'), $incomplete)), $evidence];
+            return [null, '[UNKNOWN] Unable to inspect cookies. Verify the discovered store URL, network access and the HTTPS trust chain. Probe errors: ' . implode('; ', array_map(static fn(array $entry): string => ($entry['url'] ?? '') . ': ' . ($entry['message'] ?? $entry['reason'] ?? 'Unavailable response'), $incomplete)), $evidence];
         }
         if ($observedSensitive === []) {
             return [null, '[UNKNOWN] No session/authentication cookies observed; provide a reachable session-creating page or inspect declared Magento cookie settings. No Set-Cookie does not prove protection.', $evidence];
@@ -515,7 +532,7 @@ final class HttpCheck
     private function noDirectoryListing(array $args): array
     {
         $base = $this->baseUrl();
-        if ($base === '') return [null, '[UNKNOWN] Runtime URL unavailable; provide --url=https://your-store or configure Magento secure base URL'];
+        if ($base === '') return [null, '[UNKNOWN] Runtime URL unavailable; no valid Magento store base URL could be read. Check store configuration and scanner read access'];
         $paths = $args['paths'] ?? ['/media/', '/static/', '/errors/', '/var/'];
         $timeout = (int)($args['timeout_ms'] ?? 8000);
         $probed = 0;
@@ -673,7 +690,7 @@ final class HttpCheck
     private function noStacktrace(array $args): array
     {
         $base = $this->baseUrl();
-        if ($base === '') return [null, '[UNKNOWN] Runtime URL unavailable; provide --url=https://your-store or configure Magento secure base URL', []];
+        if ($base === '') return [null, '[UNKNOWN] Runtime URL unavailable; no valid Magento store base URL could be read. Check store configuration and scanner read access', []];
 
         $targets = [];
         $targets[] = rtrim($base, '/'); // home
@@ -731,7 +748,7 @@ final class HttpCheck
     private function noXdebugHeaders(array $args): array
     {
         $base = $this->baseUrl();
-        if ($base === '') return [null, '[UNKNOWN] Runtime URL unavailable; provide --url=https://your-store or configure Magento secure base URL', []];
+        if ($base === '') return [null, '[UNKNOWN] Runtime URL unavailable; no valid Magento store base URL could be read. Check store configuration and scanner read access', []];
         [$ok, $msg, $ev] = $this->fetch($base, 'GET', [], (int)($args['timeout_ms'] ?? 8000), false);
         if ($ok === null) return [null, $msg, $ev];
         if (!$ok) return [false, $msg, $ev];
@@ -917,7 +934,7 @@ final class HttpCheck
     private function headerIn(array $args): array
     {
         $base = $this->baseUrl();
-        if ($base === '') return [null, '[UNKNOWN] Runtime URL unavailable; provide --url=https://your-store or configure Magento secure base URL', []];
+        if ($base === '') return [null, '[UNKNOWN] Runtime URL unavailable; no valid Magento store base URL could be read. Check store configuration and scanner read access', []];
         $header = strtolower((string)($args['header'] ?? ''));
         $allowed = (array)($args['allowed'] ?? []);
         if ($header === '' || !$allowed) return [null, '[UNKNOWN] Missing header/allowed', []];
@@ -972,7 +989,7 @@ final class HttpCheck
     private function clickjackingProtection(array $args): array
     {
         $base = $this->baseUrl();
-        if ($base === '') return [null, '[UNKNOWN] Runtime URL unavailable; supply the canonical storefront --url or configure Magento base URL', []];
+        if ($base === '') return [null, '[UNKNOWN] Runtime URL unavailable; no valid Magento store base URL could be read. Check store configuration and scanner read access', []];
         [$ok, $msg, $ev] = $this->fetch($base, 'GET', [], (int)($args['timeout_ms'] ?? 8000), false);
         $issue = $this->responseAssessmentIssue($ok, $msg, $ev, $base, 'clickjacking headers', false);
         if ($issue !== null) return $issue;
@@ -1023,7 +1040,7 @@ final class HttpCheck
     private function cspNotOverlyPermissive(array $args): array
     {
         $base = $this->baseUrl();
-        if ($base === '') return [null, '[UNKNOWN] Runtime URL unavailable; supply the canonical storefront --url or configure Magento base URL', []];
+        if ($base === '') return [null, '[UNKNOWN] Runtime URL unavailable; no valid Magento store base URL could be read. Check store configuration and scanner read access', []];
         [$ok, $msg, $ev] = $this->fetch($base, 'GET', [], (int)($args['timeout_ms'] ?? 8000), false);
         $issue = $this->responseAssessmentIssue($ok, $msg, $ev, $base, 'Content-Security-Policy', false);
         if ($issue !== null) return $issue;
@@ -1043,7 +1060,7 @@ final class HttpCheck
     private function corsNoWildcardWithCreds(array $args): array
     {
         $base = $this->baseUrl();
-        if ($base === '') return [null, '[UNKNOWN] Runtime URL unavailable; supply the canonical storefront --url or configure Magento base URL', []];
+        if ($base === '') return [null, '[UNKNOWN] Runtime URL unavailable; no valid Magento store base URL could be read. Check store configuration and scanner read access', []];
         [$ok, $msg, $ev] = $this->fetch($base, 'GET', [], (int)($args['timeout_ms'] ?? 8000), false);
         $issue = $this->responseAssessmentIssue($ok, $msg, $ev, $base, 'CORS headers', false);
         if ($issue !== null) return $issue;
@@ -1058,7 +1075,7 @@ final class HttpCheck
     private function corsPreflightSafe(array $args): array
     {
         $base = $this->baseUrl();
-        if ($base === '') return [null, '[UNKNOWN] Runtime URL unavailable; provide --url=https://your-store or configure Magento secure base URL', []];
+        if ($base === '') return [null, '[UNKNOWN] Runtime URL unavailable; no valid Magento store base URL could be read. Check store configuration and scanner read access', []];
         // Real preflight with Origin + Access-Control-Request-Method
         $headers = [
             'Origin: https://example.com',
@@ -1079,7 +1096,7 @@ final class HttpCheck
     private function tlsMinVersion(array $args): array
     {
         $base = $this->baseUrl();
-        if ($base === '') return [null, '[UNKNOWN] Runtime URL unavailable; provide --url=https://your-store or configure Magento secure base URL', []];
+        if ($base === '') return [null, '[UNKNOWN] Runtime URL unavailable; no valid Magento store base URL could be read. Check store configuration and scanner read access', []];
 
         $host = (string)parse_url($base, PHP_URL_HOST);
         if ($host === '') return [null, '[UNKNOWN] Invalid host', []];
@@ -1131,7 +1148,7 @@ final class HttpCheck
     private function tlsCertDaysLeft(array $args): array
     {
         $base = $this->baseUrl();
-        if ($base === '') return [null, '[UNKNOWN] Runtime URL unavailable; provide --url=https://your-store or configure Magento secure base URL', []];
+        if ($base === '') return [null, '[UNKNOWN] Runtime URL unavailable; no valid Magento store base URL could be read. Check store configuration and scanner read access', []];
         $host = (string)parse_url($base, PHP_URL_HOST);
         if ($host === '') return [null, '[UNKNOWN] Invalid host', []];
 
@@ -1163,7 +1180,7 @@ final class HttpCheck
     private function hstsPreloadReady(array $args): array
     {
         $base = $this->baseUrl();
-        if ($base === '') return [null, '[UNKNOWN] Runtime URL unavailable; provide --url=https://your-store or configure Magento secure base URL', []];
+        if ($base === '') return [null, '[UNKNOWN] Runtime URL unavailable; no valid Magento store base URL could be read. Check store configuration and scanner read access', []];
         [$ok, $msg, $ev] = $this->fetch($base, 'GET', [], (int)($args['timeout_ms'] ?? 8000), false);
         $issue = $this->responseAssessmentIssue($ok, $msg, $ev, $base, 'HSTS preload policy', true);
         if ($issue !== null) return $issue;
@@ -1185,7 +1202,7 @@ final class HttpCheck
     private function methodDisallowed(array $args): array
     {
         $base = $this->baseUrl();
-        if ($base === '') return [null, '[UNKNOWN] Runtime URL unavailable; provide --url=https://your-store or configure Magento secure base URL', []];
+        if ($base === '') return [null, '[UNKNOWN] Runtime URL unavailable; no valid Magento store base URL could be read. Check store configuration and scanner read access', []];
         $method = strtoupper((string)($args['method'] ?? 'TRACE'));
         [$ok, $msg, $ev] = $this->fetch($base, $method, [], (int)($args['timeout_ms'] ?? 8000), false);
         if ($ok === null) return [null, $msg, $ev];
@@ -1198,7 +1215,7 @@ final class HttpCheck
     private function optionsNotVerbose(array $args): array
     {
         $base = $this->baseUrl();
-        if ($base === '') return [null, '[UNKNOWN] Runtime URL unavailable; provide --url=https://your-store or configure Magento secure base URL', []];
+        if ($base === '') return [null, '[UNKNOWN] Runtime URL unavailable; no valid Magento store base URL could be read. Check store configuration and scanner read access', []];
         [$ok, $msg, $ev] = $this->fetch($base, 'OPTIONS', [], (int)($args['timeout_ms'] ?? 8000), false);
         if ($ok === null) return [null, $msg, $ev];
         if (!$ok) return [null, '[UNKNOWN] OPTIONS not allowed', $ev];
@@ -1211,7 +1228,7 @@ final class HttpCheck
     private function serverBannerNotVerbose(array $args): array
     {
         $base = $this->baseUrl();
-        if ($base === '') return [null, '[UNKNOWN] Runtime URL unavailable; provide --url=https://your-store or configure Magento secure base URL', []];
+        if ($base === '') return [null, '[UNKNOWN] Runtime URL unavailable; no valid Magento store base URL could be read. Check store configuration and scanner read access', []];
         [$ok, $msg, $ev] = $this->fetch($base, 'GET', [], (int)($args['timeout_ms'] ?? 8000), false);
         if ($ok === null) return [null, $msg, $ev];
         if (!$ok) return [false, $msg, $ev];
@@ -1224,7 +1241,7 @@ final class HttpCheck
     private function blockPath(array $args): array
     {
         $base = $this->baseUrl();
-        if ($base === '') return [null, '[UNKNOWN] Runtime URL unavailable; provide --url=https://your-store or configure Magento secure base URL', []];
+        if ($base === '') return [null, '[UNKNOWN] Runtime URL unavailable; no valid Magento store base URL could be read. Check store configuration and scanner read access', []];
         $paths = (array)($args['paths'] ?? []);
         $allowed = (array)($args['allowed_status'] ?? [404, 403, 401, 302, 301]);
         $timeout = (int)($args['timeout_ms'] ?? 8000);
@@ -1245,7 +1262,7 @@ final class HttpCheck
     private function graphqlIntrospectionDisabled(array $args): array
     {
         $base = $this->baseUrl();
-        if ($base === '') return [null, '[UNKNOWN] Runtime URL unavailable; provide --url=https://your-store or configure Magento secure base URL', []];
+        if ($base === '') return [null, '[UNKNOWN] Runtime URL unavailable; no valid Magento store base URL could be read. Check store configuration and scanner read access', []];
         $path = (string)($args['path'] ?? '/graphql');
         $url = rtrim($base, '/') . $path;
         $query = '{"query":"query IntrospectionQuery { __schema { types { name } } }"}';
@@ -1262,7 +1279,7 @@ final class HttpCheck
     private function restSensitiveEndpointsClosed(array $args): array
     {
         $base = $this->baseUrl();
-        if ($base === '') return [null, '[UNKNOWN] Runtime URL unavailable; provide --url=https://your-store or configure Magento secure base URL', []];
+        if ($base === '') return [null, '[UNKNOWN] Runtime URL unavailable; no valid Magento store base URL could be read. Check store configuration and scanner read access', []];
         $paths = (array)($args['paths'] ?? []);
         $timeout = (int)($args['timeout_ms'] ?? 8000);
         if (!$paths) return [null, '[UNKNOWN] No paths', []];
@@ -1284,7 +1301,7 @@ final class HttpCheck
     {
         if (!empty($args['strict_scope'])) return $this->strictStaticAssets($args);
         $base = $this->baseUrl();
-        if ($base === '') return [null, '[UNKNOWN] Runtime URL unavailable; provide --url=https://your-store or configure Magento secure base URL', []];
+        if ($base === '') return [null, '[UNKNOWN] Runtime URL unavailable; no valid Magento store base URL could be read. Check store configuration and scanner read access', []];
         [$ok, $msg, $ev] = $this->fetch($base, 'GET', [], (int)($args['timeout_ms'] ?? 8000), true);
         if ($ok === null) return [null, $msg, $ev];
         if (!$ok) return [null, '[UNKNOWN] Unable to fetch homepage for static asset check', $ev];
@@ -1305,7 +1322,7 @@ final class HttpCheck
     private function strictStaticAssets(array $args): array
     {
         $base = $this->baseUrl();
-        if ($base === '') return [null, '[UNKNOWN] Runtime URL unavailable; provide --url=https://your-store', []];
+        if ($base === '') return [null, '[UNKNOWN] Runtime URL unavailable; no valid Magento store base URL could be read. Check store configuration and scanner read access', []];
         [$ok, $msg, $page] = $this->fetch($base, 'GET', [], (int)($args['timeout_ms'] ?? 8000), true);
         if ($ok !== true || (int)($page['status'] ?? 0) !== 200) return [null, '[UNKNOWN] Cannot retrieve storefront for static asset assessment', $page];
         $html = preg_replace('~<!--[\s\S]*?-->~', '', (string)($page['body'] ?? '')) ?? '';
@@ -1343,7 +1360,7 @@ final class HttpCheck
     private function cacheSignals(array $args): array
     {
         $base = $this->baseUrl();
-        if ($base === '') return [null, '[UNKNOWN] Runtime URL unavailable; provide --url=https://your-store or configure Magento secure base URL', []];
+        if ($base === '') return [null, '[UNKNOWN] Runtime URL unavailable; no valid Magento store base URL could be read. Check store configuration and scanner read access', []];
         // First fetch
         [$ok1, $msg1, $ev1] = $this->fetch($base, 'GET', [], (int)($args['timeout_ms'] ?? 8000), true);
         if ($ok1 === null) return [null, $msg1, $ev1];
@@ -1394,7 +1411,7 @@ final class HttpCheck
     private function logsProtected(array $args): array
     {
         $base = $this->baseUrl();
-        if ($base === '') return [null, '[UNKNOWN] Runtime URL unavailable; provide --url=https://your-store or configure Magento secure base URL', []];
+        if ($base === '') return [null, '[UNKNOWN] Runtime URL unavailable; no valid Magento store base URL could be read. Check store configuration and scanner read access', []];
 
         $paths = ['/var/log/', '/var/report/'];
         $allowStatuses = [401, 403, 404, 405, 410, 301, 302, 307, 308];
@@ -1540,7 +1557,7 @@ final class HttpCheck
     private function paymentTlsMin(array $args): array
     {
         $base = $this->baseUrl();
-        if ($base === '') return [null, '[UNKNOWN] Runtime URL unavailable; provide --url=https://your-store or configure Magento secure base URL', []];
+        if ($base === '') return [null, '[UNKNOWN] Runtime URL unavailable; no valid Magento store base URL could be read. Check store configuration and scanner read access', []];
 
         [$ok, $msg, $ev] = $this->fetch($base, 'GET', [], 8000, true);
         if ($ok === null) return [null, $msg, $ev];

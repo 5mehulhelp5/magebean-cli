@@ -32,8 +32,9 @@ Docs: <href=https://magebean.com/documentation>magebean.com/documentation</>
 
 <options=bold>TARGET MODES</>
   • <fg=green;options=bold>LOCAL</> — --path only, or omit both target options to auto-detect the Magento root
+    HTTP checks discover the default store base URL from Magento configuration; --url is not required.
   • <fg=blue;options=bold>REMOTE</> — --url only; verifies Magento and runs externally observable rules
-  • <fg=magenta;options=bold>HYBRID</> — --path plus --url; combines local and HTTP evidence
+  • With a Magento path, store configuration is authoritative; a supplied --url does not override it.
   • Profiles select applicable internal requirements and preserve their evidence scope.
   • Default REMOTE scans use applicable basic requirements.
 
@@ -49,7 +50,7 @@ Docs: <href=https://magebean.com/documentation>magebean.com/documentation</>
 
 <options=bold>COMMAND OPTIONS</>
   <fg=yellow>--path=PATH</>                     Magento root. Omit to search from the current directory.
-  <fg=yellow>--url=URL</>                       Absolute storefront URL; selects REMOTE or HYBRID mode.
+  <fg=yellow>--url=URL</>                       External REMOTE target only; ignored when --path selects a local Magento installation.
   <fg=yellow>--profile=PROFILE|FILE</>          Built-in or custom profile. Default: basic.
   <fg=yellow>--include-manual-review</>           Include human-review rules; excluded by default.
   <fg=yellow>--capabilities=NAME,NAME</>         Enable contextual profile rules (for example graphql,oauth_oidc).
@@ -79,12 +80,12 @@ Docs: <href=https://magebean.com/documentation>magebean.com/documentation</>
   # LOCAL, REMOTE, and HYBRID scans
   <fg=green>php magebean.phar scan --path=/var/www/magento</>
   <fg=green>php magebean.phar scan --url=https://store.example.com</>
-  <fg=green>php magebean.phar scan --path=/var/www/magento --url=https://store.example.com</>
+  <fg=green>php magebean.phar scan --path=/var/www/magento</>
 
   # ASVS Level 1, application security, payment readiness, deep hardening
   <fg=green>php magebean.phar scan --path=/var/www/magento --profile=asvs-l1</>
-  <fg=green>php magebean.phar scan --path=/var/www/magento --url=https://store.example.com --profile=asvs-l2 --include-manual-review --capabilities=graphql</>
-  <fg=green>php magebean.phar scan --path=/var/www/magento --url=https://store.example.com --profile=asvs-l3 --include-manual-review</>
+  <fg=green>php magebean.phar scan --path=/var/www/magento --profile=asvs-l2 --include-manual-review --capabilities=graphql</>
+  <fg=green>php magebean.phar scan --path=/var/www/magento --profile=asvs-l3 --include-manual-review</>
   <fg=green>php magebean.phar scan --path=/var/www/magento --profile=owasp</>
   <fg=green>php magebean.phar scan --path=/var/www/magento --profile=pci</>
   <fg=green>php magebean.phar scan --path=/var/www/magento --profile=hardening</>
@@ -124,7 +125,7 @@ HELP;
             ->setDescription('Audit Magento 2 security using selectable Magebean security profiles.')
             ->addUsage('--url=https://magento-store.com')
             ->addUsage('--path=/var/www/html')
-            ->addUsage('--path=/var/www/html --url=https://magento-store.com')
+            ->addUsage('--path=/var/www/html')
             // HTML report output is disabled, so the HTML-only detail option is hidden for now.
             // ->addOption('detail', null, InputOption::VALUE_NONE, 'Include Details column in HTML report')
             ->addOption('standard', null, InputOption::VALUE_OPTIONAL, 'Legacy report selector: magebean (default) | owasp | pci | cwe; prefer --profile', 'magebean')
@@ -168,6 +169,7 @@ HELP;
             $projectUrl = $target->url;
 
             $out->writeln(sprintf('<info>Target mode:</info> %s', $targetMode));
+            if ($hasPath && $hasUrl) $out->writeln('<comment>Local Magento store configuration supplies the runtime URL; --url is ignored.</comment>');
 
             $standard = strtolower((string)($in->getOption('standard') ?? 'magebean'));
             $allowed = ['magebean', 'owasp', 'pci', 'cwe'];
