@@ -9,36 +9,33 @@
 
 This baseline contains only Magebean's Magento security and production-readiness requirements. The authoritative inventory is the `magebean` family in [magebean-catalog.json](../src/Rules/requirements/magebean-catalog.json). The catalog owns identity, revision, criterion, applicability, evidence obligations and implementation guidance; this document mirrors its criteria for review.
 
-OWASP ASVS and PCI DSS clauses belong to their separate versioned official documents and are excluded from this baseline. Their independent CLI catalogs and workflows are documented in [source families](requirement-source-families.md), [ASVS evidence](asvs-native-evidence.md) and [PCI workflow](pci-dss-v4.0.1-workflow.md). Shared checks and standards citations do not transfer ownership of a requirement or establish compliance.
+PCI DSS and OWASP ASVS requirements are outside this baseline. Use their official documents for standard clauses; Magebean does not reproduce or maintain those standards here. See [source families](requirement-source-families.md) for the CLI catalog boundary.
 
-The Magebean `owasp` profile groups Magebean criteria by OWASP Top 10 categories. It is distinct from the ASVS profiles.
+## Reading the rules
 
-## Requirements and profiles
+One requirement is one assessable Magebean criterion with a stable MB identity. Each entry records its revision, criterion, severity, catalog coverage, target modes and native profile membership. Checks and evidence obligations remain defined in the authoritative catalog. Historical MB-R identifiers are compatibility definitions, not baseline inventory.
 
-One requirement is one assessable criterion with a stable `MB-…` identity. Checks collect observations for requirement-owned evidence obligations. Profiles select requirements without redefining them. Historical `MB-Rxxx` rules remain compatibility definitions, not baseline inventory. See the [requirement model](requirement-model.md).
+Profile membership selects rules without redefining them. Rules without native profile membership remain documented criteria outside executable profiles. Coverage describes implementation capability, not a scan outcome or complete verification of the criterion.
 
-| Magebean profile | Inventory | Default LOCAL selection |
-|---|---:|---:|
-| `basic` | 37 | 37 |
-| `hardening` | 79 | 67 |
-| `owasp` | 51 | 41 |
+For profile selection and execution, use the [automated-only profile contract](magebean-automated-only-profiles.md) and [CLI reference](cli-reference.md). For evidence obligations and outcomes, use the [requirement model](requirement-model.md).
 
-Inventories overlap and must not be added together. Native profiles are automated-only; capabilities and target mode can limit execution. Fifty original requirements remain in the [automation engineering backlog](../src/Rules/requirements/magebean-automation-backlog.json), outside executable profiles. Retaining a criterion here does not claim complete automated verification. See the [profile contract](magebean-automated-only-profiles.md) and [machine policy](automation-feasibility/production-policy.md).
+## Rule groups
 
-There is no executable full-inventory `baseline` profile. Use a named profile or explicit requirement selectors within one source family.
-
-## Assessment and usage
-
-PASS requires sufficient evidence for the applicable criterion. Missing necessary evidence remains UNKNOWN; supporting observations cannot replace mandatory human evidence. Native automated profiles report collection failures as execution errors, not clean results or confirmed vulnerabilities. Coverage labels describe implementation capability, not individual scan outcomes. Severity supports remediation priority within the collected scope.
-
-```bash
-php magebean.phar scan --path=/var/www/magento
-php magebean.phar scan --path=/var/www/magento --profile=hardening
-php magebean.phar rules:list --profile=owasp
-php magebean.phar scan --path=/var/www/magento --rules=MB-0001
-```
-
-Use the [README](../README.md) and [CLI reference](cli-reference.md) for installation, options and CI exit codes. API-backed checks disclose the data described in [API data disclosure](api-reference.md#data-disclosure).
+| Control | Rules |
+|---|---:|
+| MB-C01 — File & Folder Permissions | 12 |
+| MB-C02 — Admin & Auth Hardening | 15 |
+| MB-C03 — Secure Coding Practices | 32 |
+| MB-C04 — HTTPS & TLS Enforcement | 12 |
+| MB-C05 — Production Mode & Deployment Hygiene | 9 |
+| MB-C06 — Cache & Indexing Health | 5 |
+| MB-C07 — Logging & Monitoring | 9 |
+| MB-C08 — Cron Job Reliability | 3 |
+| MB-C09 — Extension Vulnerability Management | 13 |
+| MB-C10 — Abandoned Extensions Removal | 5 |
+| MB-C11 — Composer Dependency Hygiene | 6 |
+| MB-C12 — Third-party Config Security | 18 |
+| **Total Magebean rules** | **139** |
 
 ## Magebean requirement inventory
 

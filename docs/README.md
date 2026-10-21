@@ -4,7 +4,7 @@
 
 - [README](../README.md): installation, quick start and profile selection.
 - [CLI reference](cli-reference.md): commands, options, modes and agent operations.
-- [Magebean Security Baseline v1](magebean-baseline-v1.md): Magebean requirements only, mirrored from the Magebean catalog.
+- [Magebean Security Baseline v1](magebean-baseline-v1.md): 139 Magebean rules grouped by control, mirrored from the Magebean catalog; excludes PCI DSS and OWASP ASVS clauses.
 - [Requirement source families](requirement-source-families.md): catalog authority, family boundaries and current inventory.
 - [Requirement model](requirement-model.md): identities, reusable checks, obligations and outcomes.
 
@@ -17,9 +17,9 @@
 - [Release packaging](release-packaging.md): building and validating the PHAR.
 - [Architecture](architecture.md): implementation boundaries and scan pipeline.
 
-## Independent standards
+## External standards and CLI integration
 
-ASVS and PCI DSS are separate source families, not chapters of the Magebean baseline. Their official versioned documents own their clauses; CLI catalogs describe assessment implementation and evidence scope. The Magebean `owasp` profile uses Top 10 taxonomy and is not an ASVS assessment.
+ASVS and PCI DSS are separate source families, not chapters of the Magebean baseline. Use their official versioned documents for standard requirements; no separate Magebean baseline documentation of those clauses is maintained. The links below provide source references and CLI-specific implementation and evidence scope. The Magebean `owasp` profile uses Top 10 taxonomy and is not an ASVS assessment.
 
 | Source | Local official document | CLI implementation |
 |---|---|---|
