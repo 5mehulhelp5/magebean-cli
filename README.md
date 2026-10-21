@@ -355,12 +355,10 @@ Responsible disclosure: please email **support@magebean.com**.
 MageBean CLI is open-sourced software licensed under the [MIT license](./LICENSE).
 
 - **Core CLI** → MIT licensed, free to use and extend.
-- **CVE Data Bundle** → Proprietary, licensed separately.
 - **Audit-as-a-Service** → Commercial offering.
 
-This dual model ensures that the community benefits from a free baseline audit tool, while advanced vulnerability data and professional audit services remain sustainable.
+The CLI is free to use and extend under MIT; professional audit services are offered separately.
 
 ASVS counts above are requirement findings, including 12 native partial evidence implementations (missing evidence still returns UNKNOWN). Canonical selectors require a profile, for example `scan --profile=asvs-l2 --rules=OWASP-ASVS:5.0.0:6.2.1`. Explicit MB-R selections retain legacy execution. See [runtime migration and dashboard compatibility](docs/requirement-migration.md).
 
 The former ASVS L1 implementation gaps now have native checks; see [ASVS native evidence](docs/asvs-native-evidence.md) for scope, required account artifacts and human confirmation.
-
