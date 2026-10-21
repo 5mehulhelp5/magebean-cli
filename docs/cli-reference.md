@@ -1,5 +1,7 @@
 # Magebean CLI Reference
 
+See the [documentation index](README.md), [Magebean Baseline v1](magebean-baseline-v1.md) and [source-family boundaries](requirement-source-families.md). The baseline contains Magebean criteria only; ASVS and PCI use their own official documents and separate catalogs.
+
 Current primary runtime: one internal `MB-…` requirement identity with reusable check functions and requirement-owned obligations. Profiles select identities; standards references are alignment metadata. Historical MB-R APIs/selectors/manifests remain compatibility adapters. Older examples and legacy API sections below must be read with that boundary. See [requirement model](requirement-model.md) and [migration contract](requirement-migration.md).
 
 The primary listing uses internal requirement identities. Legacy `RulePackLoader` still exposes 371 historical MB-R definitions for compatibility; those are not extra primary requirements. Obtain current primary and selected-profile totals through `rules:list`, with manual/capability filters labeled explicitly.
@@ -476,9 +478,10 @@ Missing source/runtime/artifact evidence remains UNKNOWN. Partial technical obse
 
 ### Basic automation execution contract
 
-`scan --path=/path/to/magento --profile=basic` attempts twenty automated deployment predicates. It can discover the configured runtime URL; use `--url` when the configured endpoint is inaccessible from the scanning host. Run with permission to read deployment configuration and installed scheduler sources. Missing runtime/configuration/permission evidence causes a separate execution error and process exit3. It is never counted as a confirmed vulnerability. Complete scans retain exits0=clean,1=noncritical findings,2=critical findings.
+`scan --path=/path/to/magento --profile=basic` selects 37 automated deployment requirements before target-mode filtering. It can discover the configured runtime URL; use `--url` when the configured endpoint is inaccessible from the scanning host. Run with permission to read deployment configuration and installed scheduler sources. Missing runtime/configuration/permission evidence causes a separate execution error and process exit3. It is never counted as a confirmed vulnerability. Complete scans retain exits0=clean,1=noncritical findings,2=critical findings.
 `--include-manual-review` includes requirements that declare mandatory human evidence, including those with automated technical checks. Without the flag, profile scans and listings exclude them. Explicit `--rules` selection remains an intentional opt-in.
 
 ## OWASP scan quality review — 2026-10-07
 
 The OWASP deployment profile has 31 automated requirements by default and 38 requiring explicit human evidence. Broad heuristic checks require `--include-manual-review`; reviewed bounded criteria can conclude PASS/FAIL. Git history is replaced in this deployment profile by existing MB-0730, with MB-0072 retained globally. Missing runtime/API evidence includes concrete collection guidance rather than instructions to fix a tool implementation gate. See [the 33-item security review](owasp-scan-quality-review.md).
+

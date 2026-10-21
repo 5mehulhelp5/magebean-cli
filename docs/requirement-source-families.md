@@ -1,5 +1,7 @@
 # Requirement source families
 
+[Magebean Baseline v1](magebean-baseline-v1.md) documents only the `magebean` family. Official ASVS and PCI DSS documents own their independent clauses; neither family is included in the baseline. See the [documentation index](README.md) for their source documents and implementation guides.
+
 The active catalog separates three sources of assessment criteria:
 
 | Family | Authority | Profiles | Requirements |
@@ -20,3 +22,4 @@ Earlier automation/profile audit artifacts describe the catalog at their recorde
 The current native Magebean profile contract is automated-only: Basic 37, Hardening 79 and OWASP 51, without manual checklists. Default LOCAL selection is 37/67/41 respectively; the remaining members require explicit machine context or strict policy capabilities. Fifty previous mixed-profile members retain their original definitions in the automation engineering backlog, outside executable profiles. New narrower observations do not certify those broader original criteria. See [the automated-only contract](magebean-automated-only-profiles.md). ASVS/PCI evidence workflows remain separate.
 
 Deploy the CLI catalog and Console importer together, then re-import the catalog into Console. Verify seven customer profiles and family membership after import. Existing assessments retain their historical requirement revisions. This catalog migration does not rebuild the PHAR.
+

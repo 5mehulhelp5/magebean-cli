@@ -12,6 +12,8 @@ Use the fast production-readiness profile for routine checks, map an assessment 
 
 We use **requirement** for the unit assessed and reported. The accepted model is **one requirement = one assessment definition (legacy name: rule)**, containing one or more reusable checks. ASVS profiles compile one definition per versioned requirement. The underlying MB-R catalog remains a compatibility/evidence catalog; all seven customer profiles use persisted source-family definitions. Exact command names such as `rules:list`, options such as `--rules`, and JSON `rules` keys remain supported as implemented today.
 
+Start with the [documentation index](docs/README.md) and the [Magebean Baseline v1](docs/magebean-baseline-v1.md), which contains only Magebean requirements. ASVS and PCI DSS clauses remain in their separate official source documents and CLI catalogs.
+
 Read the [requirement model](docs/requirement-model.md) and [ASVS L1/L2 migration inventory](docs/asvs-requirement-migration.md) for the mapping and implementation boundary. A technical check PASS does not resolve an unverified human obligation.
 
 
@@ -108,62 +110,26 @@ php magebean.phar agent:connect --help
 
 ---
 
-## 🖥️ CLI Output Template
+## Results and exit codes
 
-```
-Magebean CLI v1.0.0 — Security Audit (Baseline v1.0)        Target: /var/www/magento
-Profile ID: BASIC
-Profile: Magebean Baseline
-Time: 2026-07-13 05:39   PHP: 8.4   Env: PRODUCTION
+Basic, Hardening and Magebean OWASP prioritize findings requiring attention. Inspect a requirement using its current identity:
 
-AUDIT COMPLETE · ATTENTION REQUIRED
-
-76 / 81 checks passed · 4 findings · 1 inconclusive
-1 Critical | 2 High | 1 Medium | 0 Low
-
-Findings (4)
-  [CRITICAL] MB-R091 Executable handlers detected in media/upload paths
-  [HIGH] MB-R006 Admin path is default, weak, or missing
-  [HIGH] MB-R007 Admin 2FA is disabled
-  [MEDIUM] MB-R038 Cache backend is using file-based storage
-
-Inconclusive checks (1)
-  [INCONCLUSIVE] [MEDIUM] MB-R039 Indexer status file not found
-
-Next steps
-  Inspect a finding with its evidence and remediation:
-    php magebean.phar scan --rules=MB-R091
-
-  Resolve an inconclusive check:
-    php magebean.phar scan --rules=MB-R039
-
-Contact: support@magebean.com
+```bash
+php magebean.phar scan --path=/var/www/magento --rules=MB-0001
 ```
 
----
+Evidence, remediation and collection guidance depend on the selected requirement and profile. ASVS and PCI retain their independent evidence workflows. See [findings-first reporting](docs/magebean-findings-first.md) and the [CLI reference](docs/cli-reference.md).
 
-## 📄 Command-Line Results
+| Exit | Meaning |
+|---|---|
+| `0` | Completed scan with no confirmed findings |
+| `1` | Confirmed high, medium or low findings |
+| `2` | Confirmed critical findings |
+| `3` | Incomplete execution in native Magebean automated profiles |
 
-- The summary reports passed checks, confirmed findings, inconclusive checks, and confirmed-finding severity counts separately.
-- The default output lists every finding with its existing description, without verbose evidence or package/path lists.
-- Use `--rules=MB-R0xx` to inspect one rule with every selected result (including PASS), per-check status and full messages, plus remediation for FAIL or INCONCLUSIVE.
-- Inconclusive rule details include contextual `How to resolve` steps and a re-run command.
-- Multiple rules can be inspected with a comma-separated filter such as `--rules=MB-R091,MB-R006`.
-
----
-
-## 🔢 Exit Codes
-
-- `0` – no confirmed findings
-- `1` – has confirmed `High`/`Medium`/`Low` findings
-- `2` – has confirmed `Critical` findings
-
-Inconclusive checks do not change the exit code because they are not confirmed findings.
-
-> Adjust policy in `ScanCommand` if your team prefers a different threshold.
+Missing evidence does not establish PASS or a confirmed vulnerability. Resolve execution errors before treating a native profile scan as complete.
 
 ---
-
 ## ⚙️ Scan Options
 
 Target mode is selected from the explicitly provided options:
@@ -358,7 +324,7 @@ php bin/magebean rules:list
 php bin/magebean list
 ```
 
-- Findings Overview counts **failures only**
+See the [documentation index](docs/README.md) for operational guides, standards workflows and historical engineering reviews.
 
 ---
 
@@ -397,3 +363,4 @@ This dual model ensures that the community benefits from a free baseline audit t
 ASVS counts above are requirement findings, including 12 native partial evidence implementations (missing evidence still returns UNKNOWN). Canonical selectors require a profile, for example `scan --profile=asvs-l2 --rules=OWASP-ASVS:5.0.0:6.2.1`. Explicit MB-R selections retain legacy execution. See [runtime migration and dashboard compatibility](docs/requirement-migration.md).
 
 The former ASVS L1 implementation gaps now have native checks; see [ASVS native evidence](docs/asvs-native-evidence.md) for scope, required account artifacts and human confirmation.
+
